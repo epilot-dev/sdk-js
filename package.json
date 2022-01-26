@@ -5,13 +5,18 @@
   "description": "Javascript SDK monorepo for epilot",
   "scripts": {
     "test": "lerna run test --stream",
+    "lint": "eslint '**/*.{js,ts}' --cache",
+    "lint:fix": "eslint '**/*.{js,ts}' --fix",
     "postinstall": "lerna bootstrap"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git"
   },
-  "keywords": ["epilot", "sdk"],
+  "keywords": [
+    "epilot",
+    "sdk"
+  ],
   "author": "epilot GmbH",
   "license": "MIT",
   "bugs": {
@@ -19,6 +24,8 @@
   },
   "homepage": "https://github.com/epilot-dev/sdk-js#readme",
   "devDependencies": {
+    "@epilot/eslint-config": "^1.2.10",
+    "eslint": "^7.32.0",
     "lerna": "^4.0.0"
   }
 }
