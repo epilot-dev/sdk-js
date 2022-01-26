@@ -1,6 +1,6 @@
-# epilot SDK
+# @epilot/sdk
 
-Javascript SDK monorepo for epilot
+JavaScript / TypeScript SDK for epilot
 
 ## Quick Start
 
@@ -18,3 +18,4 @@ await entityClient.createEntity({ slug: 'contact' }, { name: 'My Contact' });
 ## Documentation
 
 https://docs.epilot.io/docs/architecture/sdk
+
