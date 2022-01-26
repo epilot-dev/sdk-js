@@ -1,0 +1,24 @@
+{
+  "name": "@epilot/sdk-monorepo",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Javascript SDK monorepo for epilot",
+  "scripts": {
+    "test": "lerna run test --stream",
+    "postinstall": "lerna bootstrap"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git"
+  },
+  "keywords": ["epilot", "sdk"],
+  "author": "epilot GmbH",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js#readme",
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}
