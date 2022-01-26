@@ -1,6 +1,6 @@
-# epilot SDK
+# epilot-sdk
 
-Javascript SDK monorepo for epilot
+SDK monorepo for epilot
 
 ## Quick Start
 
@@ -8,7 +8,7 @@ Javascript SDK monorepo for epilot
 npm install --save epilot-sdk
 ```
 
-```
+```typescript
 import { getClient } from 'epilot-sdk/entity';
 
 const entityClient = await getClient();
