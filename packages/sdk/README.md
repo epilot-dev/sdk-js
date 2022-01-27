@@ -18,4 +18,3 @@ await entityClient.createEntity({ slug: 'contact' }, { name: 'My Contact' });
 ## Documentation
 
 https://docs.epilot.io/docs/architecture/sdk
-
