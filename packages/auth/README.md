@@ -12,13 +12,13 @@ npm install --save @epilot/auth
 import { authenticate, authorizeClient } from '@epilot/auth';
 import { getClient } from '@epilot/entity-client';
 
-const auth = await authenticate({
+const credentials = await authenticate({
   username: 'email@example.com',
   password: 'xxx',
 });
 
 const entityClient = await getClient()
-  .then(authorizeClient(auth))
+  .then(authorizeClient(credentials))
 
 // entityClient will be authorized using epilot OAuth tokens
 ```
