@@ -19,11 +19,8 @@ import { getClient } from '@epilot/entity-client';
 const client = await getClient();
 
 // call operations
-const createRes = await client.createEntity({ slug: "contact" }, { name: "viljami" });
-const { id } = creteRes.data;
-
-const getRes = await client.getEntity(id);
-const { entity } = getRes.data;
+const createResponse = await client.createEntity({ slug: 'contact' }, { first_name: 'Example', last_name: 'Entity' });
+const getResponse = await client.getEntity({ slug: 'contact', id: createResponse.data._id });
 ```
 
 ## Documentation
