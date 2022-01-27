@@ -1,4 +1,4 @@
-# `@epilot/user-client`
+# @epilot/user-client
 
 Client library for epilot [User API](https://docs.epilot.io/api/user).
 

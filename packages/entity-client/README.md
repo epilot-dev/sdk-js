@@ -1,4 +1,4 @@
-# `@epilot/entity-client`
+# @epilot/entity-client
 
 Client library for epilot [Entity API](https://docs.epilot.io/api/entity)
 
