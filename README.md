@@ -1,6 +1,6 @@
-# epilot-sdk
+# epilot-sdk-js
 
-SDK monorepo for epilot
+SDK monorepo for [epilot](https://docs.epilot.io)
 
 ## Quick Start
 
@@ -10,7 +10,7 @@ npm install --save epilot-sdk
 
 ```typescript
 import { authenticate, authorizeClient } from 'epilot-sdk/auth';
-import { getClient } from 'epilot-sdk/entity';
+import { getClient } from 'epilot-sdk/entity-client';
 
 const credentials = await authenticate({
   username: 'email@example.com',
@@ -20,7 +20,6 @@ const credentials = await authenticate({
 const entityClient = await getClient()
   .then(authorizeClient(credentials))
 
-const entityClient = await getClient();
 await entityClient.createEntity('contact', { fist_name: 'Example', last_name: 'Contact' });
 ```
 
