@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "description": "Javascript SDK monorepo for epilot",
   "scripts": {
+    "dev": "lerna run build:watch",
     "test": "lerna run test --stream",
     "lint": "eslint '**/*.{js,ts}' --cache",
     "lint:fix": "eslint '**/*.{js,ts}' --fix",

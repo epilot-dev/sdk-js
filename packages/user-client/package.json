@@ -1,7 +1,7 @@
 {
-  "name": "@epilot/entity-client",
-  "version": "1.31.0",
-  "description": "Client library for the epilot Entity API",
+  "name": "@epilot/user-client",
+  "version": "2.6.1",
+  "description": "Client library for the epilot User API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -23,7 +23,8 @@
     "!node_modules",
     "!src",
     "!src/**",
-    "!*.config.js"
+    "!*.config.js",
+    "!tsconfig.json"
   ],
   "keywords": [],
   "author": "epilot GmbH",
@@ -32,7 +33,6 @@
     "axios": "^0.21.1"
   },
   "dependencies": {
-    "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
     "buffer": "^6.0.3",
     "https-browserify": "^1.0.0",
     "openapi-client-axios": "^4.4.9",
@@ -46,9 +46,9 @@
     "copy-webpack-plugin": "^7.0.0",
     "jest": "^26.6.3",
     "json-loader": "^0.5.7",
-    "openapi-client-axios-typegen": "^4.4.9",
-    "openapicmd": "^1.8.2",
-    "ts-jest": "^26.5.0",
+    "openapi-client-axios-typegen": "^3.13.1",
+    "openapicmd": "^1.6.2",
+    "ts-jest": "^26.5.6",
     "ts-loader": "^8.0.14",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3",

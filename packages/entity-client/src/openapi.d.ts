@@ -705,8 +705,8 @@ declare namespace Components {
          *     "example",
          *     "mock"
          *   ],
-         *   "_created_at": {},
-         *   "_updated_at": {}
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z"
          * }
          */
         export interface EntityItem {
@@ -1076,8 +1076,8 @@ declare namespace Components {
              *     "example",
              *     "mock"
              *   ],
-             *   "_created_at": {},
-             *   "_updated_at": {}
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
              * }
              */
             EntityItem[];
@@ -1242,8 +1242,8 @@ declare namespace Components {
          *     "example",
          *     "mock"
          *   ],
-         *   "_created_at": {},
-         *   "_updated_at": {},
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
          *   "status": "active",
          *   "customer_number": "abc123",
          *   "email": [
@@ -2146,8 +2146,8 @@ declare namespace Paths {
              *     "example",
              *     "mock"
              *   ],
-             *   "_created_at": {},
-             *   "_updated_at": {}
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
              * }
              */
             Components.Schemas.EntityItem;
@@ -2255,8 +2255,8 @@ declare namespace Paths {
                  *     "example",
                  *     "mock"
                  *   ],
-                 *   "_created_at": {},
-                 *   "_updated_at": {}
+                 *   "_created_at": "2021-02-09T12:41:43.662Z",
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
                  * }
                  */
                 Components.Schemas.EntityItem;
@@ -2270,8 +2270,8 @@ declare namespace Paths {
                  *     "example",
                  *     "mock"
                  *   ],
-                 *   "_created_at": {},
-                 *   "_updated_at": {}
+                 *   "_created_at": "2021-02-09T12:41:43.662Z",
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
                  * }
                  */
                 Components.Schemas.EntityItem[];
@@ -2411,8 +2411,8 @@ declare namespace Paths {
              *     "example",
              *     "mock"
              *   ],
-             *   "_created_at": {},
-             *   "_updated_at": {}
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
              * }
              */
             Components.Schemas.EntityItem;
@@ -2460,8 +2460,8 @@ declare namespace Paths {
              *     "example",
              *     "mock"
              *   ],
-             *   "_created_at": {},
-             *   "_updated_at": {}
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
              * }
              */
             Components.Schemas.EntityItem;
@@ -2475,8 +2475,8 @@ declare namespace Paths {
              *     "example",
              *     "mock"
              *   ],
-             *   "_created_at": {},
-             *   "_updated_at": {}
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
              * }
              */
             Components.Schemas.EntityItem;

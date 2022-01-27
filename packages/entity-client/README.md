@@ -2,6 +2,8 @@
 
 Client library for epilot [Entity API](https://docs.epilot.io/api/entity)
 
+Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axios)
+
 ## Installation
 
 ```bash

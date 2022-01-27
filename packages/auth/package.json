@@ -1,8 +1,8 @@
 {
-  "name": "epilot-sdk",
-  "version": "0.0.2",
-  "description": "Epilot SDK",
-  "main": "index.js",
+  "name": "@epilot/auth",
+  "version": "0.0.1",
+  "description": "Authenticate with epilot API",
+  "main": "dist/index.js",
   "scripts": {
     "test": "jest --passWithNoTests",
     "build": "tsc",
@@ -32,7 +32,6 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@epilot/entity-client": "*",
     "@epilot/user-client": "*"
   }
 }
