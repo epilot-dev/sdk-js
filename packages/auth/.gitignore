@@ -1,5 +1,2 @@
-*.js
-*.d.ts
-*.map
-!src/*
 !webpack.config.js
+dist

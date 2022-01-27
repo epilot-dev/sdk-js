@@ -1,1 +1,1 @@
-// TODO: expose all sdk packages as modules here
+// TODO: implement auth with OAuth

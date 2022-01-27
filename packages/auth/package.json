@@ -1,7 +1,7 @@
 {
   "name": "@epilot/auth",
   "version": "0.0.1",
-  "description": "Authenticate with epilot API",
+  "description": "Authenticate with epilot APIs",
   "main": "dist/index.js",
   "scripts": {
     "test": "jest --passWithNoTests",
@@ -11,7 +11,9 @@
   },
   "keywords": [
     "epilot",
-    "sdk"
+    "sdk",
+    "auth",
+    "oauth"
   ],
   "author": "epilot GmbH",
   "license": "MIT",

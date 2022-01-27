@@ -1,21 +1,29 @@
-# epilot-sdk
+# @epilot/auth
 
-JavaScript / TypeScript SDK package for epilot
+Authenticate with epilot APIs
 
 ## Quick Start
 
 ```sh
-npm install --save epilot-sdk
+npm install --save @epilot/auth
 ```
 
 ```typescript
-import { getClient } from 'epilot-sdk/entity';
+import { authenticate, authorizeClient } from '@epilot/auth';
+import { getClient } from '@epilot/entity-client';
 
-const entityClient = await getClient();
-await entityClient.createEntity({ slug: 'contact' }, { name: 'My Contact' });
+const auth = await authenticate({
+  username: 'email@example.com',
+  password: 'xxx',
+});
+
+const entityClient = await getClient()
+  .then(authorizeClient(auth))
+
+// entityClient will be authorized using epilot OAuth tokens
 ```
 
 ## Documentation
 
-https://docs.epilot.io/docs/architecture/sdk
+https://docs.epilot.io/docs/auth/authentication
 
