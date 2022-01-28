@@ -5,6 +5,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "lib": ["esnext"],
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
