@@ -31,7 +31,7 @@
   "author": "epilot GmbH",
   "license": "MIT",
   "peerDependencies": {
-    "axios": "^0.21.1"
+    "axios": "^0.21.4"
   },
   "dependencies": {
     "buffer": "^6.0.3",
