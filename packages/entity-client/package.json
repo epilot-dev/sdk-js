@@ -29,6 +29,14 @@
   "keywords": [],
   "author": "epilot GmbH",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/packages/entity-client#readme",
   "peerDependencies": {
     "axios": "^0.21.1"
   },

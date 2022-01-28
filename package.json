@@ -10,16 +10,16 @@
     "build": "lerna run build",
     "postinstall": "lerna bootstrap"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/epilot-dev/sdk-js.git"
-  },
   "keywords": [
     "epilot",
     "sdk"
   ],
   "author": "epilot GmbH",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git"
+  },
   "bugs": {
     "url": "https://github.com/epilot-dev/sdk-js/issues"
   },

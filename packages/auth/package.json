@@ -1,6 +1,6 @@
 {
   "name": "@epilot/auth",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Authenticate with epilot APIs",
   "main": "dist/index.js",
   "scripts": {
@@ -18,6 +18,14 @@
   ],
   "author": "epilot GmbH",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/packages/auth#readme",
   "files": [
     "*.js",
     "*.d.ts",
