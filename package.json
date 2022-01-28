@@ -7,6 +7,7 @@
     "dev": "lerna run build:watch",
     "test": "lerna run test --stream",
     "lint": "lerna run lint",
+    "build": "lerna run build",
     "postinstall": "lerna bootstrap"
   },
   "repository": {
