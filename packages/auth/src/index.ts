@@ -1,5 +1,3 @@
-import 'source-map-support/register';
-
 import type { AxiosInstance } from 'axios';
 
 import { loginToUserPool } from './cognito';
