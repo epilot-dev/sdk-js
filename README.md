@@ -22,7 +22,6 @@ const credentials = await authenticate({
 const entityClient = await getClient()
   .then(authorizeClient(credentials))
 
-const entityClient = await getClient();
 await entityClient.createEntity('contact', { fist_name: 'Example', last_name: 'Contact' });
 ```
 
