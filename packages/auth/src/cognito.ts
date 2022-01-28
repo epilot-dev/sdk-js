@@ -2,7 +2,7 @@ import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 
 import { Credentials } from './types';
 
-interface UserPoolLoginParams {
+export interface UserPoolLoginParams {
   userPoolId: string;
   userPoolClientId: string;
   username: string;

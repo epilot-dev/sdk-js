@@ -27,7 +27,7 @@ export const authenticate = async (authParams: UsernamePasswordAuthParams): Prom
   return credentials;
 };
 
-export const authorizeClient = (credentials: Credentials) => (client: AxiosInstance): AxiosInstance => {
+export const authorizeClient = (credentials: Credentials) => <T extends AxiosInstance>(client: T): T => {
   client.interceptors.request.use((request) => {
     request.headers['authorization'] = `Bearer ${credentials.tokens.access_token}`;
 
@@ -36,3 +36,5 @@ export const authorizeClient = (credentials: Credentials) => (client: AxiosInsta
 
   return client;
 };
+
+export * from './types';
