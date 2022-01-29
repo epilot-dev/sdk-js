@@ -5,6 +5,10 @@
 
 SDK monorepo for epilot
 
+>  **DISCLAIMER!**
+> 
+> The epilot SDK is in `alpha`. Missing features, incomplete documentation and breaking API changes are to be expected!
+
 ## Quick Start
 
 ```sh
