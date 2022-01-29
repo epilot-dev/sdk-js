@@ -43,6 +43,7 @@
   "dependencies": {
     "@epilot/auth": "*",
     "@epilot/entity-client": "*",
+    "@epilot/file-client": "*",
     "@epilot/user-client": "*"
   }
 }

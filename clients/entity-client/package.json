@@ -26,7 +26,11 @@
     "!src/**",
     "!*.config.js"
   ],
-  "keywords": [],
+  "keywords": [
+    "epilot",
+    "sdk",
+    "entity"
+  ],
   "author": "epilot GmbH",
   "license": "MIT",
   "repository": {
