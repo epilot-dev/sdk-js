@@ -27,7 +27,7 @@
   "bugs": {
     "url": "https://github.com/epilot-dev/sdk-js/issues"
   },
-  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/packages/file-client#readme",
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/file-client#readme",
   "files": [
     "*.js",
     "*.d.ts",
