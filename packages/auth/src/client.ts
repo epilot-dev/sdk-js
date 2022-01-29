@@ -1,4 +1,4 @@
-import { AxiosInstance } from 'axios';
+import { AxiosInstance } from 'openapi-client-axios';
 
 import { OAuthTokens } from './types';
 
