@@ -1,18 +1,21 @@
-import type { AxiosInstance } from 'axios';
+import createDebugLogger from 'debug';
 
+import { authorizeClient } from './client';
 import { loginToUserPool } from './cognito';
 import { Credentials } from './types';
 import { getLoginParametersForUser } from './user';
+
+const debug = createDebugLogger('epilot/auth');
 
 export interface UsernamePasswordAuthParams {
   username: string;
   password: string;
 }
 export const authenticate = async (authParams: UsernamePasswordAuthParams): Promise<Credentials> => {
-  console.debug('auth:params', { ...authParams, password: 'HIDDEN' });
+  debug('params %o', { ...authParams, password: 'HIDDEN' });
 
   const loginParams = await getLoginParametersForUser({ username: authParams.username });
-  console.debug('auth:loginParams', { loginParams });
+  debug('loginParams %o', { loginParams });
 
   const credentials = await loginToUserPool({
     username: authParams.username,
@@ -20,19 +23,12 @@ export const authenticate = async (authParams: UsernamePasswordAuthParams): Prom
     userPoolId: loginParams.userPoolId,
     userPoolClientId: loginParams.userPoolClientId,
   });
-  console.debug('auth:credentials', { credentials });
+  debug('credentials %o', { credentials });
 
-  return credentials;
-};
-
-export const authorizeClient = (credentials: Credentials) => <T extends AxiosInstance>(client: T): T => {
-  client.interceptors.request.use((request) => {
-    request.headers['authorization'] = `Bearer ${credentials.tokens.access_token}`;
-
-    return request;
-  });
-
-  return client;
+  return {
+    ...credentials,
+    configureClient: authorizeClient(credentials.tokens),
+  };
 };
 
 export * from './types';

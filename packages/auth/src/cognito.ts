@@ -1,14 +1,12 @@
 import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 
-import { Credentials } from './types';
-
 export interface UserPoolLoginParams {
   userPoolId: string;
   userPoolClientId: string;
   username: string;
   password: string;
 }
-export const loginToUserPool = async (params: UserPoolLoginParams): Promise<Credentials> => {
+export const loginToUserPool = async (params: UserPoolLoginParams) => {
   const cognitoUser = new AmazonCognitoIdentity.CognitoUser({
     Username: params.username,
     Pool: new AmazonCognitoIdentity.CognitoUserPool({

@@ -13,10 +13,9 @@ npm install --save-dev @epilot/user-client
 ## Usage
 
 ```typescript
-import { getClient } from '@epilot/user-client';
+import userClient from '@epilot/user-client';
 
-const client = await getClient();
-const res = await client.getMe();
+const currentUser = await userClient.getMe().then(res => res.data);
 ```
 
 ## Documentation
