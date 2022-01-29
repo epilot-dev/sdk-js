@@ -31,4 +31,4 @@ const uploadRes = await fileClient.put(uploadParams.data.upload_url, form, { hea
 
 ## Documentation
 
-https://docs.epilot.io/api/file
+https://docs.epilot.io/docs/files/file-api
