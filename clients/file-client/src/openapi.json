@@ -1,0 +1,562 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "File API",
+    "version": "0.1.0",
+    "description": "File Upload and Management for epilot SaaS"
+  },
+  "tags": [
+    {
+      "name": "files",
+      "description": "Files"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "AsOrganization": []
+    }
+  ],
+  "paths": {
+    "/v1/files/public/upload": {
+      "post": {
+        "operationId": "uploadFilePublic",
+        "summary": "uploadFilePublic",
+        "security": [],
+        "description": "Create pre-signed S3 URL to upload a file to keep temporarily (one week).\n\nUse the createFile operation to store file file permanently.\n",
+        "tags": [
+          "files"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFilePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pre-signed URL for POST / PUT upload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "s3ref": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/S3Reference"
+                        },
+                        {
+                          "example": {
+                            "bucket": "epilot-files-prod",
+                            "key": "123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+                          }
+                        }
+                      ]
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "url",
+                      "example": "https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/upload": {
+      "post": {
+        "operationId": "uploadFile",
+        "summary": "uploadFile",
+        "description": "Create pre-signed S3 URL to upload a file to keep temporarily (one week).\n\nUse the createFile operation to store file file permanently.\n",
+        "tags": [
+          "files"
+        ],
+        "parameters": [
+          {
+            "name": "file_entity_id",
+            "in": "query",
+            "description": "file entity id",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFilePayload",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pre-signed URL for POST / PUT upload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "s3ref": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/S3Reference"
+                        },
+                        {
+                          "example": {
+                            "bucket": "epilot-files-prod",
+                            "key": "123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+                          }
+                        }
+                      ]
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "url",
+                      "example": "https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+                    },
+                    "public_url": {
+                      "description": "Returned only if file is permanent i.e. file_entity_id is passed",
+                      "type": "string",
+                      "format": "url",
+                      "example": "https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files": {
+      "post": {
+        "operationId": "saveFile",
+        "summary": "saveFile",
+        "description": "Create / Update a permanent File entity\n\nMakes file object permanent\n\nSaves metadata to file entity\n",
+        "tags": [
+          "files"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveFilePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created File Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/{id}/download": {
+      "get": {
+        "operationId": "downloadFile",
+        "summary": "downloadFile",
+        "description": "Generate pre-signed download S3 url for a file",
+        "tags": [
+          "files"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "index of file version",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "query",
+            "description": "Controls the Content-Disposition header to control browser behaviour. Set to true to trigger download.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generated thumbnail image",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/{id}/preview": {
+      "get": {
+        "operationId": "previewFile",
+        "summary": "previewFile",
+        "description": "Generate thumbnail preview for a file entity",
+        "tags": [
+          "files"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "index of file version",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "w",
+            "in": "query",
+            "description": "width",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "h",
+            "in": "query",
+            "description": "height",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generated thumbnail image",
+            "content": {
+              "image/png": {},
+              "image/jpeg": {}
+            }
+          }
+        }
+      }
+    },
+    "/v1/files:previewS3": {
+      "post": {
+        "operationId": "previewS3File",
+        "summary": "previewS3File",
+        "description": "Generate thumbnail preview from an s3 reference for a file entity",
+        "tags": [
+          "files"
+        ],
+        "parameters": [
+          {
+            "name": "w",
+            "in": "query",
+            "description": "width",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "h",
+            "in": "query",
+            "description": "height",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/S3Reference"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated thumbnail image",
+            "content": {
+              "image/png": {},
+              "image/jpeg": {}
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/delete": {
+      "delete": {
+        "operationId": "deleteFile",
+        "summary": "deleteFile",
+        "description": "Delete file entity",
+        "tags": [
+          "files"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteFilePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File delete response"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Bearer Token"
+      },
+      "AsOrganization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-org-id",
+        "description": "Set organization id when using internal auth"
+      }
+    },
+    "schemas": {
+      "FileEntityId": {
+        "type": "string",
+        "example": "ef7d985c-2385-44f4-9c71-ae06a52264f8"
+      },
+      "FileEntity": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/FileEntityId"
+          },
+          "filename": {
+            "type": "string",
+            "example": "document.pdf"
+          },
+          "access_control": {
+            "type": "string",
+            "default": "private",
+            "enum": [
+              "private",
+              "public-read"
+            ]
+          },
+          "public_url": {
+            "description": "Direct URL for file (public only if file access control is public-read)",
+            "type": "string",
+            "format": "url",
+            "example": "https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+          },
+          "type": {
+            "description": "Human readable type for file",
+            "type": "string",
+            "enum": [
+              "document",
+              "document_template",
+              "text",
+              "image",
+              "video",
+              "audio",
+              "spreadsheet",
+              "presentation",
+              "font",
+              "archive",
+              "application",
+              "unknown"
+            ]
+          },
+          "mime_type": {
+            "type": "string",
+            "description": "MIME type of the file",
+            "example": "application/pdf"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "File size in bytes"
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "s3ref": {
+                  "$ref": "#/components/schemas/S3Reference"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UploadFilePayload": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "example": "document.pdf"
+          },
+          "mime_type": {
+            "description": "MIME type of file",
+            "type": "string",
+            "example": "application/pdf",
+            "default": "application/octet-stream"
+          }
+        },
+        "required": [
+          "filename"
+        ]
+      },
+      "SaveFilePayload": {
+        "type": "object",
+        "properties": {
+          "s3ref": {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          "file_entity_id": {
+            "type": "string",
+            "description": "if passed, adds a new version to existing file entity"
+          },
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "document",
+              "document_template",
+              "text",
+              "image",
+              "video",
+              "audio",
+              "spreadsheet",
+              "presentation",
+              "font",
+              "archive",
+              "application",
+              "unknown"
+            ]
+          },
+          "filename": {
+            "type": "string",
+            "example": "document.pdf"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "access_control": {
+            "type": "string",
+            "default": "private",
+            "enum": [
+              "private",
+              "public-read"
+            ]
+          }
+        },
+        "required": [
+          "s3ref"
+        ]
+      },
+      "DeleteFilePayload": {
+        "type": "object",
+        "properties": {
+          "s3ref": {
+            "$ref": "#/components/schemas/S3Reference"
+          }
+        },
+        "required": [
+          "s3ref"
+        ]
+      },
+      "S3Reference": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "example": "epilot-files-prod"
+          },
+          "key": {
+            "type": "string",
+            "example": "123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+          }
+        },
+        "required": [
+          "bucket",
+          "key"
+        ]
+      },
+      "FileItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string",
+                "example": "document.pdf"
+              },
+              "size_bytes": {
+                "type": "integer",
+                "example": 1234
+              },
+              "mime_type": {
+                "type": "string",
+                "example": "image/jpeg"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
