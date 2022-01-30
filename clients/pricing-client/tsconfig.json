@@ -4,21 +4,20 @@
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
     "strictNullChecks": false,
+    "resolveJsonModule": true,
     "baseUrl": ".",
-    "rootDir": "src/",
+    "rootDir": "src",
     "outDir": "dist",
     "sourceMap": true,
     "declaration": true
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "**/*.test.ts"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["**/*.test.ts"]
 }

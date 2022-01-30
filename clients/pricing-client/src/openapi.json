@@ -1,0 +1,1716 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Pricing API",
+    "description": "This API hub sets the foundations for the following Pricing APIs:\n\n- Shopping Cart API, used to interact with a cart during a customer's checkout session, and it's responsible for providing the following set of features:\n  - A unified data model to model a Shopping Cart\n  - Cart abandonment recovery\n  - Pricing features such as automatic calculation of totals and price breakdowns for taxes\n  - Product and pricing data validation\n  - Checkout a cart into an order, invoice, or quote\n\n- Order API, provides a way to manage orders, keep track of inventory, with individual adjustments, tax calculation, and shipping, apply discounts, store tracking information, and handle returns. The responsibilities of this API contemplate the following set of features:\n  - Create or update a new Order from a Shopping Cart\n  - Marking a Shopping Cart as complete once the Order is set as open (immutable/closed for modification)\n  - Pricing features such as automatic calculation of totals and price breakdowns for taxes\n\n- Product Catalog API, provides a way to query the entire catalog of products and prices.\n  - Exposes querying operations to access the customer Product Catalog\n\n- Opportunity API, provides a way for journey users to initiate a sales process with an opportunity, responsible for holding something as simple as a lead (no quote) or a quote.\n",
+    "contact": {
+      "name": "Maintainers Channel",
+      "url": "https://epilot.slack.com/archives/C020B4URQNS"
+    },
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "Read the full docs here",
+    "url": "https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5459705918/Shopping+Cart+Orders+API"
+  },
+  "tags": [
+    {
+      "name": "Draft",
+      "description": "Operations not implement under the current release."
+    },
+    {
+      "name": "Public",
+      "description": "Customer-facing Endpoints (requiring a X-Ivy-Org-ID identification)"
+    },
+    {
+      "name": "Cart",
+      "description": "The shopping cart & checkout management operations"
+    },
+    {
+      "name": "Order",
+      "description": "Order management operations"
+    },
+    {
+      "name": "Opportunity",
+      "description": "Opportunity management operations"
+    },
+    {
+      "name": "Product Catalog",
+      "description": "Product querying operations"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "AsOrganization": []
+    }
+  ],
+  "paths": {
+    "/v1/public/cart": {
+      "put": {
+        "description": "Creates a new cart or updates an existing one.",
+        "operationId": "$upsertCart",
+        "summary": "upsertCart",
+        "security": [],
+        "tags": [
+          "Cart",
+          "Public",
+          "Draft"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated Cart.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The new Cart.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/cart:checkout": {
+      "post": {
+        "description": "Checkouts a cart and executes the specified checkout `mode` process.\n\nA Checkout implicitly finalizes the provided cart (if not transient from a fast-checkout) and behaves in one of the following modes:\n- `create_order` (**default**): the payment happens at a later date or managed by 3rd-party CRM (SAP)\n- `create_invoice`: the payment happens on the online checkout (paypal, stripe, adyen)\n- `create_quote`: the checkout represents a price quote request\n\nFast checkout is also supported, by passing the Cart contents directly.\nWhen a fast checkout is performed the cart is considered transient and there is no cart persistance.\n\nIf the checkout `mode` is omitted, the `mode` will default to `create_order`.\n",
+        "operationId": "$checkoutCart",
+        "summary": "checkoutCart",
+        "security": [],
+        "tags": [
+          "Cart",
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutCart"
+              },
+              "examples": {
+                "Checkout with a CartID": {
+                  "$ref": "#/components/examples/checkoutWithCartId"
+                },
+                "Fast Checkout with a transient Cart": {
+                  "$ref": "#/components/examples/checkoutWithTransientCart"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The checkout result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutCartResult"
+                },
+                "examples": {
+                  "Checkout with created order": {
+                    "$ref": "#/components/examples/checkoutResult"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cart/{cart-id}": {
+      "get": {
+        "description": "Retrieves a cart by id.",
+        "operationId": "$getCart",
+        "summary": "getCart",
+        "tags": [
+          "Cart",
+          "Draft"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cart-id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The id of the cart to be fetched",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The customer's cart.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cart not found"
+          }
+        }
+      },
+      "delete": {
+        "description": "Deletes the Cart specified and returns its content.",
+        "operationId": "$deleteCart",
+        "summary": "deleteCart",
+        "tags": [
+          "Cart",
+          "Draft"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cart-id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The id of the cart to be deleted",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The customer's cart.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/order": {
+      "put": {
+        "description": "Creates a new order or updates an existing one. During the creation of an order, an unique customer-readable `order_number` will be generated.\nThe `order_number` can be used to universally identify an order within epilot platform.\n\nThe upsert operation is idempotent, meaning that multiple calls will have effect just once. Calling the upsert multiple times will not duplicate the items on an order.\n\nWhen the the `cart_id` payload field is specified, the cart items are appended to the existing order items, or replaced in-place if they belong to the same `cart_id`.\n\nOn multiple updates with the same `cart_id` the line items linked with that `cart_id` (`order.line_items[]?.metadata.cart_id`) are removed and re-added.\n",
+        "operationId": "$upsertOrder",
+        "summary": "upsertOrder",
+        "tags": [
+          "Order",
+          "Draft"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Order"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated Order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The new Order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/catalog": {
+      "post": {
+        "description": "Provides a querying functionalities over products and prices of the Catalog for a given organization.",
+        "operationId": "$searchCatalog",
+        "summary": "searchCatalog",
+        "security": [],
+        "tags": [
+          "Product Catalog",
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The search result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/opportunity": {
+      "post": {
+        "description": "Creates a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.\nThe `opportunity_number` can be used to universally identify an opportunity within epilot platform.\n",
+        "operationId": "$createOpportunity",
+        "summary": "createOpportunity",
+        "security": [],
+        "tags": [
+          "Opportunity",
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Opportunity"
+              },
+              "examples": {
+                "Opportunity containing one Order": {
+                  "value": {
+                    "billing_address": {
+                      "street": "sdf",
+                      "street_number": "1",
+                      "city": "Berlin",
+                      "postal_code": "12045",
+                      "country": "de",
+                      "additional_info": "adasd"
+                    },
+                    "delivery_address": {
+                      "street": "sdf",
+                      "street_number": "1",
+                      "city": "Berlin",
+                      "postal_code": "12045",
+                      "country": "de",
+                      "additional_info": "adasd"
+                    },
+                    "items": {
+                      "$relation": [
+                        {
+                          "entity_id": "c8dbe8f3-28b6-4d77-aae8-47bc24a2532f",
+                          "_tags": [
+                            "journey"
+                          ]
+                        }
+                      ]
+                    },
+                    "_tags": [
+                      "journey",
+                      "ORWNr4iCN"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new Opportunity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Opportunity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Bearer Token"
+      },
+      "AsOrganization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-org-id",
+        "description": "Set organization id when using internal auth"
+      },
+      "AsUser": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-user-id",
+        "description": "Set user id when using internal auth"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      },
+      "MetaData": {
+        "description": "A set of key-value pairs.",
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "type": "object",
+              "description": "Key value pair entry",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "description": "Item key"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Item value"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "CatalogSearch": {
+        "description": "A catalog search payload",
+        "type": "object",
+        "properties": {
+          "q": {
+            "description": "The query to perform using lucene query syntax.",
+            "type": "string"
+          },
+          "sort": {
+            "description": "The sort expression to sort the results.",
+            "type": "string"
+          },
+          "from": {
+            "description": "The index from which to query, used for pagination purposes. Defaults to 0",
+            "type": "number"
+          },
+          "size": {
+            "description": "The max size of the response, defaults to 2000.",
+            "type": "number"
+          },
+          "expand": {
+            "type": "array",
+            "description": "A list of additional fields to expand on the search results, such as non-indexed fields.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
+          "sort": "description ASC",
+          "from": 0,
+          "size": 200
+        }
+      },
+      "CatalogSearchResult": {
+        "description": "The query result payload",
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "number",
+            "description": "The number os results returned."
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Product"
+                },
+                {
+                  "$ref": "#/components/schemas/Price"
+                }
+              ]
+            }
+          }
+        },
+        "example": {
+          "hits": 2,
+          "results": [
+            {
+              "schema": "product",
+              "description": "product a"
+            },
+            {
+              "schema": "price",
+              "unit_amount_decimal": "124.342343434"
+            }
+          ]
+        }
+      },
+      "CartDto": {
+        "description": "A valid cart payload from a client.",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/MetaData"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "billing_address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "delivery_address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "payment_method": {
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "line_items": {
+            "$ref": "#/components/schemas/PriceItemsDto"
+          },
+          "files": {
+            "type": "array",
+            "description": "An array of file IDs, already upload into the File API, that are related with this cart",
+            "items": {
+              "type": "string",
+              "description": "a string representing a file ID as received from the File API"
+            }
+          }
+        },
+        "required": [
+          "line_items"
+        ]
+      },
+      "CheckoutCart": {
+        "type": "object",
+        "description": "The cart checkout request payload",
+        "properties": {
+          "cart": {
+            "anyOf": [
+              {
+                "description": "the cart id",
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/CartDto"
+              }
+            ]
+          },
+          "mode": {
+            "$ref": "#/components/schemas/CheckoutMode"
+          }
+        }
+      },
+      "CheckoutCartResult": {
+        "type": "object",
+        "description": "The cart checkout result",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/Order"
+          }
+        }
+      },
+      "CheckoutMode": {
+        "type": "string",
+        "description": "The checkout mode for the cart checkout.",
+        "enum": [
+          "create_order",
+          "create_invoice",
+          "create_quote"
+        ]
+      },
+      "PriceItemsDto": {
+        "description": "A valid set of product prices, quantities, (discounts) and taxes from a client.",
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/PriceItemDto"
+            }
+          ]
+        }
+      },
+      "PriceItemDto": {
+        "description": "Represents a valid price item from a client.",
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/MetaData"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "The quantity of products being purchased."
+          },
+          "description": {
+            "type": "string",
+            "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
+          },
+          "product_id": {
+            "type": "string",
+            "description": "The id of the product."
+          },
+          "price_id": {
+            "type": "string",
+            "description": "The id of the price."
+          },
+          "taxes": {
+            "type": "array",
+            "description": "The taxes applied to the price item.",
+            "readOnly": true,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TaxAmountDto"
+                }
+              ]
+            }
+          },
+          "recurrences": {
+            "type": "array",
+            "description": "The taxes applied to the price item.",
+            "readOnly": true,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/RecurrenceAmountDto"
+                }
+              ]
+            }
+          },
+          "_price": {
+            "$ref": "#/components/schemas/Price"
+          }
+        }
+      },
+      "TaxAmountDto": {
+        "type": "object",
+        "description": "A valid tax rate from a client.",
+        "properties": {
+          "rate": {
+            "type": "string",
+            "description": "The tax rate applied."
+          },
+          "tax": {
+            "description": "The tax applied.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Tax"
+              }
+            ]
+          }
+        }
+      },
+      "RecurrenceAmountDto": {
+        "type": "object",
+        "description": "An amount associated with a specific recurrence.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The price type."
+          },
+          "billing_period": {
+            "type": "string",
+            "description": "The price billing period."
+          },
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total of all items, with same recurrence, before (discounts or) taxes are applied."
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total of all items, with same recurrence, after (discounts and) taxes are applied."
+          },
+          "amount_tax": {
+            "type": "integer",
+            "description": "Total of all items taxes, with same recurrence."
+          }
+        },
+        "required": [
+          "type",
+          "amount_subtotal",
+          "amount_total"
+        ]
+      },
+      "Cart": {
+        "description": "Supports shopping for products and services until ready for checkout.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The cart identifier"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "The user's Organization Id the cart belongs to",
+            "readOnly": true
+          },
+          "status": {
+            "enum": [
+              "open",
+              "complete",
+              "expired"
+            ],
+            "type": "string",
+            "readOnly": true,
+            "description": "The status of the Cart:\n- open - the cart checkout is still in progress. Payment processing has not started\n- complete - the cart checkout is complete. Payment processing may still be in progress\n- expired - the cart checkout has expired. No further processing will occur\n"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "billing_address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "delivery_address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MetaData"
+          },
+          "line_items": {
+            "$ref": "#/components/schemas/PriceItems"
+          },
+          "amount_subtotal": {
+            "readOnly": true,
+            "type": "integer",
+            "description": "Total of all items before (discounts or) taxes are applied."
+          },
+          "amount_total": {
+            "readOnly": true,
+            "type": "integer",
+            "description": "Total of all items after (discounts and) taxes are applied."
+          },
+          "total_details": {
+            "$ref": "#/components/schemas/TotalDetails"
+          },
+          "created_at": {
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Currency": {
+        "type": "string",
+        "description": "Three-letter ISO currency code, in lowercase. Must be a supported currency.\nISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html\n"
+      },
+      "Opportunity": {
+        "type": "object",
+        "description": "The opportunity entity",
+        "additionalProperties": true,
+        "properties": {
+          "opportunity_number": {
+            "type": "string",
+            "description": "The opportunity id number for the customer (autogenerated if left blank)"
+          },
+          "description": {
+            "type": "string",
+            "description": "A description to frame this opportunity within its sales process"
+          },
+          "status": {
+            "type": "string",
+            "description": "The opportunity status",
+            "enum": [
+              "lead",
+              "qualification",
+              "validation",
+              "offering",
+              "supply",
+              "approval",
+              "operations",
+              "complete"
+            ]
+          },
+          "items": {
+            "oneOf": [
+              {
+                "type": "array",
+                "description": "An array of order when the opportunity entity is hydrated",
+                "items": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              },
+              {
+                "type": "object",
+                "description": "The order relations items, representing quotes or orders associated with the opportunity",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OrderRelation"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "_org_id": {
+            "type": "string",
+            "description": "Organization Id the order belongs to"
+          },
+          "_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "_created_at": {
+            "type": "string",
+            "readOnly": true
+          },
+          "_updated_at": {
+            "type": "string",
+            "readOnly": true
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OrderRelation": {
+        "type": "object",
+        "description": "An order relation reference",
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "description": "The relation order id"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "The tags array associated with the relation"
+            }
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "description": "The order entity",
+        "additionalProperties": true,
+        "properties": {
+          "order_number": {
+            "type": "string",
+            "description": "The order id number for the customer"
+          },
+          "cart_id": {
+            "type": "string",
+            "description": "The cart id that originated or is associated with the order"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "quote",
+              "open",
+              "paid",
+              "shipped",
+              "delivered",
+              "complete"
+            ],
+            "description": "The order status"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MetaData"
+          },
+          "billing_first_name": {
+            "type": "string"
+          },
+          "billing_last_name": {
+            "type": "string"
+          },
+          "billing_company_name": {
+            "type": "string"
+          },
+          "billing_vat": {
+            "type": "string"
+          },
+          "billing_email": {
+            "type": "string"
+          },
+          "billing_phone": {
+            "type": "string"
+          },
+          "billing_address": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Address"
+            }
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "delivery_address": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Address"
+            }
+          },
+          "payment_method": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentMethod"
+            }
+          },
+          "contact": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The id of an existing contact."
+          },
+          "line_items": {
+            "$ref": "#/components/schemas/PriceItems"
+          },
+          "amount_subtotal": {
+            "readOnly": true,
+            "type": "integer",
+            "description": "Total of all items before (discounts or) taxes are applied."
+          },
+          "amount_total": {
+            "readOnly": true,
+            "type": "integer",
+            "description": "Total of all items after (discounts and) taxes are applied."
+          },
+          "total_details": {
+            "$ref": "#/components/schemas/TotalDetails"
+          },
+          "_org_id": {
+            "type": "string",
+            "description": "Organization Id the order belongs to"
+          },
+          "_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "_created_at": {
+            "type": "string",
+            "readOnly": true
+          },
+          "_updated_at": {
+            "type": "string",
+            "readOnly": true
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PriceItems": {
+        "description": "Tracks a set of product prices, quantities, (discounts) and taxes.",
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/PriceItem"
+            }
+          ]
+        }
+      },
+      "PriceItem": {
+        "description": "Represents a price item",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "price item id",
+            "readOnly": true
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MetaData"
+          },
+          "unit_amount": {
+            "type": "integer",
+            "description": "The unit amount value",
+            "readOnly": true
+          },
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total before any (discounts or) taxes are applied.",
+            "readOnly": true
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total after (discounts and) taxes.",
+            "readOnly": true
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "description": {
+            "type": "string",
+            "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "The quantity of products being purchased."
+          },
+          "product_id": {
+            "type": "string",
+            "description": "The id of the product."
+          },
+          "price_id": {
+            "type": "string",
+            "description": "The id of the price."
+          },
+          "_price": {
+            "$ref": "#/components/schemas/Price"
+          },
+          "_product": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "taxes": {
+            "type": "array",
+            "description": "The taxes applied to the price item.",
+            "readOnly": true,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TaxAmount"
+                }
+              ]
+            }
+          },
+          "recurrences": {
+            "type": "array",
+            "description": "The sum of amounts of the price items by recurrence.",
+            "readOnly": true,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/RecurrenceAmount"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "TaxAmount": {
+        "type": "object",
+        "description": "A tax amount associated with a specific tax rate.",
+        "readOnly": true,
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "description": "The tax amount."
+          },
+          "rate": {
+            "type": "string",
+            "description": "The tax rate applied."
+          },
+          "tax": {
+            "description": "The tax applied.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Tax"
+              }
+            ]
+          }
+        }
+      },
+      "RecurrenceAmount": {
+        "type": "object",
+        "description": "An amount associated with a specific recurrence.",
+        "readOnly": true,
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The price type."
+          },
+          "billing_period": {
+            "type": "string",
+            "description": "The price billing period."
+          },
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total of all items, with same recurrence, before (discounts or) taxes are applied."
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total of all items, with same recurrence, after (discounts and) taxes are applied."
+          },
+          "amount_tax": {
+            "type": "integer",
+            "description": "Total of all items taxes, with same recurrence."
+          }
+        },
+        "required": [
+          "type",
+          "amount_subtotal",
+          "amount_total"
+        ]
+      },
+      "TotalDetails": {
+        "type": "object",
+        "description": "The total details with tax (and discount) aggregated totals.",
+        "readOnly": true,
+        "properties": {
+          "amount_shipping": {
+            "type": "integer",
+            "description": "This is the sum of all the price item shipping amounts."
+          },
+          "amount_tax": {
+            "type": "integer",
+            "description": "This is the sum of all the price item tax amounts."
+          },
+          "breakdown": {
+            "type": "object",
+            "description": "Breakdown of individual tax (and discount) amounts that add up to the totals.",
+            "properties": {
+              "taxes": {
+                "type": "array",
+                "description": "The aggregated price items tax amount per rate.",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/TaxAmount"
+                    }
+                  ]
+                }
+              },
+              "recurrences": {
+                "type": "array",
+                "description": "The aggregated price items tax amount per rate.",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/RecurrenceAmount"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "PricingDetails": {
+        "type": "object",
+        "description": "The result from the calculation of a set of price items.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PriceItem"
+                }
+              ]
+            }
+          },
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total of all items before (discounts or) taxes are applied."
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total of all items after (discounts and) taxes are applied."
+          },
+          "total_details": {
+            "$ref": "#/components/schemas/TotalDetails"
+          }
+        }
+      },
+      "BillingPeriod": {
+        "type": "string",
+        "enum": [
+          "weekly",
+          "monthly",
+          "every_quarter",
+          "every_6_months",
+          "yearly"
+        ]
+      },
+      "SalexTax": {
+        "type": "string",
+        "enum": [
+          "nontaxable",
+          "reduced",
+          "standard"
+        ]
+      },
+      "Price": {
+        "type": "object",
+        "description": "The price configuration",
+        "additionalProperties": true,
+        "readOnly": true,
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "billing_scheme": {
+            "type": "string",
+            "enum": [
+              "Per Unit"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "sales_tax": {
+            "$ref": "#/components/schemas/SalexTax"
+          },
+          "tax_behavior": {
+            "type": "string",
+            "enum": [
+              "inclusive",
+              "exclusive"
+            ]
+          },
+          "tiers_mode": {
+            "type": "string",
+            "enum": [
+              "Standard"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "one_time",
+              "recurring"
+            ]
+          },
+          "billing_period": {
+            "$ref": "#/components/schemas/BillingPeriod"
+          },
+          "unit_amount": {
+            "type": "number"
+          },
+          "unit_amount_decimal": {
+            "type": "string"
+          },
+          "unit_amount_currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "billing_duration_amount": {
+            "type": "number"
+          },
+          "billing_duration_unit": {
+            "type": "string",
+            "enum": [
+              "weeks",
+              "months",
+              "years"
+            ]
+          },
+          "notice_time_amount": {
+            "type": "number"
+          },
+          "notice_time_unit": {
+            "type": "string",
+            "enum": [
+              "weeks",
+              "months",
+              "years"
+            ]
+          },
+          "termination_time_amount": {
+            "type": "number"
+          },
+          "termination_time_unit": {
+            "type": "string",
+            "enum": [
+              "weeks",
+              "months",
+              "years"
+            ]
+          },
+          "renewal_duration_amount": {
+            "type": "number"
+          },
+          "renewal_duration_unit": {
+            "type": "string",
+            "enum": [
+              "weeks",
+              "months",
+              "years"
+            ]
+          },
+          "_created_at": {
+            "type": "string"
+          },
+          "_id": {
+            "type": "string"
+          },
+          "_title": {
+            "type": "string"
+          },
+          "_updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "street": {
+            "type": "string",
+            "description": "The first line of the address. Typically the street address or PO Box number."
+          },
+          "street_number": {
+            "type": "string",
+            "description": "The second line of the address. Typically the number of the apartment, suite, or unit."
+          },
+          "postal_code": {
+            "type": "string",
+            "description": "The postal code for the address."
+          },
+          "city": {
+            "type": "string",
+            "description": "The name of the city, district, village, or town."
+          },
+          "country": {
+            "type": "string",
+            "description": "The two-letter code for the country of the address."
+          },
+          "additional_info": {
+            "type": "string",
+            "description": "An additional description for the address"
+          }
+        }
+      },
+      "PaymentMethod": {
+        "type": "object",
+        "description": "A PaymentMethod represent your customer's payment instruments.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the PaymentMethod."
+          },
+          "details": {
+            "type": "object",
+            "description": "Contains relevant data associated with the payment method type.",
+            "additionalProperties": true
+          }
+        }
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "company_name": {
+            "type": "string"
+          },
+          "vat_id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "description": "A valid email identifying the customer."
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "description": "The product configuration",
+        "readOnly": true,
+        "additionalProperties": true,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Product",
+              "Service"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "_id": {
+            "type": "string"
+          },
+          "_title": {
+            "type": "string"
+          }
+        }
+      },
+      "Tax": {
+        "type": "object",
+        "description": "the tax configuration",
+        "additionalProperties": true,
+        "required": [
+          "type",
+          "rate",
+          "behavior"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "VAT",
+              "GST",
+              "Custom"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "behavior": {
+            "type": "string",
+            "enum": [
+              "Exclusive",
+              "Inclusive"
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "region": {
+            "type": "string"
+          },
+          "region_label": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "examples": {
+      "checkoutWithCartId": {
+        "value": {
+          "mode": "create_order",
+          "cart": "pZ324jnndf"
+        }
+      },
+      "checkoutWithTransientCart": {
+        "value": {
+          "mode": "create_order",
+          "cart": {
+            "metadata": [
+              {
+                "key": "journey-id",
+                "value": "8d0a2235-97ce-42d0-88a3-e374634ca44e"
+              }
+            ],
+            "customer": {
+              "first_name": "john",
+              "last_name": "doe",
+              "company_name": "company limited",
+              "vat_id": "123892321",
+              "email": "johndoe@company.com",
+              "phone": "+44233242423"
+            },
+            "billing_address": {
+              "street1": "wallstreet",
+              "street2": 1,
+              "city": "new york city",
+              "country": "united states",
+              "country_code": "US",
+              "additional_info": "headquarters office"
+            },
+            "delivery_address": {
+              "street1": "berverly hills avenue",
+              "street2": "block 1",
+              "city": "berverly hills",
+              "country": "california",
+              "country_code": "CA",
+              "additional_info": "remote cowork place"
+            },
+            "line_items": [
+              {
+                "quantity": 1,
+                "product": "b7185fb7-b10f-4875-bda7-288631446555",
+                "price": "df240bab-9f71-4a9a-a9e1-59f18827dbf9"
+              },
+              {
+                "quantity": 1,
+                "product": "zzzzzz-b10f-4875-bda7-288631446555",
+                "price": "zzzzz-9f71-4a9a-a9e1-59f18827dbf9"
+              }
+            ],
+            "files": [
+              "xf240bab-9f71-4a9a-a9e1-59f18827dbf9",
+              "yf240bab-9f71-4a9a-a9e1-59f18827dbf9",
+              "zf240bab-9f71-4a9a-a9e1-59f18827dbf9"
+            ]
+          }
+        }
+      },
+      "checkoutResult": {
+        "value": {
+          "order": {
+            "_id": "d1ZoC1FwZ6",
+            "type": "Draft",
+            "cart_id": "p0ZoB1FwH6",
+            "order_number": "20201021-234324",
+            "_org_id": 123,
+            "metadata": [
+              {
+                "key": "journey-id",
+                "value": "8d0a2235-97ce-42d0-88a3-e374634ca44e"
+              }
+            ],
+            "billing_first_name": "john",
+            "billing_last_name": "doe",
+            "billing_company_name": "i me and myself",
+            "billing_vat": "234823948",
+            "billing_email": "johndoe@nowhere.com",
+            "currency": "EUR",
+            "billing_phone": "+1234234545",
+            "billing_address": "wallstreet, 1",
+            "billing_contact": "villy or zilly",
+            "line_items": [
+              {
+                "id": "mSjGCTfn8w",
+                "metadata": [
+                  {
+                    "cart_id": "p0ZoB1FwH6"
+                  }
+                ],
+                "description": "Wallbox Premium - Premium Price",
+                "currency": "EUR",
+                "unit_amount": 78900,
+                "amount_subtotal": 50000,
+                "amount_total": 61500,
+                "quantity": 1,
+                "product_id": "b7185fb7-b10f-4875-bda7-288631446555",
+                "price_id": "df240bab-9f71-4a9a-a9e1-59f18827dbf9",
+                "taxes": [
+                  {
+                    "amount": 11500,
+                    "rate": "MwSt. 23%"
+                  }
+                ],
+                "_price": {
+                  "_id": "df240bab-9f71-4a9a-a9e1-59f18827dbf9",
+                  "unit_amount": "€ 789",
+                  "type": "one_time",
+                  "active": true,
+                  "sales_tax": "standard",
+                  "tax_behavior": "inclusive",
+                  "description": "Winter Sale",
+                  "billing_scheme": "Per Unit",
+                  "tiers_mode": "Standard",
+                  "_created_at": "2021-11-10T18:02:58.318Z",
+                  "_updated_at": "2021-11-10T18:02:58.318Z",
+                  "_title": "Winter Sale"
+                }
+              },
+              {
+                "id": "mZkGCTfn6p",
+                "metadata": [
+                  {
+                    "cart_id": "p0ZoB1FwH6"
+                  }
+                ],
+                "description": "Wallbox Basic with Full Add-ons - Basic Price",
+                "currency": "EUR",
+                "unit_amount": 78900,
+                "amount_subtotal": 50000,
+                "amount_total": 53500,
+                "quantity": 1,
+                "product_id": "zzzzzz-b10f-4875-bda7-288631446555",
+                "price_id": "zzzzz-9f71-4a9a-a9e1-59f18827dbf9",
+                "taxes": [
+                  {
+                    "amount": 3500,
+                    "rate": "MwSt. 7%"
+                  }
+                ],
+                "_price": {
+                  "_id": "zzzzz-9f71-4a9a-a9e1-59f18827dbf9",
+                  "unit_amount": "€ 789",
+                  "type": "one_time",
+                  "active": true,
+                  "sales_tax": "standard",
+                  "tax_behavior": "inclusive",
+                  "description": "Winter Sale",
+                  "billing_scheme": "Per Unit",
+                  "tiers_mode": "Standard",
+                  "_created_at": "2021-11-10T18:02:58.318Z",
+                  "_updated_at": "2021-11-10T18:02:58.318Z",
+                  "_title": "Winter Sale"
+                }
+              }
+            ],
+            "amount_subtotal": 100000,
+            "amount_total": 115000,
+            "total_details": {
+              "amount_shipping": 10000,
+              "amount_tax": 15000,
+              "breakdown": [
+                {
+                  "amount": 11500,
+                  "rate": "MwSt. 23%"
+                },
+                {
+                  "amount": 3500,
+                  "rate": "MwSt. 7%"
+                }
+              ]
+            },
+            "_created_at": "2021-11-10T18:02:58.318Z",
+            "_updated_at": "2021-11-10T18:02:58.318Z"
+          }
+        }
+      }
+    }
+  }
+}
