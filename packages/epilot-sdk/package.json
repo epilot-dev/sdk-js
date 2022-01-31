@@ -45,6 +45,7 @@
     "@epilot/entity-client": "*",
     "@epilot/file-client": "*",
     "@epilot/user-client": "*",
+    "@epilot/pricing-client": "*",
     "axios": "^0.21.4",
     "openapi-client-axios": "^4.4.9"
   }

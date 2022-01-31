@@ -1,0 +1,69 @@
+{
+  "name": "@epilot/pricing-client",
+  "version": "1.5.2",
+  "description": "Client for epilot Pricing APIs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [
+    "order",
+    "cart",
+    "pricing"
+  ],
+  "scripts": {
+    "test": "jest",
+    "bundle-definition": "webpack",
+    "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
+    "build": "npm run typegen && tsc && npm run bundle-definition",
+    "build:watch": "npm run build && tsc -w",
+    "prepublishOnly": "npm run build",
+    "lint": "../../node_modules/eslint/bin/eslint.js src"
+  },
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "**/*.js",
+    "**/*.d.ts",
+    "!*.test.*",
+    "!**/*.test.*",
+    "!node_modules",
+    "!src",
+    "!*.config.js"
+  ],
+  "author": "epilot GmbH",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/pricing-client#readme",
+  "peerDependencies": {
+    "axios": "^0.21.1"
+  },
+  "dependencies": {
+    "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
+    "buffer": "^6.0.3",
+    "https-browserify": "^1.0.0",
+    "openapi-client-axios": "^4.4.9",
+    "stream-http": "^3.1.1",
+    "url": "^0.11.0",
+    "util": "^0.12.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.20",
+    "axios": "^0.21.1",
+    "copy-webpack-plugin": "^7.0.0",
+    "jest": "^26.6.3",
+    "json-loader": "^0.5.7",
+    "openapi-client-axios-typegen": "^4.4.9",
+    "openapicmd": "^1.8.2",
+    "ts-jest": "^26.5.0",
+    "ts-loader": "^8.0.14",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3",
+    "webpack": "^5.18.0",
+    "webpack-cli": "^4.4.0"
+  }
+}
