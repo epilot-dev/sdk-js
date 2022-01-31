@@ -1,4 +1,4 @@
-# @epilot/file-client
+# @epilot/pricing-client
 
 [![CI](https://github.com/epilot-dev/sdk-js/workflows/CI/badge.svg)](https://github.com/epilot-dev/sdk-js/actions?query=workflow%3ACI)
 [![npm version](https://img.shields.io/npm/v/@epilot/pricing-client.svg)](https://www.npmjs.com/package/@epilot/pricing-client)
