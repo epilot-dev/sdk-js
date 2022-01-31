@@ -12,7 +12,7 @@ Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axi
 ## Installation
 
 ```bash
-npm install --save-dev @epilot/pricing-client
+npm install --save @epilot/pricing-client
 ```
 
 ## Usage
