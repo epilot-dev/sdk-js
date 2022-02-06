@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { rest } from 'msw';
 
-import { authServer } from '../../epilot-sdk/src/__tests__/server-mocks';
+import { authServer } from './__tests__/server-mocks';
 
 import { authenticate } from './';
 
