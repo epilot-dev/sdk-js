@@ -146,7 +146,7 @@ declare namespace Components {
             download_url: string;
             alt_text?: string;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Tax Relationship */ TaxRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* Custom input */ CustomAttribute;
         export interface BaseAttribute {
             name: string;
             label: string;
@@ -202,6 +202,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
         }
         /**
          * example:
@@ -237,17 +239,10 @@ declare namespace Components {
             _created_at: string; // date-time
             _updated_at: string; // date-time
         }
-        export interface Blueprint {
-            id?: BlueprintId /* uuid */;
-            /**
-             * example:
-             * Power & Gas Utilities
-             */
-            name?: string;
-            schemas?: /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ EntitySchema[];
-        }
+        /**
+         * Reference to blueprint
+         */
         export type BlueprintEntityId = string; // uuid
-        export type BlueprintId = string; // uuid
         /**
          * Yes / No Toggle
          */
@@ -306,6 +301,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "boolean";
         }
         /**
@@ -366,6 +363,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type: "consent";
             topic: string;
             identifiers?: string[];
@@ -428,6 +427,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "country";
         }
         /**
@@ -488,6 +489,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type: "currency";
             /**
              * An array of currency configurations with a country code (ISO-4217)
@@ -498,6 +501,68 @@ declare namespace Components {
                 symbol: string;
                 flag?: string;
             })[];
+        }
+        /**
+         * Custom input
+         */
+        export interface CustomAttribute {
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: string | {
+                [name: string]: any;
+            } | number | number | boolean | any[];
+            group?: string;
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            type?: "custom";
         }
         /**
          * Date or Datetime picker
@@ -557,6 +622,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "date" | "datetime";
         }
         export interface Entity {
@@ -790,13 +857,17 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
-            blueprint?: BlueprintEntityId /* uuid */;
+            blueprint?: /* Reference to blueprint */ BlueprintEntityId /* uuid */;
             /**
              * This schema should only be active when the feature flag is enabled
              * example:
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This schema should only be active when one of the organization settings is enabled
+             */
+            enable_setting?: string[];
             /**
              * User-friendly identifier for the entity schema
              * example:
@@ -843,6 +914,10 @@ declare namespace Components {
             group_settings?: {
                 [name: string]: {
                     expanded?: boolean;
+                    /**
+                     * Render order of the group
+                     */
+                    order?: number;
                 };
             };
             /**
@@ -914,13 +989,17 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
-            blueprint?: BlueprintEntityId /* uuid */;
+            blueprint?: /* Reference to blueprint */ BlueprintEntityId /* uuid */;
             /**
              * This schema should only be active when the feature flag is enabled
              * example:
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This schema should only be active when one of the organization settings is enabled
+             */
+            enable_setting?: string[];
             /**
              * User-friendly identifier for the entity schema
              * example:
@@ -967,6 +1046,10 @@ declare namespace Components {
             group_settings?: {
                 [name: string]: {
                     expanded?: boolean;
+                    /**
+                     * Render order of the group
+                     */
+                    order?: number;
                 };
             };
             /**
@@ -1033,7 +1116,7 @@ declare namespace Components {
              * example:
              * _schema:contact AND status:active
              */
-            q?: string;
+            q: string;
             /**
              * example:
              * _created_at:desc
@@ -1164,6 +1247,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type: "image" | "file";
             multiple?: boolean;
             /**
@@ -1375,6 +1460,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "internal";
         }
         /**
@@ -1435,6 +1522,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "link";
         }
         /**
@@ -1495,6 +1584,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "number";
             format?: string;
         }
@@ -1556,6 +1647,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "ordered_list";
         }
         /**
@@ -1631,6 +1724,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "relation";
             relation_type?: "belongs_to" | "has_many";
             delete_mode?: "cascade";
@@ -1703,6 +1798,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             repeatable?: boolean;
             relation_affinity_mode?: "weak" | "strong";
             type?: "string" | "phone" | "email" | "address" | "relation";
@@ -1769,6 +1866,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "select" | "radio";
             options?: (string | {
                 value: string;
@@ -1846,70 +1945,11 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "tags";
             options?: string[];
             suggestions?: string[];
-        }
-        /**
-         * Tax Relationship
-         */
-        export interface TaxRelationAttribute {
-            name: string;
-            label: string;
-            placeholder?: string;
-            /**
-             * Do not render attribute in entity views
-             */
-            hidden?: boolean;
-            /**
-             * Render as a column in table views. When defined, overrides `hidden`
-             */
-            show_in_table?: boolean;
-            required?: boolean;
-            readonly?: boolean;
-            deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
-            group?: string;
-            layout?: string;
-            /**
-             * When set to true, will hide the label of the field.
-             */
-            hide_label?: boolean;
-            /**
-             * Code name of the icon to used to represent this attribute.
-             * The value must be a valid @epilot/base-elements Icon name
-             *
-             */
-            icon?: string;
-            /**
-             * Defines the conditional rendering expression for showing this field.
-             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
-             * Note: Empty or invalid expression have no effect on the field visibility.
-             *
-             */
-            render_condition?: string;
-            /**
-             * A set of constraints applicable to the attribute.
-             * These constraints should and will be enforced by the attribute renderer.
-             *
-             * example:
-             * {
-             *   "disablePast": true
-             * }
-             */
-            constraints?: {
-                [key: string]: any;
-            };
-            /**
-             * This attribute should only be active when the feature flag is enabled
-             * example:
-             * FF_MY_FEATURE_FLAG
-             */
-            feature_flag?: string;
-            type?: "relation_tax";
-            multiple?: boolean;
         }
         /**
          * Textarea or text input
@@ -1969,6 +2009,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "string";
             multiline?: boolean;
         }
@@ -2030,6 +2072,8 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
             type?: "relation_user";
             multiple?: boolean;
         }
@@ -2214,17 +2258,6 @@ declare namespace Paths {
             export type $200 = Components.Schemas.ActivityItem;
         }
     }
-    namespace GetBlueprint {
-        namespace Parameters {
-            export type Id = Components.Schemas.BlueprintId /* uuid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.Blueprint;
-        }
-    }
     namespace GetEntity {
         namespace Parameters {
             export type Hydrate = boolean;
@@ -2361,13 +2394,6 @@ declare namespace Paths {
         export type RequestBody = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchema;
         namespace Responses {
             export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
-        }
-    }
-    namespace SearchAvailableBlueprints {
-        namespace Responses {
-            export interface $200 {
-                results?: Components.Schemas.Blueprint[];
-            }
         }
     }
     namespace SearchEntities {
@@ -2573,17 +2599,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchEntities.Responses.$200>
   /**
-   * autocomplete - autocomplete
-   * 
-   * Autocomplete entity attributes
-   * 
-   */
-  'autocomplete'(
-    parameters?: Parameters<Paths.Autocomplete.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.Autocomplete.Responses.$200>
-  /**
    * createEntity - createEntity
    * 
    * Creates a new entity using a key.
@@ -2741,6 +2756,17 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteEntity.Responses.$200>
   /**
+   * autocomplete - autocomplete
+   * 
+   * Autocomplete entity attributes
+   * 
+   */
+  'autocomplete'(
+    parameters?: Parameters<Paths.Autocomplete.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.Autocomplete.Responses.$200>
+  /**
    * createActivity - createActivity
    * 
    * Create an activity that can be displayed in activity feeds.
@@ -2785,26 +2811,10 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
-  /**
-   * searchAvailableBlueprints - searchAvailableBlueprints
-   */
-  'searchAvailableBlueprints'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.SearchAvailableBlueprints.Responses.$200>
-  /**
-   * getBlueprint - getBlueprint
-   */
-  'getBlueprint'(
-    parameters?: Parameters<Paths.GetBlueprint.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetBlueprint.Responses.$200>
 }
 
 export interface PathsDictionary {
-  ['/schemas']: {
+  ['/v1/entity/schemas']: {
     /**
      * listSchemas - listSchemas
      */
@@ -2814,7 +2824,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListSchemas.Responses.$200>
   }
-  ['/schemas/{slug}']: {
+  ['/v1/entity/schemas/{slug}']: {
     /**
      * getSchema - getSchema
      */
@@ -2840,7 +2850,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchema.Responses.$204>
   }
-  ['/entity:search']: {
+  ['/v1/entity:search']: {
     /**
      * searchEntities - searchEntities
      * 
@@ -2895,20 +2905,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchEntities.Responses.$200>
   }
-  ['/entity:autocomplete']: {
-    /**
-     * autocomplete - autocomplete
-     * 
-     * Autocomplete entity attributes
-     * 
-     */
-    'get'(
-      parameters?: Parameters<Paths.Autocomplete.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.Autocomplete.Responses.$200>
-  }
-  ['/entity/{slug}']: {
+  ['/v1/entity/{slug}']: {
     /**
      * createEntity - createEntity
      * 
@@ -2945,7 +2942,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateEntity.Responses.$201>
   }
-  ['/entity/{slug}:upsert']: {
+  ['/v1/entity/{slug}:upsert']: {
     /**
      * upsertEntity - upsertEntity
      * 
@@ -2966,7 +2963,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpsertEntity.Responses.$200 | Paths.UpsertEntity.Responses.$201>
   }
-  ['/entity/{slug}/{id}']: {
+  ['/v1/entity/{slug}/{id}']: {
     /**
      * getEntity - getEntity
      * 
@@ -3071,7 +3068,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteEntity.Responses.$200>
   }
-  ['/activity']: {
+  ['/v1/entity:autocomplete']: {
+    /**
+     * autocomplete - autocomplete
+     * 
+     * Autocomplete entity attributes
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.Autocomplete.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.Autocomplete.Responses.$200>
+  }
+  ['/v1/entity/activity']: {
     /**
      * createActivity - createActivity
      * 
@@ -3087,7 +3097,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateActivity.Responses.$200>
   }
-  ['/activity/{id}']: {
+  ['/v1/entity/activity/{id}']: {
     /**
      * getActivity - getActivity
      * 
@@ -3099,7 +3109,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetActivity.Responses.$200>
   }
-  ['/activity/{id}:attach']: {
+  ['/v1/entity/activity/{id}:attach']: {
     /**
      * attachActivity - attachActivity
      * 
@@ -3111,7 +3121,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AttachActivity.Responses.$200>
   }
-  ['/entity/{slug}/{id}/activity']: {
+  ['/v1/entity/{slug}/{id}/activity']: {
     /**
      * getEntityActivityFeed - getEntityActivityFeed
      * 
@@ -3123,26 +3133,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
-  }
-  ['/blueprints']: {
-    /**
-     * searchAvailableBlueprints - searchAvailableBlueprints
-     */
-    'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.SearchAvailableBlueprints.Responses.$200>
-  }
-  ['/blueprints/{id}']: {
-    /**
-     * getBlueprint - getBlueprint
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetBlueprint.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetBlueprint.Responses.$200>
   }
 }
 

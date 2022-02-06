@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "description": "Javascript SDK monorepo for epilot",
   "scripts": {
+    "clean": "lerna clean",
     "dev": "lerna run build:watch",
     "test": "lerna run test --stream",
     "lint": "lerna run lint",
@@ -26,6 +27,7 @@
   "homepage": "https://github.com/epilot-dev/sdk-js#readme",
   "devDependencies": {
     "@epilot/eslint-config": "^1.2.10",
+    "@types/jest": "^27.4.0",
     "eslint": "^7.32.0",
     "lerna": "^4.0.0"
   }
