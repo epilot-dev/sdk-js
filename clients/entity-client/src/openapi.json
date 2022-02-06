@@ -3,12 +3,12 @@
   "info": {
     "title": "Entity API",
     "version": "1.0.0",
-    "description": "Core entity data layer API for [epilot SaaS](https://go.epilot.cloud).\n\nUse this API to configure and access domain entities like Contacts, Accounts, Products and Contracts.\n\nAll mutations to entities produce Entity Activity events to a EventBridge event bus. (to be documented)\n"
+    "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
     {
       "name": "Schemas",
-      "description": "Configure Entities"
+      "description": "Model Entities"
     },
     {
       "name": "Entities",
@@ -16,23 +16,16 @@
     },
     {
       "name": "Activity",
-      "description": "Event System for Entities"
-    },
-    {
-      "name": "Blueprints",
-      "description": "Blueprints for Schemas"
+      "description": "Entity Events"
     }
   ],
   "security": [
     {
       "EpilotAuth": []
-    },
-    {
-      "AsOrganization": []
     }
   ],
   "paths": {
-    "/schemas": {
+    "/v1/entity/schemas": {
       "get": {
         "operationId": "listSchemas",
         "summary": "listSchemas",
@@ -61,7 +54,7 @@
         }
       }
     },
-    "/schemas/{slug}": {
+    "/v1/entity/schemas/{slug}": {
       "get": {
         "operationId": "getSchema",
         "summary": "getSchema",
@@ -152,7 +145,7 @@
         }
       }
     },
-    "/entity:search": {
+    "/v1/entity:search": {
       "post": {
         "operationId": "searchEntities",
         "summary": "searchEntities",
@@ -183,94 +176,7 @@
         }
       }
     },
-    "/entity:autocomplete": {
-      "get": {
-        "operationId": "autocomplete",
-        "summary": "autocomplete",
-        "description": "Autocomplete entity attributes\n",
-        "tags": [
-          "Entities"
-        ],
-        "parameters": [
-          {
-            "name": "input",
-            "in": "query",
-            "description": "Input to autocomplete",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "attribute",
-            "in": "query",
-            "description": "Autocomplete attribute",
-            "schema": {
-              "type": "string",
-              "example": "_tags"
-            },
-            "required": true
-          },
-          {
-            "name": "slug",
-            "in": "query",
-            "description": "Limit results to entity schema",
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "description": "Maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "default": 10,
-              "minimum": 1,
-              "maximum": 250
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "hits": {
-                      "type": "number",
-                      "example": 1
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "boolean"
-                          },
-                          {
-                            "type": "object",
-                            "additionalProperties": true
-                          }
-                        ]
-                      },
-                      "example": [
-                        "value"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/entity/{slug}": {
+    "/v1/entity/{slug}": {
       "post": {
         "operationId": "createEntity",
         "summary": "createEntity",
@@ -356,7 +262,7 @@
         }
       }
     },
-    "/entity/{slug}:upsert": {
+    "/v1/entity/{slug}:upsert": {
       "patch": {
         "operationId": "upsertEntity",
         "summary": "upsertEntity",
@@ -439,7 +345,7 @@
         }
       }
     },
-    "/entity/{slug}/{id}": {
+    "/v1/entity/{slug}/{id}": {
       "get": {
         "operationId": "getEntity",
         "summary": "getEntity",
@@ -601,7 +507,94 @@
         }
       }
     },
-    "/activity": {
+    "/v1/entity:autocomplete": {
+      "get": {
+        "operationId": "autocomplete",
+        "summary": "autocomplete",
+        "description": "Autocomplete entity attributes\n",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "description": "Input to autocomplete",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attribute",
+            "in": "query",
+            "description": "Autocomplete attribute",
+            "schema": {
+              "type": "string",
+              "example": "_tags"
+            },
+            "required": true
+          },
+          {
+            "name": "slug",
+            "in": "query",
+            "description": "Limit results to entity schema",
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Maximum number of results to return",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 250
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        ]
+                      },
+                      "example": [
+                        "value"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/activity": {
       "post": {
         "operationId": "createActivity",
         "summary": "createActivity",
@@ -647,7 +640,7 @@
         }
       }
     },
-    "/activity/{id}": {
+    "/v1/entity/activity/{id}": {
       "get": {
         "operationId": "getActivity",
         "summary": "getActivity",
@@ -680,7 +673,7 @@
         }
       }
     },
-    "/activity/{id}:attach": {
+    "/v1/entity/activity/{id}:attach": {
       "post": {
         "operationId": "attachActivity",
         "summary": "attachActivity",
@@ -726,7 +719,7 @@
         }
       }
     },
-    "/entity/{slug}/{id}/activity": {
+    "/v1/entity/{slug}/{id}/activity": {
       "get": {
         "operationId": "getEntityActivityFeed",
         "summary": "getEntityActivityFeed",
@@ -826,66 +819,6 @@
           }
         }
       }
-    },
-    "/blueprints": {
-      "get": {
-        "operationId": "searchAvailableBlueprints",
-        "summary": "searchAvailableBlueprints",
-        "tags": [
-          "Blueprints"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Blueprint"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/blueprints/{id}": {
-      "get": {
-        "operationId": "getBlueprint",
-        "summary": "getBlueprint",
-        "tags": [
-          "Blueprints"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/BlueprintId"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Blueprint"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -893,13 +826,8 @@
       "EpilotAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Epilot OAuth2 Token"
-      },
-      "AsOrganization": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-ivy-org-id",
-        "description": "Set organization id when using internal auth"
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
       }
     },
     "schemas": {
@@ -922,6 +850,14 @@
             "type": "string",
             "example": "FF_MY_FEATURE_FLAG",
             "description": "This schema should only be active when the feature flag is enabled"
+          },
+          "enable_setting": {
+            "description": "This schema should only be active when one of the organization settings is enabled",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "ecommerce_preview"
+            }
           },
           "name": {
             "description": "User-friendly identifier for the entity schema",
@@ -982,6 +918,11 @@
               "properties": {
                 "expanded": {
                   "type": "boolean"
+                },
+                "order": {
+                  "description": "Render order of the group",
+                  "type": "integer",
+                  "default": 0
                 }
               }
             },
@@ -1111,9 +1052,6 @@
             "$ref": "#/components/schemas/UserRelationAttribute"
           },
           {
-            "$ref": "#/components/schemas/TaxRelationAttribute"
-          },
-          {
             "$ref": "#/components/schemas/CurrencyAttribute"
           },
           {
@@ -1136,6 +1074,9 @@
           },
           {
             "$ref": "#/components/schemas/FileAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/CustomAttribute"
           }
         ]
       },
@@ -1224,6 +1165,12 @@
             "type": "string",
             "example": "FF_MY_FEATURE_FLAG",
             "description": "This attribute should only be active when the feature flag is enabled"
+          },
+          "value_formatter": {
+            "type": "string"
+          },
+          "preview_value_formatter": {
+            "type": "string"
           }
         },
         "required": [
@@ -1608,29 +1555,6 @@
           }
         ]
       },
-      "TaxRelationAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "Tax Relationship",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "relation_tax"
-                ]
-              },
-              "multiple": {
-                "type": "boolean",
-                "default": true
-              }
-            }
-          }
-        ]
-      },
       "RepeatableAttribute": {
         "allOf": [
           {
@@ -1762,6 +1686,25 @@
                 "type": "string",
                 "enum": [
                   "ordered_list"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "CustomAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Custom input",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "custom"
                 ]
               }
             }
@@ -2258,7 +2201,10 @@
               "type": "string"
             }
           }
-        }
+        },
+        "required": [
+          "q"
+        ]
       },
       "EntitySearchResults": {
         "type": "object",
@@ -2452,29 +2398,8 @@
           }
         ]
       },
-      "BlueprintId": {
-        "type": "string",
-        "format": "uuid"
-      },
-      "Blueprint": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "$ref": "#/components/schemas/BlueprintId"
-          },
-          "name": {
-            "type": "string",
-            "example": "Power & Gas Utilities"
-          },
-          "schemas": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EntitySchema"
-            }
-          }
-        }
-      },
       "BlueprintEntityId": {
+        "description": "Reference to blueprint",
         "type": "string",
         "format": "uuid"
       }
