@@ -7,7 +7,7 @@ const config: Config.InitialOptions = {
   testPathIgnorePatterns: ['node_modules'],
   coveragePathIgnorePatterns: ['__tests__', 'node_modules'],
   verbose: true,
-  silent: true,
+  silent: false,
 };
 
 export default config;
