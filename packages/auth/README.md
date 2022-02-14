@@ -28,6 +28,19 @@ await entityClient.createEntity('contact', { fist_name: 'Example', last_name: 'C
 // entityClient will be authorized using epilot OAuth tokens
 ```
 
+## CLI Usage
+
+For convenience, you can quickly obtain a token for testing via the CLI
+
+```sh
+npx @epilot/auth
+
+? Email email@example.com
+? Password [hidden]
+
+<access token printed out here>
+```
+
 ## Documentation
 
 https://docs.epilot.io/docs/auth/authentication
