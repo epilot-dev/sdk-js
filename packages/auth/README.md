@@ -33,12 +33,12 @@ await entityClient.createEntity('contact', { fist_name: 'Example', last_name: 'C
 For convenience, you can quickly obtain a token for testing via the CLI
 
 ```sh
-npx @epilot/auth
+$ npx @epilot/auth
 
 ? Email email@example.com
 ? Password [hidden]
 
-<access token printed out here>
+# <access token printed here>
 ```
 
 ## Documentation
