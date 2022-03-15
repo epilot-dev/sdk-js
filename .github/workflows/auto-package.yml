@@ -14,18 +14,18 @@ jobs:
         run: |
           npm ci
           npm run build
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-      - name: Commit Changes
-        run: |
-          git config user.name "Thank God It's Friday"
-          git config user.email 'dev@epilot.cloud'
-          git add .
-          git commit . -m 'Built client files added'
-          git push
-      - uses: repo-sync/pull-request@v2
-        with:
-          destination_branch: "main"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Extract branch name
+      #   shell: bash
+      #   run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      #   id: extract_branch
+      # - name: Commit Changes
+      #   run: |
+      #     git config user.name "Thank God It's Friday"
+      #     git config user.email 'dev@epilot.cloud'
+      #     git add .
+      #     git commit . -m 'Built client files added'
+      #     git push
+      # - uses: repo-sync/pull-request@v2
+      #   with:
+      #     destination_branch: "main"
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
