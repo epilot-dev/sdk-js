@@ -1,7 +1,7 @@
 name: Auto Package
 on:
   push:
-    branches: ["feat/auto-npm-ci"]
+    branches: ["feat/**"]
 
 jobs:
   build:
