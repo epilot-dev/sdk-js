@@ -1,7 +1,7 @@
 name: Auto Package
 on:
   push:
-    branches: ["feat/**"]
+    branches: ["auto/**"]
 
 jobs:
   build:
