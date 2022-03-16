@@ -14,10 +14,6 @@ jobs:
         run: |
           npm ci
           npm run build
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
       - name: Commit Changes
         run: |
           git config user.name "Thank God It's Friday"
