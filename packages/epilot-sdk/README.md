@@ -26,7 +26,7 @@ const credentials = await authenticate({
 });
 credentials.configureClient(entityClient);
 
-await entityClient.createEntity('contact', { fist_name: 'Example', last_name: 'Contact' });
+await entityClient.createEntity('contact', { fiest_name: 'Example', last_name: 'Contact' });
 ```
 
 ## Documentation
