@@ -24,7 +24,7 @@ const credentials = await authenticate({
 credentials.configureClient(entityClient);
 
 // use your epilot module (entity module)
-await entityClient.createEntity('contact', { fist_name: 'Example', last_name: 'Contact' });
+await entityClient.createEntity('contact', { first_name: 'Example', last_name: 'Contact' });
 ```
 
 # Documentation
