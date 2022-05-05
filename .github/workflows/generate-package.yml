@@ -1,0 +1,27 @@
+name: Generate Package
+on:
+  push:
+    branches: ["auto/**"]
+
+jobs:
+  generate:
+    name: Generate Client Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+      - name: Build
+        run: |
+          npm ci
+          npm run build
+      - name: Commit Changes
+        run: |
+          git config user.name "Thank God It's Friday"
+          git config user.email 'dev@epilot.cloud'
+          git add .
+          git commit . -m 'Generated client files added'
+          git push
+      - uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "main"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
