@@ -3,6 +3,7 @@ import { getClient as getEntityClient, Client as EntityClient } from '@epilot/en
 import { getClient as getFileClient, Client as FileClient } from '@epilot/file-client';
 import { getClient as getOrganizationClient, Client as OrganizationClient } from '@epilot/organization-client';
 import { getClient as getPricingClient, Client as PricingClient } from '@epilot/pricing-client';
+import { getClient as getSubmissionClient, Client as SubmissionClient } from '@epilot/submission-client';
 import { getClient as getUserClient, Client as UserClient } from '@epilot/user-client';
 
 export class EpilotClient {
@@ -11,6 +12,7 @@ export class EpilotClient {
   user: UserClient = null;
   file: FileClient = null;
   organization: OrganizationClient = null;
+  submission: SubmissionClient = null;
 
   async login(credentials: UsernamePasswordAuthParams) {
     const authorizer = await authenticate(credentials);
@@ -20,6 +22,7 @@ export class EpilotClient {
     this.user = authorizer.configureClient(getUserClient());
     this.file = authorizer.configureClient(getFileClient());
     this.organization = authorizer.configureClient(getOrganizationClient());
+    this.submission = authorizer.configureClient(getSubmissionClient());
 
     return this;
   }

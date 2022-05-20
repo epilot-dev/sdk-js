@@ -1,43 +1,42 @@
 {
-  "name": "@epilot/entity-client",
-  "version": "3.0.12",
-  "description": "JavaScript client library for the epilot Core Entity API",
+  "name": "@epilot/submission-client",
+  "version": "1.1.2",
+  "description": "Client library for epilot Submission API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "epilot GmbH",
   "license": "MIT",
-  "repsitory": {
+  "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git",
-    "directory": "clients/entity-client"
+    "directory": "clients/submission-client"
   },
   "bugs": {
     "url": "https://github.com/epilot-dev/sdk-js/issues"
   },
-  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/entity-client#readme",
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/submission-client#readme",
   "keywords": [
     "epilot",
     "sdk",
-    "entity"
+    "submission"
   ],
   "scripts": {
     "test": "jest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "openapi read --json https://docs.api.epilot.io/entity.yaml > src/openapi.json",
+    "openapi": "openapi read --json --dereference --bundle https://docs.api.epilot.io/submission-api.yaml > src/openapi.json",
     "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
     "build": "npm run typegen && tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",
     "prepublishOnly": "npm run build",
-    "release-alpha": "npm version prerelease --preid alpha",
     "lint": "../../node_modules/eslint/bin/eslint.js src"
   },
   "files": [
     "*.js",
     "*.d.ts",
-    "**/*.json",
     "**/*.js",
     "**/*.d.ts",
+    "**/*.json",
     "!*.test.*",
     "!**/*.test.*",
     "!node_modules",
@@ -49,7 +48,6 @@
     "axios": "^0.25.0"
   },
   "dependencies": {
-    "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
     "buffer": "^6.0.3",
     "https-browserify": "^1.0.0",
     "openapi-client-axios": "^5.1.1",

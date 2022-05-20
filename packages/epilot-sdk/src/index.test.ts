@@ -7,7 +7,7 @@ import { authServer } from './__tests__/server-mocks';
 import EpilotClient from './';
 
 authServer.use(
-  rest.get('http://localhost/v1/entity/order/123', (req, res, ctx) => {
+  rest.get('https://entity.sls.epilot.io/v1/entity/order/123', (req, res, ctx) => {
     if (req.headers.get('authorization') !== 'Bearer THE-AUTH-TOKEN') {
       return res(ctx.status(401, 'Unauthorized client call'));
     }
@@ -53,6 +53,8 @@ describe('EpilotClient', () => {
       expect(eclient.user).not.toBeNull();
       expect(eclient.pricing).not.toBeNull();
       expect(eclient.file).not.toBeNull();
+      expect(eclient.organization).not.toBeNull();
+      expect(eclient.submission).not.toBeNull();
     });
   });
 
