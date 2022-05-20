@@ -1,12 +1,14 @@
 {
   "name": "@epilot/user-client",
-  "version": "2.6.1",
+  "version": "3.0.1",
   "description": "Client library for the epilot User API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest",
+    "typescript": "tsc",
     "bundle-definition": "webpack",
+    "openapi": "openapi read --json --dereference --bundle https://docs.api.epilot.io/user.yaml > src/openapi.json",
     "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
     "build": "npm run typegen && tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",
@@ -27,7 +29,7 @@
     "!*.config.js",
     "!tsconfig.json"
   ],
-  "keywords": [],
+  "keywords": ["epilot", "sdk", "user"],
   "author": "epilot GmbH",
   "license": "MIT",
   "repository": {
@@ -39,7 +41,7 @@
   },
   "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/user-client#readme",
   "peerDependencies": {
-    "axios": "^0.21.4"
+    "axios": "^0.21.1"
   },
   "dependencies": {
     "buffer": "^6.0.3",
@@ -57,7 +59,7 @@
     "json-loader": "^0.5.7",
     "openapi-client-axios-typegen": "^3.13.1",
     "openapicmd": "^1.6.2",
-    "ts-jest": "^26.5.6",
+    "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.14",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3",
