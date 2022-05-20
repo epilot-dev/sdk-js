@@ -46,6 +46,7 @@
     "@epilot/auth": "*",
     "@epilot/entity-client": "*",
     "@epilot/file-client": "*",
+    "@epilot/organization-client": "*",
     "@epilot/pricing-client": "*",
     "@epilot/user-client": "*",
     "axios": "^0.25.0",

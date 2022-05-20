@@ -18,15 +18,26 @@ npm install --save @epilot/file-client
 ## Usage
 
 ```typescript
+import fs from 'fs';
 import fileClient from '@epilot/file-client';
 
 // get upload params
-const uploadParams = await client.uploadFile(null, { filename: 'my-document.pdf', mime_type: 'application/pdf' });
+const uploadFileRes = await fileClient.uploadFile(null, { filename: 'document.pdf', mime_type: 'application/pdf' });
+const uploadParams = uploadFileRes.data;
 
-// upload file as multipart/form-data
-const form = new FormData();
-formData.append('file', fileToUpload);
-const uploadRes = await fileClient.put(uploadParams.data.upload_url, form, { headers: form.getHeaders() });
+// upload file to S3
+const file = fs.readFileSync('./document.pdf')
+const uploadRes = await fileClient.put(
+  uploadParams.upload_url,
+  file, 
+  { headers: { 'content-type': 'application/json' }}
+);
+
+// save file as an entity
+const uploadParams = await fileClient.saveFile(
+  null,
+  { s3ref: uploadParams.s3ref, access_control: 'private' },
+);
 ```
 
 ## Documentation
