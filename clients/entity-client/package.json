@@ -4,6 +4,22 @@
   "description": "JavaScript client library for the epilot Core Entity API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "epilot GmbH",
+  "license": "MIT",
+  "repsitory": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git",
+    "directory": "clients/entity-client"
+  },
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/entity-client#readme",
+  "keywords": [
+    "epilot",
+    "sdk",
+    "entity"
+  ],
   "scripts": {
     "test": "jest",
     "typescript": "tsc",
@@ -30,9 +46,6 @@
     "!src/**",
     "!*.config.js"
   ],
-  "keywords": [],
-  "author": "epilot GmbH",
-  "license": "UNLICENSED",
   "peerDependencies": {
     "axios": "^0.25.0"
   },
