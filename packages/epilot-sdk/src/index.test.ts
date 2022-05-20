@@ -55,6 +55,7 @@ describe('EpilotClient', () => {
       expect(eclient.file).not.toBeNull();
       expect(eclient.organization).not.toBeNull();
       expect(eclient.submission).not.toBeNull();
+      expect(eclient.workflow).not.toBeNull();
     });
   });
 

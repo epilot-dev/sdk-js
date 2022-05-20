@@ -50,6 +50,7 @@
     "@epilot/pricing-client": "*",
     "@epilot/submission-client": "*",
     "@epilot/user-client": "*",
+    "@epilot/workflow-client": "*",
     "axios": "^0.25.0",
     "openapi-client-axios": "^5.1.2"
   }

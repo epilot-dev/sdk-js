@@ -62,8 +62,144 @@ declare namespace Components {
             oauth_response_type?: "code" | "token";
         }
         export type Offset = number;
+        export interface Organization {
+            id?: string;
+            type?: "Vendor" | "Partner";
+            /**
+             * example:
+             * Epilot
+             */
+            name?: string | null;
+            /**
+             * example:
+             * <p>Thanks</p>
+             */
+            signature?: string | null;
+            /**
+             * example:
+             * EPI
+             */
+            symbol?: string | null;
+            /**
+             * example:
+             * professional
+             */
+            pricing_tier?: string | null;
+            /**
+             * example:
+             * someone@epilot.cloud
+             */
+            email?: string | null;
+            /**
+             * example:
+             * 49123123123
+             */
+            phone?: string | null;
+            /**
+             * example:
+             * https://epilot.cloud
+             */
+            website?: string | null;
+            address?: {
+                country?: string | null;
+                city?: string | null;
+                postal_code?: string | null;
+                street?: string | null;
+                street_number?: string | null;
+            };
+            /**
+             * example:
+             * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
+             */
+            logo_url?: string | null;
+            /**
+             * example:
+             * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
+             */
+            logo_thumbnail_url?: string | null;
+            /**
+             * example:
+             * false
+             */
+            is_unlicensed_org?: boolean | null;
+        }
+        export interface OrganizationDetail {
+            [name: string]: any;
+            type: "Vendor" | "Partner";
+            /**
+             * example:
+             * Epilot
+             */
+            name: string;
+            /**
+             * example:
+             * professional
+             */
+            pricing_tier: string;
+            email: string;
+            phone?: string;
+            website?: string;
+            /**
+             * example:
+             * false
+             */
+            is_privacy_policy_checked?: boolean | null;
+            /**
+             * example:
+             * false
+             */
+            is_terms_and_conditions_checked?: boolean | null;
+        }
         export type OrganizationId = string;
+        export type PartnerInvitationToken = string;
         export type Query = string;
+        export interface SignupUserPayload {
+            organization_detail?: {
+                [name: string]: any;
+                type: "Vendor" | "Partner";
+                /**
+                 * example:
+                 * Epilot
+                 */
+                name: string;
+                /**
+                 * example:
+                 * professional
+                 */
+                pricing_tier: string;
+                email: string;
+                phone?: string;
+                website?: string;
+                /**
+                 * example:
+                 * false
+                 */
+                is_privacy_policy_checked?: boolean | null;
+                /**
+                 * example:
+                 * false
+                 */
+                is_terms_and_conditions_checked?: boolean | null;
+            };
+            user_detail?: {
+                /**
+                 * example:
+                 * Example user
+                 */
+                full_name: string;
+                email: string; // email
+                /**
+                 * User's password
+                 * example:
+                 * AKjhdakjsdh@!34
+                 */
+                password: string;
+            };
+            /**
+             * Language for user invitation email
+             */
+            language?: "en" | "de";
+        }
         export interface User {
             id: string;
             organization_id: string;
@@ -132,6 +268,20 @@ declare namespace Components {
              */
             password?: string;
         }
+        export interface UserDetail {
+            /**
+             * example:
+             * Example user
+             */
+            full_name: string;
+            email: string; // email
+            /**
+             * User's password
+             * example:
+             * AKjhdakjsdh@!34
+             */
+            password: string;
+        }
         export type UserId = string;
         export interface UserInvitationPayload {
             /**
@@ -162,6 +312,7 @@ declare namespace Components {
             display_name?: string;
             status?: "Active" | "Pending" | "Deactivated" | "Deleted";
             email?: string; // email
+            draft_email?: string | null; // email
             /**
              * example:
              * 1234567890
@@ -172,6 +323,11 @@ declare namespace Components {
              * de
              */
             preferred_language?: string;
+            /**
+             * example:
+             * 65dc527f-cb2d-4158-8f2e-8978dbceb599
+             */
+            token?: string;
             /**
              * example:
              * <p>Thanks</p>
@@ -207,7 +363,16 @@ declare namespace Components {
                 value: string;
             }[];
         }
+        export interface UserVerificationPayload {
+            /**
+             * User's password
+             * example:
+             * AKjhdakjsdh@!34
+             */
+            password?: string;
+        }
         export type Username = string;
+        export type VerificationToken = string;
     }
 }
 declare namespace Paths {
@@ -379,6 +544,7 @@ declare namespace Paths {
                 display_name?: string;
                 status?: "Active" | "Pending" | "Deactivated" | "Deleted";
                 email?: string; // email
+                draft_email?: string | null; // email
                 /**
                  * example:
                  * 1234567890
@@ -389,6 +555,11 @@ declare namespace Paths {
                  * de
                  */
                 preferred_language?: string;
+                /**
+                 * example:
+                 * 65dc527f-cb2d-4158-8f2e-8978dbceb599
+                 */
+                token?: string;
                 /**
                  * example:
                  * <p>Thanks</p>
@@ -638,6 +809,7 @@ declare namespace Paths {
                 display_name?: string;
                 status?: "Active" | "Pending" | "Deactivated" | "Deleted";
                 email?: string; // email
+                draft_email?: string | null; // email
                 /**
                  * example:
                  * 1234567890
@@ -648,6 +820,11 @@ declare namespace Paths {
                  * de
                  */
                 preferred_language?: string;
+                /**
+                 * example:
+                 * 65dc527f-cb2d-4158-8f2e-8978dbceb599
+                 */
+                token?: string;
                 /**
                  * example:
                  * <p>Thanks</p>
@@ -716,6 +893,7 @@ declare namespace Paths {
                 display_name?: string;
                 status?: "Active" | "Pending" | "Deactivated" | "Deleted";
                 email?: string; // email
+                draft_email?: string | null; // email
                 /**
                  * example:
                  * 1234567890
@@ -726,6 +904,11 @@ declare namespace Paths {
                  * de
                  */
                 preferred_language?: string;
+                /**
+                 * example:
+                 * 65dc527f-cb2d-4158-8f2e-8978dbceb599
+                 */
+                token?: string;
                 /**
                  * example:
                  * <p>Thanks</p>
@@ -866,6 +1049,7 @@ declare namespace Paths {
                     display_name?: string;
                     status?: "Active" | "Pending" | "Deactivated" | "Deleted";
                     email?: string; // email
+                    draft_email?: string | null; // email
                     /**
                      * example:
                      * 1234567890
@@ -876,6 +1060,11 @@ declare namespace Paths {
                      * de
                      */
                     preferred_language?: string;
+                    /**
+                     * example:
+                     * 65dc527f-cb2d-4158-8f2e-8978dbceb599
+                     */
+                    token?: string;
                     /**
                      * example:
                      * <p>Thanks</p>
@@ -944,6 +1133,7 @@ declare namespace Paths {
                 display_name?: string;
                 status?: "Active" | "Pending" | "Deactivated" | "Deleted";
                 email?: string; // email
+                draft_email?: string | null; // email
                 /**
                  * example:
                  * 1234567890
@@ -954,6 +1144,11 @@ declare namespace Paths {
                  * de
                  */
                 preferred_language?: string;
+                /**
+                 * example:
+                 * 65dc527f-cb2d-4158-8f2e-8978dbceb599
+                 */
+                token?: string;
                 /**
                  * example:
                  * <p>Thanks</p>
@@ -993,6 +1188,180 @@ declare namespace Paths {
             }
         }
     }
+    namespace SignUpUser {
+        namespace Parameters {
+            export type Token = string;
+        }
+        export interface QueryParameters {
+            token?: Parameters.Token;
+        }
+        export interface RequestBody {
+            organization_detail?: {
+                [name: string]: any;
+                type: "Vendor" | "Partner";
+                /**
+                 * example:
+                 * Epilot
+                 */
+                name: string;
+                /**
+                 * example:
+                 * professional
+                 */
+                pricing_tier: string;
+                email: string;
+                phone?: string;
+                website?: string;
+                /**
+                 * example:
+                 * false
+                 */
+                is_privacy_policy_checked?: boolean | null;
+                /**
+                 * example:
+                 * false
+                 */
+                is_terms_and_conditions_checked?: boolean | null;
+            };
+            user_detail?: {
+                /**
+                 * example:
+                 * Example user
+                 */
+                full_name: string;
+                email: string; // email
+                /**
+                 * User's password
+                 * example:
+                 * AKjhdakjsdh@!34
+                 */
+                password: string;
+            };
+            /**
+             * Language for user invitation email
+             */
+            language?: "en" | "de";
+        }
+        namespace Responses {
+            export interface $200 {
+                user?: {
+                    id: string;
+                    organization_id: string;
+                    email: string; // email
+                    /**
+                     * example:
+                     * Example user
+                     */
+                    display_name?: string;
+                    /**
+                     * example:
+                     * Example user
+                     */
+                    name: string;
+                    /**
+                     * example:
+                     * de
+                     */
+                    preferred_language: string;
+                    /**
+                     * example:
+                     * <p>Thanks</p>
+                     */
+                    signature?: string;
+                    /**
+                     * Deprecated! Please use Permissions API instead
+                     */
+                    roles: string[];
+                    image_uri?: {
+                        [name: string]: any;
+                        /**
+                         * example:
+                         * https://account-profile-images.epilot.cloud/1/avatar.png
+                         */
+                        original?: string; // uri
+                        /**
+                         * example:
+                         * https://account-profile-images.epilot.cloud/1/avatar_32x32.png
+                         */
+                        thumbnail_32?: string; // uri
+                    };
+                    properties: {
+                        /**
+                         * example:
+                         * profileImageName
+                         */
+                        name: string;
+                        /**
+                         * example:
+                         * avatar.png
+                         */
+                        value: string;
+                    }[];
+                };
+                organization?: {
+                    id?: string;
+                    type?: "Vendor" | "Partner";
+                    /**
+                     * example:
+                     * Epilot
+                     */
+                    name?: string | null;
+                    /**
+                     * example:
+                     * <p>Thanks</p>
+                     */
+                    signature?: string | null;
+                    /**
+                     * example:
+                     * EPI
+                     */
+                    symbol?: string | null;
+                    /**
+                     * example:
+                     * professional
+                     */
+                    pricing_tier?: string | null;
+                    /**
+                     * example:
+                     * someone@epilot.cloud
+                     */
+                    email?: string | null;
+                    /**
+                     * example:
+                     * 49123123123
+                     */
+                    phone?: string | null;
+                    /**
+                     * example:
+                     * https://epilot.cloud
+                     */
+                    website?: string | null;
+                    address?: {
+                        country?: string | null;
+                        city?: string | null;
+                        postal_code?: string | null;
+                        street?: string | null;
+                        street_number?: string | null;
+                    };
+                    /**
+                     * example:
+                     * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
+                     */
+                    logo_url?: string | null;
+                    /**
+                     * example:
+                     * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
+                     */
+                    logo_thumbnail_url?: string | null;
+                    /**
+                     * example:
+                     * false
+                     */
+                    is_unlicensed_org?: boolean | null;
+                };
+            }
+        }
+    }
     namespace UpdateUserV2 {
         namespace Parameters {
             export type Id = string;
@@ -1016,6 +1385,7 @@ declare namespace Paths {
             display_name?: string;
             status?: "Active" | "Pending" | "Deactivated" | "Deleted";
             email?: string; // email
+            draft_email?: string | null; // email
             /**
              * example:
              * 1234567890
@@ -1026,6 +1396,11 @@ declare namespace Paths {
              * de
              */
             preferred_language?: string;
+            /**
+             * example:
+             * 65dc527f-cb2d-4158-8f2e-8978dbceb599
+             */
+            token?: string;
             /**
              * example:
              * <p>Thanks</p>
@@ -1078,6 +1453,7 @@ declare namespace Paths {
                 display_name?: string;
                 status?: "Active" | "Pending" | "Deactivated" | "Deleted";
                 email?: string; // email
+                draft_email?: string | null; // email
                 /**
                  * example:
                  * 1234567890
@@ -1088,6 +1464,11 @@ declare namespace Paths {
                  * de
                  */
                 preferred_language?: string;
+                /**
+                 * example:
+                 * 65dc527f-cb2d-4158-8f2e-8978dbceb599
+                 */
+                token?: string;
                 /**
                  * example:
                  * <p>Thanks</p>
@@ -1125,9 +1506,39 @@ declare namespace Paths {
             }
         }
     }
+    namespace VerifyEmailWithToken {
+        namespace Parameters {
+            export type Token = string;
+        }
+        export interface QueryParameters {
+            token: Parameters.Token;
+        }
+        export interface RequestBody {
+            /**
+             * User's password
+             * example:
+             * AKjhdakjsdh@!34
+             */
+            password?: string;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $404 {
+            }
+        }
+    }
 }
 
 export interface OperationMethods {
+  /**
+   * signUpUser - signUpUser
+   */
+  'signUpUser'(
+    parameters?: Parameters<Paths.SignUpUser.QueryParameters> | null,
+    data?: Paths.SignUpUser.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SignUpUser.Responses.$200>
   /**
    * getMeV2 - getMeV2
    * 
@@ -1199,6 +1610,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ResendUserInvitation.Responses.$200>
   /**
+   * verifyEmailWithToken - verifyEmailWithToken
+   * 
+   * Update new email using an verification token
+   */
+  'verifyEmailWithToken'(
+    parameters?: Parameters<Paths.VerifyEmailWithToken.QueryParameters> | null,
+    data?: Paths.VerifyEmailWithToken.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.VerifyEmailWithToken.Responses.$200>
+  /**
    * activateUser - activateUser
    * 
    * Activate user using an invite token
@@ -1261,6 +1682,16 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
+  ['/v2/users/public/signup']: {
+    /**
+     * signUpUser - signUpUser
+     */
+    'post'(
+      parameters?: Parameters<Paths.SignUpUser.QueryParameters> | null,
+      data?: Paths.SignUpUser.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SignUpUser.Responses.$200>
+  }
   ['/v2/users/me']: {
     /**
      * getMeV2 - getMeV2
@@ -1340,6 +1771,18 @@ export interface PathsDictionary {
       data?: Paths.ResendUserInvitation.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ResendUserInvitation.Responses.$200>
+  }
+  ['/v2/users/public/verifyEmail']: {
+    /**
+     * verifyEmailWithToken - verifyEmailWithToken
+     * 
+     * Update new email using an verification token
+     */
+    'post'(
+      parameters?: Parameters<Paths.VerifyEmailWithToken.QueryParameters> | null,
+      data?: Paths.VerifyEmailWithToken.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.VerifyEmailWithToken.Responses.$200>
   }
   ['/v2/users/public/activate']: {
     /**
