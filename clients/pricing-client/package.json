@@ -1,6 +1,6 @@
 {
   "name": "@epilot/pricing-client",
-  "version": "1.12.3",
+  "version": "1.13.0",
   "description": "Client for epilot Pricing APIs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -35,10 +35,12 @@
     "*.d.ts",
     "**/*.js",
     "**/*.d.ts",
+    "**/*.json",
     "!*.test.*",
     "!**/*.test.*",
     "!node_modules",
     "!src",
+    "!src/**",
     "!*.config.js"
   ],
   "peerDependencies": {

@@ -47,11 +47,12 @@ describe('EpilotClient', () => {
       expect(authenticateSpy).toHaveBeenCalledTimes(1);
       expect(authenticateSpy).toHaveBeenCalledWith({ password: 'doe123', username: 'john-doe@epilot.cloud' });
 
-      expect(authorizerMock).toHaveBeenCalledTimes(3);
+      expect(authorizerMock).toHaveBeenCalled();
 
       expect(eclient.entity).not.toBeNull();
       expect(eclient.user).not.toBeNull();
       expect(eclient.pricing).not.toBeNull();
+      expect(eclient.file).not.toBeNull();
     });
   });
 
@@ -61,6 +62,7 @@ describe('EpilotClient', () => {
 
       const result = await eclient.entity.getEntity({ slug: 'order', id: '123' });
 
+      expect(result.status).toBe(200);
       expect(result.data.entity).toStrictEqual({ _id: 'my-entity_id' });
     });
   });
