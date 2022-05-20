@@ -28,7 +28,6 @@
     "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
     "build": "npm run typegen && tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",
-    "eslint": "../node_modules/.bin/eslint -c ../.eslintrc.yml",
     "prepublishOnly": "npm run build",
     "release-alpha": "npm version prerelease --preid alpha",
     "lint": "../../node_modules/eslint/bin/eslint.js src"
