@@ -19,7 +19,8 @@ npm install --save @epilot/permissions-client
 
 ```typescript
 import fs from 'fs';
-import permissionsClient from '@epilot/permissions-client';
+import { getClient } from '@epilot/permissions-client';
+const permissionsClient = getClient();
 
 const rolesResponse = await permissionsClient.listCurrentRoles();
 ```

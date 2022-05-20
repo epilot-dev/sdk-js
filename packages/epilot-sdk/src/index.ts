@@ -1,12 +1,13 @@
 import { authenticate, UsernamePasswordAuthParams } from '@epilot/auth';
-import { default as entityClient, Client as EntityClient } from '@epilot/entity-client';
-import { default as fileClient, Client as FileClient } from '@epilot/file-client';
-import { default as organizationClient, Client as OrganizationClient } from '@epilot/organization-client';
-import { default as permissionsClient, Client as PermissionsClient } from '@epilot/permissions-client';
-import { default as pricingClient, Client as PricingClient } from '@epilot/pricing-client';
-import { default as submissionClient, Client as SubmissionClient } from '@epilot/submission-client';
-import { default as userClient, Client as UserClient } from '@epilot/user-client';
-import { default as workflowClient, Client as WorkflowClient } from '@epilot/workflow-client';
+
+import { default as entityClient, Client as EntityClient } from './entity-client';
+import { default as fileClient, Client as FileClient } from './file-client';
+import { default as organizationClient, Client as OrganizationClient } from './organization-client';
+import { default as permissionsClient, Client as PermissionsClient } from './permissions-client';
+import { default as pricingClient, Client as PricingClient } from './pricing-client';
+import { default as submissionClient, Client as SubmissionClient } from './submission-client';
+import { default as userClient, Client as UserClient } from './user-client';
+import { default as workflowClient, Client as WorkflowClient } from './workflow-client';
 
 export class EpilotClient {
   entity: EntityClient = null;

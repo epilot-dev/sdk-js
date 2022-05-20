@@ -18,9 +18,10 @@ npm install --save @epilot/submission-client
 ## Usage
 
 ```typescript
-import submissionClient from '@epilot/submission-client';
+import { getClient } from '@epilot/submission-client';
 
-const res = await client.createSubmission(null, mySubmission)
+const submissionClient = getClient();
+const res = await submissionClient.createSubmission(null, mySubmission)
 ```
 
 ## Documentation

@@ -18,9 +18,10 @@ npm install --save @epilot/workflow-client
 ## Usage
 
 ```typescript
-import workflowClient from '@epilot/workflow-client';
+import { getClient } from '@epilot/workflow-client';
 
-const res = await client.createExecution(null, { workflowId: 'my-id-123' })
+const workflowClient = getClient();
+const res = await workflowClient.createExecution(null, { workflowId: 'my-id-123' })
 ```
 
 ## Documentation

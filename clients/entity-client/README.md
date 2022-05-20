@@ -18,7 +18,8 @@ npm install --save @epilot/entity-client
 ## Usage
 
 ```typescript
-import entityClient from '@epilot/entity-client';
+import { getClient } from '@epilot/entity-client';
+const entityClient = getClient();
 
 const createResponse = await entityClient.createEntity({ slug: 'contact' }, { first_name: 'Example', last_name: 'Entity' });
 const getResponse = await entityClient.getEntity({ slug: 'contact', id: createResponse.data._id });

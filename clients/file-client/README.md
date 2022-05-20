@@ -19,7 +19,8 @@ npm install --save @epilot/file-client
 
 ```typescript
 import fs from 'fs';
-import fileClient from '@epilot/file-client';
+import { getClient } from '@epilot/file-client';
+const fileClient = getClient();
 
 // get upload params
 const uploadFileRes = await fileClient.uploadFile(null, { filename: 'document.pdf', mime_type: 'application/pdf' });

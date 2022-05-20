@@ -18,10 +18,13 @@ npm install --save @epilot/organization-client
 ## Usage
 
 ```typescript
-import client from '@epilot/organization-client';
+import { getClient } from '@epilot/organization-client';
+
+// get client
+const organizationClient = getClient();
 
 // call an operation
-const res = await client.getSettings();
+const res = await organizationClient.getSettings();
 ```
 
 ## Documentation
