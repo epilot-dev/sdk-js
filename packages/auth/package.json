@@ -1,6 +1,6 @@
 {
   "name": "@epilot/auth",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Authenticate with epilot APIs",
   "main": "dist/index.js",
   "bin": {
@@ -52,7 +52,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@epilot/user-client": "*",
+    "@epilot/user-client": "^3.0.3",
     "amazon-cognito-identity-js": "^5.2.5",
     "axios": "^0.25.0",
     "debug": "^4.3.3",

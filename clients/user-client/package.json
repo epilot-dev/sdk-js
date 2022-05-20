@@ -1,6 +1,6 @@
 {
   "name": "@epilot/user-client",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Client library for the epilot User API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
