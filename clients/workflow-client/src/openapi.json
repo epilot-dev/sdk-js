@@ -66,303 +66,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "allOf": [
-                      {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "definitionId": {
-                            "type": "string"
-                          },
-                          "orgId": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "creationTime": {
-                            "type": "string",
-                            "description": "Creation timestamp"
-                          },
-                          "lastUpdateTime": {
-                            "type": "string",
-                            "description": "Last Update timestamp"
-                          },
-                          "dueDate": {
-                            "type": "string",
-                            "description": "Due date for finishing the workflow"
-                          },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "STARTED",
-                              "DONE",
-                              "CLOSED"
-                            ]
-                          },
-                          "trigger": {
-                            "type": "string",
-                            "enum": [
-                              "MANUAL",
-                              "AUTOMATIC"
-                            ]
-                          },
-                          "assignedTo": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "lastModifiedBy": {
-                            "type": "string",
-                            "description": "Id of the user who closed workflow"
-                          },
-                          "contexts": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "id": {
-                                  "type": "string"
-                                },
-                                "title": {
-                                  "type": "string"
-                                },
-                                "schema": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "id",
-                                "title",
-                                "schema"
-                              ]
-                            }
-                          },
-                          "nextOpenStep": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "entityRefId": {
-                                "type": "string"
-                              }
-                            }
-                          },
-                          "configuredClosingReasonSnapshot": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "id": {
-                                  "type": "string"
-                                },
-                                "title": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "id",
-                                "title"
-                              ]
-                            }
-                          },
-                          "selectedClosingReasons": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "id": {
-                                  "type": "string"
-                                },
-                                "title": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "id",
-                                "title"
-                              ]
-                            }
-                          },
-                          "closingReasonDescription": {
-                            "type": "string"
-                          },
-                          "enableECPWorkflow": {
-                            "type": "boolean",
-                            "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
-                          }
-                        }
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "flow": {
-                            "type": "array",
-                            "items": {
-                              "anyOf": [
-                                {
-                                  "type": "object",
-                                  "description": "A group of Steps that define the progress of the Workflow",
-                                  "properties": {
-                                    "id": {
-                                      "type": "string"
-                                    },
-                                    "definitionId": {
-                                      "type": "string"
-                                    },
-                                    "name": {
-                                      "type": "string",
-                                      "description": "Name for this Section",
-                                      "example": "Lead Qualification"
-                                    },
-                                    "userIds": {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "number"
-                                      }
-                                    },
-                                    "type": {
-                                      "type": "string",
-                                      "enum": [
-                                        "STEP",
-                                        "SECTION"
-                                      ]
-                                    },
-                                    "steps": {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "object",
-                                        "properties": {
-                                          "id": {
-                                            "type": "string"
-                                          },
-                                          "definitionId": {
-                                            "type": "string"
-                                          },
-                                          "entityRefId": {
-                                            "type": "string"
-                                          },
-                                          "name": {
-                                            "type": "string"
-                                          },
-                                          "type": {
-                                            "type": "string",
-                                            "enum": [
-                                              "STEP",
-                                              "SECTION"
-                                            ]
-                                          },
-                                          "ecp": {
-                                            "type": "object",
-                                            "description": "Details regarding ECP for the workflow step",
-                                            "properties": {
-                                              "label": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          }
-                                        },
-                                        "required": [
-                                          "id",
-                                          "entityRefId",
-                                          "name",
-                                          "type"
-                                        ]
-                                      }
-                                    }
-                                  },
-                                  "required": [
-                                    "id",
-                                    "name",
-                                    "type",
-                                    "steps"
-                                  ]
-                                },
-                                {
-                                  "type": "object",
-                                  "properties": {
-                                    "id": {
-                                      "type": "string"
-                                    },
-                                    "definitionId": {
-                                      "type": "string"
-                                    },
-                                    "entityRefId": {
-                                      "type": "string"
-                                    },
-                                    "name": {
-                                      "type": "string"
-                                    },
-                                    "type": {
-                                      "type": "string",
-                                      "enum": [
-                                        "STEP",
-                                        "SECTION"
-                                      ]
-                                    },
-                                    "ecp": {
-                                      "type": "object",
-                                      "description": "Details regarding ECP for the workflow step",
-                                      "properties": {
-                                        "label": {
-                                          "type": "string"
-                                        }
-                                      }
-                                    }
-                                  },
-                                  "required": [
-                                    "id",
-                                    "entityRefId",
-                                    "name",
-                                    "type"
-                                  ]
-                                }
-                              ]
-                            }
-                          }
-                        },
-                        "required": [
-                          "flow"
-                        ]
-                      }
-                    ],
-                    "example": {
-                      "id": "8gja72h6kas6h",
-                      "name": "Lead Qualification",
-                      "trigger": "MANUAL",
-                      "status": "STARTED",
-                      "creationTime": "2021-04-27T12:01:13.000Z",
-                      "lastUpdateTime": "2021-04-27T12:01:13.000Z",
-                      "dueDate": "2021-04-27T12:01:13.000Z",
-                      "flow": [
-                        {
-                          "id": "sectionId1",
-                          "name": "Initial Information Gathering",
-                          "steps": [
-                            {
-                              "id": "sada5641f3a21",
-                              "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-1ragw"
-                            },
-                            {
-                              "id": "sada5641f3a22",
-                              "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-sga72"
-                            },
-                            {
-                              "id": "sada5641f3a23",
-                              "entityRefId": "s9guauj2-sgha8h2t2kl-1589y15n-asjo2t"
-                            }
-                          ]
-                        },
-                        {
-                          "id": "firstLevelStepId1",
-                          "entityRefId": "sgja902tk-sgha8h2t2kl-1589y15n-asfsah2"
-                        }
-                      ]
-                    }
+                    "$ref": "#/components/schemas/WorkflowExecutionSlim"
                   }
                 }
               }
@@ -373,12 +77,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -398,72 +97,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "workflowId": {
-                    "type": "string"
-                  },
-                  "trigger": {
-                    "type": "string",
-                    "enum": [
-                      "MANUAL",
-                      "AUTOMATIC"
-                    ]
-                  },
-                  "assignedTo": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "dueDate": {
-                    "type": "string"
-                  },
-                  "contexts": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        },
-                        "schema": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "title",
-                        "schema"
-                      ]
-                    }
-                  }
-                },
-                "required": [
-                  "workflowId"
-                ],
-                "example": {
-                  "workflowId": "j3f23fh23uif98",
-                  "trigger": "AUTOMATIC",
-                  "assignedTo": [
-                    192582,
-                    10521
-                  ],
-                  "dueDate": "02.22.2022",
-                  "contexts": [
-                    {
-                      "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
-                      "schema": "contact"
-                    },
-                    {
-                      "id": "3a6d42fa-5070-4723-b90f-41ead4303e33",
-                      "schema": "opportunity"
-                    }
-                  ]
-                }
+                "$ref": "#/components/schemas/WorkflowExecutionCreateReq"
               }
             }
           }
@@ -474,393 +108,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "allOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "definitionId": {
-                          "type": "string"
-                        },
-                        "orgId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "creationTime": {
-                          "type": "string",
-                          "description": "Creation timestamp"
-                        },
-                        "lastUpdateTime": {
-                          "type": "string",
-                          "description": "Last Update timestamp"
-                        },
-                        "dueDate": {
-                          "type": "string",
-                          "description": "Due date for finishing the workflow"
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "STARTED",
-                            "DONE",
-                            "CLOSED"
-                          ]
-                        },
-                        "trigger": {
-                          "type": "string",
-                          "enum": [
-                            "MANUAL",
-                            "AUTOMATIC"
-                          ]
-                        },
-                        "assignedTo": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "lastModifiedBy": {
-                          "type": "string",
-                          "description": "Id of the user who closed workflow"
-                        },
-                        "contexts": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              },
-                              "schema": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "title",
-                              "schema"
-                            ]
-                          }
-                        },
-                        "nextOpenStep": {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            },
-                            "entityRefId": {
-                              "type": "string"
-                            }
-                          }
-                        },
-                        "configuredClosingReasonSnapshot": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "title"
-                            ]
-                          }
-                        },
-                        "selectedClosingReasons": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "title"
-                            ]
-                          }
-                        },
-                        "closingReasonDescription": {
-                          "type": "string"
-                        },
-                        "enableECPWorkflow": {
-                          "type": "boolean",
-                          "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
-                        }
-                      }
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "flow": {
-                          "type": "array",
-                          "items": {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "description": "A group of Steps that define the progress of the Workflow",
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  },
-                                  "definitionId": {
-                                    "type": "string"
-                                  },
-                                  "name": {
-                                    "type": "string",
-                                    "description": "Name for this Section",
-                                    "example": "Lead Qualification"
-                                  },
-                                  "userIds": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "number"
-                                    }
-                                  },
-                                  "type": {
-                                    "type": "string",
-                                    "enum": [
-                                      "STEP",
-                                      "SECTION"
-                                    ]
-                                  },
-                                  "steps": {
-                                    "type": "array",
-                                    "items": {
-                                      "allOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "id": {
-                                              "type": "string"
-                                            },
-                                            "definitionId": {
-                                              "type": "string"
-                                            },
-                                            "entityRefId": {
-                                              "type": "string"
-                                            },
-                                            "name": {
-                                              "type": "string"
-                                            },
-                                            "type": {
-                                              "type": "string",
-                                              "enum": [
-                                                "STEP",
-                                                "SECTION"
-                                              ]
-                                            },
-                                            "ecp": {
-                                              "type": "object",
-                                              "description": "Details regarding ECP for the workflow step",
-                                              "properties": {
-                                                "label": {
-                                                  "type": "string"
-                                                }
-                                              }
-                                            }
-                                          },
-                                          "required": [
-                                            "id",
-                                            "entityRefId",
-                                            "name",
-                                            "type"
-                                          ]
-                                        },
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "sectionId": {
-                                              "type": "string"
-                                            },
-                                            "userIds": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "number"
-                                              }
-                                            },
-                                            "status": {
-                                              "type": "string",
-                                              "enum": [
-                                                "UNASSIGNED",
-                                                "ASSIGNED",
-                                                "COMPLETED",
-                                                "SKIPPED"
-                                              ]
-                                            },
-                                            "created": {
-                                              "type": "string"
-                                            },
-                                            "lastUpdated": {
-                                              "type": "string"
-                                            },
-                                            "dueDate": {
-                                              "type": "string"
-                                            },
-                                            "manuallyCreated": {
-                                              "type": "boolean"
-                                            }
-                                          }
-                                        }
-                                      ]
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "name",
-                                  "type",
-                                  "steps"
-                                ]
-                              },
-                              {
-                                "allOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "id": {
-                                        "type": "string"
-                                      },
-                                      "definitionId": {
-                                        "type": "string"
-                                      },
-                                      "entityRefId": {
-                                        "type": "string"
-                                      },
-                                      "name": {
-                                        "type": "string"
-                                      },
-                                      "type": {
-                                        "type": "string",
-                                        "enum": [
-                                          "STEP",
-                                          "SECTION"
-                                        ]
-                                      },
-                                      "ecp": {
-                                        "type": "object",
-                                        "description": "Details regarding ECP for the workflow step",
-                                        "properties": {
-                                          "label": {
-                                            "type": "string"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "required": [
-                                      "id",
-                                      "entityRefId",
-                                      "name",
-                                      "type"
-                                    ]
-                                  },
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "sectionId": {
-                                        "type": "string"
-                                      },
-                                      "userIds": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "number"
-                                        }
-                                      },
-                                      "status": {
-                                        "type": "string",
-                                        "enum": [
-                                          "UNASSIGNED",
-                                          "ASSIGNED",
-                                          "COMPLETED",
-                                          "SKIPPED"
-                                        ]
-                                      },
-                                      "created": {
-                                        "type": "string"
-                                      },
-                                      "lastUpdated": {
-                                        "type": "string"
-                                      },
-                                      "dueDate": {
-                                        "type": "string"
-                                      },
-                                      "manuallyCreated": {
-                                        "type": "boolean"
-                                      }
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        }
-                      },
-                      "required": [
-                        "flow"
-                      ]
-                    }
-                  ],
-                  "example": {
-                    "id": "8gja72h6kas6h",
-                    "name": "Lead Qualification",
-                    "trigger": "MANUAL",
-                    "status": "STARTED",
-                    "creationTime": "2021-04-27T12:01:13.000Z",
-                    "lastUpdateTime": "2021-04-27T12:01:13.000Z",
-                    "dueDate": "2021-04-27T12:01:13.000Z",
-                    "assignedTo": [
-                      "252",
-                      "29052"
-                    ],
-                    "flow": [
-                      {
-                        "id": "sectionId1",
-                        "name": "Initial Information Gathering",
-                        "steps": [
-                          {
-                            "id": "sada5641f3a21",
-                            "name": "Call client and confirm address and product",
-                            "status": "ASSIGNED",
-                            "userIds": [
-                              11
-                            ]
-                          },
-                          {
-                            "id": "sada5641f3a22",
-                            "name": "Check product availability",
-                            "status": "UNASSIGNED"
-                          },
-                          {
-                            "id": "sada5641f3a23",
-                            "name": "Send email confirming contact with the client",
-                            "status": "SKIPPED"
-                          }
-                        ]
-                      },
-                      {
-                        "id": "firstLevelStepId1",
-                        "name": "Print and send catalog",
-                        "status": "SKIPPED",
-                        "dueDate": "2023-01-15T20:00:00"
-                      }
-                    ]
-                  }
+                  "$ref": "#/components/schemas/WorkflowExecution"
                 }
               }
             }
@@ -870,12 +118,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -885,12 +128,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -900,12 +138,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -939,393 +172,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "allOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "definitionId": {
-                          "type": "string"
-                        },
-                        "orgId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "creationTime": {
-                          "type": "string",
-                          "description": "Creation timestamp"
-                        },
-                        "lastUpdateTime": {
-                          "type": "string",
-                          "description": "Last Update timestamp"
-                        },
-                        "dueDate": {
-                          "type": "string",
-                          "description": "Due date for finishing the workflow"
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "STARTED",
-                            "DONE",
-                            "CLOSED"
-                          ]
-                        },
-                        "trigger": {
-                          "type": "string",
-                          "enum": [
-                            "MANUAL",
-                            "AUTOMATIC"
-                          ]
-                        },
-                        "assignedTo": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "lastModifiedBy": {
-                          "type": "string",
-                          "description": "Id of the user who closed workflow"
-                        },
-                        "contexts": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              },
-                              "schema": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "title",
-                              "schema"
-                            ]
-                          }
-                        },
-                        "nextOpenStep": {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            },
-                            "entityRefId": {
-                              "type": "string"
-                            }
-                          }
-                        },
-                        "configuredClosingReasonSnapshot": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "title"
-                            ]
-                          }
-                        },
-                        "selectedClosingReasons": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "title"
-                            ]
-                          }
-                        },
-                        "closingReasonDescription": {
-                          "type": "string"
-                        },
-                        "enableECPWorkflow": {
-                          "type": "boolean",
-                          "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
-                        }
-                      }
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "flow": {
-                          "type": "array",
-                          "items": {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "description": "A group of Steps that define the progress of the Workflow",
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  },
-                                  "definitionId": {
-                                    "type": "string"
-                                  },
-                                  "name": {
-                                    "type": "string",
-                                    "description": "Name for this Section",
-                                    "example": "Lead Qualification"
-                                  },
-                                  "userIds": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "number"
-                                    }
-                                  },
-                                  "type": {
-                                    "type": "string",
-                                    "enum": [
-                                      "STEP",
-                                      "SECTION"
-                                    ]
-                                  },
-                                  "steps": {
-                                    "type": "array",
-                                    "items": {
-                                      "allOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "id": {
-                                              "type": "string"
-                                            },
-                                            "definitionId": {
-                                              "type": "string"
-                                            },
-                                            "entityRefId": {
-                                              "type": "string"
-                                            },
-                                            "name": {
-                                              "type": "string"
-                                            },
-                                            "type": {
-                                              "type": "string",
-                                              "enum": [
-                                                "STEP",
-                                                "SECTION"
-                                              ]
-                                            },
-                                            "ecp": {
-                                              "type": "object",
-                                              "description": "Details regarding ECP for the workflow step",
-                                              "properties": {
-                                                "label": {
-                                                  "type": "string"
-                                                }
-                                              }
-                                            }
-                                          },
-                                          "required": [
-                                            "id",
-                                            "entityRefId",
-                                            "name",
-                                            "type"
-                                          ]
-                                        },
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "sectionId": {
-                                              "type": "string"
-                                            },
-                                            "userIds": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "number"
-                                              }
-                                            },
-                                            "status": {
-                                              "type": "string",
-                                              "enum": [
-                                                "UNASSIGNED",
-                                                "ASSIGNED",
-                                                "COMPLETED",
-                                                "SKIPPED"
-                                              ]
-                                            },
-                                            "created": {
-                                              "type": "string"
-                                            },
-                                            "lastUpdated": {
-                                              "type": "string"
-                                            },
-                                            "dueDate": {
-                                              "type": "string"
-                                            },
-                                            "manuallyCreated": {
-                                              "type": "boolean"
-                                            }
-                                          }
-                                        }
-                                      ]
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "name",
-                                  "type",
-                                  "steps"
-                                ]
-                              },
-                              {
-                                "allOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "id": {
-                                        "type": "string"
-                                      },
-                                      "definitionId": {
-                                        "type": "string"
-                                      },
-                                      "entityRefId": {
-                                        "type": "string"
-                                      },
-                                      "name": {
-                                        "type": "string"
-                                      },
-                                      "type": {
-                                        "type": "string",
-                                        "enum": [
-                                          "STEP",
-                                          "SECTION"
-                                        ]
-                                      },
-                                      "ecp": {
-                                        "type": "object",
-                                        "description": "Details regarding ECP for the workflow step",
-                                        "properties": {
-                                          "label": {
-                                            "type": "string"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "required": [
-                                      "id",
-                                      "entityRefId",
-                                      "name",
-                                      "type"
-                                    ]
-                                  },
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "sectionId": {
-                                        "type": "string"
-                                      },
-                                      "userIds": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "number"
-                                        }
-                                      },
-                                      "status": {
-                                        "type": "string",
-                                        "enum": [
-                                          "UNASSIGNED",
-                                          "ASSIGNED",
-                                          "COMPLETED",
-                                          "SKIPPED"
-                                        ]
-                                      },
-                                      "created": {
-                                        "type": "string"
-                                      },
-                                      "lastUpdated": {
-                                        "type": "string"
-                                      },
-                                      "dueDate": {
-                                        "type": "string"
-                                      },
-                                      "manuallyCreated": {
-                                        "type": "boolean"
-                                      }
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        }
-                      },
-                      "required": [
-                        "flow"
-                      ]
-                    }
-                  ],
-                  "example": {
-                    "id": "8gja72h6kas6h",
-                    "name": "Lead Qualification",
-                    "trigger": "MANUAL",
-                    "status": "STARTED",
-                    "creationTime": "2021-04-27T12:01:13.000Z",
-                    "lastUpdateTime": "2021-04-27T12:01:13.000Z",
-                    "dueDate": "2021-04-27T12:01:13.000Z",
-                    "assignedTo": [
-                      "252",
-                      "29052"
-                    ],
-                    "flow": [
-                      {
-                        "id": "sectionId1",
-                        "name": "Initial Information Gathering",
-                        "steps": [
-                          {
-                            "id": "sada5641f3a21",
-                            "name": "Call client and confirm address and product",
-                            "status": "ASSIGNED",
-                            "userIds": [
-                              11
-                            ]
-                          },
-                          {
-                            "id": "sada5641f3a22",
-                            "name": "Check product availability",
-                            "status": "UNASSIGNED"
-                          },
-                          {
-                            "id": "sada5641f3a23",
-                            "name": "Send email confirming contact with the client",
-                            "status": "SKIPPED"
-                          }
-                        ]
-                      },
-                      {
-                        "id": "firstLevelStepId1",
-                        "name": "Print and send catalog",
-                        "status": "SKIPPED",
-                        "dueDate": "2023-01-15T20:00:00"
-                      }
-                    ]
-                  }
+                  "$ref": "#/components/schemas/WorkflowExecution"
                 }
               }
             }
@@ -1335,12 +182,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -1372,47 +214,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "STARTED",
-                      "DONE",
-                      "CLOSED"
-                    ]
-                  },
-                  "assignedTo": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "selectedClosingReasons": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "title"
-                      ]
-                    }
-                  },
-                  "closingReasonDescription": {
-                    "type": "string"
-                  },
-                  "dueDate": {
-                    "type": "string"
-                  }
-                }
+                "$ref": "#/components/schemas/WorkflowExecutionUpdateReq"
               }
             }
           }
@@ -1426,12 +228,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -1466,12 +263,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -1508,31 +300,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "insertionIndex": {
-                    "type": "number"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "UNASSIGNED",
-                      "ASSIGNED",
-                      "COMPLETED",
-                      "SKIPPED"
-                    ]
-                  },
-                  "sectionId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "insertionIndex"
-                ]
+                "$ref": "#/components/schemas/CreateStepReq"
               }
             }
           }
@@ -1543,82 +311,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "allOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "definitionId": {
-                          "type": "string"
-                        },
-                        "entityRefId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "STEP",
-                            "SECTION"
-                          ]
-                        },
-                        "ecp": {
-                          "type": "object",
-                          "description": "Details regarding ECP for the workflow step",
-                          "properties": {
-                            "label": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "entityRefId",
-                        "name",
-                        "type"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "sectionId": {
-                          "type": "string"
-                        },
-                        "userIds": {
-                          "type": "array",
-                          "items": {
-                            "type": "number"
-                          }
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "UNASSIGNED",
-                            "ASSIGNED",
-                            "COMPLETED",
-                            "SKIPPED"
-                          ]
-                        },
-                        "created": {
-                          "type": "string"
-                        },
-                        "lastUpdated": {
-                          "type": "string"
-                        },
-                        "dueDate": {
-                          "type": "string"
-                        },
-                        "manuallyCreated": {
-                          "type": "boolean"
-                        }
-                      }
-                    }
-                  ]
+                  "$ref": "#/components/schemas/Step"
                 }
               }
             }
@@ -1628,12 +321,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -1643,12 +331,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -1658,12 +341,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -1707,50 +385,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "entityRefId": {
-                    "type": "string"
-                  },
-                  "userIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "number"
-                    }
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "UNASSIGNED",
-                      "ASSIGNED",
-                      "COMPLETED",
-                      "SKIPPED"
-                    ]
-                  },
-                  "dueDate": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "position": {
-                    "type": "object",
-                    "properties": {
-                      "index": {
-                        "type": "number"
-                      },
-                      "sectionId": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "index"
-                    ]
-                  }
-                },
-                "required": [
-                  "entityRefId"
-                ]
+                "$ref": "#/components/schemas/UpdateStepReq"
               }
             }
           }
@@ -1761,82 +396,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "allOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "definitionId": {
-                          "type": "string"
-                        },
-                        "entityRefId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "STEP",
-                            "SECTION"
-                          ]
-                        },
-                        "ecp": {
-                          "type": "object",
-                          "description": "Details regarding ECP for the workflow step",
-                          "properties": {
-                            "label": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "entityRefId",
-                        "name",
-                        "type"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "sectionId": {
-                          "type": "string"
-                        },
-                        "userIds": {
-                          "type": "array",
-                          "items": {
-                            "type": "number"
-                          }
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "UNASSIGNED",
-                            "ASSIGNED",
-                            "COMPLETED",
-                            "SKIPPED"
-                          ]
-                        },
-                        "created": {
-                          "type": "string"
-                        },
-                        "lastUpdated": {
-                          "type": "string"
-                        },
-                        "dueDate": {
-                          "type": "string"
-                        },
-                        "manuallyCreated": {
-                          "type": "boolean"
-                        }
-                      }
-                    }
-                  ]
+                  "$ref": "#/components/schemas/Step"
                 }
               }
             }
@@ -1846,12 +406,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -1861,12 +416,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -1876,12 +426,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -1926,12 +471,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -1953,48 +493,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "STARTED",
-                      "DONE",
-                      "CLOSED"
-                    ]
-                  },
-                  "includeDoneWorkflows": {
-                    "type": "boolean"
-                  },
-                  "assignedTo": {
-                    "type": "string"
-                  },
-                  "sorting": {
-                    "type": "string",
-                    "enum": [
-                      "A_Z",
-                      "Z_A",
-                      "DUE_DATE_ASC",
-                      "DUE_DATE_DESC",
-                      "TRIGGER_DATE_ASC",
-                      "TRIGGER_DATE_DESC"
-                    ]
-                  },
-                  "pagination": {
-                    "type": "object",
-                    "properties": {
-                      "orgId": {
-                        "type": "string"
-                      },
-                      "creationTime": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
+                "$ref": "#/components/schemas/SearchExecutionsReq"
               }
             }
           }
@@ -2005,325 +504,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "executions": {
-                      "type": "array",
-                      "items": {
-                        "allOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "definitionId": {
-                                "type": "string"
-                              },
-                              "orgId": {
-                                "type": "string"
-                              },
-                              "name": {
-                                "type": "string"
-                              },
-                              "creationTime": {
-                                "type": "string",
-                                "description": "Creation timestamp"
-                              },
-                              "lastUpdateTime": {
-                                "type": "string",
-                                "description": "Last Update timestamp"
-                              },
-                              "dueDate": {
-                                "type": "string",
-                                "description": "Due date for finishing the workflow"
-                              },
-                              "status": {
-                                "type": "string",
-                                "enum": [
-                                  "STARTED",
-                                  "DONE",
-                                  "CLOSED"
-                                ]
-                              },
-                              "trigger": {
-                                "type": "string",
-                                "enum": [
-                                  "MANUAL",
-                                  "AUTOMATIC"
-                                ]
-                              },
-                              "assignedTo": {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              },
-                              "lastModifiedBy": {
-                                "type": "string",
-                                "description": "Id of the user who closed workflow"
-                              },
-                              "contexts": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "id": {
-                                      "type": "string"
-                                    },
-                                    "title": {
-                                      "type": "string"
-                                    },
-                                    "schema": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  "required": [
-                                    "id",
-                                    "title",
-                                    "schema"
-                                  ]
-                                }
-                              },
-                              "nextOpenStep": {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  },
-                                  "entityRefId": {
-                                    "type": "string"
-                                  }
-                                }
-                              },
-                              "configuredClosingReasonSnapshot": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "id": {
-                                      "type": "string"
-                                    },
-                                    "title": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  "required": [
-                                    "id",
-                                    "title"
-                                  ]
-                                }
-                              },
-                              "selectedClosingReasons": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "id": {
-                                      "type": "string"
-                                    },
-                                    "title": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  "required": [
-                                    "id",
-                                    "title"
-                                  ]
-                                }
-                              },
-                              "closingReasonDescription": {
-                                "type": "string"
-                              },
-                              "enableECPWorkflow": {
-                                "type": "boolean",
-                                "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
-                              }
-                            }
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "flow": {
-                                "type": "array",
-                                "items": {
-                                  "anyOf": [
-                                    {
-                                      "type": "object",
-                                      "description": "A group of Steps that define the progress of the Workflow",
-                                      "properties": {
-                                        "id": {
-                                          "type": "string"
-                                        },
-                                        "definitionId": {
-                                          "type": "string"
-                                        },
-                                        "name": {
-                                          "type": "string",
-                                          "description": "Name for this Section",
-                                          "example": "Lead Qualification"
-                                        },
-                                        "userIds": {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "number"
-                                          }
-                                        },
-                                        "type": {
-                                          "type": "string",
-                                          "enum": [
-                                            "STEP",
-                                            "SECTION"
-                                          ]
-                                        },
-                                        "steps": {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "object",
-                                            "properties": {
-                                              "id": {
-                                                "type": "string"
-                                              },
-                                              "definitionId": {
-                                                "type": "string"
-                                              },
-                                              "entityRefId": {
-                                                "type": "string"
-                                              },
-                                              "name": {
-                                                "type": "string"
-                                              },
-                                              "type": {
-                                                "type": "string",
-                                                "enum": [
-                                                  "STEP",
-                                                  "SECTION"
-                                                ]
-                                              },
-                                              "ecp": {
-                                                "type": "object",
-                                                "description": "Details regarding ECP for the workflow step",
-                                                "properties": {
-                                                  "label": {
-                                                    "type": "string"
-                                                  }
-                                                }
-                                              }
-                                            },
-                                            "required": [
-                                              "id",
-                                              "entityRefId",
-                                              "name",
-                                              "type"
-                                            ]
-                                          }
-                                        }
-                                      },
-                                      "required": [
-                                        "id",
-                                        "name",
-                                        "type",
-                                        "steps"
-                                      ]
-                                    },
-                                    {
-                                      "type": "object",
-                                      "properties": {
-                                        "id": {
-                                          "type": "string"
-                                        },
-                                        "definitionId": {
-                                          "type": "string"
-                                        },
-                                        "entityRefId": {
-                                          "type": "string"
-                                        },
-                                        "name": {
-                                          "type": "string"
-                                        },
-                                        "type": {
-                                          "type": "string",
-                                          "enum": [
-                                            "STEP",
-                                            "SECTION"
-                                          ]
-                                        },
-                                        "ecp": {
-                                          "type": "object",
-                                          "description": "Details regarding ECP for the workflow step",
-                                          "properties": {
-                                            "label": {
-                                              "type": "string"
-                                            }
-                                          }
-                                        }
-                                      },
-                                      "required": [
-                                        "id",
-                                        "entityRefId",
-                                        "name",
-                                        "type"
-                                      ]
-                                    }
-                                  ]
-                                }
-                              }
-                            },
-                            "required": [
-                              "flow"
-                            ]
-                          }
-                        ],
-                        "example": {
-                          "id": "8gja72h6kas6h",
-                          "name": "Lead Qualification",
-                          "trigger": "MANUAL",
-                          "status": "STARTED",
-                          "creationTime": "2021-04-27T12:01:13.000Z",
-                          "lastUpdateTime": "2021-04-27T12:01:13.000Z",
-                          "dueDate": "2021-04-27T12:01:13.000Z",
-                          "flow": [
-                            {
-                              "id": "sectionId1",
-                              "name": "Initial Information Gathering",
-                              "steps": [
-                                {
-                                  "id": "sada5641f3a21",
-                                  "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-1ragw"
-                                },
-                                {
-                                  "id": "sada5641f3a22",
-                                  "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-sga72"
-                                },
-                                {
-                                  "id": "sada5641f3a23",
-                                  "entityRefId": "s9guauj2-sgha8h2t2kl-1589y15n-asjo2t"
-                                }
-                              ]
-                            },
-                            {
-                              "id": "firstLevelStepId1",
-                              "entityRefId": "sgja902tk-sgha8h2t2kl-1589y15n-asfsah2"
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    "lastEvaluatedKey": {
-                      "type": "object",
-                      "properties": {
-                        "orgId": {
-                          "type": "string"
-                        },
-                        "creationTime": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "executions"
-                  ]
+                  "$ref": "#/components/schemas/SearchExecutionsResp"
                 }
               }
             }
@@ -2333,12 +514,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -2348,12 +524,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -2363,12 +534,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -2390,54 +556,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "executionName": {
-                    "type": "string"
-                  },
-                  "stepName": {
-                    "type": "string"
-                  },
-                  "assignedTo": {
-                    "type": "number"
-                  },
-                  "includeDoneWorkflows": {
-                    "type": "boolean"
-                  },
-                  "manuallyCreated": {
-                    "type": "boolean"
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "OPEN",
-                      "COMPLETE",
-                      "NEXT_OPEN_ITEM_IN_WORKFLOW"
-                    ]
-                  },
-                  "sorting": {
-                    "type": "string",
-                    "enum": [
-                      "A_Z",
-                      "Z_A",
-                      "DUE_DATE_ASC",
-                      "DUE_DATE_DESC",
-                      "TRIGGER_DATE_ASC",
-                      "TRIGGER_DATE_DESC"
-                    ]
-                  },
-                  "pagination": {
-                    "type": "object",
-                    "properties": {
-                      "from": {
-                        "type": "number"
-                      },
-                      "size": {
-                        "type": "number"
-                      }
-                    }
-                  }
-                }
+                "$ref": "#/components/schemas/SearchStepsReq"
               }
             }
           }
@@ -2449,151 +568,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {
-                    "hits": {
-                      "type": "number",
-                      "example": 50
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "allOf": [
-                          {
-                            "allOf": [
-                              {
-                                "allOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "id": {
-                                        "type": "string"
-                                      },
-                                      "definitionId": {
-                                        "type": "string"
-                                      },
-                                      "entityRefId": {
-                                        "type": "string"
-                                      },
-                                      "name": {
-                                        "type": "string"
-                                      },
-                                      "type": {
-                                        "type": "string",
-                                        "enum": [
-                                          "STEP",
-                                          "SECTION"
-                                        ]
-                                      },
-                                      "ecp": {
-                                        "type": "object",
-                                        "description": "Details regarding ECP for the workflow step",
-                                        "properties": {
-                                          "label": {
-                                            "type": "string"
-                                          }
-                                        }
-                                      }
-                                    },
-                                    "required": [
-                                      "id",
-                                      "entityRefId",
-                                      "name",
-                                      "type"
-                                    ]
-                                  },
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "sectionId": {
-                                        "type": "string"
-                                      },
-                                      "userIds": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "number"
-                                        }
-                                      },
-                                      "status": {
-                                        "type": "string",
-                                        "enum": [
-                                          "UNASSIGNED",
-                                          "ASSIGNED",
-                                          "COMPLETED",
-                                          "SKIPPED"
-                                        ]
-                                      },
-                                      "created": {
-                                        "type": "string"
-                                      },
-                                      "lastUpdated": {
-                                        "type": "string"
-                                      },
-                                      "dueDate": {
-                                        "type": "string"
-                                      },
-                                      "manuallyCreated": {
-                                        "type": "boolean"
-                                      }
-                                    }
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "executionId": {
-                                    "type": "string"
-                                  },
-                                  "executionName": {
-                                    "type": "string"
-                                  },
-                                  "executionStatus": {
-                                    "type": "string",
-                                    "enum": [
-                                      "STARTED",
-                                      "DONE",
-                                      "CLOSED"
-                                    ]
-                                  },
-                                  "contexts": {
-                                    "type": "array",
-                                    "items": {
-                                      "allOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "id": {
-                                              "type": "string"
-                                            },
-                                            "title": {
-                                              "type": "string"
-                                            },
-                                            "schema": {
-                                              "type": "string"
-                                            }
-                                          },
-                                          "required": [
-                                            "id",
-                                            "title",
-                                            "schema"
-                                          ]
-                                        }
-                                      ]
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "executionId",
-                                  "executionName",
-                                  "executionStatus"
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/SearchStepsResp"
                 }
               }
             }
@@ -2603,12 +578,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -2618,12 +588,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -2633,12 +598,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -2672,27 +632,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "reasons": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "title"
-                        ]
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/ClosingReasonResp"
                 }
               }
             }
@@ -2702,12 +642,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/ErrorResp"
                 }
               }
             }
@@ -2732,11 +667,7 @@
             "type": "string"
           },
           "trigger": {
-            "type": "string",
-            "enum": [
-              "MANUAL",
-              "AUTOMATIC"
-            ]
+            "$ref": "#/components/schemas/TriggerType"
           },
           "assignedTo": {
             "type": "array",
@@ -2750,23 +681,7 @@
           "contexts": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                },
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "title",
-                "schema"
-              ]
+              "$ref": "#/components/schemas/WorkflowContext"
             }
           }
         },
@@ -2797,12 +712,7 @@
         "type": "object",
         "properties": {
           "status": {
-            "type": "string",
-            "enum": [
-              "STARTED",
-              "DONE",
-              "CLOSED"
-            ]
+            "$ref": "#/components/schemas/WorkflowStatus"
           },
           "assignedTo": {
             "type": "array",
@@ -2813,19 +723,7 @@
           "selectedClosingReasons": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "title"
-              ]
+              "$ref": "#/components/schemas/ClosingReason"
             }
           },
           "closingReasonDescription": {
@@ -2898,19 +796,10 @@
             "description": "Due date for finishing the workflow"
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "STARTED",
-              "DONE",
-              "CLOSED"
-            ]
+            "$ref": "#/components/schemas/WorkflowStatus"
           },
           "trigger": {
-            "type": "string",
-            "enum": [
-              "MANUAL",
-              "AUTOMATIC"
-            ]
+            "$ref": "#/components/schemas/TriggerType"
           },
           "assignedTo": {
             "type": "array",
@@ -2925,70 +814,22 @@
           "contexts": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                },
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "title",
-                "schema"
-              ]
+              "$ref": "#/components/schemas/WorkflowContext"
             }
           },
           "nextOpenStep": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "entityRefId": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/components/schemas/StepId"
           },
           "configuredClosingReasonSnapshot": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "title"
-              ]
+              "$ref": "#/components/schemas/ClosingReason"
             }
           },
           "selectedClosingReasons": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "title"
-              ]
+              "$ref": "#/components/schemas/ClosingReason"
             }
           },
           "closingReasonDescription": {
@@ -3003,266 +844,10 @@
       "WorkflowExecutionSlim": {
         "allOf": [
           {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "definitionId": {
-                "type": "string"
-              },
-              "orgId": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "creationTime": {
-                "type": "string",
-                "description": "Creation timestamp"
-              },
-              "lastUpdateTime": {
-                "type": "string",
-                "description": "Last Update timestamp"
-              },
-              "dueDate": {
-                "type": "string",
-                "description": "Due date for finishing the workflow"
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "STARTED",
-                  "DONE",
-                  "CLOSED"
-                ]
-              },
-              "trigger": {
-                "type": "string",
-                "enum": [
-                  "MANUAL",
-                  "AUTOMATIC"
-                ]
-              },
-              "assignedTo": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "lastModifiedBy": {
-                "type": "string",
-                "description": "Id of the user who closed workflow"
-              },
-              "contexts": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "schema": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title",
-                    "schema"
-                  ]
-                }
-              },
-              "nextOpenStep": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "entityRefId": {
-                    "type": "string"
-                  }
-                }
-              },
-              "configuredClosingReasonSnapshot": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title"
-                  ]
-                }
-              },
-              "selectedClosingReasons": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title"
-                  ]
-                }
-              },
-              "closingReasonDescription": {
-                "type": "string"
-              },
-              "enableECPWorkflow": {
-                "type": "boolean",
-                "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
-              }
-            }
+            "$ref": "#/components/schemas/WorkflowExecutionBase"
           },
           {
-            "type": "object",
-            "properties": {
-              "flow": {
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "description": "A group of Steps that define the progress of the Workflow",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "definitionId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string",
-                          "description": "Name for this Section",
-                          "example": "Lead Qualification"
-                        },
-                        "userIds": {
-                          "type": "array",
-                          "items": {
-                            "type": "number"
-                          }
-                        },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "STEP",
-                            "SECTION"
-                          ]
-                        },
-                        "steps": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "definitionId": {
-                                "type": "string"
-                              },
-                              "entityRefId": {
-                                "type": "string"
-                              },
-                              "name": {
-                                "type": "string"
-                              },
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "STEP",
-                                  "SECTION"
-                                ]
-                              },
-                              "ecp": {
-                                "type": "object",
-                                "description": "Details regarding ECP for the workflow step",
-                                "properties": {
-                                  "label": {
-                                    "type": "string"
-                                  }
-                                }
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "entityRefId",
-                              "name",
-                              "type"
-                            ]
-                          }
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "name",
-                        "type",
-                        "steps"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "definitionId": {
-                          "type": "string"
-                        },
-                        "entityRefId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "STEP",
-                            "SECTION"
-                          ]
-                        },
-                        "ecp": {
-                          "type": "object",
-                          "description": "Details regarding ECP for the workflow step",
-                          "properties": {
-                            "label": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "entityRefId",
-                        "name",
-                        "type"
-                      ]
-                    }
-                  ]
-                }
-              }
-            },
-            "required": [
-              "flow"
-            ]
+            "$ref": "#/components/schemas/FlowSlim"
           }
         ],
         "example": {
@@ -3307,121 +892,10 @@
             "items": {
               "anyOf": [
                 {
-                  "type": "object",
-                  "description": "A group of Steps that define the progress of the Workflow",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "definitionId": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "Name for this Section",
-                      "example": "Lead Qualification"
-                    },
-                    "userIds": {
-                      "type": "array",
-                      "items": {
-                        "type": "number"
-                      }
-                    },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "STEP",
-                        "SECTION"
-                      ]
-                    },
-                    "steps": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "definitionId": {
-                            "type": "string"
-                          },
-                          "entityRefId": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "type": "string",
-                            "enum": [
-                              "STEP",
-                              "SECTION"
-                            ]
-                          },
-                          "ecp": {
-                            "type": "object",
-                            "description": "Details regarding ECP for the workflow step",
-                            "properties": {
-                              "label": {
-                                "type": "string"
-                              }
-                            }
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "entityRefId",
-                          "name",
-                          "type"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "type",
-                    "steps"
-                  ]
+                  "$ref": "#/components/schemas/SectionSimplified"
                 },
                 {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "definitionId": {
-                      "type": "string"
-                    },
-                    "entityRefId": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "STEP",
-                        "SECTION"
-                      ]
-                    },
-                    "ecp": {
-                      "type": "object",
-                      "description": "Details regarding ECP for the workflow step",
-                      "properties": {
-                        "label": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "entityRefId",
-                    "name",
-                    "type"
-                  ]
+                  "$ref": "#/components/schemas/StepSimplified"
                 }
               ]
             }
@@ -3439,199 +913,10 @@
             "items": {
               "anyOf": [
                 {
-                  "type": "object",
-                  "description": "A group of Steps that define the progress of the Workflow",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "definitionId": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "Name for this Section",
-                      "example": "Lead Qualification"
-                    },
-                    "userIds": {
-                      "type": "array",
-                      "items": {
-                        "type": "number"
-                      }
-                    },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "STEP",
-                        "SECTION"
-                      ]
-                    },
-                    "steps": {
-                      "type": "array",
-                      "items": {
-                        "allOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "definitionId": {
-                                "type": "string"
-                              },
-                              "entityRefId": {
-                                "type": "string"
-                              },
-                              "name": {
-                                "type": "string"
-                              },
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "STEP",
-                                  "SECTION"
-                                ]
-                              },
-                              "ecp": {
-                                "type": "object",
-                                "description": "Details regarding ECP for the workflow step",
-                                "properties": {
-                                  "label": {
-                                    "type": "string"
-                                  }
-                                }
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "entityRefId",
-                              "name",
-                              "type"
-                            ]
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "sectionId": {
-                                "type": "string"
-                              },
-                              "userIds": {
-                                "type": "array",
-                                "items": {
-                                  "type": "number"
-                                }
-                              },
-                              "status": {
-                                "type": "string",
-                                "enum": [
-                                  "UNASSIGNED",
-                                  "ASSIGNED",
-                                  "COMPLETED",
-                                  "SKIPPED"
-                                ]
-                              },
-                              "created": {
-                                "type": "string"
-                              },
-                              "lastUpdated": {
-                                "type": "string"
-                              },
-                              "dueDate": {
-                                "type": "string"
-                              },
-                              "manuallyCreated": {
-                                "type": "boolean"
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "type",
-                    "steps"
-                  ]
+                  "$ref": "#/components/schemas/Section"
                 },
                 {
-                  "allOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "definitionId": {
-                          "type": "string"
-                        },
-                        "entityRefId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "STEP",
-                            "SECTION"
-                          ]
-                        },
-                        "ecp": {
-                          "type": "object",
-                          "description": "Details regarding ECP for the workflow step",
-                          "properties": {
-                            "label": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "entityRefId",
-                        "name",
-                        "type"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "sectionId": {
-                          "type": "string"
-                        },
-                        "userIds": {
-                          "type": "array",
-                          "items": {
-                            "type": "number"
-                          }
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "UNASSIGNED",
-                            "ASSIGNED",
-                            "COMPLETED",
-                            "SKIPPED"
-                          ]
-                        },
-                        "created": {
-                          "type": "string"
-                        },
-                        "lastUpdated": {
-                          "type": "string"
-                        },
-                        "dueDate": {
-                          "type": "string"
-                        },
-                        "manuallyCreated": {
-                          "type": "boolean"
-                        }
-                      }
-                    }
-                  ]
+                  "$ref": "#/components/schemas/Step"
                 }
               ]
             }
@@ -3644,344 +929,10 @@
       "WorkflowExecution": {
         "allOf": [
           {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "definitionId": {
-                "type": "string"
-              },
-              "orgId": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "creationTime": {
-                "type": "string",
-                "description": "Creation timestamp"
-              },
-              "lastUpdateTime": {
-                "type": "string",
-                "description": "Last Update timestamp"
-              },
-              "dueDate": {
-                "type": "string",
-                "description": "Due date for finishing the workflow"
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "STARTED",
-                  "DONE",
-                  "CLOSED"
-                ]
-              },
-              "trigger": {
-                "type": "string",
-                "enum": [
-                  "MANUAL",
-                  "AUTOMATIC"
-                ]
-              },
-              "assignedTo": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "lastModifiedBy": {
-                "type": "string",
-                "description": "Id of the user who closed workflow"
-              },
-              "contexts": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "schema": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title",
-                    "schema"
-                  ]
-                }
-              },
-              "nextOpenStep": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "entityRefId": {
-                    "type": "string"
-                  }
-                }
-              },
-              "configuredClosingReasonSnapshot": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title"
-                  ]
-                }
-              },
-              "selectedClosingReasons": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "title"
-                  ]
-                }
-              },
-              "closingReasonDescription": {
-                "type": "string"
-              },
-              "enableECPWorkflow": {
-                "type": "boolean",
-                "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
-              }
-            }
+            "$ref": "#/components/schemas/WorkflowExecutionBase"
           },
           {
-            "type": "object",
-            "properties": {
-              "flow": {
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "description": "A group of Steps that define the progress of the Workflow",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "definitionId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string",
-                          "description": "Name for this Section",
-                          "example": "Lead Qualification"
-                        },
-                        "userIds": {
-                          "type": "array",
-                          "items": {
-                            "type": "number"
-                          }
-                        },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "STEP",
-                            "SECTION"
-                          ]
-                        },
-                        "steps": {
-                          "type": "array",
-                          "items": {
-                            "allOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  },
-                                  "definitionId": {
-                                    "type": "string"
-                                  },
-                                  "entityRefId": {
-                                    "type": "string"
-                                  },
-                                  "name": {
-                                    "type": "string"
-                                  },
-                                  "type": {
-                                    "type": "string",
-                                    "enum": [
-                                      "STEP",
-                                      "SECTION"
-                                    ]
-                                  },
-                                  "ecp": {
-                                    "type": "object",
-                                    "description": "Details regarding ECP for the workflow step",
-                                    "properties": {
-                                      "label": {
-                                        "type": "string"
-                                      }
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "entityRefId",
-                                  "name",
-                                  "type"
-                                ]
-                              },
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "sectionId": {
-                                    "type": "string"
-                                  },
-                                  "userIds": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "number"
-                                    }
-                                  },
-                                  "status": {
-                                    "type": "string",
-                                    "enum": [
-                                      "UNASSIGNED",
-                                      "ASSIGNED",
-                                      "COMPLETED",
-                                      "SKIPPED"
-                                    ]
-                                  },
-                                  "created": {
-                                    "type": "string"
-                                  },
-                                  "lastUpdated": {
-                                    "type": "string"
-                                  },
-                                  "dueDate": {
-                                    "type": "string"
-                                  },
-                                  "manuallyCreated": {
-                                    "type": "boolean"
-                                  }
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "name",
-                        "type",
-                        "steps"
-                      ]
-                    },
-                    {
-                      "allOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            },
-                            "definitionId": {
-                              "type": "string"
-                            },
-                            "entityRefId": {
-                              "type": "string"
-                            },
-                            "name": {
-                              "type": "string"
-                            },
-                            "type": {
-                              "type": "string",
-                              "enum": [
-                                "STEP",
-                                "SECTION"
-                              ]
-                            },
-                            "ecp": {
-                              "type": "object",
-                              "description": "Details regarding ECP for the workflow step",
-                              "properties": {
-                                "label": {
-                                  "type": "string"
-                                }
-                              }
-                            }
-                          },
-                          "required": [
-                            "id",
-                            "entityRefId",
-                            "name",
-                            "type"
-                          ]
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "sectionId": {
-                              "type": "string"
-                            },
-                            "userIds": {
-                              "type": "array",
-                              "items": {
-                                "type": "number"
-                              }
-                            },
-                            "status": {
-                              "type": "string",
-                              "enum": [
-                                "UNASSIGNED",
-                                "ASSIGNED",
-                                "COMPLETED",
-                                "SKIPPED"
-                              ]
-                            },
-                            "created": {
-                              "type": "string"
-                            },
-                            "lastUpdated": {
-                              "type": "string"
-                            },
-                            "dueDate": {
-                              "type": "string"
-                            },
-                            "manuallyCreated": {
-                              "type": "boolean"
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-            },
-            "required": [
-              "flow"
-            ]
+            "$ref": "#/components/schemas/Flow"
           }
         ],
         "example": {
@@ -4060,52 +1011,12 @@
             }
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "STEP",
-              "SECTION"
-            ]
+            "$ref": "#/components/schemas/ItemType"
           },
           "steps": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "definitionId": {
-                  "type": "string"
-                },
-                "entityRefId": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string",
-                  "enum": [
-                    "STEP",
-                    "SECTION"
-                  ]
-                },
-                "ecp": {
-                  "type": "object",
-                  "description": "Details regarding ECP for the workflow step",
-                  "properties": {
-                    "label": {
-                      "type": "string"
-                    }
-                  }
-                }
-              },
-              "required": [
-                "id",
-                "entityRefId",
-                "name",
-                "type"
-              ]
+              "$ref": "#/components/schemas/StepSimplified"
             }
           }
         },
@@ -4138,91 +1049,12 @@
             }
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "STEP",
-              "SECTION"
-            ]
+            "$ref": "#/components/schemas/ItemType"
           },
           "steps": {
             "type": "array",
             "items": {
-              "allOf": [
-                {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "definitionId": {
-                      "type": "string"
-                    },
-                    "entityRefId": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "STEP",
-                        "SECTION"
-                      ]
-                    },
-                    "ecp": {
-                      "type": "object",
-                      "description": "Details regarding ECP for the workflow step",
-                      "properties": {
-                        "label": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "entityRefId",
-                    "name",
-                    "type"
-                  ]
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "sectionId": {
-                      "type": "string"
-                    },
-                    "userIds": {
-                      "type": "array",
-                      "items": {
-                        "type": "number"
-                      }
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "UNASSIGNED",
-                        "ASSIGNED",
-                        "COMPLETED",
-                        "SKIPPED"
-                      ]
-                    },
-                    "created": {
-                      "type": "string"
-                    },
-                    "lastUpdated": {
-                      "type": "string"
-                    },
-                    "dueDate": {
-                      "type": "string"
-                    },
-                    "manuallyCreated": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              ]
+              "$ref": "#/components/schemas/Step"
             }
           }
         },
@@ -4260,20 +1092,10 @@
             "type": "string"
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "STEP",
-              "SECTION"
-            ]
+            "$ref": "#/components/schemas/ItemType"
           },
           "ecp": {
-            "type": "object",
-            "description": "Details regarding ECP for the workflow step",
-            "properties": {
-              "label": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/components/schemas/ECPDetails"
           }
         },
         "required": [
@@ -4286,43 +1108,7 @@
       "Step": {
         "allOf": [
           {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "definitionId": {
-                "type": "string"
-              },
-              "entityRefId": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "STEP",
-                  "SECTION"
-                ]
-              },
-              "ecp": {
-                "type": "object",
-                "description": "Details regarding ECP for the workflow step",
-                "properties": {
-                  "label": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            "required": [
-              "id",
-              "entityRefId",
-              "name",
-              "type"
-            ]
+            "$ref": "#/components/schemas/StepSimplified"
           },
           {
             "type": "object",
@@ -4337,13 +1123,7 @@
                 }
               },
               "status": {
-                "type": "string",
-                "enum": [
-                  "UNASSIGNED",
-                  "ASSIGNED",
-                  "COMPLETED",
-                  "SKIPPED"
-                ]
+                "$ref": "#/components/schemas/StepStatus"
               },
               "created": {
                 "type": "string"
@@ -4364,82 +1144,7 @@
       "StepExtended": {
         "allOf": [
           {
-            "allOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "definitionId": {
-                    "type": "string"
-                  },
-                  "entityRefId": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "STEP",
-                      "SECTION"
-                    ]
-                  },
-                  "ecp": {
-                    "type": "object",
-                    "description": "Details regarding ECP for the workflow step",
-                    "properties": {
-                      "label": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "required": [
-                  "id",
-                  "entityRefId",
-                  "name",
-                  "type"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "sectionId": {
-                    "type": "string"
-                  },
-                  "userIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "number"
-                    }
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "UNASSIGNED",
-                      "ASSIGNED",
-                      "COMPLETED",
-                      "SKIPPED"
-                    ]
-                  },
-                  "created": {
-                    "type": "string"
-                  },
-                  "lastUpdated": {
-                    "type": "string"
-                  },
-                  "dueDate": {
-                    "type": "string"
-                  },
-                  "manuallyCreated": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            ]
+            "$ref": "#/components/schemas/Step"
           },
           {
             "type": "object",
@@ -4451,35 +1156,14 @@
                 "type": "string"
               },
               "executionStatus": {
-                "type": "string",
-                "enum": [
-                  "STARTED",
-                  "DONE",
-                  "CLOSED"
-                ]
+                "$ref": "#/components/schemas/WorkflowStatus"
               },
               "contexts": {
                 "type": "array",
                 "items": {
                   "allOf": [
                     {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        },
-                        "schema": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "title",
-                        "schema"
-                      ]
+                      "$ref": "#/components/schemas/WorkflowContext"
                     }
                   ]
                 }
@@ -4535,13 +1219,7 @@
             "type": "string"
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "UNASSIGNED",
-              "ASSIGNED",
-              "COMPLETED",
-              "SKIPPED"
-            ]
+            "$ref": "#/components/schemas/StepStatus"
           },
           "sectionId": {
             "type": "string"
@@ -4565,13 +1243,7 @@
             }
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "UNASSIGNED",
-              "ASSIGNED",
-              "COMPLETED",
-              "SKIPPED"
-            ]
+            "$ref": "#/components/schemas/StepStatus"
           },
           "dueDate": {
             "type": "string"
@@ -4580,18 +1252,7 @@
             "type": "string"
           },
           "position": {
-            "type": "object",
-            "properties": {
-              "index": {
-                "type": "number"
-              },
-              "sectionId": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "index"
-            ]
+            "$ref": "#/components/schemas/StepPositionAt"
           }
         },
         "required": [
@@ -4615,82 +1276,7 @@
       "UpdateStepResp": {
         "allOf": [
           {
-            "allOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "definitionId": {
-                    "type": "string"
-                  },
-                  "entityRefId": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "STEP",
-                      "SECTION"
-                    ]
-                  },
-                  "ecp": {
-                    "type": "object",
-                    "description": "Details regarding ECP for the workflow step",
-                    "properties": {
-                      "label": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "required": [
-                  "id",
-                  "entityRefId",
-                  "name",
-                  "type"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "sectionId": {
-                    "type": "string"
-                  },
-                  "userIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "number"
-                    }
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "UNASSIGNED",
-                      "ASSIGNED",
-                      "COMPLETED",
-                      "SKIPPED"
-                    ]
-                  },
-                  "created": {
-                    "type": "string"
-                  },
-                  "lastUpdated": {
-                    "type": "string"
-                  },
-                  "dueDate": {
-                    "type": "string"
-                  },
-                  "manuallyCreated": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            ]
+            "$ref": "#/components/schemas/Step"
           }
         ]
       },
@@ -4706,136 +1292,7 @@
             "items": {
               "allOf": [
                 {
-                  "allOf": [
-                    {
-                      "allOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            },
-                            "definitionId": {
-                              "type": "string"
-                            },
-                            "entityRefId": {
-                              "type": "string"
-                            },
-                            "name": {
-                              "type": "string"
-                            },
-                            "type": {
-                              "type": "string",
-                              "enum": [
-                                "STEP",
-                                "SECTION"
-                              ]
-                            },
-                            "ecp": {
-                              "type": "object",
-                              "description": "Details regarding ECP for the workflow step",
-                              "properties": {
-                                "label": {
-                                  "type": "string"
-                                }
-                              }
-                            }
-                          },
-                          "required": [
-                            "id",
-                            "entityRefId",
-                            "name",
-                            "type"
-                          ]
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "sectionId": {
-                              "type": "string"
-                            },
-                            "userIds": {
-                              "type": "array",
-                              "items": {
-                                "type": "number"
-                              }
-                            },
-                            "status": {
-                              "type": "string",
-                              "enum": [
-                                "UNASSIGNED",
-                                "ASSIGNED",
-                                "COMPLETED",
-                                "SKIPPED"
-                              ]
-                            },
-                            "created": {
-                              "type": "string"
-                            },
-                            "lastUpdated": {
-                              "type": "string"
-                            },
-                            "dueDate": {
-                              "type": "string"
-                            },
-                            "manuallyCreated": {
-                              "type": "boolean"
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "executionId": {
-                          "type": "string"
-                        },
-                        "executionName": {
-                          "type": "string"
-                        },
-                        "executionStatus": {
-                          "type": "string",
-                          "enum": [
-                            "STARTED",
-                            "DONE",
-                            "CLOSED"
-                          ]
-                        },
-                        "contexts": {
-                          "type": "array",
-                          "items": {
-                            "allOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  },
-                                  "title": {
-                                    "type": "string"
-                                  },
-                                  "schema": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "title",
-                                  "schema"
-                                ]
-                              }
-                            ]
-                          }
-                        }
-                      },
-                      "required": [
-                        "executionId",
-                        "executionName",
-                        "executionStatus"
-                      ]
-                    }
-                  ]
+                  "$ref": "#/components/schemas/StepExtended"
                 }
               ]
             }
@@ -4849,12 +1306,7 @@
             "type": "string"
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "STARTED",
-              "DONE",
-              "CLOSED"
-            ]
+            "$ref": "#/components/schemas/WorkflowStatus"
           },
           "includeDoneWorkflows": {
             "type": "boolean"
@@ -4863,26 +1315,10 @@
             "type": "string"
           },
           "sorting": {
-            "type": "string",
-            "enum": [
-              "A_Z",
-              "Z_A",
-              "DUE_DATE_ASC",
-              "DUE_DATE_DESC",
-              "TRIGGER_DATE_ASC",
-              "TRIGGER_DATE_DESC"
-            ]
+            "$ref": "#/components/schemas/SearchSorting"
           },
           "pagination": {
-            "type": "object",
-            "properties": {
-              "orgId": {
-                "type": "string"
-              },
-              "creationTime": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/components/schemas/ExecutionPaginationDynamo"
           }
         }
       },
@@ -4892,315 +1328,11 @@
           "executions": {
             "type": "array",
             "items": {
-              "allOf": [
-                {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "definitionId": {
-                      "type": "string"
-                    },
-                    "orgId": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "creationTime": {
-                      "type": "string",
-                      "description": "Creation timestamp"
-                    },
-                    "lastUpdateTime": {
-                      "type": "string",
-                      "description": "Last Update timestamp"
-                    },
-                    "dueDate": {
-                      "type": "string",
-                      "description": "Due date for finishing the workflow"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "STARTED",
-                        "DONE",
-                        "CLOSED"
-                      ]
-                    },
-                    "trigger": {
-                      "type": "string",
-                      "enum": [
-                        "MANUAL",
-                        "AUTOMATIC"
-                      ]
-                    },
-                    "assignedTo": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "lastModifiedBy": {
-                      "type": "string",
-                      "description": "Id of the user who closed workflow"
-                    },
-                    "contexts": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "schema": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "title",
-                          "schema"
-                        ]
-                      }
-                    },
-                    "nextOpenStep": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "entityRefId": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "configuredClosingReasonSnapshot": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "title"
-                        ]
-                      }
-                    },
-                    "selectedClosingReasons": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "title"
-                        ]
-                      }
-                    },
-                    "closingReasonDescription": {
-                      "type": "string"
-                    },
-                    "enableECPWorkflow": {
-                      "type": "boolean",
-                      "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "flow": {
-                      "type": "array",
-                      "items": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "description": "A group of Steps that define the progress of the Workflow",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "definitionId": {
-                                "type": "string"
-                              },
-                              "name": {
-                                "type": "string",
-                                "description": "Name for this Section",
-                                "example": "Lead Qualification"
-                              },
-                              "userIds": {
-                                "type": "array",
-                                "items": {
-                                  "type": "number"
-                                }
-                              },
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "STEP",
-                                  "SECTION"
-                                ]
-                              },
-                              "steps": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "id": {
-                                      "type": "string"
-                                    },
-                                    "definitionId": {
-                                      "type": "string"
-                                    },
-                                    "entityRefId": {
-                                      "type": "string"
-                                    },
-                                    "name": {
-                                      "type": "string"
-                                    },
-                                    "type": {
-                                      "type": "string",
-                                      "enum": [
-                                        "STEP",
-                                        "SECTION"
-                                      ]
-                                    },
-                                    "ecp": {
-                                      "type": "object",
-                                      "description": "Details regarding ECP for the workflow step",
-                                      "properties": {
-                                        "label": {
-                                          "type": "string"
-                                        }
-                                      }
-                                    }
-                                  },
-                                  "required": [
-                                    "id",
-                                    "entityRefId",
-                                    "name",
-                                    "type"
-                                  ]
-                                }
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "name",
-                              "type",
-                              "steps"
-                            ]
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "definitionId": {
-                                "type": "string"
-                              },
-                              "entityRefId": {
-                                "type": "string"
-                              },
-                              "name": {
-                                "type": "string"
-                              },
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "STEP",
-                                  "SECTION"
-                                ]
-                              },
-                              "ecp": {
-                                "type": "object",
-                                "description": "Details regarding ECP for the workflow step",
-                                "properties": {
-                                  "label": {
-                                    "type": "string"
-                                  }
-                                }
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "entityRefId",
-                              "name",
-                              "type"
-                            ]
-                          }
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "flow"
-                  ]
-                }
-              ],
-              "example": {
-                "id": "8gja72h6kas6h",
-                "name": "Lead Qualification",
-                "trigger": "MANUAL",
-                "status": "STARTED",
-                "creationTime": "2021-04-27T12:01:13.000Z",
-                "lastUpdateTime": "2021-04-27T12:01:13.000Z",
-                "dueDate": "2021-04-27T12:01:13.000Z",
-                "flow": [
-                  {
-                    "id": "sectionId1",
-                    "name": "Initial Information Gathering",
-                    "steps": [
-                      {
-                        "id": "sada5641f3a21",
-                        "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-1ragw"
-                      },
-                      {
-                        "id": "sada5641f3a22",
-                        "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-sga72"
-                      },
-                      {
-                        "id": "sada5641f3a23",
-                        "entityRefId": "s9guauj2-sgha8h2t2kl-1589y15n-asjo2t"
-                      }
-                    ]
-                  },
-                  {
-                    "id": "firstLevelStepId1",
-                    "entityRefId": "sgja902tk-sgha8h2t2kl-1589y15n-asfsah2"
-                  }
-                ]
-              }
+              "$ref": "#/components/schemas/WorkflowExecutionSlim"
             }
           },
           "lastEvaluatedKey": {
-            "type": "object",
-            "properties": {
-              "orgId": {
-                "type": "string"
-              },
-              "creationTime": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/components/schemas/LastEvaluatedKey"
           }
         },
         "required": [
@@ -5245,26 +1377,10 @@
             ]
           },
           "sorting": {
-            "type": "string",
-            "enum": [
-              "A_Z",
-              "Z_A",
-              "DUE_DATE_ASC",
-              "DUE_DATE_DESC",
-              "TRIGGER_DATE_ASC",
-              "TRIGGER_DATE_DESC"
-            ]
+            "$ref": "#/components/schemas/SearchSorting"
           },
           "pagination": {
-            "type": "object",
-            "properties": {
-              "from": {
-                "type": "number"
-              },
-              "size": {
-                "type": "number"
-              }
-            }
+            "$ref": "#/components/schemas/SearchPagination"
           }
         }
       },
@@ -5315,19 +1431,7 @@
           "reasons": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "title"
-              ]
+              "$ref": "#/components/schemas/ClosingReason"
             }
           }
         }

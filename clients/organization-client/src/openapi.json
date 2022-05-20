@@ -33,8 +33,7 @@
             "in": "path",
             "name": "org_id",
             "schema": {
-              "type": "string",
-              "example": "739224"
+              "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
             "description": "The Id of the organization."
@@ -46,107 +45,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "example": "739224"
-                    },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "Vendor",
-                        "Partner"
-                      ],
-                      "nullable": true
-                    },
-                    "name": {
-                      "type": "string",
-                      "example": "Epilot",
-                      "nullable": true
-                    },
-                    "signature": {
-                      "type": "string",
-                      "example": "<p>Thanks</p>",
-                      "nullable": true
-                    },
-                    "symbol": {
-                      "type": "string",
-                      "example": "EPI",
-                      "nullable": true
-                    },
-                    "pricing_tier": {
-                      "type": "string",
-                      "example": "professional",
-                      "nullable": true
-                    },
-                    "email": {
-                      "type": "string",
-                      "example": "someone@epilot.cloud",
-                      "nullable": true
-                    },
-                    "free_user_limit": {
-                      "type": "number",
-                      "example": 50,
-                      "nullable": true
-                    },
-                    "phone": {
-                      "type": "string",
-                      "example": 49123123123,
-                      "nullable": true
-                    },
-                    "website": {
-                      "type": "string",
-                      "example": "https://epilot.cloud",
-                      "nullable": true
-                    },
-                    "address": {
-                      "type": "object",
-                      "properties": {
-                        "country": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "city": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "postal_code": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "street": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "street_number": {
-                          "type": "string",
-                          "nullable": true
-                        }
-                      }
-                    },
-                    "logo_url": {
-                      "type": "string",
-                      "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
-                      "nullable": true
-                    },
-                    "logo_thumbnail_url": {
-                      "type": "string",
-                      "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
-                      "nullable": true
-                    },
-                    "is_unlicensed_org": {
-                      "type": "boolean",
-                      "example": false,
-                      "nullable": true
-                    },
-                    "style": {
-                      "type": "object",
-                      "description": "Organization style setting (e.g. font setting)",
-                      "additionalProperties": true,
-                      "nullable": true
-                    }
-                  }
+                  "$ref": "#/components/schemas/Organization"
                 }
               }
             }
@@ -164,8 +63,7 @@
             "in": "path",
             "name": "org_id",
             "schema": {
-              "type": "string",
-              "example": "739224"
+              "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
             "description": "The Id of the organization."
@@ -175,107 +73,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string",
-                    "example": "739224"
-                  },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "Vendor",
-                      "Partner"
-                    ],
-                    "nullable": true
-                  },
-                  "name": {
-                    "type": "string",
-                    "example": "Epilot",
-                    "nullable": true
-                  },
-                  "signature": {
-                    "type": "string",
-                    "example": "<p>Thanks</p>",
-                    "nullable": true
-                  },
-                  "symbol": {
-                    "type": "string",
-                    "example": "EPI",
-                    "nullable": true
-                  },
-                  "pricing_tier": {
-                    "type": "string",
-                    "example": "professional",
-                    "nullable": true
-                  },
-                  "email": {
-                    "type": "string",
-                    "example": "someone@epilot.cloud",
-                    "nullable": true
-                  },
-                  "free_user_limit": {
-                    "type": "number",
-                    "example": 50,
-                    "nullable": true
-                  },
-                  "phone": {
-                    "type": "string",
-                    "example": 49123123123,
-                    "nullable": true
-                  },
-                  "website": {
-                    "type": "string",
-                    "example": "https://epilot.cloud",
-                    "nullable": true
-                  },
-                  "address": {
-                    "type": "object",
-                    "properties": {
-                      "country": {
-                        "type": "string",
-                        "nullable": true
-                      },
-                      "city": {
-                        "type": "string",
-                        "nullable": true
-                      },
-                      "postal_code": {
-                        "type": "string",
-                        "nullable": true
-                      },
-                      "street": {
-                        "type": "string",
-                        "nullable": true
-                      },
-                      "street_number": {
-                        "type": "string",
-                        "nullable": true
-                      }
-                    }
-                  },
-                  "logo_url": {
-                    "type": "string",
-                    "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
-                    "nullable": true
-                  },
-                  "logo_thumbnail_url": {
-                    "type": "string",
-                    "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
-                    "nullable": true
-                  },
-                  "is_unlicensed_org": {
-                    "type": "boolean",
-                    "example": false,
-                    "nullable": true
-                  },
-                  "style": {
-                    "type": "object",
-                    "description": "Organization style setting (e.g. font setting)",
-                    "additionalProperties": true,
-                    "nullable": true
-                  }
-                }
+                "$ref": "#/components/schemas/Organization"
               }
             }
           }
@@ -286,107 +84,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "example": "739224"
-                    },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "Vendor",
-                        "Partner"
-                      ],
-                      "nullable": true
-                    },
-                    "name": {
-                      "type": "string",
-                      "example": "Epilot",
-                      "nullable": true
-                    },
-                    "signature": {
-                      "type": "string",
-                      "example": "<p>Thanks</p>",
-                      "nullable": true
-                    },
-                    "symbol": {
-                      "type": "string",
-                      "example": "EPI",
-                      "nullable": true
-                    },
-                    "pricing_tier": {
-                      "type": "string",
-                      "example": "professional",
-                      "nullable": true
-                    },
-                    "email": {
-                      "type": "string",
-                      "example": "someone@epilot.cloud",
-                      "nullable": true
-                    },
-                    "free_user_limit": {
-                      "type": "number",
-                      "example": 50,
-                      "nullable": true
-                    },
-                    "phone": {
-                      "type": "string",
-                      "example": 49123123123,
-                      "nullable": true
-                    },
-                    "website": {
-                      "type": "string",
-                      "example": "https://epilot.cloud",
-                      "nullable": true
-                    },
-                    "address": {
-                      "type": "object",
-                      "properties": {
-                        "country": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "city": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "postal_code": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "street": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "street_number": {
-                          "type": "string",
-                          "nullable": true
-                        }
-                      }
-                    },
-                    "logo_url": {
-                      "type": "string",
-                      "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
-                      "nullable": true
-                    },
-                    "logo_thumbnail_url": {
-                      "type": "string",
-                      "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
-                      "nullable": true
-                    },
-                    "is_unlicensed_org": {
-                      "type": "boolean",
-                      "example": false,
-                      "nullable": true
-                    },
-                    "style": {
-                      "type": "object",
-                      "description": "Organization style setting (e.g. font setting)",
-                      "additionalProperties": true,
-                      "nullable": true
-                    }
-                  }
+                  "$ref": "#/components/schemas/Organization"
                 }
               }
             }
@@ -407,8 +105,7 @@
             "in": "path",
             "name": "org_id",
             "schema": {
-              "type": "string",
-              "example": "739224"
+              "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
             "description": "The Id of the organization."
@@ -420,13 +117,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "example": {
-                    "double_opt_in": {
-                      "enabled": true
-                    }
-                  }
+                  "$ref": "#/components/schemas/Settings"
                 }
               }
             }
@@ -447,8 +138,7 @@
             "in": "path",
             "name": "org_id",
             "schema": {
-              "type": "string",
-              "example": "739224"
+              "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
             "description": "The Id of the organization."
@@ -468,27 +158,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "boolean"
-                  },
-                  {
-                    "type": "array"
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": true
-                  }
-                ],
-                "example": {
-                  "enabled": true
-                }
+                "$ref": "#/components/schemas/SettingsValue"
               }
             }
           }
@@ -499,27 +169,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "number"
-                    },
-                    {
-                      "type": "boolean"
-                    },
-                    {
-                      "type": "array"
-                    },
-                    {
-                      "type": "object",
-                      "additionalProperties": true
-                    }
-                  ],
-                  "example": {
-                    "enabled": true
-                  }
+                  "$ref": "#/components/schemas/SettingsValue"
                 }
               }
             }
@@ -538,8 +188,7 @@
             "in": "path",
             "name": "org_id",
             "schema": {
-              "type": "string",
-              "example": "739224"
+              "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
             "description": "The Id of the organization."
@@ -580,8 +229,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "example": "739224"
+            "$ref": "#/components/schemas/OrganizationId"
           },
           "type": {
             "type": "string",
@@ -712,5 +360,13 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://organization-v2.sls.epilot.io"
+    },
+    {
+      "url": "https://organization-v2.sls.epilot.io"
+    }
+  ]
 }

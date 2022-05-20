@@ -3,7 +3,7 @@
   "info": {
     "title": "File API",
     "version": "0.1.0",
-    "description": "File Upload and Management for epilot SaaS"
+    "description": "Upload and manage all files stored in epilot"
   },
   "tags": [
     {
@@ -14,9 +14,6 @@
   "security": [
     {
       "EpilotAuth": []
-    },
-    {
-      "AsOrganization": []
     }
   ],
   "paths": {
@@ -228,6 +225,62 @@
         }
       }
     },
+    "/v1/files:downloadS3": {
+      "post": {
+        "operationId": "downloadS3File",
+        "summary": "downloadS3File",
+        "description": "Generate pre-signed download S3 url for a file",
+        "tags": [
+          "files"
+        ],
+        "parameters": [
+          {
+            "name": "s3_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "s3_bucket",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachment",
+            "in": "query",
+            "description": "Controls the Content-Disposition header to control browser behaviour. Set to true to trigger download.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generated thumbnail image",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/files/{id}/preview": {
       "get": {
         "operationId": "previewFile",
@@ -358,13 +411,8 @@
       "EpilotAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Epilot Bearer Token"
-      },
-      "AsOrganization": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-ivy-org-id",
-        "description": "Set organization id when using internal auth"
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
       }
     },
     "schemas": {
@@ -558,5 +606,13 @@
         ]
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://file.sls.epilot.io"
+    },
+    {
+      "url": "https://file.sls.epilot.io"
+    }
+  ]
 }

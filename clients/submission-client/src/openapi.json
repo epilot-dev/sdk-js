@@ -24,151 +24,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "description": "Holds content and meta information",
-                "type": "object",
-                "properties": {
-                  "organization_id": {
-                    "description": "organization id",
-                    "type": "string",
-                    "example": "123"
-                  },
-                  "journey_submit_id": {
-                    "description": "journey submit uid",
-                    "type": "string",
-                    "example": "123"
-                  },
-                  "source_type": {
-                    "type": "string",
-                    "description": "type of source, e.g. journey or frontend",
-                    "example": "journey"
-                  },
-                  "source_id": {
-                    "type": "string",
-                    "description": "identifier for source e.g. journey ID or frontend ID",
-                    "example": "ce99875f-fba9-4fe2-a8f9-afaf52059051"
-                  },
-                  "opt_ins": {
-                    "description": "Opt-ins to create from submission\n",
-                    "type": "array",
-                    "maxItems": 10,
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "topic": {
-                          "type": "string",
-                          "example": "EMAIL_MARKETING"
-                        },
-                        "identifier": {
-                          "type": "string",
-                          "description": "Consent identifier",
-                          "example": "example@email.com"
-                        },
-                        "meta": {
-                          "type": "object",
-                          "additionalProperties": true
-                        }
-                      }
-                    }
-                  },
-                  "entities": {
-                    "description": "Entities to create from submission\n",
-                    "type": "array",
-                    "minItems": 1,
-                    "maxItems": 10,
-                    "items": {
-                      "type": "object",
-                      "description": "The submission entity to create",
-                      "additionalProperties": true,
-                      "properties": {
-                        "_schema": {
-                          "type": "string",
-                          "enum": [
-                            "submission"
-                          ]
-                        },
-                        "description": {
-                          "type": "string",
-                          "description": "Readable description of the submission. Will be used as the title if passed"
-                        },
-                        "files": {
-                          "type": "array",
-                          "description": "Files to attach to Submission Entity as a relation (s3refs from File API)\n",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "s3ref": {
-                                "type": "object",
-                                "description": "S3 Reference from File API",
-                                "properties": {
-                                  "bucket": {
-                                    "type": "string",
-                                    "example": "epilot-user-content"
-                                  },
-                                  "key": {
-                                    "type": "string",
-                                    "example": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                                  }
-                                },
-                                "required": [
-                                  "bucket",
-                                  "key"
-                                ]
-                              },
-                              "filename": {
-                                "type": "string",
-                                "description": "Override the file name"
-                              },
-                              "_tags": {
-                                "type": "array",
-                                "description": "List of tags/labels for files",
-                                "items": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "required": [
-                              "s3ref"
-                            ]
-                          }
-                        }
-                      },
-                      "required": [
-                        "_schema"
-                      ],
-                      "example": {
-                        "_schema": "submission",
-                        "description": "Submission created via API",
-                        "contact_first_name": "First",
-                        "contact_last_name": "Last",
-                        "contact_email": "example@submission.com",
-                        "request": "I would like to know more about electric vehicles",
-                        "files": [
-                          {
-                            "s3ref": {
-                              "bucket": "epilot-user-content",
-                              "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  },
-                  "_ivy_opportunity_ids": {
-                    "deprecated": true,
-                    "description": "Related Ivy Opportunity Ids",
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "required": [
-                  "organization_id",
-                  "source_type",
-                  "source_id",
-                  "entities"
-                ]
+                "$ref": "#/components/schemas/SubmissionPayload"
               }
             }
           }
@@ -212,22 +68,7 @@
             "type": "array",
             "maxItems": 10,
             "items": {
-              "type": "object",
-              "properties": {
-                "topic": {
-                  "type": "string",
-                  "example": "EMAIL_MARKETING"
-                },
-                "identifier": {
-                  "type": "string",
-                  "description": "Consent identifier",
-                  "example": "example@email.com"
-                },
-                "meta": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
+              "$ref": "#/components/schemas/OptIn"
             }
           },
           "entities": {
@@ -236,81 +77,7 @@
             "minItems": 1,
             "maxItems": 10,
             "items": {
-              "type": "object",
-              "description": "The submission entity to create",
-              "additionalProperties": true,
-              "properties": {
-                "_schema": {
-                  "type": "string",
-                  "enum": [
-                    "submission"
-                  ]
-                },
-                "description": {
-                  "type": "string",
-                  "description": "Readable description of the submission. Will be used as the title if passed"
-                },
-                "files": {
-                  "type": "array",
-                  "description": "Files to attach to Submission Entity as a relation (s3refs from File API)\n",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "s3ref": {
-                        "type": "object",
-                        "description": "S3 Reference from File API",
-                        "properties": {
-                          "bucket": {
-                            "type": "string",
-                            "example": "epilot-user-content"
-                          },
-                          "key": {
-                            "type": "string",
-                            "example": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                          }
-                        },
-                        "required": [
-                          "bucket",
-                          "key"
-                        ]
-                      },
-                      "filename": {
-                        "type": "string",
-                        "description": "Override the file name"
-                      },
-                      "_tags": {
-                        "type": "array",
-                        "description": "List of tags/labels for files",
-                        "items": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "required": [
-                      "s3ref"
-                    ]
-                  }
-                }
-              },
-              "required": [
-                "_schema"
-              ],
-              "example": {
-                "_schema": "submission",
-                "description": "Submission created via API",
-                "contact_first_name": "First",
-                "contact_last_name": "Last",
-                "contact_email": "example@submission.com",
-                "request": "I would like to know more about electric vehicles",
-                "files": [
-                  {
-                    "s3ref": {
-                      "bucket": "epilot-user-content",
-                      "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                    }
-                  }
-                ]
-              }
+              "$ref": "#/components/schemas/SubmissionEntity"
             }
           },
           "_ivy_opportunity_ids": {
@@ -352,22 +119,7 @@
               "type": "object",
               "properties": {
                 "s3ref": {
-                  "type": "object",
-                  "description": "S3 Reference from File API",
-                  "properties": {
-                    "bucket": {
-                      "type": "string",
-                      "example": "epilot-user-content"
-                    },
-                    "key": {
-                      "type": "string",
-                      "example": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                    }
-                  },
-                  "required": [
-                    "bucket",
-                    "key"
-                  ]
+                  "$ref": "#/components/schemas/S3Reference"
                 },
                 "filename": {
                   "type": "string",
@@ -444,5 +196,10 @@
         ]
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://submission.sls.epilot.io"
+    }
+  ]
 }

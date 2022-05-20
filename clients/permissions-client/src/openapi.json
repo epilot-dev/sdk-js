@@ -918,6 +918,9 @@
   "servers": [
     {
       "url": "https://permissions.sls.epilot.io"
+    },
+    {
+      "url": "https://permissions.sls.epilot.io"
     }
   ]
 }

@@ -23,7 +23,7 @@
   "scripts": {
     "test": "jest",
     "bundle-definition": "webpack",
-    "openapi": "openapi read --json https://docs.api.epilot.io/pricing-api.yaml > src/openapi.json",
+    "openapi": "../../scripts/update-openapi.sh https://docs.api.epilot.io/pricing-api.yaml",
     "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
     "build": "npm run typegen && tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",

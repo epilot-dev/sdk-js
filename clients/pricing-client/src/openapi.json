@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Pricing API",
-    "description": "This API hub sets the foundations for the following Pricing APIs:\n\n- Shopping Cart API, used to interact with a cart during a customer's checkout session, and it's responsible for providing the following set of features:\n  - A unified data model to model a Shopping Cart\n  - Cart abandonment recovery\n  - Pricing features such as automatic calculation of totals and price breakdowns for taxes\n  - Product and pricing data validation\n  - Checkout a cart into an order, invoice, or quote\n\n- Order API, provides a way to manage orders, keep track of inventory, with individual adjustments, tax calculation, and shipping, apply discounts, store tracking information, and handle returns. The responsibilities of this API contemplate the following set of features:\n  - Create or update a new Order from a Shopping Cart\n  - Marking a Shopping Cart as complete once the Order is set as open (immutable/closed for modification)\n  - Pricing features such as automatic calculation of totals and price breakdowns for taxes\n\n- Product Catalog API, provides a way to query the entire catalog of products and prices.\n  - Exposes querying operations to access the customer Product Catalog\n\n- Opportunity API, provides a way for journey users to initiate a sales process with an opportunity, responsible for holding something as simple as a lead (no quote) or a quote.\n",
+    "description": "This API hub sets the foundations for the following Pricing APIs:\n- Order API, used to manage orders in Epilot 360:\n  - Pricing features such as automatic calculation of totals and price breakdowns for taxes\n  - Product and pricing data validation\n- Shopping Cart API, used to interact with a cart during a customer's checkout session, and it's responsible for providing the following set of features:\n  - A unified data model to model a Shopping Cart\n  - Cart abandonment recovery\n  - Product and pricing data validation\n  - Checkout a cart into an order, invoice, or quote\n\n- Product Catalog API, provides a way to query the entire catalog of products and prices.\n  - Exposes querying operations to access the customer Product Catalog\n\n- Product Availability Service, provides a way to check for products availability by a set of predefined dimensions.\n",
     "contact": {
       "name": "Maintainers Channel",
       "url": "https://epilot.slack.com/archives/C020B4URQNS"
@@ -15,24 +15,12 @@
   },
   "tags": [
     {
-      "name": "Draft",
-      "description": "Operations not implement under the current release."
-    },
-    {
-      "name": "Public",
-      "description": "Customer-facing Endpoints (requiring a X-Ivy-Org-ID identification)"
+      "name": "Order",
+      "description": "Order Management"
     },
     {
       "name": "Cart",
       "description": "The shopping cart & checkout management operations"
-    },
-    {
-      "name": "Order",
-      "description": "Order management operations"
-    },
-    {
-      "name": "Opportunity",
-      "description": "Opportunity management operations"
     },
     {
       "name": "Product Catalog",
@@ -42,32 +30,69 @@
   "security": [
     {
       "EpilotAuth": []
-    },
-    {
-      "AsOrganization": []
     }
   ],
   "paths": {
-    "/v1/public/cart": {
-      "put": {
-        "description": "Creates a new cart or updates an existing one.",
-        "operationId": "$upsertCart",
-        "summary": "upsertCart",
-        "security": [],
+    "/v1/order": {
+      "post": {
+        "description": "Create an order",
+        "operationId": "createOrder",
+        "summary": "createOrder",
         "tags": [
-          "Cart",
-          "Public",
-          "Draft"
+          "Order"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/order/{id}": {
+      "put": {
+        "description": "Update an existing Order",
+        "operationId": "putOrder",
+        "summary": "putOrder",
+        "tags": [
+          "Order"
         ],
         "parameters": [
           {
-            "in": "header",
-            "name": "X-Ivy-Org-ID",
-            "description": "The target Organization Id represented by the caller",
+            "in": "path",
+            "name": "id",
+            "description": "Order entity ID",
             "schema": {
               "type": "string"
             },
-            "required": true
+            "required": true,
+            "example": "1ec8518f-7538-48f7-8297-44f120d3e5cd"
           }
         ],
         "requestBody": {
@@ -75,28 +100,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CartDto"
+                "$ref": "#/components/schemas/OrderPayload"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "The updated Cart.",
+            "description": "Order result",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Cart"
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "The new Cart.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Cart"
+                  "$ref": "#/components/schemas/Order"
                 }
               }
             }
@@ -121,8 +136,7 @@
         "summary": "checkoutCart",
         "security": [],
         "tags": [
-          "Cart",
-          "Public"
+          "Cart"
         ],
         "parameters": [
           {
@@ -182,148 +196,6 @@
         }
       }
     },
-    "/v1/cart/{cart-id}": {
-      "get": {
-        "description": "Retrieves a cart by id.",
-        "operationId": "$getCart",
-        "summary": "getCart",
-        "tags": [
-          "Cart",
-          "Draft"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "cart-id",
-            "schema": {
-              "type": "string"
-            },
-            "description": "The id of the cart to be fetched",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The customer's cart.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Cart"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid payload",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Cart not found"
-          }
-        }
-      },
-      "delete": {
-        "description": "Deletes the Cart specified and returns its content.",
-        "operationId": "$deleteCart",
-        "summary": "deleteCart",
-        "tags": [
-          "Cart",
-          "Draft"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "cart-id",
-            "schema": {
-              "type": "string"
-            },
-            "description": "The id of the cart to be deleted",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The customer's cart.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Cart"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid payload",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/order": {
-      "put": {
-        "description": "Creates a new order or updates an existing one. During the creation of an order, an unique customer-readable `order_number` will be generated.\nThe `order_number` can be used to universally identify an order within epilot platform.\n\nThe upsert operation is idempotent, meaning that multiple calls will have effect just once. Calling the upsert multiple times will not duplicate the items on an order.\n\nWhen the the `cart_id` payload field is specified, the cart items are appended to the existing order items, or replaced in-place if they belong to the same `cart_id`.\n\nOn multiple updates with the same `cart_id` the line items linked with that `cart_id` (`order.line_items[]?.metadata.cart_id`) are removed and re-added.\n",
-        "operationId": "$upsertOrder",
-        "summary": "upsertOrder",
-        "tags": [
-          "Order",
-          "Draft"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Order"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The updated Order.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Order"
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "The new Order.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Order"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid payload",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/public/catalog": {
       "post": {
         "description": "Provides a querying functionalities over products and prices of the Catalog for a given organization.",
@@ -331,8 +203,7 @@
         "summary": "searchCatalog",
         "security": [],
         "tags": [
-          "Product Catalog",
-          "Public"
+          "Product Catalog"
         ],
         "parameters": [
           {
@@ -379,16 +250,139 @@
         }
       }
     },
+    "/v1/public/availability:check": {
+      "post": {
+        "description": "The availability check endpoint",
+        "operationId": "$availabilityCheck",
+        "summary": "availabilityCheck",
+        "security": [],
+        "tags": [
+          "Product Catalog"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityCheckParams"
+              },
+              "examples": {
+                "Check availability with location dimension": {
+                  "value": {
+                    "products": [
+                      "cd75456a-30e4-4912-95be-e743d5ea175b"
+                    ],
+                    "filters": {
+                      "location": {
+                        "postal_code": "57008",
+                        "city": "Cologne",
+                        "street": "Media Park",
+                        "street_number": "8a"
+                      }
+                    }
+                  }
+                },
+                "Check availability with location & available date dimension": {
+                  "value": {
+                    "products": [
+                      "cd75456a-30e4-4912-95be-e743d5ea175b"
+                    ],
+                    "filters": {
+                      "location": {
+                        "postal_code": "57008",
+                        "city": "Cologne",
+                        "street": "Media Park",
+                        "street_number": "8a"
+                      },
+                      "available_date": "2022-05-01"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The availability check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityResult"
+                },
+                "examples": {
+                  "Response with available products": {
+                    "value": {
+                      "available_products": [
+                        "cd75456a-30e4-4912-95be-e743d5ea175b"
+                      ],
+                      "check_results": [
+                        {
+                          "product_id": "cd75456a-30e4-4912-95be-e743d5ea175b",
+                          "matching_hits": 1
+                        }
+                      ]
+                    }
+                  },
+                  "Response with no available products": {
+                    "value": {
+                      "available_products": []
+                    }
+                  },
+                  "Response with available and unavailable products": {
+                    "value": {
+                      "availableProducts": [
+                        "my-product-id-123-2"
+                      ],
+                      "checkResults": [
+                        {
+                          "productId": "my-product-id-123-1",
+                          "matchingError": {
+                            "msg": "Error - Unknown file extension for availability file."
+                          }
+                        },
+                        {
+                          "matchingHits": 1,
+                          "productId": "my-product-id-123-2"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/public/opportunity": {
       "post": {
-        "description": "Creates a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.\nThe `opportunity_number` can be used to universally identify an opportunity within epilot platform.\n",
+        "deprecated": true,
+        "description": "This API is Deprecated. Please use the Entity API or Submission API to create opportunities. Creates a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.\nThe `opportunity_number` can be used to universally identify an opportunity within epilot platform.\n",
         "operationId": "$createOpportunity",
         "summary": "createOpportunity",
         "security": [],
-        "tags": [
-          "Opportunity",
-          "Public"
-        ],
         "parameters": [
           {
             "in": "header",
@@ -477,18 +471,6 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Epilot Bearer Token"
-      },
-      "AsOrganization": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-ivy-org-id",
-        "description": "Set organization id when using internal auth"
-      },
-      "AsUser": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-ivy-user-id",
-        "description": "Set user id when using internal auth"
       }
     },
     "schemas": {
@@ -545,20 +527,35 @@
             "description": "The max size of the response, defaults to 2000.",
             "type": "number"
           },
-          "expand": {
-            "type": "array",
-            "description": "A list of additional fields to expand on the search results, such as non-indexed fields.",
-            "items": {
-              "type": "string"
-            }
+          "hydrate": {
+            "type": "boolean",
+            "description": "When true, enables entity hydration to resolve nested $relation references in-place.",
+            "default": false
+          },
+          "availability": {
+            "$ref": "#/components/schemas/AvailabilityFilters"
           }
         },
         "example": {
           "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
           "sort": "description ASC",
           "from": 0,
-          "size": 200
-        }
+          "size": 200,
+          "availability": {
+            "location": {
+              "postal_code": "57008,",
+              "city": "Cologne,",
+              "street": "Media Park,",
+              "street_number": "8a"
+            },
+            "available_date": {
+              "value": "2022-05-01"
+            }
+          }
+        },
+        "required": [
+          "q"
+        ]
       },
       "CatalogSearchResult": {
         "description": "The query result payload",
@@ -596,6 +593,80 @@
           ]
         }
       },
+      "AvailabilityCheckParams": {
+        "description": "Availability check request payload",
+        "type": "object",
+        "properties": {
+          "products": {
+            "description": "Products to check availability",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Product under availability check"
+            }
+          },
+          "filters": {
+            "$ref": "#/components/schemas/AvailabilityFilters"
+          }
+        },
+        "required": [
+          "products",
+          "filters"
+        ]
+      },
+      "AvailabilityResult": {
+        "description": "The availability check result payload",
+        "type": "object",
+        "properties": {
+          "available_products": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Available Products"
+            }
+          },
+          "check_results": {
+            "description": "The check result details",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": {
+                  "type": "string"
+                },
+                "matching_hits": {
+                  "description": "The number of rules matched",
+                  "type": "number"
+                },
+                "matching_error": {
+                  "description": "A set of matching errors when checking availability",
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "required": [
+                "product_id"
+              ]
+            }
+          }
+        },
+        "required": [
+          "available_products"
+        ],
+        "example": {
+          "available_products": [],
+          "check_results": [
+            {
+              "product_id": "my-product-id-123-1",
+              "matching_hits": 0
+            },
+            {
+              "product_id": "my-product-id-123-2",
+              "matching_hits": 0
+            }
+          ]
+        }
+      },
       "CartDto": {
         "description": "A valid cart payload from a client.",
         "properties": {
@@ -611,6 +682,25 @@
           "delivery_address": {
             "$ref": "#/components/schemas/Address"
           },
+          "source_type": {
+            "type": "string",
+            "description": "type of source, e.g. journey or manual",
+            "example": "journey"
+          },
+          "source_id": {
+            "type": "string",
+            "description": "identifier for source e.g. journey ID",
+            "example": "ce99875f-fba9-4fe2-a8f9-afaf52059051"
+          },
+          "source": {
+            "$ref": "#/components/schemas/OrderSource"
+          },
+          "additional_addresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Address"
+            }
+          },
           "payment_method": {
             "$ref": "#/components/schemas/PaymentMethod"
           },
@@ -624,6 +714,23 @@
               "type": "string",
               "description": "a string representing a file ID as received from the File API"
             }
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "journey_data": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "consents": {
+            "type": "object",
+            "additionalProperties": true
           }
         },
         "required": [
@@ -667,6 +774,17 @@
           "create_invoice",
           "create_quote"
         ]
+      },
+      "OrderStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "quote",
+          "placed",
+          "cancelled",
+          "completed"
+        ],
+        "description": "The order status"
       },
       "PriceItemsDto": {
         "description": "A valid set of product prices, quantities, (discounts) and taxes from a client.",
@@ -728,6 +846,10 @@
           },
           "_price": {
             "$ref": "#/components/schemas/Price"
+          },
+          "_product": {
+            "description": "The product linked to the price item.",
+            "$ref": "#/components/schemas/Product"
           }
         }
       },
@@ -746,6 +868,38 @@
                 "$ref": "#/components/schemas/Tax"
               }
             ]
+          }
+        }
+      },
+      "OrderSource": {
+        "type": "object",
+        "description": "Order Source",
+        "properties": {
+          "http": {
+            "type": "string",
+            "description": "Link path for the source",
+            "example": "/app/v2/journey-builder/editor/db7f6940-994b-11ec-a46d-9f1824ff2939"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title for the source",
+            "example": "Journey: PH Journey"
+          }
+        }
+      },
+      "OpportunitySource": {
+        "type": "object",
+        "description": "Order Source",
+        "properties": {
+          "http": {
+            "type": "string",
+            "description": "Link path for the source",
+            "example": "/app/v2/journey-builder/editor/db7f6940-994b-11ec-a46d-9f1824ff2939"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title for the source",
+            "example": "Journey: PH Journey"
           }
         }
       },
@@ -844,7 +998,8 @@
       },
       "Currency": {
         "type": "string",
-        "description": "Three-letter ISO currency code, in lowercase. Must be a supported currency.\nISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html\n"
+        "description": "Three-letter ISO currency code, in lowercase. Must be a supported currency.\nISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html\n",
+        "example": "EUR"
       },
       "Opportunity": {
         "type": "object",
@@ -912,6 +1067,19 @@
             "type": "string",
             "readOnly": true
           },
+          "source_type": {
+            "type": "string",
+            "description": "type of source, e.g. journey or manual",
+            "example": "journey"
+          },
+          "source_id": {
+            "type": "string",
+            "description": "identifier for source e.g. journey ID",
+            "example": "ce99875f-fba9-4fe2-a8f9-afaf52059051"
+          },
+          "source": {
+            "$ref": "#/components/schemas/OpportunitySource"
+          },
           "_tags": {
             "type": "array",
             "items": {
@@ -937,6 +1105,73 @@
           }
         }
       },
+      "OrderPayload": {
+        "type": "object",
+        "description": "Order Entity Payload",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "line_items": {
+            "$ref": "#/components/schemas/PriceItems"
+          },
+          "source_type": {
+            "type": "string",
+            "description": "type of source, e.g. journey or manual",
+            "example": "journey"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "contact": {
+            "readOnly": true,
+            "type": "string",
+            "description": "The id of an existing contact."
+          },
+          "billing_first_name": {
+            "type": "string"
+          },
+          "billing_last_name": {
+            "type": "string"
+          },
+          "billing_company_name": {
+            "type": "string"
+          },
+          "billing_vat": {
+            "type": "string"
+          },
+          "billing_email": {
+            "type": "string"
+          },
+          "billing_phone": {
+            "type": "string"
+          },
+          "billing_address": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Address"
+            }
+          },
+          "delivery_address": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Address"
+            }
+          },
+          "payment_method": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentMethod"
+            }
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "Order": {
         "type": "object",
         "description": "The order entity",
@@ -951,17 +1186,20 @@
             "description": "The cart id that originated or is associated with the order"
           },
           "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "source_type": {
             "type": "string",
-            "enum": [
-              "draft",
-              "quote",
-              "open",
-              "paid",
-              "shipped",
-              "delivered",
-              "complete"
-            ],
-            "description": "The order status"
+            "description": "type of source, e.g. journey or manual",
+            "example": "journey"
+          },
+          "source_id": {
+            "type": "string",
+            "description": "identifier for source e.g. journey ID",
+            "example": "ce99875f-fba9-4fe2-a8f9-afaf52059051"
+          },
+          "source": {
+            "$ref": "#/components/schemas/OrderSource"
           },
           "metadata": {
             "$ref": "#/components/schemas/MetaData"
@@ -1081,6 +1319,11 @@
           "amount_subtotal": {
             "type": "integer",
             "description": "Total before any (discounts or) taxes are applied.",
+            "readOnly": true
+          },
+          "unit_amount_net": {
+            "type": "integer",
+            "description": "Net unit amount without taxes.",
             "readOnly": true
           },
           "amount_total": {
@@ -1271,10 +1514,11 @@
           "monthly",
           "every_quarter",
           "every_6_months",
-          "yearly"
+          "yearly",
+          "one_time"
         ]
       },
-      "SalexTax": {
+      "SalesTax": {
         "type": "string",
         "enum": [
           "nontaxable",
@@ -1301,7 +1545,7 @@
             "type": "string"
           },
           "sales_tax": {
-            "$ref": "#/components/schemas/SalexTax"
+            "$ref": "#/components/schemas/SalesTax"
           },
           "tax_behavior": {
             "type": "string",
@@ -1393,10 +1637,79 @@
           }
         }
       },
+      "AvailabilityLocation": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "description": "The first line of the address. Typically the street address or PO Box number."
+          },
+          "street_number": {
+            "type": "string",
+            "description": "The second line of the address. Typically the number of the apartment, suite, or unit."
+          },
+          "postal_code": {
+            "type": "string",
+            "description": "The postal code for the address."
+          },
+          "city": {
+            "type": "string",
+            "description": "The name of the city, district, village, or town."
+          },
+          "country": {
+            "type": "string",
+            "description": "The name of the country."
+          }
+        }
+      },
+      "AvailabilityDate": {
+        "type": "object",
+        "properties": {
+          "available_start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "The availability interval start date",
+            "example": "2017-07-21"
+          },
+          "available_end_date": {
+            "type": "string",
+            "format": "date",
+            "description": "The availability interval end date",
+            "example": "2017-07-21"
+          }
+        }
+      },
+      "AvailabilityFilters": {
+        "description": "Availability filters dimensions",
+        "type": "object",
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/AvailabilityLocation"
+          },
+          "available_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2017-07-21",
+            "description": "A value to be matched against the availability window (start & end date)"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      },
       "Address": {
         "type": "object",
         "additionalProperties": true,
         "properties": {
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "billing"
+            ]
+          },
           "street": {
             "type": "string",
             "description": "The first line of the address. Typically the street address or PO Box number."
@@ -1486,6 +1799,99 @@
           },
           "_title": {
             "type": "string"
+          },
+          "_availability_files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            }
+          }
+        }
+      },
+      "File": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "mime_type": {
+            "type": "string"
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "s3ref": {
+                  "type": "object",
+                  "properties": {
+                    "bucket": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "bucket",
+                    "key"
+                  ]
+                }
+              },
+              "required": [
+                "s3ref"
+              ]
+            }
+          },
+          "_schema": {
+            "type": "string"
+          },
+          "_org": {
+            "type": "string"
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "_title": {
+            "type": "string"
+          },
+          "$relation": {
+            "$ref": "#/components/schemas/EntityRelation"
+          }
+        },
+        "required": [
+          "versions",
+          "_id",
+          "_schema",
+          "_created_at",
+          "_updated_at",
+          "_org",
+          "mime_type",
+          "filename"
+        ]
+      },
+      "EntityRelation": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1712,5 +2118,13 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://pricing-api.sls.epilot.io"
+    },
+    {
+      "url": "https://pricing-api.sls.epilot.io"
+    }
+  ]
 }
