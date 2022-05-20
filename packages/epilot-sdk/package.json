@@ -1,5 +1,5 @@
 {
-  "name": "@epilot/epilot-sdk",
+  "name": "epilot-sdk",
   "version": "0.1.0",
   "description": "Epilot SDK",
   "main": "index.js",
