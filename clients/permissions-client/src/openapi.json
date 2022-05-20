@@ -1,0 +1,923 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Permissions API",
+    "version": "1.0.0",
+    "description": "Flexible Role-based Access Control for epilot"
+  },
+  "tags": [
+    {
+      "name": "Roles",
+      "description": "Manage roles and grants"
+    },
+    {
+      "name": "Assignments",
+      "description": "Assign roles to users"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v1/permissions/me": {
+      "get": {
+        "operationId": "listCurrentRoles",
+        "summary": "listCurrentRoles",
+        "description": "Returns roles and grants assigned to current user",
+        "tags": [
+          "Roles"
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Role"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/permissions/roles": {
+      "get": {
+        "operationId": "listAllRoles",
+        "summary": "listAllRoles",
+        "description": "Returns list of all roles in organization",
+        "tags": [
+          "Roles"
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Role"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/permissions/roles/{roleId}": {
+      "get": {
+        "operationId": "getRole",
+        "summary": "getRole",
+        "description": "Get role by id",
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RoleId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putRole",
+        "summary": "putRole",
+        "description": "Create or update role",
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RoleId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RolePayload"
+              },
+              "examples": {
+                "User role: manager": {
+                  "description": "Example manager role",
+                  "value": {
+                    "id": "123:manager",
+                    "name": "Manager",
+                    "slug": "manager",
+                    "type": "user_role",
+                    "organization_id": "123",
+                    "grants": [
+                      {
+                        "action": "entity:view",
+                        "resource": "*"
+                      },
+                      {
+                        "action": "entity:update",
+                        "resource": "*"
+                      },
+                      {
+                        "action": "user:view"
+                      },
+                      {
+                        "action": "user:invite"
+                      },
+                      {
+                        "action": "role:view"
+                      },
+                      {
+                        "action": "role:create"
+                      },
+                      {
+                        "action": "role:assign"
+                      },
+                      {
+                        "action": "message:view",
+                        "dependencies": [
+                          {
+                            "action": "entity:view",
+                            "resource": "message*"
+                          },
+                          {
+                            "action": "entity:view",
+                            "resource": "thread*"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "message:send",
+                        "dependencies": [
+                          {
+                            "action": "entity:*",
+                            "resource": "message*"
+                          },
+                          {
+                            "action": "entity:*",
+                            "resource": "thread*"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "workflow:*"
+                      },
+                      {
+                        "action": "journey:*"
+                      }
+                    ]
+                  }
+                },
+                "User role: employee": {
+                  "description": "Example employee role",
+                  "value": {
+                    "id": "123:employee",
+                    "name": "Employee",
+                    "slug": "employee",
+                    "type": "user_role",
+                    "organization_id": "123",
+                    "grants": [
+                      {
+                        "action": "entity:view",
+                        "resource": "*"
+                      },
+                      {
+                        "action": "entity:update",
+                        "resource": "*"
+                      },
+                      {
+                        "action": "user:view"
+                      },
+                      {
+                        "action": "message:view",
+                        "dependencies": [
+                          {
+                            "action": "entity:view",
+                            "resource": "message*"
+                          },
+                          {
+                            "action": "entity:view",
+                            "resource": "thread*"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "message:send",
+                        "dependencies": [
+                          {
+                            "action": "entity:*",
+                            "resource": "message*"
+                          },
+                          {
+                            "action": "entity:*",
+                            "resource": "thread*"
+                          }
+                        ]
+                      },
+                      {
+                        "action": "workflow:execution:*"
+                      },
+                      {
+                        "action": "journey:view"
+                      }
+                    ]
+                  }
+                },
+                "User role: administrator": {
+                  "description": "Example administrator role",
+                  "value": {
+                    "id": "123:administrator",
+                    "name": "Administrator",
+                    "slug": "administrator",
+                    "type": "user_role",
+                    "organization_id": "123",
+                    "grants": [
+                      {
+                        "action": "*",
+                        "resource": "*"
+                      }
+                    ]
+                  }
+                },
+                "Organization root role": {
+                  "description": "Example organization root role. Must be satisifed for all org queries.",
+                  "value": {
+                    "id": "123:root",
+                    "name": "Organization root role",
+                    "slug": "root",
+                    "type": "org_role",
+                    "organization_id": "123",
+                    "grants": [
+                      {
+                        "action": "*",
+                        "resource": "*"
+                      },
+                      {
+                        "action": "webhook:*",
+                        "effect": "deny"
+                      }
+                    ]
+                  }
+                },
+                "Share role": {
+                  "description": "Example share role. This can be assigned to users in other organizations",
+                  "value": {
+                    "id": "123:example_share_role",
+                    "name": "Example opportunity share role",
+                    "slug": "example_share_role",
+                    "type": "share_role",
+                    "organization_id": "123",
+                    "grants": [
+                      {
+                        "action": "entity:view",
+                        "resource": "opportunity:123456"
+                      },
+                      {
+                        "action": "entity:edit",
+                        "resource": "opportunity:123456"
+                      },
+                      {
+                        "action": "workflow:execution:*"
+                      },
+                      {
+                        "action": "message:*"
+                      },
+                      {
+                        "action": "entity:*",
+                        "resource": "message*"
+                      },
+                      {
+                        "action": "entity:*",
+                        "resource": "thread*"
+                      }
+                    ]
+                  }
+                },
+                "Partner role": {
+                  "description": "Example partner role. This can be given to a partner organization, who can then assign it to their users",
+                  "value": {
+                    "id": "123:example_partner_role",
+                    "name": "Example opportunity share role",
+                    "slug": "example_partner_role",
+                    "type": "partner_role",
+                    "organization_id": "123",
+                    "partner_org_id": "456",
+                    "grants": [
+                      {
+                        "action": "entity:view",
+                        "resource": "opportunity*"
+                      },
+                      {
+                        "action": "entity:edit",
+                        "resource": "opportunity*"
+                      },
+                      {
+                        "action": "workflow:execution:*"
+                      },
+                      {
+                        "action": "message:*"
+                      },
+                      {
+                        "action": "entity:*",
+                        "resource": "message*"
+                      },
+                      {
+                        "action": "entity:*",
+                        "resource": "thread*"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteRole",
+        "summary": "deleteRole",
+        "description": "Delete role by id",
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RoleId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/permissions/refresh": {
+      "get": {
+        "operationId": "refreshPermissions",
+        "summary": "refreshPermissions",
+        "description": "Makes sure the user has a role in the organization",
+        "tags": [
+          "Roles"
+        ],
+        "responses": {
+          "200": {
+            "description": "Refreshed succesfully"
+          }
+        }
+      }
+    },
+    "/v1/permissions/assignments/{userId}": {
+      "get": {
+        "operationId": "getAssignedRolesForUser",
+        "summary": "getAssignedRolesForUser",
+        "description": "Get list of assigned roles by user id",
+        "tags": [
+          "Assignments"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assignments"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "assignRoles",
+        "summary": "assignRoles",
+        "description": "Assign / unassign roles to users.",
+        "tags": [
+          "Assignments"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Assignments"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assignments"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/permissions/assignments/{userId}/{roleId}": {
+      "post": {
+        "operationId": "addAssignment",
+        "summary": "addAssignment",
+        "description": "Assign a user to a role.\n\nUse the `x-epilot-org-id` header to assign share roles to users in other orgs\n",
+        "tags": [
+          "Assignments"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RoleId"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assignment"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeAssignment",
+        "summary": "removeAssignment",
+        "description": "Remove role assignment from user",
+        "tags": [
+          "Assignments"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RoleId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assignment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/permissions/assignments": {
+      "get": {
+        "operationId": "listAllAssignments",
+        "summary": "listAllAssignments",
+        "description": "Returns list of all assignments in organization",
+        "tags": [
+          "Assignments"
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "assignments": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Assignment"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "Grant": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "example": "entity-read"
+          },
+          "resource": {
+            "type": "string",
+            "example": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947"
+          },
+          "effect": {
+            "type": "string",
+            "default": "allow",
+            "enum": [
+              "allow",
+              "deny"
+            ]
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "GrantWithDependencies": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Grant"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "dependencies": {
+                "description": "Provided additional dependencies, exploded when storing the role",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Grant"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "RoleId": {
+        "type": "string",
+        "example": "123:owner",
+        "description": "Format: <organization_id>:<slug>"
+      },
+      "BaseRole": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RoleId"
+          },
+          "name": {
+            "type": "string",
+            "example": "Owner",
+            "description": "Human-friendly name for the role"
+          },
+          "slug": {
+            "type": "string",
+            "example": "owner",
+            "description": "URL-friendly name for the role"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the role"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2028-07-21T17:32:28Z",
+            "description": "date and time then the role will expire"
+          },
+          "organization_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "grants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Grant"
+            },
+            "description": "List of grants (permissions) applied to the role"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "type",
+          "organization_id",
+          "grants"
+        ]
+      },
+      "UserRole": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseRole"
+          },
+          {
+            "description": "A standard user role. Must be explicitly assigned to users.",
+            "properties": {
+              "type": {
+                "enum": [
+                  "user_role"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "OrgRole": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseRole"
+          },
+          {
+            "description": "A role automatically applied to all users in an organization.",
+            "properties": {
+              "type": {
+                "enum": [
+                  "org_role"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ShareRole": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseRole"
+          },
+          {
+            "description": "A role that can be assigned to users in other organizations for sharing purposes.",
+            "properties": {
+              "type": {
+                "enum": [
+                  "share_role"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "PartnerRole": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseRole"
+          },
+          {
+            "description": "A role that appears in another organization's role list that can be assigned but not modified by the partner organization.",
+            "properties": {
+              "type": {
+                "enum": [
+                  "partner_role"
+                ]
+              },
+              "partner_org_id": {
+                "allOf": [
+                  {
+                    "description": "Partner organization who can assign this role to their users."
+                  },
+                  {
+                    "$ref": "#/components/schemas/OrganizationId"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "Role": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          {
+            "$ref": "#/components/schemas/OrgRole"
+          },
+          {
+            "$ref": "#/components/schemas/ShareRole"
+          },
+          {
+            "$ref": "#/components/schemas/PartnerRole"
+          }
+        ]
+      },
+      "RolePayload": {
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              },
+              {
+                "properties": {
+                  "grants": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/GrantWithDependencies"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrgRole"
+              },
+              {
+                "properties": {
+                  "grants": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/GrantWithDependencies"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ShareRole"
+              },
+              {
+                "properties": {
+                  "grants": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/GrantWithDependencies"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PartnerRole"
+              },
+              {
+                "properties": {
+                  "grants": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/GrantWithDependencies"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "Assignment": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleId"
+            }
+          }
+        }
+      },
+      "Assignments": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/RoleId"
+        }
+      },
+      "UserId": {
+        "type": "string",
+        "example": "1"
+      },
+      "OrganizationId": {
+        "type": "string",
+        "example": "123"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://permissions.sls.epilot.io"
+    }
+  ]
+}

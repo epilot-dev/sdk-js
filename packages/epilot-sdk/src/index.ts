@@ -2,6 +2,7 @@ import { authenticate, UsernamePasswordAuthParams } from '@epilot/auth';
 import { default as entityClient, Client as EntityClient } from '@epilot/entity-client';
 import { default as fileClient, Client as FileClient } from '@epilot/file-client';
 import { default as organizationClient, Client as OrganizationClient } from '@epilot/organization-client';
+import { default as permissionsClient, Client as PermissionsClient } from '@epilot/permissions-client';
 import { default as pricingClient, Client as PricingClient } from '@epilot/pricing-client';
 import { default as submissionClient, Client as SubmissionClient } from '@epilot/submission-client';
 import { default as userClient, Client as UserClient } from '@epilot/user-client';
@@ -15,6 +16,7 @@ export class EpilotClient {
   organization: OrganizationClient = null;
   submission: SubmissionClient = null;
   workflow: WorkflowClient = null;
+  permissions: PermissionsClient = null;
 
   async login(credentials: UsernamePasswordAuthParams) {
     const authorizer = await authenticate(credentials);
@@ -26,6 +28,7 @@ export class EpilotClient {
     this.organization = authorizer.configureClient(organizationClient);
     this.submission = authorizer.configureClient(submissionClient);
     this.workflow = authorizer.configureClient(workflowClient);
+    this.permissions = authorizer.configureClient(permissionsClient);
 
     return this;
   }
@@ -44,3 +47,4 @@ export { fileClient };
 export { organizationClient };
 export { submissionClient };
 export { workflowClient };
+export { permissionsClient };

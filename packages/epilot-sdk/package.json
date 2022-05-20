@@ -47,6 +47,7 @@
     "@epilot/entity-client": "*",
     "@epilot/file-client": "*",
     "@epilot/organization-client": "*",
+    "@epilot/permissions-client": "^0.6.1",
     "@epilot/pricing-client": "*",
     "@epilot/submission-client": "*",
     "@epilot/user-client": "*",
