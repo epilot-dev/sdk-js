@@ -22,6 +22,9 @@
   "security": [
     {
       "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
     }
   ],
   "paths": {
@@ -29,6 +32,18 @@
       "get": {
         "operationId": "listSchemas",
         "summary": "listSchemas",
+        "description": "Get the latest version of local schema",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "unpublished",
+            "description": "Includes the unpublished version of unpublished schema",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "tags": [
           "Schemas"
         ],
@@ -54,10 +69,41 @@
         }
       }
     },
-    "/v1/entity/schemas/{slug}": {
+    "/v1/entity/schemas/blueprints": {
       "get": {
-        "operationId": "getSchema",
-        "summary": "getSchema",
+        "operationId": "listSchemaBlueprints",
+        "summary": "listSchemaBlueprints",
+        "description": "List canonical versions of all available schemas",
+        "tags": [
+          "Schemas"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntitySchemaItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/{slug}/versions": {
+      "get": {
+        "operationId": "getSchemaVersions",
+        "summary": "getSchemaVersions",
+        "description": "Get all versions of this schema ordered by the latest versions including drafts.",
         "tags": [
           "Schemas"
         ],
@@ -77,16 +123,33 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntitySchemaItem"
+                  "type": "object",
+                  "properties": {
+                    "versions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntitySchemaItem"
+                      }
+                    },
+                    "drafts": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntitySchemaItem"
+                      }
+                    }
+                  }
                 }
               }
             }
           }
         }
-      },
-      "put": {
-        "operationId": "putSchema",
-        "summary": "putSchema",
+      }
+    },
+    "/v1/entity/schemas/{slug}": {
+      "get": {
+        "operationId": "getSchema",
+        "summary": "getSchema",
+        "description": "By default gets the latest version of the Schema and to get the specific version of schema pass the id.",
         "tags": [
           "Schemas"
         ],
@@ -97,6 +160,51 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/SchemaId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySchemaItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "createNewSchemaVersion",
+        "summary": "createNewSchemaVersion",
+        "description": "Create new version of the schema and default draft is false.",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "query",
+            "name": "draft",
+            "schema": {
+              "default": false,
+              "type": "boolean"
             }
           }
         ],
@@ -123,8 +231,9 @@
         }
       },
       "delete": {
-        "operationId": "deleteSchema",
-        "summary": "deleteSchema",
+        "operationId": "deleteSchemaById",
+        "summary": "deleteSchemaById",
+        "description": "Delete schema by Id",
         "tags": [
           "Schemas"
         ],
@@ -135,6 +244,14 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SchemaId"
             }
           }
         ],
@@ -149,7 +266,7 @@
       "post": {
         "operationId": "searchEntities",
         "summary": "searchEntities",
-        "description": "Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
+        "description": "Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.\n\nPassing comma-separated `x-epilot-org-id` is supported for cross-org entity search.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
         "tags": [
           "Entities"
         ],
@@ -169,6 +286,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EntitySearchResults"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -819,6 +941,295 @@
           }
         }
       }
+    },
+    "/v1/entity/{slug}/{id}/relations": {
+      "get": {
+        "operationId": "getRelations",
+        "summary": "getRelations",
+        "description": "It loads 1st level relations for the mentioned entity. You can control whether entire related entity is loaded or not via hydrate param.",
+        "tags": [
+          "Relations"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity Type",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Entity id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hydrate",
+            "description": "When true, expand relation items with full blown entities.",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRelationsResp"
+                },
+                "example": [
+                  {
+                    "attribute": "contacts",
+                    "entity_id": "ed27830b-984c-4bca-9b87-2849bb5789ca",
+                    "_tags": [
+                      "primary",
+                      "billing"
+                    ]
+                  },
+                  {
+                    "attribute": "contacts",
+                    "entity_id": "fadfc950-6e43-4e38-bae0-ffcf4b8b90e1"
+                  },
+                  {
+                    "_id": "9924c4de-d3ed-4752-821d-fc0b9bd57c1b",
+                    "order_number": "a34234jd",
+                    "customer_email": "johndoe@epilot.cloud",
+                    "billing_first_name": "john",
+                    "billing_last_name": "doe",
+                    "billing_company_name": "ePilot Gmbh",
+                    "billing_vat": "234823948,",
+                    "billing_email": "johndoe@nowhere.com",
+                    "billing_phone": "1234234545,",
+                    "billing_address": "wallstreet, 1",
+                    "billing_contact": "villy or zilly",
+                    "$relation": {
+                      "attribute": "orders",
+                      "entity_id": "9924c4de-d3ed-4752-821d-fc0b9bd57c1b",
+                      "_tags": [
+                        "solar_panel",
+                        "one_time"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "addRelations",
+        "summary": "addRelations",
+        "description": "It relates one or more entities to some parent entity, by providing meaning for relations via attribute field.",
+        "tags": [
+          "Relations"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity Type",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Entity id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RelationItem"
+                }
+              },
+              "example": [
+                {
+                  "attribute": "contacts",
+                  "entity_id": "e8878f62-2d3d-4c86-bfe7-01a4180ff048",
+                  "_tags": [
+                    "billing"
+                  ]
+                },
+                {
+                  "attribute": "contacts",
+                  "entity_id": "ee8a2af9-fb36-4981-b848-4e65275851af"
+                },
+                {
+                  "attribute": "opportunities",
+                  "entity_id": "30990430-a53d-41a2-83db-2de072dc4dd4"
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/{slug}/{id}/relations/{attribute}/{entity_id}": {
+      "put": {
+        "operationId": "updateRelation",
+        "summary": "updateRelation",
+        "description": "It updates a relation between two entities.",
+        "tags": [
+          "Relations"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity Type",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Entity id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "description": "The attribute that express meaning",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The attribute that express meaning",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "_tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "_tags": [
+                  "billing",
+                  "prepaid"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteRelation",
+        "summary": "deleteRelation",
+        "description": "It deletes a relation between one entity and the other.",
+        "tags": [
+          "Relations"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity Type",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Entity id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "description": "The attribute that express meaning",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The attribute that express meaning",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Relation deleted with success."
+          }
+        }
+      }
     }
   },
   "components": {
@@ -828,6 +1239,12 @@
         "scheme": "bearer",
         "description": "Authorization header with epilot OAuth2 bearer token",
         "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
       }
     },
     "schemas": {
@@ -842,6 +1259,10 @@
         "properties": {
           "slug": {
             "$ref": "#/components/schemas/EntitySlug"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
           },
           "blueprint": {
             "$ref": "#/components/schemas/BlueprintEntityId"
@@ -867,6 +1288,14 @@
           "plural": {
             "type": "string",
             "example": "Contacts"
+          },
+          "published": {
+            "type": "boolean",
+            "example": false
+          },
+          "draft": {
+            "type": "boolean",
+            "example": false
           },
           "icon": {
             "type": "string",
@@ -901,6 +1330,16 @@
                     }
                   }
                 }
+              },
+              "sharing": {
+                "type": "object",
+                "properties": {
+                  "show_sharing_button": {
+                    "type": "boolean",
+                    "description": "Show the sharing button in entity detail view",
+                    "example": true
+                  }
+                }
               }
             }
           },
@@ -911,27 +1350,61 @@
             }
           },
           "group_settings": {
-            "type": "object",
+            "type": "array",
             "description": "A dictionary of Group Titles and associated settings if present.",
-            "additionalProperties": {
+            "items": {
               "type": "object",
               "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
                 "expanded": {
                   "type": "boolean"
+                },
+                "render_condition": {
+                  "type": "string",
+                  "example": "composite_price = \"false\""
                 },
                 "order": {
                   "description": "Render order of the group",
                   "type": "integer",
                   "default": 0
+                },
+                "feature_flag": {
+                  "type": "string",
+                  "example": "FF_MY_FEATURE_FLAG",
+                  "description": "This schema should only be active when the feature flag is enabled"
+                },
+                "info_tooltip_title": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "default": {
+                      "type": "string"
+                    }
+                  }
                 }
-              }
+              },
+              "required": [
+                "label",
+                "id"
+              ]
             },
             "example": {
               "Order Info": {
                 "expanded": true
               },
               "Contact Details": {
-                "expanded": false
+                "expanded": false,
+                "info_tooltip_title": {
+                  "key": "partner.partner_information_group_tooltip",
+                  "default": "These informations are provided by the partner company and cannot be edited."
+                }
               }
             }
           },
@@ -949,6 +1422,10 @@
                 }
               }
             }
+          },
+          "dialog_config": {
+            "type": "object",
+            "additionalProperties": true
           },
           "attributes": {
             "description": "An ordered list of attributes the entity contains",
@@ -999,15 +1476,15 @@
                 "label": "Image"
               }
             ]
+          },
+          "explicit_search_mappings": {
+            "$ref": "#/components/schemas/SearchMappings"
           }
         },
         "required": [
           "slug",
           "name",
-          "plural",
-          "attributes",
-          "capabilities",
-          "views"
+          "plural"
         ]
       },
       "EntitySchemaItem": {
@@ -1017,6 +1494,26 @@
             "properties": {
               "id": {
                 "$ref": "#/components/schemas/SchemaId"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                }
               }
             }
           },
@@ -1026,7 +1523,7 @@
         ]
       },
       "Attribute": {
-        "oneOf": [
+        "anyOf": [
           {
             "$ref": "#/components/schemas/TextAttribute"
           },
@@ -1050,6 +1547,9 @@
           },
           {
             "$ref": "#/components/schemas/UserRelationAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/AddressRelationAttribute"
           },
           {
             "$ref": "#/components/schemas/CurrencyAttribute"
@@ -1076,7 +1576,13 @@
             "$ref": "#/components/schemas/FileAttribute"
           },
           {
-            "$ref": "#/components/schemas/CustomAttribute"
+            "$ref": "#/components/schemas/ComputedAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/PartnerStatusAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/PriceComponentsAttribute"
           }
         ]
       },
@@ -1171,6 +1677,16 @@
           },
           "preview_value_formatter": {
             "type": "string"
+          },
+          "entity_builder_disable_edit": {
+            "description": "Setting to `true` disables editing the attribute on the entity builder UI",
+            "type": "boolean",
+            "default": false
+          },
+          "protected": {
+            "description": "Setting to `true` prevents the attribute from being modified / deleted",
+            "type": "boolean",
+            "default": true
           }
         },
         "required": [
@@ -1317,7 +1833,8 @@
                 "items": {
                   "anyOf": [
                     {
-                      "type": "string"
+                      "type": "string",
+                      "nullable": true
                     },
                     {
                       "type": "object",
@@ -1335,6 +1852,10 @@
                     }
                   ]
                 }
+              },
+              "allow_any": {
+                "type": "boolean",
+                "description": "Allow arbitrary input values in addition to provided options"
               }
             }
           }
@@ -1376,8 +1897,7 @@
               }
             },
             "required": [
-              "type",
-              "attachments"
+              "type"
             ]
           }
         ]
@@ -1396,6 +1916,10 @@
                 "enum": [
                   "currency"
                 ]
+              },
+              "currency_selector_only": {
+                "type": "boolean",
+                "default": false
               },
               "currency": {
                 "description": "An array of currency configurations with a country code (ISO-4217)",
@@ -1474,8 +1998,8 @@
               "relation_type": {
                 "type": "string",
                 "enum": [
-                  "belongs_to",
-                  "has_many"
+                  "has_many",
+                  "has_one"
                 ]
               },
               "delete_mode": {
@@ -1490,6 +2014,11 @@
                   "weak",
                   "strong"
                 ]
+              },
+              "enable_relation_picker": {
+                "type": "boolean",
+                "default": true,
+                "description": "when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link."
               },
               "edit_mode": {
                 "type": "string",
@@ -1522,11 +2051,19 @@
                   ]
                 }
               },
+              "has_primary": {
+                "type": "boolean"
+              },
               "allowedSchemas": {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/EntitySlug"
                 }
+              },
+              "enable_relation_tags": {
+                "type": "boolean",
+                "default": true,
+                "description": "when enable_relation_tags is set to true the user will be able to set tags(labels) in each relation item"
               }
             }
           }
@@ -1555,6 +2092,28 @@
           }
         ]
       },
+      "AddressRelationAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Reference to an address attribute of another entity",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "relation_address"
+                ]
+              },
+              "has_primary": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
       "RepeatableAttribute": {
         "allOf": [
           {
@@ -1565,6 +2124,9 @@
             "description": "Repeatable (add N number of fields)",
             "properties": {
               "repeatable": {
+                "type": "boolean"
+              },
+              "has_primary": {
                 "type": "boolean"
               },
               "relation_affinity_mode": {
@@ -1581,8 +2143,15 @@
                   "phone",
                   "email",
                   "address",
-                  "relation"
+                  "relation",
+                  "payment",
+                  "price_component"
                 ]
+              },
+              "enable_relation_picker": {
+                "type": "boolean",
+                "default": true,
+                "description": "when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link."
               }
             }
           }
@@ -1692,19 +2261,57 @@
           }
         ]
       },
-      "CustomAttribute": {
+      "ComputedAttribute": {
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseAttribute"
           },
           {
             "type": "object",
-            "description": "Custom input",
+            "description": "An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes)",
             "properties": {
               "type": {
                 "type": "string",
                 "enum": [
-                  "custom"
+                  "computed"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "PriceComponentsAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "An attribute that holds a set of price components, used for dynamic pricing",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "price_components"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "PartnerStatusAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Partner Status",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "partner_status"
                 ]
               }
             }
@@ -1782,6 +2389,10 @@
                   "description": "name of the hook to use",
                   "example": "EntityDetailsV2:Tab"
                 },
+                "render_condition": {
+                  "type": "string",
+                  "example": "composite_price = \"false\""
+                },
                 "order": {
                   "type": "integer",
                   "description": "render order (ascending)",
@@ -1822,6 +2433,23 @@
                 "header": {
                   "type": "boolean",
                   "description": "Specific to Activity pilot"
+                },
+                "requiredPermission": {
+                  "type": "object",
+                  "description": "Require a permission to display UI hook",
+                  "properties": {
+                    "action": {
+                      "type": "string",
+                      "example": "note:view"
+                    },
+                    "resource": {
+                      "type": "string",
+                      "example": 123
+                    }
+                  },
+                  "required": [
+                    "action"
+                  ]
                 }
               },
               "required": [
@@ -2154,6 +2782,55 @@
           }
         ]
       },
+      "GetRelationsResp": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/RelationItem"
+            },
+            {
+              "$ref": "#/components/schemas/RelationEntity"
+            }
+          ]
+        }
+      },
+      "RelationEntity": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "$ref": "#/components/schemas/RelationItem"
+              }
+            }
+          }
+        ]
+      },
+      "RelationItem": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "attribute": {
+            "type": "string"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "entity_id",
+          "attribute"
+        ]
+      },
       "EntitySearchParams": {
         "type": "object",
         "properties": {
@@ -2193,13 +2870,15 @@
               "first_name"
             ]
           },
-          "expand": {
-            "deprecated": true,
-            "type": "array",
-            "description": "Deprecated. Use hydrate=true instead",
-            "items": {
-              "type": "string"
-            }
+          "csv": {
+            "type": "boolean",
+            "description": "When true, returns the results as a CSV file",
+            "default": false
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema",
+            "example": "contact"
           }
         },
         "required": [
@@ -2217,6 +2896,42 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/EntityItem"
+            }
+          }
+        }
+      },
+      "SearchMappings": {
+        "description": "Advanced: explicit Elasticsearch index mapping definitions for entity data\n",
+        "example": {
+          "image": {
+            "type": "keyword",
+            "index": false
+          }
+        },
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "type": "boolean",
+              "default": true
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "keyword",
+                "text",
+                "boolean",
+                "integer",
+                "long",
+                "float",
+                "date",
+                "flattened",
+                "nested"
+              ]
+            },
+            "fields": {
+              "additionalProperties": true
             }
           }
         }
@@ -2321,9 +3036,17 @@
           "entity": {
             "$ref": "#/components/schemas/EntityId"
           },
+          "org": {
+            "type": "string",
+            "example": "123"
+          },
           "operation": {
             "type": "string",
-            "example": "updateEntity"
+            "enum": [
+              "createEntity",
+              "updateEntity",
+              "deleteEntity"
+            ]
           },
           "params": {
             "type": "object",
@@ -2353,11 +3076,26 @@
                 }
               }
             ]
+          },
+          "diff": {
+            "type": "object",
+            "properties": {
+              "added": {
+                "$ref": "#/components/schemas/Entity"
+              },
+              "updated": {
+                "$ref": "#/components/schemas/Entity"
+              },
+              "deleted": {
+                "$ref": "#/components/schemas/Entity"
+              }
+            }
           }
         },
         "required": [
           "entity",
-          "name"
+          "org",
+          "operation"
         ]
       },
       "ActivityItem": {
@@ -3019,5 +3757,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    }
+  ]
 }

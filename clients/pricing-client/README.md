@@ -18,15 +18,12 @@ npm install --save @epilot/pricing-client
 ## Usage
 
 ```typescript
-import PricingClient from '@epilot/pricing-client';
-```
+import { getClient } from '@epilot/pricing-client';
 
-Use the client:
-```typescript
-// checkout a cart
-const res = await PricingClient.checkoutCart({ /* your shopping cart */ })
+const pricingClient = getClient()
+const res = await pricingClient.createOrder(null, order)
 ```
 
 ## Documentation:
 
-https://docs.api.epilot.io
+https://docs.epilot.io/api/pricing

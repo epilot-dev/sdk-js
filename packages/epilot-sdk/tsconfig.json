@@ -15,7 +15,7 @@
     "baseUrl": ".",
     "rootDir": "src",
     "resolveJsonModule": true,
-    "outDir": "dist",
+    "outDir": ".",
     "sourceMap": true,
     "declaration": true
   },
