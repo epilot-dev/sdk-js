@@ -12,6 +12,13 @@ declare namespace Components {
         export interface Address {
             [name: string]: any;
             /**
+             * example:
+             * [
+             *   "billing"
+             * ]
+             */
+            _tags?: string[];
+            /**
              * The first line of the address. Typically the street address or PO Box number.
              */
             street?: string;
@@ -36,7 +43,101 @@ declare namespace Components {
              */
             additional_info?: string;
         }
-        export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
+        /**
+         * Availability check request payload
+         */
+        export interface AvailabilityCheckParams {
+            /**
+             * Products to check availability
+             */
+            products: string[];
+            filters: /* Availability filters dimensions */ AvailabilityFilters;
+        }
+        export interface AvailabilityDate {
+            /**
+             * The availability interval start date
+             * example:
+             * 2017-07-21
+             */
+            available_start_date?: string; // date
+            /**
+             * The availability interval end date
+             * example:
+             * 2017-07-21
+             */
+            available_end_date?: string; // date
+        }
+        /**
+         * Availability filters dimensions
+         */
+        export interface AvailabilityFilters {
+            location: AvailabilityLocation;
+            /**
+             * A value to be matched against the availability window (start & end date)
+             * example:
+             * 2017-07-21
+             */
+            available_date?: string; // date
+        }
+        export interface AvailabilityLocation {
+            /**
+             * The first line of the address. Typically the street address or PO Box number.
+             */
+            street?: string;
+            /**
+             * The second line of the address. Typically the number of the apartment, suite, or unit.
+             */
+            street_number?: string;
+            /**
+             * The postal code for the address.
+             */
+            postal_code?: string;
+            /**
+             * The name of the city, district, village, or town.
+             */
+            city?: string;
+            /**
+             * The name of the country.
+             */
+            country?: string;
+        }
+        /**
+         * The availability check result payload
+         * example:
+         * {
+         *   "available_products": [],
+         *   "check_results": [
+         *     {
+         *       "product_id": "my-product-id-123-1",
+         *       "matching_hits": 0
+         *     },
+         *     {
+         *       "product_id": "my-product-id-123-2",
+         *       "matching_hits": 0
+         *     }
+         *   ]
+         * }
+         */
+        export interface AvailabilityResult {
+            available_products: string[];
+            /**
+             * The check result details
+             */
+            check_results?: {
+                product_id: string;
+                /**
+                 * The number of rules matched
+                 */
+                matching_hits?: number;
+                /**
+                 * A set of matching errors when checking availability
+                 */
+                matching_error?: {
+                    [name: string]: any;
+                };
+            }[];
+        }
+        export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
         /**
          * Supports shopping for products and services until ready for checkout.
          */
@@ -82,6 +183,20 @@ declare namespace Components {
             customer?: Customer;
             billing_address?: Address;
             delivery_address?: Address;
+            /**
+             * type of source, e.g. journey or manual
+             * example:
+             * journey
+             */
+            source_type?: string;
+            /**
+             * identifier for source e.g. journey ID
+             * example:
+             * ce99875f-fba9-4fe2-a8f9-afaf52059051
+             */
+            source_id?: string;
+            source?: /* Order Source */ OrderSource;
+            additional_addresses?: Address[];
             payment_method?: /**
              * A PaymentMethod represent your customer's payment instruments.
              *
@@ -92,6 +207,14 @@ declare namespace Components {
              * An array of file IDs, already upload into the File API, that are related with this cart
              */
             files?: string[];
+            status?: /* The order status */ OrderStatus;
+            tags?: string[];
+            journey_data?: {
+                [name: string]: any;
+            };
+            consents?: {
+                [name: string]: any;
+            };
         }
         /**
          * A catalog search payload
@@ -100,14 +223,25 @@ declare namespace Components {
          *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
          *   "sort": "description ASC",
          *   "from": 0,
-         *   "size": 200
+         *   "size": 200,
+         *   "availability": {
+         *     "location": {
+         *       "postal_code": "57008,",
+         *       "city": "Cologne,",
+         *       "street": "Media Park,",
+         *       "street_number": "8a"
+         *     },
+         *     "available_date": {
+         *       "value": "2022-05-01"
+         *     }
+         *   }
          * }
          */
         export interface CatalogSearch {
             /**
              * The query to perform using lucene query syntax.
              */
-            q?: string;
+            q: string;
             /**
              * The sort expression to sort the results.
              */
@@ -121,9 +255,10 @@ declare namespace Components {
              */
             size?: number;
             /**
-             * A list of additional fields to expand on the search results, such as non-indexed fields.
+             * When true, enables entity hydration to resolve nested $relation references in-place.
              */
-            expand?: string[];
+            hydrate?: boolean;
+            availability?: /* Availability filters dimensions */ AvailabilityFilters;
         }
         /**
          * The query result payload
@@ -170,6 +305,8 @@ declare namespace Components {
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
          * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
          *
+         * example:
+         * EUR
          */
         export type Currency = string;
         export interface Customer {
@@ -183,11 +320,35 @@ declare namespace Components {
             email?: string;
             phone?: string;
         }
+        export interface EntityRelation {
+            [name: string]: any;
+            entity_id?: string;
+            _tags?: string[];
+        }
         export interface Error {
             /**
              * Error message
              */
             message: string;
+        }
+        export interface File {
+            [name: string]: any;
+            _id: string;
+            filename: string;
+            mime_type: string;
+            versions: {
+                [name: string]: any;
+                s3ref: {
+                    bucket: string;
+                    key: string;
+                };
+            }[];
+            _schema: string;
+            _org: string;
+            _created_at: string; // date-time
+            _updated_at: string; // date-time
+            _title?: string;
+            $relation?: EntityRelation;
         }
         /**
          * A set of key-value pairs.
@@ -229,7 +390,37 @@ declare namespace Components {
             _id?: string;
             _created_at?: string;
             _updated_at?: string;
+            /**
+             * type of source, e.g. journey or manual
+             * example:
+             * journey
+             */
+            source_type?: string;
+            /**
+             * identifier for source e.g. journey ID
+             * example:
+             * ce99875f-fba9-4fe2-a8f9-afaf52059051
+             */
+            source_id?: string;
+            source?: /* Order Source */ OpportunitySource;
             _tags?: string[];
+        }
+        /**
+         * Order Source
+         */
+        export interface OpportunitySource {
+            /**
+             * Link path for the source
+             * example:
+             * /app/v2/journey-builder/editor/db7f6940-994b-11ec-a46d-9f1824ff2939
+             */
+            http?: string;
+            /**
+             * Title for the source
+             * example:
+             * Journey: PH Journey
+             */
+            title?: string;
         }
         /**
          * The order entity
@@ -244,10 +435,20 @@ declare namespace Components {
              * The cart id that originated or is associated with the order
              */
             cart_id?: string;
+            status?: /* The order status */ OrderStatus;
             /**
-             * The order status
+             * type of source, e.g. journey or manual
+             * example:
+             * journey
              */
-            status?: "draft" | "quote" | "open" | "paid" | "shipped" | "delivered" | "complete";
+            source_type?: string;
+            /**
+             * identifier for source e.g. journey ID
+             * example:
+             * ce99875f-fba9-4fe2-a8f9-afaf52059051
+             */
+            source_id?: string;
+            source?: /* Order Source */ OrderSource;
             metadata?: /* A set of key-value pairs. */ MetaData;
             billing_first_name?: string;
             billing_last_name?: string;
@@ -260,6 +461,8 @@ declare namespace Components {
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
              *
+             * example:
+             * EUR
              */
             Currency;
             delivery_address?: Address[];
@@ -292,6 +495,45 @@ declare namespace Components {
             _tags?: string[];
         }
         /**
+         * Order Entity Payload
+         */
+        export interface OrderPayload {
+            status?: /* The order status */ OrderStatus;
+            line_items?: /* Tracks a set of product prices, quantities, (discounts) and taxes. */ PriceItems;
+            /**
+             * type of source, e.g. journey or manual
+             * example:
+             * journey
+             */
+            source_type?: string;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * The id of an existing contact.
+             */
+            contact?: string;
+            billing_first_name?: string;
+            billing_last_name?: string;
+            billing_company_name?: string;
+            billing_vat?: string;
+            billing_email?: string;
+            billing_phone?: string;
+            billing_address?: Address[];
+            delivery_address?: Address[];
+            payment_method?: /**
+             * A PaymentMethod represent your customer's payment instruments.
+             *
+             */
+            PaymentMethod[];
+            _tags?: string[];
+        }
+        /**
          * An order relation reference
          */
         export interface OrderRelation {
@@ -301,6 +543,27 @@ declare namespace Components {
             entity_id?: string;
             _tags?: string[];
         }
+        /**
+         * Order Source
+         */
+        export interface OrderSource {
+            /**
+             * Link path for the source
+             * example:
+             * /app/v2/journey-builder/editor/db7f6940-994b-11ec-a46d-9f1824ff2939
+             */
+            http?: string;
+            /**
+             * Title for the source
+             * example:
+             * Journey: PH Journey
+             */
+            title?: string;
+        }
+        /**
+         * The order status
+         */
+        export type OrderStatus = "draft" | "quote" | "placed" | "cancelled" | "completed";
         /**
          * A PaymentMethod represent your customer's payment instruments.
          *
@@ -325,7 +588,7 @@ declare namespace Components {
             active?: boolean;
             billing_scheme?: "Per Unit";
             description?: string;
-            sales_tax?: SalexTax;
+            sales_tax?: SalesTax;
             tax_behavior?: "inclusive" | "exclusive";
             tiers_mode?: "Standard";
             type?: "one_time" | "recurring";
@@ -336,6 +599,8 @@ declare namespace Components {
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
              *
+             * example:
+             * EUR
              */
             Currency;
             billing_duration_amount?: number;
@@ -369,6 +634,10 @@ declare namespace Components {
              */
             amount_subtotal?: number;
             /**
+             * Net unit amount without taxes.
+             */
+            unit_amount_net?: number;
+            /**
              * Total after (discounts and) taxes.
              */
             amount_total?: number;
@@ -376,6 +645,8 @@ declare namespace Components {
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
              *
+             * example:
+             * EUR
              */
             Currency;
             /**
@@ -435,6 +706,10 @@ declare namespace Components {
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
             _price?: /* The price configuration */ Price;
+            /**
+             * The product linked to the price item.
+             */
+            _product?: /* The product configuration */ Product;
         }
         /**
          * Tracks a set of product prices, quantities, (discounts) and taxes.
@@ -469,6 +744,7 @@ declare namespace Components {
             name?: string;
             _id?: string;
             _title?: string;
+            _availability_files?: File[];
         }
         /**
          * An amount associated with a specific recurrence.
@@ -520,7 +796,7 @@ declare namespace Components {
              */
             amount_tax?: number;
         }
-        export type SalexTax = "nontaxable" | "reduced" | "standard";
+        export type SalesTax = "nontaxable" | "reduced" | "standard";
         /**
          * the tax configuration
          */
@@ -593,6 +869,36 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace $AvailabilityCheck {
+        export interface HeaderParameters {
+            "X-Ivy-Org-ID": Parameters.XIvyOrgID;
+        }
+        namespace Parameters {
+            export type XIvyOrgID = string;
+        }
+        export type RequestBody = /* Availability check request payload */ Components.Schemas.AvailabilityCheckParams;
+        namespace Responses {
+            export type $200 = /**
+             * The availability check result payload
+             * example:
+             * {
+             *   "available_products": [],
+             *   "check_results": [
+             *     {
+             *       "product_id": "my-product-id-123-1",
+             *       "matching_hits": 0
+             *     },
+             *     {
+             *       "product_id": "my-product-id-123-2",
+             *       "matching_hits": 0
+             *     }
+             *   ]
+             * }
+             */
+            Components.Schemas.AvailabilityResult;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace $CheckoutCart {
         export interface HeaderParameters {
             "X-Ivy-Org-ID": Parameters.XIvyOrgID;
@@ -619,32 +925,6 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
-    namespace $DeleteCart {
-        namespace Parameters {
-            export type CartId = string;
-        }
-        export interface PathParameters {
-            "cart-id": Parameters.CartId;
-        }
-        namespace Responses {
-            export type $200 = /* Supports shopping for products and services until ready for checkout. */ Components.Schemas.Cart;
-            export type $400 = Components.Schemas.Error;
-        }
-    }
-    namespace $GetCart {
-        namespace Parameters {
-            export type CartId = string;
-        }
-        export interface PathParameters {
-            "cart-id": Parameters.CartId;
-        }
-        namespace Responses {
-            export type $200 = /* Supports shopping for products and services until ready for checkout. */ Components.Schemas.Cart;
-            export type $400 = Components.Schemas.Error;
-            export interface $404 {
-            }
-        }
-    }
     namespace $SearchCatalog {
         export interface HeaderParameters {
             "X-Ivy-Org-ID": Parameters.XIvyOrgID;
@@ -659,7 +939,18 @@ declare namespace Paths {
          *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
          *   "sort": "description ASC",
          *   "from": 0,
-         *   "size": 200
+         *   "size": 200,
+         *   "availability": {
+         *     "location": {
+         *       "postal_code": "57008,",
+         *       "city": "Cologne,",
+         *       "street": "Media Park,",
+         *       "street_number": "8a"
+         *     },
+         *     "available_date": {
+         *       "value": "2022-05-01"
+         *     }
+         *   }
          * }
          */
         Components.Schemas.CatalogSearch;
@@ -685,25 +976,23 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
-    namespace $UpsertCart {
-        export interface HeaderParameters {
-            "X-Ivy-Org-ID": Parameters.XIvyOrgID;
-        }
-        namespace Parameters {
-            export type XIvyOrgID = string;
-        }
-        export type RequestBody = /* A valid cart payload from a client. */ Components.Schemas.CartDto;
+    namespace CreateOrder {
+        export type RequestBody = /* Order Entity Payload */ Components.Schemas.OrderPayload;
         namespace Responses {
-            export type $200 = /* Supports shopping for products and services until ready for checkout. */ Components.Schemas.Cart;
-            export type $201 = /* Supports shopping for products and services until ready for checkout. */ Components.Schemas.Cart;
+            export type $201 = /* The order entity */ Components.Schemas.Order;
             export type $400 = Components.Schemas.Error;
         }
     }
-    namespace $UpsertOrder {
-        export type RequestBody = /* The order entity */ Components.Schemas.Order;
+    namespace PutOrder {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = /* Order Entity Payload */ Components.Schemas.OrderPayload;
         namespace Responses {
             export type $200 = /* The order entity */ Components.Schemas.Order;
-            export type $201 = /* The order entity */ Components.Schemas.Order;
             export type $400 = Components.Schemas.Error;
         }
     }
@@ -711,15 +1000,25 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * $upsertCart - upsertCart
+   * createOrder - createOrder
    * 
-   * Creates a new cart or updates an existing one.
+   * Create an order
    */
-  '$upsertCart'(
-    parameters?: Parameters<Paths.$UpsertCart.HeaderParameters> | null,
-    data?: Paths.$UpsertCart.RequestBody,
+  'createOrder'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateOrder.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.$UpsertCart.Responses.$200 | Paths.$UpsertCart.Responses.$201>
+  ): OperationResponse<Paths.CreateOrder.Responses.$201>
+  /**
+   * putOrder - putOrder
+   * 
+   * Update an existing Order
+   */
+  'putOrder'(
+    parameters?: Parameters<Paths.PutOrder.PathParameters> | null,
+    data?: Paths.PutOrder.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutOrder.Responses.$200>
   /**
    * $checkoutCart - checkoutCart
    * 
@@ -742,44 +1041,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$CheckoutCart.Responses.$200>
   /**
-   * $getCart - getCart
-   * 
-   * Retrieves a cart by id.
-   */
-  '$getCart'(
-    parameters?: Parameters<Paths.$GetCart.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.$GetCart.Responses.$200>
-  /**
-   * $deleteCart - deleteCart
-   * 
-   * Deletes the Cart specified and returns its content.
-   */
-  '$deleteCart'(
-    parameters?: Parameters<Paths.$DeleteCart.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.$DeleteCart.Responses.$200>
-  /**
-   * $upsertOrder - upsertOrder
-   * 
-   * Creates a new order or updates an existing one. During the creation of an order, an unique customer-readable `order_number` will be generated.
-   * The `order_number` can be used to universally identify an order within epilot platform.
-   * 
-   * The upsert operation is idempotent, meaning that multiple calls will have effect just once. Calling the upsert multiple times will not duplicate the items on an order.
-   * 
-   * When the the `cart_id` payload field is specified, the cart items are appended to the existing order items, or replaced in-place if they belong to the same `cart_id`.
-   * 
-   * On multiple updates with the same `cart_id` the line items linked with that `cart_id` (`order.line_items[]?.metadata.cart_id`) are removed and re-added.
-   * 
-   */
-  '$upsertOrder'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.$UpsertOrder.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.$UpsertOrder.Responses.$200 | Paths.$UpsertOrder.Responses.$201>
-  /**
    * $searchCatalog - searchCatalog
    * 
    * Provides a querying functionalities over products and prices of the Catalog for a given organization.
@@ -790,9 +1051,19 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchCatalog.Responses.$200>
   /**
+   * $availabilityCheck - availabilityCheck
+   * 
+   * The availability check endpoint
+   */
+  '$availabilityCheck'(
+    parameters?: Parameters<Paths.$AvailabilityCheck.HeaderParameters> | null,
+    data?: Paths.$AvailabilityCheck.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$AvailabilityCheck.Responses.$200>
+  /**
    * $createOpportunity - createOpportunity
    * 
-   * Creates a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
+   * This API is Deprecated. Please use the Entity API or Submission API to create opportunities. Creates a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
    * The `opportunity_number` can be used to universally identify an opportunity within epilot platform.
    * 
    */
@@ -804,17 +1075,29 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
-  ['/v1/public/cart']: {
+  ['/v1/order']: {
     /**
-     * $upsertCart - upsertCart
+     * createOrder - createOrder
      * 
-     * Creates a new cart or updates an existing one.
+     * Create an order
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateOrder.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateOrder.Responses.$201>
+  }
+  ['/v1/order/{id}']: {
+    /**
+     * putOrder - putOrder
+     * 
+     * Update an existing Order
      */
     'put'(
-      parameters?: Parameters<Paths.$UpsertCart.HeaderParameters> | null,
-      data?: Paths.$UpsertCart.RequestBody,
+      parameters?: Parameters<Paths.PutOrder.PathParameters> | null,
+      data?: Paths.PutOrder.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.$UpsertCart.Responses.$200 | Paths.$UpsertCart.Responses.$201>
+    ): OperationResponse<Paths.PutOrder.Responses.$200>
   }
   ['/v1/public/cart:checkout']: {
     /**
@@ -839,48 +1122,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$CheckoutCart.Responses.$200>
   }
-  ['/v1/cart/{cart-id}']: {
-    /**
-     * $getCart - getCart
-     * 
-     * Retrieves a cart by id.
-     */
-    'get'(
-      parameters?: Parameters<Paths.$GetCart.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.$GetCart.Responses.$200>
-    /**
-     * $deleteCart - deleteCart
-     * 
-     * Deletes the Cart specified and returns its content.
-     */
-    'delete'(
-      parameters?: Parameters<Paths.$DeleteCart.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.$DeleteCart.Responses.$200>
-  }
-  ['/v1/order']: {
-    /**
-     * $upsertOrder - upsertOrder
-     * 
-     * Creates a new order or updates an existing one. During the creation of an order, an unique customer-readable `order_number` will be generated.
-     * The `order_number` can be used to universally identify an order within epilot platform.
-     * 
-     * The upsert operation is idempotent, meaning that multiple calls will have effect just once. Calling the upsert multiple times will not duplicate the items on an order.
-     * 
-     * When the the `cart_id` payload field is specified, the cart items are appended to the existing order items, or replaced in-place if they belong to the same `cart_id`.
-     * 
-     * On multiple updates with the same `cart_id` the line items linked with that `cart_id` (`order.line_items[]?.metadata.cart_id`) are removed and re-added.
-     * 
-     */
-    'put'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.$UpsertOrder.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.$UpsertOrder.Responses.$200 | Paths.$UpsertOrder.Responses.$201>
-  }
   ['/v1/public/catalog']: {
     /**
      * $searchCatalog - searchCatalog
@@ -893,11 +1134,23 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$SearchCatalog.Responses.$200>
   }
+  ['/v1/public/availability:check']: {
+    /**
+     * $availabilityCheck - availabilityCheck
+     * 
+     * The availability check endpoint
+     */
+    'post'(
+      parameters?: Parameters<Paths.$AvailabilityCheck.HeaderParameters> | null,
+      data?: Paths.$AvailabilityCheck.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$AvailabilityCheck.Responses.$200>
+  }
   ['/v1/public/opportunity']: {
     /**
      * $createOpportunity - createOpportunity
      * 
-     * Creates a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
+     * This API is Deprecated. Please use the Entity API or Submission API to create opportunities. Creates a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
      * The `opportunity_number` can be used to universally identify an opportunity within epilot platform.
      * 
      */

@@ -14,7 +14,8 @@
     "build:watch": "npm run build && tsc -w",
     "eslint": "../node_modules/.bin/eslint -c ../.eslintrc.yml",
     "prepublishOnly": "npm run build",
-    "release-alpha": "npm version prerelease --preid alpha"
+    "release-alpha": "npm version prerelease --preid alpha",
+    "lint": "../../node_modules/eslint/bin/eslint.js src"
   },
   "files": [
     "*.js",
