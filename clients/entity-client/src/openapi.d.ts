@@ -137,6 +137,77 @@ declare namespace Components {
             caller?: ActivityCallerContext;
             operations?: EntityOperation[];
         }
+        /**
+         * Reference to an address attribute of another entity
+         */
+        export interface AddressRelationAttribute {
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: string | {
+                [name: string]: any;
+            } | number | number | boolean | any[];
+            group?: string;
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            type?: "relation_address";
+            has_primary?: boolean;
+        }
         export interface Attachment {
             key: string;
             mime: string;
@@ -146,7 +217,7 @@ declare namespace Components {
             download_url: string;
             alt_text?: string;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* Custom input */ CustomAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute;
         export interface BaseAttribute {
             name: string;
             label: string;
@@ -204,6 +275,14 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
         }
         /**
          * example:
@@ -303,7 +382,85 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "boolean";
+        }
+        /**
+         * An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes)
+         */
+        export interface ComputedAttribute {
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: string | {
+                [name: string]: any;
+            } | number | number | boolean | any[];
+            group?: string;
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            type?: "computed";
         }
         /**
          * Consent Management
@@ -365,6 +522,14 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type: "consent";
             topic: string;
             identifiers?: string[];
@@ -429,6 +594,14 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "country";
         }
         /**
@@ -491,7 +664,16 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type: "currency";
+            currency_selector_only?: boolean;
             /**
              * An array of currency configurations with a country code (ISO-4217)
              */
@@ -501,68 +683,6 @@ declare namespace Components {
                 symbol: string;
                 flag?: string;
             })[];
-        }
-        /**
-         * Custom input
-         */
-        export interface CustomAttribute {
-            name: string;
-            label: string;
-            placeholder?: string;
-            /**
-             * Do not render attribute in entity views
-             */
-            hidden?: boolean;
-            /**
-             * Render as a column in table views. When defined, overrides `hidden`
-             */
-            show_in_table?: boolean;
-            required?: boolean;
-            readonly?: boolean;
-            deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
-            group?: string;
-            layout?: string;
-            /**
-             * When set to true, will hide the label of the field.
-             */
-            hide_label?: boolean;
-            /**
-             * Code name of the icon to used to represent this attribute.
-             * The value must be a valid @epilot/base-elements Icon name
-             *
-             */
-            icon?: string;
-            /**
-             * Defines the conditional rendering expression for showing this field.
-             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
-             * Note: Empty or invalid expression have no effect on the field visibility.
-             *
-             */
-            render_condition?: string;
-            /**
-             * A set of constraints applicable to the attribute.
-             * These constraints should and will be enforced by the attribute renderer.
-             *
-             * example:
-             * {
-             *   "disablePast": true
-             * }
-             */
-            constraints?: {
-                [key: string]: any;
-            };
-            /**
-             * This attribute should only be active when the feature flag is enabled
-             * example:
-             * FF_MY_FEATURE_FLAG
-             */
-            feature_flag?: string;
-            value_formatter?: string;
-            preview_value_formatter?: string;
-            type?: "custom";
         }
         /**
          * Date or Datetime picker
@@ -624,6 +744,14 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "date" | "datetime";
         }
         export interface Entity {
@@ -654,6 +782,11 @@ declare namespace Components {
                  * EntityDetailsV2:Tab
                  */
                 hook: string;
+                /**
+                 * example:
+                 * composite_price = "false"
+                 */
+                render_condition?: string;
                 /**
                  * render order (ascending)
                  * example:
@@ -701,6 +834,21 @@ declare namespace Components {
                  * Specific to Activity pilot
                  */
                 header?: boolean;
+                /**
+                 * Require a permission to display UI hook
+                 */
+                requiredPermission?: {
+                    /**
+                     * example:
+                     * note:view
+                     */
+                    action: string;
+                    /**
+                     * example:
+                     * 123
+                     */
+                    resource?: string;
+                };
             }[];
             /**
              * This capability should only be active when the feature flag is enabled
@@ -772,8 +920,8 @@ declare namespace Components {
          *     "example",
          *     "mock"
          *   ],
-         *   "_created_at": "2021-02-09T12:41:43.662Z",
-         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         *   "_created_at": {},
+         *   "_updated_at": {}
          * }
          */
         export interface EntityItem {
@@ -801,9 +949,10 @@ declare namespace Components {
             entity: EntityId /* uuid */;
             /**
              * example:
-             * updateEntity
+             * 123
              */
-            operation?: string;
+            org: string;
+            operation: "createEntity" | "updateEntity" | "deleteEntity";
             /**
              * example:
              * {
@@ -831,6 +980,11 @@ declare namespace Components {
             payload?: {
                 [name: string]: any;
             };
+            diff?: {
+                added?: Entity;
+                updated?: Entity;
+                deleted?: Entity;
+            };
         }
         /**
          * example:
@@ -857,6 +1011,7 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
+            version?: number;
             blueprint?: /* Reference to blueprint */ BlueprintEntityId /* uuid */;
             /**
              * This schema should only be active when the feature flag is enabled
@@ -881,6 +1036,16 @@ declare namespace Components {
             plural: string;
             /**
              * example:
+             * false
+             */
+            published?: boolean;
+            /**
+             * example:
+             * false
+             */
+            draft?: boolean;
+            /**
+             * example:
              * person
              */
             icon?: string;
@@ -897,8 +1062,16 @@ declare namespace Components {
                 list_item?: {
                     summary_attributes?: string[];
                 };
+                sharing?: {
+                    /**
+                     * Show the sharing button in entity detail view
+                     * example:
+                     * true
+                     */
+                    show_sharing_button?: boolean;
+                };
             };
-            capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
+            capabilities?: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
              * A dictionary of Group Titles and associated settings if present.
              * example:
@@ -907,19 +1080,38 @@ declare namespace Components {
              *     "expanded": true
              *   },
              *   "Contact Details": {
-             *     "expanded": false
+             *     "expanded": false,
+             *     "info_tooltip_title": {
+             *       "key": "partner.partner_information_group_tooltip",
+             *       "default": "These informations are provided by the partner company and cannot be edited."
+             *     }
              *   }
              * }
              */
             group_settings?: {
-                [name: string]: {
-                    expanded?: boolean;
-                    /**
-                     * Render order of the group
-                     */
-                    order?: number;
+                label: string;
+                id: string;
+                expanded?: boolean;
+                /**
+                 * example:
+                 * composite_price = "false"
+                 */
+                render_condition?: string;
+                /**
+                 * Render order of the group
+                 */
+                order?: number;
+                /**
+                 * This schema should only be active when the feature flag is enabled
+                 * example:
+                 * FF_MY_FEATURE_FLAG
+                 */
+                feature_flag?: string;
+                info_tooltip_title?: {
+                    key?: string;
+                    default?: string;
                 };
-            };
+            }[];
             /**
              * Custom grid definitions for the layout
              */
@@ -928,6 +1120,9 @@ declare namespace Components {
                     grid_gap?: string;
                     grid_template_columns?: string;
                 };
+            };
+            dialog_config?: {
+                [name: string]: any;
             };
             /**
              * An ordered list of attributes the entity contains
@@ -976,19 +1171,39 @@ declare namespace Components {
              *   }
              * ]
              */
-            attributes: Attribute[];
+            attributes?: Attribute[];
+            explicit_search_mappings?: /**
+             * Advanced: explicit Elasticsearch index mapping definitions for entity data
+             *
+             * example:
+             * {
+             *   "image": {
+             *     "type": "keyword",
+             *     "index": false
+             *   }
+             * }
+             */
+            SearchMappings;
         }
         /**
          * The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities.
          */
         export interface EntitySchemaItem {
             id?: /* Generated uuid for schema */ SchemaId /* uuid */;
+            created_at?: string;
+            updated_at?: string;
+            comment?: string;
+            source?: {
+                id?: string;
+                type?: string;
+            };
             slug: /**
              * URL-friendly identifier for the entity schema
              * example:
              * contact
              */
             EntitySlug;
+            version?: number;
             blueprint?: /* Reference to blueprint */ BlueprintEntityId /* uuid */;
             /**
              * This schema should only be active when the feature flag is enabled
@@ -1013,6 +1228,16 @@ declare namespace Components {
             plural: string;
             /**
              * example:
+             * false
+             */
+            published?: boolean;
+            /**
+             * example:
+             * false
+             */
+            draft?: boolean;
+            /**
+             * example:
              * person
              */
             icon?: string;
@@ -1029,8 +1254,16 @@ declare namespace Components {
                 list_item?: {
                     summary_attributes?: string[];
                 };
+                sharing?: {
+                    /**
+                     * Show the sharing button in entity detail view
+                     * example:
+                     * true
+                     */
+                    show_sharing_button?: boolean;
+                };
             };
-            capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
+            capabilities?: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
              * A dictionary of Group Titles and associated settings if present.
              * example:
@@ -1039,19 +1272,38 @@ declare namespace Components {
              *     "expanded": true
              *   },
              *   "Contact Details": {
-             *     "expanded": false
+             *     "expanded": false,
+             *     "info_tooltip_title": {
+             *       "key": "partner.partner_information_group_tooltip",
+             *       "default": "These informations are provided by the partner company and cannot be edited."
+             *     }
              *   }
              * }
              */
             group_settings?: {
-                [name: string]: {
-                    expanded?: boolean;
-                    /**
-                     * Render order of the group
-                     */
-                    order?: number;
+                label: string;
+                id: string;
+                expanded?: boolean;
+                /**
+                 * example:
+                 * composite_price = "false"
+                 */
+                render_condition?: string;
+                /**
+                 * Render order of the group
+                 */
+                order?: number;
+                /**
+                 * This schema should only be active when the feature flag is enabled
+                 * example:
+                 * FF_MY_FEATURE_FLAG
+                 */
+                feature_flag?: string;
+                info_tooltip_title?: {
+                    key?: string;
+                    default?: string;
                 };
-            };
+            }[];
             /**
              * Custom grid definitions for the layout
              */
@@ -1060,6 +1312,9 @@ declare namespace Components {
                     grid_gap?: string;
                     grid_template_columns?: string;
                 };
+            };
+            dialog_config?: {
+                [name: string]: any;
             };
             /**
              * An ordered list of attributes the entity contains
@@ -1108,7 +1363,19 @@ declare namespace Components {
              *   }
              * ]
              */
-            attributes: Attribute[];
+            attributes?: Attribute[];
+            explicit_search_mappings?: /**
+             * Advanced: explicit Elasticsearch index mapping definitions for entity data
+             *
+             * example:
+             * {
+             *   "image": {
+             *     "type": "keyword",
+             *     "index": false
+             *   }
+             * }
+             */
+            SearchMappings;
         }
         export interface EntitySearchParams {
             /**
@@ -1139,9 +1406,15 @@ declare namespace Components {
              */
             fields?: string[];
             /**
-             * Deprecated. Use hydrate=true instead
+             * When true, returns the results as a CSV file
              */
-            expand?: string[];
+            csv?: boolean;
+            /**
+             * Entity schema
+             * example:
+             * contact
+             */
+            schema?: string;
         }
         export interface EntitySearchResults {
             /**
@@ -1159,8 +1432,8 @@ declare namespace Components {
              *     "example",
              *     "mock"
              *   ],
-             *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_created_at": {},
+             *   "_updated_at": {}
              * }
              */
             EntityItem[];
@@ -1249,6 +1522,14 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type: "image" | "file";
             multiple?: boolean;
             /**
@@ -1257,6 +1538,21 @@ declare namespace Components {
             allowed_types?: string[];
             default_access_control?: "public-read" | "private";
         }
+        export type GetRelationsResp = (RelationItem | /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": {},
+         *   "_updated_at": {}
+         * }
+         */
+        RelationEntity)[];
         /**
          * Entity with relation data resolved into the attribute values
          * example:
@@ -1327,8 +1623,8 @@ declare namespace Components {
          *     "example",
          *     "mock"
          *   ],
-         *   "_created_at": "2021-02-09T12:41:43.662Z",
-         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_created_at": {},
+         *   "_updated_at": {},
          *   "status": "active",
          *   "customer_number": "abc123",
          *   "email": [
@@ -1462,6 +1758,14 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "internal";
         }
         /**
@@ -1524,6 +1828,14 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "link";
         }
         /**
@@ -1586,6 +1898,14 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "number";
             format?: string;
         }
@@ -1649,7 +1969,85 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "ordered_list";
+        }
+        /**
+         * Partner Status
+         */
+        export interface PartnerStatusAttribute {
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: string | {
+                [name: string]: any;
+            } | number | number | boolean | any[];
+            group?: string;
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            type?: "partner_status";
         }
         /**
          * example:
@@ -1726,19 +2124,76 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "relation";
-            relation_type?: "belongs_to" | "has_many";
+            relation_type?: "has_many" | "has_one";
             delete_mode?: "cascade";
             relation_affinity_mode?: "weak" | "strong";
+            /**
+             * when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link.
+             */
+            enable_relation_picker?: boolean;
             edit_mode?: "list-view";
             drawer_size?: "small" | "medium" | "large";
             summary_fields?: (string | /* Summary Fields are displayed inside list view as a resume of the relation entity. */ SummaryField)[];
+            has_primary?: boolean;
             allowedSchemas?: /**
              * URL-friendly identifier for the entity schema
              * example:
              * contact
              */
             EntitySlug[];
+            /**
+             * when enable_relation_tags is set to true the user will be able to set tags(labels) in each relation item
+             */
+            enable_relation_tags?: boolean;
+        }
+        /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": {},
+         *   "_updated_at": {}
+         * }
+         */
+        export interface RelationEntity {
+            _id: EntityId /* uuid */;
+            /**
+             * Title of entity
+             */
+            _title: string;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org: string;
+            _schema: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            _tags?: string[];
+            _created_at: string; // date-time
+            _updated_at: string; // date-time
+            $relation?: RelationItem;
+        }
+        export interface RelationItem {
+            entity_id: EntityId /* uuid */;
+            attribute: string;
+            _tags?: string[];
         }
         /**
          * Repeatable (add N number of fields)
@@ -1800,14 +2255,47 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             repeatable?: boolean;
+            has_primary?: boolean;
             relation_affinity_mode?: "weak" | "strong";
-            type?: "string" | "phone" | "email" | "address" | "relation";
+            type?: "string" | "phone" | "email" | "address" | "relation" | "payment" | "price_component";
+            /**
+             * when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link.
+             */
+            enable_relation_picker?: boolean;
         }
         /**
          * Generated uuid for schema
          */
         export type SchemaId = string; // uuid
+        /**
+         * Advanced: explicit Elasticsearch index mapping definitions for entity data
+         *
+         * example:
+         * {
+         *   "image": {
+         *     "type": "keyword",
+         *     "index": false
+         *   }
+         * }
+         */
+        export interface SearchMappings {
+            [name: string]: {
+                index?: boolean;
+                type?: "keyword" | "text" | "boolean" | "integer" | "long" | "float" | "date" | "flattened" | "nested";
+                fields?: {
+                    [name: string]: any;
+                };
+            };
+        }
         /**
          * Dropdown select
          */
@@ -1868,11 +2356,23 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "select" | "radio";
-            options?: (string | {
+            options?: ((string | null) | {
                 value: string;
                 title?: string;
             })[];
+            /**
+             * Allow arbitrary input values in addition to provided options
+             */
+            allow_any?: boolean;
         }
         /**
          * Summary Fields are displayed inside list view as a resume of the relation entity.
@@ -1947,6 +2447,14 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "tags";
             options?: string[];
             suggestions?: string[];
@@ -2011,6 +2519,14 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "string";
             multiline?: boolean;
         }
@@ -2074,12 +2590,39 @@ declare namespace Components {
             feature_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
             type?: "relation_user";
             multiple?: boolean;
         }
     }
 }
 declare namespace Paths {
+    namespace AddRelations {
+        namespace Parameters {
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.RelationItem[];
+        namespace Responses {
+            export type $200 = Components.Schemas.RelationItem;
+        }
+    }
     namespace AttachActivity {
         namespace Parameters {
             export type Entities = Components.Schemas.EntityId /* uuid */[];
@@ -2190,11 +2733,32 @@ declare namespace Paths {
              *     "example",
              *     "mock"
              *   ],
-             *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_created_at": {},
+             *   "_updated_at": {}
              * }
              */
             Components.Schemas.EntityItem;
+        }
+    }
+    namespace CreateNewSchemaVersion {
+        namespace Parameters {
+            export type Draft = boolean;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        export interface QueryParameters {
+            draft?: Parameters.Draft;
+        }
+        export type RequestBody = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchema;
+        namespace Responses {
+            export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
         }
     }
     namespace DeleteEntity {
@@ -2225,8 +2789,11 @@ declare namespace Paths {
             }
         }
     }
-    namespace DeleteSchema {
+    namespace DeleteRelation {
         namespace Parameters {
+            export type Attribute = string;
+            export type EntityId = string;
+            export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -2236,6 +2803,30 @@ declare namespace Paths {
         }
         export interface PathParameters {
             slug: Parameters.Slug;
+            id: Parameters.Id;
+            attribute: Parameters.Attribute;
+            entity_id: Parameters.EntityId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+        }
+    }
+    namespace DeleteSchemaById {
+        namespace Parameters {
+            export type Id = /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        export interface QueryParameters {
+            id: Parameters.Id;
         }
         namespace Responses {
             export interface $204 {
@@ -2288,8 +2879,8 @@ declare namespace Paths {
                  *     "example",
                  *     "mock"
                  *   ],
-                 *   "_created_at": "2021-02-09T12:41:43.662Z",
-                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 *   "_created_at": {},
+                 *   "_updated_at": {}
                  * }
                  */
                 Components.Schemas.EntityItem;
@@ -2303,8 +2894,8 @@ declare namespace Paths {
                  *     "example",
                  *     "mock"
                  *   ],
-                 *   "_created_at": "2021-02-09T12:41:43.662Z",
-                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 *   "_created_at": {},
+                 *   "_updated_at": {}
                  * }
                  */
                 Components.Schemas.EntityItem[];
@@ -2356,7 +2947,49 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetRelations {
+        namespace Parameters {
+            export type Hydrate = boolean;
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            hydrate?: Parameters.Hydrate;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.GetRelationsResp;
+        }
+    }
     namespace GetSchema {
+        namespace Parameters {
+            export type Id = /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        export interface QueryParameters {
+            id?: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+        }
+    }
+    namespace GetSchemaVersions {
         namespace Parameters {
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -2369,31 +3002,30 @@ declare namespace Paths {
             slug: Parameters.Slug;
         }
         namespace Responses {
-            export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+            export interface $200 {
+                versions?: /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem[];
+                drafts?: /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem[];
+            }
         }
     }
-    namespace ListSchemas {
+    namespace ListSchemaBlueprints {
         namespace Responses {
             export interface $200 {
                 results?: /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem[];
             }
         }
     }
-    namespace PutSchema {
+    namespace ListSchemas {
         namespace Parameters {
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
+            export type Unpublished = boolean;
         }
-        export interface PathParameters {
-            slug: Parameters.Slug;
+        export interface QueryParameters {
+            unpublished?: Parameters.Unpublished;
         }
-        export type RequestBody = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchema;
         namespace Responses {
-            export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+            export interface $200 {
+                results?: /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem[];
+            }
         }
     }
     namespace SearchEntities {
@@ -2437,11 +3069,36 @@ declare namespace Paths {
              *     "example",
              *     "mock"
              *   ],
-             *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_created_at": {},
+             *   "_updated_at": {}
              * }
              */
             Components.Schemas.EntityItem;
+        }
+    }
+    namespace UpdateRelation {
+        namespace Parameters {
+            export type Attribute = string;
+            export type EntityId = string;
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+            attribute: Parameters.Attribute;
+            entity_id: Parameters.EntityId;
+        }
+        export interface RequestBody {
+            _tags?: string[];
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.RelationItem;
         }
     }
     namespace UpsertEntity {
@@ -2486,8 +3143,8 @@ declare namespace Paths {
              *     "example",
              *     "mock"
              *   ],
-             *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_created_at": {},
+             *   "_updated_at": {}
              * }
              */
             Components.Schemas.EntityItem;
@@ -2501,8 +3158,8 @@ declare namespace Paths {
              *     "example",
              *     "mock"
              *   ],
-             *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_created_at": {},
+             *   "_updated_at": {}
              * }
              */
             Components.Schemas.EntityItem;
@@ -2515,40 +3172,70 @@ declare namespace Paths {
 export interface OperationMethods {
   /**
    * listSchemas - listSchemas
+   * 
+   * Get the latest version of local schema
    */
   'listSchemas'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.ListSchemas.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListSchemas.Responses.$200>
   /**
+   * listSchemaBlueprints - listSchemaBlueprints
+   * 
+   * List canonical versions of all available schemas
+   */
+  'listSchemaBlueprints'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSchemaBlueprints.Responses.$200>
+  /**
+   * getSchemaVersions - getSchemaVersions
+   * 
+   * Get all versions of this schema ordered by the latest versions including drafts.
+   */
+  'getSchemaVersions'(
+    parameters?: Parameters<Paths.GetSchemaVersions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
+  /**
    * getSchema - getSchema
+   * 
+   * By default gets the latest version of the Schema and to get the specific version of schema pass the id.
    */
   'getSchema'(
-    parameters?: Parameters<Paths.GetSchema.PathParameters> | null,
+    parameters?: Parameters<Paths.GetSchema.PathParameters & Paths.GetSchema.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchema.Responses.$200>
   /**
-   * putSchema - putSchema
+   * createNewSchemaVersion - createNewSchemaVersion
+   * 
+   * Create new version of the schema and default draft is false.
    */
-  'putSchema'(
-    parameters?: Parameters<Paths.PutSchema.PathParameters> | null,
-    data?: Paths.PutSchema.RequestBody,
+  'createNewSchemaVersion'(
+    parameters?: Parameters<Paths.CreateNewSchemaVersion.PathParameters & Paths.CreateNewSchemaVersion.QueryParameters> | null,
+    data?: Paths.CreateNewSchemaVersion.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.PutSchema.Responses.$200>
+  ): OperationResponse<Paths.CreateNewSchemaVersion.Responses.$200>
   /**
-   * deleteSchema - deleteSchema
+   * deleteSchemaById - deleteSchemaById
+   * 
+   * Delete schema by Id
    */
-  'deleteSchema'(
-    parameters?: Parameters<Paths.DeleteSchema.PathParameters> | null,
+  'deleteSchemaById'(
+    parameters?: Parameters<Paths.DeleteSchemaById.PathParameters & Paths.DeleteSchemaById.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteSchema.Responses.$204>
+  ): OperationResponse<Paths.DeleteSchemaById.Responses.$204>
   /**
    * searchEntities - searchEntities
    * 
    * Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.
+   * 
+   * Passing comma-separated `x-epilot-org-id` is supported for cross-org entity search.
    * 
    * ## Relations
    * 
@@ -2811,50 +3498,124 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
+  /**
+   * getRelations - getRelations
+   * 
+   * It loads 1st level relations for the mentioned entity. You can control whether entire related entity is loaded or not via hydrate param.
+   */
+  'getRelations'(
+    parameters?: Parameters<Paths.GetRelations.PathParameters & Paths.GetRelations.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRelations.Responses.$200>
+  /**
+   * addRelations - addRelations
+   * 
+   * It relates one or more entities to some parent entity, by providing meaning for relations via attribute field.
+   */
+  'addRelations'(
+    parameters?: Parameters<Paths.AddRelations.PathParameters> | null,
+    data?: Paths.AddRelations.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AddRelations.Responses.$200>
+  /**
+   * updateRelation - updateRelation
+   * 
+   * It updates a relation between two entities.
+   */
+  'updateRelation'(
+    parameters?: Parameters<Paths.UpdateRelation.PathParameters> | null,
+    data?: Paths.UpdateRelation.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateRelation.Responses.$200>
+  /**
+   * deleteRelation - deleteRelation
+   * 
+   * It deletes a relation between one entity and the other.
+   */
+  'deleteRelation'(
+    parameters?: Parameters<Paths.DeleteRelation.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteRelation.Responses.$204>
 }
 
 export interface PathsDictionary {
   ['/v1/entity/schemas']: {
     /**
      * listSchemas - listSchemas
+     * 
+     * Get the latest version of local schema
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListSchemas.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSchemas.Responses.$200>
+  }
+  ['/v1/entity/schemas/blueprints']: {
+    /**
+     * listSchemaBlueprints - listSchemaBlueprints
+     * 
+     * List canonical versions of all available schemas
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListSchemas.Responses.$200>
+    ): OperationResponse<Paths.ListSchemaBlueprints.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/versions']: {
+    /**
+     * getSchemaVersions - getSchemaVersions
+     * 
+     * Get all versions of this schema ordered by the latest versions including drafts.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSchemaVersions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
   }
   ['/v1/entity/schemas/{slug}']: {
     /**
      * getSchema - getSchema
+     * 
+     * By default gets the latest version of the Schema and to get the specific version of schema pass the id.
      */
     'get'(
-      parameters?: Parameters<Paths.GetSchema.PathParameters> | null,
+      parameters?: Parameters<Paths.GetSchema.PathParameters & Paths.GetSchema.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchema.Responses.$200>
     /**
-     * putSchema - putSchema
+     * createNewSchemaVersion - createNewSchemaVersion
+     * 
+     * Create new version of the schema and default draft is false.
      */
     'put'(
-      parameters?: Parameters<Paths.PutSchema.PathParameters> | null,
-      data?: Paths.PutSchema.RequestBody,
+      parameters?: Parameters<Paths.CreateNewSchemaVersion.PathParameters & Paths.CreateNewSchemaVersion.QueryParameters> | null,
+      data?: Paths.CreateNewSchemaVersion.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.PutSchema.Responses.$200>
+    ): OperationResponse<Paths.CreateNewSchemaVersion.Responses.$200>
     /**
-     * deleteSchema - deleteSchema
+     * deleteSchemaById - deleteSchemaById
+     * 
+     * Delete schema by Id
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteSchema.PathParameters> | null,
+      parameters?: Parameters<Paths.DeleteSchemaById.PathParameters & Paths.DeleteSchemaById.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteSchema.Responses.$204>
+    ): OperationResponse<Paths.DeleteSchemaById.Responses.$204>
   }
   ['/v1/entity:search']: {
     /**
      * searchEntities - searchEntities
      * 
      * Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.
+     * 
+     * Passing comma-separated `x-epilot-org-id` is supported for cross-org entity search.
      * 
      * ## Relations
      * 
@@ -3133,6 +3894,50 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
+  }
+  ['/v1/entity/{slug}/{id}/relations']: {
+    /**
+     * getRelations - getRelations
+     * 
+     * It loads 1st level relations for the mentioned entity. You can control whether entire related entity is loaded or not via hydrate param.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetRelations.PathParameters & Paths.GetRelations.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRelations.Responses.$200>
+    /**
+     * addRelations - addRelations
+     * 
+     * It relates one or more entities to some parent entity, by providing meaning for relations via attribute field.
+     */
+    'post'(
+      parameters?: Parameters<Paths.AddRelations.PathParameters> | null,
+      data?: Paths.AddRelations.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AddRelations.Responses.$200>
+  }
+  ['/v1/entity/{slug}/{id}/relations/{attribute}/{entity_id}']: {
+    /**
+     * updateRelation - updateRelation
+     * 
+     * It updates a relation between two entities.
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateRelation.PathParameters> | null,
+      data?: Paths.UpdateRelation.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateRelation.Responses.$200>
+    /**
+     * deleteRelation - deleteRelation
+     * 
+     * It deletes a relation between one entity and the other.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteRelation.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteRelation.Responses.$204>
   }
 }
 

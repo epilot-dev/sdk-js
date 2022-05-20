@@ -1,22 +1,18 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "title": "Entity API",
-    "version": "1.0.0",
-    "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
+    "title": "User API",
+    "version": "2.0.0",
+    "description": "Manage users in epilot organization(s)\n"
   },
   "tags": [
     {
-      "name": "Schemas",
-      "description": "Model Entities"
+      "name": "User V2",
+      "description": "User API V2"
     },
     {
-      "name": "Entities",
-      "description": "CRUD Access for Entities"
-    },
-    {
-      "name": "Activity",
-      "description": "Entity Events"
+      "name": "User V1",
+      "description": "Legacy User API"
     }
   ],
   "security": [
@@ -25,16 +21,118 @@
     }
   ],
   "paths": {
-    "/v1/entity/schemas": {
-      "get": {
-        "operationId": "listSchemas",
-        "summary": "listSchemas",
+    "/v2/users/public/signup": {
+      "post": {
+        "operationId": "signUpUser",
+        "summary": "signUpUser",
+        "security": [],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "description": "Invitation partner token",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PartnerInvitationToken"
+            }
+          }
+        ],
         "tags": [
-          "Schemas"
+          "User V2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupUserPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created user and organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "organization": {
+                      "$ref": "#/components/schemas/Organization"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/me": {
+      "get": {
+        "operationId": "getMeV2",
+        "summary": "getMeV2",
+        "description": "Get currently logged in user",
+        "tags": [
+          "User V2"
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "currently logged in user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserV2"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users": {
+      "get": {
+        "operationId": "listUsersV2",
+        "summary": "listUsersV2",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Query text to filter by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Query"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit the results size",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Specify the page",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Offset"
+            }
+          }
+        ],
+        "description": "Get the list of organization users",
+        "tags": [
+          "User V2"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of organization users",
             "content": {
               "application/json": {
                 "schema": {
@@ -43,7 +141,7 @@
                     "results": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/EntitySchemaItem"
+                        "$ref": "#/components/schemas/UserV2"
                       }
                     }
                   }
@@ -54,68 +152,72 @@
         }
       }
     },
-    "/v1/entity/schemas/{slug}": {
+    "/v2/users/{id}": {
       "get": {
-        "operationId": "getSchema",
-        "summary": "getSchema",
+        "operationId": "getUserV2",
+        "summary": "getUserV2",
+        "description": "Get user details by user id",
         "tags": [
-          "Schemas"
+          "User V2"
         ],
         "parameters": [
           {
             "in": "path",
-            "name": "slug",
-            "required": true,
+            "name": "id",
             "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+              "$ref": "#/components/schemas/UserId"
+            },
+            "required": true,
+            "description": "The Id of user"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The returned user",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntitySchemaItem"
+                  "$ref": "#/components/schemas/UserV2"
                 }
               }
             }
           }
         }
       },
-      "put": {
-        "operationId": "putSchema",
-        "summary": "putSchema",
+      "patch": {
+        "operationId": "updateUserV2",
+        "summary": "updateUserV2",
+        "description": "Update user details",
         "tags": [
-          "Schemas"
+          "User V2"
         ],
         "parameters": [
           {
             "in": "path",
-            "name": "slug",
-            "required": true,
+            "name": "id",
             "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+              "$ref": "#/components/schemas/UserId"
+            },
+            "required": true,
+            "description": "The Id of user"
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EntitySchema"
+                "$ref": "#/components/schemas/UserV2"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The returned user",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntitySchemaItem"
+                  "$ref": "#/components/schemas/UserV2"
                 }
               }
             }
@@ -123,52 +225,30 @@
         }
       },
       "delete": {
-        "operationId": "deleteSchema",
-        "summary": "deleteSchema",
+        "operationId": "deleteUserV2",
+        "summary": "deleteUserV2",
+        "description": "Delete user by user id",
         "tags": [
-          "Schemas"
+          "User V2"
         ],
         "parameters": [
           {
             "in": "path",
-            "name": "slug",
-            "required": true,
+            "name": "id",
             "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+              "$ref": "#/components/schemas/UserId"
+            },
+            "required": true,
+            "description": "The Id of user"
           }
         ],
-        "responses": {
-          "204": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/v1/entity:search": {
-      "post": {
-        "operationId": "searchEntities",
-        "summary": "searchEntities",
-        "description": "Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
-        "tags": [
-          "Entities"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EntitySearchParams"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "The deleted user",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntitySearchResults"
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
@@ -176,119 +256,47 @@
         }
       }
     },
-    "/v1/entity/{slug}": {
+    "/v2/users/invite": {
       "post": {
-        "operationId": "createEntity",
-        "summary": "createEntity",
-        "description": "Creates a new entity using a key.\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated`\n\n## Relations\n\nTo create a relation, store a property object that defines a `$relation` array.\n\nExample:\n\n```json\n{\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\" }\n    ]\n  }\n}\n```\n\nThe items in `$relation` support two properties:\n- `entity_id` - The ID of the entity to link\n- `_tags` - Tags or labels for the relation (optional)\n",
+        "operationId": "inviteUser",
+        "summary": "inviteUser",
+        "description": "Creates a new user in the caller's organization and sends an invite email to activate",
         "tags": [
-          "Entities"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Schema",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
-          },
-          {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
-          }
+          "User V2"
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Entity"
-              },
-              "examples": {
-                "contact": {
-                  "$ref": "#/components/examples/ContactEntity"
-                },
-                "account": {
-                  "$ref": "#/components/examples/AccountEntity"
-                },
-                "product": {
-                  "$ref": "#/components/examples/ProductEntity"
-                },
-                "price": {
-                  "$ref": "#/components/examples/PriceEntity"
-                },
-                "tax": {
-                  "$ref": "#/components/examples/TaxEntity"
-                },
-                "order": {
-                  "$ref": "#/components/examples/OrderEntity"
-                },
-                "opportunity": {
-                  "$ref": "#/components/examples/OpportunityEntity"
-                },
-                "email template": {
-                  "$ref": "#/components/examples/EmailTemplateEntity"
-                },
-                "file": {
-                  "$ref": "#/components/examples/FileEntity"
-                },
-                "workflow step": {
-                  "$ref": "#/components/examples/WorkflowStepEntity"
-                },
-                "submission": {
-                  "$ref": "#/components/examples/SubmissionEntity"
-                }
+                "$ref": "#/components/schemas/UserInvitationPayload"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Success",
+            "description": "Invited successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntityItem"
+                  "$ref": "#/components/schemas/UserV2"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Unable to invite the above email address."
           }
         }
       }
     },
-    "/v1/entity/{slug}:upsert": {
-      "patch": {
-        "operationId": "upsertEntity",
-        "summary": "upsertEntity",
-        "description": "Create or update an entity using `unique_key`\n\n- If no entities are matched, a new entity is created.\n- If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.\n- If more than one entity is matched a `409` Error is returned\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated` or `EntityUpdated`\n",
+    "/v2/users/invite:resendEmail": {
+      "post": {
+        "operationId": "resendUserInvitation",
+        "summary": "resendUserInvitation",
+        "description": "Resend user invitation email",
         "tags": [
-          "Entities"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Schema",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
-          },
-          {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
-          }
+          "User V2"
         ],
         "requestBody": {
           "content": {
@@ -296,107 +304,152 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "unique_key": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "example": "email.0.email"
-                    },
-                    "example": [
-                      "_id"
-                    ]
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the address",
+                    "example": "test@example.com"
                   },
-                  "entity": {
-                    "$ref": "#/components/schemas/Entity"
+                  "language": {
+                    "type": "string",
+                    "description": "Language for user invitation email",
+                    "enum": [
+                      "en",
+                      "de"
+                    ],
+                    "default": "en"
                   }
-                },
-                "required": [
-                  "unique_key",
-                  "entity"
-                ]
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Entity was updated",
+            "description": "User Invitation sent successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntityItem"
+                  "$ref": "#/components/schemas/UserV2"
                 }
               }
             }
           },
-          "201": {
-            "description": "Entity was created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EntityItem"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict: multiple entities were matched with `unique_key`"
+          "400": {
+            "description": "User not found."
           }
         }
       }
     },
-    "/v1/entity/{slug}/{id}": {
-      "get": {
-        "operationId": "getEntity",
-        "summary": "getEntity",
-        "description": "Gets Entity and relations by id.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
+    "/v2/users/public/verifyEmail": {
+      "post": {
+        "operationId": "verifyEmailWithToken",
+        "summary": "verifyEmailWithToken",
+        "description": "Update new email using an verification token",
+        "security": [],
         "tags": [
-          "Entities"
+          "User V2"
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
+            "in": "query",
+            "name": "token",
             "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
+              "$ref": "#/components/schemas/VerificationToken"
+            },
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
+            "description": "Verification Token"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserVerificationPayload"
+              }
             }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verified successfully"
           },
+          "404": {
+            "description": "Token not found for the user"
+          }
+        }
+      }
+    },
+    "/v2/users/public/activate": {
+      "post": {
+        "operationId": "activateUser",
+        "summary": "activateUser",
+        "description": "Activate user using an invite token",
+        "security": [],
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
           {
             "in": "query",
-            "name": "hydrate",
-            "description": "When true, enables entity hydration to resolve nested $relation references in-place.",
+            "name": "token",
             "schema": {
-              "default": false,
-              "type": "boolean"
+              "$ref": "#/components/schemas/InviteToken"
+            },
+            "required": true,
+            "description": "Invite Token"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserActivationPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Activated successfully"
+          },
+          "404": {
+            "description": "Token not found for the user"
+          }
+        }
+      }
+    },
+    "/v2/users/public/username/{username}:getLoginParameters": {
+      "get": {
+        "operationId": "getUserLoginParametersV2",
+        "summary": "getUserLoginParametersV2",
+        "description": "Get user organization login parameters by username",
+        "security": [],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "Username",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Username"
             }
           }
         ],
+        "tags": [
+          "User V2"
+        ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "User",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "entity": {
-                      "$ref": "#/components/schemas/EntityItem"
-                    },
-                    "relations": {
+                    "login_parameters": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/EntityItem"
+                        "$ref": "#/components/schemas/LoginParameters"
                       }
                     }
                   }
@@ -405,186 +458,93 @@
             }
           }
         }
-      },
-      "put": {
-        "operationId": "updateEntity",
-        "summary": "updateEntity",
-        "description": "Updates an Entity\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityUpdated`\n\n## Relations\n\nTo create a relation, store a property that defines a `$relation` array.\n\nExample:\n\n```json\n{\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\" }\n    ]\n  }\n}\n```\n\nThe items in `$relation` support two properties:\n- `entity_id` - The ID of the entity to link\n- `_tags` - Tags or labels for the relation (optional)\n",
+      }
+    },
+    "/v1/users/me": {
+      "get": {
+        "operationId": "getMe",
+        "summary": "getMe",
+        "description": "Get currently logged in user",
         "tags": [
-          "Entities"
+          "User V1"
         ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
-          },
-          {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Entity"
-              },
-              "example": {}
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Currently logged in user",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntityItem"
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
           }
         }
-      },
-      "delete": {
-        "operationId": "deleteEntity",
-        "summary": "deleteEntity",
-        "description": "Deletes an Entity\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityDeleted`\n",
-        "tags": [
-          "Entities"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
-          },
-          {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
       }
     },
-    "/v1/entity:autocomplete": {
+    "/v1/users": {
       "get": {
-        "operationId": "autocomplete",
-        "summary": "autocomplete",
-        "description": "Autocomplete entity attributes\n",
-        "tags": [
-          "Entities"
-        ],
+        "operationId": "listUsers",
+        "summary": "listUsers",
+        "description": "Lists users in organizations you have access to",
         "parameters": [
           {
-            "name": "input",
+            "name": "org_ids",
             "in": "query",
-            "description": "Input to autocomplete",
+            "description": "Comma-separated list of organization ids to filter by",
+            "style": "form",
+            "explode": false,
             "schema": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/OrganizationId"
+              }
             }
           },
           {
-            "name": "attribute",
+            "name": "query",
             "in": "query",
-            "description": "Autocomplete attribute",
+            "description": "Query text to filter by",
+            "required": false,
             "schema": {
-              "type": "string",
-              "example": "_tags"
-            },
-            "required": true
-          },
-          {
-            "name": "slug",
-            "in": "query",
-            "description": "Limit results to entity schema",
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
+              "$ref": "#/components/schemas/Query"
             }
           },
           {
-            "name": "size",
+            "name": "limit",
             "in": "query",
-            "description": "Maximum number of results to return",
+            "description": "Limit the results size",
+            "required": false,
             "schema": {
-              "type": "integer",
-              "default": 10,
-              "minimum": 1,
-              "maximum": 250
+              "$ref": "#/components/schemas/Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Specify the page",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Offset"
             }
           }
         ],
+        "tags": [
+          "User V1"
+        ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "List of users",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "hits": {
-                      "type": "number",
-                      "example": 1
-                    },
-                    "results": {
+                    "users": {
                       "type": "array",
                       "items": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "boolean"
-                          },
-                          {
-                            "type": "object",
-                            "additionalProperties": true
-                          }
-                        ]
-                      },
-                      "example": [
-                        "value"
-                      ]
+                        "$ref": "#/components/schemas/User"
+                      }
                     }
                   }
                 }
@@ -594,78 +554,32 @@
         }
       }
     },
-    "/v1/entity/activity": {
-      "post": {
-        "operationId": "createActivity",
-        "summary": "createActivity",
-        "description": "Create an activity that can be displayed in activity feeds.\n\n- All activites are published as events on the event bus\n- Entity mutations are always part of an activity\n",
-        "tags": [
-          "Activity"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "entities",
-            "description": "Comma-separated list of entities which the activity primarily concerns",
-            "style": "form",
-            "explode": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/EntityId"
-              }
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Activity"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ActivityItem"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/entity/activity/{id}": {
+    "/v1/users/{id}": {
       "get": {
-        "operationId": "getActivity",
-        "summary": "getActivity",
-        "description": "Get activity by id",
-        "tags": [
-          "Activity"
-        ],
+        "operationId": "getUser",
+        "summary": "getUser",
+        "description": "Get user by id",
         "parameters": [
           {
-            "in": "path",
             "name": "id",
-            "description": "Activity Id",
+            "in": "path",
+            "description": "User id",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/ActivityId"
+              "$ref": "#/components/schemas/UserId"
             }
           }
         ],
+        "tags": [
+          "User V1"
+        ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "User",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ActivityItem"
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
@@ -673,143 +587,38 @@
         }
       }
     },
-    "/v1/entity/activity/{id}:attach": {
-      "post": {
-        "operationId": "attachActivity",
-        "summary": "attachActivity",
-        "description": "Attach existing activity to entity activity feeds",
-        "tags": [
-          "Activity"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "Activity Id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
-          },
-          {
-            "in": "query",
-            "name": "entities",
-            "description": "Comma-separated list of entities which the activity primarily concerns",
-            "style": "form",
-            "explode": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/EntityId"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ActivityItem"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/entity/{slug}/{id}/activity": {
+    "/v1/users/username/{username}:getLoginParameters": {
       "get": {
-        "operationId": "getEntityActivityFeed",
-        "summary": "getEntityActivityFeed",
-        "description": "Get activity feed for an entity\n",
-        "tags": [
-          "Activity"
-        ],
+        "operationId": "getUserLoginParameters",
+        "summary": "getUserLoginParameters",
+        "description": "Get user organization login parameters by username",
+        "security": [],
         "parameters": [
           {
+            "name": "username",
             "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
+            "description": "Username",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
-          },
-          {
-            "in": "query",
-            "name": "after",
-            "description": "Get activities after this timestamp",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "in": "query",
-            "name": "before",
-            "description": "get activities before this timestamp",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "in": "query",
-            "name": "from",
-            "description": "start from page",
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0
-            }
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "description": "max number of results to return",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 25
-            }
-          },
-          {
-            "in": "query",
-            "name": "type",
-            "description": "Activity type",
-            "schema": {
-              "type": "string",
-              "example": "SyncActivity"
+              "$ref": "#/components/schemas/Username"
             }
           }
         ],
+        "tags": [
+          "User V1"
+        ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "User",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "total": {
-                      "type": "integer",
-                      "example": 1
-                    },
-                    "results": {
+                    "login_parameters": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/ActivityItem"
+                        "$ref": "#/components/schemas/LoginParameters"
                       }
                     }
                   }
@@ -831,2193 +640,507 @@
       }
     },
     "schemas": {
-      "SchemaId": {
-        "description": "Generated uuid for schema",
-        "type": "string",
-        "format": "uuid"
+      "PartnerInvitationToken": {
+        "type": "string"
       },
-      "EntitySchema": {
-        "description": "The \"type\" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities.",
+      "InviteToken": {
+        "type": "string"
+      },
+      "VerificationToken": {
+        "type": "string"
+      },
+      "UserId": {
+        "type": "string"
+      },
+      "Query": {
+        "type": "string"
+      },
+      "OrganizationId": {
+        "type": "string"
+      },
+      "Limit": {
+        "type": "number"
+      },
+      "Offset": {
+        "type": "number"
+      },
+      "Username": {
+        "type": "string"
+      },
+      "UserInvitationPayload": {
         "type": "object",
         "properties": {
-          "slug": {
-            "$ref": "#/components/schemas/EntitySlug"
-          },
-          "blueprint": {
-            "$ref": "#/components/schemas/BlueprintEntityId"
-          },
-          "feature_flag": {
+          "email": {
             "type": "string",
-            "example": "FF_MY_FEATURE_FLAG",
-            "description": "This schema should only be active when the feature flag is enabled"
+            "description": "Email address of the address",
+            "example": "test@example.com"
           },
-          "enable_setting": {
-            "description": "This schema should only be active when one of the organization settings is enabled",
+          "language": {
+            "type": "string",
+            "description": "Language for user invitation email",
+            "enum": [
+              "en",
+              "de"
+            ],
+            "default": "en"
+          },
+          "roles": {
             "type": "array",
             "items": {
               "type": "string",
-              "example": "ecommerce_preview"
+              "description": "Role IDs for the user",
+              "example": "123:owner"
             }
-          },
-          "name": {
-            "description": "User-friendly identifier for the entity schema",
-            "type": "string",
-            "example": "Contact"
-          },
-          "plural": {
-            "type": "string",
-            "example": "Contacts"
-          },
-          "icon": {
-            "type": "string",
-            "example": "person"
-          },
-          "title_template": {
-            "type": "string",
-            "description": "Template for rendering the title field. Uses handlebars",
-            "example": "{{first_name}} {{last_name}}"
-          },
-          "ui_config": {
-            "type": "object",
-            "properties": {
-              "table_view": {
-                "$ref": "#/components/schemas/EntityViewConfig"
-              },
-              "create_view": {
-                "$ref": "#/components/schemas/EntityViewConfig"
-              },
-              "edit_view": {
-                "$ref": "#/components/schemas/EntityViewConfig"
-              },
-              "list_item": {
-                "type": "object",
-                "properties": {
-                  "summary_attributes": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "description": "List of attributes to show in list item",
-                      "example": "email"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "capabilities": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EntityCapability"
-            }
-          },
-          "group_settings": {
-            "type": "object",
-            "description": "A dictionary of Group Titles and associated settings if present.",
-            "additionalProperties": {
-              "type": "object",
-              "properties": {
-                "expanded": {
-                  "type": "boolean"
-                },
-                "order": {
-                  "description": "Render order of the group",
-                  "type": "integer",
-                  "default": 0
-                }
-              }
-            },
-            "example": {
-              "Order Info": {
-                "expanded": true
-              },
-              "Contact Details": {
-                "expanded": false
-              }
-            }
-          },
-          "layout_settings": {
-            "type": "object",
-            "description": "Custom grid definitions for the layout",
-            "additionalProperties": {
-              "type": "object",
-              "properties": {
-                "grid_gap": {
-                  "type": "string"
-                },
-                "grid_template_columns": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "attributes": {
-            "description": "An ordered list of attributes the entity contains",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Attribute"
-            },
-            "example": [
-              {
-                "name": "email",
-                "type": "email",
-                "label": "Email",
-                "required": true
-              },
-              {
-                "name": "first_name",
-                "type": "string",
-                "label": "First Name"
-              },
-              {
-                "name": "last_name",
-                "type": "string",
-                "label": "Last Name"
-              },
-              {
-                "name": "birthdate",
-                "type": "date",
-                "label": "Birthdate"
-              },
-              {
-                "name": "salutation",
-                "type": "select",
-                "label": "Salutation",
-                "options": [
-                  "Mr.",
-                  "Ms. / Mrs.",
-                  "Other"
-                ]
-              },
-              {
-                "name": "marketing_permission",
-                "type": "boolean",
-                "label": "Marketing permission"
-              },
-              {
-                "name": "image",
-                "type": "file",
-                "label": "Image"
-              }
-            ]
-          }
-        },
-        "required": [
-          "slug",
-          "name",
-          "plural",
-          "attributes",
-          "capabilities",
-          "views"
-        ]
-      },
-      "EntitySchemaItem": {
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "id": {
-                "$ref": "#/components/schemas/SchemaId"
-              }
-            }
-          },
-          {
-            "$ref": "#/components/schemas/EntitySchema"
-          }
-        ]
-      },
-      "Attribute": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/TextAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/LinkAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/DateAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/CountryAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/BooleanAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/SelectAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/RelationAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/UserRelationAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/CurrencyAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/RepeatableAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/TagsAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/NumberAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/ConsentAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/InternalAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/OrderedListAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/FileAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/CustomAttribute"
-          }
-        ]
-      },
-      "BaseAttribute": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "placeholder": {
-            "type": "string"
-          },
-          "hidden": {
-            "description": "Do not render attribute in entity views",
-            "type": "boolean",
-            "default": false
-          },
-          "show_in_table": {
-            "description": "Render as a column in table views. When defined, overrides `hidden`",
-            "type": "boolean"
-          },
-          "required": {
-            "type": "boolean",
-            "default": false
-          },
-          "readonly": {
-            "type": "boolean",
-            "default": false
-          },
-          "deprecated": {
-            "type": "boolean",
-            "default": false
-          },
-          "default_value": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "additionalProperties": true
-              },
-              {
-                "type": "integer"
-              },
-              {
-                "type": "number"
-              },
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "array"
-              }
-            ]
-          },
-          "group": {
-            "type": "string"
-          },
-          "layout": {
-            "type": "string"
-          },
-          "hide_label": {
-            "type": "boolean",
-            "description": "When set to true, will hide the label of the field."
-          },
-          "icon": {
-            "type": "string",
-            "description": "Code name of the icon to used to represent this attribute.\nThe value must be a valid @epilot/base-elements Icon name\n"
-          },
-          "render_condition": {
-            "type": "string",
-            "description": "Defines the conditional rendering expression for showing this field.\nWhen a valid expression is parsed, their evaluation defines the visibility of this attribute.\nNote: Empty or invalid expression have no effect on the field visibility.\n"
-          },
-          "constraints": {
-            "type": "object",
-            "description": "A set of constraints applicable to the attribute.\nThese constraints should and will be enforced by the attribute renderer.\n",
-            "example": {
-              "disablePast": true
-            }
-          },
-          "feature_flag": {
-            "type": "string",
-            "example": "FF_MY_FEATURE_FLAG",
-            "description": "This attribute should only be active when the feature flag is enabled"
-          },
-          "value_formatter": {
-            "type": "string"
-          },
-          "preview_value_formatter": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "label"
-        ]
-      },
-      "TextAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "Textarea or text input",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "string"
-                ]
-              },
-              "multiline": {
-                "type": "boolean"
-              }
-            }
-          }
-        ]
-      },
-      "LinkAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "Link with title and href",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "link"
-                ]
-              }
-            }
-          }
-        ]
-      },
-      "InternalAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "No UI representation",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "internal"
-                ]
-              }
-            }
-          }
-        ]
-      },
-      "BooleanAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "Yes / No Toggle",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "boolean"
-                ]
-              }
-            }
-          }
-        ]
-      },
-      "DateAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "Date or Datetime picker",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "date",
-                  "datetime"
-                ]
-              }
-            }
-          }
-        ]
-      },
-      "CountryAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "Country picker",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "country"
-                ]
-              }
-            }
-          }
-        ]
-      },
-      "SelectAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "Dropdown select",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "select",
-                  "radio"
-                ]
-              },
-              "options": {
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "value": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "value"
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        ]
-      },
-      "FileAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "File or Image Attachment",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "image",
-                  "file"
-                ]
-              },
-              "multiple": {
-                "type": "boolean"
-              },
-              "allowed_types": {
-                "description": "List of unique content type specifiers (mime-types / extension)",
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "example": "image/*"
-                }
-              },
-              "default_access_control": {
-                "type": "string",
-                "enum": [
-                  "public-read",
-                  "private"
-                ]
-              }
-            },
-            "required": [
-              "type",
-              "attachments"
-            ]
-          }
-        ]
-      },
-      "CurrencyAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "Currency input",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "currency"
-                ]
-              },
-              "currency": {
-                "description": "An array of currency configurations with a country code (ISO-4217)",
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "description": "A currency configuration",
-                      "properties": {
-                        "code": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "type": "string"
-                        },
-                        "symbol": {
-                          "type": "string"
-                        },
-                        "flag": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "code",
-                        "description",
-                        "symbol"
-                      ],
-                      "example": {
-                        "code": "EUR",
-                        "description": "Euro",
-                        "symbol": "€",
-                        "flag": "🇪🇺"
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            "required": [
-              "type",
-              "currency"
-            ]
-          }
-        ]
-      },
-      "SummaryField": {
-        "type": "object",
-        "description": "Summary Fields are displayed inside list view as a resume of the relation entity.",
-        "properties": {
-          "field": {
-            "type": "string",
-            "description": "The field from the entity attributes to display"
-          },
-          "display_as": {
-            "type": "string",
-            "description": "An hint on how to display the summary field"
           }
         }
       },
-      "RelationAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
+      "UserActivationPayload": {
+        "type": "object",
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "description": "User's display name (default: email address)",
+            "example": "Example User"
           },
-          {
-            "type": "object",
-            "description": "Entity Relationship",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "relation"
-                ]
-              },
-              "relation_type": {
-                "type": "string",
-                "enum": [
-                  "belongs_to",
-                  "has_many"
-                ]
-              },
-              "delete_mode": {
-                "type": "string",
-                "enum": [
-                  "cascade"
-                ]
-              },
-              "relation_affinity_mode": {
-                "type": "string",
-                "enum": [
-                  "weak",
-                  "strong"
-                ]
-              },
-              "edit_mode": {
-                "type": "string",
-                "enum": [
-                  "list-view"
-                ]
-              },
-              "drawer_size": {
-                "type": "string",
-                "enum": [
-                  "small",
-                  "medium",
-                  "large"
-                ]
-              },
-              "icon": {
-                "type": "string"
-              },
-              "summary_fields": {
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "description": "The field name from the entity attributes to display"
-                    },
-                    {
-                      "$ref": "#/components/schemas/SummaryField"
-                    }
-                  ]
-                }
-              },
-              "allowedSchemas": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/EntitySlug"
-                }
-              }
-            }
+          "password": {
+            "type": "string",
+            "description": "User's password",
+            "example": "AKjhdakjsdh@!34"
           }
-        ]
+        }
       },
-      "UserRelationAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "User Relationship",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "relation_user"
-                ]
-              },
-              "multiple": {
-                "type": "boolean",
-                "default": false
-              }
-            }
+      "UserVerificationPayload": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "User's password",
+            "example": "AKjhdakjsdh@!34"
           }
-        ]
+        }
       },
-      "RepeatableAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
+      "UserV2": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UserId"
           },
-          {
-            "type": "object",
-            "description": "Repeatable (add N number of fields)",
-            "properties": {
-              "repeatable": {
-                "type": "boolean"
-              },
-              "relation_affinity_mode": {
-                "type": "string",
-                "enum": [
-                  "weak",
-                  "strong"
-                ]
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "string",
-                  "phone",
-                  "email",
-                  "address",
-                  "relation"
-                ]
-              }
-            }
-          }
-        ]
-      },
-      "TagsAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
+          "organization_id": {
+            "$ref": "#/components/schemas/OrganizationId"
           },
-          {
-            "type": "object",
-            "description": "Tags",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "tags"
-                ]
-              },
-              "options": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "suggestions": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "NumberAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
+          "created_at": {
+            "type": "string",
+            "example": "2022-02-08T04:44:32.246Z"
           },
-          {
-            "type": "object",
-            "description": "Numeric input",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "number"
-                ]
-              },
-              "format": {
-                "type": "string"
-              }
-            }
-          }
-        ]
-      },
-      "ConsentAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
+          "display_name": {
+            "type": "string",
+            "description": "User's display name (default: email address)",
+            "example": "Example User"
           },
-          {
+          "status": {
+            "type": "string",
+            "enum": [
+              "Active",
+              "Pending",
+              "Deactivated",
+              "Deleted"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "draft_email": {
+            "type": "string",
+            "nullable": true,
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "example": 1234567890
+          },
+          "preferred_language": {
+            "type": "string",
+            "example": "de"
+          },
+          "token": {
+            "type": "string",
+            "example": "65dc527f-cb2d-4158-8f2e-8978dbceb599"
+          },
+          "signature": {
+            "type": "string",
+            "example": "<p>Thanks</p>"
+          },
+          "is_signature_enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "image_uri": {
             "type": "object",
-            "description": "Consent Management",
+            "additionalProperties": true,
             "properties": {
-              "type": {
+              "original": {
                 "type": "string",
-                "enum": [
-                  "consent"
-                ]
+                "format": "uri"
               },
-              "topic": {
-                "type": "string"
-              },
-              "identifiers": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
+              "thumbnail_32": {
+                "type": "string",
+                "format": "uri"
               }
             },
-            "required": [
-              "type",
-              "topic"
-            ]
-          }
-        ]
-      },
-      "OrderedListAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "Type of attribute to render N number of ordered fields",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "ordered_list"
-                ]
-              }
-            }
-          }
-        ]
-      },
-      "CustomAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "Custom input",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "custom"
-                ]
-              }
-            }
-          }
-        ]
-      },
-      "Attachment": {
-        "type": "object",
-        "deprecated": true,
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "mime": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "size": {
-            "type": "number"
-          },
-          "image_url": {
-            "type": "string"
-          },
-          "download_url": {
-            "type": "string"
-          },
-          "alt_text": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "key",
-          "mime",
-          "name",
-          "size",
-          "image_url",
-          "download_url"
-        ]
-      },
-      "EntitySlug": {
-        "description": "URL-friendly identifier for the entity schema",
-        "type": "string",
-        "example": "contact"
-      },
-      "EntityCapability": {
-        "description": "Capabilities the Entity has. Turn features on/off for entities.",
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Unique name for the capability",
-            "example": "customer_messaging"
-          },
-          "title": {
-            "type": "string",
-            "description": "Human readable title of the capability",
-            "example": "Messaging"
-          },
-          "attributes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Attribute"
+            "example": {
+              "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+              "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
             }
           },
-          "ui_hooks": {
+          "properties": {
             "type": "array",
             "items": {
               "type": "object",
-              "additionalProperties": true,
               "properties": {
-                "hook": {
+                "name": {
                   "type": "string",
-                  "description": "name of the hook to use",
-                  "example": "EntityDetailsV2:Tab"
+                  "example": "profileImageName"
                 },
-                "order": {
-                  "type": "integer",
-                  "description": "render order (ascending)",
-                  "example": 10
-                },
-                "title": {
+                "value": {
                   "type": "string",
-                  "example": "Notes"
-                },
-                "group_expanded": {
-                  "type": "boolean",
-                  "description": "Sets the group expand/collapse default state"
-                },
-                "import": {
-                  "type": "string",
-                  "description": "package to be imported",
-                  "example": "@epilot360/notes"
-                },
-                "component": {
-                  "type": "string",
-                  "description": "the component to be dynamically loaded",
-                  "example": "PricingItems"
-                },
-                "route": {
-                  "type": "string",
-                  "description": "route for specified capability",
-                  "example": "notes"
-                },
-                "icon": {
-                  "type": "string",
-                  "description": "Preview icon name(As in Base elements) for the capability",
-                  "example": "email"
-                },
-                "disabled": {
-                  "type": "boolean",
-                  "description": "Whether capability should be disabled"
-                },
-                "header": {
-                  "type": "boolean",
-                  "description": "Specific to Activity pilot"
+                  "example": "avatar.png"
                 }
               },
               "required": [
-                "hook"
+                "name",
+                "value"
               ]
             }
-          },
-          "feature_flag": {
-            "type": "string",
-            "example": "FF_MY_FEATURE_FLAG",
-            "description": "This capability should only be active when the feature flag is enabled"
-          },
-          "legacy": {
-            "type": "boolean",
-            "description": "Only show capability for legacy tenants (ivy)"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "EntityViewConfig": {
-        "anyOf": [
-          {
-            "$ref": "#/components/schemas/EntityDefaultCreate"
-          },
-          {
-            "$ref": "#/components/schemas/EntityDefaultEdit"
-          },
-          {
-            "$ref": "#/components/schemas/EntityDefaultOverview"
-          },
-          {
-            "$ref": "#/components/schemas/RedirectEntityView"
-          },
-          {
-            "$ref": "#/components/schemas/EntityParcelView"
-          },
-          {
-            "$ref": "#/components/schemas/EntityViewDisabled"
-          }
-        ]
-      },
-      "EntityViewDisabled": {
-        "type": "object",
-        "properties": {
-          "view_type": {
-            "type": "string",
-            "enum": [
-              "disabled"
-            ]
           }
         }
       },
-      "EntityDefaultOverview": {
+      "User": {
         "type": "object",
         "properties": {
-          "view_type": {
-            "type": "string",
-            "enum": [
-              "default"
-            ]
+          "id": {
+            "$ref": "#/components/schemas/UserId"
           },
-          "dropdown_items": {
+          "organization_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "display_name": {
+            "type": "string",
+            "example": "Example user",
+            "deprecated": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Example user",
+            "deprecated": true
+          },
+          "preferred_language": {
+            "type": "string",
+            "example": "de"
+          },
+          "signature": {
+            "type": "string",
+            "example": "<p>Thanks</p>"
+          },
+          "roles": {
             "type": "array",
             "items": {
-              "allOf": [
-                {
-                  "type": "object",
-                  "properties": {
-                    "feature_flag": {
-                      "type": "string",
-                      "example": "FF_MY_FEATURE_FLAG",
-                      "description": "This dropdown item should only be active when the feature flag is enabled"
-                    },
-                    "legacy": {
-                      "type": "boolean",
-                      "description": "Only show item for legacy tenants (ivy)"
-                    }
-                  }
-                },
-                {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "entity"
-                          ]
-                        },
-                        "entity": {
-                          "$ref": "#/components/schemas/EntitySlug"
-                        }
-                      }
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "link"
-                          ]
-                        },
-                        "title": {
-                          "type": "string",
-                          "example": "Opportunities"
-                        },
-                        "uri": {
-                          "type": "string",
-                          "format": "uri"
-                        }
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
+              "type": "string",
+              "example": "Owner"
+            },
+            "deprecated": true,
+            "description": "Deprecated! Please use Permissions API instead"
           },
-          "row_actions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "classic_view": {
-            "type": "string",
-            "format": "uri"
-          }
-        }
-      },
-      "EntityDefaultCreate": {
-        "type": "object",
-        "properties": {
-          "view_type": {
-            "type": "string",
-            "enum": [
-              "default"
-            ]
-          }
-        }
-      },
-      "EntityDefaultEdit": {
-        "type": "object",
-        "properties": {
-          "view_type": {
-            "type": "string",
-            "enum": [
-              "default"
-            ]
-          }
-        }
-      },
-      "RedirectEntityView": {
-        "type": "object",
-        "properties": {
-          "view_type": {
-            "type": "string",
-            "enum": [
-              "redirect"
-            ]
-          },
-          "route": {
-            "type": "string",
-            "example": "/app/pricing-hub/product/:entityId"
-          }
-        },
-        "example": {
-          "type": "redirect",
-          "route": "/app/pricing-hub/product/:entityId"
-        }
-      },
-      "EntityParcelView": {
-        "type": "object",
-        "properties": {
-          "view_type": {
-            "type": "string",
-            "enum": [
-              "parcel"
-            ]
-          },
-          "import": {
-            "type": "string",
-            "example": "@epilot360/pricing-hub-app"
-          }
-        },
-        "example": {
-          "type": "redirect",
-          "route": "/app/pricing-hub/product/:entityId"
-        }
-      },
-      "EntityId": {
-        "type": "string",
-        "format": "uuid"
-      },
-      "BaseEntity": {
-        "type": "object",
-        "properties": {
-          "_id": {
-            "$ref": "#/components/schemas/EntityId"
-          },
-          "_title": {
-            "type": "string",
-            "description": "Title of entity"
-          },
-          "_org": {
-            "type": "string",
-            "description": "Organization Id the entity belongs to"
-          },
-          "_schema": {
-            "$ref": "#/components/schemas/EntitySlug"
-          },
-          "_tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "_created_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "_updated_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "_id",
-          "_title",
-          "_org",
-          "_schema",
-          "_created_at",
-          "_updated_at"
-        ],
-        "example": {
-          "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "_org": "123",
-          "_schema": "contact",
-          "_tags": [
-            "example",
-            "mock"
-          ],
-          "_created_at": "2021-02-09T12:41:43.662Z",
-          "_updated_at": "2021-02-09T12:41:43.662Z"
-        }
-      },
-      "Entity": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
-      },
-      "HydratedEntity": {
-        "type": "object",
-        "description": "Entity with relation data resolved into the attribute values",
-        "properties": {},
-        "additionalProperties": true,
-        "example": {
-          "status": "active",
-          "customer_number": "abc123",
-          "email": [
-            {
-              "label": "work",
-              "email": "user@example.com"
-            }
-          ],
-          "phone": [
-            {
-              "label": "work",
-              "phone": "+49123456789"
-            }
-          ],
-          "first_name": "First Name",
-          "middle_name": "Middle Name",
-          "last_name": "Last Name",
-          "date_of_birth": "2019-08-24",
-          "title": "Mr.",
-          "account": [
-            {
-              "status": "active",
-              "name": "Company name",
-              "company_email": [
-                {
-                  "label": "Company email",
-                  "email": "company@example.com"
-                }
-              ],
-              "company_phone": [
-                {
-                  "label": "Support phone",
-                  "phone": "+49123456789"
-                }
-              ],
-              "company_website": "https://example.com",
-              "tax_id": "DE123456789",
-              "tax_exemption": "2019-08-24",
-              "contacts": {
-                "$relation": [
-                  {
-                    "_tags": [
-                      "CEO"
-                    ],
-                    "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                  }
-                ]
+          "image_uri": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "original": {
+                "type": "string",
+                "format": "uri",
+                "example": "https://account-profile-images.epilot.cloud/1/avatar.png"
+              },
+              "thumbnail_32": {
+                "type": "string",
+                "format": "uri",
+                "example": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
               }
             }
-          ]
-        }
-      },
-      "EntityItem": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseEntity"
           },
-          {
-            "$ref": "#/components/schemas/Entity"
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "profileImageName"
+                },
+                "value": {
+                  "type": "string",
+                  "example": "avatar.png"
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ]
+            }
           }
+        },
+        "required": [
+          "id",
+          "organization_id",
+          "email",
+          "name",
+          "preferred_language",
+          "roles",
+          "properties"
         ]
       },
-      "HydratedEntityItem": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseEntity"
-          },
-          {
-            "$ref": "#/components/schemas/HydratedEntity"
-          }
-        ]
-      },
-      "EntitySearchParams": {
+      "LoginParameters": {
         "type": "object",
         "properties": {
-          "q": {
-            "description": "Lucene queries supported with ElasticSearch",
+          "organization_id": {
             "type": "string",
-            "example": "_schema:contact AND status:active"
+            "example": "123"
           },
-          "sort": {
+          "organization_name": {
             "type": "string",
-            "example": "_created_at:desc"
+            "example": "epilot GmbH"
           },
-          "from": {
-            "type": "integer",
-            "minimum": 0,
-            "default": 0
+          "organization_type": {
+            "type": "string",
+            "example": "Vendor"
           },
-          "size": {
-            "type": "integer",
-            "minimum": 1,
-            "default": 10
+          "cognito_region": {
+            "type": "string",
+            "example": "eu-central-1"
           },
-          "hydrate": {
-            "type": "boolean",
-            "description": "When true, enables entity hydration to resolve nested $relation references in-place.",
-            "default": false
+          "cognito_identity_pool_id": {
+            "type": "string",
+            "example": "eu-central-1:d24af723-7b40-4c3d-be57-d0a732a59a5d"
           },
-          "fields": {
+          "cognito_user_pool_id": {
+            "type": "string",
+            "example": "eu-central-sample"
+          },
+          "cognito_user_pool_client_id": {
+            "type": "string",
+            "example": "asbkh213ehkquwhdi"
+          },
+          "cognito_oauth_domain": {
+            "type": "string",
+            "example": "epilot-org-123"
+          },
+          "cognito_oauth_scopes": {
             "type": "array",
-            "description": "List of entity fields to include in search results",
             "items": {
               "type": "string"
             },
             "example": [
-              "_id",
-              "_title",
-              "first_name"
+              "openid"
             ]
           },
-          "expand": {
-            "deprecated": true,
-            "type": "array",
-            "description": "Deprecated. Use hydrate=true instead",
-            "items": {
-              "type": "string"
-            }
+          "oauth_response_type": {
+            "type": "string",
+            "enum": [
+              "code",
+              "token"
+            ]
           }
-        },
-        "required": [
-          "q"
-        ]
+        }
       },
-      "EntitySearchResults": {
+      "SignupUserPayload": {
         "type": "object",
         "properties": {
-          "hits": {
-            "type": "number",
-            "example": 1
+          "organization_detail": {
+            "$ref": "#/components/schemas/OrganizationDetail"
           },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EntityItem"
-            }
+          "user_detail": {
+            "$ref": "#/components/schemas/UserDetail"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language for user invitation email",
+            "enum": [
+              "en",
+              "de"
+            ],
+            "default": "en"
           }
         }
       },
-      "ActivityId": {
-        "type": "string",
-        "format": "ulid",
-        "description": "See https://github.com/ulid/spec",
-        "example": "01F130Q52Q6MWSNS8N2AVXV4JN"
-      },
-      "ActivityCallerContext": {
-        "type": "object",
+      "OrganizationDetail": {
         "additionalProperties": true,
-        "properties": {
-          "EpilotAuth": {
-            "type": "object",
-            "properties": {
-              "token": {
-                "type": "object",
-                "properties": {
-                  "sub": {
-                    "type": "string",
-                    "example": "476e9b48-42f4-4234-a2b0-4668b34626ce"
-                  },
-                  "email": {
-                    "type": "string",
-                    "example": "example@epilot.cloud"
-                  },
-                  "cognito:username": {
-                    "type": "string",
-                    "example": "example@epilot.cloud"
-                  },
-                  "custom:ivy_user_id": {
-                    "type": "string",
-                    "example": "10006129"
-                  }
-                },
-                "example": {
-                  "sub": "476e9b48-42f4-4234-a2b0-4668b34626ce",
-                  "cognito:groups": [
-                    "Administrator"
-                  ],
-                  "cognito:preferred_role": "arn:aws:iam::912468240823:role/base-administrator-role",
-                  "iss": "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_6lZSgmU6D",
-                  "custom:ivy_org_id": "739224",
-                  "cognito:username": "n.ahmad@epilot.cloud",
-                  "custom:ivy_user_id": "10006129",
-                  "cognito:roles": [
-                    "arn:aws:iam::912468240823:role/base-administrator-role"
-                  ],
-                  "aud": "6e0jbdnger7nmoktaaflarue1l",
-                  "event_id": "cd5f5583-d90c-4db5-8e99-5f5dd29a4d75",
-                  "token_use": "id",
-                  "auth_time": 1614333023,
-                  "exp": 1614336623,
-                  "iat": 1614333023,
-                  "email": "n.ahmad@epilot.cloud"
-                }
-              }
-            }
-          }
-        }
-      },
-      "Activity": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "example": "MyCustomActivity"
+            "enum": [
+              "Vendor",
+              "Partner"
+            ]
           },
-          "title": {
+          "name": {
             "type": "string",
-            "description": "Title for activity. Supports handlebars syntax.",
-            "example": "My custom activity"
+            "example": "Epilot"
           },
-          "message": {
+          "pricing_tier": {
             "type": "string",
-            "description": "Message for activity. Supports handlebars syntax.",
-            "example": "{{caller}} did something with {{entity payload.entity.id}}."
+            "example": "professional"
           },
-          "payload": {
-            "type": "object",
-            "properties": {},
-            "additionalProperties": true,
-            "example": {
-              "entity": {
-                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "schema": "contact"
-              }
-            }
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "website": {
+            "type": "string"
+          },
+          "is_privacy_policy_checked": {
+            "type": "boolean",
+            "example": false,
+            "nullable": true
+          },
+          "is_terms_and_conditions_checked": {
+            "type": "boolean",
+            "example": false,
+            "nullable": true
           }
         },
         "required": [
           "type",
-          "title",
-          "message"
+          "name",
+          "pricing_tier",
+          "email"
         ]
       },
-      "EntityOperation": {
+      "UserDetail": {
         "type": "object",
         "properties": {
-          "entity": {
-            "$ref": "#/components/schemas/EntityId"
-          },
-          "operation": {
+          "full_name": {
             "type": "string",
-            "example": "updateEntity"
+            "example": "Example user"
           },
-          "params": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "$ref": "#/components/schemas/EntityId"
-              },
-              "slug": {
-                "$ref": "#/components/schemas/EntitySlug"
-              }
-            },
-            "example": {
-              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-              "slug": "contact"
-            }
+          "email": {
+            "type": "string",
+            "format": "email"
           },
-          "payload": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Entity"
-              },
-              {
-                "example": {
-                  "_schema": "contact",
-                  "_org": "123",
-                  "status": "Inactive"
-                }
-              }
-            ]
+          "password": {
+            "type": "string",
+            "description": "User's password",
+            "example": "AKjhdakjsdh@!34"
           }
         },
         "required": [
-          "entity",
-          "name"
+          "full_name",
+          "email",
+          "password"
         ]
       },
-      "ActivityItem": {
-        "allOf": [
-          {
+      "Organization": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Vendor",
+              "Partner"
+            ],
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Epilot",
+            "nullable": true
+          },
+          "signature": {
+            "type": "string",
+            "example": "<p>Thanks</p>",
+            "nullable": true
+          },
+          "symbol": {
+            "type": "string",
+            "example": "EPI",
+            "nullable": true
+          },
+          "pricing_tier": {
+            "type": "string",
+            "example": "professional",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "example": "someone@epilot.cloud",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "example": 49123123123,
+            "nullable": true
+          },
+          "website": {
+            "type": "string",
+            "example": "https://epilot.cloud",
+            "nullable": true
+          },
+          "address": {
             "type": "object",
             "properties": {
-              "_id": {
-                "$ref": "#/components/schemas/ActivityId"
-              },
-              "timestamp": {
+              "country": {
                 "type": "string",
-                "format": "date-time"
-              }
-            }
-          },
-          {
-            "$ref": "#/components/schemas/Activity"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "caller": {
-                "$ref": "#/components/schemas/ActivityCallerContext"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "properties": {
-              "operations": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/EntityOperation"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "BlueprintEntityId": {
-        "description": "Reference to blueprint",
-        "type": "string",
-        "format": "uuid"
-      }
-    },
-    "examples": {
-      "TaxEntity": {
-        "description": "Example of a Tax Rate entity",
-        "value": {
-          "active": true,
-          "type": "VAT",
-          "region": "Germany",
-          "region_label": "All Regions",
-          "rate": 19,
-          "behavior": "Exclusive",
-          "description": "MwSt. 19%"
-        }
-      },
-      "ContactEntity": {
-        "description": "Example of a contact entity",
-        "value": {
-          "status": "Active",
-          "customer_number": "abc123",
-          "first_name": "First",
-          "middle_name": "Middle",
-          "last_name": "Last",
-          "title": "Herr Prof. Dr.",
-          "email": [
-            {
-              "email": "user@example.com",
-              "_tags": [
-                "work"
-              ]
-            }
-          ],
-          "phone": [
-            {
-              "phone": "+49123456789",
-              "_tags": [
-                "personal",
-                "mobile"
-              ]
-            }
-          ],
-          "address": [
-            {
-              "country": "Germany",
-              "city": "Koln",
-              "postal_code": 81475,
-              "street": "Melatengürtel",
-              "street_number": 71,
-              "additional_info": "5. Etage",
-              "_tags": [
-                "billing",
-                "delivery"
-              ]
-            }
-          ],
-          "birthdate": "2019-08-24",
-          "account": {
-            "$relation": [
-              {
-                "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "_tags": [
-                  "company"
-                ]
-              }
-            ]
-          },
-          "consent_email_marketing": {
-            "status": "OPTED_IN",
-            "events": [
-              {
-                "type": "OPT_IN",
-                "organization_id": "123",
-                "created_at": "2021-07-05T09:12:29.352Z",
-                "topic": "EMAIL_MARKETING",
-                "identifier": "user@example.com",
-                "source": "https://consent.sls.epilot.io/optin?token=abc123",
-                "meta": {
-                  "ip_address": "1.1.1.1",
-                  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
-                }
+                "nullable": true
               },
-              {
-                "type": "DOUBLE_OPT_IN_REQUEST",
-                "organization_id": "123",
-                "created_at": "2021-07-05T08:12:29.352Z",
-                "topic": "EMAIL_MARKETING",
-                "identifier": "user@example.com",
-                "source": "consent-api",
-                "meta": {
-                  "token": "abc123"
-                }
+              "city": {
+                "type": "string",
+                "nullable": true
               },
-              {
-                "type": "OPT_IN",
-                "organization_id": "123",
-                "created_at": "2021-07-04T09:12:29.352Z",
-                "topic": "EMAIL_MARKETING",
-                "identifier": "user@example.com",
-                "source": "https://frontend.epilot.cloud",
-                "meta": {
-                  "ip_address": "1.1.1.1",
-                  "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
-                }
-              }
-            ]
-          }
-        }
-      },
-      "AccountEntity": {
-        "description": "Example of an account entity",
-        "value": {
-          "status": "Active",
-          "name": "Example Company",
-          "tax_id": "DE123456789",
-          "email": [
-            {
-              "email": "user@example.com",
-              "_tags": [
-                "work"
-              ]
-            }
-          ],
-          "phone": [
-            {
-              "phone": "+49123456789",
-              "_tags": [
-                "personal",
-                "mobile"
-              ]
-            }
-          ],
-          "address": [
-            {
-              "country": "Germany",
-              "city": "Koln",
-              "postal_code": 81475,
-              "street": "Melatengürtel",
-              "street_number": 71,
-              "additional_info": "5. Etage",
-              "_tags": [
-                "billing",
-                "delivery"
-              ]
-            }
-          ],
-          "website": "http://company.com",
-          "tax_exemption": "2021-02-23T09:08:57.320Z",
-          "registry_court": "Amtsgericht Köln",
-          "registry_number": "HRB 95505",
-          "company_size": "50-99",
-          "industry": [
-            "ecommerce",
-            "tech"
-          ],
-          "annual_revenue": "5000000",
-          "contact": {
-            "$relation": [
-              {
-                "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "_tags": [
-                  "CEO"
-                ]
-              }
-            ]
-          }
-        }
-      },
-      "ProductEntity": {
-        "description": "Example of a product entity",
-        "value": {
-          "code": "SunrockSolar375",
-          "type": "Product",
-          "name": "Sunrock Solar Panel",
-          "description": "Sunrock Solar Panel, provide high capacity power generation even at night.",
-          "shippable": "true,",
-          "_files": {
-            "type": "file",
-            "attachments": [
-              {
-                "key": "f001-32123-asdasd-23213",
-                "mime": "application/pdf",
-                "name": "wallbox-premium.pdf",
-                "size": 6933430,
-                "image_url": "https://s3-bucket.epilot.cloud/uid/f001-32123-asdasd-23213",
-                "download_url": "https://s3-bucket.epilot.cloud/uid/f001-32123-asdasd-23213"
-              }
-            ]
-          },
-          "_images": {
-            "type": "image",
-            "attachments": [
-              {
-                "key": "i001-32123-asdasd-23213",
-                "mime": "application/pdf",
-                "name": "wallbox-premium.pdf",
-                "size": 6933430,
-                "image_url": "https://s3-bucket.epilot.cloud/uid/f001-32123-asdasd-23213",
-                "download_url": "https://s3-bucket.epilot.cloud/uid/f001-32123-asdasd-23213"
-              }
-            ]
-          },
-          "prices": {
-            "$relation": [
-              {
-                "entity_id": "a38cca03-18a2-4e9c-8516-0918d81e7830",
-                "_tags": [
-                  "price"
-                ]
+              "postal_code": {
+                "type": "string",
+                "nullable": true
               },
-              {
-                "entity_id": "3d10c912-c419-42d7-9270-02b7d05294e5",
-                "_tags": [
-                  "price"
-                ]
-              }
-            ]
-          }
-        }
-      },
-      "PriceEntity": {
-        "description": "Example of a price entity",
-        "value": {
-          "code": "MODEL_375KW_PREMIUM",
-          "type": "One Time",
-          "description": "Solar Panel 375 kWp Premium",
-          "billing_scheme": "per_unit",
-          "unit_amount": "€ 28500",
-          "tiers_mode": "Standard"
-        }
-      },
-      "OrderEntity": {
-        "description": "Example of a Order entity",
-        "value": {
-          "amount_subtotal": 23045,
-          "amount_total": 27424,
-          "billing_address": [
-            {
-              "additional_info": "",
-              "city": "City",
-              "country": "DE",
-              "postal_code": "123",
-              "street": "Street 1",
-              "street_number": "2",
-              "_tags": []
-            }
-          ],
-          "billing_company_name": "Epilot",
-          "billing_contact": {
-            "$relation": [
-              {
-                "entity_id": "0691f503-5a3c-4e9e-b036-ffb21ea1d284",
-                "relationText": "Daniel Test",
-                "_schema": "contact",
-                "_tags": []
-              }
-            ]
-          },
-          "billing_email": "x@email.xyz",
-          "billing_first_name": "Paulo",
-          "billing_last_name": "Henriques",
-          "billing_phone": "00351912611099",
-          "billing_vat": "123456789",
-          "currency": "EUR",
-          "delivery_address": [
-            {
-              "additional_info": "",
-              "city": "City",
-              "country": "DE",
-              "postal_code": "123",
-              "street": "Street 1",
-              "street_number": "2",
-              "_tags": []
-            }
-          ],
-          "footer_notes": "Footer",
-          "line_items": [
-            {
-              "amount_subtotal": 23045,
-              "amount_total": 27424,
-              "currency": "EUR",
-              "description": "Basic Model - No Wifi",
-              "price_id": "efe9ff76-865c-4287-8de9-422cfc741ff9",
-              "product_id": "beefa9f1-29a8-448e-94d5-ebf1963428f8",
-              "quantity": 1,
-              "taxes": [
-                {
-                  "amount": 4379,
-                  "rate": "standard"
-                }
-              ],
-              "unit_amount": 23045,
-              "_price": {
-                "active": false,
-                "billing_duration_amount": "2",
-                "billing_duration_unit": "years",
-                "billing_period": "monthly",
-                "description": "Basic Model - No Wifi",
-                "notice_time_amount": "1",
-                "notice_time_unit": "months",
-                "price_display_in_journeys": "show_price",
-                "renewal_duration_amount": "1",
-                "renewal_duration_unit": "years",
-                "sales_tax": "standard",
-                "tax_behavior": "exclusive",
-                "termination_time_amount": "1",
-                "termination_time_unit": "months",
-                "type": "recurring",
-                "unit_amount": 23045,
-                "unit_amount_currency": "EUR",
-                "unit_amount_decimal": "230.4524",
-                "_created_at": "2021-12-15T12:34:59.579Z",
-                "_id": "efe9ff76-865c-4287-8de9-422cfc741ff9",
-                "_org": "739224",
-                "_schema": "price",
-                "_tags": [
-                  "basic-model",
-                  "wifi"
-                ],
-                "_title": "Basic Model - No Wifi",
-                "_updated_at": "2021-12-31T13:07:51.392Z"
+              "street": {
+                "type": "string",
+                "nullable": true
               },
-              "_product": {
-                "active": true,
-                "code": "PWB",
-                "feature": [
-                  {
-                    "_tags": [],
-                    "feature": "Pure Energon Fueled"
-                  },
-                  {
-                    "_tags": [],
-                    "feature": "Mobile App Available"
-                  }
-                ],
-                "name": "Pinho Walls in a Box",
-                "price_options": {
-                  "$relation": [
-                    {
-                      "entity_id": "efe9ff76-865c-4287-8de9-422cfc741ff9"
-                    }
-                  ]
-                },
-                "type": "product",
-                "_created_at": "2021-12-15T12:35:08.438Z",
-                "_id": "beefa9f1-29a8-448e-94d5-ebf1963428f8",
-                "_org": "739224",
-                "_schema": "product",
-                "_tags": [
-                  "energon",
-                  "eco-friendly",
-                  "wallbox"
-                ],
-                "_title": "Pinho Walls in a Box",
-                "_updated_at": "2022-01-03T17:14:41.042Z"
+              "street_number": {
+                "type": "string",
+                "nullable": true
               }
             }
-          ],
-          "memo": "Memo",
-          "status": "Paid",
-          "total_details": {
-            "amount_tax": 4379,
-            "breakdown": {
-              "recurrences": [
-                {
-                  "amount_subtotal": 23045,
-                  "amount_tax": 4379,
-                  "amount_total": 27424,
-                  "billing_period": "monthly",
-                  "type": "recurring"
-                }
-              ],
-              "taxes": [
-                {
-                  "amount": 4379,
-                  "rate": "standard"
-                }
-              ]
-            }
-          }
-        }
-      },
-      "OpportunityEntity": {
-        "description": "Example of an Opportunity entity",
-        "value": {
-          "amount_subtotal": 23045,
-          "amount_total": 27424,
-          "assignees": {
-            "$relation": [
-              {
-                "entity_id": "66a1a6a3-38ee-4ffe-b68d-ee90e3bb1a77",
-                "relationText": "Claudius Iohannis",
-                "_schema": "contact",
-                "_tags": []
-              }
-            ]
           },
-          "billing_address": [
-            {
-              "additional_info": "",
-              "city": "City",
-              "country": "DE",
-              "postal_code": "123",
-              "street": "Street 1",
-              "street_number": "2",
-              "_tags": []
-            }
-          ],
-          "billing_company_name": "Epilot",
-          "billing_contact": {
-            "$relation": [
-              {
-                "entity_id": "0691f503-5a3c-4e9e-b036-ffb21ea1d284",
-                "relationText": "Daniel Test",
-                "_schema": "contact",
-                "_tags": []
-              }
-            ]
+          "logo_url": {
+            "type": "string",
+            "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
+            "nullable": true
           },
-          "billing_email": "customer@email.xyz",
-          "billing_first_name": "Customer First Name",
-          "billing_last_name": "Customer Last Name",
-          "billing_phone": "00351912611098",
-          "billing_vat": "123456789",
-          "currency": "EUR",
-          "delivery_address": [
-            {
-              "additional_info": "",
-              "city": "City",
-              "country": "DE",
-              "postal_code": "123",
-              "street": "Street 1",
-              "street_number": "2",
-              "_tags": []
-            }
-          ],
-          "line_items": [
-            {
-              "amount_subtotal": 23045,
-              "amount_total": 27424,
-              "currency": "EUR",
-              "description": "Basic Model - No Wifi",
-              "price_id": "efe9ff76-865c-4287-8de9-422cfc741ff9",
-              "product_id": "beefa9f1-29a8-448e-94d5-ebf1963428f8",
-              "quantity": 1,
-              "taxes": [
-                {
-                  "amount": 4379,
-                  "rate": "standard"
-                }
-              ],
-              "unit_amount": 23045,
-              "_price": {
-                "active": false,
-                "billing_duration_amount": "2",
-                "billing_duration_unit": "years",
-                "billing_period": "monthly",
-                "description": "Basic Model - No Wifi",
-                "notice_time_amount": "1",
-                "notice_time_unit": "months",
-                "price_display_in_journeys": "show_price",
-                "renewal_duration_amount": "1",
-                "renewal_duration_unit": "years",
-                "sales_tax": "standard",
-                "tax_behavior": "exclusive",
-                "termination_time_amount": "1",
-                "termination_time_unit": "months",
-                "type": "recurring",
-                "unit_amount": 23045,
-                "unit_amount_currency": "EUR",
-                "unit_amount_decimal": "230.4524",
-                "_created_at": "2021-12-15T12:34:59.579Z",
-                "_id": "efe9ff76-865c-4287-8de9-422cfc741ff9",
-                "_org": "739224",
-                "_schema": "price",
-                "_tags": [
-                  "basic-model",
-                  "wifi"
-                ],
-                "_title": "Basic Model - No Wifi",
-                "_updated_at": "2021-12-31T13:07:51.392Z"
-              },
-              "_product": {
-                "active": true,
-                "code": "PWB",
-                "feature": [
-                  {
-                    "_tags": [],
-                    "feature": "Pure Energon Fueled"
-                  },
-                  {
-                    "_tags": [],
-                    "feature": "Mobile App Available"
-                  }
-                ],
-                "name": "Pinho Walls in a Box",
-                "price_options": {
-                  "$relation": [
-                    {
-                      "entity_id": "efe9ff76-865c-4287-8de9-422cfc741ff9"
-                    }
-                  ]
-                },
-                "type": "product",
-                "_created_at": "2021-12-15T12:35:08.438Z",
-                "_id": "beefa9f1-29a8-448e-94d5-ebf1963428f8",
-                "_org": "739224",
-                "_schema": "product",
-                "_tags": [
-                  "energon",
-                  "eco-friendly",
-                  "wallbox"
-                ],
-                "_title": "Pinho Walls in a Box",
-                "_updated_at": "2022-01-03T17:14:41.042Z"
-              }
-            }
-          ],
-          "opportunity_number": "20220105-768854819",
-          "participants": {
-            "$relation": [
-              {
-                "entity_id": "9bbfdaa9-22b2-4100-a256-67600202e3f4",
-                "relationText": "Alex Marques",
-                "_schema": "contact",
-                "_tags": []
-              }
-            ]
+          "logo_thumbnail_url": {
+            "type": "string",
+            "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
+            "nullable": true
           },
-          "status": "Lead",
-          "total_details": {
-            "amount_tax": 4379,
-            "breakdown": {
-              "recurrences": [
-                {
-                  "amount_subtotal": 23045,
-                  "amount_tax": 4379,
-                  "amount_total": 27424,
-                  "billing_period": "monthly",
-                  "type": "recurring"
-                }
-              ],
-              "taxes": [
-                {
-                  "amount": 4379,
-                  "rate": "standard"
-                }
-              ]
-            }
-          }
-        }
-      },
-      "EmailTemplateEntity": {
-        "description": "Example of an email template entity",
-        "value": {
-          "attachments": [],
-          "body": "<p fr-original-style=\"caret-color: rgb(65, 65, 65); color: rgb(65, 65, 65); font-family: sans-serif;\" id=\"isPasted\" style=\"caret-color: rgb(65, 65, 65); color: rgb(65, 65, 65); font-family: sans-serif; box-sizing: inherit; border-color: rgba(229, 231, 235, var(--tw-border-opacity));\"><span fr-original-style=\"font-weight: 700;\" style=\"font-weight: 700; box-sizing: inherit; border-color: rgba(229, 231, 235, var(--tw-border-opacity));\">Variablen - Kontakt</span></p>",
-          "brand_id": 7066103,
-          "from": {
-            "name": "Name",
-            "email": "admin@email.xyz"
-          },
-          "name": "PH Test",
-          "subject": "Example Subject",
-          "system_template": false,
-          "to": [
-            {
-              "id": "1",
-              "name": "Contact Name",
-              "email": "Contact email"
-            }
-          ],
-          "_tags": [
-            "Bestellung"
-          ]
-        }
-      },
-      "FileEntity": {
-        "description": "Example of a file template entity",
-        "value": {
-          "access_control": "private",
-          "filename": "solar_panel_ph.jpeg",
-          "s3ref": {
-            "bucket": "epilot-staging-user-content",
-            "key": "728/temp/6d450fd1-2d63-435f-b598-c605dfb89cbc/solar_panel_ph.jpeg"
-          }
-        }
-      },
-      "WorkflowStepEntity": {
-        "description": "Example of a workflow step template entity",
-        "value": {
-          "name": "Name",
-          "assigned_to\"": [
-            "10000563"
-          ],
-          "status": "Unassigned",
-          "order": 123,
-          "tags": [
-            "tag1"
-          ]
-        }
-      },
-      "SubmissionEntity": {
-        "description": "Example of a submission step template entity",
-        "value": {
-          "mapped_entities": {
-            "$relation": [
-              {
-                "entity_id": "4ffb071c-2821-4505-86d0-09b801ffd97a",
-                "relationText": "4ffb071c-2821-4505-86d0-09b801ffd97a",
-                "_schema": "price",
-                "_tags": []
-              }
-            ]
+          "is_unlicensed_org": {
+            "type": "boolean",
+            "example": false,
+            "nullable": true
           }
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://user.sls.epilot.io"
+    }
+  ]
 }

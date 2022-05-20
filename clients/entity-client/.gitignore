@@ -1,1 +1,3 @@
-dist
+*.js
+!webpack.config.js
+src/openapi.json
