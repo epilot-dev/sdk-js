@@ -30,6 +30,7 @@ jobs:
         with:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
-      - run: npx lerna publish from-package --yes --no-verify-access
+      - run: npm run build
+      - run: npx lerna publish from-package --yes --no-verify-access --ignore-prepublish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
