@@ -30,6 +30,5 @@ jobs:
         with:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
+      - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
       - run: npx lerna publish from-package --yes
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
