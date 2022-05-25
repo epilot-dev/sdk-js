@@ -1733,6 +1733,26 @@
           "additional_info": {
             "type": "string",
             "description": "An additional description for the address"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "the company name, usually used as extra delivery instructions"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "the first name of the recipient, usually used as extra delivery instructions"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "the last name of the recipient, usually used as extra delivery instructions"
+          },
+          "salutation": {
+            "type": "string",
+            "description": "the salutation of the recipient, usually used as extra delivery instructions"
+          },
+          "title": {
+            "type": "string",
+            "description": "the title of the recipient, usually used as extra delivery instructions"
           }
         }
       },
@@ -2120,9 +2140,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://pricing-api.sls.epilot.io"
-    },
     {
       "url": "https://pricing-api.sls.epilot.io"
     }
