@@ -217,7 +217,77 @@ declare namespace Components {
             download_url: string;
             alt_text?: string;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* An attribute that holds a set of price components, used for dynamic pricing */ PriceComponentsAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* An attribute that holds a set of price components, used for dynamic pricing */ PriceComponentsAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute;
+        /**
+         * Automation entity
+         */
+        export interface AutomationAttribute {
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: string | {
+                [name: string]: any;
+            } | number | number | boolean | any[];
+            group?: string;
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            type?: "automation";
+        }
         export interface BaseAttribute {
             name: string;
             label: string;
@@ -1769,6 +1839,146 @@ declare namespace Components {
             type?: "internal";
         }
         /**
+         * Epilot internal user info
+         */
+        export interface InternalUserAttribute {
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: string | {
+                [name: string]: any;
+            } | number | number | boolean | any[];
+            group?: string;
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            type?: "internal_user";
+        }
+        /**
+         * Email address for send invitation
+         */
+        export interface InvitationEmailAttribute {
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: string | {
+                [name: string]: any;
+            } | number | number | boolean | any[];
+            group?: string;
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            type?: "invitation_email";
+        }
+        /**
          * Link with title and href
          */
         export interface LinkAttribute {
@@ -3179,6 +3389,7 @@ declare namespace Paths {
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
             Components.Schemas.ActivityId /* ulid */;
+            export type DryRun = boolean;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -3191,6 +3402,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             activity_id?: Parameters.ActivityId;
+            dry_run?: Parameters.DryRun;
         }
         export interface RequestBody {
             /**

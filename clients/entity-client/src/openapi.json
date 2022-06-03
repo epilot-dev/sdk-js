@@ -410,6 +410,16 @@
             "schema": {
               "$ref": "#/components/schemas/ActivityId"
             }
+          },
+          {
+            "in": "query",
+            "name": "dry_run",
+            "description": "Dry Run mode = return matched entities but don't update them.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "requestBody": {
@@ -1583,6 +1593,15 @@
           },
           {
             "$ref": "#/components/schemas/PriceComponentsAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/InvitationEmailAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/AutomationAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/InternalUserAttribute"
           }
         ]
       },
@@ -2109,6 +2128,63 @@
               },
               "has_primary": {
                 "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "InvitationEmailAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Email address for send invitation",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "invitation_email"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "AutomationAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Automation entity",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "automation"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "InternalUserAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Epilot internal user info",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "internal_user"
+                ]
               }
             }
           }
@@ -3759,9 +3835,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }
