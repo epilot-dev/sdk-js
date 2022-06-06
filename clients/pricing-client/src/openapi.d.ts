@@ -181,7 +181,7 @@ declare namespace Components {
             customer?: Customer;
             billing_address?: Address;
             delivery_address?: Address;
-            metadata?: /* A set of key-value pairs. */ MetaData;
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             line_items?: /* Tracks a set of product prices, quantities, (discounts) and taxes. */ PriceItems;
             /**
              * Total of all items before (discounts or) taxes are applied.
@@ -199,7 +199,7 @@ declare namespace Components {
          * A valid cart payload from a client.
          */
         export interface CartDto {
-            metadata?: /* A set of key-value pairs. */ MetaData;
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             customer?: Customer;
             billing_address?: Address;
             delivery_address?: Address;
@@ -215,7 +215,7 @@ declare namespace Components {
              * ce99875f-fba9-4fe2-a8f9-afaf52059051
              */
             source_id?: string;
-            source?: /* Order Source */ OrderSource;
+            source?: /* The order generation source */ OrderSource;
             additional_addresses?: Address[];
             payment_method?: /**
              * A PaymentMethod represent your customer's payment instruments.
@@ -227,7 +227,18 @@ declare namespace Components {
              * An array of file IDs, already upload into the File API, that are related with this cart
              */
             files?: string[];
-            status?: /* The order status */ OrderStatus;
+            status?: /**
+             *
+             * | status      | description |
+             * |-------------|-------|
+             * | `draft`     | ​​Starting state for all orders, at this point we can still edit the order |
+             * | `quote`     | The order is in a quoting phase, bound to an expiration date |
+             * | `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
+             * | `cancelled` | The order has been cancelled |
+             * | `completed` | The order is now closed and finalized |
+             *
+             */
+            OrderStatus;
             tags?: string[];
             journey_data?: {
                 [name: string]: any;
@@ -302,7 +313,7 @@ declare namespace Components {
              * The number os results returned.
              */
             hits?: number;
-            results?: (/* The product configuration */ Product | /* The price configuration */ Price)[];
+            results?: (/* The product entity */ Product | /* The price configuration */ Price)[];
         }
         /**
          * The cart checkout request payload
@@ -371,7 +382,7 @@ declare namespace Components {
             $relation?: EntityRelation;
         }
         /**
-         * A set of key-value pairs.
+         * A set of key-value pairs used to store meta data information about an entity.
          */
         export type MetaData = ({
             /**
@@ -393,40 +404,156 @@ declare namespace Components {
              */
             opportunity_number?: string;
             /**
+             * The opportunity title for the opportunity
+             */
+            opportunity_title?: string;
+            /**
              * A description to frame this opportunity within its sales process
              */
             description?: string;
             /**
-             * The opportunity status
+             * The opportunity status (defined by the opportunity workflow)
              */
-            status?: "lead" | "qualification" | "validation" | "offering" | "supply" | "approval" | "operations" | "complete";
-            items?: /* The order entity */ Order[] | {
+            status?: string;
+            /**
+             * The expiration date
+             */
+            due_date?: string;
+            /**
+             * The opportunity assignees
+             */
+            assignee?: {
+                id?: string;
+                email?: string;
+                display_name?: string;
+                token?: string;
+                image_uri?: string;
+                organization_id?: string;
+                department?: string;
+                preferred_language?: string;
+                status?: string;
+                phone?: string;
+                email_notification_settings?: {
+                    [key: string]: any;
+                };
+                is_signature_enabled?: boolean;
+                created_at?: string;
+            }[];
+            /**
+             * A list of customers related with the opportunity
+             */
+            customer?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * A set of dates associated with the opportunity
+             */
+            dates?: ({
+                /**
+                 * The date tags
+                 */
+                _tags?: string[];
+                /**
+                 * The date value
+                 */
+                value?: string;
+            })[];
+            /**
+             * The billing address
+             */
+            billing_address?: {
+                /**
+                 * The relation from which a field is being referenced
+                 */
+                $relation_ref?: ({
+                    /**
+                     * The id of the referenced entity
+                     */
+                    entity_id?: string;
+                    /**
+                     * The path to the target attribute being referenced
+                     */
+                    path?: string;
+                })[];
+            };
+            /**
+             * The delivery address
+             */
+            delivery_address?: {
+                /**
+                 * The relation from which a field is being referenced
+                 */
+                $relation_ref?: ({
+                    /**
+                     * The id of the referenced entity
+                     */
+                    entity_id?: string;
+                    /**
+                     * The path to the target attribute being referenced
+                     */
+                    path?: string;
+                })[];
+            };
+            /**
+             * A list of additional addresses
+             */
+            address?: {
+                /**
+                 * The relation from which a field is being referenced
+                 */
+                $relation_ref?: ({
+                    /**
+                     * The id of the referenced entity
+                     */
+                    entity_id?: string;
+                    /**
+                     * The path to the target attribute being referenced
+                     */
+                    path?: string;
+                })[];
+            };
+            /**
+             * The order relations items, representing quotes or orders associated with the opportunity
+             */
+            items?: {
                 $relation?: /* An order relation reference */ OrderRelation[];
             };
             /**
              * Organization Id the order belongs to
              */
             _org_id?: string;
+            /**
+             * The opportunity id
+             */
             _id?: string;
+            /**
+             * The opportunity creation date
+             */
             _created_at?: string;
+            /**
+             * The opportunity last update date
+             */
             _updated_at?: string;
             /**
-             * type of source, e.g. journey or manual
+             * Type of source, e.g. journey or manual
              * example:
              * journey
              */
             source_type?: string;
             /**
-             * identifier for source e.g. journey ID
+             * Identifier for source e.g. journey ID
              * example:
              * ce99875f-fba9-4fe2-a8f9-afaf52059051
              */
             source_id?: string;
-            source?: /* Order Source */ OpportunitySource;
+            source?: /* The opportunity generation source */ OpportunitySource;
+            /**
+             * An arbitrary set of tags attached to the opportunity
+             */
             _tags?: string[];
         }
         /**
-         * Order Source
+         * The opportunity generation source
          */
         export interface OpportunitySource {
             /**
@@ -448,36 +575,77 @@ declare namespace Components {
         export interface Order {
             [name: string]: any;
             /**
-             * The order id number for the customer
+             * The order number (customer facing)
              */
             order_number?: string;
             /**
-             * The cart id that originated or is associated with the order
+             * The cart id that originated or is associated with the this order
              */
             cart_id?: string;
-            status?: /* The order status */ OrderStatus;
+            status?: /**
+             *
+             * | status      | description |
+             * |-------------|-------|
+             * | `draft`     | ​​Starting state for all orders, at this point we can still edit the order |
+             * | `quote`     | The order is in a quoting phase, bound to an expiration date |
+             * | `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
+             * | `cancelled` | The order has been cancelled |
+             * | `completed` | The order is now closed and finalized |
+             *
+             */
+            OrderStatus;
             /**
-             * type of source, e.g. journey or manual
+             * Type of source, e.g. journey or manual
              * example:
              * journey
              */
             source_type?: string;
             /**
-             * identifier for source e.g. journey ID
+             * Identifier for source e.g. journey ID
              * example:
              * ce99875f-fba9-4fe2-a8f9-afaf52059051
              */
             source_id?: string;
-            source?: /* Order Source */ OrderSource;
-            metadata?: /* A set of key-value pairs. */ MetaData;
+            source?: /* The order generation source */ OrderSource;
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            /**
+             * A list of customers related with the opportunity
+             */
+            customer?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * The billing contact first name
+             */
             billing_first_name?: string;
+            /**
+             * The billing contact last name
+             */
             billing_last_name?: string;
+            /**
+             * The billing account name
+             */
             billing_company_name?: string;
+            /**
+             * The billing account VAT
+             */
             billing_vat?: string;
+            /**
+             * The billing email
+             */
             billing_email?: string;
+            /**
+             * The billing phone
+             */
             billing_phone?: string;
+            /**
+             * The billing address
+             */
             billing_address?: Address[];
-            currency?: /**
+            /**
+             * The order main currency
+             */
+            currency?: /* The order main currency */ /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
              *
@@ -485,16 +653,18 @@ declare namespace Components {
              * EUR
              */
             Currency;
+            /**
+             * The delivery address
+             */
             delivery_address?: Address[];
+            /**
+             * The payment method details for the order
+             */
             payment_method?: /**
              * A PaymentMethod represent your customer's payment instruments.
              *
              */
             PaymentMethod[];
-            /**
-             * The id of an existing contact.
-             */
-            contact?: string;
             line_items?: /* Tracks a set of product prices, quantities, (discounts) and taxes. */ PriceItems;
             /**
              * Total of all items before (discounts or) taxes are applied.
@@ -509,16 +679,39 @@ declare namespace Components {
              * Organization Id the order belongs to
              */
             _org_id?: string;
+            /**
+             * The order id
+             */
             _id?: string;
+            /**
+             * The order creation date
+             */
             _created_at?: string;
+            /**
+             * The order last update date
+             */
             _updated_at?: string;
+            /**
+             * An arbitrary set of tags attached to the order
+             */
             _tags?: string[];
         }
         /**
          * Order Entity Payload
          */
         export interface OrderPayload {
-            status?: /* The order status */ OrderStatus;
+            status?: /**
+             *
+             * | status      | description |
+             * |-------------|-------|
+             * | `draft`     | ​​Starting state for all orders, at this point we can still edit the order |
+             * | `quote`     | The order is in a quoting phase, bound to an expiration date |
+             * | `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
+             * | `cancelled` | The order has been cancelled |
+             * | `completed` | The order is now closed and finalized |
+             *
+             */
+            OrderStatus;
             line_items?: /* Tracks a set of product prices, quantities, (discounts) and taxes. */ PriceItems;
             /**
              * type of source, e.g. journey or manual
@@ -564,7 +757,7 @@ declare namespace Components {
             _tags?: string[];
         }
         /**
-         * Order Source
+         * The order generation source
          */
         export interface OrderSource {
             /**
@@ -581,7 +774,15 @@ declare namespace Components {
             title?: string;
         }
         /**
-         * The order status
+         *
+         * | status      | description |
+         * |-------------|-------|
+         * | `draft`     | ​​Starting state for all orders, at this point we can still edit the order |
+         * | `quote`     | The order is in a quoting phase, bound to an expiration date |
+         * | `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
+         * | `cancelled` | The order has been cancelled |
+         * | `completed` | The order is now closed and finalized |
+         *
          */
         export type OrderStatus = "draft" | "quote" | "placed" | "cancelled" | "completed";
         /**
@@ -637,6 +838,42 @@ declare namespace Components {
             _updated_at?: string;
         }
         /**
+         * The price configuration
+         */
+        export interface PriceBundle {
+            [name: string]: any;
+            active?: boolean;
+            billing_scheme?: "Per Unit";
+            description?: string;
+            sales_tax?: SalesTax;
+            tax_behavior?: "inclusive" | "exclusive";
+            tiers_mode?: "Standard";
+            type?: "one_time" | "recurring";
+            billing_period?: BillingPeriod;
+            unit_amount?: number;
+            unit_amount_decimal?: string;
+            unit_amount_currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            billing_duration_amount?: number;
+            billing_duration_unit?: "weeks" | "months" | "years";
+            notice_time_amount?: number;
+            notice_time_unit?: "weeks" | "months" | "years";
+            termination_time_amount?: number;
+            termination_time_unit?: "weeks" | "months" | "years";
+            renewal_duration_amount?: number;
+            renewal_duration_unit?: "weeks" | "months" | "years";
+            _created_at?: string;
+            _id?: string;
+            _title?: string;
+            _updated_at?: string;
+        }
+        /**
          * Represents a price item
          */
         export interface PriceItem {
@@ -644,7 +881,7 @@ declare namespace Components {
              * price item id
              */
             id?: string;
-            metadata?: /* A set of key-value pairs. */ MetaData;
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The unit amount value
              */
@@ -654,7 +891,7 @@ declare namespace Components {
              */
             amount_subtotal?: number;
             /**
-             * Net unit amount without taxes.
+             * Net unit amount without taxes or discounts.
              */
             unit_amount_net?: number;
             /**
@@ -685,8 +922,14 @@ declare namespace Components {
              * The id of the price.
              */
             price_id?: string;
-            _price?: /* The price configuration */ Price;
-            _product?: /* The product configuration */ Product;
+            /**
+             * The price snapshot data.
+             */
+            _price?: /* The price snapshot data. */ /* The price configuration */ Price;
+            /**
+             * The product snapshot data.
+             */
+            _product?: /* The product snapshot data. */ /* The product entity */ Product;
             /**
              * The taxes applied to the price item.
              */
@@ -700,7 +943,7 @@ declare namespace Components {
          * Represents a valid price item from a client.
          */
         export interface PriceItemDto {
-            metadata?: /* A set of key-value pairs. */ MetaData;
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The quantity of products being purchased.
              */
@@ -729,7 +972,7 @@ declare namespace Components {
             /**
              * The product linked to the price item.
              */
-            _product?: /* The product configuration */ Product;
+            _product?: /* The product entity */ Product;
         }
         /**
          * Tracks a set of product prices, quantities, (discounts) and taxes.
@@ -755,16 +998,87 @@ declare namespace Components {
             total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
         }
         /**
-         * The product configuration
+         * The product entity
          */
         export interface Product {
             [name: string]: any;
+            /**
+             * The product code
+             */
             code?: string;
-            type?: "Product" | "Service";
+            /**
+             * The type of Product:
+             *
+             * | type | description |
+             * |----| ----|
+             * | `product` | Represents a physical good |
+             * | `service` | Represents a service or virtual product |
+             *
+             */
+            type?: "product" | "service";
+            /**
+             * The product main name
+             */
             name?: string;
-            _id?: string;
-            _title?: string;
+            feature?: {
+                /**
+                 * An arbitrary set of tags attached to a feature
+                 */
+                _tags?: string[];
+                feature?: string;
+            }[];
+            /**
+             * Stores references to products that can be cross sold with the current product.
+             */
+            cross_sellable_products?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Stores references to a set of file images of the product
+             */
+            product_images?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Stores references to a set of files downloadable from the product.
+             * e.g: tech specifications, quality control sheets, privacy policy agreements
+             *
+             */
+            product_downloads?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * A set of [prices](/api/pricing#tag/simple_price_schema) or [price bundles](/api/pricing#tag/dynamic_price_schema) for the current product.
+             */
+            price_options?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Stores references to the availability files that define where this product is available.
+             * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
+             *
+             */
             _availability_files?: File[];
+            /**
+             * The product id
+             */
+            _id?: string;
+            /**
+             * The autogenerated product title
+             */
+            _title?: string;
+            /**
+             * The organization id the product belongs to
+             */
+            _org_id?: string;
+            /**
+             * The product creation date
+             */
+            _created_at?: string;
+            /**
+             * The product last update date
+             */
+            _updated_at?: string;
         }
         /**
          * An amount associated with a specific recurrence.
@@ -1083,7 +1397,9 @@ export interface OperationMethods {
   /**
    * $createOpportunity - createOpportunity
    * 
-   * This API is Deprecated. Please use the Entity API or Submission API to create opportunities. Creates a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
+   * This API is Deprecated. Please use the Entity API or Submission API to create opportunities.
+   * 
+   * Enables the creation of a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
    * The `opportunity_number` can be used to universally identify an opportunity within epilot platform.
    * 
    */
@@ -1170,7 +1486,9 @@ export interface PathsDictionary {
     /**
      * $createOpportunity - createOpportunity
      * 
-     * This API is Deprecated. Please use the Entity API or Submission API to create opportunities. Creates a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
+     * This API is Deprecated. Please use the Entity API or Submission API to create opportunities.
+     * 
+     * Enables the creation of a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
      * The `opportunity_number` can be used to universally identify an opportunity within epilot platform.
      * 
      */
