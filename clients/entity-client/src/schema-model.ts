@@ -9,22 +9,5 @@ export enum RelationAffinityMode {
   STRONG = 'strong',
 }
 
-export type Attribute =
-  | Components.Schemas.InternalAttribute
-  | Components.Schemas.TextAttribute
-  | Components.Schemas.RepeatableAttribute
-  | Components.Schemas.BooleanAttribute
-  | Components.Schemas.SelectAttribute
-  | Components.Schemas.RelationAttribute
-  | Components.Schemas.UserRelationAttribute
-  | Components.Schemas.DateAttribute
-  | Components.Schemas.TagsAttribute
-  | Components.Schemas.NumberAttribute
-  | Components.Schemas.CurrencyAttribute
-  | Components.Schemas.ConsentAttribute
-  | Components.Schemas.LinkAttribute
-  | Components.Schemas.OrderedListAttribute
-  | Components.Schemas.FileAttribute
-  | Components.Schemas.CountryAttribute;
-
+export type Attribute = Components.Schemas.Attribute;
 export type AttributeType = Attribute['type'];

@@ -1,6 +1,6 @@
 {
   "name": "@epilot/entity-client",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "JavaScript client library for the epilot Core Entity API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
