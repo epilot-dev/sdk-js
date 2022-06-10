@@ -1334,9 +1334,16 @@
                   "summary_attributes": {
                     "type": "array",
                     "items": {
-                      "type": "string",
-                      "description": "List of attributes to show in list item",
-                      "example": "email"
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/SummaryAttribute"
+                        },
+                        {
+                          "type": "string",
+                          "description": "List of attributes to show in list item",
+                          "example": "email"
+                        }
+                      ]
                     }
                   }
                 }
@@ -1376,7 +1383,7 @@
                 },
                 "render_condition": {
                   "type": "string",
-                  "example": "composite_price = \"false\""
+                  "example": "_is_price_bundle = \"false\""
                 },
                 "order": {
                   "description": "Render order of the group",
@@ -1590,9 +1597,6 @@
           },
           {
             "$ref": "#/components/schemas/PartnerStatusAttribute"
-          },
-          {
-            "$ref": "#/components/schemas/PriceComponentsAttribute"
           },
           {
             "$ref": "#/components/schemas/InvitationEmailAttribute"
@@ -2037,13 +2041,60 @@
               "enable_relation_picker": {
                 "type": "boolean",
                 "default": true,
-                "description": "when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link."
+                "description": "When enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link."
               },
               "edit_mode": {
                 "type": "string",
                 "enum": [
                   "list-view"
                 ]
+              },
+              "details_view_mode_enabled": {
+                "type": "boolean",
+                "default": false,
+                "description": "Enables the preview, edition, and creation of relation items on a Master-Details view mode."
+              },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "action_type": {
+                      "type": "string",
+                      "enum": [
+                        "add_existing",
+                        "create_new",
+                        "create_from_existing"
+                      ],
+                      "description": "The action type. Currently supported actions:\n\n| action | description |\n|--------|-------------|\n| add_existing | Enables the user to pick an existing entity to link as relation |\n| create_new | Enables the user to create a new entity using the first/main `allowed_schemas` schema\n| create_from_existing | Enables the user to pick an existing entity to clone from, while creating a blank new entity to link as relation |\n"
+                    },
+                    "label": {
+                      "type": "string",
+                      "description": "The action label or action translation key (i18n)"
+                    },
+                    "default": {
+                      "type": "boolean",
+                      "description": "Sets the action as the default action, visible as the main action button."
+                    }
+                  }
+                },
+                "example": {
+                  "value": [
+                    {
+                      "action_type": "add_existing",
+                      "label": "entityrelation.add_existing",
+                      "default": true
+                    },
+                    {
+                      "action_type": "create_new",
+                      "label": "entityrelation.create_new"
+                    },
+                    {
+                      "action_type": "create_from_existing",
+                      "label": "entityrelation.create_from_existing"
+                    }
+                  ]
+                }
               },
               "drawer_size": {
                 "type": "string",
@@ -2082,7 +2133,7 @@
               "enable_relation_tags": {
                 "type": "boolean",
                 "default": true,
-                "description": "when enable_relation_tags is set to true the user will be able to set tags(labels) in each relation item"
+                "description": "When enable_relation_tags is set to true the user will be able to set tags(labels) in each relation item."
               }
             }
           }
@@ -2356,25 +2407,6 @@
           }
         ]
       },
-      "PriceComponentsAttribute": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAttribute"
-          },
-          {
-            "type": "object",
-            "description": "An attribute that holds a set of price components, used for dynamic pricing",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "price_components"
-                ]
-              }
-            }
-          }
-        ]
-      },
       "PartnerStatusAttribute": {
         "allOf": [
           {
@@ -2429,6 +2461,36 @@
           "download_url"
         ]
       },
+      "SummaryAttribute": {
+        "description": "Represents an expanded version of an attribute to be displayed in the list item summary.\nThis configuration can be used in the following way: \n```js\n{\n  \"label\": \"Price components\"\n  \"value\": \"{{item.prices.length}} price components\"\n  \"show_as_tag\": true\n  \"render_condition\": \"is_price_bundle = \\\"true\\\"\"\n}\n```\nThe value field supports handlebar expressions from which you can pick any field from the entity state. \n",
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Label to be shown on the top of the value."
+          },
+          "value": {
+            "type": "string",
+            "description": "A static value or an handlebar expression."
+          },
+          "show_as_tag": {
+            "type": "boolean",
+            "description": "Displays the value within a tag chip."
+          },
+          "tag_color": {
+            "type": "string",
+            "description": "CSS hex color or CSS color name for the tag chip."
+          },
+          "render_condition": {
+            "type": "string",
+            "description": "Defines the conditional rendering expression for showing this field.\nWhen a valid expression is parsed, their evaluation defines the visibility of this attribute.\nNote: Empty or invalid expression have no effect on the field visibility.\n"
+          }
+        },
+        "required": [
+          "label",
+          "value"
+        ]
+      },
       "EntitySlug": {
         "description": "URL-friendly identifier for the entity schema",
         "type": "string",
@@ -2467,7 +2529,7 @@
                 },
                 "render_condition": {
                   "type": "string",
-                  "example": "composite_price = \"false\""
+                  "example": "_is_price_bundle = \"false\""
                 },
                 "order": {
                   "type": "integer",
@@ -2945,16 +3007,6 @@
               "_title",
               "first_name"
             ]
-          },
-          "csv": {
-            "type": "boolean",
-            "description": "When true, returns the results as a CSV file",
-            "default": false
-          },
-          "schema": {
-            "type": "string",
-            "description": "Entity schema",
-            "example": "contact"
           }
         },
         "required": [
@@ -3835,6 +3887,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    },
     {
       "url": "https://entity.sls.epilot.io"
     }

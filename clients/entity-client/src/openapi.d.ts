@@ -217,7 +217,7 @@ declare namespace Components {
             download_url: string;
             alt_text?: string;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* An attribute that holds a set of price components, used for dynamic pricing */ PriceComponentsAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute;
         /**
          * Automation entity
          */
@@ -854,7 +854,7 @@ declare namespace Components {
                 hook: string;
                 /**
                  * example:
-                 * composite_price = "false"
+                 * _is_price_bundle = "false"
                  */
                 render_condition?: string;
                 /**
@@ -1130,7 +1130,21 @@ declare namespace Components {
                 create_view?: EntityViewConfig;
                 edit_view?: EntityViewConfig;
                 list_item?: {
-                    summary_attributes?: string[];
+                    summary_attributes?: (/**
+                     * Represents an expanded version of an attribute to be displayed in the list item summary.
+                     * This configuration can be used in the following way:
+                     * ```js
+                     * {
+                     *   "label": "Price components"
+                     *   "value": "{{item.prices.length}} price components"
+                     *   "show_as_tag": true
+                     *   "render_condition": "is_price_bundle = \"true\""
+                     * }
+                     * ```
+                     * The value field supports handlebar expressions from which you can pick any field from the entity state.
+                     *
+                     */
+                    SummaryAttribute | string)[];
                 };
                 sharing?: {
                     /**
@@ -1164,7 +1178,7 @@ declare namespace Components {
                 expanded?: boolean;
                 /**
                  * example:
-                 * composite_price = "false"
+                 * _is_price_bundle = "false"
                  */
                 render_condition?: string;
                 /**
@@ -1322,7 +1336,21 @@ declare namespace Components {
                 create_view?: EntityViewConfig;
                 edit_view?: EntityViewConfig;
                 list_item?: {
-                    summary_attributes?: string[];
+                    summary_attributes?: (/**
+                     * Represents an expanded version of an attribute to be displayed in the list item summary.
+                     * This configuration can be used in the following way:
+                     * ```js
+                     * {
+                     *   "label": "Price components"
+                     *   "value": "{{item.prices.length}} price components"
+                     *   "show_as_tag": true
+                     *   "render_condition": "is_price_bundle = \"true\""
+                     * }
+                     * ```
+                     * The value field supports handlebar expressions from which you can pick any field from the entity state.
+                     *
+                     */
+                    SummaryAttribute | string)[];
                 };
                 sharing?: {
                     /**
@@ -1356,7 +1384,7 @@ declare namespace Components {
                 expanded?: boolean;
                 /**
                  * example:
-                 * composite_price = "false"
+                 * _is_price_bundle = "false"
                  */
                 render_condition?: string;
                 /**
@@ -1475,16 +1503,6 @@ declare namespace Components {
              * ]
              */
             fields?: string[];
-            /**
-             * When true, returns the results as a CSV file
-             */
-            csv?: boolean;
-            /**
-             * Entity schema
-             * example:
-             * contact
-             */
-            schema?: string;
         }
         export interface EntitySearchResults {
             /**
@@ -2260,76 +2278,6 @@ declare namespace Components {
             type?: "partner_status";
         }
         /**
-         * An attribute that holds a set of price components, used for dynamic pricing
-         */
-        export interface PriceComponentsAttribute {
-            name: string;
-            label: string;
-            placeholder?: string;
-            /**
-             * Do not render attribute in entity views
-             */
-            hidden?: boolean;
-            /**
-             * Render as a column in table views. When defined, overrides `hidden`
-             */
-            show_in_table?: boolean;
-            required?: boolean;
-            readonly?: boolean;
-            deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
-            group?: string;
-            layout?: string;
-            /**
-             * When set to true, will hide the label of the field.
-             */
-            hide_label?: boolean;
-            /**
-             * Code name of the icon to used to represent this attribute.
-             * The value must be a valid @epilot/base-elements Icon name
-             *
-             */
-            icon?: string;
-            /**
-             * Defines the conditional rendering expression for showing this field.
-             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
-             * Note: Empty or invalid expression have no effect on the field visibility.
-             *
-             */
-            render_condition?: string;
-            /**
-             * A set of constraints applicable to the attribute.
-             * These constraints should and will be enforced by the attribute renderer.
-             *
-             * example:
-             * {
-             *   "disablePast": true
-             * }
-             */
-            constraints?: {
-                [key: string]: any;
-            };
-            /**
-             * This attribute should only be active when the feature flag is enabled
-             * example:
-             * FF_MY_FEATURE_FLAG
-             */
-            feature_flag?: string;
-            value_formatter?: string;
-            preview_value_formatter?: string;
-            /**
-             * Setting to `true` disables editing the attribute on the entity builder UI
-             */
-            entity_builder_disable_edit?: boolean;
-            /**
-             * Setting to `true` prevents the attribute from being modified / deleted
-             */
-            protected?: boolean;
-            type?: "price_components";
-        }
-        /**
          * example:
          * {
          *   "type": "redirect",
@@ -2417,10 +2365,55 @@ declare namespace Components {
             delete_mode?: "cascade";
             relation_affinity_mode?: "weak" | "strong";
             /**
-             * when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link.
+             * When enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link.
              */
             enable_relation_picker?: boolean;
             edit_mode?: "list-view";
+            /**
+             * Enables the preview, edition, and creation of relation items on a Master-Details view mode.
+             */
+            details_view_mode_enabled?: boolean;
+            /**
+             * example:
+             * {
+             *   "value": [
+             *     {
+             *       "action_type": "add_existing",
+             *       "label": "entityrelation.add_existing",
+             *       "default": true
+             *     },
+             *     {
+             *       "action_type": "create_new",
+             *       "label": "entityrelation.create_new"
+             *     },
+             *     {
+             *       "action_type": "create_from_existing",
+             *       "label": "entityrelation.create_from_existing"
+             *     }
+             *   ]
+             * }
+             */
+            actions?: {
+                /**
+                 * The action type. Currently supported actions:
+                 *
+                 * | action | description |
+                 * |--------|-------------|
+                 * | add_existing | Enables the user to pick an existing entity to link as relation |
+                 * | create_new | Enables the user to create a new entity using the first/main `allowed_schemas` schema
+                 * | create_from_existing | Enables the user to pick an existing entity to clone from, while creating a blank new entity to link as relation |
+                 *
+                 */
+                action_type?: "add_existing" | "create_new" | "create_from_existing";
+                /**
+                 * The action label or action translation key (i18n)
+                 */
+                label?: string;
+                /**
+                 * Sets the action as the default action, visible as the main action button.
+                 */
+                default?: boolean;
+            }[];
             drawer_size?: "small" | "medium" | "large";
             summary_fields?: (string | /* Summary Fields are displayed inside list view as a resume of the relation entity. */ SummaryField)[];
             has_primary?: boolean;
@@ -2431,7 +2424,7 @@ declare namespace Components {
              */
             EntitySlug[];
             /**
-             * when enable_relation_tags is set to true the user will be able to set tags(labels) in each relation item
+             * When enable_relation_tags is set to true the user will be able to set tags(labels) in each relation item.
              */
             enable_relation_tags?: boolean;
         }
@@ -2653,6 +2646,45 @@ declare namespace Components {
              * Allow arbitrary input values in addition to provided options
              */
             allow_any?: boolean;
+        }
+        /**
+         * Represents an expanded version of an attribute to be displayed in the list item summary.
+         * This configuration can be used in the following way:
+         * ```js
+         * {
+         *   "label": "Price components"
+         *   "value": "{{item.prices.length}} price components"
+         *   "show_as_tag": true
+         *   "render_condition": "is_price_bundle = \"true\""
+         * }
+         * ```
+         * The value field supports handlebar expressions from which you can pick any field from the entity state.
+         *
+         */
+        export interface SummaryAttribute {
+            /**
+             * Label to be shown on the top of the value.
+             */
+            label: string;
+            /**
+             * A static value or an handlebar expression.
+             */
+            value: string;
+            /**
+             * Displays the value within a tag chip.
+             */
+            show_as_tag?: boolean;
+            /**
+             * CSS hex color or CSS color name for the tag chip.
+             */
+            tag_color?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
         }
         /**
          * Summary Fields are displayed inside list view as a resume of the relation entity.
