@@ -1560,6 +1560,9 @@
             "$ref": "#/components/schemas/SelectAttribute"
           },
           {
+            "$ref": "#/components/schemas/StatusAttribute"
+          },
+          {
             "$ref": "#/components/schemas/RelationAttribute"
           },
           {
@@ -1879,6 +1882,50 @@
               "allow_any": {
                 "type": "boolean",
                 "description": "Allow arbitrary input values in addition to provided options"
+              }
+            }
+          }
+        ]
+      },
+      "StatusAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Status select",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "status"
+                ]
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value"
+                      ]
+                    }
+                  ]
+                }
               }
             }
           }
@@ -3887,9 +3934,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }
