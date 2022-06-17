@@ -2075,6 +2075,10 @@
                     "default": {
                       "type": "boolean",
                       "description": "Sets the action as the default action, visible as the main action button."
+                    },
+                    "new_entity_state": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/BaseEntity"
                     }
                   }
                 },
