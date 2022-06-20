@@ -2413,6 +2413,45 @@ declare namespace Components {
                  * Sets the action as the default action, visible as the main action button.
                  */
                 default?: boolean;
+                /**
+                 * Name of the feature flag that enables this action
+                 */
+                feature?: string;
+                /**
+                 * example:
+                 * {
+                 *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                 *   "_org": "123",
+                 *   "_schema": "contact",
+                 *   "_tags": [
+                 *     "example",
+                 *     "mock"
+                 *   ],
+                 *   "_created_at": "2021-02-09T12:41:43.662Z",
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 * }
+                 */
+                new_entity_item?: {
+                    [name: string]: any;
+                    _id: EntityId /* uuid */;
+                    /**
+                     * Title of entity
+                     */
+                    _title: string;
+                    /**
+                     * Organization Id the entity belongs to
+                     */
+                    _org: string;
+                    _schema: /**
+                     * URL-friendly identifier for the entity schema
+                     * example:
+                     * contact
+                     */
+                    EntitySlug;
+                    _tags?: string[];
+                    _created_at: string; // date-time
+                    _updated_at: string; // date-time
+                };
             }[];
             drawer_size?: "small" | "medium" | "large";
             summary_fields?: (string | /* Summary Fields are displayed inside list view as a resume of the relation entity. */ SummaryField)[];

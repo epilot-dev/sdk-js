@@ -2122,6 +2122,18 @@
                     "default": {
                       "type": "boolean",
                       "description": "Sets the action as the default action, visible as the main action button."
+                    },
+                    "feature": {
+                      "type": "string",
+                      "description": "Name of the feature flag that enables this action"
+                    },
+                    "new_entity_item": {
+                      "type": "object",
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/EntityItem"
+                        }
+                      ]
                     }
                   }
                 },
