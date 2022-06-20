@@ -313,7 +313,21 @@ declare namespace Components {
              * The number os results returned.
              */
             hits?: number;
-            results?: (/* The product entity */ Product | /* The price configuration */ Price)[];
+            results?: (/**
+             * The product entity
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            Product | /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price)[];
         }
         /**
          * The cart checkout request payload
@@ -326,7 +340,14 @@ declare namespace Components {
          * The cart checkout result
          */
         export interface CheckoutCartResult {
-            order?: /* The order entity */ Order;
+            order?: /**
+             * The order entity
+             * example:
+             * {
+             *   "$ref": "#/components/examples/order-with-simple-prices"
+             * }
+             */
+            Order;
         }
         /**
          * The checkout mode for the cart checkout.
@@ -396,6 +417,10 @@ declare namespace Components {
         })[];
         /**
          * The opportunity entity
+         * example:
+         * {
+         *   "$ref": "#/components/examples/opportunity"
+         * }
          */
         export interface Opportunity {
             [name: string]: any;
@@ -571,6 +596,10 @@ declare namespace Components {
         }
         /**
          * The order entity
+         * example:
+         * {
+         *   "$ref": "#/components/examples/order-with-simple-prices"
+         * }
          */
         export interface Order {
             [name: string]: any;
@@ -802,21 +831,78 @@ declare namespace Components {
             };
         }
         /**
-         * The price configuration
+         * The price entity schema for simple pricing
+         * example:
+         * {
+         *   "$ref": "#/components/examples/price"
+         * }
          */
         export interface Price {
             [name: string]: any;
+            /**
+             * Whether the price can be used for new purchases.
+             */
             active?: boolean;
-            billing_scheme?: "Per Unit";
+            /**
+             * Describes how to compute the price per period. Either `per_unit` or `tiered`.
+             * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+             * - `tiered` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers and tiers_mode attributes.
+             *
+             * ⚠️ Tiered pricing is **not supported** yet.
+             *
+             */
+            billing_scheme?: "per_unit";
+            /**
+             * A brief description of the price.
+             */
             description?: string;
-            sales_tax?: SalesTax;
+            /**
+             * The default tax rate applicable to the product.
+             * This field is deprecated, use the new `tax` attribute.
+             *
+             */
+            sales_tax?: /**
+             * The default tax rate applicable to the product.
+             * This field is deprecated, use the new `tax` attribute.
+             *
+             */
+            SalesTax;
+            /**
+             * The default tax rate applied to the price
+             */
+            tax?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Specifies whether the price is considered `inclusive` of taxes or `exclusive` of taxes.
+             * One of `inclusive`, `exclusive`, or `unspecified`.
+             *
+             */
             tax_behavior?: "inclusive" | "exclusive";
-            tiers_mode?: "Standard";
+            /**
+             * Defines the tiered pricing type of the price.
+             */
+            tiers_mode?: "standard";
+            /**
+             * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
+             */
             type?: "one_time" | "recurring";
-            billing_period?: BillingPeriod;
+            /**
+             * For recurring prices `billing_period` defines the default extent of the recurrence.
+             */
+            billing_period?: /* For recurring prices `billing_period` defines the default extent of the recurrence. */ BillingPeriod;
+            /**
+             * The unit amount in cents to be charged, represented as a whole integer if possible.
+             */
             unit_amount?: number;
+            /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
             unit_amount_decimal?: string;
-            unit_amount_currency?: /**
+            /**
+             * Three-letter ISO currency code, in lowercase.
+             */
+            unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
              *
@@ -824,57 +910,137 @@ declare namespace Components {
              * EUR
              */
             Currency;
+            /**
+             * Defines the way the price amount is display in epilot journeys.
+             */
+            price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request";
+            /**
+             * The billing period duration
+             */
             billing_duration_amount?: number;
+            /**
+             * The billing period duration unit
+             */
             billing_duration_unit?: "weeks" | "months" | "years";
+            /**
+             * The notice period duration
+             */
             notice_time_amount?: number;
+            /**
+             * The notice period duration unit
+             */
             notice_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The termination period duration
+             */
             termination_time_amount?: number;
+            /**
+             * The termination period duration unit
+             */
             termination_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The renewal period duration
+             */
             renewal_duration_amount?: number;
+            /**
+             * The renewal period duration unit
+             */
             renewal_duration_unit?: "weeks" | "months" | "years";
+            /**
+             * The price creation date
+             */
             _created_at?: string;
+            /**
+             * The price id
+             */
             _id?: string;
+            /**
+             * The price autogenerated title
+             */
             _title?: string;
+            /**
+             * The price last update date
+             */
             _updated_at?: string;
+            /**
+             * The organization id the price belongs to
+             */
+            _org_id?: string;
+            /**
+             * An arbitrary set of tags attached to the price
+             */
+            _tags?: string[];
         }
         /**
-         * The price configuration
+         * The price entity schema for dynamic pricing
+         * example:
+         * {
+         *   "$ref": "#/components/examples/price-bundle"
+         * }
          */
         export interface PriceBundle {
             [name: string]: any;
-            active?: boolean;
-            billing_scheme?: "Per Unit";
-            description?: string;
-            sales_tax?: SalesTax;
-            tax_behavior?: "inclusive" | "exclusive";
-            tiers_mode?: "Standard";
-            type?: "one_time" | "recurring";
-            billing_period?: BillingPeriod;
-            unit_amount?: number;
-            unit_amount_decimal?: string;
-            unit_amount_currency?: /**
-             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
-             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
-             *
-             * example:
-             * EUR
+            /**
+             * Whether the price can be used for new purchases.
              */
-            Currency;
-            billing_duration_amount?: number;
-            billing_duration_unit?: "weeks" | "months" | "years";
-            notice_time_amount?: number;
-            notice_time_unit?: "weeks" | "months" | "years";
-            termination_time_amount?: number;
-            termination_time_unit?: "weeks" | "months" | "years";
-            renewal_duration_amount?: number;
-            renewal_duration_unit?: "weeks" | "months" | "years";
+            active?: boolean;
+            /**
+             * A brief description of the price.
+             */
+            description?: string;
+            /**
+             * A set of [price](/api/pricing#tag/simple_price_schema) components that define the price bundle.
+             */
+            price_components?: {
+                $relation?: PriceComponentRelation[];
+            };
+            /**
+             * The price creation date
+             */
             _created_at?: string;
+            /**
+             * The price id
+             */
             _id?: string;
+            /**
+             * The price autogenerated title
+             */
             _title?: string;
+            /**
+             * The price last update date
+             */
             _updated_at?: string;
+            /**
+             * The organization id the price belongs to
+             */
+            _org_id?: string;
+            /**
+             * An arbitrary set of tags attached to the price bundle
+             */
+            _tags?: string[];
+        }
+        export interface PriceComponentRelation {
+            /**
+             * The id of the price component
+             */
+            entity_id?: string;
+            /**
+             * By default, the quantity is set to 1, when greater than 1 this value is used as a multiplicative factor.
+             * E.g: 16 x Solar Modules - Premium price.
+             *
+             */
+            quantity?: number;
+            /**
+             * An arbitrary set of tags attached to the bundle - component relation
+             */
+            _tags?: string[];
         }
         /**
          * Represents a price item
+         * example:
+         * {
+         *   "$ref": "#/components/examples/order-with-simple-prices"
+         * }
          */
         export interface PriceItem {
             /**
@@ -882,6 +1048,10 @@ declare namespace Components {
              */
             id?: string;
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            /**
+             * Contains price item configurations, per price component, when the main price item is a [price bundle](/api/pricing#tag/dynamic_price_schema).
+             */
+            item_components?: PriceItemComponent[];
             /**
              * The unit amount value
              */
@@ -925,11 +1095,25 @@ declare namespace Components {
             /**
              * The price snapshot data.
              */
-            _price?: /* The price snapshot data. */ /* The price configuration */ Price;
+            _price?: /* The price snapshot data. */ /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price;
             /**
              * The product snapshot data.
              */
-            _product?: /* The product snapshot data. */ /* The product entity */ Product;
+            _product?: /* The product snapshot data. */ /**
+             * The product entity
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            Product;
             /**
              * The taxes applied to the price item.
              */
@@ -939,6 +1123,14 @@ declare namespace Components {
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
         }
+        export type PriceItemComponent = /**
+         * Represents a price item
+         * example:
+         * {
+         *   "$ref": "#/components/examples/order-with-simple-prices"
+         * }
+         */
+        PriceItem;
         /**
          * Represents a valid price item from a client.
          */
@@ -968,16 +1160,37 @@ declare namespace Components {
              * The taxes applied to the price item.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
-            _price?: /* The price configuration */ Price;
+            _price?: /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price;
             /**
              * The product linked to the price item.
              */
-            _product?: /* The product entity */ Product;
+            _product?: /**
+             * The product entity
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            Product;
         }
         /**
          * Tracks a set of product prices, quantities, (discounts) and taxes.
          */
-        export type PriceItems = (/* Represents a price item */ PriceItem)[];
+        export type PriceItems = (/**
+         * Represents a price item
+         * example:
+         * {
+         *   "$ref": "#/components/examples/order-with-simple-prices"
+         * }
+         */
+        PriceItem)[];
         /**
          * A valid set of product prices, quantities, (discounts) and taxes from a client.
          */
@@ -986,7 +1199,14 @@ declare namespace Components {
          * The result from the calculation of a set of price items.
          */
         export interface PricingDetails {
-            items?: (/* Represents a price item */ PriceItem)[];
+            items?: (/**
+             * Represents a price item
+             * example:
+             * {
+             *   "$ref": "#/components/examples/order-with-simple-prices"
+             * }
+             */
+            PriceItem)[];
             /**
              * Total of all items before (discounts or) taxes are applied.
              */
@@ -999,6 +1219,10 @@ declare namespace Components {
         }
         /**
          * The product entity
+         * example:
+         * {
+         *   "$ref": "#/components/examples/product"
+         * }
          */
         export interface Product {
             [name: string]: any;
@@ -1253,9 +1477,23 @@ declare namespace Paths {
         namespace Parameters {
             export type XIvyOrgID = string;
         }
-        export type RequestBody = /* The opportunity entity */ Components.Schemas.Opportunity;
+        export type RequestBody = /**
+         * The opportunity entity
+         * example:
+         * {
+         *   "$ref": "#/components/examples/opportunity"
+         * }
+         */
+        Components.Schemas.Opportunity;
         namespace Responses {
-            export type $201 = /* The opportunity entity */ Components.Schemas.Opportunity;
+            export type $201 = /**
+             * The opportunity entity
+             * example:
+             * {
+             *   "$ref": "#/components/examples/opportunity"
+             * }
+             */
+            Components.Schemas.Opportunity;
             export type $400 = Components.Schemas.Error;
         }
     }
@@ -1313,7 +1551,14 @@ declare namespace Paths {
     namespace CreateOrder {
         export type RequestBody = /* Order Entity Payload */ Components.Schemas.OrderPayload;
         namespace Responses {
-            export type $201 = /* The order entity */ Components.Schemas.Order;
+            export type $201 = /**
+             * The order entity
+             * example:
+             * {
+             *   "$ref": "#/components/examples/order-with-simple-prices"
+             * }
+             */
+            Components.Schemas.Order;
             export type $400 = Components.Schemas.Error;
         }
     }
@@ -1326,7 +1571,14 @@ declare namespace Paths {
         }
         export type RequestBody = /* Order Entity Payload */ Components.Schemas.OrderPayload;
         namespace Responses {
-            export type $200 = /* The order entity */ Components.Schemas.Order;
+            export type $200 = /**
+             * The order entity
+             * example:
+             * {
+             *   "$ref": "#/components/examples/order-with-simple-prices"
+             * }
+             */
+            Components.Schemas.Order;
             export type $400 = Components.Schemas.Error;
         }
     }
