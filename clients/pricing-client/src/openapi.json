@@ -107,9 +107,6 @@
     },
     {
       "url": "https://pricing-api.sls.epilot.io"
-    },
-    {
-      "url": "https://pricing-api.sls.epilot.io"
     }
   ],
   "paths": {
@@ -573,6 +570,9 @@
         "description": "The product entity",
         "readOnly": true,
         "additionalProperties": true,
+        "example": {
+          "$ref": "#/components/examples/product"
+        },
         "properties": {
           "code": {
             "type": "string",
@@ -691,6 +691,9 @@
         "type": "object",
         "description": "The opportunity entity",
         "additionalProperties": true,
+        "example": {
+          "$ref": "#/components/examples/opportunity"
+        },
         "properties": {
           "opportunity_number": {
             "type": "string",
@@ -934,6 +937,9 @@
         "type": "object",
         "description": "The order entity",
         "additionalProperties": true,
+        "example": {
+          "$ref": "#/components/examples/order-with-simple-prices"
+        },
         "properties": {
           "order_number": {
             "type": "string",
@@ -1073,61 +1079,111 @@
       },
       "Price": {
         "type": "object",
-        "description": "The price configuration",
+        "description": "The price entity schema for simple pricing",
+        "example": {
+          "$ref": "#/components/examples/price"
+        },
         "additionalProperties": true,
         "readOnly": true,
         "properties": {
           "active": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the price can be used for new purchases."
           },
           "billing_scheme": {
             "type": "string",
+            "description": "Describes how to compute the price per period. Either `per_unit` or `tiered`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers and tiers_mode attributes.\n\n⚠️ Tiered pricing is **not supported** yet.\n",
             "enum": [
-              "Per Unit"
+              "per_unit"
             ]
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "A brief description of the price."
           },
           "sales_tax": {
-            "$ref": "#/components/schemas/SalesTax"
+            "deprecated": true,
+            "description": "The default tax rate applicable to the product.\nThis field is deprecated, use the new `tax` attribute.\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SalesTax"
+              }
+            ]
+          },
+          "tax": {
+            "type": "object",
+            "description": "The default tax rate applied to the price",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
           },
           "tax_behavior": {
             "type": "string",
+            "description": "Specifies whether the price is considered `inclusive` of taxes or `exclusive` of taxes.\nOne of `inclusive`, `exclusive`, or `unspecified`.\n",
             "enum": [
               "inclusive",
               "exclusive"
             ]
           },
           "tiers_mode": {
+            "description": "Defines the tiered pricing type of the price.",
             "type": "string",
             "enum": [
-              "Standard"
+              "standard"
             ]
           },
           "type": {
             "type": "string",
+            "description": "One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.",
             "enum": [
               "one_time",
               "recurring"
             ]
           },
           "billing_period": {
-            "$ref": "#/components/schemas/BillingPeriod"
+            "description": "For recurring prices `billing_period` defines the default extent of the recurrence.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BillingPeriod"
+              }
+            ]
           },
           "unit_amount": {
+            "description": "The unit amount in cents to be charged, represented as a whole integer if possible.",
             "type": "number"
           },
           "unit_amount_decimal": {
+            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
             "type": "string"
           },
           "unit_amount_currency": {
-            "$ref": "#/components/schemas/Currency"
+            "description": "Three-letter ISO currency code, in lowercase.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Currency"
+              }
+            ]
+          },
+          "price_display_in_journeys": {
+            "description": "Defines the way the price amount is display in epilot journeys.",
+            "type": "string",
+            "enum": [
+              "show_price",
+              "show_as_starting_price",
+              "show_as_on_request"
+            ]
           },
           "billing_duration_amount": {
+            "description": "The billing period duration",
             "type": "number"
           },
           "billing_duration_unit": {
+            "description": "The billing period duration unit",
             "type": "string",
             "enum": [
               "weeks",
@@ -1136,9 +1192,11 @@
             ]
           },
           "notice_time_amount": {
+            "description": "The notice period duration",
             "type": "number"
           },
           "notice_time_unit": {
+            "description": "The notice period duration unit",
             "type": "string",
             "enum": [
               "weeks",
@@ -1147,9 +1205,11 @@
             ]
           },
           "termination_time_amount": {
+            "description": "The termination period duration",
             "type": "number"
           },
           "termination_time_unit": {
+            "description": "The termination period duration unit",
             "type": "string",
             "enum": [
               "weeks",
@@ -1158,9 +1218,11 @@
             ]
           },
           "renewal_duration_amount": {
+            "description": "The renewal period duration",
             "type": "number"
           },
           "renewal_duration_unit": {
+            "description": "The renewal period duration unit",
             "type": "string",
             "enum": [
               "weeks",
@@ -1169,127 +1231,109 @@
             ]
           },
           "_created_at": {
+            "description": "The price creation date",
             "type": "string"
           },
           "_id": {
+            "description": "The price id",
             "type": "string"
           },
           "_title": {
+            "description": "The price autogenerated title",
             "type": "string"
           },
           "_updated_at": {
+            "description": "The price last update date",
             "type": "string"
+          },
+          "_org_id": {
+            "type": "string",
+            "description": "The organization id the price belongs to"
+          },
+          "_tags": {
+            "type": "array",
+            "description": "An arbitrary set of tags attached to the price",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
       "PriceBundle": {
         "type": "object",
-        "description": "The price configuration",
+        "description": "The price entity schema for dynamic pricing",
+        "example": {
+          "$ref": "#/components/examples/price-bundle"
+        },
         "additionalProperties": true,
         "readOnly": true,
         "properties": {
           "active": {
-            "type": "boolean"
-          },
-          "billing_scheme": {
-            "type": "string",
-            "enum": [
-              "Per Unit"
-            ]
+            "type": "boolean",
+            "description": "Whether the price can be used for new purchases."
           },
           "description": {
-            "type": "string"
-          },
-          "sales_tax": {
-            "$ref": "#/components/schemas/SalesTax"
-          },
-          "tax_behavior": {
             "type": "string",
-            "enum": [
-              "inclusive",
-              "exclusive"
-            ]
+            "description": "A brief description of the price."
           },
-          "tiers_mode": {
-            "type": "string",
-            "enum": [
-              "Standard"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "one_time",
-              "recurring"
-            ]
-          },
-          "billing_period": {
-            "$ref": "#/components/schemas/BillingPeriod"
-          },
-          "unit_amount": {
-            "type": "number"
-          },
-          "unit_amount_decimal": {
-            "type": "string"
-          },
-          "unit_amount_currency": {
-            "$ref": "#/components/schemas/Currency"
-          },
-          "billing_duration_amount": {
-            "type": "number"
-          },
-          "billing_duration_unit": {
-            "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
-          },
-          "notice_time_amount": {
-            "type": "number"
-          },
-          "notice_time_unit": {
-            "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
-          },
-          "termination_time_amount": {
-            "type": "number"
-          },
-          "termination_time_unit": {
-            "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
-          },
-          "renewal_duration_amount": {
-            "type": "number"
-          },
-          "renewal_duration_unit": {
-            "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
+          "price_components": {
+            "type": "object",
+            "description": "A set of [price](/api/pricing#tag/simple_price_schema) components that define the price bundle.",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PriceComponentRelation"
+                }
+              }
+            }
           },
           "_created_at": {
+            "description": "The price creation date",
             "type": "string"
           },
           "_id": {
+            "description": "The price id",
             "type": "string"
           },
           "_title": {
+            "description": "The price autogenerated title",
             "type": "string"
           },
           "_updated_at": {
+            "description": "The price last update date",
             "type": "string"
+          },
+          "_org_id": {
+            "type": "string",
+            "description": "The organization id the price belongs to"
+          },
+          "_tags": {
+            "type": "array",
+            "description": "An arbitrary set of tags attached to the price bundle",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PriceComponentRelation": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "description": "The id of the price component",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "By default, the quantity is set to 1, when greater than 1 this value is used as a multiplicative factor.\nE.g: 16 x Solar Modules - Premium price.\n",
+            "type": "number"
+          },
+          "_tags": {
+            "type": "array",
+            "description": "An arbitrary set of tags attached to the bundle - component relation",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1907,6 +1951,9 @@
       "PriceItem": {
         "description": "Represents a price item",
         "type": "object",
+        "example": {
+          "$ref": "#/components/examples/order-with-simple-prices"
+        },
         "properties": {
           "id": {
             "type": "string",
@@ -1915,6 +1962,13 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/MetaData"
+          },
+          "item_components": {
+            "type": "array",
+            "description": "Contains price item configurations, per price component, when the main price item is a [price bundle](/api/pricing#tag/dynamic_price_schema).",
+            "items": {
+              "$ref": "#/components/schemas/PriceItemComponent"
+            }
           },
           "unit_amount": {
             "type": "integer",
@@ -1996,6 +2050,13 @@
             }
           }
         }
+      },
+      "PriceItemComponent": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PriceItem"
+          }
+        ]
       },
       "TaxAmount": {
         "type": "object",
@@ -2543,7 +2604,7 @@
                   "sales_tax": "standard",
                   "tax_behavior": "inclusive",
                   "description": "Winter Sale",
-                  "billing_scheme": "Per Unit",
+                  "billing_scheme": "per_unit",
                   "tiers_mode": "Standard",
                   "_created_at": "2021-11-10T18:02:58.318Z",
                   "_updated_at": "2021-11-10T18:02:58.318Z",
@@ -2579,7 +2640,7 @@
                   "sales_tax": "standard",
                   "tax_behavior": "inclusive",
                   "description": "Winter Sale",
-                  "billing_scheme": "Per Unit",
+                  "billing_scheme": "per_unit",
                   "tiers_mode": "Standard",
                   "_created_at": "2021-11-10T18:02:58.318Z",
                   "_updated_at": "2021-11-10T18:02:58.318Z",
@@ -2905,7 +2966,7 @@
                 "sales_tax": "reduced",
                 "tax_behavior": "inclusive",
                 "description": "Monthly",
-                "billing_scheme": "Per Unit",
+                "billing_scheme": "per_unit",
                 "tiers_mode": "Standard",
                 "_schema": "price",
                 "_org": "728",
