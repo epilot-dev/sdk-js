@@ -69,4 +69,4 @@ git commit -am 'chore(entity-client): updating client against new spec'
 npx lerna publish
 ```
 
-Depending on whether you have publish access to epilot-sdk registry repo or not `epilot-sdk` may fail with 403, which will leave some unstaged package.json's with a gitHead entry. Feel free to discard those files–the pipeline will pick up the changes an publish the `epilot-sdk` automatically.
+Depending on whether you have publish access to [epilot-sdk](https://www.npmjs.com/package/epilot-sdk) registry repo or not `epilot-sdk` may fail with 403, which will leave some unstaged package.json's with a gitHead entry. Feel free to discard those files–the pipeline will pick up the changes an publish the `epilot-sdk` automatically.
