@@ -32,18 +32,13 @@ await entityClient.createEntity('contact', { first_name: 'Example', last_name: '
 - [epilot-sdk Docs](https://docs.epilot.io/docs/architecture/sdk)
 - [epilot-sdk Reference](https://docs.epilot.io/api)
 
-# Contributing
+# Updating clients (epilot internal)
 
-ℹ️ Contributions are limited to epilot core maintainers.
+To update a client package with a new API definition, you should have made the changes already on the current API repo.
 
-## Updating a client against a new API spec
-
-To update a client SDK against a new API spec, you should have made the changes already on the current API repo.
-⚠️ Never modify a client `openapi.json` directly, such approach will most certainly lead to you losing your changes on a future release.
+⚠️  Never modify a client `openapi.json` directly, such approach will most certainly lead to you losing your changes on a future release.
 
 ```bash
-npm i
-
 ## navigate into you client folder
 cd clients/entity-client
 
@@ -51,18 +46,13 @@ cd clients/entity-client
 npm run openapi
 
 ## shortcut: if the desired openapi spec is still deploying, but will be in prod soon.
-## make sure you discard the *hunk* regarding the openapi server which now points to your local on `openapi.json`.
-../../scripts/update-openapi.sh http://localhost:3001/openapi.json
+npm run openapi <path/to/local/openapi.yml>
 
-## after updating and reviewing your freshly updated openapi.json
-## perform the type regeneration
-npm run typegen
-
-## from the root directory, perform a build
-npm run build
+## build and generate new types
+npm run typegen && npm run build
 
 ## commit your changes
-git commit -am 'chore(entity-client): updating client against new spec'
+git commit -am 'chore(entity-client): update client with new spec'
 
 ## push, tag & release
 ## ensure you are only bumping the package your changed & the epilot-sdk.
@@ -70,3 +60,9 @@ npx lerna publish
 ```
 
 Depending on whether you have publish access to [epilot-sdk](https://www.npmjs.com/package/epilot-sdk) registry repo or not `epilot-sdk` may fail with 403, which will leave some unstaged package.json's with a gitHead entry. Feel free to discard those files–the pipeline will pick up the changes an publish the `epilot-sdk` automatically.
+
+# Contributing
+
+`@epilot/sdk-js` is free and open source software, PRs are welcome! 🦄
+
+
