@@ -1,4 +1,4 @@
-# epilot-sdk
+<h1 align="center"><img alt="epilot-logo" src="./logo.png" style="max-width:50rem"><br>epilot-sdk</h1>
 
 [![CI](https://github.com/epilot-dev/sdk-js/workflows/CI/badge.svg)](https://github.com/epilot-dev/sdk-js/actions?query=workflow%3ACI) [![npm version](https://img.shields.io/npm/v/epilot-sdk.svg)](https://www.npmjs.com/package/epilot-sdk) [![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/epilot-dev/sdk-js/blob/main/LICENSE)
 
