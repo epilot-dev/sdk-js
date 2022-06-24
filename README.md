@@ -1,6 +1,10 @@
 <h1 align="center"><img alt="epilot-logo" src="./logo.png" width="200"><br>epilot-sdk</h1>
 
-[![CI](https://github.com/epilot-dev/sdk-js/workflows/CI/badge.svg)](https://github.com/epilot-dev/sdk-js/actions?query=workflow%3ACI) [![npm version](https://img.shields.io/npm/v/epilot-sdk.svg)](https://www.npmjs.com/package/epilot-sdk) [![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/epilot-dev/sdk-js/blob/main/LICENSE)
+[![CI](https://github.com/epilot-dev/sdk-js/workflows/CI/badge.svg)](https://github.com/epilot-dev/sdk-js/actions?query=workflow%3ACI)
+[![npm version](https://img.shields.io/npm/v/epilot-sdk.svg)](https://www.npmjs.com/package/epilot-sdk)
+[![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/epilot-dev/sdk-js/blob/main/LICENSE)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/epilot-dev/sdk-js.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/epilot-dev/sdk-js/alerts/)
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/epilot-dev/sdk-js.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/epilot-dev/sdk-js/context:javascript)
 
 >  ⚠️ **DISCLAIMER!**
 >
@@ -63,6 +67,8 @@ Depending on whether you have publish access to [epilot-sdk](https://www.npmjs.c
 
 # Contributing
 
-`@epilot/sdk-js` is free and open source software, PRs are welcome! 🦄
+The epilot Javascript SDK is free and open source software. PRs welcome!
+
+🚀
 
 

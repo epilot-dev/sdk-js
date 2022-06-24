@@ -12,7 +12,7 @@ export interface UsernamePasswordAuthParams {
   password: string;
 }
 export const authenticate = async (authParams: UsernamePasswordAuthParams): Promise<Credentials> => {
-  debug('params %o', { ...authParams, password: 'HIDDEN' });
+  debug('params %o', { ...authParams, password: 'HIDDEN' }); // lgtm [js/clear-text-logging]
 
   const loginParams = await getLoginParametersForUser({ username: authParams.username });
   debug('loginParams %o', { loginParams });
