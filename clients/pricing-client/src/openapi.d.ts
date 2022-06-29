@@ -21,47 +21,47 @@ declare namespace Components {
             /**
              * The first line of the address. Typically the street address or PO Box number.
              */
-            street?: string;
+            street?: string | null;
             /**
              * The second line of the address. Typically the number of the apartment, suite, or unit.
              */
-            street_number?: string;
+            street_number?: string | null;
             /**
              * The postal code for the address.
              */
-            postal_code?: string;
+            postal_code?: string | null;
             /**
              * The name of the city, district, village, or town.
              */
-            city?: string;
+            city?: string | null;
             /**
              * The two-letter code for the country of the address.
              */
-            country?: string;
+            country?: string | null;
             /**
              * An additional description for the address
              */
-            additional_info?: string;
+            additional_info?: string | null;
             /**
              * the company name, usually used as extra delivery instructions
              */
-            company_name?: string;
+            company_name?: string | null;
             /**
              * the first name of the recipient, usually used as extra delivery instructions
              */
-            first_name?: string;
+            first_name?: string | null;
             /**
              * the last name of the recipient, usually used as extra delivery instructions
              */
-            last_name?: string;
+            last_name?: string | null;
             /**
              * the salutation of the recipient, usually used as extra delivery instructions
              */
-            salutation?: string;
+            salutation?: string | null;
             /**
              * the title of the recipient, usually used as extra delivery instructions
              */
-            title?: string;
+            title?: string | null;
         }
         /**
          * Availability check request payload
@@ -1030,6 +1030,14 @@ declare namespace Components {
              *
              */
             quantity?: number;
+            item?: /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price;
             /**
              * An arbitrary set of tags attached to the bundle - component relation
              */
@@ -1051,7 +1059,14 @@ declare namespace Components {
             /**
              * Contains price item configurations, per price component, when the main price item is a [price bundle](/api/pricing#tag/dynamic_price_schema).
              */
-            item_components?: PriceItemComponent[];
+            item_components?: /**
+             * Represents a price item
+             * example:
+             * {
+             *   "$ref": "#/components/examples/order-with-simple-prices"
+             * }
+             */
+            PriceItemComponent[];
             /**
              * The unit amount value
              */
@@ -1093,9 +1108,196 @@ declare namespace Components {
              */
             price_id?: string;
             /**
+             * The flag for prices that contain price components.
+             */
+            is_price_bundle?: boolean;
+            /**
              * The price snapshot data.
              */
             _price?: /* The price snapshot data. */ /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price | /**
+             * The price entity schema for dynamic pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-bundle"
+             * }
+             */
+            PriceBundle;
+            /**
+             * The product snapshot data.
+             */
+            _product?: /* The product snapshot data. */ /**
+             * The product entity
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            Product;
+            /**
+             * The taxes applied to the price item.
+             */
+            taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
+            /**
+             * The sum of amounts of the price items by recurrence.
+             */
+            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+        }
+        /**
+         * Represents a price bundle input to the pricing library.
+         */
+        export interface PriceItemBundleDto {
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            /**
+             * The quantity of products being purchased.
+             */
+            quantity?: number;
+            /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            description?: string;
+            /**
+             * The id of the product.
+             */
+            product_id?: string;
+            /**
+             * The id of the price.
+             */
+            price_id?: string;
+            /**
+             * The unit amount value
+             */
+            unit_amount?: number;
+            /**
+             * Three-letter ISO currency code, in lowercase.
+             */
+            unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_price_bundle?: boolean;
+            /**
+             * The taxes applied to the price item.
+             */
+            taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
+            /**
+             * The taxes applied to the price item.
+             */
+            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
+            _price?: /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price | /**
+             * The price entity schema for dynamic pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-bundle"
+             * }
+             */
+            PriceBundle;
+            _product?: /**
+             * The product entity
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            Product;
+            /**
+             * Contains price item configurations, per price component, when the main price item is a [price bundle](/api/pricing#tag/dynamic_price_schema).
+             */
+            item_components?: /* Represents a valid price item from a client. */ PriceItemDto[];
+        }
+        /**
+         * Represents a price item
+         * example:
+         * {
+         *   "$ref": "#/components/examples/order-with-simple-prices"
+         * }
+         */
+        export interface PriceItemComponent {
+            /**
+             * price item id
+             */
+            id?: string;
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            /**
+             * Contains price item configurations, per price component, when the main price item is a [price bundle](/api/pricing#tag/dynamic_price_schema).
+             */
+            item_components?: /**
+             * Represents a price item
+             * example:
+             * {
+             *   "$ref": "#/components/examples/order-with-simple-prices"
+             * }
+             */
+            PriceItemComponent[];
+            /**
+             * The unit amount value
+             */
+            unit_amount?: number;
+            /**
+             * Total before any (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Net unit amount without taxes or discounts.
+             */
+            unit_amount_net?: number;
+            /**
+             * Total after (discounts and) taxes.
+             */
+            amount_total?: number;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            description?: string;
+            /**
+             * The quantity of products being purchased.
+             */
+            quantity?: number;
+            /**
+             * The id of the product.
+             */
+            product_id?: string;
+            /**
+             * The id of the price.
+             */
+            price_id?: string;
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_price_bundle?: boolean;
+            _price?: /**
              * The price entity schema for simple pricing
              * example:
              * {
@@ -1123,14 +1325,6 @@ declare namespace Components {
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
         }
-        export type PriceItemComponent = /**
-         * Represents a price item
-         * example:
-         * {
-         *   "$ref": "#/components/examples/order-with-simple-prices"
-         * }
-         */
-        PriceItem;
         /**
          * Represents a valid price item from a client.
          */
@@ -1153,6 +1347,29 @@ declare namespace Components {
              */
             price_id?: string;
             /**
+             * The unit amount value
+             */
+            unit_amount?: number;
+            /**
+             * Three-letter ISO currency code, in lowercase.
+             */
+            unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_price_bundle?: boolean;
+            /**
              * The taxes applied to the price item.
              */
             taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
@@ -1167,7 +1384,14 @@ declare namespace Components {
              *   "$ref": "#/components/examples/price"
              * }
              */
-            Price;
+            Price | /**
+             * The price entity schema for dynamic pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-bundle"
+             * }
+             */
+            PriceBundle;
             /**
              * The product linked to the price item.
              */

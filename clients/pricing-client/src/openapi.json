@@ -1328,6 +1328,9 @@
             "description": "By default, the quantity is set to 1, when greater than 1 this value is used as a multiplicative factor.\nE.g: 16 x Solar Modules - Premium price.\n",
             "type": "number"
           },
+          "item": {
+            "$ref": "#/components/schemas/Price"
+          },
           "_tags": {
             "type": "array",
             "description": "An arbitrary set of tags attached to the bundle - component relation",
@@ -1672,6 +1675,26 @@
             "type": "string",
             "description": "The id of the price."
           },
+          "unit_amount": {
+            "type": "integer",
+            "description": "The unit amount value"
+          },
+          "unit_amount_currency": {
+            "description": "Three-letter ISO currency code, in lowercase.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Currency"
+              }
+            ]
+          },
+          "unit_amount_decimal": {
+            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+            "type": "string"
+          },
+          "is_price_bundle": {
+            "description": "The flag for prices that contain price components.",
+            "type": "boolean"
+          },
           "taxes": {
             "type": "array",
             "description": "The taxes applied to the price item.",
@@ -1697,11 +1720,36 @@
             }
           },
           "_price": {
-            "$ref": "#/components/schemas/Price"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Price"
+              },
+              {
+                "$ref": "#/components/schemas/PriceBundle"
+              }
+            ]
           },
           "_product": {
             "description": "The product linked to the price item.",
             "$ref": "#/components/schemas/Product"
+          }
+        }
+      },
+      "PriceItemBundleDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PriceItemDto"
+          }
+        ],
+        "description": "Represents a price bundle input to the pricing library.",
+        "type": "object",
+        "properties": {
+          "item_components": {
+            "type": "array",
+            "description": "Contains price item configurations, per price component, when the main price item is a [price bundle](/api/pricing#tag/dynamic_price_schema).",
+            "items": {
+              "$ref": "#/components/schemas/PriceItemDto"
+            }
           }
         }
       },
@@ -2009,11 +2057,18 @@
             "type": "string",
             "description": "The id of the price."
           },
+          "is_price_bundle": {
+            "description": "The flag for prices that contain price components.",
+            "type": "boolean"
+          },
           "_price": {
             "description": "The price snapshot data.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Price"
+              },
+              {
+                "$ref": "#/components/schemas/PriceBundle"
               }
             ]
           },
@@ -2052,9 +2107,17 @@
         }
       },
       "PriceItemComponent": {
-        "oneOf": [
+        "allOf": [
           {
             "$ref": "#/components/schemas/PriceItem"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "_price": {
+                "$ref": "#/components/schemas/Price"
+              }
+            }
           }
         ]
       },
@@ -2277,47 +2340,58 @@
           },
           "street": {
             "type": "string",
-            "description": "The first line of the address. Typically the street address or PO Box number."
+            "description": "The first line of the address. Typically the street address or PO Box number.",
+            "nullable": true
           },
           "street_number": {
             "type": "string",
-            "description": "The second line of the address. Typically the number of the apartment, suite, or unit."
+            "description": "The second line of the address. Typically the number of the apartment, suite, or unit.",
+            "nullable": true
           },
           "postal_code": {
             "type": "string",
-            "description": "The postal code for the address."
+            "description": "The postal code for the address.",
+            "nullable": true
           },
           "city": {
             "type": "string",
-            "description": "The name of the city, district, village, or town."
+            "description": "The name of the city, district, village, or town.",
+            "nullable": true
           },
           "country": {
             "type": "string",
-            "description": "The two-letter code for the country of the address."
+            "description": "The two-letter code for the country of the address.",
+            "nullable": true
           },
           "additional_info": {
             "type": "string",
-            "description": "An additional description for the address"
+            "description": "An additional description for the address",
+            "nullable": true
           },
           "company_name": {
             "type": "string",
-            "description": "the company name, usually used as extra delivery instructions"
+            "description": "the company name, usually used as extra delivery instructions",
+            "nullable": true
           },
           "first_name": {
             "type": "string",
-            "description": "the first name of the recipient, usually used as extra delivery instructions"
+            "description": "the first name of the recipient, usually used as extra delivery instructions",
+            "nullable": true
           },
           "last_name": {
             "type": "string",
-            "description": "the last name of the recipient, usually used as extra delivery instructions"
+            "description": "the last name of the recipient, usually used as extra delivery instructions",
+            "nullable": true
           },
           "salutation": {
             "type": "string",
-            "description": "the salutation of the recipient, usually used as extra delivery instructions"
+            "description": "the salutation of the recipient, usually used as extra delivery instructions",
+            "nullable": true
           },
           "title": {
             "type": "string",
-            "description": "the title of the recipient, usually used as extra delivery instructions"
+            "description": "the title of the recipient, usually used as extra delivery instructions",
+            "nullable": true
           }
         }
       },
