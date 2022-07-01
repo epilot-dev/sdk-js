@@ -1424,7 +1424,14 @@ declare namespace Components {
          *   "$ref": "#/components/examples/price-item"
          * }
          */
-        PriceItem)[];
+        PriceItem | /**
+         * Represents a composite price input to the pricing library.
+         * example:
+         * {
+         *   "$ref": "#/components/examples/price-item"
+         * }
+         */
+        CompositePriceItem)[];
         /**
          * A valid set of product prices, quantities, (discounts) and taxes from a client.
          */

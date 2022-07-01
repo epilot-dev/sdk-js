@@ -2000,6 +2000,9 @@
           "oneOf": [
             {
               "$ref": "#/components/schemas/PriceItem"
+            },
+            {
+              "$ref": "#/components/schemas/CompositePriceItem"
             }
           ]
         }
