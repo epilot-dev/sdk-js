@@ -1691,7 +1691,7 @@
             "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
             "type": "string"
           },
-          "is_price_bundle": {
+          "is_composite_price": {
             "description": "The flag for prices that contain price components.",
             "type": "boolean"
           },
@@ -2057,7 +2057,7 @@
             "type": "string",
             "description": "The id of the price."
           },
-          "is_price_bundle": {
+          "is_composite_price": {
             "description": "The flag for prices that contain price components.",
             "type": "boolean"
           },
