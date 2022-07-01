@@ -377,6 +377,17 @@ declare namespace Components {
                 $relation?: PriceComponentRelation[];
             };
             /**
+             * Three-letter ISO currency code, in lowercase.
+             */
+            unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
              * The price creation date
              */
             _created_at?: string;

@@ -1288,6 +1288,14 @@
               }
             }
           },
+          "unit_amount_currency": {
+            "description": "Three-letter ISO currency code, in lowercase.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Currency"
+              }
+            ]
+          },
           "_created_at": {
             "description": "The price creation date",
             "type": "string"
