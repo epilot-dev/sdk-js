@@ -38,9 +38,9 @@
       "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Order\" exampleRef=\"#/components/examples/order-with-simple-prices\" />\n"
     },
     {
-      "name": "order_with_bundles",
-      "x-displayName": "Order (with Price Bundles)",
-      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Order\" exampleRef=\"#/components/examples/order-with-price-bundles\" />\n"
+      "name": "order_composite_prices",
+      "x-displayName": "Order (with Composite Prices)",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Order\" exampleRef=\"#/components/examples/order-with-composite-prices\" />\n"
     },
     {
       "name": "opportunity_schema",
@@ -59,8 +59,8 @@
     },
     {
       "name": "dynamic_price_schema",
-      "x-displayName": "Price Bundle",
-      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/PriceBundle\" exampleRef=\"#/components/examples/price-bundle\" />\n"
+      "x-displayName": "Composite Price",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/CompositePrice\" exampleRef=\"#/components/examples/composite-price\" />\n"
     }
   ],
   "x-tagGroups": [
@@ -82,7 +82,7 @@
     {
       "name": "Examples",
       "tags": [
-        "order_with_bundles"
+        "order_composite_prices"
       ]
     },
     {
@@ -646,7 +646,7 @@
           },
           "price_options": {
             "type": "object",
-            "description": "A set of [prices](/api/pricing#tag/simple_price_schema) or [price bundles](/api/pricing#tag/dynamic_price_schema) for the current product.",
+            "description": "A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.",
             "properties": {
               "$relation": {
                 "type": "array",
@@ -1259,11 +1259,11 @@
           }
         }
       },
-      "PriceBundle": {
+      "CompositePrice": {
         "type": "object",
         "description": "The price entity schema for dynamic pricing",
         "example": {
-          "$ref": "#/components/examples/price-bundle"
+          "$ref": "#/components/examples/composite-price"
         },
         "additionalProperties": true,
         "readOnly": true,
@@ -1278,7 +1278,7 @@
           },
           "price_components": {
             "type": "object",
-            "description": "A set of [price](/api/pricing#tag/simple_price_schema) components that define the price bundle.",
+            "description": "A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price.",
             "properties": {
               "$relation": {
                 "type": "array",
@@ -1310,7 +1310,7 @@
           },
           "_tags": {
             "type": "array",
-            "description": "An arbitrary set of tags attached to the price bundle",
+            "description": "An arbitrary set of tags attached to the composite price",
             "items": {
               "type": "string"
             }
@@ -1333,7 +1333,7 @@
           },
           "_tags": {
             "type": "array",
-            "description": "An arbitrary set of tags attached to the bundle - component relation",
+            "description": "An arbitrary set of tags attached to the composite price - component relation",
             "items": {
               "type": "string"
             }
@@ -1725,7 +1725,7 @@
                 "$ref": "#/components/schemas/Price"
               },
               {
-                "$ref": "#/components/schemas/PriceBundle"
+                "$ref": "#/components/schemas/CompositePrice"
               }
             ]
           },
@@ -1735,18 +1735,18 @@
           }
         }
       },
-      "PriceItemBundleDto": {
+      "CompositePriceItemDto": {
         "allOf": [
           {
             "$ref": "#/components/schemas/PriceItemDto"
           }
         ],
-        "description": "Represents a price bundle input to the pricing library.",
+        "description": "Represents a composite price input to the pricing library.",
         "type": "object",
         "properties": {
           "item_components": {
             "type": "array",
-            "description": "Contains price item configurations, per price component, when the main price item is a [price bundle](/api/pricing#tag/dynamic_price_schema).",
+            "description": "Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).",
             "items": {
               "$ref": "#/components/schemas/PriceItemDto"
             }
@@ -1996,11 +1996,29 @@
           ]
         }
       },
+      "CompositePriceItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PriceItem"
+          }
+        ],
+        "description": "Represents a composite price input to the pricing library.",
+        "type": "object",
+        "properties": {
+          "item_components": {
+            "type": "array",
+            "description": "Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).",
+            "items": {
+              "$ref": "#/components/schemas/PriceItem"
+            }
+          }
+        }
+      },
       "PriceItem": {
         "description": "Represents a price item",
         "type": "object",
         "example": {
-          "$ref": "#/components/examples/order-with-simple-prices"
+          "$ref": "#/components/examples/price-item"
         },
         "properties": {
           "id": {
@@ -2010,13 +2028,6 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/MetaData"
-          },
-          "item_components": {
-            "type": "array",
-            "description": "Contains price item configurations, per price component, when the main price item is a [price bundle](/api/pricing#tag/dynamic_price_schema).",
-            "items": {
-              "$ref": "#/components/schemas/PriceItemComponent"
-            }
           },
           "unit_amount": {
             "type": "integer",
@@ -2068,7 +2079,7 @@
                 "$ref": "#/components/schemas/Price"
               },
               {
-                "$ref": "#/components/schemas/PriceBundle"
+                "$ref": "#/components/schemas/CompositePrice"
               }
             ]
           },
@@ -2105,21 +2116,6 @@
             }
           }
         }
-      },
-      "PriceItemComponent": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/PriceItem"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "_price": {
-                "$ref": "#/components/schemas/Price"
-              }
-            }
-          }
-        ]
       },
       "TaxAmount": {
         "type": "object",
@@ -3281,7 +3277,7 @@
           "_updated_at": "2022-06-03T16:29:46.303Z"
         }
       },
-      "order-with-price-bundles": {
+      "order-with-composite-prices": {
         "value": {
           "metadata": [
             {
@@ -3483,7 +3479,7 @@
                 "name": "Cool box",
                 "_title": "Cool box"
               },
-              "description": "Price Bundle - Test 1",
+              "description": "Price Component",
               "unit_amount": 90000,
               "amount_subtotal": 270000,
               "amount_total": 286200
@@ -3859,12 +3855,12 @@
           "_updated_at": "2022-06-03T16:04:10.369Z"
         }
       },
-      "price-bundle": {
+      "composite-price": {
         "value": {
           "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
           "_schema": "price",
-          "_title": "My Price Bundle",
-          "description": "My Price Bundle",
+          "_title": "My Composite Price",
+          "description": "My Composite Price",
           "_org": "739224",
           "_created_at": "2022-02-18T10:10:26.439Z",
           "_updated_at": "2022-02-18T11:53:04.191Z",
@@ -3942,6 +3938,72 @@
                 }
               }
             ]
+          }
+        }
+      },
+      "price-item": {
+        "value": {
+          "amount_subtotal": 10000,
+          "amount_total": 10600,
+          "currency": "EUR",
+          "description": "Annual internet service",
+          "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+          "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+          "taxes": [
+            {
+              "amount": "600",
+              "tax": {
+                "active": true,
+                "behavior": "Exclusive",
+                "description": "Without Behaviour",
+                "rate": "6",
+                "region": "DE",
+                "type": "VAT",
+                "_created_at": "2022-02-07T14:49:08.831Z",
+                "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+                "_org": "739224",
+                "_schema": "tax",
+                "_title": "Tax Without Behaviour",
+                "_updated_at": "2022-02-07T14:49:08.831Z"
+              }
+            }
+          ],
+          "unit_amount": 10000,
+          "unit_amount_net": 10000,
+          "_price": {
+            "unit_amount": 10000,
+            "unit_amount_currency": "EUR",
+            "unit_amount_decimal": "100.00",
+            "sales_tax": "standard",
+            "tax_behavior": "exclusive",
+            "price_display_in_journeys": "show_price",
+            "type": "one_time",
+            "billing_period": "weekly",
+            "billing_duration_unit": "months",
+            "notice_time_unit": "months",
+            "termination_time_unit": "months",
+            "renewal_duration_unit": "months",
+            "_schema": "price",
+            "_title": "Solar Panel Module",
+            "description": "Solar Panel Module",
+            "active": true,
+            "tax": {
+              "$relation": [
+                {
+                  "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+                }
+              ]
+            },
+            "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+            "_org": "728",
+            "_created_at": "2022-06-03T16:04:10.369Z",
+            "_updated_at": "2022-06-03T16:04:10.369Z"
+          },
+          "_product": {
+            "name": "Cool box",
+            "type": "product",
+            "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+            "_title": "Cool box"
           }
         }
       }
