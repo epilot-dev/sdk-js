@@ -2055,6 +2055,10 @@
             "description": "Net unit amount without taxes or discounts.",
             "readOnly": true
           },
+          "unit_amount_decimal": {
+            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+            "type": "string"
+          },
           "amount_total": {
             "type": "integer",
             "description": "Total after (discounts and) taxes.",

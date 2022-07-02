@@ -438,6 +438,10 @@ declare namespace Components {
              */
             unit_amount_net?: number;
             /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
              * Total after (discounts and) taxes.
              */
             amount_total?: number;
@@ -1265,6 +1269,10 @@ declare namespace Components {
              * Net unit amount without taxes or discounts.
              */
             unit_amount_net?: number;
+            /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
             /**
              * Total after (discounts and) taxes.
              */
