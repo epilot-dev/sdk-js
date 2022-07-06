@@ -1383,7 +1383,7 @@
                 },
                 "render_condition": {
                   "type": "string",
-                  "example": "_is_composite_price = \"false\""
+                  "example": "is_composite_price = \"false\""
                 },
                 "order": {
                   "description": "Render order of the group",
@@ -2588,7 +2588,7 @@
                 },
                 "render_condition": {
                   "type": "string",
-                  "example": "_is_composite_price = \"false\""
+                  "example": "is_composite_price = \"false\""
                 },
                 "order": {
                   "type": "integer",

@@ -854,7 +854,7 @@ declare namespace Components {
                 hook: string;
                 /**
                  * example:
-                 * _is_composite_price = "false"
+                 * is_composite_price = "false"
                  */
                 render_condition?: string;
                 /**
@@ -1178,7 +1178,7 @@ declare namespace Components {
                 expanded?: boolean;
                 /**
                  * example:
-                 * _is_composite_price = "false"
+                 * is_composite_price = "false"
                  */
                 render_condition?: string;
                 /**
@@ -1384,7 +1384,7 @@ declare namespace Components {
                 expanded?: boolean;
                 /**
                  * example:
-                 * _is_composite_price = "false"
+                 * is_composite_price = "false"
                  */
                 render_condition?: string;
                 /**
