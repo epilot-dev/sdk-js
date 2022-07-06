@@ -1383,7 +1383,7 @@
                 },
                 "render_condition": {
                   "type": "string",
-                  "example": "_is_price_bundle = \"false\""
+                  "example": "_is_composite_price = \"false\""
                 },
                 "order": {
                   "description": "Render order of the group",
@@ -2521,7 +2521,7 @@
         ]
       },
       "SummaryAttribute": {
-        "description": "Represents an expanded version of an attribute to be displayed in the list item summary.\nThis configuration can be used in the following way: \n```js\n{\n  \"label\": \"Price components\"\n  \"value\": \"{{item.prices.length}} price components\"\n  \"show_as_tag\": true\n  \"render_condition\": \"is_price_bundle = \\\"true\\\"\"\n}\n```\nThe value field supports handlebar expressions from which you can pick any field from the entity state. \n",
+        "description": "Represents an expanded version of an attribute to be displayed in the list item summary.\nThis configuration can be used in the following way: \n```js\n{\n  \"label\": \"Price components\"\n  \"value\": \"{{item.prices.length}} price components\"\n  \"show_as_tag\": true\n  \"render_condition\": \"is_composite_price = \\\"true\\\"\"\n}\n```\nThe value field supports handlebar expressions from which you can pick any field from the entity state. \n",
         "type": "object",
         "properties": {
           "label": {
@@ -2588,7 +2588,7 @@
                 },
                 "render_condition": {
                   "type": "string",
-                  "example": "_is_price_bundle = \"false\""
+                  "example": "_is_composite_price = \"false\""
                 },
                 "order": {
                   "type": "integer",
