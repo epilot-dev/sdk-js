@@ -1336,9 +1336,6 @@
             "description": "By default, the quantity is set to 1, when greater than 1 this value is used as a multiplicative factor.\nE.g: 16 x Solar Modules - Premium price.\n",
             "type": "number"
           },
-          "item": {
-            "$ref": "#/components/schemas/Price"
-          },
           "_tags": {
             "type": "array",
             "description": "An arbitrary set of tags attached to the composite price - component relation",
@@ -1687,21 +1684,9 @@
             "type": "integer",
             "description": "The unit amount value"
           },
-          "unit_amount_currency": {
-            "description": "Three-letter ISO currency code, in lowercase.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Currency"
-              }
-            ]
-          },
           "unit_amount_decimal": {
             "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
             "type": "string"
-          },
-          "is_composite_price": {
-            "description": "The flag for prices that contain price components.",
-            "type": "boolean"
           },
           "taxes": {
             "type": "array",
@@ -1731,9 +1716,6 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Price"
-              },
-              {
-                "$ref": "#/components/schemas/CompositePrice"
               }
             ]
           },
@@ -1758,6 +1740,13 @@
             "items": {
               "$ref": "#/components/schemas/PriceItemDto"
             }
+          },
+          "_price": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompositePrice"
+              }
+            ]
           }
         }
       },
@@ -2000,6 +1989,9 @@
           "oneOf": [
             {
               "$ref": "#/components/schemas/PriceItem"
+            },
+            {
+              "$ref": "#/components/schemas/CompositePriceItem"
             }
           ]
         }
@@ -2051,6 +2043,10 @@
             "type": "integer",
             "description": "Net unit amount without taxes or discounts.",
             "readOnly": true
+          },
+          "unit_amount_decimal": {
+            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+            "type": "string"
           },
           "amount_total": {
             "type": "integer",

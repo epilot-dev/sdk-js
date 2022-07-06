@@ -438,6 +438,10 @@ declare namespace Components {
              */
             unit_amount_net?: number;
             /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
              * Total after (discounts and) taxes.
              */
             amount_total?: number;
@@ -544,24 +548,9 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
-             * Three-letter ISO currency code, in lowercase.
-             */
-            unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
-             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
-             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
-             *
-             * example:
-             * EUR
-             */
-            Currency;
-            /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * The taxes applied to the price item.
              */
@@ -1227,14 +1216,6 @@ declare namespace Components {
              *
              */
             quantity?: number;
-            item?: /**
-             * The price entity schema for simple pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/price"
-             * }
-             */
-            Price;
             /**
              * An arbitrary set of tags attached to the composite price - component relation
              */
@@ -1265,6 +1246,10 @@ declare namespace Components {
              * Net unit amount without taxes or discounts.
              */
             unit_amount_net?: number;
+            /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
             /**
              * Total after (discounts and) taxes.
              */
@@ -1361,24 +1346,9 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
-             * Three-letter ISO currency code, in lowercase.
-             */
-            unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
-             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
-             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
-             *
-             * example:
-             * EUR
-             */
-            Currency;
-            /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * The taxes applied to the price item.
              */
@@ -1394,14 +1364,7 @@ declare namespace Components {
              *   "$ref": "#/components/examples/price"
              * }
              */
-            Price | /**
-             * The price entity schema for dynamic pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/composite-price"
-             * }
-             */
-            CompositePrice;
+            Price;
             /**
              * The product linked to the price item.
              */
@@ -1424,7 +1387,14 @@ declare namespace Components {
          *   "$ref": "#/components/examples/price-item"
          * }
          */
-        PriceItem)[];
+        PriceItem | /**
+         * Represents a composite price input to the pricing library.
+         * example:
+         * {
+         *   "$ref": "#/components/examples/price-item"
+         * }
+         */
+        CompositePriceItem)[];
         /**
          * A valid set of product prices, quantities, (discounts) and taxes from a client.
          */
