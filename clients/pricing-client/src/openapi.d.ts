@@ -1216,6 +1216,14 @@ declare namespace Components {
              *
              */
             quantity?: number;
+            item?: /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price;
             /**
              * An arbitrary set of tags attached to the composite price - component relation
              */
@@ -1364,7 +1372,14 @@ declare namespace Components {
              *   "$ref": "#/components/examples/price"
              * }
              */
-            Price;
+            Price | /**
+             * The price entity schema for dynamic pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/composite-price"
+             * }
+             */
+            CompositePrice;
             /**
              * The product linked to the price item.
              */

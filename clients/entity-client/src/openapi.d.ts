@@ -854,7 +854,7 @@ declare namespace Components {
                 hook: string;
                 /**
                  * example:
-                 * _is_price_bundle = "false"
+                 * is_composite_price = "false"
                  */
                 render_condition?: string;
                 /**
@@ -1138,7 +1138,7 @@ declare namespace Components {
                      *   "label": "Price components"
                      *   "value": "{{item.prices.length}} price components"
                      *   "show_as_tag": true
-                     *   "render_condition": "is_price_bundle = \"true\""
+                     *   "render_condition": "is_composite_price = \"true\""
                      * }
                      * ```
                      * The value field supports handlebar expressions from which you can pick any field from the entity state.
@@ -1178,7 +1178,7 @@ declare namespace Components {
                 expanded?: boolean;
                 /**
                  * example:
-                 * _is_price_bundle = "false"
+                 * is_composite_price = "false"
                  */
                 render_condition?: string;
                 /**
@@ -1344,7 +1344,7 @@ declare namespace Components {
                      *   "label": "Price components"
                      *   "value": "{{item.prices.length}} price components"
                      *   "show_as_tag": true
-                     *   "render_condition": "is_price_bundle = \"true\""
+                     *   "render_condition": "is_composite_price = \"true\""
                      * }
                      * ```
                      * The value field supports handlebar expressions from which you can pick any field from the entity state.
@@ -1384,7 +1384,7 @@ declare namespace Components {
                 expanded?: boolean;
                 /**
                  * example:
-                 * _is_price_bundle = "false"
+                 * is_composite_price = "false"
                  */
                 render_condition?: string;
                 /**
@@ -2768,7 +2768,7 @@ declare namespace Components {
          *   "label": "Price components"
          *   "value": "{{item.prices.length}} price components"
          *   "show_as_tag": true
-         *   "render_condition": "is_price_bundle = \"true\""
+         *   "render_condition": "is_composite_price = \"true\""
          * }
          * ```
          * The value field supports handlebar expressions from which you can pick any field from the entity state.

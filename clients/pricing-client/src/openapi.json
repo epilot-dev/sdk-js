@@ -1336,6 +1336,9 @@
             "description": "By default, the quantity is set to 1, when greater than 1 this value is used as a multiplicative factor.\nE.g: 16 x Solar Modules - Premium price.\n",
             "type": "number"
           },
+          "item": {
+            "$ref": "#/components/schemas/Price"
+          },
           "_tags": {
             "type": "array",
             "description": "An arbitrary set of tags attached to the composite price - component relation",
