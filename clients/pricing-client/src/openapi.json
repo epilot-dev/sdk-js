@@ -1687,21 +1687,9 @@
             "type": "integer",
             "description": "The unit amount value"
           },
-          "unit_amount_currency": {
-            "description": "Three-letter ISO currency code, in lowercase.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Currency"
-              }
-            ]
-          },
           "unit_amount_decimal": {
             "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
             "type": "string"
-          },
-          "is_composite_price": {
-            "description": "The flag for prices that contain price components.",
-            "type": "boolean"
           },
           "taxes": {
             "type": "array",
@@ -1731,9 +1719,6 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Price"
-              },
-              {
-                "$ref": "#/components/schemas/CompositePrice"
               }
             ]
           },
@@ -1758,6 +1743,13 @@
             "items": {
               "$ref": "#/components/schemas/PriceItemDto"
             }
+          },
+          "_price": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompositePrice"
+              }
+            ]
           }
         }
       },

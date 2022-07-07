@@ -548,24 +548,9 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
-             * Three-letter ISO currency code, in lowercase.
-             */
-            unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
-             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
-             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
-             *
-             * example:
-             * EUR
-             */
-            Currency;
-            /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * The taxes applied to the price item.
              */
@@ -1369,24 +1354,9 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
-             * Three-letter ISO currency code, in lowercase.
-             */
-            unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
-             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
-             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
-             *
-             * example:
-             * EUR
-             */
-            Currency;
-            /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * The taxes applied to the price item.
              */
