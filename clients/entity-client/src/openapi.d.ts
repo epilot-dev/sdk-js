@@ -1621,9 +1621,9 @@ declare namespace Components {
             type: "image" | "file";
             multiple?: boolean;
             /**
-             * List of unique content type specifiers (mime-types / extension)
+             * List of file extensions (without the dot suffix)
              */
-            allowed_types?: string[];
+            allowed_extensions?: string[];
             default_access_control?: "public-read" | "private";
         }
         export type GetRelationsResp = (RelationItem | /**

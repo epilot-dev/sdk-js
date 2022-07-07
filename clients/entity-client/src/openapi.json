@@ -1950,12 +1950,12 @@
               "multiple": {
                 "type": "boolean"
               },
-              "allowed_types": {
-                "description": "List of unique content type specifiers (mime-types / extension)",
+              "allowed_extensions": {
+                "description": "List of file extensions (without the dot suffix)",
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "example": "image/*"
+                  "example": "csv"
                 }
               },
               "default_access_control": {
