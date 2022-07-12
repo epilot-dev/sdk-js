@@ -84,6 +84,48 @@
         }
       }
     },
+    "/v1/permissions/roles:search": {
+      "post": {
+        "operationId": "searchRoles",
+        "summary": "searchRoles",
+        "description": "Search Roles",
+        "tags": [
+          "Roles"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleSearchInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "type": "number"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Role"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/permissions/roles/{roleId}": {
       "get": {
         "operationId": "getRole",
@@ -887,6 +929,7 @@
       },
       "Assignment": {
         "type": "object",
+        "description": "A role attached to an user",
         "properties": {
           "user_id": {
             "$ref": "#/components/schemas/UserId"
@@ -901,24 +944,86 @@
       },
       "Assignments": {
         "type": "array",
+        "description": "List of role ids attached to an user",
         "items": {
           "$ref": "#/components/schemas/RoleId"
         }
       },
       "UserId": {
         "type": "string",
-        "example": "1"
+        "example": "1",
+        "description": "Id of a user"
       },
       "OrganizationId": {
         "type": "string",
-        "example": "123"
+        "example": "123",
+        "description": "Id of an organization"
+      },
+      "Slug": {
+        "type": "string",
+        "example": "owner",
+        "description": "Slug of a role; for a role with id = 123:manager -> 123 is org_id & manager is slug"
+      },
+      "RoleSearchInput": {
+        "type": "object",
+        "properties": {
+          "role_ids": {
+            "type": "array",
+            "description": "List of role ids to filter by",
+            "example": [
+              "123:manager",
+              "456:owner"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/RoleId"
+            }
+          },
+          "org_ids": {
+            "type": "array",
+            "description": "List of organization ids to filter by",
+            "example": [
+              "123",
+              "456"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/OrganizationId"
+            }
+          },
+          "slugs": {
+            "type": "array",
+            "description": "List of role slugs to filter by",
+            "example": [
+              "manager",
+              "owner"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/Slug"
+            }
+          },
+          "query": {
+            "type": "string",
+            "description": "Input to search across fields",
+            "example": "Administrator"
+          },
+          "limit": {
+            "type": "number",
+            "description": "The Number of roles to return",
+            "example": 1,
+            "minimum": 1,
+            "default": 50
+          },
+          "offset": {
+            "type": "number",
+            "description": "The number of roles to skip before starting to collect the result set",
+            "example": 1,
+            "minimum": 1,
+            "default": 0
+          }
+        }
       }
     }
   },
   "servers": [
-    {
-      "url": "https://permissions.sls.epilot.io"
-    },
     {
       "url": "https://permissions.sls.epilot.io"
     }

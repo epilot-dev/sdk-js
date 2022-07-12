@@ -9,8 +9,12 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        /**
+         * A role attached to an user
+         */
         export interface Assignment {
             user_id?: /**
+             * Id of a user
              * example:
              * 1
              */
@@ -22,6 +26,9 @@ declare namespace Components {
              */
             RoleId[];
         }
+        /**
+         * List of role ids attached to an user
+         */
         export type Assignments = /**
          * Format: <organization_id>:<slug>
          * example:
@@ -58,6 +65,7 @@ declare namespace Components {
              */
             expires_at?: string; // date-time
             organization_id: /**
+             * Id of an organization
              * example:
              * 123
              */
@@ -130,6 +138,7 @@ declare namespace Components {
              */
             expires_at?: string; // date-time
             organization_id: /**
+             * Id of an organization
              * example:
              * 123
              */
@@ -140,6 +149,7 @@ declare namespace Components {
             grants: Grant[];
         }
         /**
+         * Id of an organization
          * example:
          * 123
          */
@@ -177,6 +187,7 @@ declare namespace Components {
              */
             expires_at?: string; // date-time
             organization_id: /**
+             * Id of an organization
              * example:
              * 123
              */
@@ -186,7 +197,7 @@ declare namespace Components {
              */
             grants: Grant[];
             /**
-             * Partner organization who can assign this role to their users.
+             * Id of an organization
              * example:
              * 123
              */
@@ -229,6 +240,7 @@ declare namespace Components {
              */
             expires_at?: string; // date-time
             organization_id: /**
+             * Id of an organization
              * example:
              * 123
              */
@@ -267,6 +279,7 @@ declare namespace Components {
              */
             expires_at?: string; // date-time
             organization_id: /**
+             * Id of an organization
              * example:
              * 123
              */
@@ -305,6 +318,7 @@ declare namespace Components {
              */
             expires_at?: string; // date-time
             organization_id: /**
+             * Id of an organization
              * example:
              * 123
              */
@@ -343,6 +357,7 @@ declare namespace Components {
              */
             expires_at?: string; // date-time
             organization_id: /**
+             * Id of an organization
              * example:
              * 123
              */
@@ -352,12 +367,74 @@ declare namespace Components {
              */
             grants: GrantWithDependencies[];
             /**
-             * Partner organization who can assign this role to their users.
+             * Id of an organization
              * example:
              * 123
              */
             partner_org_id?: string;
         };
+        export interface RoleSearchInput {
+            /**
+             * List of role ids to filter by
+             * example:
+             * [
+             *   "123:manager",
+             *   "456:owner"
+             * ]
+             */
+            role_ids?: /**
+             * Format: <organization_id>:<slug>
+             * example:
+             * 123:owner
+             */
+            RoleId[];
+            /**
+             * List of organization ids to filter by
+             * example:
+             * [
+             *   "123",
+             *   "456"
+             * ]
+             */
+            org_ids?: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId[];
+            /**
+             * List of role slugs to filter by
+             * example:
+             * [
+             *   "manager",
+             *   "owner"
+             * ]
+             */
+            slugs?: /**
+             * Slug of a role; for a role with id = 123:manager -> 123 is org_id & manager is slug
+             * example:
+             * owner
+             */
+            Slug[];
+            /**
+             * Input to search across fields
+             * example:
+             * Administrator
+             */
+            query?: string;
+            /**
+             * The Number of roles to return
+             * example:
+             * 1
+             */
+            limit?: number;
+            /**
+             * The number of roles to skip before starting to collect the result set
+             * example:
+             * 1
+             */
+            offset?: number;
+        }
         /**
          * A role that can be assigned to users in other organizations for sharing purposes.
          */
@@ -391,6 +468,7 @@ declare namespace Components {
              */
             expires_at?: string; // date-time
             organization_id: /**
+             * Id of an organization
              * example:
              * 123
              */
@@ -401,6 +479,13 @@ declare namespace Components {
             grants: Grant[];
         }
         /**
+         * Slug of a role; for a role with id = 123:manager -> 123 is org_id & manager is slug
+         * example:
+         * owner
+         */
+        export type Slug = string;
+        /**
+         * Id of a user
          * example:
          * 1
          */
@@ -438,6 +523,7 @@ declare namespace Components {
              */
             expires_at?: string; // date-time
             organization_id: /**
+             * Id of an organization
              * example:
              * 123
              */
@@ -459,6 +545,7 @@ declare namespace Paths {
              */
             Components.Schemas.RoleId;
             export type UserId = /**
+             * Id of a user
              * example:
              * 1
              */
@@ -469,12 +556,13 @@ declare namespace Paths {
             roleId: Parameters.RoleId;
         }
         namespace Responses {
-            export type $201 = Components.Schemas.Assignment;
+            export type $201 = /* A role attached to an user */ Components.Schemas.Assignment;
         }
     }
     namespace AssignRoles {
         namespace Parameters {
             export type UserId = /**
+             * Id of a user
              * example:
              * 1
              */
@@ -483,9 +571,9 @@ declare namespace Paths {
         export interface PathParameters {
             userId: Parameters.UserId;
         }
-        export type RequestBody = Components.Schemas.Assignments;
+        export type RequestBody = /* List of role ids attached to an user */ Components.Schemas.Assignments;
         namespace Responses {
-            export type $200 = Components.Schemas.Assignments;
+            export type $200 = /* List of role ids attached to an user */ Components.Schemas.Assignments;
         }
     }
     namespace DeleteRole {
@@ -507,6 +595,7 @@ declare namespace Paths {
     namespace GetAssignedRolesForUser {
         namespace Parameters {
             export type UserId = /**
+             * Id of a user
              * example:
              * 1
              */
@@ -516,7 +605,7 @@ declare namespace Paths {
             userId: Parameters.UserId;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.Assignments;
+            export type $200 = /* List of role ids attached to an user */ Components.Schemas.Assignments;
         }
     }
     namespace GetRole {
@@ -538,7 +627,7 @@ declare namespace Paths {
     namespace ListAllAssignments {
         namespace Responses {
             export interface $200 {
-                assignments?: Components.Schemas.Assignment[];
+                assignments?: /* A role attached to an user */ Components.Schemas.Assignment[];
             }
         }
     }
@@ -588,6 +677,7 @@ declare namespace Paths {
              */
             Components.Schemas.RoleId;
             export type UserId = /**
+             * Id of a user
              * example:
              * 1
              */
@@ -598,7 +688,16 @@ declare namespace Paths {
             roleId: Parameters.RoleId;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.Assignment;
+            export type $200 = /* A role attached to an user */ Components.Schemas.Assignment;
+        }
+    }
+    namespace SearchRoles {
+        export type RequestBody = Components.Schemas.RoleSearchInput;
+        namespace Responses {
+            export interface $200 {
+                hits?: number;
+                results?: Components.Schemas.Role[];
+            }
         }
     }
 }
@@ -624,6 +723,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListAllRoles.Responses.$200>
+  /**
+   * searchRoles - searchRoles
+   * 
+   * Search Roles
+   */
+  'searchRoles'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchRoles.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchRoles.Responses.$200>
   /**
    * getRole - getRole
    * 
@@ -743,6 +852,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListAllRoles.Responses.$200>
+  }
+  ['/v1/permissions/roles:search']: {
+    /**
+     * searchRoles - searchRoles
+     * 
+     * Search Roles
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchRoles.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchRoles.Responses.$200>
   }
   ['/v1/permissions/roles/{roleId}']: {
     /**
