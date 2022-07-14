@@ -562,6 +562,14 @@
           "message": {
             "type": "string",
             "description": "Error message"
+          },
+          "status": {
+            "type": "number",
+            "description": "The HTTP status code"
+          },
+          "cause": {
+            "type": "string",
+            "description": "The cause of the error (visible for bad requests - http 400)"
           }
         }
       },
@@ -1111,16 +1119,26 @@
             ]
           },
           "tax": {
-            "type": "object",
             "description": "The default tax rate applied to the price",
-            "properties": {
-              "$relation": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                }
+              },
+              {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/EntityRelation"
+                  "$ref": "#/components/schemas/Tax"
                 }
               }
-            }
+            ]
           },
           "tax_behavior": {
             "type": "string",
@@ -1277,16 +1295,26 @@
             "description": "A brief description of the price."
           },
           "price_components": {
-            "type": "object",
             "description": "A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price.",
-            "properties": {
-              "$relation": {
+            "oneOf": [
+              {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/PriceComponentRelation"
+                  "$ref": "#/components/schemas/Price"
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PriceComponentRelation"
+                    }
+                  }
                 }
               }
-            }
+            ]
           },
           "unit_amount_currency": {
             "description": "Three-letter ISO currency code, in lowercase.",
@@ -1335,9 +1363,6 @@
           "quantity": {
             "description": "By default, the quantity is set to 1, when greater than 1 this value is used as a multiplicative factor.\nE.g: 16 x Solar Modules - Premium price.\n",
             "type": "number"
-          },
-          "item": {
-            "$ref": "#/components/schemas/Price"
           },
           "_tags": {
             "type": "array",
@@ -1660,11 +1685,12 @@
           ]
         }
       },
-      "PriceItemDto": {
-        "description": "Represents a valid price item from a client.",
+      "BasePriceItemDto": {
+        "description": "Represents a valid base price item from a client.",
         "type": "object",
         "properties": {
           "metadata": {
+            "description": "An additional structure to keep metadata related with the price item.",
             "$ref": "#/components/schemas/MetaData"
           },
           "quantity": {
@@ -1682,14 +1708,6 @@
           "price_id": {
             "type": "string",
             "description": "The id of the price."
-          },
-          "unit_amount": {
-            "type": "integer",
-            "description": "The unit amount value"
-          },
-          "unit_amount_decimal": {
-            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
-            "type": "string"
           },
           "taxes": {
             "type": "array",
@@ -1715,23 +1733,39 @@
               ]
             }
           },
-          "_price": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Price"
-              }
-            ]
-          },
           "_product": {
-            "description": "The product linked to the price item.",
+            "description": "The snapshot of the product linked to the price item.",
             "$ref": "#/components/schemas/Product"
+          }
+        }
+      },
+      "PriceItemDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BasePriceItemDto"
+          }
+        ],
+        "description": "Represents a price input to the pricing library.",
+        "type": "object",
+        "properties": {
+          "unit_amount": {
+            "type": "integer",
+            "description": "The unit amount value"
+          },
+          "unit_amount_decimal": {
+            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+            "type": "string"
+          },
+          "_price": {
+            "description": "The snapshot of the price linked to the price item.",
+            "$ref": "#/components/schemas/Price"
           }
         }
       },
       "CompositePriceItemDto": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/PriceItemDto"
+            "$ref": "#/components/schemas/BasePriceItemDto"
           }
         ],
         "description": "Represents a composite price input to the pricing library.",
@@ -1745,11 +1779,8 @@
             }
           },
           "_price": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/CompositePrice"
-              }
-            ]
+            "description": "The snapshot of the price linked to the price item.",
+            "$ref": "#/components/schemas/CompositePrice"
           }
         }
       },
@@ -1759,7 +1790,8 @@
         "properties": {
           "rate": {
             "type": "string",
-            "description": "The tax rate applied."
+            "deprecated": true,
+            "description": "The deprecated tax rate applied.\nThis field has been deprecated in favor of the new Tax Management. You should use the new tax fields pointing to a proper tax entity.\n"
           },
           "tax": {
             "description": "The tax applied.",
@@ -1829,7 +1861,6 @@
           }
         },
         "required": [
-          "type",
           "amount_subtotal",
           "amount_total"
         ]
@@ -1989,7 +2020,7 @@
         "description": "Tracks a set of product prices, quantities, (discounts) and taxes.",
         "type": "array",
         "items": {
-          "oneOf": [
+          "anyOf": [
             {
               "$ref": "#/components/schemas/PriceItem"
             },
@@ -2135,13 +2166,49 @@
           },
           "rate": {
             "type": "string",
-            "description": "The tax rate applied."
+            "description": "The tax rate applied. With the release of the tax management feature this field is being deprecated in favor of the tax field.",
+            "deprecated": true
+          },
+          "rateValue": {
+            "type": "number",
+            "description": "The tax rate value applied (represented as an integer percentage, e.g, 19 or 7).\nWith the release of the tax management feature this field is being deprecated in favor of the tax field.\n",
+            "example": 19,
+            "deprecated": true
           },
           "tax": {
             "description": "The tax applied.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/Tax"
+              }
+            ]
+          }
+        }
+      },
+      "TaxAmountBreakdown": {
+        "type": "object",
+        "description": "A tax amount associated with a specific tax rate.",
+        "readOnly": true,
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "description": "The tax amount."
+          },
+          "rate": {
+            "type": "string",
+            "description": "The tax rate applied. With the release of the tax manager feature this field is being deprecated in favor of the tax field.",
+            "deprecated": true
+          },
+          "rateValue": {
+            "type": "number",
+            "description": "The tax rate value applied. With the release of the tax manager feature this field is being deprecated in favor of the tax field.",
+            "deprecated": true
+          },
+          "tax": {
+            "description": "The tax applied.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TaxBreakdownInfo"
               }
             ]
           }
@@ -2174,7 +2241,6 @@
           }
         },
         "required": [
-          "type",
           "amount_subtotal",
           "amount_total"
         ]
@@ -2202,7 +2268,7 @@
                 "items": {
                   "oneOf": [
                     {
-                      "$ref": "#/components/schemas/TaxAmount"
+                      "$ref": "#/components/schemas/TaxAmountBreakdown"
                     }
                   ]
                 }
@@ -2509,6 +2575,62 @@
           "filename"
         ]
       },
+      "EntityId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "EntityItem": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "_title": {
+            "type": "string",
+            "description": "Title of entity"
+          },
+          "_org": {
+            "type": "string",
+            "description": "Organization Id the entity belongs to"
+          },
+          "_schema": {
+            "type": "string"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "_id",
+          "_title",
+          "_org",
+          "_schema",
+          "_created_at",
+          "_updated_at"
+        ],
+        "example": {
+          "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "_org": "123",
+          "_schema": "contact",
+          "_tags": [
+            "example",
+            "mock"
+          ],
+          "_created_at": "2021-02-09T12:41:43.662Z",
+          "_updated_at": "2021-02-09T12:41:43.662Z"
+        }
+      },
       "EntityRelation": {
         "type": "object",
         "additionalProperties": true,
@@ -2531,9 +2653,43 @@
         "required": [
           "type",
           "rate",
-          "behavior"
+          "behavior",
+          "_id",
+          "_title",
+          "_org",
+          "_schema",
+          "_created_at",
+          "_updated_at"
         ],
         "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "_title": {
+            "type": "string",
+            "description": "Title of entity"
+          },
+          "_org": {
+            "type": "string",
+            "description": "Organization Id the entity belongs to"
+          },
+          "_schema": {
+            "type": "string"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
           "type": {
             "type": "string",
             "enum": [
@@ -2552,7 +2708,9 @@
             "type": "string",
             "enum": [
               "Exclusive",
-              "Inclusive"
+              "Inclusive",
+              "exclusive",
+              "inclusive"
             ]
           },
           "active": {
@@ -2562,6 +2720,42 @@
             "type": "string"
           },
           "region_label": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "type": "VAT",
+          "description": "Tax description",
+          "behavior": "Exclusive",
+          "active": "true",
+          "region": "DE",
+          "region_label": "Germany",
+          "_org": "123",
+          "_schema": "tax",
+          "_tags": [
+            "example",
+            "mock"
+          ],
+          "_created_at": "2021-02-09T12:41:43.662Z",
+          "_updated_at": "2021-02-09T12:41:43.662Z"
+        }
+      },
+      "TaxBreakdownInfo": {
+        "type": "object",
+        "properties": {
+          "rate": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "VAT",
+              "GST",
+              "Custom"
+            ]
+          },
+          "_id": {
             "type": "string"
           }
         }

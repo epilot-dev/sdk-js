@@ -157,6 +157,50 @@ declare namespace Components {
                 };
             }[];
         }
+        /**
+         * Represents a valid base price item from a client.
+         */
+        export interface BasePriceItemDto {
+            /**
+             * An additional structure to keep metadata related with the price item.
+             */
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            /**
+             * The quantity of products being purchased.
+             */
+            quantity?: number;
+            /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            description?: string;
+            /**
+             * The id of the product.
+             */
+            product_id?: string;
+            /**
+             * The id of the price.
+             */
+            price_id?: string;
+            /**
+             * The taxes applied to the price item.
+             */
+            taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
+            /**
+             * The taxes applied to the price item.
+             */
+            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
+            /**
+             * The snapshot of the product linked to the price item.
+             */
+            _product?: /**
+             * The product entity
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            Product;
+        }
         export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
         /**
          * Supports shopping for products and services until ready for checkout.
@@ -373,7 +417,14 @@ declare namespace Components {
             /**
              * A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price.
              */
-            price_components?: {
+            price_components?: /* A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price. */ /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price[] | {
                 $relation?: PriceComponentRelation[];
             };
             /**
@@ -544,14 +595,6 @@ declare namespace Components {
              */
             price_id?: string;
             /**
-             * The unit amount value
-             */
-            unit_amount?: number;
-            /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
-             */
-            unit_amount_decimal?: string;
-            /**
              * The taxes applied to the price item.
              */
             taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
@@ -559,21 +602,6 @@ declare namespace Components {
              * The taxes applied to the price item.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
-            _price?: /**
-             * The price entity schema for simple pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/price"
-             * }
-             */
-            Price | /**
-             * The price entity schema for dynamic pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/composite-price"
-             * }
-             */
-            CompositePrice;
             _product?: /**
              * The product entity
              * example:
@@ -585,7 +613,15 @@ declare namespace Components {
             /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
-            item_components?: /* Represents a valid price item from a client. */ PriceItemDto[];
+            item_components?: /* Represents a price input to the pricing library. */ PriceItemDto[];
+            _price?: /**
+             * The price entity schema for dynamic pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/composite-price"
+             * }
+             */
+            CompositePrice;
         }
         /**
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
@@ -606,6 +642,36 @@ declare namespace Components {
             email?: string;
             phone?: string;
         }
+        export type EntityId = string; // uuid
+        /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         * }
+         */
+        export interface EntityItem {
+            _id: EntityId /* uuid */;
+            /**
+             * Title of entity
+             */
+            _title: string;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org: string;
+            _schema: string;
+            _tags?: string[];
+            _created_at: string; // date-time
+            _updated_at: string; // date-time
+        }
         export interface EntityRelation {
             [name: string]: any;
             entity_id?: string;
@@ -616,6 +682,14 @@ declare namespace Components {
              * Error message
              */
             message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
         }
         export interface File {
             [name: string]: any;
@@ -1104,9 +1178,30 @@ declare namespace Components {
             /**
              * The default tax rate applied to the price
              */
-            tax?: {
+            tax?: /* The default tax rate applied to the price */ {
                 $relation?: EntityRelation[];
-            };
+            } | /**
+             * the tax configuration
+             * example:
+             * {
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "type": "VAT",
+             *   "description": "Tax description",
+             *   "behavior": "Exclusive",
+             *   "active": "true",
+             *   "region": "DE",
+             *   "region_label": "Germany",
+             *   "_org": "123",
+             *   "_schema": "tax",
+             *   "_tags": [
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             * }
+             */
+            Tax[];
             /**
              * Specifies whether the price is considered `inclusive` of taxes or `exclusive` of taxes.
              * One of `inclusive`, `exclusive`, or `unspecified`.
@@ -1216,14 +1311,6 @@ declare namespace Components {
              *
              */
             quantity?: number;
-            item?: /**
-             * The price entity schema for simple pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/price"
-             * }
-             */
-            Price;
             /**
              * An arbitrary set of tags attached to the composite price - component relation
              */
@@ -1329,7 +1416,7 @@ declare namespace Components {
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
         }
         /**
-         * Represents a valid price item from a client.
+         * Represents a price input to the pricing library.
          */
         export interface PriceItemDto {
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
@@ -1350,14 +1437,6 @@ declare namespace Components {
              */
             price_id?: string;
             /**
-             * The unit amount value
-             */
-            unit_amount?: number;
-            /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
-             */
-            unit_amount_decimal?: string;
-            /**
              * The taxes applied to the price item.
              */
             taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
@@ -1365,24 +1444,6 @@ declare namespace Components {
              * The taxes applied to the price item.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
-            _price?: /**
-             * The price entity schema for simple pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/price"
-             * }
-             */
-            Price | /**
-             * The price entity schema for dynamic pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/composite-price"
-             * }
-             */
-            CompositePrice;
-            /**
-             * The product linked to the price item.
-             */
             _product?: /**
              * The product entity
              * example:
@@ -1391,6 +1452,22 @@ declare namespace Components {
              * }
              */
             Product;
+            /**
+             * The unit amount value
+             */
+            unit_amount?: number;
+            /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            _price?: /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price;
         }
         /**
          * Tracks a set of product prices, quantities, (discounts) and taxes.
@@ -1413,7 +1490,7 @@ declare namespace Components {
         /**
          * A valid set of product prices, quantities, (discounts) and taxes from a client.
          */
-        export type PriceItemsDto = (/* Represents a valid price item from a client. */ PriceItemDto)[];
+        export type PriceItemsDto = (/* Represents a price input to the pricing library. */ PriceItemDto)[];
         /**
          * The result from the calculation of a set of price items.
          */
@@ -1530,7 +1607,7 @@ declare namespace Components {
             /**
              * The price type.
              */
-            type: string;
+            type?: string;
             /**
              * The price billing period.
              */
@@ -1555,7 +1632,7 @@ declare namespace Components {
             /**
              * The price type.
              */
-            type: string;
+            type?: string;
             /**
              * The price billing period.
              */
@@ -1576,13 +1653,44 @@ declare namespace Components {
         export type SalesTax = "nontaxable" | "reduced" | "standard";
         /**
          * the tax configuration
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "type": "VAT",
+         *   "description": "Tax description",
+         *   "behavior": "Exclusive",
+         *   "active": "true",
+         *   "region": "DE",
+         *   "region_label": "Germany",
+         *   "_org": "123",
+         *   "_schema": "tax",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         * }
          */
         export interface Tax {
             [name: string]: any;
+            _id: EntityId /* uuid */;
+            /**
+             * Title of entity
+             */
+            _title: string;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org: string;
+            _schema: string;
+            _tags?: string[];
+            _created_at: string; // date-time
+            _updated_at: string; // date-time
             type: "VAT" | "GST" | "Custom";
             description?: string;
             rate: number;
-            behavior: "Exclusive" | "Inclusive";
+            behavior: "Exclusive" | "Inclusive" | "exclusive" | "inclusive";
             active?: boolean;
             region?: string;
             region_label?: string;
@@ -1596,26 +1704,104 @@ declare namespace Components {
              */
             amount?: number;
             /**
-             * The tax rate applied.
+             * The tax rate applied. With the release of the tax management feature this field is being deprecated in favor of the tax field.
              */
             rate?: string;
             /**
+             * The tax rate value applied (represented as an integer percentage, e.g, 19 or 7).
+             * With the release of the tax management feature this field is being deprecated in favor of the tax field.
+             *
+             * example:
+             * 19
+             */
+            rateValue?: number;
+            /**
              * The tax applied.
              */
-            tax?: /* The tax applied. */ /* the tax configuration */ Tax;
+            tax?: /* The tax applied. */ /**
+             * the tax configuration
+             * example:
+             * {
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "type": "VAT",
+             *   "description": "Tax description",
+             *   "behavior": "Exclusive",
+             *   "active": "true",
+             *   "region": "DE",
+             *   "region_label": "Germany",
+             *   "_org": "123",
+             *   "_schema": "tax",
+             *   "_tags": [
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             * }
+             */
+            Tax;
+        }
+        /**
+         * A tax amount associated with a specific tax rate.
+         */
+        export interface TaxAmountBreakdown {
+            /**
+             * The tax amount.
+             */
+            amount?: number;
+            /**
+             * The tax rate applied. With the release of the tax manager feature this field is being deprecated in favor of the tax field.
+             */
+            rate?: string;
+            /**
+             * The tax rate value applied. With the release of the tax manager feature this field is being deprecated in favor of the tax field.
+             */
+            rateValue?: number;
+            /**
+             * The tax applied.
+             */
+            tax?: /* The tax applied. */ TaxBreakdownInfo;
         }
         /**
          * A valid tax rate from a client.
          */
         export interface TaxAmountDto {
             /**
-             * The tax rate applied.
+             * The deprecated tax rate applied.
+             * This field has been deprecated in favor of the new Tax Management. You should use the new tax fields pointing to a proper tax entity.
+             *
              */
             rate?: string;
             /**
              * The tax applied.
              */
-            tax?: /* The tax applied. */ /* the tax configuration */ Tax;
+            tax?: /* The tax applied. */ /**
+             * the tax configuration
+             * example:
+             * {
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "type": "VAT",
+             *   "description": "Tax description",
+             *   "behavior": "Exclusive",
+             *   "active": "true",
+             *   "region": "DE",
+             *   "region_label": "Germany",
+             *   "_org": "123",
+             *   "_schema": "tax",
+             *   "_tags": [
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             * }
+             */
+            Tax;
+        }
+        export interface TaxBreakdownInfo {
+            rate?: number;
+            type?: "VAT" | "GST" | "Custom";
+            _id?: string;
         }
         /**
          * The total details with tax (and discount) aggregated totals.
@@ -1636,7 +1822,7 @@ declare namespace Components {
                 /**
                  * The aggregated price items tax amount per rate.
                  */
-                taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
+                taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmountBreakdown)[];
                 /**
                  * The aggregated price items tax amount per rate.
                  */
