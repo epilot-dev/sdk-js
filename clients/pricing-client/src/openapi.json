@@ -1690,6 +1690,7 @@
         "type": "object",
         "properties": {
           "metadata": {
+            "description": "An additional structure to keep metadata related with the price item.",
             "$ref": "#/components/schemas/MetaData"
           },
           "quantity": {
@@ -1733,7 +1734,7 @@
             }
           },
           "_product": {
-            "description": "The product linked to the price item.",
+            "description": "The snapshot of the product linked to the price item.",
             "$ref": "#/components/schemas/Product"
           }
         }
@@ -1756,6 +1757,7 @@
             "type": "string"
           },
           "_price": {
+            "description": "The snapshot of the price linked to the price item.",
             "$ref": "#/components/schemas/Price"
           }
         }
@@ -1777,6 +1779,7 @@
             }
           },
           "_price": {
+            "description": "The snapshot of the price linked to the price item.",
             "$ref": "#/components/schemas/CompositePrice"
           }
         }
@@ -1858,7 +1861,6 @@
           }
         },
         "required": [
-          "type",
           "amount_subtotal",
           "amount_total"
         ]
@@ -2164,12 +2166,13 @@
           },
           "rate": {
             "type": "string",
-            "description": "The tax rate applied. With the release of the tax manager feature this field is being deprecated in favor of the tax field.",
+            "description": "The tax rate applied. With the release of the tax management feature this field is being deprecated in favor of the tax field.",
             "deprecated": true
           },
           "rateValue": {
             "type": "number",
-            "description": "The tax rate value applied. With the release of the tax manager feature this field is being deprecated in favor of the tax field.",
+            "description": "The tax rate value applied (represented as an integer percentage, e.g, 19 or 7).\nWith the release of the tax management feature this field is being deprecated in favor of the tax field.\n",
+            "example": 19,
             "deprecated": true
           },
           "tax": {
@@ -2238,7 +2241,6 @@
           }
         },
         "required": [
-          "type",
           "amount_subtotal",
           "amount_total"
         ]

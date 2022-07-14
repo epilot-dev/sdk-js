@@ -161,6 +161,9 @@ declare namespace Components {
          * Represents a valid base price item from a client.
          */
         export interface BasePriceItemDto {
+            /**
+             * An additional structure to keep metadata related with the price item.
+             */
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The quantity of products being purchased.
@@ -187,7 +190,7 @@ declare namespace Components {
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
             /**
-             * The product linked to the price item.
+             * The snapshot of the product linked to the price item.
              */
             _product?: /**
              * The product entity
@@ -1604,7 +1607,7 @@ declare namespace Components {
             /**
              * The price type.
              */
-            type: string;
+            type?: string;
             /**
              * The price billing period.
              */
@@ -1629,7 +1632,7 @@ declare namespace Components {
             /**
              * The price type.
              */
-            type: string;
+            type?: string;
             /**
              * The price billing period.
              */
@@ -1701,11 +1704,15 @@ declare namespace Components {
              */
             amount?: number;
             /**
-             * The tax rate applied. With the release of the tax manager feature this field is being deprecated in favor of the tax field.
+             * The tax rate applied. With the release of the tax management feature this field is being deprecated in favor of the tax field.
              */
             rate?: string;
             /**
-             * The tax rate value applied. With the release of the tax manager feature this field is being deprecated in favor of the tax field.
+             * The tax rate value applied (represented as an integer percentage, e.g, 19 or 7).
+             * With the release of the tax management feature this field is being deprecated in favor of the tax field.
+             *
+             * example:
+             * 19
              */
             rateValue?: number;
             /**
