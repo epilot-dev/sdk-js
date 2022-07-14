@@ -1182,8 +1182,14 @@ declare namespace Components {
              * example:
              * {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "type": "VAT",
+             *   "description": "Tax description",
+             *   "behavior": "Exclusive",
+             *   "active": "true",
+             *   "region": "DE",
+             *   "region_label": "Germany",
              *   "_org": "123",
-             *   "_schema": "contact",
+             *   "_schema": "tax",
              *   "_tags": [
              *     "example",
              *     "mock"
@@ -1647,8 +1653,14 @@ declare namespace Components {
          * example:
          * {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "type": "VAT",
+         *   "description": "Tax description",
+         *   "behavior": "Exclusive",
+         *   "active": "true",
+         *   "region": "DE",
+         *   "region_label": "Germany",
          *   "_org": "123",
-         *   "_schema": "contact",
+         *   "_schema": "tax",
          *   "_tags": [
          *     "example",
          *     "mock"
@@ -1704,8 +1716,14 @@ declare namespace Components {
              * example:
              * {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "type": "VAT",
+             *   "description": "Tax description",
+             *   "behavior": "Exclusive",
+             *   "active": "true",
+             *   "region": "DE",
+             *   "region_label": "Germany",
              *   "_org": "123",
-             *   "_schema": "contact",
+             *   "_schema": "tax",
              *   "_tags": [
              *     "example",
              *     "mock"
@@ -1755,8 +1773,14 @@ declare namespace Components {
              * example:
              * {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "type": "VAT",
+             *   "description": "Tax description",
+             *   "behavior": "Exclusive",
+             *   "active": "true",
+             *   "region": "DE",
+             *   "region_label": "Germany",
              *   "_org": "123",
-             *   "_schema": "contact",
+             *   "_schema": "tax",
              *   "_tags": [
              *     "example",
              *     "mock"
