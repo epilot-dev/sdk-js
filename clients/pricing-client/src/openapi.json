@@ -122,6 +122,77 @@
           "required": true,
           "content": {
             "application/json": {
+              "examples": {
+                "Order with Simple Prices": {
+                  "value": {
+                    "status": "quote",
+                    "source_type": "manual",
+                    "expires_at": "2022-06-30T16:17:00.000Z",
+                    "line_items": [
+                      {
+                        "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+                        "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+                        "quantity": 16
+                      },
+                      {
+                        "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+                        "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+                        "quantity": 4
+                      },
+                      {
+                        "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+                        "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+                        "quantity": 1
+                      },
+                      {
+                        "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+                        "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+                        "quantity": 1
+                      }
+                    ],
+                    "currency": "EUR",
+                    "payment_method": [
+                      {
+                        "type": "IBAN",
+                        "details": {}
+                      }
+                    ],
+                    "billing_contact": {
+                      "$relation": [
+                        {
+                          "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
+                          "_tags": []
+                        }
+                      ]
+                    },
+                    "billing_first_name": "Joao",
+                    "billing_last_name": "Pinho",
+                    "billing_email": "j.pinho@epilot.cloud",
+                    "billing_company_name": "epilot cloud",
+                    "billing_address": [
+                      {
+                        "_tags": [],
+                        "street": "Im Media Park",
+                        "street_number": "8a",
+                        "postal_code": "52000",
+                        "city": "Cologne",
+                        "country": "DE",
+                        "additional_info": ""
+                      }
+                    ],
+                    "delivery_address": [],
+                    "dates": [
+                      {
+                        "_tags": [
+                          "Instalation Date"
+                        ],
+                        "dates": "",
+                        "value": "2022-06-30T16:29:00.000Z"
+                      }
+                    ]
+                  }
+                }
+              },
               "schema": {
                 "$ref": "#/components/schemas/OrderPayload"
               }
@@ -1691,7 +1762,11 @@
         "properties": {
           "metadata": {
             "description": "An additional structure to keep metadata related with the price item.",
-            "$ref": "#/components/schemas/MetaData"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MetaData"
+              }
+            ]
           },
           "quantity": {
             "type": "integer",
@@ -1735,7 +1810,11 @@
           },
           "_product": {
             "description": "The snapshot of the product linked to the price item.",
-            "$ref": "#/components/schemas/Product"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Product"
+              }
+            ]
           }
         }
       },
@@ -1758,7 +1837,11 @@
           },
           "_price": {
             "description": "The snapshot of the price linked to the price item.",
-            "$ref": "#/components/schemas/Price"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Price"
+              }
+            ]
           }
         }
       },
@@ -1780,7 +1863,11 @@
           },
           "_price": {
             "description": "The snapshot of the price linked to the price item.",
-            "$ref": "#/components/schemas/CompositePrice"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompositePrice"
+              }
+            ]
           }
         }
       },
@@ -3478,6 +3565,86 @@
           "_updated_at": "2022-06-03T16:29:46.303Z"
         }
       },
+      "order-with-simple-prices-request": {
+        "value": {
+          "order_number": "OR 2022/742701",
+          "status": "quote",
+          "source": {
+            "title": "manual",
+            "href": null
+          },
+          "source_type": "manual",
+          "_schema": "order",
+          "_title": "OR 2022/742701",
+          "expires_at": "2022-06-30T16:17:00.000Z",
+          "line_items": [
+            {
+              "price_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+              "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+              "quantity": 16
+            },
+            {
+              "price_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+              "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+              "quantity": 4
+            },
+            {
+              "price_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
+              "product_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
+              "quantity": 1
+            },
+            {
+              "price_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+              "product_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
+              "quantity": 1
+            }
+          ],
+          "currency": "EUR",
+          "payment_method": [
+            {
+              "type": "IBAN",
+              "details": {}
+            }
+          ],
+          "billing_contact": {
+            "$relation": [
+              {
+                "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
+                "_tags": []
+              }
+            ]
+          },
+          "billing_first_name": "Joao",
+          "billing_last_name": "Pinho",
+          "billing_email": "j.pinho@epilot.cloud",
+          "billing_company_name": "epilot cloud",
+          "billing_address": [
+            {
+              "_tags": [],
+              "street": "Im Media Park",
+              "street_number": "8a",
+              "postal_code": "52000",
+              "city": "Cologne",
+              "country": "DE",
+              "additional_info": ""
+            }
+          ],
+          "delivery_address": [],
+          "dates": [
+            {
+              "_tags": [
+                "Instalation Date"
+              ],
+              "dates": "",
+              "value": "2022-06-30T16:29:00.000Z"
+            }
+          ],
+          "_id": "4c7c9562-f8f0-4af0-a3a6-6aebc5571a6e",
+          "_org": "728",
+          "_created_at": "2022-06-03T16:29:46.303Z",
+          "_updated_at": "2022-06-03T16:29:46.303Z"
+        }
+      },
       "order-with-composite-prices": {
         "value": {
           "metadata": [
@@ -3580,7 +3747,7 @@
                         "_schema": "tax",
                         "_title": "Tax Without Behaviour",
                         "description": "Without Behaviour",
-                        "rate": "6",
+                        "rate": 6,
                         "_org": "739224",
                         "_created_at": "2022-02-07T14:49:08.831Z",
                         "_updated_at": "2022-02-07T14:49:08.831Z"
@@ -3811,7 +3978,7 @@
                     "_schema": "tax",
                     "_title": "Tax Without Behaviour",
                     "description": "Without Behaviour",
-                    "rate": "6",
+                    "rate": 6,
                     "_org": "739224",
                     "_created_at": "2022-02-07T14:49:08.831Z",
                     "_updated_at": "2022-02-07T14:49:08.831Z"
@@ -4152,12 +4319,12 @@
           "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
           "taxes": [
             {
-              "amount": "600",
+              "amount": 600,
               "tax": {
                 "active": true,
                 "behavior": "Exclusive",
                 "description": "Without Behaviour",
-                "rate": "6",
+                "rate": 6,
                 "region": "DE",
                 "type": "VAT",
                 "_created_at": "2022-02-07T14:49:08.831Z",
