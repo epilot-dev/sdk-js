@@ -240,7 +240,7 @@
               "type": "string"
             },
             "required": true,
-            "example": "1ec8518f-7538-48f7-8297-44f120d3e5cd"
+            "example": "9d4602d3-03be-4d85-86b2-f3c6555fc606"
           }
         ],
         "requestBody": {
@@ -249,6 +249,77 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/OrderPayload"
+              },
+              "examples": {
+                "Order with Simple Prices": {
+                  "value": {
+                    "status": "quote",
+                    "source_type": "manual",
+                    "expires_at": "2022-06-30T16:17:00.000Z",
+                    "line_items": [
+                      {
+                        "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+                        "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+                        "quantity": 16
+                      },
+                      {
+                        "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+                        "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+                        "quantity": 4
+                      },
+                      {
+                        "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+                        "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+                        "quantity": 1
+                      },
+                      {
+                        "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+                        "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+                        "quantity": 1
+                      }
+                    ],
+                    "currency": "EUR",
+                    "payment_method": [
+                      {
+                        "type": "IBAN",
+                        "details": {}
+                      }
+                    ],
+                    "billing_contact": {
+                      "$relation": [
+                        {
+                          "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
+                          "_tags": []
+                        }
+                      ]
+                    },
+                    "billing_first_name": "Joao",
+                    "billing_last_name": "Pinho",
+                    "billing_email": "j.pinho@epilot.cloud",
+                    "billing_company_name": "epilot cloud",
+                    "billing_address": [
+                      {
+                        "_tags": [],
+                        "street": "Im Media Park",
+                        "street_number": "8a",
+                        "postal_code": "52000",
+                        "city": "Cologne",
+                        "country": "DE",
+                        "additional_info": ""
+                      }
+                    ],
+                    "delivery_address": [],
+                    "dates": [
+                      {
+                        "_tags": [
+                          "Instalation Date"
+                        ],
+                        "dates": "",
+                        "value": "2022-06-30T16:29:00.000Z"
+                      }
+                    ]
+                  }
+                }
               }
             }
           }
@@ -305,10 +376,7 @@
                 "$ref": "#/components/schemas/CheckoutCart"
               },
               "examples": {
-                "Checkout with a CartID": {
-                  "$ref": "#/components/examples/checkout-with-cart-id"
-                },
-                "Fast Checkout with a transient Cart": {
+                "Checkout with a transient Cart": {
                   "$ref": "#/components/examples/checkout-with-transient-cart"
                 }
               }
@@ -1395,6 +1463,10 @@
               }
             ]
           },
+          "is_composite_price": {
+            "description": "The flag for prices that contain price components.",
+            "type": "boolean"
+          },
           "_created_at": {
             "description": "The price creation date",
             "type": "string"
@@ -1761,12 +1833,7 @@
         "type": "object",
         "properties": {
           "metadata": {
-            "description": "An additional structure to keep metadata related with the price item.",
-            "allOf": [
-              {
                 "$ref": "#/components/schemas/MetaData"
-              }
-            ]
           },
           "quantity": {
             "type": "integer",
@@ -1808,8 +1875,12 @@
               ]
             }
           },
+          "is_composite_price": {
+            "description": "The flag for prices that contain price components.",
+            "type": "boolean"
+          },
           "_product": {
-            "description": "The snapshot of the product linked to the price item.",
+            "description": "The snapshot of the product.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/Product"
@@ -1827,6 +1898,14 @@
         "description": "Represents a price input to the pricing library.",
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "description": "One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.",
+            "enum": [
+              "one_time",
+              "recurring"
+            ]
+          },
           "unit_amount": {
             "type": "integer",
             "description": "The unit amount value"
@@ -1862,12 +1941,7 @@
             }
           },
           "_price": {
-            "description": "The snapshot of the price linked to the price item.",
-            "allOf": [
-              {
                 "$ref": "#/components/schemas/CompositePrice"
-              }
-            ]
           }
         }
       },
@@ -1881,12 +1955,7 @@
             "description": "The deprecated tax rate applied.\nThis field has been deprecated in favor of the new Tax Management. You should use the new tax fields pointing to a proper tax entity.\n"
           },
           "tax": {
-            "description": "The tax applied.",
-            "oneOf": [
-              {
                 "$ref": "#/components/schemas/Tax"
-              }
-            ]
           }
         }
       },
@@ -2120,7 +2189,7 @@
       "CompositePriceItem": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/PriceItem"
+            "$ref": "#/components/schemas/BasePriceItem"
           }
         ],
         "description": "Represents a composite price input to the pricing library.",
@@ -2135,7 +2204,7 @@
           }
         }
       },
-      "PriceItem": {
+      "BasePriceItem": {
         "description": "Represents a price item",
         "type": "object",
         "example": {
@@ -2209,12 +2278,7 @@
             ]
           },
           "_product": {
-            "description": "The product snapshot data.",
-            "anyOf": [
-              {
                 "$ref": "#/components/schemas/Product"
-              }
-            ]
           },
           "taxes": {
             "type": "array",
@@ -2239,6 +2303,28 @@
                 }
               ]
             }
+          }
+        }
+      },
+      "PriceItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BasePriceItem"
+          }
+        ],
+        "description": "Represents a price item",
+        "type": "object",
+        "example": {
+          "$ref": "#/components/examples/price-item"
+        },
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.",
+            "enum": [
+              "one_time",
+              "recurring"
+            ]
           }
         }
       },
@@ -2292,12 +2378,7 @@
             "deprecated": true
           },
           "tax": {
-            "description": "The tax applied.",
-            "oneOf": [
-              {
                 "$ref": "#/components/schemas/TaxBreakdownInfo"
-              }
-            ]
           }
         }
       },

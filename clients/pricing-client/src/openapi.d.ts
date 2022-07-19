@@ -158,22 +158,106 @@ declare namespace Components {
             }[];
         }
         /**
+         * Represents a price item
+         * example:
+         * {
+         *   "$ref": "#/components/examples/price-item"
+         * }
+         */
+        export interface BasePriceItem {
+            /**
+             * price item id
+             */
+            id?: string;
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            /**
+             * The unit amount value
+             */
+            unit_amount?: number;
+            /**
+             * Total before any (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Net unit amount without taxes or discounts.
+             */
+            unit_amount_net?: number;
+            /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
+             * Total after (discounts and) taxes.
+             */
+            amount_total?: number;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            description?: string;
+            /**
+             * The quantity of products being purchased.
+             */
+            quantity?: number;
+            /**
+             * The id of the product.
+             */
+            product_id?: string;
+            /**
+             * The id of the price.
+             */
+            price_id?: string;
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
+             * The price snapshot data.
+             */
+            _price?: /* The price snapshot data. */ /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price | /**
+             * The price entity schema for dynamic pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/composite-price"
+             * }
+             */
+            CompositePrice;
+            _product?: /**
+             * The product entity
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            Product;
+            /**
+             * The taxes applied to the price item.
+             */
+            taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
+            /**
+             * The sum of amounts of the price items by recurrence.
+             */
+            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+        }
+        /**
          * Represents a valid base price item from a client.
          */
         export interface BasePriceItemDto {
-            /**
-             * An additional structure to keep metadata related with the price item.
-             */
-            metadata?: ({
-                /**
-                 * Item key
-                 */
-                key?: string;
-                /**
-                 * Item value
-                 */
-                value?: string;
-            })[];
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The quantity of products being purchased.
              */
@@ -199,7 +283,11 @@ declare namespace Components {
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
             /**
-             * The snapshot of the product linked to the price item.
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
+             * The snapshot of the product.
              * example:
              * {
              *   "$ref": "#/components/examples/product"
@@ -524,6 +612,10 @@ declare namespace Components {
              */
             Currency;
             /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
              * The price creation date
              */
             _created_at?: string;
@@ -627,10 +719,7 @@ declare namespace Components {
              * }
              */
             CompositePrice;
-            /**
-             * The product snapshot data.
-             */
-            _product?: /* The product snapshot data. */ /**
+            _product?: /**
              * The product entity
              * example:
              * {
@@ -662,19 +751,7 @@ declare namespace Components {
          * Represents a composite price input to the pricing library.
          */
         export interface CompositePriceItemDto {
-            /**
-             * An additional structure to keep metadata related with the price item.
-             */
-            metadata?: ({
-                /**
-                 * Item key
-                 */
-                key?: string;
-                /**
-                 * Item value
-                 */
-                value?: string;
-            })[];
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The quantity of products being purchased.
              */
@@ -700,7 +777,11 @@ declare namespace Components {
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
             /**
-             * The snapshot of the product linked to the price item.
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
+             * The snapshot of the product.
              * example:
              * {
              *   "$ref": "#/components/examples/product"
@@ -790,72 +871,14 @@ declare namespace Components {
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
             item_components?: /* Represents a price input to the pricing library. */ PriceItemDto[];
-            /**
-             * The snapshot of the price linked to the price item.
+            _price?: /**
+             * The price entity schema for dynamic pricing
              * example:
              * {
              *   "$ref": "#/components/examples/composite-price"
              * }
              */
-            _price?: {
-                [name: string]: any;
-                /**
-                 * Whether the price can be used for new purchases.
-                 */
-                active?: boolean;
-                /**
-                 * A brief description of the price.
-                 */
-                description?: string;
-                /**
-                 * A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price.
-                 */
-                price_components?: /* A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price. */ /**
-                 * The price entity schema for simple pricing
-                 * example:
-                 * {
-                 *   "$ref": "#/components/examples/price"
-                 * }
-                 */
-                Price[] | {
-                    $relation?: PriceComponentRelation[];
-                };
-                /**
-                 * Three-letter ISO currency code, in lowercase.
-                 */
-                unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
-                 * Three-letter ISO currency code, in lowercase. Must be a supported currency.
-                 * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
-                 *
-                 * example:
-                 * EUR
-                 */
-                Currency;
-                /**
-                 * The price creation date
-                 */
-                _created_at?: string;
-                /**
-                 * The price id
-                 */
-                _id?: string;
-                /**
-                 * The price autogenerated title
-                 */
-                _title?: string;
-                /**
-                 * The price last update date
-                 */
-                _updated_at?: string;
-                /**
-                 * The organization id the price belongs to
-                 */
-                _org_id?: string;
-                /**
-                 * An arbitrary set of tags attached to the composite price
-                 */
-                _tags?: string[];
-            };
+            CompositePrice;
         }
         /**
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
@@ -1629,10 +1652,7 @@ declare namespace Components {
              * }
              */
             CompositePrice;
-            /**
-             * The product snapshot data.
-             */
-            _product?: /* The product snapshot data. */ /**
+            _product?: /**
              * The product entity
              * example:
              * {
@@ -1648,24 +1668,16 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            /**
+             * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
+             */
+            type?: "one_time" | "recurring";
         }
         /**
          * Represents a price input to the pricing library.
          */
         export interface PriceItemDto {
-            /**
-             * An additional structure to keep metadata related with the price item.
-             */
-            metadata?: ({
-                /**
-                 * Item key
-                 */
-                key?: string;
-                /**
-                 * Item value
-                 */
-                value?: string;
-            })[];
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The quantity of products being purchased.
              */
@@ -1691,7 +1703,11 @@ declare namespace Components {
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
             /**
-             * The snapshot of the product linked to the price item.
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
+             * The snapshot of the product.
              * example:
              * {
              *   "$ref": "#/components/examples/product"
@@ -1777,6 +1793,10 @@ declare namespace Components {
                  */
                 _updated_at?: string;
             };
+            /**
+             * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
+             */
+            type?: "one_time" | "recurring";
             /**
              * The unit amount value
              */
@@ -2236,10 +2256,7 @@ declare namespace Components {
              * The tax rate value applied. With the release of the tax manager feature this field is being deprecated in favor of the tax field.
              */
             rateValue?: number;
-            /**
-             * The tax applied.
-             */
-            tax?: /* The tax applied. */ TaxBreakdownInfo;
+            tax?: TaxBreakdownInfo;
         }
         /**
          * A valid tax rate from a client.
@@ -2251,10 +2268,7 @@ declare namespace Components {
              *
              */
             rate?: string;
-            /**
-             * The tax applied.
-             */
-            tax?: /* The tax applied. */ /**
+            tax?: /**
              * the tax configuration
              * example:
              * {
