@@ -1383,7 +1383,7 @@
                 },
                 "render_condition": {
                   "type": "string",
-                  "example": "is_composite_price = \"false\""
+                  "example": "_is_composite_price = \"false\""
                 },
                 "order": {
                   "description": "Render order of the group",
@@ -1561,6 +1561,9 @@
           },
           {
             "$ref": "#/components/schemas/StatusAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/SequenceAttribute"
           },
           {
             "$ref": "#/components/schemas/RelationAttribute"
@@ -1926,6 +1929,34 @@
                     }
                   ]
                 }
+              }
+            }
+          }
+        ]
+      },
+      "SequenceAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Sequence of unique identifiers",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "sequence"
+                ]
+              },
+              "prefix": {
+                "description": "Prefix added before the sequence number",
+                "type": "string",
+                "example": "OR-"
+              },
+              "start_number": {
+                "type": "integer",
+                "minimum": 0
               }
             }
           }
@@ -2331,7 +2362,8 @@
                   "address",
                   "relation",
                   "payment",
-                  "price_component"
+                  "price_component",
+                  "date"
                 ]
               },
               "enable_relation_picker": {
@@ -2521,7 +2553,7 @@
         ]
       },
       "SummaryAttribute": {
-        "description": "Represents an expanded version of an attribute to be displayed in the list item summary.\nThis configuration can be used in the following way: \n```js\n{\n  \"label\": \"Price components\"\n  \"value\": \"{{item.prices.length}} price components\"\n  \"show_as_tag\": true\n  \"render_condition\": \"is_composite_price = \\\"true\\\"\"\n}\n```\nThe value field supports handlebar expressions from which you can pick any field from the entity state. \n",
+        "description": "Represents an expanded version of an attribute to be displayed in the list item summary.\nThis configuration can be used in the following way: \n```js\n{\n  \"label\": \"Price components\"\n  \"value\": \"{{item.prices.length}} price components\"\n  \"show_as_tag\": true\n  \"render_condition\": \"is_composite_price = \\\"true\\\"\"\n}\n```\nThe value field supports handlebar expressions from which you can pick any field from the entity state.\n",
         "type": "object",
         "properties": {
           "label": {
@@ -2588,7 +2620,7 @@
                 },
                 "render_condition": {
                   "type": "string",
-                  "example": "is_composite_price = \"false\""
+                  "example": "_is_composite_price = \"false\""
                 },
                 "order": {
                   "type": "integer",
