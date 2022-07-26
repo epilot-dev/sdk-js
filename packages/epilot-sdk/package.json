@@ -1,6 +1,6 @@
 {
   "name": "epilot-sdk",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "Epilot SDK",
   "main": "index.js",
   "scripts": {
@@ -44,10 +44,10 @@
   },
   "dependencies": {
     "@epilot/auth": "^0.2.6",
-    "@epilot/entity-client": "^3.3.0",
+    "@epilot/entity-client": "^3.4.0",
     "@epilot/file-client": "^1.3.3",
     "@epilot/organization-client": "^0.6.2",
-    "@epilot/permissions-client": "^0.6.4",
+    "@epilot/permissions-client": "^0.7.0",
     "@epilot/pricing-client": "^1.13.1",
     "@epilot/submission-client": "^1.1.3",
     "@epilot/user-client": "^3.0.3",
