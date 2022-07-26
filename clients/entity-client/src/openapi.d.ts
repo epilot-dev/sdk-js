@@ -195,6 +195,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -217,7 +223,7 @@ declare namespace Components {
             download_url: string;
             alt_text?: string;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Status select */ StatusAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute;
         /**
          * Automation entity
          */
@@ -276,6 +282,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -343,6 +355,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -450,6 +468,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -520,6 +544,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -590,6 +620,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -662,6 +698,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -732,6 +774,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -812,6 +860,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -854,7 +908,7 @@ declare namespace Components {
                 hook: string;
                 /**
                  * example:
-                 * is_composite_price = "false"
+                 * _is_composite_price = "false"
                  */
                 render_condition?: string;
                 /**
@@ -926,6 +980,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This capability should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             /**
              * Only show capability for legacy tenants (ivy)
              */
@@ -1178,7 +1238,7 @@ declare namespace Components {
                 expanded?: boolean;
                 /**
                  * example:
-                 * is_composite_price = "false"
+                 * _is_composite_price = "false"
                  */
                 render_condition?: string;
                 /**
@@ -1186,11 +1246,17 @@ declare namespace Components {
                  */
                 order?: number;
                 /**
-                 * This schema should only be active when the feature flag is enabled
+                 * This group should only be active when the feature flag is enabled
                  * example:
                  * FF_MY_FEATURE_FLAG
                  */
                 feature_flag?: string;
+                /**
+                 * This group should only be active when the setting is enabled
+                 * example:
+                 * MY_SETTING
+                 */
+                setting?: string;
                 info_tooltip_title?: {
                     key?: string;
                     default?: string;
@@ -1384,7 +1450,7 @@ declare namespace Components {
                 expanded?: boolean;
                 /**
                  * example:
-                 * is_composite_price = "false"
+                 * _is_composite_price = "false"
                  */
                 render_condition?: string;
                 /**
@@ -1392,11 +1458,17 @@ declare namespace Components {
                  */
                 order?: number;
                 /**
-                 * This schema should only be active when the feature flag is enabled
+                 * This group should only be active when the feature flag is enabled
                  * example:
                  * FF_MY_FEATURE_FLAG
                  */
                 feature_flag?: string;
+                /**
+                 * This group should only be active when the setting is enabled
+                 * example:
+                 * MY_SETTING
+                 */
+                setting?: string;
                 info_tooltip_title?: {
                     key?: string;
                     default?: string;
@@ -1608,6 +1680,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -1844,6 +1922,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -1914,6 +1998,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -1984,6 +2074,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2054,6 +2150,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2124,6 +2226,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2195,6 +2303,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2265,6 +2379,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2350,6 +2470,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2565,6 +2691,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2578,7 +2710,7 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             relation_affinity_mode?: "weak" | "strong";
-            type?: "string" | "phone" | "email" | "address" | "relation" | "payment" | "price_component";
+            type?: "string" | "phone" | "email" | "address" | "relation" | "payment" | "price_component" | "date";
             /**
              * when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link.
              */
@@ -2666,6 +2798,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2685,6 +2823,89 @@ declare namespace Components {
              * Allow arbitrary input values in addition to provided options
              */
             allow_any?: boolean;
+        }
+        /**
+         * Sequence of unique identifiers
+         */
+        export interface SequenceAttribute {
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: string | {
+                [name: string]: any;
+            } | number | number | boolean | any[];
+            group?: string;
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            type?: "sequence";
+            /**
+             * Prefix added before the sequence number
+             * example:
+             * OR-
+             */
+            prefix?: string;
+            start_number?: number;
         }
         /**
          * Status select
@@ -2744,6 +2965,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2870,6 +3097,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2942,6 +3175,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -3013,6 +3252,12 @@ declare namespace Components {
              * FF_MY_FEATURE_FLAG
              */
             feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
