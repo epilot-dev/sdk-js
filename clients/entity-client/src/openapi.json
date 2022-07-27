@@ -1395,7 +1395,7 @@
                   "example": "FF_MY_FEATURE_FLAG",
                   "description": "This group should only be active when the feature flag is enabled"
                 },
-                "setting": {
+                "setting_flag": {
                   "type": "string",
                   "example": "MY_SETTING",
                   "description": "This group should only be active when the setting is enabled"
@@ -2701,7 +2701,7 @@
             "example": "FF_MY_FEATURE_FLAG",
             "description": "This capability should only be active when the feature flag is enabled"
           },
-          "setting": {
+          "setting_flag": {
             "type": "string",
             "example": "MY_SETTING",
             "description": "This capability should only be active when the setting is enabled"
