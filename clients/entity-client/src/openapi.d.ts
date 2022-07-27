@@ -200,7 +200,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -287,7 +287,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -360,7 +360,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -473,7 +473,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -549,7 +549,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -625,7 +625,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -703,7 +703,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -779,7 +779,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -865,7 +865,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -1685,7 +1685,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -1927,7 +1927,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2003,7 +2003,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2079,7 +2079,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2155,7 +2155,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2231,7 +2231,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2308,7 +2308,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2384,7 +2384,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2475,7 +2475,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2696,7 +2696,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2803,7 +2803,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2887,7 +2887,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -2970,7 +2970,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -3102,7 +3102,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -3180,7 +3180,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -3257,7 +3257,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             value_formatter?: string;
             preview_value_formatter?: string;
             /**

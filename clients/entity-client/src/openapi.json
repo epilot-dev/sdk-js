@@ -1706,7 +1706,7 @@
             "example": "FF_MY_FEATURE_FLAG",
             "description": "This attribute should only be active when the feature flag is enabled"
           },
-          "setting": {
+          "setting_flag": {
             "type": "string",
             "example": "MY_SETTING",
             "description": "This attribute should only be active when the setting is enabled"
