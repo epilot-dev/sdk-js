@@ -985,7 +985,7 @@ declare namespace Components {
              * example:
              * MY_SETTING
              */
-            setting?: string;
+            setting_flag?: string;
             /**
              * Only show capability for legacy tenants (ivy)
              */
@@ -1256,7 +1256,7 @@ declare namespace Components {
                  * example:
                  * MY_SETTING
                  */
-                setting?: string;
+                setting_flag?: string;
                 info_tooltip_title?: {
                     key?: string;
                     default?: string;
@@ -1468,7 +1468,7 @@ declare namespace Components {
                  * example:
                  * MY_SETTING
                  */
-                setting?: string;
+                setting_flag?: string;
                 info_tooltip_title?: {
                     key?: string;
                     default?: string;
