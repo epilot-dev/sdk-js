@@ -2542,7 +2542,11 @@ declare namespace Components {
                 /**
                  * Name of the feature flag that enables this action
                  */
-                feature?: string;
+                feature_flag?: string;
+                /**
+                 * Name of the setting flag that enables this action
+                 */
+                setting_flag?: string;
                 /**
                  * example:
                  * {

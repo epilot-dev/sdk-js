@@ -2164,9 +2164,13 @@
                       "type": "boolean",
                       "description": "Sets the action as the default action, visible as the main action button."
                     },
-                    "feature": {
+                    "feature_flag": {
                       "type": "string",
                       "description": "Name of the feature flag that enables this action"
+                    },
+                    "setting_flag": {
+                      "type": "string",
+                      "description": "Name of the setting flag that enables this action"
                     },
                     "new_entity_item": {
                       "type": "object",
@@ -2563,7 +2567,7 @@
         ]
       },
       "SummaryAttribute": {
-        "description": "Represents an expanded version of an attribute to be displayed in the list item summary.\nThis configuration can be used in the following way: \n```js\n{\n  \"label\": \"Price components\"\n  \"value\": \"{{item.prices.length}} price components\"\n  \"show_as_tag\": true\n  \"render_condition\": \"is_composite_price = \\\"true\\\"\"\n}\n```\nThe value field supports handlebar expressions from which you can pick any field from the entity state.\n",
+        "description": "Represents an expanded version of an attribute to be displayed in the list item summary.\nThis configuration can be used in the following way:\n```js\n{\n  \"label\": \"Price components\"\n  \"value\": \"{{item.prices.length}} price components\"\n  \"show_as_tag\": true\n  \"render_condition\": \"is_composite_price = \\\"true\\\"\"\n}\n```\nThe value field supports handlebar expressions from which you can pick any field from the entity state.\n",
         "type": "object",
         "properties": {
           "label": {
