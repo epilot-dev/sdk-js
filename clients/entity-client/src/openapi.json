@@ -2589,6 +2589,14 @@
           "render_condition": {
             "type": "string",
             "description": "Defines the conditional rendering expression for showing this field.\nWhen a valid expression is parsed, their evaluation defines the visibility of this attribute.\nNote: Empty or invalid expression have no effect on the field visibility.\n"
+          },
+          "feature_flag": {
+            "type": "string",
+            "description": "Binds summary field visibility to the feature flag state."
+          },
+          "setting_flag": {
+            "type": "string",
+            "description": "Binds summary field visibility to the setting flag state."
           }
         },
         "required": [

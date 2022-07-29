@@ -3029,6 +3029,14 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Binds summary field visibility to the feature flag state.
+             */
+            feature_flag?: string;
+            /**
+             * Binds summary field visibility to the setting flag state.
+             */
+            setting_flag?: string;
         }
         /**
          * Summary Fields are displayed inside list view as a resume of the relation entity.
