@@ -549,6 +549,7 @@
             ]
           }
         },
+        "additionalProperties": true,
         "required": [
           "s3ref"
         ]
@@ -608,9 +609,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://file.sls.epilot.io"
-    },
     {
       "url": "https://file.sls.epilot.io"
     }
