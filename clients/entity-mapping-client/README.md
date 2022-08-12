@@ -19,11 +19,9 @@ npm install --save @epilot/entity-mapping-client
 
 ```typescript
 import { getClient } from '@epilot/entity-mapping-client';
-const entityClient = getClient();
+const entityMappingClient = getClient();
 
-const getResponse = await entityClient.getEntity({ slug: 'contact', id: createResponse.data._id });
-```
+const getResponse = await entityMappingClient.getConfig(<mapping_config_id>);
 
 ## Documentation
-
-https://docs.epilot.io/docs/entities/entity-api
+https://docs.epilot.io
