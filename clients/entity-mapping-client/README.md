@@ -12,7 +12,7 @@ Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axi
 ## Installation
 
 ```bash
-npm install --save @epilot/entity-client
+npm install --save @epilot/entity-mapping-client
 ```
 
 ## Usage
