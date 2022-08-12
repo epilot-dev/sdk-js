@@ -257,6 +257,10 @@ declare namespace Components {
         }
         export interface TargetConfig {
             /**
+             * A name for this configuration
+             */
+            name?: string;
+            /**
              * Schema of target entity
              */
             target_schema: string;

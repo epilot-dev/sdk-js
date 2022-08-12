@@ -461,6 +461,10 @@
       "TargetConfig": {
         "type": "object",
         "properties": {
+          "name": {
+            "type": "string",
+            "description": "A name for this configuration"
+          },
           "target_schema": {
             "type": "string",
             "description": "Schema of target entity"
