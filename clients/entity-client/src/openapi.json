@@ -1580,6 +1580,9 @@
             "$ref": "#/components/schemas/AddressRelationAttribute"
           },
           {
+            "$ref": "#/components/schemas/PaymentMethodRelationAttribute"
+          },
+          {
             "$ref": "#/components/schemas/CurrencyAttribute"
           },
           {
@@ -2279,6 +2282,28 @@
                 "type": "string",
                 "enum": [
                   "relation_address"
+                ]
+              },
+              "has_primary": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "PaymentMethodRelationAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Reference to a payment method attribute of another entity",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "relation_payment_method"
                 ]
               },
               "has_primary": {
