@@ -191,20 +191,20 @@
         }
       }
     },
-    "/v1/mappings/{id}:execute": {
+    "/v1/mappings:execute": {
       "post": {
         "operationId": "executeMapping",
         "summary": "executeMapping",
         "description": "Execute entity mapping based on a config",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "Mapping Config Id",
+            "name": "preview_mode",
+            "in": "query",
+            "required": false,
+            "description": "True, if you want to preview the entities which will result",
             "schema": {
-              "type": "string",
-              "example": "uuidv4"
+              "type": "boolean",
+              "example": true
             }
           }
         ],
@@ -259,6 +259,66 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MappingConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/mappings/{id}/history": {
+      "get": {
+        "operationId": "getMappingHistory",
+        "summary": "getMappingHistory",
+        "description": "Get the Mapping History",
+        "tags": [
+          "history"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "the id of the mapping"
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string",
+              "format": "datetime"
+            },
+            "required": false,
+            "description": "filter the history from this date on"
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string",
+              "format": "datetime"
+            },
+            "required": false,
+            "description": "filter the history to this date on"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Query result of mapping history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MappingHistoryResponse"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -380,13 +440,22 @@
         "type": "object",
         "description": "Pass either source or source_entity",
         "properties": {
-          "source": {
-            "$ref": "#/components/schemas/EntityRef"
+          "source_ref": {
+            "$ref": "#/components/schemas/EntityRef",
+            "description": "A reference (id and schema) to the entity to be used as source."
           },
-          "source_entity": {
-            "$ref": "#/components/schemas/Entity"
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TargetConfig"
+            },
+            "description": "Mapping Configuration to apply."
           }
-        }
+        },
+        "required": [
+          "source_ref",
+          "targets"
+        ]
       },
       "ExecuteMappingResp": {
         "type": "object",
@@ -396,6 +465,32 @@
             "items": {
               "$ref": "#/components/schemas/Entity"
             }
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingFailure"
+            }
+          }
+        },
+        "required": [
+          "mapped_entities"
+        ]
+      },
+      "MappingFailure": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "$ref": "#/components/schemas/TargetConfig"
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
           }
         }
       },
@@ -406,6 +501,24 @@
             "type": "string"
           },
           "_schema": {
+            "type": "string"
+          },
+          "_title": {
+            "type": "string"
+          },
+          "_org": {
+            "type": "string"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_created_at": {
+            "type": "string"
+          },
+          "_updated_at": {
             "type": "string"
           }
         },
@@ -461,9 +574,17 @@
       "TargetConfig": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier for target configuration. Useful for later usages when trying to identify which target config to map to."
+          },
           "name": {
             "type": "string",
             "description": "A name for this configuration"
+          },
+          "allow_failure": {
+            "type": "boolean",
+            "description": "Pass it as true, when you don't want failures to interrupt the mapping process."
           },
           "target_schema": {
             "type": "string",
@@ -518,7 +639,8 @@
           }
         },
         "required": [
-          "target_schema"
+          "target_schema",
+          "mapping_attributes"
         ]
       },
       "MapCondition": {
@@ -644,6 +766,9 @@
           },
           "operation": {
             "$ref": "#/components/schemas/OperationNode"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/AttributeOrigin"
           }
         },
         "required": [
@@ -660,6 +785,14 @@
             "_uniq": true
           }
         }
+      },
+      "AttributeOrigin": {
+        "type": "string",
+        "description": "Origin of an attribute.",
+        "enum": [
+          "system_recommendation",
+          "user_manually"
+        ]
       },
       "OperationNode": {
         "description": "Mapping operation nodes are either primitive values or operation node objects",
@@ -829,6 +962,26 @@
           "target",
           "value_json"
         ]
+      },
+      "MappingHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "configId": {
+            "type": "string",
+            "example": "source#entity_id"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "version": {
+            "type": "string",
+            "example": "v1"
+          },
+          "attributes": {
+            "type": "object"
+          }
+        }
       }
     }
   },
