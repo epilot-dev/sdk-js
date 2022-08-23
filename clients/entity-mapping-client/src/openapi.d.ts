@@ -35,6 +35,10 @@ declare namespace Components {
              */
             target_unique?: string[];
         }
+        /**
+         * Origin of an attribute.
+         */
+        export type AttributeOrigin = "system_recommendation" | "user_manually";
         export interface ConditionNode {
             source?: string;
             value?: string | number | {
@@ -63,6 +67,11 @@ declare namespace Components {
             [name: string]: any;
             _id?: string;
             _schema?: string;
+            _title?: string;
+            _org?: string;
+            _tags?: string[];
+            _created_at?: string;
+            _updated_at?: string;
         }
         export interface EntityRef {
             /**
@@ -80,11 +89,18 @@ declare namespace Components {
          * Pass either source or source_entity
          */
         export interface ExecuteMappingReq {
-            source?: EntityRef;
-            source_entity?: Entity;
+            /**
+             * A reference (id and schema) to the entity to be used as source.
+             */
+            source_ref: EntityRef;
+            /**
+             * Mapping Configuration to apply.
+             */
+            targets: TargetConfig[];
         }
         export interface ExecuteMappingResp {
-            mapped_entities?: Entity[];
+            mapped_entities: Entity[];
+            failures?: MappingFailure[];
         }
         export interface JourneyRef {
             journey_id?: string;
@@ -120,6 +136,7 @@ declare namespace Components {
              */
             target?: string;
             operation: /* Mapping operation nodes are either primitive values or operation node objects */ OperationNode;
+            origin?: /* Origin of an attribute. */ AttributeOrigin;
         }
         export interface MappingConfig {
             id: string;
@@ -151,6 +168,29 @@ declare namespace Components {
         export type MappingConfigs = MappingConfig[];
         export interface MappingConfigsResp {
             configs: MappingConfigs;
+        }
+        export interface MappingFailure {
+            target?: TargetConfig;
+            error?: {
+                [name: string]: any;
+                message?: string;
+            };
+        }
+        export interface MappingHistoryResponse {
+            /**
+             * example:
+             * source#entity_id
+             */
+            configId?: string;
+            timestamp?: string; // datetime
+            /**
+             * example:
+             * v1
+             */
+            version?: string;
+            attributes?: {
+                [key: string]: any;
+            };
         }
         /**
          * Mapping operation nodes are either primitive values or operation node objects
@@ -257,9 +297,17 @@ declare namespace Components {
         }
         export interface TargetConfig {
             /**
+             * Identifier for target configuration. Useful for later usages when trying to identify which target config to map to.
+             */
+            id?: string;
+            /**
              * A name for this configuration
              */
             name?: string;
+            /**
+             * Pass it as true, when you don't want failures to interrupt the mapping process.
+             */
+            allow_failure?: boolean;
             /**
              * Schema of target entity
              */
@@ -275,7 +323,7 @@ declare namespace Components {
             /**
              * Attribute mappings
              */
-            mapping_attributes?: (/**
+            mapping_attributes: (/**
              * example:
              * {
              *   "target": "_tags",
@@ -329,16 +377,16 @@ declare namespace Paths {
         namespace Parameters {
             /**
              * example:
-             * uuidv4
+             * true
              */
-            export type Id = string;
+            export type PreviewMode = boolean;
         }
-        export interface PathParameters {
-            id: /**
+        export interface QueryParameters {
+            preview_mode?: /**
              * example:
-             * uuidv4
+             * true
              */
-            Parameters.Id;
+            Parameters.PreviewMode;
         }
         export type RequestBody = /* Pass either source or source_entity */ Components.Schemas.ExecuteMappingReq;
         namespace Responses {
@@ -381,6 +429,25 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.MappingConfig;
+        }
+    }
+    namespace GetMappingHistory {
+        namespace Parameters {
+            export type From = string; // datetime
+            export type Id = string;
+            export type To = string; // datetime
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            from?: Parameters.From /* datetime */;
+            to?: Parameters.To /* datetime */;
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.MappingHistoryResponse[];
+            }
         }
     }
     namespace SearchConfigs {
@@ -474,7 +541,7 @@ export interface OperationMethods {
    * Execute entity mapping based on a config
    */
   'executeMapping'(
-    parameters?: Parameters<Paths.ExecuteMapping.PathParameters> | null,
+    parameters?: Parameters<Paths.ExecuteMapping.QueryParameters> | null,
     data?: Paths.ExecuteMapping.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExecuteMapping.Responses.$200>
@@ -488,6 +555,16 @@ export interface OperationMethods {
     data?: Paths.SearchConfigs.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchConfigs.Responses.$200>
+  /**
+   * getMappingHistory - getMappingHistory
+   * 
+   * Get the Mapping History
+   */
+  'getMappingHistory'(
+    parameters?: Parameters<Paths.GetMappingHistory.PathParameters & Paths.GetMappingHistory.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMappingHistory.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -547,14 +624,14 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.StoreNewVersion.Responses.$200>
   }
-  ['/v1/mappings/{id}:execute']: {
+  ['/v1/mappings:execute']: {
     /**
      * executeMapping - executeMapping
      * 
      * Execute entity mapping based on a config
      */
     'post'(
-      parameters?: Parameters<Paths.ExecuteMapping.PathParameters> | null,
+      parameters?: Parameters<Paths.ExecuteMapping.QueryParameters> | null,
       data?: Paths.ExecuteMapping.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExecuteMapping.Responses.$200>
@@ -570,6 +647,18 @@ export interface PathsDictionary {
       data?: Paths.SearchConfigs.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchConfigs.Responses.$200>
+  }
+  ['/v1/mappings/{id}/history']: {
+    /**
+     * getMappingHistory - getMappingHistory
+     * 
+     * Get the Mapping History
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMappingHistory.PathParameters & Paths.GetMappingHistory.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMappingHistory.Responses.$200>
   }
 }
 
