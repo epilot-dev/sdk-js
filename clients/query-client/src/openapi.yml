@@ -1,0 +1,217 @@
+openapi: 3.0.0
+info:
+  title: Query API
+  description: API to query datalake for epilot organisations
+  version: 0.0.1
+tags:
+  - name: Query
+  - name: Datasets
+  - name: Credentials
+security:
+- EpilotAuth: []
+paths:
+  '/v1/query:execute':
+    post:
+      operationId: executeQuery
+      summary: executeQuery
+      description: |
+        Execute queries against datasets.
+
+        **Measures** are referred to as quantitative data, such as number of unique entities, operations, sum of profit, and so on.
+
+        **Dimensions** are referred to as categorical data, such as workflow status, product name, or units of time (e.g., day, week, month).
+
+        **Filters** are used to narrow down the dataset to be more specific e.g. only to a time range or specific entity schemas.
+      tags:
+       - Query
+      parameters:
+        - in: query
+          name: execution_id
+          schema:
+            $ref: "#/components/schemas/ExecutionId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  $ref: "#/components/schemas/DatalakeQuery"
+            examples:
+              Number of new submissions this month:
+                value:
+                  query:
+                    dataset: entity_operations
+                    measure: count_operations
+                    filters:
+                      - operation: ['createEntity']
+                      - entity_schema: ['submission']
+                      - time_between: ['2022-05-01T00:00:00Z', '2022-08-01T00:00:00Z']
+
+              Opportunities created by journeys by month:
+                value:
+                  query:
+                    dataset: entity_operations
+                    measure: count_operations
+                    filters:
+                      - operation: ['createEntity']
+                      - entity_schema: ['opportunity']
+                      - time_between: ['2022-01-01T00:00:00Z', '2023-01-01T00:00:00Z']
+                    dimensions:
+                    - entity_attribute: 'source.title' # json_extract_text('payload', 'source', 'title')
+                      as: Journey Title
+                    - time_with_granularity: 'year-month'
+
+
+              Total number of opportunities by workflow step:
+                value:
+                  query:
+                    dataset: entities_timemachine
+                    measure: count_entities
+                    point_in_time: CURRENT_DATE
+                    filters:
+                    - entity_schema: ['opportunity']
+                    dimensions:
+                    - entity_attribute: 'workflows.0.next_open_step_name' # json_extract_text('payload', 'workflows','0','next_open_step_name')
+                      as: Workflow Step
+
+              Total number of orders by status:
+                value:
+                  query:
+                    dataset: entities_timemachine
+                    measure: count_entities
+                    point_in_time: CURRENT_DATE
+                    filters:
+                    - entity_schema: ['order']
+                    dimensions:
+                    - entity_attribute: 'status' # json_extract_text('payload', 'status')
+
+      responses:
+        200:
+          description: Query results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResults'
+  '/v1/query/datasets':
+    get:
+      operationId: listDatasets
+      summary: listDatasets
+      description: Get list of available datasets
+      tags:
+       - Datasets
+      responses:
+        200:
+          description: List of available datasets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Dataset'
+                example:
+                  results:
+                    - dataset: entity_operations
+                    - dataset: entities_timemachine
+  '/v1/query/credentials':
+    get:
+      operationId: getCredentials
+      summary: getCredentials
+      description: Get temporary crendtials for datalake access
+      tags:
+       - Credentials
+      responses:
+        200:
+          description: Temporary credentials and endpoints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    example: IAMR:datalake_role_123
+                  password:
+                    type: string
+                    example: '***'
+                  endpoints:
+                    type: object
+                    properties:
+                      endpoint:
+                        type: string
+                        example: 'default.893804459037.eu-central-1.redshift-serverless.amazonaws.com:5439/dev'
+                      jdbc_url:
+                        type: string
+                        example: 'jdbc:redshift://default.893804459037.eu-central-1.redshift-serverless.amazonaws.com:5439/dev'
+                      odbc_url:
+                        type: string
+                        example: 'Driver={Amazon Redshift (x64)}; Server=default.893804459037.eu-central-1.redshift-serverless.amazonaws.com; Database=dev'
+                  expires_at:
+                    type: string
+                    format: date-time
+
+components:
+  schemas:
+    DatasetName:
+      type: string
+      example: entity_operations
+    ExecutionId:
+      description: Execution Id for the query
+      type: string
+      format: uuid
+    Dataset:
+      type: object
+      properties:
+        dataset:
+          $ref: '#/components/schemas/DatasetName'
+#        measures:
+#          type: array
+#          items:
+#             $ref: '#/components/schemas/Measure'
+#        dimensions:
+#          type: array
+#          items:
+#            $ref: '#/components/schemas/Dimension'
+
+    DatalakeQuery:
+      type: object
+      properties:
+        dataset:
+          type: string
+          example: entity_operations
+        measure:
+          type: string
+          example: count_operations
+        dimensions:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+            example:
+              time_with_granularity: year
+        filters:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+            example:
+              entity_schema: opportunity
+      additionalProperties: true
+
+    QueryResults:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+  securitySchemes:
+    EpilotAuth:
+      type: http
+      scheme: bearer
+      description: Authorization header with epilot OAuth
+
