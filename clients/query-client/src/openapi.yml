@@ -30,6 +30,7 @@ paths:
           schema:
             $ref: "#/components/schemas/ExecutionId"
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -204,6 +205,11 @@ components:
     QueryResults:
       type: object
       properties:
+        execution_id:
+          $ref: '#/components/schemas/ExecutionId'
+        status:
+          type: string
+          example: FINISHED
         results:
           type: array
           items:
