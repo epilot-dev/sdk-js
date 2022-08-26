@@ -1328,6 +1328,9 @@
               "edit_view": {
                 "$ref": "#/components/schemas/EntityViewConfig"
               },
+              "single_view": {
+                "$ref": "#/components/schemas/EntityViewConfig"
+              },
               "list_item": {
                 "type": "object",
                 "properties": {
@@ -4030,6 +4033,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    },
     {
       "url": "https://entity.sls.epilot.io"
     }

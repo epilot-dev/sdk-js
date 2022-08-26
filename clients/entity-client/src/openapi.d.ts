@@ -1189,6 +1189,7 @@ declare namespace Components {
                 table_view?: EntityViewConfig;
                 create_view?: EntityViewConfig;
                 edit_view?: EntityViewConfig;
+                single_view?: EntityViewConfig;
                 list_item?: {
                     summary_attributes?: (/**
                      * Represents an expanded version of an attribute to be displayed in the list item summary.
@@ -1401,6 +1402,7 @@ declare namespace Components {
                 table_view?: EntityViewConfig;
                 create_view?: EntityViewConfig;
                 edit_view?: EntityViewConfig;
+                single_view?: EntityViewConfig;
                 list_item?: {
                     summary_attributes?: (/**
                      * Represents an expanded version of an attribute to be displayed in the list item summary.
