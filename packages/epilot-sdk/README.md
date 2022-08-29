@@ -7,8 +7,8 @@
 JavaScript / TypeScript SDK for epilot
 
 >  ⚠️ **DISCLAIMER!**
-> 
-> The epilot SDK is in `alpha`. Missing features, incomplete documentation and breaking API changes are to be expected!
+>
+> The epilot SDK is in `beta`. Missing features, incomplete documentation and breaking API changes are to be expected!
 
 ## Quick Start
 
