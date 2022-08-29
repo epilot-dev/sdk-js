@@ -93,6 +93,7 @@ declare namespace Components {
             key: string;
         }
         export interface SaveFilePayload {
+            [name: string]: any;
             s3ref: S3Reference;
             /**
              * if passed, adds a new version to existing file entity
@@ -145,6 +146,27 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             version?: Parameters.Version;
+            attachment?: Parameters.Attachment;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123
+                 */
+                download_url?: string; // uri
+            }
+        }
+    }
+    namespace DownloadS3File {
+        namespace Parameters {
+            export type Attachment = boolean;
+            export type S3Bucket = string;
+            export type S3Key = string;
+        }
+        export interface QueryParameters {
+            s3_key: Parameters.S3Key;
+            s3_bucket: Parameters.S3Bucket;
             attachment?: Parameters.Attachment;
         }
         namespace Responses {
@@ -327,6 +349,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DownloadFile.Responses.$200>
   /**
+   * downloadS3File - downloadS3File
+   * 
+   * Generate pre-signed download S3 url for a file
+   */
+  'downloadS3File'(
+    parameters?: Parameters<Paths.DownloadS3File.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DownloadS3File.Responses.$200>
+  /**
    * previewFile - previewFile
    * 
    * Generate thumbnail preview for a file entity
@@ -417,6 +449,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DownloadFile.Responses.$200>
+  }
+  ['/v1/files:downloadS3']: {
+    /**
+     * downloadS3File - downloadS3File
+     * 
+     * Generate pre-signed download S3 url for a file
+     */
+    'post'(
+      parameters?: Parameters<Paths.DownloadS3File.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DownloadS3File.Responses.$200>
   }
   ['/v1/files/{id}/preview']: {
     /**
