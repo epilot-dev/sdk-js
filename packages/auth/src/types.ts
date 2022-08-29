@@ -20,7 +20,7 @@ export interface Credentials {
 }
 
 export interface OAuthTokens {
-  id_token: string;
   access_token: string;
-  refresh_token: string;
+  id_token?: string;
+  refresh_token?: string;
 }
