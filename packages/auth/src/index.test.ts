@@ -1,54 +1,83 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 import { rest } from 'msw';
-
-import { authServer } from './__tests__/server-mocks';
-
-import { authenticate } from './';
-
-authServer.use(
-  rest.get('http://localhost/v1/entity/contact', (req, res, ctx) => {
-    if (req.headers.get('authorization') !== 'Bearer THE-AUTH-TOKEN') {
-      return res(ctx.status(401, 'Unauthorized client call'));
-    }
-
-    return res(
-      ctx.json({
-        entity: {
-          _id: 'my-entity_id',
-        },
-        relations: [],
-      }),
-    );
-  }),
-);
-
-beforeAll(() => {
-  authServer.listen({ onUnhandledRequest: 'error' });
-});
-afterAll(() => {
-  authServer.close();
-});
-beforeEach(() => {
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
-});
+import { setupServer, SetupServerApi } from 'msw/node';
 
 describe('auth', () => {
-  describe('authenticate', () => {
-    it('should call the auth api', async () => {
-      const authorizer = await authenticate({ username: 'john-doe@epilot.cloud', password: 'doe123' });
-      authorizer.configureClient(axios);
+  let server: SetupServerApi;
 
-      const res = await axios.get('http://localhost/v1/entity/contact');
+  afterEach(() => {
+    server?.close();
+  });
 
+  describe('authorizeWithToken', () => {
+    it('should use passed access token', async () => {
+      // given
+      const mockApiHandler = jest.fn((_req, res) => res());
+      server = setupServer(rest.get('http://localhost/v1/test', mockApiHandler));
+      server.listen();
+
+      const { authorizeWithToken } = await import('./index');
+      const client = axios.create();
+      authorizeWithToken(client, 'test-token');
+
+      // when
+      const res = await client.get('http://localhost/v1/test');
+
+      // then
       expect(res.status).toStrictEqual(200);
-      expect(authorizer).toStrictEqual({
-        configureClient: expect.anything(),
-        logout: expect.anything(),
-        refresh: expect.anything(),
-        tokens: { access_token: 'THE-AUTH-TOKEN', id_token: 'THE-ID-TOKEN', refresh_token: 'THE-REFRESH-TOKEN' },
-      });
+      expect(mockApiHandler).toBeCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            _headers: expect.objectContaining({ authorization: 'Bearer test-token' }),
+          }),
+        }),
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+  });
+
+  describe('authenticate', () => {
+    it('should authenticate with the auth api', async () => {
+      // given
+      const mockApiHandler = jest.fn((_req, res) => res());
+      server = setupServer(rest.get('http://localhost/v1/test', mockApiHandler));
+      server.listen();
+
+      jest.mock('./user', () => ({
+        getLoginParametersForUser: async () => ({
+          userPoolId: 'pool-id',
+          userPoolClientId: 'client-id',
+        }),
+      }));
+      jest.mock('./cognito', () => ({
+        loginToUserPool: async () => ({
+          tokens: {
+            access_token: 'test-token',
+          },
+        }),
+      }));
+      jest.resetModules();
+
+      const client = axios.create();
+
+      // when
+      const { authenticate } = await import('./index');
+      const authorizer = await authenticate({ username: 'john-doe@epilot.cloud', password: 'doe123' });
+      authorizer.configureClient(client);
+
+      // then
+      const res = await client.get('http://localhost/v1/test');
+      expect(res.status).toStrictEqual(200);
+      expect(mockApiHandler).toBeCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            _headers: expect.objectContaining({ authorization: 'Bearer test-token' }),
+          }),
+        }),
+        expect.anything(),
+        expect.anything(),
+      );
     });
   });
 });
