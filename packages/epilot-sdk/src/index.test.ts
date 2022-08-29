@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as EpilotAuth from '@epilot/auth';
+import * as EpilotAuthLogin from '@epilot/auth/dist/login';
 import { rest } from 'msw';
 
 import { authServer } from './__tests__/server-mocks';
@@ -8,7 +8,7 @@ import EpilotClient from './';
 
 authServer.use(
   rest.get('https://entity.sls.epilot.io/v1/entity/order/123', (req, res, ctx) => {
-    if (req.headers.get('authorization') !== 'Bearer THE-AUTH-TOKEN') {
+    if (req.headers.get('authorization')?.startsWith('Bearer ')) {
       return res(ctx.status(401, 'Unauthorized client call'));
     }
 
@@ -35,19 +35,10 @@ beforeEach(() => {
 });
 
 describe('EpilotClient', () => {
-  describe('login', () => {
-    it('should call the auth api', async () => {
-      const authorizerMock = jest.fn((client: any) => client);
-
-      const authenticateSpy = jest.spyOn(EpilotAuth, 'authenticate');
-      authenticateSpy.mockResolvedValue({ configureClient: authorizerMock } as any);
-
-      const eclient = await EpilotClient.buildClient({ username: 'john-doe@epilot.cloud', password: 'doe123' });
-
-      expect(authenticateSpy).toHaveBeenCalledTimes(1);
-      expect(authenticateSpy).toHaveBeenCalledWith({ password: 'doe123', username: 'john-doe@epilot.cloud' });
-
-      expect(authorizerMock).toHaveBeenCalled();
+  describe('constructor', () => {
+    it('should initialise clients', async () => {
+      const eclient = new EpilotClient();
+      eclient.authorize('token');
 
       expect(eclient.entity).not.toBeNull();
       expect(eclient.user).not.toBeNull();
@@ -59,10 +50,31 @@ describe('EpilotClient', () => {
     });
   });
 
-  describe('entity', () => {
-    it('should authorize entity client requests', async () => {
-      const eclient = await EpilotClient.buildClient({ username: 'john-doe@epilot.cloud', password: 'doe123' });
+  describe('authorize', () => {
+    it('should authorize clients', async () => {
+      const eclient = new EpilotClient();
+      eclient.authorize('token');
+    });
+  });
 
+  describe('login', () => {
+    const eclient = new EpilotClient();
+
+    it('should call the auth api', async () => {
+      const authorizerMock = jest.fn((client: any) => client);
+
+      const authenticateSpy = jest.spyOn(EpilotAuthLogin, 'authenticate');
+      authenticateSpy.mockResolvedValue({ configureClient: authorizerMock } as any);
+
+      await eclient.login({ username: 'john-doe@epilot.cloud', password: 'doe123' });
+
+      expect(authenticateSpy).toHaveBeenCalledTimes(1);
+      expect(authenticateSpy).toHaveBeenCalledWith({ password: 'doe123', username: 'john-doe@epilot.cloud' });
+
+      expect(authorizerMock).toHaveBeenCalled();
+    });
+
+    it('should authorize entity client requests', async () => {
       const result = await eclient.entity.getEntity({ slug: 'order', id: '123' });
 
       expect(result.status).toBe(200);
