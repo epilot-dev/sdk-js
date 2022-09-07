@@ -15,8 +15,16 @@
       "description": "CRUD Access for Entities"
     },
     {
+      "name": "Relations",
+      "description": "Entity Relationships"
+    },
+    {
       "name": "Activity",
       "description": "Entity Events"
+    },
+    {
+      "name": "Export",
+      "description": "Export and Import entities via files"
     }
   ],
   "security": [
@@ -1240,6 +1248,40 @@
           }
         }
       }
+    },
+    "/v1/entity:export": {
+      "post": {
+        "operationId": "exportEntities",
+        "summary": "exportEntities",
+        "description": "create export file of entities",
+        "tags": [
+          "Export"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id",
+            "description": "Export Job Id to get the result",
+            "schema": {
+              "$ref": "#/components/schemas/ExportJobId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntitySearchParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "created export url and download url"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1258,6 +1300,10 @@
       }
     },
     "schemas": {
+      "ExportJobId": {
+        "description": "Export Job Id to get the result",
+        "type": "string"
+      },
       "SchemaId": {
         "description": "Generated uuid for schema",
         "type": "string",
@@ -2595,7 +2641,7 @@
         ]
       },
       "SummaryAttribute": {
-        "description": "Represents an expanded version of an attribute to be displayed in the list item summary.\nThis configuration can be used in the following way:\n```js\n{\n  \"label\": \"Price components\"\n  \"value\": \"{{item.prices.length}} price components\"\n  \"show_as_tag\": true\n  \"render_condition\": \"is_composite_price = \\\"true\\\"\"\n}\n```\nThe value field supports handlebar expressions from which you can pick any field from the entity state.\n",
+        "description": "Represents an expanded version of an attribute to be displayed in the list item summary.\nThis configuration can be used in the following way:\n```js\n{\n  \"label\": \"Price components\"\n  \"value\": \"{{item.prices.length}} price components\"\n  \"show_as_tag\": true\n  \"render_condition\": \"is_composite_price = \"true\"\"\n}\n```\nThe value field supports handlebar expressions from which you can pick any field from the entity state.\n",
         "type": "object",
         "properties": {
           "label": {
@@ -3313,6 +3359,9 @@
           "org": {
             "type": "string",
             "example": "123"
+          },
+          "activity_id": {
+            "$ref": "#/components/schemas/ActivityId"
           },
           "operation": {
             "type": "string",
