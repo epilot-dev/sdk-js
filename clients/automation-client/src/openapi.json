@@ -1,0 +1,1997 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Automation API",
+    "description": "API Backend for epilot Automation Workflows feature",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "flows",
+      "description": "Automation flows"
+    },
+    {
+      "name": "executions",
+      "description": "Automation executions"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/automation/flows": {
+      "get": {
+        "operationId": "searchFlows",
+        "summary": "searchFlows",
+        "description": "Search available automation flows",
+        "tags": [
+          "flows"
+        ],
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "query",
+            "description": "Entity Schema",
+            "schema": {
+              "type": "string",
+              "example": "submission"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Pagination: max number of results to return",
+            "schema": {
+              "type": "integer",
+              "default": 25
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Pagination: starting for results",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "trigger_source_id",
+            "in": "query",
+            "description": "Trigger source identifier",
+            "schema": {
+              "type": "string",
+              "example": "600945fe-212e-4b97-acf7-391d64648384"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of automation flows, including total count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchAutomationsResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createFlow",
+        "summary": "createFlow",
+        "description": "Create new automation flow",
+        "tags": [
+          "flows"
+        ],
+        "requestBody": {
+          "description": "Automation flow to create",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationFlow"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created automation flow",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationFlow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/automation/flows/{flow_id}": {
+      "get": {
+        "operationId": "getFlow",
+        "summary": "getFlow",
+        "description": "List available automation flows",
+        "tags": [
+          "flows"
+        ],
+        "parameters": [
+          {
+            "name": "flow_id",
+            "in": "path",
+            "required": true,
+            "description": "Automation Workflow ID",
+            "schema": {
+              "$ref": "#/components/schemas/AutomationFlowId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The returned automation flow",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationFlow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putFlow",
+        "summary": "putFlow",
+        "description": "Update automation flow by id",
+        "tags": [
+          "flows"
+        ],
+        "parameters": [
+          {
+            "name": "flow_id",
+            "in": "path",
+            "required": true,
+            "description": "Automation Workflow ID",
+            "schema": {
+              "$ref": "#/components/schemas/AutomationFlowId"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Automation flow to create",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomationFlow"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated automation flow",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationFlow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteFlow",
+        "summary": "deleteFlow",
+        "description": "Update automation flow by id",
+        "tags": [
+          "flows"
+        ],
+        "parameters": [
+          {
+            "name": "flow_id",
+            "in": "path",
+            "required": true,
+            "description": "Automation Workflow ID",
+            "schema": {
+              "$ref": "#/components/schemas/AutomationFlowId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted automation flow",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationFlow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/automation/executions": {
+      "get": {
+        "operationId": "getExecutions",
+        "summary": "getExecutions",
+        "description": "List automation executions",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Pagination: max number of results to return",
+            "schema": {
+              "type": "integer",
+              "default": 25
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Pagination: starting for results",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "tags": [
+          "executions"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of automation executions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExecutionsResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "startExecution",
+        "summary": "startExecution",
+        "description": "Start new automation execution",
+        "requestBody": {
+          "description": "Execution parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartExecutionRequest"
+              }
+            }
+          }
+        },
+        "tags": [
+          "executions"
+        ],
+        "responses": {
+          "201": {
+            "description": "The created execution",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationExecution"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/automation/executions/{execution_id}": {
+      "get": {
+        "operationId": "getExecution",
+        "summary": "getExecution",
+        "description": "Get automation execution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/AutomationExecutionId"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "executions"
+        ],
+        "responses": {
+          "200": {
+            "description": "The returned execution",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationExecution"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "cancelExecution",
+        "summary": "cancelExecution",
+        "description": "Cancel automation execution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/AutomationExecutionId"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "executions"
+        ],
+        "responses": {
+          "200": {
+            "description": "The cancelled execution",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationExecution"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/automation/executions/{execution_id}/{action_id}/retrigger": {
+      "post": {
+        "operationId": "retriggerAction",
+        "summary": "retriggerAction",
+        "description": "Retrigger a specific automation execution action",
+        "tags": [
+          "executions"
+        ],
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "description": "Execution Id",
+            "schema": {
+              "$ref": "#/components/schemas/AutomationExecutionId"
+            },
+            "required": true
+          },
+          {
+            "name": "action_id",
+            "in": "path",
+            "description": "Id of Action to retrigger",
+            "schema": {
+              "$ref": "#/components/schemas/AutomationActionId"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "action re-triggered with success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Bearer Token"
+      }
+    },
+    "schemas": {
+      "AutomationFlowId": {
+        "type": "string",
+        "example": "7791b04a-16d2-44a2-9af9-2d59c25c512f"
+      },
+      "AutomationActionId": {
+        "type": "string",
+        "example": "9ec3711b-db63-449c-b894-54d5bb622a8f"
+      },
+      "AutomationFlow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/AutomationFlowId"
+          },
+          "flow_name": {
+            "type": "string",
+            "description": "A descriptive name for the Automation",
+            "example": "Handle contact form"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the automation is enabled or not",
+            "default": true
+          },
+          "triggers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnyTrigger"
+            }
+          },
+          "trigger_conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TriggerCondition"
+            }
+          },
+          "entity_schema": {
+            "description": "The triggering entity schema",
+            "type": "string",
+            "example": "submission"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnyAction"
+            }
+          },
+          "runs": {
+            "type": "number",
+            "example": 7,
+            "description": "Number of automation executions that ran"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "example": "user:123",
+            "description": "User / service who created automation flow"
+          },
+          "last_updated_by": {
+            "type": "string",
+            "example": "user:123",
+            "description": "User / service who last updated automation flow"
+          }
+        },
+        "required": [
+          "flow_name",
+          "triggers",
+          "actions"
+        ]
+      },
+      "SearchAutomationsResp": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AutomationFlow"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "results"
+        ]
+      },
+      "AnyTrigger": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/FrontendSubmitTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/JourneySubmitTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/ApiSubmissionTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/EntityOperationTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/EntityManualTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/ReceivedEmailTrigger"
+          }
+        ]
+      },
+      "AnyAction": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/MapEntityAction"
+          },
+          {
+            "$ref": "#/components/schemas/FillEntityAction"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerWorkflowAction"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerWebhookAction"
+          },
+          {
+            "$ref": "#/components/schemas/CreateDocumentAction"
+          },
+          {
+            "$ref": "#/components/schemas/SendEmailAction"
+          },
+          {
+            "$ref": "#/components/schemas/CartCheckoutAction"
+          },
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          }
+        ]
+      },
+      "AutomationAction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/AutomationActionId"
+          },
+          "flow_action_id": {
+            "$ref": "#/components/schemas/AutomationActionId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "execution_status": {
+            "$ref": "#/components/schemas/ExecutionStatus"
+          },
+          "started_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "allow_failure": {
+            "description": "Whether to stop execution in a failed state if this action fails",
+            "type": "boolean"
+          },
+          "created_automatically": {
+            "description": "Flag indicating whether the action was created automatically or manually",
+            "type": "boolean"
+          },
+          "outputs": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {}
+          },
+          "error_output": {
+            "$ref": "#/components/schemas/ErrorOutput"
+          }
+        }
+      },
+      "ErrorOutput": {
+        "type": "object",
+        "properties": {
+          "error_code": {
+            "$ref": "#/components/schemas/ErrorCode"
+          },
+          "error_reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error_code",
+          "error_reason"
+        ]
+      },
+      "ErrorCode": {
+        "type": "string",
+        "enum": [
+          "MAPPING_ERROR",
+          "REFRESH_RELATIONS_ERROR",
+          "DUPLICATE_ENTITY_ERROR",
+          "TRIGGER_WORKFLOW_ERROR",
+          "TIMEOUT_ERROR",
+          "BAD_CONFIG",
+          "INTERNAL_ERROR"
+        ]
+      },
+      "CartCheckoutAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "description": "Creates an order entity with prices from journey",
+            "properties": {
+              "type": {
+                "enum": [
+                  "cart-checkout"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/CartCheckoutConfig"
+              }
+            }
+          }
+        ]
+      },
+      "CartCheckoutConfig": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "description": "Version of the config",
+            "type": "string",
+            "default": "1"
+          },
+          "mapping_config": {
+            "$ref": "#/components/schemas/MappingConfigRef"
+          },
+          "relation_attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RelationAttribute"
+            }
+          },
+          "mapping_attributes": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/MappingAttributeV2"
+                },
+                {
+                  "$ref": "#/components/schemas/MappingAttribute"
+                }
+              ]
+            }
+          },
+          "linkback_relation_attribute": {
+            "type": "string",
+            "default": "mapped_entities",
+            "description": "Relation attribute on the main entity where the target entity will be linked. Set to false to disable linkback\n"
+          },
+          "linkback_relation_tags": {
+            "type": "array",
+            "description": "Relation tags (labels) to include in main entity linkback relation attribute",
+            "items": {
+              "type": "string"
+            }
+          },
+          "target_unique": {
+            "type": "array",
+            "description": "Unique key for target entity (see upsertEntity of Entity API)",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MapEntityAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "map-entity"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/MapEntityActionConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "2520gja-2sgmsaga-0asg-822jgal",
+          "name": "Map Entity",
+          "type": "map-entity",
+          "config": {
+            "target_schema": "contact",
+            "target_unique": [
+              "email.0.email"
+            ],
+            "relation_attributes": [
+              {
+                "target": "company",
+                "mode": "append",
+                "source_filter": {
+                  "schema": "account",
+                  "limit": 1
+                }
+              }
+            ],
+            "mapping_attributes": [
+              {
+                "target": "_tags",
+                "operation": {
+                  "_append": [
+                    "primary",
+                    "payer"
+                  ],
+                  "_uniq": true
+                }
+              },
+              {
+                "target": "email",
+                "operation": {
+                  "_append": [
+                    {
+                      "email": {
+                        "_copy": "billing_contact.email"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "target": "first_name",
+                "operation": {
+                  "_copy": "billing_contact.first_name"
+                }
+              },
+              {
+                "target": "last_name",
+                "operation": {
+                  "_copy": "billing_contact.last_name"
+                }
+              },
+              {
+                "target": "contact_type",
+                "operation": {
+                  "_set": "customer"
+                }
+              },
+              {
+                "target": "address",
+                "operation": {
+                  "_append": [
+                    {
+                      "_tags": [
+                        "billing",
+                        "primary"
+                      ],
+                      "street_name": {
+                        "_copy": "billing_contact.street_name"
+                      },
+                      "street_number": {
+                        "_copy": "billing_contact.street_number"
+                      },
+                      "city": {
+                        "_copy": "billing_contact.city"
+                      },
+                      "postal_code": {
+                        "_copy": "billing_contact.postal_code"
+                      },
+                      "country": {
+                        "_copy": "billing_contact.country"
+                      }
+                    },
+                    {
+                      "_tags": [
+                        "delivery"
+                      ],
+                      "street_name": {
+                        "_copy": "delivery_contact.street_name"
+                      },
+                      "street_number": {
+                        "_copy": "delivery_contact.street_number"
+                      },
+                      "city": {
+                        "_copy": "delivery_contact.city"
+                      },
+                      "postal_code": {
+                        "_copy": "delivery_contact.postal_code"
+                      },
+                      "country": {
+                        "_copy": "delivery_contact.country"
+                      }
+                    }
+                  ],
+                  "_uniq": [
+                    "street_name",
+                    "street_number",
+                    "postal_code",
+                    "country"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "MapEntityActionConfig": {
+        "type": "object",
+        "properties": {
+          "mapping_config": {
+            "$ref": "#/components/schemas/MappingConfigRef"
+          },
+          "target_schema": {
+            "type": "string",
+            "description": "Schema of target entity"
+          },
+          "target_unique": {
+            "type": "array",
+            "description": "Unique key for target entity (see upsertEntity of Entity API)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mapping_attributes": {
+            "type": "array",
+            "description": "Attribute mappings",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/MappingAttributeV2"
+                },
+                {
+                  "$ref": "#/components/schemas/MappingAttribute"
+                }
+              ]
+            }
+          },
+          "relation_attributes": {
+            "type": "array",
+            "description": "Relation mappings",
+            "items": {
+              "$ref": "#/components/schemas/RelationAttribute"
+            }
+          },
+          "linkback_relation_attribute": {
+            "type": "string",
+            "default": "mapped_entities",
+            "description": "Relation attribute on the main entity where the target entity will be linked. Set to false to disable linkback\n"
+          },
+          "linkback_relation_tags": {
+            "type": "array",
+            "description": "Relation tags (labels) to include in main entity linkback relation attribute",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "target_schema"
+        ]
+      },
+      "MappingConfigRef": {
+        "type": "object",
+        "properties": {
+          "config_id": {
+            "type": "string",
+            "description": "Id of Entity Mapping Configuration to run for mapping."
+          },
+          "target_id": {
+            "type": "string",
+            "description": "Id of TargetConfig to run for mapping."
+          }
+        },
+        "required": [
+          "config_id",
+          "target_id"
+        ]
+      },
+      "FillEntityAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "deprecated": true,
+            "properties": {
+              "type": {
+                "enum": [
+                  "fill-entity"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/FillEntityConfig"
+              }
+            },
+            "required": [
+              "config"
+            ]
+          }
+        ]
+      },
+      "FillEntityConfig": {
+        "type": "object",
+        "properties": {
+          "mappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressMapper"
+            }
+          }
+        },
+        "required": [
+          "mappings"
+        ]
+      },
+      "AddressMapper": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string",
+                "description": "find target entity based on schema"
+              },
+              "tag": {
+                "type": "string",
+                "description": "find target entity based on entity tag"
+              },
+              "relation_tag": {
+                "type": "string",
+                "description": "find target entity based on relation tag on main entity relation"
+              },
+              "key": {
+                "type": "string",
+                "description": "target field for where to store this address."
+              },
+              "value_json": {
+                "type": "string",
+                "description": "stringified JSON for how to map address data"
+              },
+              "target_unique": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Array of keys which should be used when checking for uniqueness. Eg: [country, city, postal_code]\n"
+              }
+            },
+            "required": [
+              "schema",
+              "key",
+              "value_json"
+            ]
+          },
+          "reference": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string",
+                "description": "Schema of the entity where the reference will be stored."
+              },
+              "key": {
+                "type": "string",
+                "description": "Field location to store the reference."
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Optional relation labels to give meaning to this reference."
+              }
+            },
+            "required": [
+              "schema",
+              "key"
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "reference"
+        ],
+        "example": {
+          "target": {
+            "schema": "contact",
+            "tag": "primary",
+            "key": "address",
+            "value_json": "{\"_tags\": [\"billing\"],\"city\":\"steps[0][Adresse][city]\",\"country\":\"steps[0][Adresse][countryCode]\",\"postal_code\":\"steps[0][Adresse][zipCode]\",\"street\":\"steps[0][Adresse][streetName]\",\"street_number\":\"steps[0][Adresse][houseNumber]\",\"additional_info\":\"steps[0][Adresse][addressExtention]\"}",
+            "target_unique": [
+              "country",
+              "city",
+              "postal_code",
+              "street",
+              "street_number"
+            ]
+          },
+          "reference": {
+            "schema": "opportunity",
+            "key": "billing_address"
+          }
+        }
+      },
+      "RelationAttribute": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Target attribute to store the relation in"
+          },
+          "target_tags": {
+            "type": "array",
+            "description": "Relation tags (labels) to set for the stored relations",
+            "items": {
+              "type": "string"
+            }
+          },
+          "target_tags_include_source": {
+            "type": "boolean",
+            "description": "Include all relation tags (labels) present on the main entity relation",
+            "default": false
+          },
+          "source_filter": {
+            "type": "object",
+            "description": "A filter to identify which source entities to pick as relations from main entity",
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "description": "Limit relations to maximum number (default, all matched relations)",
+                "minimum": 0
+              },
+              "schema": {
+                "type": "string",
+                "description": "Filter by specific schema"
+              },
+              "attribute": {
+                "type": "string",
+                "description": "Filter by a specific relation attribute on the main entity"
+              },
+              "relation_tag": {
+                "type": "string",
+                "description": "Filter by relation tag (label) on the main entity"
+              },
+              "tag": {
+                "type": "string",
+                "description": "Filter by a specific tag on the related entity"
+              },
+              "self": {
+                "type": "boolean",
+                "description": "Picks main entity as relation (overrides other filters)",
+                "default": false
+              }
+            }
+          },
+          "related_to": {
+            "type": "object",
+            "additionalProperties": true,
+            "deprecated": true
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "append",
+              "prepend",
+              "set"
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "mode"
+        ]
+      },
+      "MappingAttributeV2": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Target JSON path for the attribute to set"
+          },
+          "operation": {
+            "$ref": "#/components/schemas/OperationNode"
+          }
+        },
+        "required": [
+          "targetPath",
+          "operation"
+        ],
+        "example": {
+          "target": "_tags",
+          "operation": {
+            "_append": [
+              "new",
+              "tags"
+            ],
+            "_uniq": true
+          }
+        }
+      },
+      "OperationNode": {
+        "description": "Mapping operation nodes are either primitive values or operation node objects",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/OperationObjectNode"
+          },
+          {
+            "$ref": "#/components/schemas/PrimitiveJSONValue"
+          }
+        ]
+      },
+      "OperationObjectNode": {
+        "type": "object",
+        "properties": {
+          "_set": {
+            "$ref": "#/components/schemas/PrimitiveJSONValue"
+          },
+          "_append": {
+            "description": "Append to array",
+            "items": {
+              "$ref": "#/components/schemas/PrimitiveJSONValue"
+            }
+          },
+          "_uniq": {
+            "description": "Unique array",
+            "oneOf": [
+              {
+                "type": "boolean",
+                "example": true
+              },
+              {
+                "type": "array",
+                "description": "Unique key consisting of object keys",
+                "example": [
+                  "email"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "_copy": {
+            "description": "Copy JSONPath value from source entity context",
+            "type": "string",
+            "example": "contact.first_name"
+          }
+        },
+        "additionalProperties": true
+      },
+      "PrimitiveJSONValue": {
+        "description": "Represents any primitive JSON value",
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "object",
+            "additionalProperties": true
+          },
+          {
+            "type": "array"
+          }
+        ]
+      },
+      "MappingAttribute": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/SetValueMapper"
+          },
+          {
+            "$ref": "#/components/schemas/CopyValueMapper"
+          },
+          {
+            "$ref": "#/components/schemas/AppendValueMapper"
+          }
+        ]
+      },
+      "MappingAttributeMode": {
+        "type": "string",
+        "enum": [
+          "copy_if_exists",
+          "append_if_exists",
+          "set_value"
+        ],
+        "description": "- copy_if_exists - it replaces the target attribute with the source value - append_if_exists - it currently replaces target attribute with array like values. Useful when you have multiple values to be added into one attribute. - set_value - it sets a value to a predefined value. Must be used together with value property.\n"
+      },
+      "SetValueMapper": {
+        "type": "object",
+        "deprecated": true,
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/MappingAttributeMode"
+          },
+          "target": {
+            "type": "string",
+            "description": "JSON like target path for the attribute. Eg. last_name"
+          },
+          "value": {
+            "description": "Any value to be set: string, number, string[], number[], JSON object, etc. It will override existing values, if any.\n"
+          }
+        },
+        "required": [
+          "mode",
+          "target",
+          "value"
+        ]
+      },
+      "CopyValueMapper": {
+        "type": "object",
+        "deprecated": true,
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/MappingAttributeMode"
+          },
+          "target": {
+            "type": "string",
+            "description": "JSON like target path for the attribute. Eg. last_name"
+          },
+          "source": {
+            "type": "string",
+            "description": "JSON source path for the value to be extracted from the main entity. Eg: steps[1].['Product Info'].price\n"
+          }
+        },
+        "required": [
+          "mode",
+          "target",
+          "source"
+        ]
+      },
+      "AppendValueMapper": {
+        "type": "object",
+        "deprecated": true,
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/MappingAttributeMode"
+          },
+          "target": {
+            "type": "string",
+            "description": "JSON like target path for the attribute. Eg. last_name"
+          },
+          "source": {
+            "type": "string",
+            "description": "JSON source path for the value to be extracted from the main entity. Eg: steps[1].['Product Info'].price\n"
+          },
+          "value_json": {
+            "type": "string",
+            "description": "To be provided only when mapping json objects into a target attribute. Eg array of addresses.\n"
+          },
+          "target_unique": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of keys which should be used when checking for uniqueness. Eg: [country, city, postal_code]\n"
+          }
+        },
+        "required": [
+          "mode",
+          "target",
+          "value_json"
+        ]
+      },
+      "SendEmailAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "send-email"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/SendEmailActionConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "25jga0-gkasl26-0asg-908sgaj2",
+          "name": "Send Email",
+          "type": "send-email",
+          "config": {
+            "email_template_id": "gasj02-29ug9asgm-29t9gsaghg2g-pkmbhx2",
+            "language_code": "de"
+          }
+        }
+      },
+      "SendEmailActionConfig": {
+        "type": "object",
+        "properties": {
+          "email_template_id": {
+            "type": "string"
+          },
+          "language_code": {
+            "type": "string",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "attachments": {
+            "type": "array",
+            "description": "Include extra file attachments in sent email.\n\nAttachments in email template will be sent regardless of this configuration.\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "source_filter": {
+                  "type": "object",
+                  "description": "Specify filters to match file entities related to main entity",
+                  "properties": {
+                    "limit": {
+                      "type": "integer",
+                      "description": "Limit files to maximum number (default, all matched file relations)",
+                      "minimum": 0,
+                      "example": 1
+                    },
+                    "filename_regex": {
+                      "type": "string",
+                      "description": "Match by filename. Regex syntax supported",
+                      "example": ".*"
+                    },
+                    "attribute": {
+                      "type": "string",
+                      "description": "Filter by a specific relation attribute on the main entity",
+                      "example": "_files"
+                    },
+                    "relation_tag": {
+                      "type": "string",
+                      "description": "Filter by relation tag (label) on the main entity",
+                      "example": "contract"
+                    },
+                    "tag": {
+                      "type": "string",
+                      "description": "Filter by a specific tag on the related file entity"
+                    },
+                    "document_type": {
+                      "type": "string",
+                      "description": "Filter by a specific document type (e.g. document)",
+                      "enum": [
+                        "document",
+                        "text",
+                        "image",
+                        "video",
+                        "audio",
+                        "spreadsheet",
+                        "presentation",
+                        "font",
+                        "archive",
+                        "application",
+                        "unknown"
+                      ]
+                    },
+                    "self": {
+                      "type": "boolean",
+                      "description": "Picks main entity as file (only works if source entity is a file)",
+                      "default": false
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "email_template_id"
+            ]
+          }
+        }
+      },
+      "CreateDocumentAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "create-document"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/CreateDocumentConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "08g988-ojt2jtaga-292h-8978gsaga",
+          "name": "Create Document",
+          "type": "create-document",
+          "config": {
+            "template_id": {
+              "type": "string",
+              "example": "112b08ba-789c-42f2-9940-43b302f641e8\""
+            },
+            "filename": {
+              "type": "string",
+              "example": "newsletter.pdf\""
+            }
+          }
+        }
+      },
+      "CreateDocumentConfig": {
+        "type": "object",
+        "properties": {
+          "template_id": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          }
+        }
+      },
+      "TriggerWorkflowAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "trigger-workflow"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/TriggerWorkflowConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "08g988-ojt2jtaga-292h-8978gsaga",
+          "name": "Trigger Workflow",
+          "type": "trigger-workflow",
+          "config": {
+            "target_workflow": "mfptvUMH",
+            "conditions": [
+              {
+                "schema": "ivy-opportunity",
+                "source": "customer.type",
+                "comparison": "equals",
+                "value": "PRIVATE"
+              }
+            ],
+            "assign_steps": [
+              {
+                "step_name": "Lead Sales",
+                "user_ids": [
+                  10010729
+                ]
+              },
+              {
+                "step_name": "Operations",
+                "user_ids": [
+                  10010728,
+                  10010729
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "TriggerWorkflowConfig": {
+        "type": "object",
+        "properties": {
+          "target_workflow": {
+            "type": "string"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TriggerWorkflowCondition"
+            }
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assign_steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssignUsersToStep"
+            }
+          }
+        }
+      },
+      "TriggerWorkflowCondition": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TriggerCondition"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "required": [
+          "schema",
+          "source",
+          "comparison"
+        ],
+        "example": {
+          "schema": "contact",
+          "source": "email",
+          "comparison": "equals",
+          "value": "test@epilot.cloud"
+        }
+      },
+      "AssignUsersToStep": {
+        "type": "object",
+        "properties": {
+          "step_id": {
+            "type": "string"
+          },
+          "step_name": {
+            "type": "string"
+          },
+          "user_ids": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "example": [
+          {
+            "step_id": "xyh9t2ha",
+            "step_name": "Lead Sales",
+            "user_ids": [
+              10010729
+            ]
+          },
+          {
+            "step_id": "29jgasl",
+            "step_name": "Operations",
+            "user_ids": [
+              10010728,
+              10010729
+            ]
+          }
+        ]
+      },
+      "TriggerWebhookAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "trigger-webhook"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/TriggerWebhookActionConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "2520gja-2sgmsaga-0asg-822jgal",
+          "name": "Trigger Webhook",
+          "type": "trigger-webhook",
+          "config": {
+            "entity_sources": [
+              "contact",
+              "account"
+            ],
+            "target_webhook_id": "25jg9ag2ga"
+          }
+        }
+      },
+      "TriggerWebhookActionConfig": {
+        "type": "object",
+        "properties": {
+          "entity_sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "target_webhook_id": {
+            "type": "string"
+          }
+        }
+      },
+      "AutomationExecutionId": {
+        "type": "string",
+        "example": "9baf184f-bc81-4128-bca3-d974c90a12c4"
+      },
+      "AutomationExecution": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/AutomationExecutionId"
+          },
+          "execution_status": {
+            "$ref": "#/components/schemas/ExecutionStatus"
+          },
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "entity_snapshot": {
+            "$ref": "#/components/schemas/EntityItemSnapshot"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "flow_id": {
+            "$ref": "#/components/schemas/AutomationFlowId"
+          },
+          "flow_name": {
+            "type": "string",
+            "example": "Handle contact form"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "current_action_id": {
+            "$ref": "#/components/schemas/AutomationActionId"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnyAction"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "entity_id",
+          "org_id",
+          "flow_id",
+          "actions"
+        ]
+      },
+      "ExecutionStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "in_progress",
+          "success",
+          "failed",
+          "cancelled"
+        ]
+      },
+      "GetExecutionsResp": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AutomationExecution"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "results"
+        ]
+      },
+      "StartExecutionRequest": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "flow_id": {
+            "$ref": "#/components/schemas/AutomationFlowId"
+          }
+        }
+      },
+      "EntityId": {
+        "type": "string",
+        "example": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74"
+      },
+      "OrganizationId": {
+        "type": "string",
+        "example": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74"
+      },
+      "JourneySubmitTrigger": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "journey_submission"
+            ]
+          },
+          "configuration": {
+            "type": "object",
+            "properties": {
+              "source_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "source_id"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "configuration"
+        ]
+      },
+      "FrontendSubmitTrigger": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "frontend_submission"
+            ]
+          },
+          "configuration": {
+            "type": "object",
+            "properties": {
+              "source_id": {
+                "type": "string",
+                "example": "99"
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "configuration"
+        ]
+      },
+      "ApiSubmissionTrigger": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "api_submission"
+            ]
+          },
+          "configuration": {
+            "type": "object",
+            "properties": {
+              "source_id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "configuration"
+        ]
+      },
+      "ReceivedEmailTrigger": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "received_email"
+            ]
+          },
+          "configuration": {
+            "type": "object",
+            "properties": {
+              "message_type": {
+                "type": "string",
+                "enum": [
+                  "RECEIVED"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "configuration"
+        ]
+      },
+      "EntityOperationTrigger": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "entity_operation"
+            ]
+          },
+          "configuration": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string",
+                "example": "submission"
+              },
+              "operations": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "createEntity",
+                    "updateEntity",
+                    "deleteEntity"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "configuration"
+        ]
+      },
+      "EntityManualTrigger": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "entity_manual"
+            ]
+          },
+          "configuration": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "description": "Which entity type can this automation be triggered from",
+                "type": "string",
+                "example": "submission"
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "configuration"
+        ]
+      },
+      "TriggerCondition": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "comparison": {
+            "$ref": "#/components/schemas/Comparison"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            ]
+          }
+        },
+        "required": [
+          "source",
+          "comparison"
+        ],
+        "example": {
+          "source": "billing_contact.email",
+          "comparison": "exists"
+        }
+      },
+      "Comparison": {
+        "type": "string",
+        "enum": [
+          "equals",
+          "any_of",
+          "not_empty",
+          "is_empty"
+        ]
+      },
+      "EntityItemSnapshot": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "_title": {
+            "type": "string"
+          },
+          "_org": {
+            "type": "string"
+          },
+          "_schema": {
+            "type": "string"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "_id",
+          "_title",
+          "_org",
+          "_schema",
+          "_created_at",
+          "_updated_at"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://automation.sls.epilot.io"
+    },
+    {
+      "url": "https://automation.sls.epilot.io"
+    }
+  ]
+}
