@@ -1082,6 +1082,12 @@ declare namespace Components {
              * 123
              */
             org: string;
+            activity_id?: /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            ActivityId /* ulid */;
             operation: "createEntity" | "updateEntity" | "deleteEntity";
             /**
              * example:
@@ -1199,7 +1205,7 @@ declare namespace Components {
                      *   "label": "Price components"
                      *   "value": "{{item.prices.length}} price components"
                      *   "show_as_tag": true
-                     *   "render_condition": "is_composite_price = \"true\""
+                     *   "render_condition": "is_composite_price = "true""
                      * }
                      * ```
                      * The value field supports handlebar expressions from which you can pick any field from the entity state.
@@ -1412,7 +1418,7 @@ declare namespace Components {
                      *   "label": "Price components"
                      *   "value": "{{item.prices.length}} price components"
                      *   "show_as_tag": true
-                     *   "render_condition": "is_composite_price = \"true\""
+                     *   "render_condition": "is_composite_price = "true""
                      * }
                      * ```
                      * The value field supports handlebar expressions from which you can pick any field from the entity state.
@@ -1624,6 +1630,10 @@ declare namespace Components {
         export interface EntityViewDisabled {
             view_type?: "disabled";
         }
+        /**
+         * Export Job Id to get the result
+         */
+        export type ExportJobId = string;
         /**
          * File or Image Attachment
          */
@@ -3078,7 +3088,7 @@ declare namespace Components {
          *   "label": "Price components"
          *   "value": "{{item.prices.length}} price components"
          *   "show_as_tag": true
-         *   "render_condition": "is_composite_price = \"true\""
+         *   "render_condition": "is_composite_price = "true""
          * }
          * ```
          * The value field supports handlebar expressions from which you can pick any field from the entity state.
@@ -3591,6 +3601,19 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $204 {
+            }
+        }
+    }
+    namespace ExportEntities {
+        namespace Parameters {
+            export type JobId = /* Export Job Id to get the result */ Components.Schemas.ExportJobId;
+        }
+        export interface QueryParameters {
+            job_id?: Parameters.JobId;
+        }
+        export type RequestBody = Components.Schemas.EntitySearchParams;
+        namespace Responses {
+            export interface $201 {
             }
         }
     }
@@ -4301,6 +4324,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteRelation.Responses.$204>
+  /**
+   * exportEntities - exportEntities
+   * 
+   * create export file of entities
+   */
+  'exportEntities'(
+    parameters?: Parameters<Paths.ExportEntities.QueryParameters> | null,
+    data?: Paths.ExportEntities.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ExportEntities.Responses.$201>
 }
 
 export interface PathsDictionary {
@@ -4701,6 +4734,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteRelation.Responses.$204>
+  }
+  ['/v1/entity:export']: {
+    /**
+     * exportEntities - exportEntities
+     * 
+     * create export file of entities
+     */
+    'post'(
+      parameters?: Parameters<Paths.ExportEntities.QueryParameters> | null,
+      data?: Paths.ExportEntities.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ExportEntities.Responses.$201>
   }
 }
 
