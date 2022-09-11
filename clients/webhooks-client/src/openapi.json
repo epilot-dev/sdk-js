@@ -1,0 +1,818 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Webhooks",
+    "version": "1.0.0",
+    "description": "Service for configuring webhooks on different events\n"
+  },
+  "tags": [
+    {
+      "name": "webhooks",
+      "description": "Configure and trigger webhooks"
+    }
+  ],
+  "paths": {
+    "/v1/webhooks/configured-events": {
+      "get": {
+        "operationId": "getConfiguredEvents",
+        "summary": "getConfiguredEvents",
+        "description": "Retrieve events that can trigger webhooks",
+        "tags": [
+          "webhooks"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - configured events loaded with success. Empty array if no events have been configured.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventConfigResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/configs": {
+      "get": {
+        "operationId": "getConfigs",
+        "summary": "getConfigs",
+        "description": "Search Webhook Client Configs",
+        "tags": [
+          "webhooks"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "eventName",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Filter configurations by event Name",
+            "example": "customer_request_created"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - configs loaded with success. Empty array if org has configs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WebhookConfig"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createConfig",
+        "summary": "createConfig",
+        "description": "Create Webhook Client Config",
+        "tags": [
+          "webhooks"
+        ],
+        "requestBody": {
+          "description": "Webhook config payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success - if the config is created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/configs/{configId}": {
+      "get": {
+        "operationId": "getConfig",
+        "summary": "getConfig",
+        "description": "Get webhook config by id",
+        "tags": [
+          "webhooks"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - if the config is updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookConfig"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No configuration found for this id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateConfig",
+        "summary": "updateConfig",
+        "description": "Update Webhook Client Config",
+        "tags": [
+          "webhooks"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid (length 6) to identify the webhook configuration.",
+            "example": "7hj28a"
+          }
+        ],
+        "requestBody": {
+          "description": "Webhook config payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - if the config is updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteConfig",
+        "summary": "deleteConfig",
+        "description": "Delete Webhook Client Config",
+        "tags": [
+          "webhooks"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the config to de deleted.",
+            "example": "CustomerRequest"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - if the config is deleted successfully"
+          },
+          "401": {
+            "description": "Failed to authenticate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No config found"
+          }
+        }
+      }
+    },
+    "/v1/webhooks/failures": {
+      "get": {
+        "operationId": "getFailures",
+        "summary": "getFailures",
+        "description": "Get saved failures from the webhooks DB, in a paginated way",
+        "tags": [
+          "webhooks"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "lastLoadedEventId",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Optional Key. To be provided when loading paginated data. It is always returned initially by this API, is pagination is needed.",
+            "example": "1f143bd2-f816-4d7d-b33d-056db6e1ef7b"
+          },
+          {
+            "in": "query",
+            "name": "lastLoadedTimestamp",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Optional Key. To be provided when loading paginated data. It is always returned initially by this API, is pagination is needed.",
+            "example": "2021:05:06T12:00:26.000Z"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - if the API call returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailuresResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/failures/resend": {
+      "post": {
+        "operationId": "resendFailure",
+        "summary": "resendFailure",
+        "description": "Resend payload for one failure",
+        "tags": [
+          "webhooks"
+        ],
+        "requestBody": {
+          "description": "Resend payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FailureEntry"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success - Payload has been resend"
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HttpMethod": {
+        "type": "string",
+        "enum": [
+          "GET",
+          "POST",
+          "PUT",
+          "PATCH",
+          "DELETE",
+          "OPTIONS",
+          "HEAD"
+        ]
+      },
+      "AuthType": {
+        "type": "string",
+        "enum": [
+          "BASIC",
+          "OAUTH_CLIENT_CREDENTIALS",
+          "API_KEY"
+        ]
+      },
+      "Filter": {
+        "type": "object",
+        "properties": {
+          "keyToFilter": {
+            "type": "string"
+          },
+          "supportedValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "keyToFilter",
+          "supportedValues"
+        ]
+      },
+      "Auth": {
+        "type": "object",
+        "properties": {
+          "authType": {
+            "$ref": "#/components/schemas/AuthType"
+          },
+          "basicAuthConfig": {
+            "$ref": "#/components/schemas/BasicAuthConfig"
+          },
+          "oauthConfig": {
+            "$ref": "#/components/schemas/OAuthConfig"
+          },
+          "apiKeyConfig": {
+            "$ref": "#/components/schemas/ApiKeyConfig"
+          }
+        },
+        "required": [
+          "authType"
+        ]
+      },
+      "BasicAuthConfig": {
+        "type": "object",
+        "description": "To be sent only if authType is BASIC",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ]
+      },
+      "OAuthConfig": {
+        "type": "object",
+        "description": "To be sent only if authType is OAUTH_CLIENT_CREDENTIALS",
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "clientSecret": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string",
+            "description": "Https Endpoint for authentication"
+          },
+          "httpMethod": {
+            "$ref": "#/components/schemas/HttpMethod"
+          }
+        },
+        "required": [
+          "clientId",
+          "endpoint",
+          "httpMethod"
+        ]
+      },
+      "ApiKeyConfig": {
+        "type": "object",
+        "description": "To be sent only if authType is API_KEY",
+        "properties": {
+          "keyName": {
+            "type": "string"
+          },
+          "keyValue": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "keyName"
+        ]
+      },
+      "WebhookConfig": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "eventName": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "creationTime": {
+            "type": "string",
+            "description": "creation timestamp",
+            "example": "2021-04-27T12:01:13.000Z"
+          },
+          "httpMethod": {
+            "$ref": "#/components/schemas/HttpMethod"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/Auth"
+          },
+          "filter": {
+            "$ref": "#/components/schemas/Filter"
+          }
+        },
+        "required": [
+          "eventName",
+          "url",
+          "httpMethod",
+          "auth"
+        ],
+        "example": {
+          "eventName": "CustomerRequest_Created",
+          "url": "https://my-partner-service.api.com",
+          "httpMethod": "POST",
+          "enabled": true,
+          "auth": {
+            "authType": "BASIC",
+            "basicAuthConfig": {
+              "username": "secretUsername",
+              "password": "secret7825@!"
+            }
+          },
+          "filter": {
+            "keyToFilter": "customer_request.productId",
+            "supportedValues": [
+              "2324245",
+              "5253642"
+            ]
+          }
+        }
+      },
+      "EventConfigResp": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/EventConfigEntry"
+        },
+        "example": [
+          {
+            "eventName": "customer_request_created",
+            "eventLabel": "Customer Request Created"
+          }
+        ]
+      },
+      "EventConfigEntry": {
+        "type": "object",
+        "properties": {
+          "eventName": {
+            "type": "string",
+            "description": "Name for identifying the event. Unique."
+          },
+          "eventLabel": {
+            "type": "string",
+            "description": "Either a user friendly label, or the eventName itself."
+          }
+        }
+      },
+      "FailureLastKey": {
+        "type": "object",
+        "description": "Key of last loaded item previously returned via paginated response",
+        "properties": {
+          "orgId": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "creationTimestamp": {
+            "type": "string"
+          }
+        }
+      },
+      "FailuresResp": {
+        "type": "object",
+        "description": "Response for get errors request.",
+        "properties": {
+          "lastLoadedKey": {
+            "$ref": "#/components/schemas/FailureLastKey"
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FailureEntry"
+            }
+          }
+        },
+        "required": [
+          "failures"
+        ],
+        "example": {
+          "failures": [
+            {
+              "eventName": "customer_request_created,",
+              "eventId": "12e8726b-071b-4c42-9221-8caae0d14863",
+              "errorCode": "502",
+              "webhookConfigId": "kreauMGUr55nDoVviaaBLG",
+              "creationTimestamp": "2021-04-13T17:43:40.576Z",
+              "orgId": "728",
+              "errorPayload": "Failed to store data",
+              "url": "https://63b2de56be27.ngrok.io",
+              "payload": {
+                "metadata": {
+                  "action": "created",
+                  "creation_timestamp": "2021-04-13T17:43:40.576Z",
+                  "event_name": "customer_request_created",
+                  "object": "customer_request",
+                  "organization_id": "728",
+                  "version": "1.0.0"
+                },
+                "customer_request": {
+                  "id": "TEST",
+                  "payment_details": {
+                    "account_owner_name": "Test",
+                    "bank_name": "Test Bank",
+                    "bic": "BIC",
+                    "iban": "IBAN",
+                    "payment_method": "sepa"
+                  },
+                  "request_items": [
+                    {
+                      "id": "TEST",
+                      "otherProp1": "test1",
+                      "otherProp2": "test2"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "eventName": "customer_request_created",
+              "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
+              "errorCode": "404",
+              "webhookConfigId": "xrExypA8HBWEtK9AXfU2de",
+              "creationTimestamp": "2021-04-13T17:43:40.576Z",
+              "orgId": "728",
+              "errorPayload": "Tunnel ef68038e3af9.ngrok.io not found",
+              "url": "https://ef68038e3af9.ngrok.io",
+              "payload": {
+                "metadata": {
+                  "action": "created",
+                  "creation_timestamp": "2021-04-13T17:43:40.576Z",
+                  "event_name": "customer_request_created",
+                  "object": "customer_request",
+                  "organization_id": "728",
+                  "version": "1.0.0"
+                },
+                "customer_request": {
+                  "id": "TEST",
+                  "payment_details": {
+                    "account_owner_name": "Test",
+                    "bank_name": "Test Bank",
+                    "bic": "BIC",
+                    "iban": "IBAN",
+                    "payment_method": "sepa"
+                  },
+                  "request_items": [
+                    {
+                      "id": "TEST",
+                      "otherProp1": "test1",
+                      "otherProp2": true
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "lastLoadedKey": {
+            "orgId": 6122,
+            "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
+            "creationTimestamp": "2022:01:01T00:00:00.000Z"
+          }
+        }
+      },
+      "FailureEntry": {
+        "type": "object",
+        "description": "Failures stored in the database.",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "The ID of the given organization"
+          },
+          "eventId": {
+            "type": "string",
+            "description": "ID of event. Unique"
+          },
+          "eventName": {
+            "type": "string",
+            "description": "Name for identifying the event. Unique."
+          },
+          "creationTimestamp": {
+            "type": "string",
+            "description": "Time of event creation"
+          },
+          "payload": {
+            "type": "object",
+            "description": "Contains the metadata about the configured event"
+          },
+          "webhookConfigId": {
+            "type": "string",
+            "description": "The ID of the webhook configuration"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "errorPayload": {
+            "type": "string",
+            "description": "The error message encountered during webhook delivery"
+          },
+          "url": {
+            "type": "string",
+            "description": "destination url of configured webhook"
+          }
+        }
+      },
+      "ErrorResp": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://webhooks.sls.epilot.io"
+    },
+    {
+      "url": "https://webhooks.sls.epilot.io"
+    }
+  ]
+}
