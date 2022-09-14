@@ -1261,6 +1261,18 @@ declare namespace Components {
             PaymentMethod[];
             line_items?: /* Tracks a set of product prices, quantities, (discounts) and taxes. */ PriceItems;
             /**
+             * The product entities referenced from within `line_items`
+             */
+            products?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * The price entities referenced from within `line_items`
+             */
+            prices?: {
+                $relation?: EntityRelation[];
+            };
+            /**
              * Total of all items before (discounts or) taxes are applied.
              */
             amount_subtotal?: number;
@@ -1294,6 +1306,7 @@ declare namespace Components {
          * Order Entity Payload
          */
         export interface OrderPayload {
+            [name: string]: any;
             status?: /**
              *
              * | status      | description |
@@ -1676,6 +1689,10 @@ declare namespace Components {
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
             type?: "one_time" | "recurring";
+            /**
+             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
+             */
+            on_request_approved?: boolean;
         }
         /**
          * Represents a price input to the pricing library.
