@@ -1183,6 +1183,30 @@
           "line_items": {
             "$ref": "#/components/schemas/PriceItems"
           },
+          "products": {
+            "type": "object",
+            "description": "The product entities referenced from within `line_items`",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "prices": {
+            "type": "object",
+            "description": "The price entities referenced from within `line_items`",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
           "amount_subtotal": {
             "readOnly": true,
             "type": "integer",
@@ -2112,6 +2136,7 @@
       "OrderPayload": {
         "type": "object",
         "description": "Order Entity Payload",
+        "additionalProperties": true,
         "properties": {
           "status": {
             "$ref": "#/components/schemas/OrderStatus"
@@ -2307,6 +2332,10 @@
                 }
               ]
             }
+          },
+          "on_request_approved": {
+            "type": "boolean",
+            "description": "This flag is true when a price On Request has the unit amout approved"
           }
         }
       },

@@ -252,6 +252,10 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            /**
+             * This flag is true when a price On Request has the unit amout approved
+             */
+            on_request_approved?: boolean;
         }
         /**
          * Represents a valid base price item from a client.
@@ -735,6 +739,10 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            /**
+             * This flag is true when a price On Request has the unit amout approved
+             */
+            on_request_approved?: boolean;
             /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
@@ -1261,6 +1269,18 @@ declare namespace Components {
             PaymentMethod[];
             line_items?: /* Tracks a set of product prices, quantities, (discounts) and taxes. */ PriceItems;
             /**
+             * The product entities referenced from within `line_items`
+             */
+            products?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * The price entities referenced from within `line_items`
+             */
+            prices?: {
+                $relation?: EntityRelation[];
+            };
+            /**
              * Total of all items before (discounts or) taxes are applied.
              */
             amount_subtotal?: number;
@@ -1294,6 +1314,7 @@ declare namespace Components {
          * Order Entity Payload
          */
         export interface OrderPayload {
+            [name: string]: any;
             status?: /**
              *
              * | status      | description |
@@ -1672,6 +1693,10 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            /**
+             * This flag is true when a price On Request has the unit amout approved
+             */
+            on_request_approved?: boolean;
             /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
