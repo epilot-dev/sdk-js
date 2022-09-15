@@ -1,6 +1,6 @@
 {
   "name": "@epilot/permissions-client",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Client library for epilot Permissions API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
