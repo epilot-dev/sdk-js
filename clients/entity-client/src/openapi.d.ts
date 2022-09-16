@@ -993,9 +993,15 @@ declare namespace Components {
         }
         export interface EntityDefaultCreate {
             view_type?: "default";
+            searchParams?: {
+                [name: string]: string;
+            };
         }
         export interface EntityDefaultEdit {
             view_type?: "default";
+            searchParams?: {
+                [name: string]: string;
+            };
         }
         export interface EntityDefaultOverview {
             view_type?: "default";
@@ -1570,7 +1576,7 @@ declare namespace Components {
             from?: number;
             size?: number;
             /**
-             * When true, enables entity hydration to resolve nested $relation references in-place.
+             * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
              */
             hydrate?: boolean;
             /**
@@ -4038,6 +4044,12 @@ export interface OperationMethods {
    *       { "entity_id": "456", "_tags": ["primary"] },
    *       { "entity_id": "789", "_tags": ["secondary"] },
    *     ]
+   *   },
+   *   "addresses": {
+   *     "$relation_ref": [
+   *       { "entity_id": "123", "_tags": ["primary"], "path": "address.0" },
+   *       { "entity_id": "234", "_tags": ["secondary"], "path": "address.0" },
+   *     ]
    *   }
    * }
    * ```
@@ -4059,6 +4071,20 @@ export interface OperationMethods {
    *       "$relation": { "entity_id": "789", "_tags": ["secondary"] },
    *       "_id": "789",
    *       "name": "child 2",
+   *       "_tags": ["child"]
+   *     }
+   *   ],
+   *   "addresses": [
+   *     {
+   *       "$relation_ref": { "entity_id": "123", "_tags": ["primary"], "path": "address.0" },
+   *       "_id": "123",
+   *       "address": "address 1",
+   *       "_tags": ["child"]
+   *     },
+   *     {
+   *       "$relation_ref": { "entity_id": "234", "_tags": ["secondary"], "path": "address.0" },
+   *       "_id": "234",
+   *       "address": "address 2",
    *       "_tags": ["child"]
    *     }
    *   ]
@@ -4145,6 +4171,12 @@ export interface OperationMethods {
    *       { "entity_id": "456", "_tags": ["primary"] },
    *       { "entity_id": "789", "_tags": ["secondary"] },
    *     ]
+   *   },
+   *   "addresses": {
+   *     "$relation_ref": [
+   *       { "entity_id": "123", "_tags": ["primary"], "path": "address.0" },
+   *       { "entity_id": "234", "_tags": ["secondary"], "path": "address.0" },
+   *     ]
    *   }
    * }
    * ```
@@ -4166,6 +4198,20 @@ export interface OperationMethods {
    *       "$relation": { "entity_id": "789", "_tags": ["secondary"] },
    *       "_id": "789",
    *       "name": "child 2",
+   *       "_tags": ["child"]
+   *     }
+   *   ],
+   *   "addresses": [
+   *     {
+   *       "$relation_ref": { "entity_id": "123", "_tags": ["primary"], "path": "address.0" },
+   *       "_id": "123",
+   *       "address": "address 1",
+   *       "_tags": ["child"]
+   *     },
+   *     {
+   *       "$relation_ref": { "entity_id": "234", "_tags": ["secondary"], "path": "address.0" },
+   *       "_id": "234",
+   *       "address": "address 2",
    *       "_tags": ["child"]
    *     }
    *   ]
@@ -4428,6 +4474,12 @@ export interface PathsDictionary {
      *       { "entity_id": "456", "_tags": ["primary"] },
      *       { "entity_id": "789", "_tags": ["secondary"] },
      *     ]
+     *   },
+     *   "addresses": {
+     *     "$relation_ref": [
+     *       { "entity_id": "123", "_tags": ["primary"], "path": "address.0" },
+     *       { "entity_id": "234", "_tags": ["secondary"], "path": "address.0" },
+     *     ]
      *   }
      * }
      * ```
@@ -4449,6 +4501,20 @@ export interface PathsDictionary {
      *       "$relation": { "entity_id": "789", "_tags": ["secondary"] },
      *       "_id": "789",
      *       "name": "child 2",
+     *       "_tags": ["child"]
+     *     }
+     *   ],
+     *   "addresses": [
+     *     {
+     *       "$relation_ref": { "entity_id": "123", "_tags": ["primary"], "path": "address.0" },
+     *       "_id": "123",
+     *       "address": "address 1",
+     *       "_tags": ["child"]
+     *     },
+     *     {
+     *       "$relation_ref": { "entity_id": "234", "_tags": ["secondary"], "path": "address.0" },
+     *       "_id": "234",
+     *       "address": "address 2",
      *       "_tags": ["child"]
      *     }
      *   ]
@@ -4541,6 +4607,12 @@ export interface PathsDictionary {
      *       { "entity_id": "456", "_tags": ["primary"] },
      *       { "entity_id": "789", "_tags": ["secondary"] },
      *     ]
+     *   },
+     *   "addresses": {
+     *     "$relation_ref": [
+     *       { "entity_id": "123", "_tags": ["primary"], "path": "address.0" },
+     *       { "entity_id": "234", "_tags": ["secondary"], "path": "address.0" },
+     *     ]
      *   }
      * }
      * ```
@@ -4562,6 +4634,20 @@ export interface PathsDictionary {
      *       "$relation": { "entity_id": "789", "_tags": ["secondary"] },
      *       "_id": "789",
      *       "name": "child 2",
+     *       "_tags": ["child"]
+     *     }
+     *   ],
+     *   "addresses": [
+     *     {
+     *       "$relation_ref": { "entity_id": "123", "_tags": ["primary"], "path": "address.0" },
+     *       "_id": "123",
+     *       "address": "address 1",
+     *       "_tags": ["child"]
+     *     },
+     *     {
+     *       "$relation_ref": { "entity_id": "234", "_tags": ["secondary"], "path": "address.0" },
+     *       "_id": "234",
+     *       "address": "address 2",
      *       "_tags": ["child"]
      *     }
      *   ]

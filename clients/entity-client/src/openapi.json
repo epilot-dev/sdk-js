@@ -274,7 +274,7 @@
       "post": {
         "operationId": "searchEntities",
         "summary": "searchEntities",
-        "description": "Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.\n\nPassing comma-separated `x-epilot-org-id` is supported for cross-org entity search.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
+        "description": "Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.\n\nPassing comma-separated `x-epilot-org-id` is supported for cross-org entity search.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  },\n  \"addresses\": {\n    \"$relation_ref\": [\n      { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ],\n  \"addresses\": [\n    {\n      \"$relation_ref\": { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      \"_id\": \"123\",\n      \"address\": \"address 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation_ref\": { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n      \"_id\": \"234\",\n      \"address\": \"address 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
         "tags": [
           "Entities"
         ],
@@ -489,7 +489,7 @@
       "get": {
         "operationId": "getEntity",
         "summary": "getEntity",
-        "description": "Gets Entity and relations by id.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
+        "description": "Gets Entity and relations by id.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  },\n  \"addresses\": {\n    \"$relation_ref\": [\n      { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ],\n  \"addresses\": [\n    {\n      \"$relation_ref\": { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      \"_id\": \"123\",\n      \"address\": \"address 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation_ref\": { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n      \"_id\": \"234\",\n      \"address\": \"address 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
         "tags": [
           "Entities"
         ],
@@ -515,7 +515,7 @@
           {
             "in": "query",
             "name": "hydrate",
-            "description": "When true, enables entity hydration to resolve nested $relation references in-place.",
+            "description": "When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.",
             "schema": {
               "default": false,
               "type": "boolean"
@@ -2921,6 +2921,12 @@
             "enum": [
               "default"
             ]
+          },
+          "searchParams": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
           }
         }
       },
@@ -2932,6 +2938,12 @@
             "enum": [
               "default"
             ]
+          },
+          "searchParams": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
           }
         }
       },
@@ -3185,7 +3197,7 @@
           },
           "hydrate": {
             "type": "boolean",
-            "description": "When true, enables entity hydration to resolve nested $relation references in-place.",
+            "description": "When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.",
             "default": false
           },
           "fields": {
