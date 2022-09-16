@@ -26,9 +26,13 @@ paths:
        - Query
       parameters:
         - in: query
-          name: execution_id
+          name: cache_expiration
           schema:
-            $ref: "#/components/schemas/ExecutionId"
+            $ref: "#/components/schemas/CacheExpiration"
+        - in: query
+          name: no_cache
+          schema:
+            $ref: "#/components/schemas/NoCache"
       requestBody:
         required: false
         content:
@@ -119,8 +123,8 @@ paths:
                     - dataset: entities_timemachine
   '/v1/query/credentials':
     get:
-      operationId: getCredentials
-      summary: getCredentials
+      operationId: getTemporaryCredentials
+      summary: getTemporaryCredentials
       description: Get temporary crendtials for datalake access
       tags:
        - Credentials
@@ -153,6 +157,105 @@ paths:
                   expires_at:
                     type: string
                     format: date-time
+  '/v1/query/credentials:generate':
+    post:
+      operationId: generateCredentials
+      summary: generateCredentials
+      description: |
+        Generate credentials for the epilot datalake for connecting other BI tools with Redshift
+      tags:
+       - Credentials
+      parameters:
+        - in: query
+          name: execution_id
+          schema:
+            $ref: "#/components/schemas/ExecutionId"
+      responses:
+        200:
+          description: Permanent credentials and endpoints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    example: IAMR:datalake_role_123
+                  password:
+                    type: string
+                    example: '***'
+                  endpoints:
+                    type: object
+                    properties:
+                      endpoint:
+                        type: string
+                        example: 'default.893804459037.eu-central-1.redshift-serverless.amazonaws.com:5439/dev'
+                      jdbc_url:
+                        type: string
+                        example: 'jdbc:redshift://default.893804459037.eu-central-1.redshift-serverless.amazonaws.com:5439/dev'
+                      odbc_url:
+                        type: string
+                        example: 'Driver={Amazon Redshift (x64)}; Server=default.893804459037.eu-central-1.redshift-serverless.amazonaws.com; Database=dev'
+                  expires_at:
+                    type: string
+                    format: date-time
+  '/v1/query/credentials:list':
+    get:
+      operationId: listCredentials
+      summary: listCredentials
+      description: List all the credentials for the organization here
+      tags:
+       - Credentials
+      parameters:
+        - in: query
+          name: execution_id
+          schema:
+            $ref: "#/components/schemas/ExecutionId"
+      responses:
+        200:
+          description: Temporary credentials and endpoints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user_id:
+                          type: string
+
+  '/v1/query/credentials:revoke':
+    post:
+      operationId: revokeredentials
+      summary: revokeredentials
+      description: |
+        Revoke credentials for the epilot datalake for connecting other BI tools with Redshift
+      tags:
+       - Credentials
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            $ref: "#/components/schemas/UserId"
+        - in: query
+          name: execution_id
+          schema:
+            $ref: "#/components/schemas/ExecutionId"
+      responses:
+        200:
+          description: Permanent credentials and endpoints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+
 
 components:
   schemas:
@@ -163,6 +266,17 @@ components:
       description: Execution Id for the query
       type: string
       format: uuid
+    NoCache:
+      type: boolean
+      example: false
+    CacheExpiration:
+      description: Cache Expiration timestamp
+      type: string
+      format: timestamp
+      example: 1663308898789
+    UserId:
+      description: Execution Id for the query
+      type: string
     Dataset:
       type: object
       properties:
@@ -205,8 +319,6 @@ components:
     QueryResults:
       type: object
       properties:
-        execution_id:
-          $ref: '#/components/schemas/ExecutionId'
         status:
           type: string
           example: FINISHED
