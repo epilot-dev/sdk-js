@@ -2922,10 +2922,21 @@
               "default"
             ]
           },
-          "searchParams": {
+          "search_params": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
+            }
+          },
+          "table_menu_options": {
+            "type": "object",
+            "properties": {
+              "icon": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
             }
           }
         }
@@ -2939,10 +2950,21 @@
               "default"
             ]
           },
-          "searchParams": {
+          "search_params": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
+            }
+          },
+          "table_menu_options": {
+            "type": "object",
+            "properties": {
+              "icon": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
             }
           }
         }
