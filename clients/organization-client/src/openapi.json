@@ -7,6 +7,10 @@
   },
   "tags": [
     {
+      "name": "Internal",
+      "description": "Internal access only"
+    },
+    {
       "name": "Organization",
       "description": "Organization info"
     },
@@ -21,6 +25,152 @@
     }
   ],
   "paths": {
+    "/v2/internal/organizations/data-points": {
+      "get": {
+        "operationId": "getDataPoints",
+        "summary": "getDataPoints",
+        "description": "Get data points of all organizations:\n- customer data points\n",
+        "tags": [
+          "Organizations",
+          "Internal"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataPointsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v2/internal/organizations/tags": {
+      "get": {
+        "operationId": "getOrganizationTags",
+        "summary": "getOrganizationTags",
+        "description": "Get tags of organization",
+        "tags": [
+          "Organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "real org"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v2/internal/organizations": {
+      "get": {
+        "operationId": "getOrganizations",
+        "summary": "getOrganizations",
+        "description": "Get all organizations",
+        "tags": [
+          "Organizations",
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "description": "The maximum number of organizations to get",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": 25
+          },
+          {
+            "name": "start_key",
+            "description": "The primary key of the first item that this operation will evaluate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "List organizations",
+                  "type": "object",
+                  "properties": {
+                    "organizations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Organization"
+                      }
+                    },
+                    "last_evaluated_key": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createOrganization",
+        "summary": "createOrganization",
+        "tags": [
+          "Organization",
+          "Internal"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Organization"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v2/organization/{org_id}": {
       "get": {
         "operationId": "getOrganization",
@@ -358,13 +508,90 @@
         "example": {
           "enabled": true
         }
+      },
+      "CreateOrganizationRequest": {
+        "type": "object",
+        "properties": {
+          "organization_detail": {
+            "description": "Organization detail",
+            "type": "object",
+            "required": [
+              "name",
+              "email_address",
+              "type"
+            ],
+            "properties": {
+              "name": {
+                "description": "Organization name",
+                "type": "string",
+                "example": "epilot"
+              },
+              "email_address": {
+                "description": "Organization email address",
+                "type": "string",
+                "example": "epilot@epilot.cloud"
+              },
+              "type": {
+                "description": "type",
+                "type": "string",
+                "example": "Vendor"
+              },
+              "pricing_tier": {
+                "description": "Pricing tier",
+                "type": "string",
+                "example": "professional"
+              }
+            }
+          },
+          "owner_user": {
+            "description": "Owner user will receive invitation",
+            "type": "object",
+            "required": [
+              "full_name",
+              "email_address"
+            ],
+            "properties": {
+              "full_name": {
+                "type": "string",
+                "example": "Ny Huynh"
+              },
+              "email_address": {
+                "type": "string",
+                "example": "ny.huynhthi@axonactive.com"
+              }
+            }
+          }
+        }
+      },
+      "DataPointsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DataPoint"
+        }
+      },
+      "DataPoint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Organization id",
+            "type": "number",
+            "example": 206801
+          },
+          "max_customer": {
+            "description": "Max customer data points last month",
+            "type": "number",
+            "example": 10
+          },
+          "actual_customer": {
+            "description": "Actual customer data points",
+            "type": "number",
+            "example": 10
+          }
+        }
       }
     }
   },
   "servers": [
-    {
-      "url": "https://organization-v2.sls.epilot.io"
-    },
     {
       "url": "https://organization-v2.sls.epilot.io"
     }

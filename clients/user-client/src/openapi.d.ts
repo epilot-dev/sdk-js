@@ -9,6 +9,33 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface DataPoint {
+            /**
+             * Organization id
+             * example:
+             * 206801
+             */
+            id?: number;
+            /**
+             * Number of current user
+             * example:
+             * 10
+             */
+            actual_users?: number;
+            /**
+             * Max user last month
+             * example:
+             * 10
+             */
+            max_users_last_month?: number;
+            /**
+             * Max non-billable user last month
+             * example:
+             * 10
+             */
+            non_billable_users_last_month?: number;
+        }
+        export type DataPointsResponse = DataPoint[];
         export type InviteToken = string;
         export type Limit = number;
         export interface LoginParameters {
@@ -63,7 +90,7 @@ declare namespace Components {
         }
         export type Offset = number;
         export interface Organization {
-            id?: string;
+            id?: OrganizationId;
             type?: "Vendor" | "Partner";
             /**
              * example:
@@ -154,55 +181,16 @@ declare namespace Components {
         export type PartnerInvitationToken = string;
         export type Query = string;
         export interface SignupUserPayload {
-            organization_detail?: {
-                [name: string]: any;
-                type: "Vendor" | "Partner";
-                /**
-                 * example:
-                 * Epilot
-                 */
-                name: string;
-                /**
-                 * example:
-                 * professional
-                 */
-                pricing_tier: string;
-                email: string;
-                phone?: string;
-                website?: string;
-                /**
-                 * example:
-                 * false
-                 */
-                is_privacy_policy_checked?: boolean | null;
-                /**
-                 * example:
-                 * false
-                 */
-                is_terms_and_conditions_checked?: boolean | null;
-            };
-            user_detail?: {
-                /**
-                 * example:
-                 * Example user
-                 */
-                full_name: string;
-                email: string; // email
-                /**
-                 * User's password
-                 * example:
-                 * AKjhdakjsdh@!34
-                 */
-                password: string;
-            };
+            organization_detail?: OrganizationDetail;
+            user_detail?: UserDetail;
             /**
              * Language for user invitation email
              */
             language?: "en" | "de";
         }
         export interface User {
-            id: string;
-            organization_id: string;
+            id: UserId;
+            organization_id: OrganizationId;
             email: string; // email
             /**
              * example:
@@ -297,8 +285,8 @@ declare namespace Components {
             roles?: string[];
         }
         export interface UserV2 {
-            id?: string;
-            organization_id?: string;
+            id?: UserId;
+            organization_id?: OrganizationId;
             /**
              * example:
              * 2022-02-08T04:44:32.246Z
@@ -330,14 +318,24 @@ declare namespace Components {
             token?: string;
             /**
              * example:
-             * <p>Thanks</p>
+             * false
              */
-            signature?: string;
+            mfa_enabled?: boolean;
             /**
              * example:
              * true
              */
-            is_signature_enabled?: boolean;
+            phone_verified?: boolean;
+            /**
+             * example:
+             * <p>Thanks</p>
+             */
+            signature?: string | null;
+            /**
+             * example:
+             * true
+             */
+            is_signature_enabled?: boolean | null;
             /**
              * example:
              * {
@@ -378,25 +376,12 @@ declare namespace Components {
 declare namespace Paths {
     namespace ActivateUser {
         namespace Parameters {
-            export type Token = string;
+            export type Token = Components.Schemas.InviteToken;
         }
         export interface QueryParameters {
             token: Parameters.Token;
         }
-        export interface RequestBody {
-            /**
-             * User's display name (default: email address)
-             * example:
-             * Example User
-             */
-            display_name?: string;
-            /**
-             * User's password
-             * example:
-             * AKjhdakjsdh@!34
-             */
-            password?: string;
-        }
+        export type RequestBody = Components.Schemas.UserActivationPayload;
         namespace Responses {
             export interface $200 {
             }
@@ -406,554 +391,119 @@ declare namespace Paths {
     }
     namespace DeleteUserV2 {
         namespace Parameters {
-            export type Id = string;
+            export type Id = Components.Schemas.UserId;
         }
         export interface PathParameters {
             id: Parameters.Id;
         }
         namespace Responses {
-            export interface $200 {
-                id: string;
-                organization_id: string;
-                email: string; // email
-                /**
-                 * example:
-                 * Example user
-                 */
-                display_name?: string;
-                /**
-                 * example:
-                 * Example user
-                 */
-                name: string;
-                /**
-                 * example:
-                 * de
-                 */
-                preferred_language: string;
-                /**
-                 * example:
-                 * <p>Thanks</p>
-                 */
-                signature?: string;
-                /**
-                 * Deprecated! Please use Permissions API instead
-                 */
-                roles: string[];
-                image_uri?: {
-                    [name: string]: any;
-                    /**
-                     * example:
-                     * https://account-profile-images.epilot.cloud/1/avatar.png
-                     */
-                    original?: string; // uri
-                    /**
-                     * example:
-                     * https://account-profile-images.epilot.cloud/1/avatar_32x32.png
-                     */
-                    thumbnail_32?: string; // uri
-                };
-                properties: {
-                    /**
-                     * example:
-                     * profileImageName
-                     */
-                    name: string;
-                    /**
-                     * example:
-                     * avatar.png
-                     */
-                    value: string;
-                }[];
+            export type $200 = Components.Schemas.User;
+        }
+    }
+    namespace GetDataPoints {
+        namespace Responses {
+            export type $200 = Components.Schemas.DataPointsResponse;
+            export interface $403 {
             }
         }
     }
     namespace GetMe {
         namespace Responses {
-            export interface $200 {
-                id: string;
-                organization_id: string;
-                email: string; // email
-                /**
-                 * example:
-                 * Example user
-                 */
-                display_name?: string;
-                /**
-                 * example:
-                 * Example user
-                 */
-                name: string;
-                /**
-                 * example:
-                 * de
-                 */
-                preferred_language: string;
-                /**
-                 * example:
-                 * <p>Thanks</p>
-                 */
-                signature?: string;
-                /**
-                 * Deprecated! Please use Permissions API instead
-                 */
-                roles: string[];
-                image_uri?: {
-                    [name: string]: any;
-                    /**
-                     * example:
-                     * https://account-profile-images.epilot.cloud/1/avatar.png
-                     */
-                    original?: string; // uri
-                    /**
-                     * example:
-                     * https://account-profile-images.epilot.cloud/1/avatar_32x32.png
-                     */
-                    thumbnail_32?: string; // uri
-                };
-                properties: {
-                    /**
-                     * example:
-                     * profileImageName
-                     */
-                    name: string;
-                    /**
-                     * example:
-                     * avatar.png
-                     */
-                    value: string;
-                }[];
-            }
+            export type $200 = Components.Schemas.User;
         }
     }
     namespace GetMeV2 {
         namespace Responses {
-            export interface $200 {
-                id?: string;
-                organization_id?: string;
-                /**
-                 * example:
-                 * 2022-02-08T04:44:32.246Z
-                 */
-                created_at?: string;
-                /**
-                 * User's display name (default: email address)
-                 * example:
-                 * Example User
-                 */
-                display_name?: string;
-                status?: "Active" | "Pending" | "Deactivated" | "Deleted";
-                email?: string; // email
-                draft_email?: string | null; // email
-                /**
-                 * example:
-                 * 1234567890
-                 */
-                phone?: string | null;
-                /**
-                 * example:
-                 * de
-                 */
-                preferred_language?: string;
-                /**
-                 * example:
-                 * 65dc527f-cb2d-4158-8f2e-8978dbceb599
-                 */
-                token?: string;
-                /**
-                 * example:
-                 * <p>Thanks</p>
-                 */
-                signature?: string;
-                /**
-                 * example:
-                 * true
-                 */
-                is_signature_enabled?: boolean;
-                /**
-                 * example:
-                 * {
-                 *   "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
-                 *   "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
-                 * }
-                 */
-                image_uri?: {
-                    [name: string]: any;
-                    original?: string; // uri
-                    thumbnail_32?: string; // uri
-                };
-                properties?: {
-                    /**
-                     * example:
-                     * profileImageName
-                     */
-                    name: string;
-                    /**
-                     * example:
-                     * avatar.png
-                     */
-                    value: string;
-                }[];
-            }
+            export type $200 = Components.Schemas.UserV2;
         }
     }
     namespace GetUser {
         namespace Parameters {
-            export type Id = string;
+            export type Id = Components.Schemas.UserId;
         }
         export interface PathParameters {
             id: Parameters.Id;
         }
         namespace Responses {
-            export interface $200 {
-                id: string;
-                organization_id: string;
-                email: string; // email
-                /**
-                 * example:
-                 * Example user
-                 */
-                display_name?: string;
-                /**
-                 * example:
-                 * Example user
-                 */
-                name: string;
-                /**
-                 * example:
-                 * de
-                 */
-                preferred_language: string;
-                /**
-                 * example:
-                 * <p>Thanks</p>
-                 */
-                signature?: string;
-                /**
-                 * Deprecated! Please use Permissions API instead
-                 */
-                roles: string[];
-                image_uri?: {
-                    [name: string]: any;
-                    /**
-                     * example:
-                     * https://account-profile-images.epilot.cloud/1/avatar.png
-                     */
-                    original?: string; // uri
-                    /**
-                     * example:
-                     * https://account-profile-images.epilot.cloud/1/avatar_32x32.png
-                     */
-                    thumbnail_32?: string; // uri
-                };
-                properties: {
-                    /**
-                     * example:
-                     * profileImageName
-                     */
-                    name: string;
-                    /**
-                     * example:
-                     * avatar.png
-                     */
-                    value: string;
-                }[];
-            }
+            export type $200 = Components.Schemas.User;
         }
     }
     namespace GetUserLoginParameters {
         namespace Parameters {
-            export type Username = string;
+            export type Username = Components.Schemas.Username;
         }
         export interface PathParameters {
             username: Parameters.Username;
         }
         namespace Responses {
             export interface $200 {
-                login_parameters?: {
-                    /**
-                     * example:
-                     * 123
-                     */
-                    organization_id?: string;
-                    /**
-                     * example:
-                     * epilot GmbH
-                     */
-                    organization_name?: string;
-                    /**
-                     * example:
-                     * Vendor
-                     */
-                    organization_type?: string;
-                    /**
-                     * example:
-                     * eu-central-1
-                     */
-                    cognito_region?: string;
-                    /**
-                     * example:
-                     * eu-central-1:d24af723-7b40-4c3d-be57-d0a732a59a5d
-                     */
-                    cognito_identity_pool_id?: string;
-                    /**
-                     * example:
-                     * eu-central-sample
-                     */
-                    cognito_user_pool_id?: string;
-                    /**
-                     * example:
-                     * asbkh213ehkquwhdi
-                     */
-                    cognito_user_pool_client_id?: string;
-                    /**
-                     * example:
-                     * epilot-org-123
-                     */
-                    cognito_oauth_domain?: string;
-                    /**
-                     * example:
-                     * [
-                     *   "openid"
-                     * ]
-                     */
-                    cognito_oauth_scopes?: string[];
-                    oauth_response_type?: "code" | "token";
-                }[];
+                login_parameters?: Components.Schemas.LoginParameters[];
             }
         }
     }
     namespace GetUserLoginParametersV2 {
         namespace Parameters {
-            export type Username = string;
+            export type Username = Components.Schemas.Username;
         }
         export interface PathParameters {
             username: Parameters.Username;
         }
         namespace Responses {
             export interface $200 {
-                login_parameters?: {
-                    /**
-                     * example:
-                     * 123
-                     */
-                    organization_id?: string;
-                    /**
-                     * example:
-                     * epilot GmbH
-                     */
-                    organization_name?: string;
-                    /**
-                     * example:
-                     * Vendor
-                     */
-                    organization_type?: string;
-                    /**
-                     * example:
-                     * eu-central-1
-                     */
-                    cognito_region?: string;
-                    /**
-                     * example:
-                     * eu-central-1:d24af723-7b40-4c3d-be57-d0a732a59a5d
-                     */
-                    cognito_identity_pool_id?: string;
-                    /**
-                     * example:
-                     * eu-central-sample
-                     */
-                    cognito_user_pool_id?: string;
-                    /**
-                     * example:
-                     * asbkh213ehkquwhdi
-                     */
-                    cognito_user_pool_client_id?: string;
-                    /**
-                     * example:
-                     * epilot-org-123
-                     */
-                    cognito_oauth_domain?: string;
-                    /**
-                     * example:
-                     * [
-                     *   "openid"
-                     * ]
-                     */
-                    cognito_oauth_scopes?: string[];
-                    oauth_response_type?: "code" | "token";
-                }[];
+                login_parameters?: Components.Schemas.LoginParameters[];
+            }
+        }
+    }
+    namespace GetUserTags {
+        namespace Responses {
+            export type $200 = string[];
+            export interface $403 {
             }
         }
     }
     namespace GetUserV2 {
         namespace Parameters {
-            export type Id = string;
+            export type Id = Components.Schemas.UserId;
         }
         export interface PathParameters {
             id: Parameters.Id;
         }
         namespace Responses {
-            export interface $200 {
-                id?: string;
-                organization_id?: string;
-                /**
-                 * example:
-                 * 2022-02-08T04:44:32.246Z
-                 */
-                created_at?: string;
-                /**
-                 * User's display name (default: email address)
-                 * example:
-                 * Example User
-                 */
-                display_name?: string;
-                status?: "Active" | "Pending" | "Deactivated" | "Deleted";
-                email?: string; // email
-                draft_email?: string | null; // email
-                /**
-                 * example:
-                 * 1234567890
-                 */
-                phone?: string | null;
-                /**
-                 * example:
-                 * de
-                 */
-                preferred_language?: string;
-                /**
-                 * example:
-                 * 65dc527f-cb2d-4158-8f2e-8978dbceb599
-                 */
-                token?: string;
-                /**
-                 * example:
-                 * <p>Thanks</p>
-                 */
-                signature?: string;
-                /**
-                 * example:
-                 * true
-                 */
-                is_signature_enabled?: boolean;
-                /**
-                 * example:
-                 * {
-                 *   "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
-                 *   "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
-                 * }
-                 */
-                image_uri?: {
-                    [name: string]: any;
-                    original?: string; // uri
-                    thumbnail_32?: string; // uri
-                };
-                properties?: {
-                    /**
-                     * example:
-                     * profileImageName
-                     */
-                    name: string;
-                    /**
-                     * example:
-                     * avatar.png
-                     */
-                    value: string;
-                }[];
+            export type $200 = Components.Schemas.UserV2;
+        }
+    }
+    namespace GetUsers {
+        namespace Parameters {
+            export type Limit = string;
+            export type StartKey = string;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            start_key?: Parameters.StartKey;
+        }
+        namespace Responses {
+            /**
+             * List users
+             */
+            export type $200 = Components.Schemas.User[];
+            export interface $403 {
             }
         }
     }
     namespace InviteUser {
-        export interface RequestBody {
-            /**
-             * Email address of the address
-             * example:
-             * test@example.com
-             */
-            email?: string;
-            /**
-             * Language for user invitation email
-             */
-            language?: "en" | "de";
-            roles?: string[];
-        }
+        export type RequestBody = Components.Schemas.UserInvitationPayload;
         namespace Responses {
-            export interface $201 {
-                id?: string;
-                organization_id?: string;
-                /**
-                 * example:
-                 * 2022-02-08T04:44:32.246Z
-                 */
-                created_at?: string;
-                /**
-                 * User's display name (default: email address)
-                 * example:
-                 * Example User
-                 */
-                display_name?: string;
-                status?: "Active" | "Pending" | "Deactivated" | "Deleted";
-                email?: string; // email
-                draft_email?: string | null; // email
-                /**
-                 * example:
-                 * 1234567890
-                 */
-                phone?: string | null;
-                /**
-                 * example:
-                 * de
-                 */
-                preferred_language?: string;
-                /**
-                 * example:
-                 * 65dc527f-cb2d-4158-8f2e-8978dbceb599
-                 */
-                token?: string;
-                /**
-                 * example:
-                 * <p>Thanks</p>
-                 */
-                signature?: string;
-                /**
-                 * example:
-                 * true
-                 */
-                is_signature_enabled?: boolean;
-                /**
-                 * example:
-                 * {
-                 *   "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
-                 *   "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
-                 * }
-                 */
-                image_uri?: {
-                    [name: string]: any;
-                    original?: string; // uri
-                    thumbnail_32?: string; // uri
-                };
-                properties?: {
-                    /**
-                     * example:
-                     * profileImageName
-                     */
-                    name: string;
-                    /**
-                     * example:
-                     * avatar.png
-                     */
-                    value: string;
-                }[];
-            }
+            export type $201 = Components.Schemas.UserV2;
             export interface $400 {
             }
         }
     }
     namespace ListUsers {
         namespace Parameters {
-            export type Limit = number;
-            export type Offset = number;
-            export type OrgIds = string[];
-            export type Query = string;
+            export type Limit = Components.Schemas.Limit;
+            export type Offset = Components.Schemas.Offset;
+            export type OrgIds = Components.Schemas.OrganizationId[];
+            export type Query = Components.Schemas.Query;
         }
         export interface QueryParameters {
             org_ids?: Parameters.OrgIds;
@@ -963,68 +513,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                users?: {
-                    id: string;
-                    organization_id: string;
-                    email: string; // email
-                    /**
-                     * example:
-                     * Example user
-                     */
-                    display_name?: string;
-                    /**
-                     * example:
-                     * Example user
-                     */
-                    name: string;
-                    /**
-                     * example:
-                     * de
-                     */
-                    preferred_language: string;
-                    /**
-                     * example:
-                     * <p>Thanks</p>
-                     */
-                    signature?: string;
-                    /**
-                     * Deprecated! Please use Permissions API instead
-                     */
-                    roles: string[];
-                    image_uri?: {
-                        [name: string]: any;
-                        /**
-                         * example:
-                         * https://account-profile-images.epilot.cloud/1/avatar.png
-                         */
-                        original?: string; // uri
-                        /**
-                         * example:
-                         * https://account-profile-images.epilot.cloud/1/avatar_32x32.png
-                         */
-                        thumbnail_32?: string; // uri
-                    };
-                    properties: {
-                        /**
-                         * example:
-                         * profileImageName
-                         */
-                        name: string;
-                        /**
-                         * example:
-                         * avatar.png
-                         */
-                        value: string;
-                    }[];
-                }[];
+                users?: Components.Schemas.User[];
             }
         }
     }
     namespace ListUsersV2 {
         namespace Parameters {
-            export type Limit = number;
-            export type Offset = number;
-            export type Query = string;
+            export type Limit = Components.Schemas.Limit;
+            export type Offset = Components.Schemas.Offset;
+            export type Query = Components.Schemas.Query;
         }
         export interface QueryParameters {
             query?: Parameters.Query;
@@ -1033,73 +530,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                results?: {
-                    id?: string;
-                    organization_id?: string;
-                    /**
-                     * example:
-                     * 2022-02-08T04:44:32.246Z
-                     */
-                    created_at?: string;
-                    /**
-                     * User's display name (default: email address)
-                     * example:
-                     * Example User
-                     */
-                    display_name?: string;
-                    status?: "Active" | "Pending" | "Deactivated" | "Deleted";
-                    email?: string; // email
-                    draft_email?: string | null; // email
-                    /**
-                     * example:
-                     * 1234567890
-                     */
-                    phone?: string | null;
-                    /**
-                     * example:
-                     * de
-                     */
-                    preferred_language?: string;
-                    /**
-                     * example:
-                     * 65dc527f-cb2d-4158-8f2e-8978dbceb599
-                     */
-                    token?: string;
-                    /**
-                     * example:
-                     * <p>Thanks</p>
-                     */
-                    signature?: string;
-                    /**
-                     * example:
-                     * true
-                     */
-                    is_signature_enabled?: boolean;
-                    /**
-                     * example:
-                     * {
-                     *   "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
-                     *   "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
-                     * }
-                     */
-                    image_uri?: {
-                        [name: string]: any;
-                        original?: string; // uri
-                        thumbnail_32?: string; // uri
-                    };
-                    properties?: {
-                        /**
-                         * example:
-                         * profileImageName
-                         */
-                        name: string;
-                        /**
-                         * example:
-                         * avatar.png
-                         */
-                        value: string;
-                    }[];
-                }[];
+                results?: Components.Schemas.UserV2[];
             }
         }
     }
@@ -1117,410 +548,46 @@ declare namespace Paths {
             language?: "en" | "de";
         }
         namespace Responses {
-            export interface $200 {
-                id?: string;
-                organization_id?: string;
-                /**
-                 * example:
-                 * 2022-02-08T04:44:32.246Z
-                 */
-                created_at?: string;
-                /**
-                 * User's display name (default: email address)
-                 * example:
-                 * Example User
-                 */
-                display_name?: string;
-                status?: "Active" | "Pending" | "Deactivated" | "Deleted";
-                email?: string; // email
-                draft_email?: string | null; // email
-                /**
-                 * example:
-                 * 1234567890
-                 */
-                phone?: string | null;
-                /**
-                 * example:
-                 * de
-                 */
-                preferred_language?: string;
-                /**
-                 * example:
-                 * 65dc527f-cb2d-4158-8f2e-8978dbceb599
-                 */
-                token?: string;
-                /**
-                 * example:
-                 * <p>Thanks</p>
-                 */
-                signature?: string;
-                /**
-                 * example:
-                 * true
-                 */
-                is_signature_enabled?: boolean;
-                /**
-                 * example:
-                 * {
-                 *   "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
-                 *   "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
-                 * }
-                 */
-                image_uri?: {
-                    [name: string]: any;
-                    original?: string; // uri
-                    thumbnail_32?: string; // uri
-                };
-                properties?: {
-                    /**
-                     * example:
-                     * profileImageName
-                     */
-                    name: string;
-                    /**
-                     * example:
-                     * avatar.png
-                     */
-                    value: string;
-                }[];
-            }
+            export type $200 = Components.Schemas.UserV2;
             export interface $400 {
             }
         }
     }
     namespace SignUpUser {
         namespace Parameters {
-            export type Token = string;
+            export type Token = Components.Schemas.PartnerInvitationToken;
         }
         export interface QueryParameters {
             token?: Parameters.Token;
         }
-        export interface RequestBody {
-            organization_detail?: {
-                [name: string]: any;
-                type: "Vendor" | "Partner";
-                /**
-                 * example:
-                 * Epilot
-                 */
-                name: string;
-                /**
-                 * example:
-                 * professional
-                 */
-                pricing_tier: string;
-                email: string;
-                phone?: string;
-                website?: string;
-                /**
-                 * example:
-                 * false
-                 */
-                is_privacy_policy_checked?: boolean | null;
-                /**
-                 * example:
-                 * false
-                 */
-                is_terms_and_conditions_checked?: boolean | null;
-            };
-            user_detail?: {
-                /**
-                 * example:
-                 * Example user
-                 */
-                full_name: string;
-                email: string; // email
-                /**
-                 * User's password
-                 * example:
-                 * AKjhdakjsdh@!34
-                 */
-                password: string;
-            };
-            /**
-             * Language for user invitation email
-             */
-            language?: "en" | "de";
-        }
+        export type RequestBody = Components.Schemas.SignupUserPayload;
         namespace Responses {
             export interface $200 {
-                user?: {
-                    id: string;
-                    organization_id: string;
-                    email: string; // email
-                    /**
-                     * example:
-                     * Example user
-                     */
-                    display_name?: string;
-                    /**
-                     * example:
-                     * Example user
-                     */
-                    name: string;
-                    /**
-                     * example:
-                     * de
-                     */
-                    preferred_language: string;
-                    /**
-                     * example:
-                     * <p>Thanks</p>
-                     */
-                    signature?: string;
-                    /**
-                     * Deprecated! Please use Permissions API instead
-                     */
-                    roles: string[];
-                    image_uri?: {
-                        [name: string]: any;
-                        /**
-                         * example:
-                         * https://account-profile-images.epilot.cloud/1/avatar.png
-                         */
-                        original?: string; // uri
-                        /**
-                         * example:
-                         * https://account-profile-images.epilot.cloud/1/avatar_32x32.png
-                         */
-                        thumbnail_32?: string; // uri
-                    };
-                    properties: {
-                        /**
-                         * example:
-                         * profileImageName
-                         */
-                        name: string;
-                        /**
-                         * example:
-                         * avatar.png
-                         */
-                        value: string;
-                    }[];
-                };
-                organization?: {
-                    id?: string;
-                    type?: "Vendor" | "Partner";
-                    /**
-                     * example:
-                     * Epilot
-                     */
-                    name?: string | null;
-                    /**
-                     * example:
-                     * <p>Thanks</p>
-                     */
-                    signature?: string | null;
-                    /**
-                     * example:
-                     * EPI
-                     */
-                    symbol?: string | null;
-                    /**
-                     * example:
-                     * professional
-                     */
-                    pricing_tier?: string | null;
-                    /**
-                     * example:
-                     * someone@epilot.cloud
-                     */
-                    email?: string | null;
-                    /**
-                     * example:
-                     * 49123123123
-                     */
-                    phone?: string | null;
-                    /**
-                     * example:
-                     * https://epilot.cloud
-                     */
-                    website?: string | null;
-                    address?: {
-                        country?: string | null;
-                        city?: string | null;
-                        postal_code?: string | null;
-                        street?: string | null;
-                        street_number?: string | null;
-                    };
-                    /**
-                     * example:
-                     * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
-                     */
-                    logo_url?: string | null;
-                    /**
-                     * example:
-                     * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
-                     */
-                    logo_thumbnail_url?: string | null;
-                    /**
-                     * example:
-                     * false
-                     */
-                    is_unlicensed_org?: boolean | null;
-                };
+                user?: Components.Schemas.User;
+                organization?: Components.Schemas.Organization;
             }
         }
     }
     namespace UpdateUserV2 {
         namespace Parameters {
-            export type Id = string;
+            export type Id = Components.Schemas.UserId;
         }
         export interface PathParameters {
             id: Parameters.Id;
         }
-        export interface RequestBody {
-            id?: string;
-            organization_id?: string;
-            /**
-             * example:
-             * 2022-02-08T04:44:32.246Z
-             */
-            created_at?: string;
-            /**
-             * User's display name (default: email address)
-             * example:
-             * Example User
-             */
-            display_name?: string;
-            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
-            email?: string; // email
-            draft_email?: string | null; // email
-            /**
-             * example:
-             * 1234567890
-             */
-            phone?: string | null;
-            /**
-             * example:
-             * de
-             */
-            preferred_language?: string;
-            /**
-             * example:
-             * 65dc527f-cb2d-4158-8f2e-8978dbceb599
-             */
-            token?: string;
-            /**
-             * example:
-             * <p>Thanks</p>
-             */
-            signature?: string;
-            /**
-             * example:
-             * true
-             */
-            is_signature_enabled?: boolean;
-            /**
-             * example:
-             * {
-             *   "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
-             *   "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
-             * }
-             */
-            image_uri?: {
-                [name: string]: any;
-                original?: string; // uri
-                thumbnail_32?: string; // uri
-            };
-            properties?: {
-                /**
-                 * example:
-                 * profileImageName
-                 */
-                name: string;
-                /**
-                 * example:
-                 * avatar.png
-                 */
-                value: string;
-            }[];
-        }
+        export type RequestBody = Components.Schemas.UserV2;
         namespace Responses {
-            export interface $200 {
-                id?: string;
-                organization_id?: string;
-                /**
-                 * example:
-                 * 2022-02-08T04:44:32.246Z
-                 */
-                created_at?: string;
-                /**
-                 * User's display name (default: email address)
-                 * example:
-                 * Example User
-                 */
-                display_name?: string;
-                status?: "Active" | "Pending" | "Deactivated" | "Deleted";
-                email?: string; // email
-                draft_email?: string | null; // email
-                /**
-                 * example:
-                 * 1234567890
-                 */
-                phone?: string | null;
-                /**
-                 * example:
-                 * de
-                 */
-                preferred_language?: string;
-                /**
-                 * example:
-                 * 65dc527f-cb2d-4158-8f2e-8978dbceb599
-                 */
-                token?: string;
-                /**
-                 * example:
-                 * <p>Thanks</p>
-                 */
-                signature?: string;
-                /**
-                 * example:
-                 * true
-                 */
-                is_signature_enabled?: boolean;
-                /**
-                 * example:
-                 * {
-                 *   "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
-                 *   "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
-                 * }
-                 */
-                image_uri?: {
-                    [name: string]: any;
-                    original?: string; // uri
-                    thumbnail_32?: string; // uri
-                };
-                properties?: {
-                    /**
-                     * example:
-                     * profileImageName
-                     */
-                    name: string;
-                    /**
-                     * example:
-                     * avatar.png
-                     */
-                    value: string;
-                }[];
-            }
+            export type $200 = Components.Schemas.UserV2;
         }
     }
     namespace VerifyEmailWithToken {
         namespace Parameters {
-            export type Token = string;
+            export type Token = Components.Schemas.VerificationToken;
         }
         export interface QueryParameters {
             token: Parameters.Token;
         }
-        export interface RequestBody {
-            /**
-             * User's password
-             * example:
-             * AKjhdakjsdh@!34
-             */
-            password?: string;
-        }
+        export type RequestBody = Components.Schemas.UserVerificationPayload;
         namespace Responses {
             export interface $200 {
             }
@@ -1531,6 +598,38 @@ declare namespace Paths {
 }
 
 export interface OperationMethods {
+  /**
+   * getUsers - getUsers
+   * 
+   * Get all users of all organizations
+   */
+  'getUsers'(
+    parameters?: Parameters<Paths.GetUsers.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetUsers.Responses.$200>
+  /**
+   * getDataPoints - getDataPoints
+   * 
+   * Get data points of all organizations:
+   * - user data points
+   * 
+   */
+  'getDataPoints'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDataPoints.Responses.$200>
+  /**
+   * getUserTags - getUserTags
+   * 
+   * Get tags of user
+   */
+  'getUserTags'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetUserTags.Responses.$200>
   /**
    * signUpUser - signUpUser
    */
@@ -1682,6 +781,44 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
+  ['/v2/internal/users']: {
+    /**
+     * getUsers - getUsers
+     * 
+     * Get all users of all organizations
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetUsers.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetUsers.Responses.$200>
+  }
+  ['/v2/internal/users/data-points']: {
+    /**
+     * getDataPoints - getDataPoints
+     * 
+     * Get data points of all organizations:
+     * - user data points
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDataPoints.Responses.$200>
+  }
+  ['/v2/internal/users/tags']: {
+    /**
+     * getUserTags - getUserTags
+     * 
+     * Get tags of user
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetUserTags.Responses.$200>
+  }
   ['/v2/users/public/signup']: {
     /**
      * signUpUser - signUpUser

@@ -13,6 +13,10 @@
     {
       "name": "User V1",
       "description": "Legacy User API"
+    },
+    {
+      "name": "Internal",
+      "description": "Internal access only"
     }
   ],
   "security": [
@@ -21,6 +25,112 @@
     }
   ],
   "paths": {
+    "/v2/internal/users": {
+      "get": {
+        "operationId": "getUsers",
+        "summary": "getUsers",
+        "description": "Get all users of all organizations",
+        "tags": [
+          "User V2",
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "description": "The maximum number of user to get",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": 25
+          },
+          {
+            "name": "start_key",
+            "description": "The primary key of the first item that this operation will evaluate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "List users",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v2/internal/users/data-points": {
+      "get": {
+        "operationId": "getDataPoints",
+        "summary": "getDataPoints",
+        "description": "Get data points of all organizations:\n- user data points\n",
+        "tags": [
+          "Users",
+          "Internal"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataPointsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v2/internal/users/tags": {
+      "get": {
+        "operationId": "getUserTags",
+        "summary": "getUserTags",
+        "description": "Get tags of user",
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "non-billable"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v2/users/public/signup": {
       "post": {
         "operationId": "signUpUser",
@@ -768,13 +878,23 @@
             "type": "string",
             "example": "65dc527f-cb2d-4158-8f2e-8978dbceb599"
           },
+          "mfa_enabled": {
+            "type": "boolean",
+            "example": false
+          },
+          "phone_verified": {
+            "type": "boolean",
+            "example": true
+          },
           "signature": {
             "type": "string",
-            "example": "<p>Thanks</p>"
+            "example": "<p>Thanks</p>",
+            "nullable": true
           },
           "is_signature_enabled": {
             "type": "boolean",
-            "example": true
+            "example": true,
+            "nullable": true
           },
           "image_uri": {
             "type": "object",
@@ -1133,6 +1253,37 @@
             "type": "boolean",
             "example": false,
             "nullable": true
+          }
+        }
+      },
+      "DataPointsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DataPoint"
+        }
+      },
+      "DataPoint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Organization id",
+            "type": "number",
+            "example": 206801
+          },
+          "actual_users": {
+            "description": "Number of current user",
+            "type": "number",
+            "example": 10
+          },
+          "max_users_last_month": {
+            "description": "Max user last month",
+            "type": "number",
+            "example": 10
+          },
+          "non_billable_users_last_month": {
+            "description": "Max non-billable user last month",
+            "type": "number",
+            "example": 10
           }
         }
       }
