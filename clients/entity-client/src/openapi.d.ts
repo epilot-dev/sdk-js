@@ -993,14 +993,22 @@ declare namespace Components {
         }
         export interface EntityDefaultCreate {
             view_type?: "default";
-            searchParams?: {
+            search_params?: {
                 [name: string]: string;
+            };
+            table_menu_options?: {
+                icon?: string;
+                label?: string;
             };
         }
         export interface EntityDefaultEdit {
             view_type?: "default";
-            searchParams?: {
+            search_params?: {
                 [name: string]: string;
+            };
+            table_menu_options?: {
+                icon?: string;
+                label?: string;
             };
         }
         export interface EntityDefaultOverview {
