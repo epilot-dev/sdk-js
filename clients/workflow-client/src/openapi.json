@@ -7,10 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://workflows-execution.dev.sls.epilot.io"
-    },
-    {
-      "url": "https://workflows-execution.staging.sls.epilot.io"
+      "url": "https://workflows-execution.sls.epilot.io"
     },
     {
       "url": "https://workflows-execution.sls.epilot.io"
@@ -386,6 +383,28 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateStepReq"
+              },
+              "examples": {
+                "dynamicDueDate": {
+                  "value": {
+                    "entityRefId": "string",
+                    "assignedTo": [
+                      "10010730"
+                    ],
+                    "dynamicDueDate": {
+                      "numberOfUnits": 2,
+                      "timePeriod": "weeks",
+                      "actionTypeCondition": "STEP_CLOSED",
+                      "stepId": "optional"
+                    },
+                    "name": "Static Duedate",
+                    "position": {
+                      "index": 0
+                    },
+                    "sectionId": "string",
+                    "status": "string"
+                  }
+                }
               }
             }
           }
@@ -675,9 +694,6 @@
               "type": "string"
             }
           },
-          "dueDate": {
-            "type": "string"
-          },
           "contexts": {
             "type": "array",
             "items": {
@@ -695,7 +711,7 @@
             192582,
             10521
           ],
-          "dueDate": "02.22.2022",
+          "dueDate": "2021-04-27T12:01:13.000Z",
           "contexts": [
             {
               "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
@@ -731,6 +747,13 @@
           },
           "dueDate": {
             "type": "string"
+          },
+          "dynamicDueDate": {
+            "$ref": "#/components/schemas/DynamicDueDate"
+          },
+          "closedBy": {
+            "type": "string",
+            "description": "id of the user / partner user who is closing the workflow. For partner pass orgId_userId."
           }
         }
       },
@@ -795,6 +818,9 @@
             "type": "string",
             "description": "Due date for finishing the workflow"
           },
+          "dynamicDueDate": {
+            "$ref": "#/components/schemas/DynamicDueDate"
+          },
           "status": {
             "$ref": "#/components/schemas/WorkflowStatus"
           },
@@ -838,6 +864,12 @@
           "enableECPWorkflow": {
             "type": "boolean",
             "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
+          },
+          "updateEntityAttributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpdateEntityAttributes"
+            }
           }
         }
       },
@@ -956,8 +988,8 @@
                   "id": "sada5641f3a21",
                   "name": "Call client and confirm address and product",
                   "status": "ASSIGNED",
-                  "userIds": [
-                    11
+                  "assignedTo": [
+                    "11"
                   ]
                 },
                 {
@@ -1004,12 +1036,6 @@
             "description": "Name for this Section",
             "example": "Lead Qualification"
           },
-          "userIds": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          },
           "type": {
             "$ref": "#/components/schemas/ItemType"
           },
@@ -1046,6 +1072,14 @@
             "type": "array",
             "items": {
               "type": "number"
+            },
+            "deprecated": true,
+            "description": "This field is deprecated. Please use assignedTo"
+          },
+          "assignedTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           },
           "type": {
@@ -1096,6 +1130,19 @@
           },
           "ecp": {
             "$ref": "#/components/schemas/ECPDetails"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "requirements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StepRequirement"
+            }
+          },
+          "executionType": {
+            "description": "Manual / Automation step",
+            "$ref": "#/components/schemas/StepType"
           }
         },
         "required": [
@@ -1120,7 +1167,19 @@
                 "type": "array",
                 "items": {
                   "type": "number"
+                },
+                "deprecated": true,
+                "description": "This field is deprecated. Please use assignedTo"
+              },
+              "assignedTo": {
+                "type": "array",
+                "items": {
+                  "type": "string"
                 }
+              },
+              "assignedToInProgress": {
+                "description": "The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task",
+                "type": "string"
               },
               "status": {
                 "$ref": "#/components/schemas/StepStatus"
@@ -1134,8 +1193,19 @@
               "dueDate": {
                 "type": "string"
               },
+              "dynamicDueDate": {
+                "$ref": "#/components/schemas/DynamicDueDate"
+              },
               "manuallyCreated": {
                 "type": "boolean"
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "enabled flag results from calculating the requirements"
+              },
+              "automationConfig": {
+                "description": "Configuration for automated steps",
+                "$ref": "#/components/schemas/AutomationConfig"
               }
             }
           }
@@ -1183,7 +1253,36 @@
           "UNASSIGNED",
           "ASSIGNED",
           "COMPLETED",
-          "SKIPPED"
+          "SKIPPED",
+          "IN_PROGRESS"
+        ]
+      },
+      "StepType": {
+        "type": "string",
+        "enum": [
+          "MANUAL",
+          "AUTOMATION"
+        ]
+      },
+      "AutomationConfig": {
+        "type": "object",
+        "description": "Configuration for automation execution to run",
+        "properties": {
+          "flowId": {
+            "type": "string",
+            "description": "Id of the configured automation to run"
+          },
+          "executionId": {
+            "type": "string",
+            "description": "Id of the automation execution which ran"
+          },
+          "executionStatus": {
+            "type": "string",
+            "description": "Status of Automation Execution. Types can be found in Automation API"
+          }
+        },
+        "required": [
+          "flowId"
         ]
       },
       "ECPDetails": {
@@ -1213,7 +1312,8 @@
         "type": "object",
         "properties": {
           "insertionIndex": {
-            "type": "number"
+            "type": "number",
+            "default": 0
           },
           "name": {
             "type": "string"
@@ -1223,6 +1323,14 @@
           },
           "sectionId": {
             "type": "string"
+          },
+          "executionType": {
+            "description": "Manual / Automation step",
+            "$ref": "#/components/schemas/StepType"
+          },
+          "automationConfig": {
+            "description": "Configuration for automated steps",
+            "$ref": "#/components/schemas/AutomationConfig"
           }
         },
         "required": [
@@ -1240,7 +1348,19 @@
             "type": "array",
             "items": {
               "type": "number"
+            },
+            "deprecated": true,
+            "description": "This field is deprecated. Please use assignedTo"
+          },
+          "assignedTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
+          },
+          "assignedToInProgress": {
+            "description": "The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task",
+            "type": "string"
           },
           "status": {
             "$ref": "#/components/schemas/StepStatus"
@@ -1248,11 +1368,17 @@
           "dueDate": {
             "type": "string"
           },
+          "dynamicDueDate": {
+            "$ref": "#/components/schemas/DynamicDueDate"
+          },
           "name": {
             "type": "string"
           },
           "position": {
             "$ref": "#/components/schemas/StepPositionAt"
+          },
+          "automationConfig": {
+            "$ref": "#/components/schemas/AutomationConfig"
           }
         },
         "required": [
@@ -1263,7 +1389,8 @@
         "type": "object",
         "properties": {
           "index": {
-            "type": "number"
+            "type": "number",
+            "default": 0
           },
           "sectionId": {
             "type": "string"
@@ -1435,6 +1562,130 @@
             }
           }
         }
+      },
+      "WorkflowInEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "next_open_step_id": {
+            "type": "string"
+          },
+          "next_open_step_name": {
+            "type": "string"
+          },
+          "next_open_section_id": {
+            "type": "string"
+          },
+          "next_open_section_name": {
+            "type": "string"
+          },
+          "workflow_status": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          },
+          "workflow_assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "workflow_definition_id": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateEntityAttributes": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "workflow_status",
+              "current_section",
+              "current_step"
+            ]
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "entitySchema": {
+                "type": "string",
+                "example": "opportunity"
+              },
+              "entityAttribute": {
+                "type": "string",
+                "example": "my_status"
+              }
+            },
+            "required": [
+              "entitySchema",
+              "entityAttribute"
+            ]
+          }
+        },
+        "required": [
+          "source",
+          "target"
+        ]
+      },
+      "DynamicDueDate": {
+        "description": "set a Duedate for a step then a specific",
+        "type": "object",
+        "properties": {
+          "numberOfUnits": {
+            "type": "number"
+          },
+          "timePeriod": {
+            "type": "string",
+            "enum": [
+              "days",
+              "weeks",
+              "months"
+            ]
+          },
+          "actionTypeCondition": {
+            "type": "string",
+            "enum": [
+              "WORKFLOW_STARTED",
+              "STEP_CLOSED"
+            ]
+          },
+          "stepId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "numberOfUnits",
+          "timePeriod",
+          "actionType"
+        ]
+      },
+      "StepRequirement": {
+        "description": "describe the requirement for step enablement",
+        "type": "object",
+        "properties": {
+          "definitionId": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ItemType"
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "CLOSED"
+            ]
+          }
+        },
+        "required": [
+          "definitionId",
+          "type",
+          "condition"
+        ]
       }
     }
   }

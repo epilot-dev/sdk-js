@@ -9,21 +9,52 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        /**
+         * Configuration for automation execution to run
+         */
+        export interface AutomationConfig {
+            /**
+             * Id of the configured automation to run
+             */
+            flowId: string;
+            /**
+             * Id of the automation execution which ran
+             */
+            executionId?: string;
+            /**
+             * Status of Automation Execution. Types can be found in Automation API
+             */
+            executionStatus?: string;
+        }
         export interface ClosingReason {
             id: string;
             title: string;
         }
         export interface ClosingReasonResp {
-            reasons?: {
-                id: string;
-                title: string;
-            }[];
+            reasons?: ClosingReason[];
         }
         export interface CreateStepReq {
             insertionIndex: number;
             name: string;
-            status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
+            status?: StepStatus;
             sectionId?: string;
+            /**
+             * Manual / Automation step
+             */
+            executionType?: StepType;
+            /**
+             * Configuration for automated steps
+             */
+            automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
+        }
+        /**
+         * set a Duedate for a step then a specific
+         */
+        export interface DynamicDueDate {
+            numberOfUnits: number;
+            timePeriod: "days" | "weeks" | "months";
+            actionTypeCondition?: "WORKFLOW_STARTED" | "STEP_CLOSED";
+            stepId?: string;
         }
         /**
          * Details regarding ECP for the workflow step
@@ -39,96 +70,10 @@ declare namespace Components {
             creationTime?: string;
         }
         export interface Flow {
-            flow: ({
-                id: string;
-                definitionId?: string;
-                /**
-                 * Name for this Section
-                 * example:
-                 * Lead Qualification
-                 */
-                name: string;
-                userIds?: number[];
-                type: "STEP" | "SECTION";
-                steps: {
-                    id: string;
-                    definitionId?: string;
-                    entityRefId: string;
-                    name: string;
-                    type: "STEP" | "SECTION";
-                    /**
-                     * Details regarding ECP for the workflow step
-                     */
-                    ecp?: {
-                        label?: string;
-                    };
-                    sectionId?: string;
-                    userIds?: number[];
-                    status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                    created?: string;
-                    lastUpdated?: string;
-                    dueDate?: string;
-                    manuallyCreated?: boolean;
-                }[];
-            } | {
-                id: string;
-                definitionId?: string;
-                entityRefId: string;
-                name: string;
-                type: "STEP" | "SECTION";
-                /**
-                 * Details regarding ECP for the workflow step
-                 */
-                ecp?: {
-                    label?: string;
-                };
-                sectionId?: string;
-                userIds?: number[];
-                status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                created?: string;
-                lastUpdated?: string;
-                dueDate?: string;
-                manuallyCreated?: boolean;
-            })[];
+            flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export interface FlowSlim {
-            flow: ({
-                id: string;
-                definitionId?: string;
-                /**
-                 * Name for this Section
-                 * example:
-                 * Lead Qualification
-                 */
-                name: string;
-                userIds?: number[];
-                type: "STEP" | "SECTION";
-                steps: {
-                    id: string;
-                    definitionId?: string;
-                    entityRefId: string;
-                    name: string;
-                    type: "STEP" | "SECTION";
-                    /**
-                     * Details regarding ECP for the workflow step
-                     */
-                    ecp?: {
-                        label?: string;
-                    };
-                }[];
-            } | {
-                id: string;
-                definitionId?: string;
-                entityRefId: string;
-                name: string;
-                type: "STEP" | "SECTION";
-                /**
-                 * Details regarding ECP for the workflow step
-                 */
-                ecp?: {
-                    label?: string;
-                };
-            })[];
+            flow: (/* A group of Steps that define the progress of the Workflow */ SectionSimplified | StepSimplified)[];
         }
         export type ItemType = "STEP" | "SECTION";
         export interface LastEvaluatedKey {
@@ -137,104 +82,51 @@ declare namespace Components {
         }
         export interface SearchExecutionsReq {
             name?: string;
-            status?: "STARTED" | "DONE" | "CLOSED";
+            status?: WorkflowStatus;
             includeDoneWorkflows?: boolean;
             assignedTo?: string;
-            sorting?: "A_Z" | "Z_A" | "DUE_DATE_ASC" | "DUE_DATE_DESC" | "TRIGGER_DATE_ASC" | "TRIGGER_DATE_DESC";
-            pagination?: {
-                orgId?: string;
-                creationTime?: string;
-            };
+            sorting?: SearchSorting;
+            pagination?: ExecutionPaginationDynamo;
         }
         export interface SearchExecutionsResp {
-            executions: {
-                id?: string;
-                definitionId?: string;
-                orgId?: string;
-                name?: string;
-                /**
-                 * Creation timestamp
-                 */
-                creationTime?: string;
-                /**
-                 * Last Update timestamp
-                 */
-                lastUpdateTime?: string;
-                /**
-                 * Due date for finishing the workflow
-                 */
-                dueDate?: string;
-                status?: "STARTED" | "DONE" | "CLOSED";
-                trigger?: "MANUAL" | "AUTOMATIC";
-                assignedTo?: string[];
-                /**
-                 * Id of the user who closed workflow
-                 */
-                lastModifiedBy?: string;
-                contexts?: {
-                    id: string;
-                    title: string;
-                    schema: string;
-                }[];
-                nextOpenStep?: {
-                    id?: string;
-                    entityRefId?: string;
-                };
-                configuredClosingReasonSnapshot?: {
-                    id: string;
-                    title: string;
-                }[];
-                selectedClosingReasons?: {
-                    id: string;
-                    title: string;
-                }[];
-                closingReasonDescription?: string;
-                /**
-                 * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
-                 */
-                enableECPWorkflow?: boolean;
-                flow: ({
-                    id: string;
-                    definitionId?: string;
-                    /**
-                     * Name for this Section
-                     * example:
-                     * Lead Qualification
-                     */
-                    name: string;
-                    userIds?: number[];
-                    type: "STEP" | "SECTION";
-                    steps: {
-                        id: string;
-                        definitionId?: string;
-                        entityRefId: string;
-                        name: string;
-                        type: "STEP" | "SECTION";
-                        /**
-                         * Details regarding ECP for the workflow step
-                         */
-                        ecp?: {
-                            label?: string;
-                        };
-                    }[];
-                } | {
-                    id: string;
-                    definitionId?: string;
-                    entityRefId: string;
-                    name: string;
-                    type: "STEP" | "SECTION";
-                    /**
-                     * Details regarding ECP for the workflow step
-                     */
-                    ecp?: {
-                        label?: string;
-                    };
-                })[];
-            }[];
-            lastEvaluatedKey?: {
-                orgId?: string;
-                creationTime?: string;
-            };
+            executions: /**
+             * example:
+             * {
+             *   "id": "8gja72h6kas6h",
+             *   "name": "Lead Qualification",
+             *   "trigger": "MANUAL",
+             *   "status": "STARTED",
+             *   "creationTime": "2021-04-27T12:01:13.000Z",
+             *   "lastUpdateTime": "2021-04-27T12:01:13.000Z",
+             *   "dueDate": "2021-04-27T12:01:13.000Z",
+             *   "flow": [
+             *     {
+             *       "id": "sectionId1",
+             *       "name": "Initial Information Gathering",
+             *       "steps": [
+             *         {
+             *           "id": "sada5641f3a21",
+             *           "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-1ragw"
+             *         },
+             *         {
+             *           "id": "sada5641f3a22",
+             *           "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-sga72"
+             *         },
+             *         {
+             *           "id": "sada5641f3a23",
+             *           "entityRefId": "s9guauj2-sgha8h2t2kl-1589y15n-asjo2t"
+             *         }
+             *       ]
+             *     },
+             *     {
+             *       "id": "firstLevelStepId1",
+             *       "entityRefId": "sgja902tk-sgha8h2t2kl-1589y15n-asfsah2"
+             *     }
+             *   ]
+             * }
+             */
+            WorkflowExecutionSlim[];
+            lastEvaluatedKey?: LastEvaluatedKey;
         }
         export interface SearchPagination {
             from?: number;
@@ -248,11 +140,8 @@ declare namespace Components {
             includeDoneWorkflows?: boolean;
             manuallyCreated?: boolean;
             status?: "OPEN" | "COMPLETE" | "NEXT_OPEN_ITEM_IN_WORKFLOW";
-            sorting?: "A_Z" | "Z_A" | "DUE_DATE_ASC" | "DUE_DATE_DESC" | "TRIGGER_DATE_ASC" | "TRIGGER_DATE_DESC";
-            pagination?: {
-                from?: number;
-                size?: number;
-            };
+            sorting?: SearchSorting;
+            pagination?: SearchPagination;
         }
         export interface SearchStepsResp {
             /**
@@ -265,23 +154,34 @@ declare namespace Components {
                 definitionId?: string;
                 entityRefId: string;
                 name: string;
-                type: "STEP" | "SECTION";
+                type: ItemType;
+                ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
                 /**
-                 * Details regarding ECP for the workflow step
+                 * enabled flag results from calculating the requirements
                  */
-                ecp?: {
-                    label?: string;
-                };
+                enabled?: boolean;
+                requirements?: /* describe the requirement for step enablement */ StepRequirement[];
+                executionType?: StepType;
                 sectionId?: string;
+                /**
+                 * This field is deprecated. Please use assignedTo
+                 */
                 userIds?: number[];
-                status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
+                assignedTo?: string[];
+                /**
+                 * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
+                 */
+                assignedToInProgress?: string;
+                status?: StepStatus;
                 created?: string;
                 lastUpdated?: string;
                 dueDate?: string;
+                dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
                 manuallyCreated?: boolean;
+                automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
                 executionId: string;
                 executionName: string;
-                executionStatus: "STARTED" | "DONE" | "CLOSED";
+                executionStatus: WorkflowStatus;
                 contexts?: {
                     id: string;
                     title: string;
@@ -301,28 +201,13 @@ declare namespace Components {
              * Lead Qualification
              */
             name: string;
+            /**
+             * This field is deprecated. Please use assignedTo
+             */
             userIds?: number[];
-            type: "STEP" | "SECTION";
-            steps: {
-                id: string;
-                definitionId?: string;
-                entityRefId: string;
-                name: string;
-                type: "STEP" | "SECTION";
-                /**
-                 * Details regarding ECP for the workflow step
-                 */
-                ecp?: {
-                    label?: string;
-                };
-                sectionId?: string;
-                userIds?: number[];
-                status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                created?: string;
-                lastUpdated?: string;
-                dueDate?: string;
-                manuallyCreated?: boolean;
-            }[];
+            assignedTo?: string[];
+            type: ItemType;
+            steps: Step[];
         }
         /**
          * A group of Steps that define the progress of the Workflow
@@ -336,64 +221,73 @@ declare namespace Components {
              * Lead Qualification
              */
             name: string;
-            userIds?: number[];
-            type: "STEP" | "SECTION";
-            steps: {
-                id: string;
-                definitionId?: string;
-                entityRefId: string;
-                name: string;
-                type: "STEP" | "SECTION";
-                /**
-                 * Details regarding ECP for the workflow step
-                 */
-                ecp?: {
-                    label?: string;
-                };
-            }[];
+            type: ItemType;
+            steps: StepSimplified[];
         }
         export interface Step {
             id: string;
             definitionId?: string;
             entityRefId: string;
             name: string;
-            type: "STEP" | "SECTION";
+            type: ItemType;
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             /**
-             * Details regarding ECP for the workflow step
+             * enabled flag results from calculating the requirements
              */
-            ecp?: {
-                label?: string;
-            };
+            enabled?: boolean;
+            requirements?: /* describe the requirement for step enablement */ StepRequirement[];
+            executionType?: StepType;
             sectionId?: string;
+            /**
+             * This field is deprecated. Please use assignedTo
+             */
             userIds?: number[];
-            status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
+            assignedTo?: string[];
+            /**
+             * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToInProgress?: string;
+            status?: StepStatus;
             created?: string;
             lastUpdated?: string;
             dueDate?: string;
+            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
+            automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
         }
         export interface StepExtended {
             id: string;
             definitionId?: string;
             entityRefId: string;
             name: string;
-            type: "STEP" | "SECTION";
+            type: ItemType;
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             /**
-             * Details regarding ECP for the workflow step
+             * enabled flag results from calculating the requirements
              */
-            ecp?: {
-                label?: string;
-            };
+            enabled?: boolean;
+            requirements?: /* describe the requirement for step enablement */ StepRequirement[];
+            executionType?: StepType;
             sectionId?: string;
+            /**
+             * This field is deprecated. Please use assignedTo
+             */
             userIds?: number[];
-            status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
+            assignedTo?: string[];
+            /**
+             * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToInProgress?: string;
+            status?: StepStatus;
             created?: string;
             lastUpdated?: string;
             dueDate?: string;
+            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
+            automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
             executionId: string;
             executionName: string;
-            executionStatus: "STARTED" | "DONE" | "CLOSED";
+            executionStatus: WorkflowStatus;
             contexts?: {
                 id: string;
                 title: string;
@@ -408,51 +302,94 @@ declare namespace Components {
             index: number;
             sectionId?: string;
         }
+        /**
+         * describe the requirement for step enablement
+         */
+        export interface StepRequirement {
+            definitionId: string;
+            type: ItemType;
+            condition: "CLOSED";
+        }
         export interface StepSimplified {
             id: string;
             definitionId?: string;
             entityRefId: string;
             name: string;
-            type: "STEP" | "SECTION";
+            type: ItemType;
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            enabled?: boolean;
+            requirements?: /* describe the requirement for step enablement */ StepRequirement[];
             /**
-             * Details regarding ECP for the workflow step
+             * Manual / Automation step
              */
-            ecp?: {
-                label?: string;
+            executionType?: StepType;
+        }
+        export type StepStatus = "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS";
+        export type StepType = "MANUAL" | "AUTOMATION";
+        export type TriggerType = "MANUAL" | "AUTOMATIC";
+        export interface UpdateEntityAttributes {
+            source: "workflow_status" | "current_section" | "current_step";
+            target: {
+                /**
+                 * example:
+                 * opportunity
+                 */
+                entitySchema: string;
+                /**
+                 * example:
+                 * my_status
+                 */
+                entityAttribute: string;
             };
         }
-        export type StepStatus = "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-        export type TriggerType = "MANUAL" | "AUTOMATIC";
         export interface UpdateStepReq {
             entityRefId: string;
+            /**
+             * This field is deprecated. Please use assignedTo
+             */
             userIds?: number[];
-            status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
+            assignedTo?: string[];
+            /**
+             * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToInProgress?: string;
+            status?: StepStatus;
             dueDate?: string;
+            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             name?: string;
-            position?: {
-                index: number;
-                sectionId?: string;
-            };
+            position?: StepPositionAt;
+            automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
         }
         export interface UpdateStepResp {
             id: string;
             definitionId?: string;
             entityRefId: string;
             name: string;
-            type: "STEP" | "SECTION";
+            type: ItemType;
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             /**
-             * Details regarding ECP for the workflow step
+             * enabled flag results from calculating the requirements
              */
-            ecp?: {
-                label?: string;
-            };
+            enabled?: boolean;
+            requirements?: /* describe the requirement for step enablement */ StepRequirement[];
+            executionType?: StepType;
             sectionId?: string;
+            /**
+             * This field is deprecated. Please use assignedTo
+             */
             userIds?: number[];
-            status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
+            assignedTo?: string[];
+            /**
+             * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToInProgress?: string;
+            status?: StepStatus;
             created?: string;
             lastUpdated?: string;
             dueDate?: string;
+            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
+            automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
         }
         export interface WorkflowContext {
             id: string;
@@ -482,8 +419,8 @@ declare namespace Components {
          *           "id": "sada5641f3a21",
          *           "name": "Call client and confirm address and product",
          *           "status": "ASSIGNED",
-         *           "userIds": [
-         *             11
+         *           "assignedTo": [
+         *             "11"
          *           ]
          *         },
          *         {
@@ -524,86 +461,25 @@ declare namespace Components {
              * Due date for finishing the workflow
              */
             dueDate?: string;
-            status?: "STARTED" | "DONE" | "CLOSED";
-            trigger?: "MANUAL" | "AUTOMATIC";
+            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
+            status?: WorkflowStatus;
+            trigger?: TriggerType;
             assignedTo?: string[];
             /**
              * Id of the user who closed workflow
              */
             lastModifiedBy?: string;
-            contexts?: {
-                id: string;
-                title: string;
-                schema: string;
-            }[];
-            nextOpenStep?: {
-                id?: string;
-                entityRefId?: string;
-            };
-            configuredClosingReasonSnapshot?: {
-                id: string;
-                title: string;
-            }[];
-            selectedClosingReasons?: {
-                id: string;
-                title: string;
-            }[];
+            contexts?: WorkflowContext[];
+            nextOpenStep?: StepId;
+            configuredClosingReasonSnapshot?: ClosingReason[];
+            selectedClosingReasons?: ClosingReason[];
             closingReasonDescription?: string;
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             enableECPWorkflow?: boolean;
-            flow: ({
-                id: string;
-                definitionId?: string;
-                /**
-                 * Name for this Section
-                 * example:
-                 * Lead Qualification
-                 */
-                name: string;
-                userIds?: number[];
-                type: "STEP" | "SECTION";
-                steps: {
-                    id: string;
-                    definitionId?: string;
-                    entityRefId: string;
-                    name: string;
-                    type: "STEP" | "SECTION";
-                    /**
-                     * Details regarding ECP for the workflow step
-                     */
-                    ecp?: {
-                        label?: string;
-                    };
-                    sectionId?: string;
-                    userIds?: number[];
-                    status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                    created?: string;
-                    lastUpdated?: string;
-                    dueDate?: string;
-                    manuallyCreated?: boolean;
-                }[];
-            } | {
-                id: string;
-                definitionId?: string;
-                entityRefId: string;
-                name: string;
-                type: "STEP" | "SECTION";
-                /**
-                 * Details regarding ECP for the workflow step
-                 */
-                ecp?: {
-                    label?: string;
-                };
-                sectionId?: string;
-                userIds?: number[];
-                status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                created?: string;
-                lastUpdated?: string;
-                dueDate?: string;
-                manuallyCreated?: boolean;
-            })[];
+            updateEntityAttributes?: UpdateEntityAttributes[];
+            flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export interface WorkflowExecutionBase {
             id?: string;
@@ -622,35 +498,24 @@ declare namespace Components {
              * Due date for finishing the workflow
              */
             dueDate?: string;
-            status?: "STARTED" | "DONE" | "CLOSED";
-            trigger?: "MANUAL" | "AUTOMATIC";
+            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
+            status?: WorkflowStatus;
+            trigger?: TriggerType;
             assignedTo?: string[];
             /**
              * Id of the user who closed workflow
              */
             lastModifiedBy?: string;
-            contexts?: {
-                id: string;
-                title: string;
-                schema: string;
-            }[];
-            nextOpenStep?: {
-                id?: string;
-                entityRefId?: string;
-            };
-            configuredClosingReasonSnapshot?: {
-                id: string;
-                title: string;
-            }[];
-            selectedClosingReasons?: {
-                id: string;
-                title: string;
-            }[];
+            contexts?: WorkflowContext[];
+            nextOpenStep?: StepId;
+            configuredClosingReasonSnapshot?: ClosingReason[];
+            selectedClosingReasons?: ClosingReason[];
             closingReasonDescription?: string;
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             enableECPWorkflow?: boolean;
+            updateEntityAttributes?: UpdateEntityAttributes[];
         }
         /**
          * example:
@@ -661,7 +526,7 @@ declare namespace Components {
          *     192582,
          *     10521
          *   ],
-         *   "dueDate": "02.22.2022",
+         *   "dueDate": "2021-04-27T12:01:13.000Z",
          *   "contexts": [
          *     {
          *       "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
@@ -676,14 +541,9 @@ declare namespace Components {
          */
         export interface WorkflowExecutionCreateReq {
             workflowId: string;
-            trigger?: "MANUAL" | "AUTOMATIC";
+            trigger?: TriggerType;
             assignedTo?: string[];
-            dueDate?: string;
-            contexts?: {
-                id: string;
-                title: string;
-                schema: string;
-            }[];
+            contexts?: WorkflowContext[];
         }
         /**
          * example:
@@ -738,89 +598,55 @@ declare namespace Components {
              * Due date for finishing the workflow
              */
             dueDate?: string;
-            status?: "STARTED" | "DONE" | "CLOSED";
-            trigger?: "MANUAL" | "AUTOMATIC";
+            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
+            status?: WorkflowStatus;
+            trigger?: TriggerType;
             assignedTo?: string[];
             /**
              * Id of the user who closed workflow
              */
             lastModifiedBy?: string;
-            contexts?: {
-                id: string;
-                title: string;
-                schema: string;
-            }[];
-            nextOpenStep?: {
-                id?: string;
-                entityRefId?: string;
-            };
-            configuredClosingReasonSnapshot?: {
-                id: string;
-                title: string;
-            }[];
-            selectedClosingReasons?: {
-                id: string;
-                title: string;
-            }[];
+            contexts?: WorkflowContext[];
+            nextOpenStep?: StepId;
+            configuredClosingReasonSnapshot?: ClosingReason[];
+            selectedClosingReasons?: ClosingReason[];
             closingReasonDescription?: string;
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             enableECPWorkflow?: boolean;
-            flow: ({
-                id: string;
-                definitionId?: string;
-                /**
-                 * Name for this Section
-                 * example:
-                 * Lead Qualification
-                 */
-                name: string;
-                userIds?: number[];
-                type: "STEP" | "SECTION";
-                steps: {
-                    id: string;
-                    definitionId?: string;
-                    entityRefId: string;
-                    name: string;
-                    type: "STEP" | "SECTION";
-                    /**
-                     * Details regarding ECP for the workflow step
-                     */
-                    ecp?: {
-                        label?: string;
-                    };
-                }[];
-            } | {
-                id: string;
-                definitionId?: string;
-                entityRefId: string;
-                name: string;
-                type: "STEP" | "SECTION";
-                /**
-                 * Details regarding ECP for the workflow step
-                 */
-                ecp?: {
-                    label?: string;
-                };
-            })[];
+            updateEntityAttributes?: UpdateEntityAttributes[];
+            flow: (/* A group of Steps that define the progress of the Workflow */ SectionSimplified | StepSimplified)[];
         }
         export interface WorkflowExecutionUpdateReq {
-            status?: "STARTED" | "DONE" | "CLOSED";
+            status?: WorkflowStatus;
             assignedTo?: string[];
-            selectedClosingReasons?: {
-                id: string;
-                title: string;
-            }[];
+            selectedClosingReasons?: ClosingReason[];
             closingReasonDescription?: string;
             dueDate?: string;
+            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
+            /**
+             * id of the user / partner user who is closing the workflow. For partner pass orgId_userId.
+             */
+            closedBy?: string;
+        }
+        export interface WorkflowInEntity {
+            id?: string;
+            name?: string;
+            next_open_step_id?: string;
+            next_open_step_name?: string;
+            next_open_section_id?: string;
+            next_open_section_name?: string;
+            workflow_status?: WorkflowStatus;
+            workflow_assignees?: string[];
+            workflow_definition_id?: string;
         }
         export type WorkflowStatus = "STARTED" | "DONE" | "CLOSED";
     }
 }
 declare namespace Paths {
     namespace CreateExecution {
-        /**
+        export type RequestBody = /**
          * example:
          * {
          *   "workflowId": "j3f23fh23uif98",
@@ -829,7 +655,7 @@ declare namespace Paths {
          *     192582,
          *     10521
          *   ],
-         *   "dueDate": "02.22.2022",
+         *   "dueDate": "2021-04-27T12:01:13.000Z",
          *   "contexts": [
          *     {
          *       "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
@@ -842,19 +668,9 @@ declare namespace Paths {
          *   ]
          * }
          */
-        export interface RequestBody {
-            workflowId: string;
-            trigger?: "MANUAL" | "AUTOMATIC";
-            assignedTo?: string[];
-            dueDate?: string;
-            contexts?: {
-                id: string;
-                title: string;
-                schema: string;
-            }[];
-        }
+        Components.Schemas.WorkflowExecutionCreateReq;
         namespace Responses {
-            /**
+            export type $201 = /**
              * example:
              * {
              *   "id": "8gja72h6kas6h",
@@ -877,8 +693,8 @@ declare namespace Paths {
              *           "id": "sada5641f3a21",
              *           "name": "Call client and confirm address and product",
              *           "status": "ASSIGNED",
-             *           "userIds": [
-             *             11
+             *           "assignedTo": [
+             *             "11"
              *           ]
              *         },
              *         {
@@ -902,113 +718,10 @@ declare namespace Paths {
              *   ]
              * }
              */
-            export interface $201 {
-                id?: string;
-                definitionId?: string;
-                orgId?: string;
-                name?: string;
-                /**
-                 * Creation timestamp
-                 */
-                creationTime?: string;
-                /**
-                 * Last Update timestamp
-                 */
-                lastUpdateTime?: string;
-                /**
-                 * Due date for finishing the workflow
-                 */
-                dueDate?: string;
-                status?: "STARTED" | "DONE" | "CLOSED";
-                trigger?: "MANUAL" | "AUTOMATIC";
-                assignedTo?: string[];
-                /**
-                 * Id of the user who closed workflow
-                 */
-                lastModifiedBy?: string;
-                contexts?: {
-                    id: string;
-                    title: string;
-                    schema: string;
-                }[];
-                nextOpenStep?: {
-                    id?: string;
-                    entityRefId?: string;
-                };
-                configuredClosingReasonSnapshot?: {
-                    id: string;
-                    title: string;
-                }[];
-                selectedClosingReasons?: {
-                    id: string;
-                    title: string;
-                }[];
-                closingReasonDescription?: string;
-                /**
-                 * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
-                 */
-                enableECPWorkflow?: boolean;
-                flow: ({
-                    id: string;
-                    definitionId?: string;
-                    /**
-                     * Name for this Section
-                     * example:
-                     * Lead Qualification
-                     */
-                    name: string;
-                    userIds?: number[];
-                    type: "STEP" | "SECTION";
-                    steps: {
-                        id: string;
-                        definitionId?: string;
-                        entityRefId: string;
-                        name: string;
-                        type: "STEP" | "SECTION";
-                        /**
-                         * Details regarding ECP for the workflow step
-                         */
-                        ecp?: {
-                            label?: string;
-                        };
-                        sectionId?: string;
-                        userIds?: number[];
-                        status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                        created?: string;
-                        lastUpdated?: string;
-                        dueDate?: string;
-                        manuallyCreated?: boolean;
-                    }[];
-                } | {
-                    id: string;
-                    definitionId?: string;
-                    entityRefId: string;
-                    name: string;
-                    type: "STEP" | "SECTION";
-                    /**
-                     * Details regarding ECP for the workflow step
-                     */
-                    ecp?: {
-                        label?: string;
-                    };
-                    sectionId?: string;
-                    userIds?: number[];
-                    status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                    created?: string;
-                    lastUpdated?: string;
-                    dueDate?: string;
-                    manuallyCreated?: boolean;
-                })[];
-            }
-            export interface $400 {
-                message?: string;
-            }
-            export interface $401 {
-                message?: string;
-            }
-            export interface $500 {
-                message?: string;
-            }
+            Components.Schemas.WorkflowExecution;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace CreateStep {
@@ -1018,42 +731,12 @@ declare namespace Paths {
         export interface PathParameters {
             executionId: Parameters.ExecutionId;
         }
-        export interface RequestBody {
-            insertionIndex: number;
-            name: string;
-            status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-            sectionId?: string;
-        }
+        export type RequestBody = Components.Schemas.CreateStepReq;
         namespace Responses {
-            export interface $201 {
-                id: string;
-                definitionId?: string;
-                entityRefId: string;
-                name: string;
-                type: "STEP" | "SECTION";
-                /**
-                 * Details regarding ECP for the workflow step
-                 */
-                ecp?: {
-                    label?: string;
-                };
-                sectionId?: string;
-                userIds?: number[];
-                status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                created?: string;
-                lastUpdated?: string;
-                dueDate?: string;
-                manuallyCreated?: boolean;
-            }
-            export interface $400 {
-                message?: string;
-            }
-            export interface $401 {
-                message?: string;
-            }
-            export interface $500 {
-                message?: string;
-            }
+            export type $201 = Components.Schemas.Step;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace DeleteExecution {
@@ -1066,9 +749,7 @@ declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
-            export interface $401 {
-                message?: string;
-            }
+            export type $401 = Components.Schemas.ErrorResp;
             export interface $404 {
             }
         }
@@ -1085,9 +766,7 @@ declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
-            export interface $500 {
-                message?: string;
-            }
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace GetClosingReasonExecution {
@@ -1098,15 +777,8 @@ declare namespace Paths {
             executionId: Parameters.ExecutionId;
         }
         namespace Responses {
-            export interface $200 {
-                reasons?: {
-                    id: string;
-                    title: string;
-                }[];
-            }
-            export interface $500 {
-                message?: string;
-            }
+            export type $200 = Components.Schemas.ClosingReasonResp;
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace GetExecution {
@@ -1117,7 +789,7 @@ declare namespace Paths {
             executionId: Parameters.ExecutionId;
         }
         namespace Responses {
-            /**
+            export type $200 = /**
              * example:
              * {
              *   "id": "8gja72h6kas6h",
@@ -1140,8 +812,8 @@ declare namespace Paths {
              *           "id": "sada5641f3a21",
              *           "name": "Call client and confirm address and product",
              *           "status": "ASSIGNED",
-             *           "userIds": [
-             *             11
+             *           "assignedTo": [
+             *             "11"
              *           ]
              *         },
              *         {
@@ -1165,107 +837,8 @@ declare namespace Paths {
              *   ]
              * }
              */
-            export interface $200 {
-                id?: string;
-                definitionId?: string;
-                orgId?: string;
-                name?: string;
-                /**
-                 * Creation timestamp
-                 */
-                creationTime?: string;
-                /**
-                 * Last Update timestamp
-                 */
-                lastUpdateTime?: string;
-                /**
-                 * Due date for finishing the workflow
-                 */
-                dueDate?: string;
-                status?: "STARTED" | "DONE" | "CLOSED";
-                trigger?: "MANUAL" | "AUTOMATIC";
-                assignedTo?: string[];
-                /**
-                 * Id of the user who closed workflow
-                 */
-                lastModifiedBy?: string;
-                contexts?: {
-                    id: string;
-                    title: string;
-                    schema: string;
-                }[];
-                nextOpenStep?: {
-                    id?: string;
-                    entityRefId?: string;
-                };
-                configuredClosingReasonSnapshot?: {
-                    id: string;
-                    title: string;
-                }[];
-                selectedClosingReasons?: {
-                    id: string;
-                    title: string;
-                }[];
-                closingReasonDescription?: string;
-                /**
-                 * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
-                 */
-                enableECPWorkflow?: boolean;
-                flow: ({
-                    id: string;
-                    definitionId?: string;
-                    /**
-                     * Name for this Section
-                     * example:
-                     * Lead Qualification
-                     */
-                    name: string;
-                    userIds?: number[];
-                    type: "STEP" | "SECTION";
-                    steps: {
-                        id: string;
-                        definitionId?: string;
-                        entityRefId: string;
-                        name: string;
-                        type: "STEP" | "SECTION";
-                        /**
-                         * Details regarding ECP for the workflow step
-                         */
-                        ecp?: {
-                            label?: string;
-                        };
-                        sectionId?: string;
-                        userIds?: number[];
-                        status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                        created?: string;
-                        lastUpdated?: string;
-                        dueDate?: string;
-                        manuallyCreated?: boolean;
-                    }[];
-                } | {
-                    id: string;
-                    definitionId?: string;
-                    entityRefId: string;
-                    name: string;
-                    type: "STEP" | "SECTION";
-                    /**
-                     * Details regarding ECP for the workflow step
-                     */
-                    ecp?: {
-                        label?: string;
-                    };
-                    sectionId?: string;
-                    userIds?: number[];
-                    status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                    created?: string;
-                    lastUpdated?: string;
-                    dueDate?: string;
-                    manuallyCreated?: boolean;
-                })[];
-            }
-            export interface $500 {
-                message?: string;
-            }
+            Components.Schemas.WorkflowExecution;
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace GetExecutions {
@@ -1278,268 +851,62 @@ declare namespace Paths {
             schema?: Parameters.Schema;
         }
         namespace Responses {
-            export type $200 = {
-                id?: string;
-                definitionId?: string;
-                orgId?: string;
-                name?: string;
-                /**
-                 * Creation timestamp
-                 */
-                creationTime?: string;
-                /**
-                 * Last Update timestamp
-                 */
-                lastUpdateTime?: string;
-                /**
-                 * Due date for finishing the workflow
-                 */
-                dueDate?: string;
-                status?: "STARTED" | "DONE" | "CLOSED";
-                trigger?: "MANUAL" | "AUTOMATIC";
-                assignedTo?: string[];
-                /**
-                 * Id of the user who closed workflow
-                 */
-                lastModifiedBy?: string;
-                contexts?: {
-                    id: string;
-                    title: string;
-                    schema: string;
-                }[];
-                nextOpenStep?: {
-                    id?: string;
-                    entityRefId?: string;
-                };
-                configuredClosingReasonSnapshot?: {
-                    id: string;
-                    title: string;
-                }[];
-                selectedClosingReasons?: {
-                    id: string;
-                    title: string;
-                }[];
-                closingReasonDescription?: string;
-                /**
-                 * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
-                 */
-                enableECPWorkflow?: boolean;
-                flow: ({
-                    id: string;
-                    definitionId?: string;
-                    /**
-                     * Name for this Section
-                     * example:
-                     * Lead Qualification
-                     */
-                    name: string;
-                    userIds?: number[];
-                    type: "STEP" | "SECTION";
-                    steps: {
-                        id: string;
-                        definitionId?: string;
-                        entityRefId: string;
-                        name: string;
-                        type: "STEP" | "SECTION";
-                        /**
-                         * Details regarding ECP for the workflow step
-                         */
-                        ecp?: {
-                            label?: string;
-                        };
-                    }[];
-                } | {
-                    id: string;
-                    definitionId?: string;
-                    entityRefId: string;
-                    name: string;
-                    type: "STEP" | "SECTION";
-                    /**
-                     * Details regarding ECP for the workflow step
-                     */
-                    ecp?: {
-                        label?: string;
-                    };
-                })[];
-            }[];
-            export interface $500 {
-                message?: string;
-            }
+            export type $200 = /**
+             * example:
+             * {
+             *   "id": "8gja72h6kas6h",
+             *   "name": "Lead Qualification",
+             *   "trigger": "MANUAL",
+             *   "status": "STARTED",
+             *   "creationTime": "2021-04-27T12:01:13.000Z",
+             *   "lastUpdateTime": "2021-04-27T12:01:13.000Z",
+             *   "dueDate": "2021-04-27T12:01:13.000Z",
+             *   "flow": [
+             *     {
+             *       "id": "sectionId1",
+             *       "name": "Initial Information Gathering",
+             *       "steps": [
+             *         {
+             *           "id": "sada5641f3a21",
+             *           "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-1ragw"
+             *         },
+             *         {
+             *           "id": "sada5641f3a22",
+             *           "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-sga72"
+             *         },
+             *         {
+             *           "id": "sada5641f3a23",
+             *           "entityRefId": "s9guauj2-sgha8h2t2kl-1589y15n-asjo2t"
+             *         }
+             *       ]
+             *     },
+             *     {
+             *       "id": "firstLevelStepId1",
+             *       "entityRefId": "sgja902tk-sgha8h2t2kl-1589y15n-asfsah2"
+             *     }
+             *   ]
+             * }
+             */
+            Components.Schemas.WorkflowExecutionSlim[];
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace SearchExecutions {
-        export interface RequestBody {
-            name?: string;
-            status?: "STARTED" | "DONE" | "CLOSED";
-            includeDoneWorkflows?: boolean;
-            assignedTo?: string;
-            sorting?: "A_Z" | "Z_A" | "DUE_DATE_ASC" | "DUE_DATE_DESC" | "TRIGGER_DATE_ASC" | "TRIGGER_DATE_DESC";
-            pagination?: {
-                orgId?: string;
-                creationTime?: string;
-            };
-        }
+        export type RequestBody = Components.Schemas.SearchExecutionsReq;
         namespace Responses {
-            export interface $200 {
-                executions: {
-                    id?: string;
-                    definitionId?: string;
-                    orgId?: string;
-                    name?: string;
-                    /**
-                     * Creation timestamp
-                     */
-                    creationTime?: string;
-                    /**
-                     * Last Update timestamp
-                     */
-                    lastUpdateTime?: string;
-                    /**
-                     * Due date for finishing the workflow
-                     */
-                    dueDate?: string;
-                    status?: "STARTED" | "DONE" | "CLOSED";
-                    trigger?: "MANUAL" | "AUTOMATIC";
-                    assignedTo?: string[];
-                    /**
-                     * Id of the user who closed workflow
-                     */
-                    lastModifiedBy?: string;
-                    contexts?: {
-                        id: string;
-                        title: string;
-                        schema: string;
-                    }[];
-                    nextOpenStep?: {
-                        id?: string;
-                        entityRefId?: string;
-                    };
-                    configuredClosingReasonSnapshot?: {
-                        id: string;
-                        title: string;
-                    }[];
-                    selectedClosingReasons?: {
-                        id: string;
-                        title: string;
-                    }[];
-                    closingReasonDescription?: string;
-                    /**
-                     * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
-                     */
-                    enableECPWorkflow?: boolean;
-                    flow: ({
-                        id: string;
-                        definitionId?: string;
-                        /**
-                         * Name for this Section
-                         * example:
-                         * Lead Qualification
-                         */
-                        name: string;
-                        userIds?: number[];
-                        type: "STEP" | "SECTION";
-                        steps: {
-                            id: string;
-                            definitionId?: string;
-                            entityRefId: string;
-                            name: string;
-                            type: "STEP" | "SECTION";
-                            /**
-                             * Details regarding ECP for the workflow step
-                             */
-                            ecp?: {
-                                label?: string;
-                            };
-                        }[];
-                    } | {
-                        id: string;
-                        definitionId?: string;
-                        entityRefId: string;
-                        name: string;
-                        type: "STEP" | "SECTION";
-                        /**
-                         * Details regarding ECP for the workflow step
-                         */
-                        ecp?: {
-                            label?: string;
-                        };
-                    })[];
-                }[];
-                lastEvaluatedKey?: {
-                    orgId?: string;
-                    creationTime?: string;
-                };
-            }
-            export interface $400 {
-                message?: string;
-            }
-            export interface $401 {
-                message?: string;
-            }
-            export interface $500 {
-                message?: string;
-            }
+            export type $200 = Components.Schemas.SearchExecutionsResp;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace SearchSteps {
-        export interface RequestBody {
-            executionName?: string;
-            stepName?: string;
-            assignedTo?: number;
-            includeDoneWorkflows?: boolean;
-            manuallyCreated?: boolean;
-            status?: "OPEN" | "COMPLETE" | "NEXT_OPEN_ITEM_IN_WORKFLOW";
-            sorting?: "A_Z" | "Z_A" | "DUE_DATE_ASC" | "DUE_DATE_DESC" | "TRIGGER_DATE_ASC" | "TRIGGER_DATE_DESC";
-            pagination?: {
-                from?: number;
-                size?: number;
-            };
-        }
+        export type RequestBody = Components.Schemas.SearchStepsReq;
         namespace Responses {
-            export interface $200 {
-                /**
-                 * example:
-                 * 50
-                 */
-                hits?: number;
-                results?: {
-                    id: string;
-                    definitionId?: string;
-                    entityRefId: string;
-                    name: string;
-                    type: "STEP" | "SECTION";
-                    /**
-                     * Details regarding ECP for the workflow step
-                     */
-                    ecp?: {
-                        label?: string;
-                    };
-                    sectionId?: string;
-                    userIds?: number[];
-                    status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                    created?: string;
-                    lastUpdated?: string;
-                    dueDate?: string;
-                    manuallyCreated?: boolean;
-                    executionId: string;
-                    executionName: string;
-                    executionStatus: "STARTED" | "DONE" | "CLOSED";
-                    contexts?: {
-                        id: string;
-                        title: string;
-                        schema: string;
-                    }[];
-                }[];
-            }
-            export interface $400 {
-                message?: string;
-            }
-            export interface $401 {
-                message?: string;
-            }
-            export interface $500 {
-                message?: string;
-            }
+            export type $200 = Components.Schemas.SearchStepsResp;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace UpdateExecution {
@@ -1549,22 +916,11 @@ declare namespace Paths {
         export interface PathParameters {
             executionId: Parameters.ExecutionId;
         }
-        export interface RequestBody {
-            status?: "STARTED" | "DONE" | "CLOSED";
-            assignedTo?: string[];
-            selectedClosingReasons?: {
-                id: string;
-                title: string;
-            }[];
-            closingReasonDescription?: string;
-            dueDate?: string;
-        }
+        export type RequestBody = Components.Schemas.WorkflowExecutionUpdateReq;
         namespace Responses {
             export interface $204 {
             }
-            export interface $500 {
-                message?: string;
-            }
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace UpdateStep {
@@ -1576,47 +932,12 @@ declare namespace Paths {
             executionId: Parameters.ExecutionId;
             stepId: Parameters.StepId;
         }
-        export interface RequestBody {
-            entityRefId: string;
-            userIds?: number[];
-            status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-            dueDate?: string;
-            name?: string;
-            position?: {
-                index: number;
-                sectionId?: string;
-            };
-        }
+        export type RequestBody = Components.Schemas.UpdateStepReq;
         namespace Responses {
-            export interface $200 {
-                id: string;
-                definitionId?: string;
-                entityRefId: string;
-                name: string;
-                type: "STEP" | "SECTION";
-                /**
-                 * Details regarding ECP for the workflow step
-                 */
-                ecp?: {
-                    label?: string;
-                };
-                sectionId?: string;
-                userIds?: number[];
-                status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED";
-                created?: string;
-                lastUpdated?: string;
-                dueDate?: string;
-                manuallyCreated?: boolean;
-            }
-            export interface $400 {
-                message?: string;
-            }
-            export interface $401 {
-                message?: string;
-            }
-            export interface $500 {
-                message?: string;
-            }
+            export type $200 = Components.Schemas.Step;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
 }
