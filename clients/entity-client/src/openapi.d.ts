@@ -2268,7 +2268,7 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
-            type?: "select" | "checkbox" | "text";
+            type?: "multiselect" | "checkbox";
             /**
              * controls if the matching of values against the options is case sensitive or not
              */
