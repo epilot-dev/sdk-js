@@ -1,5 +1,10 @@
 import { authenticate, authorizeWithToken, UsernamePasswordAuthParams } from '@epilot/auth';
 
+import {
+  default as automationClient,
+  getClient as getAutomationClient,
+  Client as AutomationClient,
+} from './automation-client';
 import { default as entityClient, getClient as getEntityClient, Client as EntityClient } from './entity-client';
 import { default as fileClient, getClient as getFileClient, Client as FileClient } from './file-client';
 import {
@@ -30,6 +35,7 @@ export class EpilotClient {
   submission: SubmissionClient = null;
   workflow: WorkflowClient = null;
   permissions: PermissionsClient = null;
+  automation: AutomationClient = null;
 
   constructor() {
     this.entity = getEntityClient();
@@ -40,6 +46,7 @@ export class EpilotClient {
     this.workflow = getWorkflowClient();
     this.permissions = getPermissionsClient();
     this.submission = getSubmissionClient();
+    this.automation = getAutomationClient();
   }
 
   public authorize(token: string) {
@@ -51,6 +58,7 @@ export class EpilotClient {
     this.submission = authorizeWithToken(this.submission, token);
     this.workflow = authorizeWithToken(this.workflow, token);
     this.permissions = authorizeWithToken(this.permissions, token);
+    this.automation = authorizeWithToken(this.automation, token);
 
     return this;
   }
@@ -66,6 +74,7 @@ export class EpilotClient {
     this.submission = authorizer.configureClient(this.submission);
     this.workflow = authorizer.configureClient(this.workflow);
     this.permissions = authorizer.configureClient(this.permissions);
+    this.automation = authorizer.configureClient(this.automation);
 
     return this;
   }
@@ -81,3 +90,4 @@ export { organizationClient };
 export { submissionClient };
 export { workflowClient };
 export { permissionsClient };
+export { automationClient };

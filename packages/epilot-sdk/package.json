@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@epilot/auth": "*",
+    "@epilot/automation-client": "*",
     "@epilot/entity-client": "*",
     "@epilot/file-client": "*",
     "@epilot/organization-client": "*",
