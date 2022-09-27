@@ -2113,6 +2113,14 @@
                   "example": "csv"
                 }
               },
+              "display_images_landscaped": {
+                "type": "boolean",
+                "description": "Controls how the images are presented to the user during upload on the Entity Details view."
+              },
+              "enable_description": {
+                "type": "boolean",
+                "description": "When set to true, an i18n description will be used alongside the attribute label.\nThis description should be set through the platform locales in the form: `file.{attribute_name}.description_text`.\n"
+              },
               "default_access_control": {
                 "type": "string",
                 "enum": [

@@ -1728,6 +1728,16 @@ declare namespace Components {
              * List of file extensions (without the dot suffix)
              */
             allowed_extensions?: string[];
+            /**
+             * Controls how the images are presented to the user during upload on the Entity Details view.
+             */
+            display_images_landscaped?: boolean;
+            /**
+             * When set to true, an i18n description will be used alongside the attribute label.
+             * This description should be set through the platform locales in the form: `file.{attribute_name}.description_text`.
+             *
+             */
+            enable_description?: boolean;
             default_access_control?: "public-read" | "private";
         }
         export type GetRelationsResp = (RelationItem | /**
