@@ -1,6 +1,6 @@
 {
   "name": "@epilot/workflow-client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Client library for epilot Workflow API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

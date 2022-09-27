@@ -1,6 +1,6 @@
 {
   "name": "epilot-sdk",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Epilot SDK",
   "main": "index.js",
   "scripts": {
@@ -43,16 +43,16 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@epilot/auth": "*",
-    "@epilot/automation-client": "*",
-    "@epilot/entity-client": "*",
-    "@epilot/file-client": "*",
+    "@epilot/auth": "^0.4.1",
+    "@epilot/automation-client": "^0.0.4",
+    "@epilot/entity-client": "^4.1.5",
+    "@epilot/file-client": "^1.4.3",
     "@epilot/organization-client": "*",
-    "@epilot/permissions-client": "*",
-    "@epilot/pricing-client": "*",
+    "@epilot/permissions-client": "^0.8.1",
+    "@epilot/pricing-client": "^2.1.8",
     "@epilot/submission-client": "*",
     "@epilot/user-client": "*",
-    "@epilot/workflow-client": "*",
+    "@epilot/workflow-client": "^0.1.1",
     "axios": "^0.25.0",
     "openapi-client-axios": "^5.1.2"
   }
