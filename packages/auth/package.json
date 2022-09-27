@@ -1,6 +1,6 @@
 {
   "name": "@epilot/auth",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Authenticate with epilot APIs",
   "main": "dist/index.js",
   "bin": {
