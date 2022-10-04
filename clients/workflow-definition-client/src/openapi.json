@@ -1,0 +1,1297 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Workflows Definitions",
+    "version": "1.0.0",
+    "description": "Service for Workflow Definitions for different processes inside of an Organization\n"
+  },
+  "servers": [
+    {
+      "url": "https://workflows-definition.sls.epilot.io"
+    },
+    {
+      "url": "https://workflows-definition.sls.epilot.io"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/workflows/limits/max-allowed": {
+      "get": {
+        "operationId": "getMaxAllowedLimit",
+        "summary": "getMaxAllowedLimit",
+        "description": "Get limits and number of created executions for an Organization.",
+        "tags": [
+          "Workflows"
+        ],
+        "responses": {
+          "200": {
+            "description": "A combo of current number of workflows, and the max allowed number of workflows.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaxAllowedLimit"
+                },
+                "example": {
+                  "currentNoOfWorkflows": 5,
+                  "maxAllowed": 7
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflows/definitions": {
+      "get": {
+        "operationId": "getDefinitions",
+        "summary": "getDefinitions",
+        "description": "Retrieve all Workflow Definitions from an Organization",
+        "tags": [
+          "Workflows"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - definitions loaded with success. Empty array if org has no definitions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkflowDefinition"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "25n2k52ja",
+                    "name": "Lead Qualification",
+                    "assignedTo": [
+                      "18625",
+                      "90252"
+                    ],
+                    "description": "Lead Qualification description",
+                    "lastUpdateTime": "2021-08-04T21:13:50.373Z",
+                    "creationTime": "2021-08-04T21:13:50.373Z",
+                    "dueDate": "2021-08-04T21:13:50.373Z",
+                    "flow": [
+                      {
+                        "id": "5892na2",
+                        "name": "Initial Information Gathering",
+                        "order": 1,
+                        "type": "SECTION",
+                        "steps": [
+                          {
+                            "id": "2hja82a",
+                            "name": "Call client and confirm address and product",
+                            "type": "STEP",
+                            "order": 1,
+                            "assignedTo": [
+                              "123482"
+                            ]
+                          },
+                          {
+                            "id": "ga92ha2",
+                            "name": "Check product availability",
+                            "type": "STEP",
+                            "order": 2,
+                            "assignedTo": [
+                              "123482"
+                            ]
+                          },
+                          {
+                            "id": "jga92ha",
+                            "name": "Send email confirming contact with the client",
+                            "type": "STEP",
+                            "order": 3,
+                            "assignedTo": [
+                              "123482"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "0a7g22a",
+                        "name": "Print and send catalog",
+                        "type": "STEP",
+                        "order": 2,
+                        "assignedTo": [
+                          "123482"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createDefinition",
+        "summary": "createDefinition",
+        "description": "Create a Workflow Definition.",
+        "tags": [
+          "Workflows"
+        ],
+        "requestBody": {
+          "description": "Workflow Definition payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowDefinition"
+              },
+              "example": {
+                "name": "Lead Qualification",
+                "description": "Lead Qualification description",
+                "dueDate": "2022-08-04T12:00:00.000Z",
+                "assignedTo": [
+                  "952802",
+                  "80225"
+                ],
+                "flow": [
+                  {
+                    "name": "Initial Information Gathering",
+                    "order": 1,
+                    "type": "SECTION",
+                    "steps": [
+                      {
+                        "name": "Call client and confirm address and product",
+                        "type": "STEP",
+                        "order": 1,
+                        "assignedTo": [
+                          "123482"
+                        ]
+                      },
+                      {
+                        "name": "Check product availability",
+                        "type": "STEP",
+                        "order": 2,
+                        "assignedTo": [
+                          "123482"
+                        ]
+                      },
+                      {
+                        "name": "Send email confirming contact with the client",
+                        "type": "STEP",
+                        "order": 3,
+                        "assignedTo": [
+                          "123482"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Print and send catalog",
+                    "type": "STEP",
+                    "order": 2,
+                    "assignedTo": [
+                      "123482"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - if the definition is created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowDefinition"
+                },
+                "example": {
+                  "id": "25n2k52ja",
+                  "name": "Lead Qualification",
+                  "description": "Lead Qualification description",
+                  "lastUpdateTime": "2021-08-04T21:13:50.373Z",
+                  "creationTime": "2021-08-04T21:13:50.373Z",
+                  "dueDate": "2022-08-04T12:00:00.000Z",
+                  "assignedTo": [
+                    "952802",
+                    "80225"
+                  ],
+                  "flow": [
+                    {
+                      "id": "5892na2",
+                      "name": "Initial Information Gathering",
+                      "order": 1,
+                      "type": "SECTION",
+                      "steps": [
+                        {
+                          "id": "2hja82a",
+                          "name": "Call client and confirm address and product",
+                          "type": "STEP",
+                          "order": 1,
+                          "assignedTo": [
+                            "48829"
+                          ]
+                        },
+                        {
+                          "id": "ga92ha2",
+                          "name": "Check product availability",
+                          "type": "STEP",
+                          "order": 2,
+                          "assignedTo": [
+                            "45390"
+                          ]
+                        },
+                        {
+                          "id": "jga92ha",
+                          "name": "Send email confirming contact with the client",
+                          "type": "STEP",
+                          "order": 3,
+                          "assignedTo": [
+                            "8230"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "0a7g22a",
+                      "name": "Print and send catalog",
+                      "type": "STEP",
+                      "order": 2,
+                      "assignedTo": [
+                        "8239"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflows/definitions/{definitionId}": {
+      "get": {
+        "operationId": "getDefinition",
+        "summary": "getDefinition",
+        "description": "Get specific Definition by id from the Organization.",
+        "tags": [
+          "Workflows"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definitionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid (length 8) to identify the Workflow Definition.",
+            "example": "7hj28a"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the Workflow definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowDefinition"
+                },
+                "example": {
+                  "id": "25n2k52ja",
+                  "name": "Lead Qualification",
+                  "dueDate": "2022-08-04T12:00:00.000Z",
+                  "assignedTo": [
+                    "952802",
+                    "80225"
+                  ],
+                  "lastUpdateTime": "2021-08-04T21:13:50.373Z",
+                  "creationTime": "2021-08-04T21:13:50.373Z",
+                  "flow": [
+                    {
+                      "id": "5892na2",
+                      "name": "Initial Information Gathering",
+                      "order": 1,
+                      "type": "SECTION",
+                      "steps": [
+                        {
+                          "id": "2hja82a",
+                          "name": "Call client and confirm address and product",
+                          "type": "STEP",
+                          "order": 1,
+                          "assignedTo": [
+                            "923432"
+                          ]
+                        },
+                        {
+                          "id": "ga92ha2",
+                          "name": "Check product availability",
+                          "type": "STEP",
+                          "order": 2,
+                          "assignedTo": [
+                            "45488"
+                          ]
+                        },
+                        {
+                          "id": "jga92ha",
+                          "name": "Send email confirming contact with the client",
+                          "type": "STEP",
+                          "order": 3,
+                          "assignedTo": [
+                            "45488"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "0a7g22a",
+                      "name": "Print and send catalog",
+                      "type": "STEP",
+                      "order": 2,
+                      "assignedTo": [
+                        "8988"
+                      ]
+                    }
+                  ],
+                  "closingReasons": [
+                    {
+                      "id": "ffoowef",
+                      "title": "test"
+                    },
+                    {
+                      "id": "hebwoeu",
+                      "title": "Closing because all"
+                    },
+                    {
+                      "id": "mbnoenq",
+                      "title": "Better offer"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Definition Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefinitionNotFoundResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateDefinition",
+        "summary": "updateDefinition",
+        "description": "Update Workflow Definition.",
+        "tags": [
+          "Workflows"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definitionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid (length 8) to identify the Workflow Definition.",
+            "example": "7hj28a"
+          }
+        ],
+        "requestBody": {
+          "description": "Workflow Definition payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowDefinition"
+              },
+              "example": {
+                "id": "25n2k52ja",
+                "name": "Lead Qualification",
+                "dueDate": "2022-08-04T12:00:00.000Z",
+                "assignedTo": [
+                  "952802",
+                  "80225"
+                ],
+                "lastUpdateTime": "2021-08-04T21:13:50.373Z",
+                "creationTime": "2021-08-04T21:13:50.373Z",
+                "flow": [
+                  {
+                    "id": "5892na2",
+                    "name": "Initial Information Gathering",
+                    "order": 1,
+                    "type": "SECTION",
+                    "steps": [
+                      {
+                        "id": "2hja82a",
+                        "name": "Call client and confirm address and product",
+                        "type": "STEP",
+                        "order": 1,
+                        "assignedTo": [
+                          "8988"
+                        ]
+                      },
+                      {
+                        "id": "ga92ha2",
+                        "name": "Check product availability",
+                        "type": "STEP",
+                        "order": 2,
+                        "assignedTo": [
+                          "8988"
+                        ]
+                      },
+                      {
+                        "id": "jga92ha",
+                        "name": "Send email confirming contact with the client",
+                        "type": "STEP",
+                        "order": 3,
+                        "assignedTo": [
+                          "8988"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "0a7g22a",
+                    "name": "Print and send catalog",
+                    "type": "STEP",
+                    "order": 2,
+                    "assignedTo": [
+                      "8988"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - if the definition is updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowDefinition"
+                },
+                "example": {
+                  "id": "25n2k52ja",
+                  "name": "Lead Qualification",
+                  "dueDate": "2022-08-04T12:00:00.000Z",
+                  "assignedTo": [
+                    "952802",
+                    "80225"
+                  ],
+                  "lastUpdateTime": "2021-08-04T21:13:50.373Z",
+                  "creationTime": "2021-08-04T21:13:50.373Z",
+                  "flow": [
+                    {
+                      "id": "5892na2",
+                      "name": "Initial Information Gathering",
+                      "order": 1,
+                      "type": "SECTION",
+                      "steps": [
+                        {
+                          "id": "2hja82a",
+                          "name": "Call client and confirm address and product",
+                          "type": "STEP",
+                          "order": 1,
+                          "assignedTo": [
+                            "1"
+                          ]
+                        },
+                        {
+                          "id": "ga92ha2",
+                          "name": "Check product availability",
+                          "type": "STEP",
+                          "order": 2,
+                          "assignedTo": [
+                            "56645"
+                          ]
+                        },
+                        {
+                          "id": "jga92ha",
+                          "name": "Send email confirming contact with the client",
+                          "type": "STEP",
+                          "order": 3,
+                          "assignedTo": [
+                            "949923"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "0a7g22a",
+                      "name": "Print and send catalog",
+                      "type": "STEP",
+                      "order": 2,
+                      "assignedTo": [
+                        "156645"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDefinition",
+        "summary": "deleteDefinition",
+        "description": "Delete Workflow Definition.",
+        "tags": [
+          "Workflows"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definitionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the definition to de deleted.",
+            "example": "CustomerRequest"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - if the definition is deleted successfully"
+          },
+          "401": {
+            "description": "Failed to authenticate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No definition found"
+          }
+        }
+      }
+    },
+    "/v1/workflows/closing-reasons": {
+      "get": {
+        "operationId": "getAllClosingReasons",
+        "summary": "getAllClosingReasons",
+        "description": "Get all Closing Reasons defined in the organization by default all Active.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "includeInactive",
+            "schema": {
+              "type": "boolean"
+            },
+            "required": false,
+            "description": "Filter Closing Reasons by status like active inactiv",
+            "example": true
+          }
+        ],
+        "tags": [
+          "Closing Reason"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the entire catalog of closing reasons per organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasons"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createClosingReason",
+        "summary": "createClosingReason",
+        "description": "A created Closing Reason is stored for the organization and will be displayed in the library of reasons.",
+        "tags": [
+          "Closing Reason"
+        ],
+        "requestBody": {
+          "description": "closing reason to store",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClosingReason"
+              },
+              "example": {
+                "title": "better offer",
+                "description": "A customer closes the process because he found something better"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "closing reason is stored successfully in the repository",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReason"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflows/closing-reasons/{reasonId}": {
+      "patch": {
+        "operationId": "changeReasonStatus",
+        "summary": "changeReasonStatus",
+        "description": "Change the status of a Closing Reason (eg. ACTIVE to INACTIVE).",
+        "tags": [
+          "Closing Reason"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reasonId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "change the status of a closing reason",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeReasonStatusReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The status change was accepted"
+          },
+          "400": {
+            "description": "bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflows/definitions/{definitionId}/closing-reasons": {
+      "get": {
+        "operationId": "getWorkflowClosingReasons",
+        "summary": "getWorkflowClosingReasons",
+        "description": "Returns all closing reasons defined for the workflow.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definitionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "ID of a workflow definition",
+            "example": "fxcwfw"
+          }
+        ],
+        "tags": [
+          "Workflows"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the entire catalog of closing reasons for a specific workflow",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonsIds"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "setWorkflowClosingReasons",
+        "summary": "setWorkflowClosingReasons",
+        "description": "Sets which closing reasons are defined for this workflow, based on the entire closing reasons catalog.",
+        "tags": [
+          "Workflows"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definitionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "ID of a workflow definition",
+            "example": 7889
+          }
+        ],
+        "requestBody": {
+          "description": "set all closing reasons for a specific definition",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClosingReasonsIds"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "closing reasons are set for this workflow"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "WorkflowDefinition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "creationTime": {
+            "type": "string",
+            "description": "ISO String Date & Time",
+            "example": "2021-04-27T12:01:13.000Z"
+          },
+          "lastUpdateTime": {
+            "type": "string",
+            "description": "ISO String Date & Time",
+            "example": "2021-04-27T12:01:13.000Z"
+          },
+          "dueDate": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "dynamicDueDate": {
+            "$ref": "#/components/schemas/DynamicDueDate"
+          },
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "deprecated": true,
+            "description": "This field is deprecated. Please use assignedTo"
+          },
+          "assignedTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "enableECPWorkflow": {
+            "type": "boolean",
+            "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
+          },
+          "flow": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Section"
+                },
+                {
+                  "$ref": "#/components/schemas/Step"
+                }
+              ]
+            }
+          },
+          "closingReasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReasonId"
+            }
+          },
+          "updateEntityAttributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpdateEntityAttributes"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "flow"
+        ]
+      },
+      "Step": {
+        "type": "object",
+        "description": "Action that needs to be done in a Workflow",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "executionType": {
+            "$ref": "#/components/schemas/StepType"
+          },
+          "automationConfig": {
+            "type": "object",
+            "properties": {
+              "flowId": {
+                "type": "string",
+                "description": "Id of the configured automation to run"
+              }
+            },
+            "required": [
+              "flowId"
+            ]
+          },
+          "order": {
+            "type": "number"
+          },
+          "dueDate": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "dynamicDueDate": {
+            "$ref": "#/components/schemas/DynamicDueDate"
+          },
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "deprecated": true,
+            "description": "This field is deprecated. Please use assignedTo"
+          },
+          "requirements": {
+            "type": "array",
+            "description": "requirements that need to be fulfilled in order to enable the step execution",
+            "items": {
+              "$ref": "#/components/schemas/StepRequirement"
+            }
+          },
+          "assignedTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "$ref": "#/components/schemas/ItemType"
+          },
+          "ecp": {
+            "$ref": "#/components/schemas/ECPDetails"
+          }
+        },
+        "required": [
+          "name",
+          "order",
+          "type"
+        ]
+      },
+      "Section": {
+        "type": "object",
+        "description": "A group of Steps that define the progress of the Workflow",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ItemType"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "order",
+          "type",
+          "steps"
+        ]
+      },
+      "ItemType": {
+        "type": "string",
+        "enum": [
+          "STEP",
+          "SECTION"
+        ]
+      },
+      "StepType": {
+        "type": "string",
+        "enum": [
+          "MANUAL",
+          "AUTOMATION"
+        ]
+      },
+      "ECPDetails": {
+        "type": "object",
+        "description": "Details regarding ECP for the workflow step",
+        "properties": {
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "MaxAllowedLimit": {
+        "type": "object",
+        "properties": {
+          "currentNoOfWorkflows": {
+            "type": "number"
+          },
+          "maxAllowed": {
+            "type": "number"
+          }
+        }
+      },
+      "DefinitionNotFoundResp": {
+        "description": "Definition could be not found",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ChangeReasonStatusReq": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ClosingReasonsStatus"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "ClosingReasons": {
+        "type": "object",
+        "properties": {
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          }
+        },
+        "required": [
+          "reasons"
+        ]
+      },
+      "ClosingReason": {
+        "type": "object",
+        "description": "One Closing reason for a workflow",
+        "required": [
+          "title",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ClosingReasonsStatus"
+          },
+          "lastUpdateTime": {
+            "type": "string"
+          },
+          "creationTime": {
+            "type": "string"
+          }
+        }
+      },
+      "ClosingReasonsStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "INACTIVE"
+        ]
+      },
+      "ClosingReasonsIds": {
+        "type": "object",
+        "properties": {
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReasonId"
+            }
+          }
+        },
+        "required": [
+          "reasons"
+        ]
+      },
+      "ClosingReasonId": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "x739cew"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ErrorResp": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateEntityAttributes": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "workflow_status",
+              "current_section",
+              "current_step"
+            ]
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "entitySchema": {
+                "type": "string",
+                "example": "opportunity"
+              },
+              "entityAttribute": {
+                "type": "string",
+                "example": "my_status"
+              }
+            },
+            "required": [
+              "entitySchema",
+              "entityAttribute"
+            ]
+          }
+        },
+        "required": [
+          "source",
+          "target"
+        ]
+      },
+      "DynamicDueDate": {
+        "description": "set a Duedate for a step then a specific",
+        "type": "object",
+        "properties": {
+          "numberOfUnits": {
+            "type": "number"
+          },
+          "timePeriod": {
+            "type": "string",
+            "enum": [
+              "days",
+              "weeks",
+              "months"
+            ]
+          },
+          "actionTypeCondition": {
+            "type": "string",
+            "enum": [
+              "WORKFLOW_STARTED",
+              "STEP_CLOSED"
+            ]
+          },
+          "stepId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "numberOfUnits",
+          "timePeriod",
+          "actionTypeCondition"
+        ]
+      },
+      "StepRequirement": {
+        "description": "describe the requirement for step enablement",
+        "type": "object",
+        "properties": {
+          "definitionId": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ItemType"
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "CLOSED"
+            ]
+          }
+        },
+        "required": [
+          "definitionId",
+          "type",
+          "condition"
+        ]
+      }
+    }
+  }
+}
