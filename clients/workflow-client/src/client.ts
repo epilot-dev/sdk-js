@@ -1,3 +1,4 @@
+import CorrelationIds from '@dazn/lambda-powertools-correlation-ids';
 import OpenAPIClientAxios from 'openapi-client-axios';
 
 import definition from './definition';
