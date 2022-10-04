@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@epilot/auth": "^0.4.1",
-    "@epilot/automation-client": "^0.0.4",
+    "@epilot/automation-client": "^1.9.3",
     "@epilot/entity-client": "^4.1.5",
     "@epilot/file-client": "^1.4.3",
     "@epilot/organization-client": "*",
@@ -52,8 +52,9 @@
     "@epilot/pricing-client": "^2.1.8",
     "@epilot/submission-client": "*",
     "@epilot/user-client": "*",
-    "@epilot/workflow-client": "^0.1.1",
+    "@epilot/workflow-client": "^1.0.0",
+    "@epilot/workflow-definition-client": "^1.0.0",
     "axios": "^0.25.0",
-    "openapi-client-axios": "^5.1.2"
+    "openapi-client-axios": "^5.3.0"
   }
 }
