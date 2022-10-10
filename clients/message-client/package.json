@@ -52,7 +52,7 @@
     "openapi-client-axios-typegen": "^5.0.1",
     "openapicmd": "^1.13.3",
     "ts-jest": "^26.5.0",
-    "ts-loader": "^9.4.1",
+    "ts-loader": "^8.3.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.8.4",
     "webpack": "^5.18.0",
