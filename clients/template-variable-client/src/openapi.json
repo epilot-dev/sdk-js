@@ -1,0 +1,1410 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Template Variables API",
+    "description": "API to provide variables for email and document templates.",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "variables",
+      "description": "Variables"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/template-variables/categories": {
+      "get": {
+        "operationId": "getCategories",
+        "summary": "getCategories",
+        "description": "Get all template variable categories",
+        "tags": [
+          "variables"
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "en",
+                "de"
+              ],
+              "description": "Language",
+              "example": "de"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryResult"
+                  }
+                },
+                "example": [
+                  {
+                    "category": "contact",
+                    "description": "Contact"
+                  },
+                  {
+                    "category": "account",
+                    "description": "Account"
+                  },
+                  {
+                    "category": "organization",
+                    "description": "Organization"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/template-variables/qrcode:generate": {
+      "get": {
+        "operationId": "generateQRcode",
+        "summary": "generateQRcode",
+        "description": "Generate QR Code for the given payload",
+        "tags": [
+          "variables"
+        ],
+        "parameters": [
+          {
+            "name": "qrdata",
+            "in": "query",
+            "description": "Payload of the QR code",
+            "schema": {
+              "type": "string",
+              "default": "{{table_order_items}}"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generated QR Code",
+            "content": {
+              "image/png": {}
+            }
+          }
+        }
+      }
+    },
+    "/v1/template-variables:search": {
+      "post": {
+        "operationId": "searchVariables",
+        "summary": "searchVariables",
+        "description": "Search variables",
+        "tags": [
+          "variables"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "template_type": {
+                    "$ref": "#/components/schemas/TemplateType"
+                  },
+                  "query": {
+                    "type": "string",
+                    "description": "Search string",
+                    "example": "logo"
+                  },
+                  "from": {
+                    "type": "integer",
+                    "default": 0
+                  },
+                  "size": {
+                    "type": "integer",
+                    "default": 25
+                  },
+                  "lang": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "de"
+                    ]
+                  },
+                  "entity_schemas": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "Schema slug",
+                      "example": "contact"
+                    }
+                  }
+                },
+                "required": [
+                  "template_type",
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VariableResult"
+                  }
+                },
+                "example": [
+                  {
+                    "group": "Personal Details",
+                    "insert": "{{account.name}}",
+                    "description": "Company name",
+                    "type": "simple"
+                  },
+                  {
+                    "group": "Personal Details",
+                    "insert": "{{account.tax_id}}",
+                    "description": "Tax ID",
+                    "type": "simple"
+                  },
+                  {
+                    "group": "Address details",
+                    "qrdata": "{{account.address_details}}",
+                    "description": "Address Details",
+                    "type": "partial"
+                  },
+                  {
+                    "group": "Address Details",
+                    "insert": "{{account.address.street}}",
+                    "description": "Address - Street name",
+                    "type": "simple"
+                  },
+                  {
+                    "group": "Address Details",
+                    "insert": "{{account.address.street_number}}",
+                    "description": "Address - Street number",
+                    "type": "simple"
+                  },
+                  {
+                    "group": "Address Details",
+                    "insert": "{{account.address.postal_code}}",
+                    "description": "Address - Postal code",
+                    "type": "simple"
+                  },
+                  {
+                    "group": "Address Details",
+                    "insert": "{{account.address.city}}",
+                    "description": "Address - City",
+                    "type": "simple"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/template-variables:context": {
+      "post": {
+        "operationId": "getVariableContext",
+        "summary": "getVariableContext",
+        "description": "Get full variable context\n\nCalls Entity API, User API, Brand API and others to construct full context object used for template variable replace\n",
+        "tags": [
+          "variables"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "parameters": {
+                    "$ref": "#/components/schemas/VariableParameters"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VariableContext"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/template-variables:replace": {
+      "post": {
+        "operationId": "replaceTemplates",
+        "summary": "replaceTemplates",
+        "description": "Replace variables in handlebars templates\n\nTakes in an array of input templates and outputs the output text with replaced variables\n",
+        "tags": [
+          "variables"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "inputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": "Hello, {{contact.first_name}}!\n\n{{{brand.signature}}}\n"
+                    }
+                  },
+                  "parameters": {
+                    "$ref": "#/components/schemas/VariableParameters"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "outputs": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": "\"[Brand Name GmbH] Order confirmation\",\n\"Hello Customer Name \n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n\"]\n"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/custom-variables": {
+      "get": {
+        "operationId": "getCustomVariables",
+        "summary": "Get custom variables",
+        "description": "Get all custom variables of organization",
+        "tags": [
+          "Custom variables"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomVariable"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createCustomVariable",
+        "summary": "Create custom variable",
+        "description": "Create custom variable",
+        "tags": [
+          "Custom variables"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomVariable"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/custom-variables/{id}": {
+      "put": {
+        "operationId": "updateCustomVariable",
+        "summary": "Update custom variable",
+        "description": "Update custom variable",
+        "tags": [
+          "Custom variables"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Custom variable ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "rbse777b-3cf8-4bff-bb0c-253fd1123250"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomVariable"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "get": {
+        "operationId": "getCustomVariable",
+        "summary": "Get custom variable",
+        "description": "Get custom variable",
+        "tags": [
+          "Custom variables"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Custom vairable ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "rbse777b-3cf8-4bff-bb0c-253fd1123250"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomVariable"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteCustomVariable",
+        "summary": "Delete custom variable",
+        "description": "Immediately and permanently deletes a custom variable",
+        "tags": [
+          "Custom variables"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Custom vairable ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "rbse777b-3cf8-4bff-bb0c-253fd1123250"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/custom-variables/order-table-blueprint": {
+      "get": {
+        "operationId": "getBluePrintTableConfig",
+        "summary": "Get default table config",
+        "description": "Get default table config",
+        "tags": [
+          "Custom variables"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomVariable"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Bearer Token"
+      }
+    },
+    "schemas": {
+      "VariableParameters": {
+        "type": "object",
+        "properties": {
+          "template_type": {
+            "$ref": "#/components/schemas/TemplateType"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "de"
+            ]
+          },
+          "main_entity_id": {
+            "type": "string",
+            "description": "The main entity ID. Use main entity in order to use the variable without schema slug prefix - or just pass directly to other object ID.",
+            "example": "63753437-c9e2-4e83-82bb-b1c666514561"
+          },
+          "brand_id": {
+            "type": "number",
+            "nullable": true,
+            "description": "Brand ID",
+            "example": 123451
+          },
+          "user_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "User ID",
+            "example": 50001
+          },
+          "custom_variables": {
+            "type": "array",
+            "description": "Custom variables with specified values form other services.",
+            "items": {
+              "$ref": "#/components/schemas/ExternalCustomVariable"
+            }
+          }
+        },
+        "required": [
+          "template_type"
+        ]
+      },
+      "VariableResult": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "simple",
+              "partial"
+            ]
+          },
+          "qrdata": {
+            "type": "string",
+            "description": "Payload for the QR data"
+          },
+          "group": {
+            "type": "string",
+            "description": "Variable group"
+          },
+          "insert": {
+            "type": "string",
+            "description": "The value which is used to insert to template"
+          },
+          "description": {
+            "type": "string",
+            "description": "Variable description"
+          }
+        },
+        "example": "#/components/examples/ExampleVariableResult/value"
+      },
+      "VariableContext": {
+        "type": "object",
+        "properties": {
+          "unsubscribe_url": {
+            "type": "string",
+            "example": "https://consent.sls.epilot.io/v1/unsubscribe?token=abc123"
+          },
+          "main": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "$ref": "#/components/examples/ExampleMain/value"
+            }
+          },
+          "contact": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "$ref": "#/components/examples/ExampleContactEntity/value"
+            }
+          },
+          "brand": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "$ref": "#/components/examples/ExampleBrand/value"
+            }
+          }
+        }
+      },
+      "TemplateType": {
+        "type": "string",
+        "enum": [
+          "email",
+          "document"
+        ]
+      },
+      "VariableType": {
+        "type": "string",
+        "enum": [
+          "simple",
+          "partial"
+        ]
+      },
+      "CategoryResult": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "example": "contact"
+          },
+          "description": {
+            "type": "string",
+            "example": "Contact"
+          }
+        }
+      },
+      "ExternalCustomVariable": {
+        "type": "object",
+        "properties": {
+          "variable": {
+            "type": "string",
+            "example": "{{craftsmen.invitation_link}}"
+          },
+          "value": {
+            "type": "string",
+            "example": "https://partner.epilot.cloud/activate-account?user_name=htny.pct%2Btet%40gmail.com&confirmation_code=EdXPRW19"
+          }
+        }
+      },
+      "CustomVariable": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID",
+            "example": "rbse777b-3cf8-4bff-bb0c-253fd1123250"
+          },
+          "type": {
+            "type": "string",
+            "description": "Custom variable type",
+            "enum": [
+              "order_table",
+              "custom"
+            ],
+            "example": "rbse777b-3cf8-4bff-bb0c-253fd1123250"
+          },
+          "name": {
+            "type": "string",
+            "description": "Custom variable name",
+            "example": "My Custom table"
+          },
+          "key": {
+            "type": "string",
+            "description": "The key which is used for Handlebar variable syntax {{key}}",
+            "example": "my_custom_table"
+          },
+          "helper_params": {
+            "type": "array",
+            "description": "The helper function parameter's names",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "param1",
+              "param2"
+            ]
+          },
+          "helper_logic": {
+            "type": "string",
+            "description": "The helper function logic",
+            "example": "return param1 * param2;"
+          },
+          "config": {
+            "type": "object",
+            "description": "Variable configuration",
+            "example": {
+              "$ref": "#/components/examples/TableConfig/value"
+            }
+          },
+          "template": {
+            "type": "string",
+            "description": "Handlebar template that used to generate the variable content",
+            "example": "<table style=\"table-layout: fixed;width: 100%;max-width: 1000px;border-collapse: collapse;\">\n  <thead>\n    <tr style=\"height: 48px;border-bottom: 1px solid #D5E1ED;\">\n      {{#each table_config.header.columns as |column|}}\n        {{#if column.enable}}\n          <th style=\"{{makeStyle @root.table_config.header.style}};{{makeStyle column.style}};\">{{column._label}}</th>\n        {{/if}}\n      {{/each}}\n    </tr>\n  </thead>\n  <tbody style=\"vertical-align: baseline  !important;font-weight: 400;font-size: 12px;position: relative;\">\n    <!-- Start rendering products -->\n    {{#each order.products as |product|}}\n      {{#if @last}}\n        <tr style=\"height: 48px;;font-size:14px;border-bottom: 1px solid #D5E1ED;\">\n      {{else}}\n        <tr style=\"height: 48px;;font-size:14px;\">\n      {{/if}}\n        {{#each @root.table_config.header.columns as |column|}}\n          {{#if column.enable}}\n            {{#if (eq column.id 'item')}}\n              <!-- Item -->\n              <td style=\"{{makeStyle @root.table_config.body.product_name.style}}\">\n                {{#if @root.table_config.body.product_name.enable}}\n                  {{product.name}}\n                {{/if}}\n                {{#if @root.table_config.body.price_description.enable}}\n                  <br>\n                  <span style=\"{{makeStyle @root.table_config.body.price_description.style}}\">{{product.price.description}}</span>\n                {{/if}}\n                {{#if @root.table_config.body.product_description.enable}}\n                  <br>\n                  <span style=\"{{makeStyle @root.table_config.body.product_description.style}}\">{{product.description}}</span>\n                {{/if}}\n              </td>\n            {{/if}}\n            {{#if (eq column.id 'quantity')}}\n              <!-- Quantity -->\n              <td style=\"{{makeStyle @root.table_config.body.quantity.style}}\">{{product.price.quantity}}\n              </td>\n            {{/if}}\n            {{#if (eq column.id 'tax')}}\n              <!-- Tax -->\n              <td style=\"{{makeStyle @root.table_config.body.tax.style}}\">\n                {{product.price.tax_rate}}\n              </td>\n            {{/if}}\n            {{#if (eq column.id 'unit_amount')}}\n              <!-- Unit amount -->\n              <td style=\"{{makeStyle @root.table_config.body.unit_amount.style}}\">\n                {{product.price.unit_amount_net}}\n              </td>\n            {{/if}}\n            {{#if (eq column.id 'net_total')}}\n              <!-- Amount Subtotal -->\n              <td style=\"{{makeStyle @root.table_config.body.net_total.style}}\">\n                {{product.price.amount_subtotal}}\n              </td>\n            {{/if}}\n            {{#if (eq column.id 'amount_tax')}}\n              <!-- Tax amount-->\n              <td style=\"{{makeStyle @root.table_config.body.amount_tax.style}}\">\n                {{product.price.amount_tax}}\n              </td>\n            {{/if}}\n            {{#if (eq column.id 'gross_total')}}\n              <!-- Gross total -->\n              <td style=\"{{makeStyle @root.table_config.body.gross_total.style}}\">\n                {{product.price.amount_total}}\n                {{#if @root.table_config.body.payment_type.enable}}\n                  {{#if (eq product.price.type 'recurring')}}\n                    <br>\n                    <span style=\"{{makeStyle @root.table_config.body.payment_type.style}}\">{{product.price.billing_period}}</span>\n                  {{/if}}\n                {{/if}}\n              </td>\n            {{/if}}\n          {{/if}}\n        {{/each}}\n        </tr>\n    {{/each}}\n    <!-- Finish rendering products -->\n    {{#if table_config.footer.gross_total.enable}}\n      {{#each order.total_details.recurrences as |item|}}\n        <tr style=\"height: 48px;font-size: 14px;\">\n          <td style=\"padding-top: 16px; padding-bottom: 8px; border: none !important; vertical-align: top;\" colspan=\"{{calculate_colspan @root.table_config}}\"></td>\n          {{#if @root.table_config.footer.payment_type.enable}}\n            <td style=\"{{makeStyle @root.table_config.footer.payment_type.style}}\" colspan=\"2\">{{item.billing_period}}</td>\n          {{/if}}\n          {{#if (isColumnEnabled @root.table_config 'net_total')}}\n            {{#if @root.table_config.footer.net_total.enable}}\n              <td style=\"{{makeStyle @root.table_config.footer.net_total.style}}\">{{item.amount_subtotal}}</td>\n            {{/if}}\n          {{/if}}\n          <td style=\"{{makeStyle @root.table_config.footer.gross_total.style}}\">{{item.amount_total}}\n            {{#if @root.table_config.footer.amount_tax.enable}}\n              <br>\n              <span style=\"{{makeStyle @root.table_config.footer.amount_tax.style}}\">{{item.full_amount_tax}}</span>\n            {{/if}}\n          </td>\n        </tr>\n      {{/each}}\n    {{/if}}\n    <tr style=\"height:16px !important;\"></tr>\n  </tbody>\n</table>\n"
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Creation time",
+            "example": "2022-04-19T12:41:43.662Z"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "Created by",
+            "example": 100042
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Last update time",
+            "example": "2022-04-20T12:41:43.662Z"
+          },
+          "updated_by": {
+            "type": "string",
+            "description": "Updated by",
+            "example": 100042
+          }
+        }
+      }
+    },
+    "examples": {
+      "ExampleMain": {
+        "value": {
+          "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
+          "_title": "Example Customer",
+          "customer_number": 123,
+          "first_name": "Example",
+          "last_name": "Customer",
+          "title": "Prof.",
+          "salutation": "Ms. / Mrs.",
+          "birthdate": "2018-03-03",
+          "email": [
+            {
+              "email": "contact.primary@domain.com",
+              "_tags": [
+                "primary"
+              ]
+            },
+            {
+              "email": "sale@domain.com"
+            }
+          ],
+          "phone": [
+            {
+              "phone": "+49123456789",
+              "_tags": [
+                "primary",
+                "support"
+              ]
+            },
+            {
+              "phone": "+49504305025"
+            }
+          ],
+          "address": [
+            {
+              "_tags": [
+                "primary",
+                "delivery"
+              ],
+              "country": "Germany",
+              "city": "Köln",
+              "postal_code": "50825",
+              "street": "Im Mediapark",
+              "street_number": "8a",
+              "additional_info": "11th floor"
+            },
+            {
+              "_tags": [
+                "billing"
+              ],
+              "country": "Finland",
+              "city": "Köln",
+              "postal_code": "50670",
+              "street": "Im Mediapark",
+              "street_number": "8a",
+              "additional_info": ""
+            }
+          ],
+          "account": [
+            {
+              "status": "Active",
+              "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
+              "tax_id": "123abc",
+              "name": "name",
+              "email": [
+                {
+                  "email": "account.primary@domain.com",
+                  "_tags": [
+                    "primary"
+                  ]
+                },
+                {
+                  "email": "account.sale@domain.com"
+                }
+              ],
+              "phone": [
+                {
+                  "phone": "+49123456789",
+                  "_tags": [
+                    "primary",
+                    "support"
+                  ]
+                },
+                {
+                  "phone": "+49504305025"
+                }
+              ],
+              "address": [
+                {
+                  "_tags": [
+                    "primary",
+                    "delivery"
+                  ],
+                  "country": "Germany",
+                  "city": "Köln",
+                  "postal_code": "50825",
+                  "street": "Im Mediapark",
+                  "street_number": "8a",
+                  "additional_info": "11th floor"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "ExampleContactEntity": {
+        "value": {
+          "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
+          "_title": "Example Customer",
+          "customer_number": 123,
+          "first_name": "Example",
+          "last_name": "Customer",
+          "title": "Prof.",
+          "salutation": "Ms. / Mrs.",
+          "birthdate": "2018-03-03",
+          "email": [
+            {
+              "email": "contact.primary@domain.com",
+              "_tags": [
+                "primary"
+              ]
+            },
+            {
+              "email": "sale@domain.com"
+            }
+          ],
+          "phone": [
+            {
+              "phone": "+49123456789",
+              "_tags": [
+                "primary",
+                "support"
+              ]
+            },
+            {
+              "phone": "+49504305025"
+            }
+          ],
+          "address": [
+            {
+              "_tags": [
+                "primary",
+                "delivery"
+              ],
+              "country": "Germany",
+              "city": "Köln",
+              "postal_code": "50825",
+              "street": "Im Mediapark",
+              "street_number": "8a",
+              "additional_info": "11th floor"
+            },
+            {
+              "_tags": [
+                "billing"
+              ],
+              "country": "Finland",
+              "city": "Köln",
+              "postal_code": "50670",
+              "street": "Im Mediapark",
+              "street_number": "8a",
+              "additional_info": ""
+            }
+          ],
+          "account": [
+            {
+              "status": "Active",
+              "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
+              "tax_id": "123abc",
+              "name": "name",
+              "email": [
+                {
+                  "email": "account.primary@domain.com",
+                  "_tags": [
+                    "primary"
+                  ]
+                },
+                {
+                  "email": "account.sale@domain.com"
+                }
+              ],
+              "phone": [
+                {
+                  "phone": "+49123456789",
+                  "_tags": [
+                    "primary",
+                    "support"
+                  ]
+                },
+                {
+                  "phone": "+49504305025"
+                }
+              ],
+              "address": [
+                {
+                  "_tags": [
+                    "primary",
+                    "delivery"
+                  ],
+                  "country": "Germany",
+                  "city": "KölnSS",
+                  "postal_code": "50825",
+                  "street": "Im Mediapark",
+                  "street_number": "8a",
+                  "additional_info": "11th floor"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "ExampleAccountEntity": {
+        "value": {
+          "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
+          "status": "Active",
+          "name": "TestGmbH",
+          "tax_id": "123abc",
+          "email": [
+            {
+              "email": "account.primary@domain.com",
+              "_tags": [
+                "primary"
+              ]
+            },
+            {
+              "email": "account.sale@domain.com"
+            }
+          ],
+          "phone": [
+            {
+              "phone": "+49123456789",
+              "_tags": [
+                "primary",
+                "support"
+              ]
+            },
+            {
+              "phone": "+49504305025"
+            }
+          ],
+          "address": [
+            {
+              "_tags": [
+                "primary",
+                "delivery"
+              ],
+              "country": "Germany",
+              "city": "Köln",
+              "postal_code": "50825",
+              "street": "Im Mediapark",
+              "street_number": "8a",
+              "additional_info": "11th floor"
+            },
+            {
+              "_tags": [
+                "billing"
+              ],
+              "country": "Finland",
+              "city": "Köln",
+              "postal_code": "50670",
+              "street": "Im Mediapark",
+              "street_number": "8a",
+              "additional_info": ""
+            }
+          ],
+          "contacts": {
+            "customer_number": 123,
+            "first_name": "Example",
+            "last_name": "Customer",
+            "title": "Prof.",
+            "salutation": "Ms. / Mrs.",
+            "birthdate": "2018-03-03",
+            "email": [
+              {
+                "email": "contact.primary@domain.com",
+                "_tags": [
+                  "primary"
+                ]
+              },
+              {
+                "email": "sale@domain.com"
+              }
+            ],
+            "phone": [
+              {
+                "phone": "+49123456789",
+                "_tags": [
+                  "primary",
+                  "support"
+                ]
+              },
+              {
+                "phone": "+49504305025"
+              }
+            ],
+            "address": [
+              {
+                "_tags": [
+                  "primary",
+                  "delivery"
+                ],
+                "country": "Germany",
+                "city": "Köln",
+                "postal_code": "50825",
+                "street": "Im Mediapark",
+                "street_number": "8a",
+                "additional_info": "11th floor"
+              },
+              {
+                "_tags": [
+                  "billing"
+                ],
+                "country": "Finland",
+                "city": "Köln",
+                "postal_code": "50670",
+                "street": "Im Mediapark",
+                "street_number": "8a",
+                "additional_info": ""
+              }
+            ]
+          }
+        }
+      },
+      "ExampleProductEntity": {
+        "value": {
+          "_id": "fa5292c8-2d0a-44c6-95e8-929e98bd5001",
+          "type": "product",
+          "code": "nbvq7nz03815",
+          "name": "Product name",
+          "active": true,
+          "unitLabel": "Unit label",
+          "shippable": true,
+          "priceOptions": [
+            {
+              "unitAmount": "EUR 349,99",
+              "type": "One Time",
+              "sales_tax\"": "Standard (19%)",
+              "tax_behavior": "Exclusive (Price amount excludes Tax)",
+              "description": "My additional options 1",
+              "billingScheme": "Per Unit",
+              "tiersMode": "Standard",
+              "_id": "d6d1148c-7d6f-4c09-9bba-07d217ecebbc",
+              "_schema": "price",
+              "_org": "749660",
+              "_created_at": "2021-10-13T04:04:46.845Z",
+              "_updated_at": "2021-10-13T04:04:46.845Z",
+              "_title": "My additional options 1",
+              "entity_id": "d6d1148c-7d6f-4c09-9bba-07d217ecebbc"
+            },
+            {
+              "unitAmount": "EUR 99,999.45",
+              "type": "Recurring",
+              "billingPeriod": "Monthly",
+              "active": true,
+              "sales_tax": "Standard (19%)",
+              "tax_behavior": "Inclusive (Price amount includes Tax)",
+              "description": "The fear",
+              "billingScheme": "Per Unit",
+              "tiersMode": "Standard",
+              "_id": "27516b31-dc5a-432f-9ad8-d3678962e104",
+              "_schema": "price",
+              "_org": "749660",
+              "_created_at": "2021-10-13T04:05:52.023Z",
+              "_updated_at": "2021-10-13T04:05:52.023Z",
+              "_title": "The fear",
+              "entity_id": "27516b31-dc5a-432f-9ad8-d3678962e104"
+            }
+          ]
+        }
+      },
+      "ExampleOrganization": {
+        "value": {
+          "id": "123450",
+          "name": "Organization name",
+          "description": "This is description",
+          "email": "my.organization@domain.com",
+          "phone": "+ 49 8888 888",
+          "website": "www.my-website.org",
+          "street": "Im Mediapark",
+          "street_number": "8a",
+          "city": "Köln",
+          "postal_code": "50670",
+          "country": "Finland",
+          "signature": "Organization signature"
+        }
+      },
+      "ExampleBrand": {
+        "value": {
+          "id": 123453,
+          "name": "Brand name",
+          "signature": "Signature"
+        }
+      },
+      "ExampleUser": {
+        "value": {
+          "id": 123452,
+          "name": "User full name",
+          "email": "user@example.email",
+          "organization_id": 123450,
+          "phone": "+ 49 8888 888"
+        }
+      },
+      "ExampleCustomVariables": {
+        "value": [
+          {
+            "variable": {
+              "[object Object]": null
+            },
+            "value": "https://partner.epilot.cloud/activate-account?user_name=htny.pct%2Btet%40gmail.com&confirmation_code=EdXPRW19"
+          }
+        ]
+      },
+      "TableConfig": {
+        "value": {
+          "header": {
+            "style": {
+              "color": "#222",
+              "background": "#fff",
+              "font-size": "16px",
+              "font-family": "",
+              "padding-bottom": "4px",
+              "font-weight": "bold",
+              "border": "none !important",
+              "text-align": "left"
+            },
+            "columns": [
+              {
+                "id": "item",
+                "index": 0,
+                "label": {
+                  "en": "Item",
+                  "de": "Produkt"
+                },
+                "enable": true,
+                "draggable": true,
+                "style": {
+                  "padding-left": "10px",
+                  "max-width": "30%"
+                }
+              },
+              {
+                "id": "quantity",
+                "index": 1,
+                "label": {
+                  "en": "Quanity",
+                  "de": "Menge"
+                },
+                "enable": true,
+                "draggable": true,
+                "style": {
+                  "min-width": "60px",
+                  "width": "30%"
+                }
+              },
+              {
+                "id": "tax",
+                "index": 2,
+                "label": {
+                  "en": "Tax Rate",
+                  "de": "Steuerrate"
+                },
+                "enable": true,
+                "draggable": true,
+                "style": {
+                  "min-width": "60px",
+                  "width": "30%"
+                }
+              },
+              {
+                "id": "unit_amount",
+                "index": 3,
+                "label": {
+                  "en": "Unit Net Price",
+                  "de": "Nettopreis"
+                },
+                "enable": true,
+                "draggable": true,
+                "style": {
+                  "min-width": "60px",
+                  "width": "30%"
+                }
+              },
+              {
+                "id": "net_total",
+                "index": 4,
+                "label": {
+                  "en": "Net total",
+                  "de": "Nettosumme"
+                },
+                "enable": "true,",
+                "draggable": true,
+                "style": {
+                  "min-width": "60px",
+                  "width": "30%"
+                }
+              },
+              {
+                "id": "gross_total",
+                "index": 5,
+                "label": {
+                  "en": "Total",
+                  "de": "Gesamt"
+                },
+                "enable": true,
+                "draggable": true,
+                "style": {
+                  "min-width": "60px",
+                  "width": "30%"
+                }
+              }
+            ]
+          },
+          "body": {
+            "product_name": {
+              "parent_column": "item",
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "14px",
+                "font-family": "",
+                "font-weight": "bold",
+                "font-style": "normal",
+                "padding-top": "16px",
+                "padding-bottom": "8px",
+                "border": "none !important",
+                "vertical-align": "top",
+                "text-align": "left",
+                "max-width": "30%",
+                "padding-left": "10px"
+              }
+            },
+            "price_description": {
+              "parent_column": "item",
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "12px",
+                "font-family": "",
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-align": "left",
+                "max-width": "30%"
+              }
+            },
+            "product_description": {
+              "parent_column": "item",
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "12px",
+                "font-family": "",
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-align": "left",
+                "max-width": "30%"
+              }
+            },
+            "quantity": {
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "12px",
+                "font-family": "",
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-align": "left",
+                "max-width": "30%"
+              }
+            },
+            "tax": {
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "12px",
+                "font-family": "",
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-align": "left",
+                "max-width": "30%"
+              }
+            },
+            "unit_amount": {
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "12px",
+                "font-family": "",
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-align": "left",
+                "max-width": "30%"
+              }
+            },
+            "net_total": {
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "12px",
+                "font-family": "",
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-align": "left",
+                "max-width": "30%"
+              }
+            },
+            "gross_total": {
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "12px",
+                "font-family": "",
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-align": "left",
+                "max-width": "30%"
+              }
+            }
+          },
+          "footer": {
+            "payment_type": {
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "12px",
+                "font-family": "",
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-align": "left",
+                "max-width": "30%"
+              }
+            },
+            "net_total": {
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "12px",
+                "font-family": "",
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-align": "left",
+                "max-width": "30%"
+              }
+            },
+            "amount_tax": {
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "12px",
+                "font-family": "",
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-align": "left",
+                "max-width": "30%"
+              }
+            },
+            "gross_total": {
+              "enable": true,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "12px",
+                "font-family": "",
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-align": "left",
+                "max-width": "30%"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://template-variables-api.sls.epilot.io"
+    },
+    {
+      "url": "https://template-variables-api.sls.epilot.io"
+    }
+  ]
+}

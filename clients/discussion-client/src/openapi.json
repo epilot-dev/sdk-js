@@ -1,0 +1,670 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Discussion API",
+    "version": "1.0.0"
+  },
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "AsOrganization": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v1/comments": {
+      "post": {
+        "operationId": "createComment",
+        "summary": "Create comment",
+        "description": "Create a comment.",
+        "tags": [
+          "Comments"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/comments/{id}": {
+      "put": {
+        "operationId": "updateComment",
+        "summary": "Update comment",
+        "description": "Update a comment.",
+        "tags": [
+          "Comments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Comment ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d9159a41-1311-47fd-b026-b59401f3bf87"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "get": {
+        "operationId": "getComment",
+        "summary": "Get comment",
+        "description": "Get comment by ID",
+        "tags": [
+          "Comments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Comment ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d9159a41-1311-47fd-b026-b59401f3bf87"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteComment",
+        "summary": "Delete comment",
+        "description": "Immediately and permanently deletes the specified comment. If the comment is the one that triggered a discussion thread, all comments belong to this thread will be deleted as well. This operation cannot be undone.",
+        "tags": [
+          "Comments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Comment ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d9159a41-1311-47fd-b026-b59401f3bf87"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/contexts/{id}/threads": {
+      "get": {
+        "operationId": "getThreadsByContext",
+        "summary": "Get threads by context",
+        "description": "Get the comments that are treated as first comment of a thread. The fully thread will be get separately.",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Context ID that threads belong to",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d9159a41-1311-47fd-b026-b59401f3bf87"
+          },
+          {
+            "name": "limit",
+            "description": "The limit of data set. Default is 10.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            },
+            "example": 10
+          },
+          {
+            "name": "offset",
+            "description": "The offset number. Default is 0.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            },
+            "example": 0
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "type": "number",
+                      "description": "Total threads of context",
+                      "example": 15
+                    },
+                    "results": {
+                      "type": "array",
+                      "description": "Threads",
+                      "items": {
+                        "$ref": "#/components/schemas/Comment"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/contexts/{id}/mentionableUsers": {
+      "get": {
+        "operationId": "getMentionableUsers",
+        "summary": "Get list of users for mention list of a context.",
+        "description": "Get list of users for mention list including entity owner's users & shared users.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Context ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d9159a41-1311-47fd-b026-b59401f3bf87"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/threads/{id}": {
+      "get": {
+        "operationId": "getThreadComments",
+        "summary": "Get thread comments",
+        "description": "Get comments belong to a thread",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d9159a41-1311-47fd-b026-b59401f3bf87"
+          },
+          {
+            "name": "limit",
+            "description": "The limit of data set. Default is 10.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "description": "The offset number. Default is 0.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "type": "number",
+                      "description": "Total comments in a thread",
+                      "example": 15
+                    },
+                    "results": {
+                      "type": "array",
+                      "description": "Comments",
+                      "items": {
+                        "$ref": "#/components/schemas/Comment"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Bearer Custom Authorization Token\n\n```\nbtoa(JSON.stringify(\n    {\n        idtoken: $idToken,\n        accesstoken: $accessToken\n    }\n))\n```\n"
+      },
+      "AsOrganization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-org-id",
+        "description": "Set organization id when using internal auth"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "BaseEntity": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Entity ID",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "_title": {
+            "type": "string",
+            "description": "Entity title"
+          },
+          "_org": {
+            "type": "string",
+            "description": "Ivy Organization ID the entity belongs to",
+            "example": "206801"
+          },
+          "_schema": {
+            "type": "string",
+            "description": "URL-friendly identifier for the entity schema",
+            "example": "message"
+          },
+          "_tags": {
+            "type": "array",
+            "description": "Entity tags",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "automatic email template"
+            ]
+          },
+          "_created_at": {
+            "type": "string",
+            "description": "Created date",
+            "format": "date-time",
+            "example": "2021-02-09T12:41:43.662Z"
+          },
+          "_updated_at": {
+            "type": "string",
+            "description": "Updated date",
+            "format": "date-time",
+            "example": "2021-02-10T09:14:31.990Z"
+          }
+        }
+      },
+      "Comment": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "description": "UUID v4",
+            "type": "string",
+            "example": "d9159a41-1311-47fd-b026-b59401f3bf87"
+          },
+          "context_id": {
+            "type": "string",
+            "description": "ID of the context the comment belongs to (entity ID, workflow ID, activity ID, opportunity ID,…)",
+            "example": "d9159a41-1311-47fd-b026-b59401f3bf87"
+          },
+          "thread_id": {
+            "type": "string",
+            "description": "Thread ID - available when the comment is a reply to thread.",
+            "example": "6a838adf-a579-4ffd-9e6c-630a09fa025a"
+          },
+          "title": {
+            "description": "Title",
+            "type": "string",
+            "example": "Discussion"
+          },
+          "content": {
+            "description": "name",
+            "type": "string",
+            "example": "I want to trigger a discussion about when we delivery the facilities to customer."
+          },
+          "attachments": {
+            "type": "array",
+            "description": "Attachments",
+            "items": {
+              "$ref": "#/components/schemas/Attachment"
+            }
+          },
+          "reactions": {
+            "type": "array",
+            "description": "Reactions",
+            "items": {
+              "$ref": "#/components/schemas/Reaction"
+            }
+          },
+          "edited_at": {
+            "type": "string",
+            "description": "Last edit time of author",
+            "format": "date-time",
+            "example": "2021-02-10T09:14:31.990Z"
+          },
+          "_tags": {
+            "type": "array",
+            "description": "Tags",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "discussion",
+              "comment"
+            ]
+          },
+          "created_by": {
+            "description": "Created by",
+            "type": "number",
+            "example": 1234
+          },
+          "_created_at": {
+            "type": "string",
+            "description": "Created at",
+            "format": "date-time",
+            "example": "2021-02-10T09:14:31.990Z"
+          },
+          "updated_by": {
+            "description": "Updated by",
+            "type": "number",
+            "example": 1234
+          },
+          "_updated_at": {
+            "type": "string",
+            "description": "Updated at",
+            "format": "date-time",
+            "example": "2021-02-10T09:14:31.990Z"
+          }
+        }
+      },
+      "Attachment": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "File ID",
+            "example": "70432e1d-eadc-4995-937c-2604637bbaae"
+          },
+          "filename": {
+            "type": "string",
+            "description": "Filename",
+            "example": "document.pdf"
+          },
+          "mime_type": {
+            "type": "string",
+            "description": "Content type",
+            "example": "application/pdf"
+          },
+          "public_url": {
+            "type": "string",
+            "description": "Public url for downloading file",
+            "example": "https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+          },
+          "s3ref": {
+            "type": "object",
+            "description": "S3 reference",
+            "properties": {
+              "bucket": {
+                "type": "string",
+                "description": "S3 bucket name",
+                "example": "epilot-files-prod"
+              },
+              "key": {
+                "type": "string",
+                "description": "S3 object key",
+                "example": "123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+              }
+            }
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "12345"
+          },
+          "organization_id": {
+            "type": "string",
+            "example": "23456"
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2022-02-08T04:44:32.246Z"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User's display name (default: email address)",
+            "example": "Example User"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Active",
+              "Pending",
+              "Deactivated",
+              "Deleted"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "draft_email": {
+            "type": "string",
+            "nullable": true,
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "example": 1234567890
+          },
+          "preferred_language": {
+            "type": "string",
+            "example": "de"
+          },
+          "token": {
+            "type": "string",
+            "example": "65dc527f-cb2d-4158-8f2e-8978dbceb599"
+          },
+          "signature": {
+            "type": "string",
+            "example": "<p>Thanks</p>"
+          },
+          "is_signature_enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "image_uri": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "original": {
+                "type": "string",
+                "format": "uri"
+              },
+              "thumbnail_32": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "example": {
+              "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+              "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+            }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "profileImageName"
+                },
+                "value": {
+                  "type": "string",
+                  "example": "avatar.png"
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ]
+            }
+          }
+        }
+      },
+      "Reaction": {
+        "type": "object",
+        "properties": {
+          "emoji": {
+            "type": "string",
+            "description": "Emoji",
+            "example": "like"
+          },
+          "user_id": {
+            "type": "number",
+            "description": "User ID who reacted",
+            "example": 12345
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://discussion.sls.epilot.io"
+    },
+    {
+      "url": "https://discussion.sls.epilot.io"
+    }
+  ]
+}
