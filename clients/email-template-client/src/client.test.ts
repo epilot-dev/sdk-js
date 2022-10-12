@@ -5,7 +5,7 @@ describe('client', () => {
     it('should inititalise and return client', async () => {
       const client = getClient();
 
-      expect(client.api.initalized).toBe(true);
+      expect(client.api.initialized).toBe(true);
     });
 
     it('should have operations', async () => {
