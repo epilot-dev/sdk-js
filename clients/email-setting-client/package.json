@@ -4,6 +4,20 @@
   "description": "API Client for epilot email-settings API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git",
+    "directory": "clients/email-setting-client"
+  },
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/email-setting-client#readme",
+  "keywords": [
+    "epilot",
+    "sdk",
+    "email-setting"
+  ],
   "scripts": {
     "test": "jest",
     "typescript": "tsc",
@@ -26,12 +40,6 @@
     "!src",
     "!*.config.js"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/epilot-dev/sdk-js",
-    "directory": "clients/email-settings-client"
-  },
-  "keywords": [],
   "author": "epilot GmbH",
   "license": "UNLICENSED",
   "peerDependencies": {
