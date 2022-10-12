@@ -4,6 +4,20 @@
   "description": "API Client for epilot Message API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git",
+    "directory": "clients/message-client"
+  },
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/message-client#readme",
+  "keywords": [
+    "epilot",
+    "sdk",
+    "message"
+  ],
   "scripts": {
     "test": "jest",
     "typescript": "tsc",
@@ -28,7 +42,6 @@
     "!src/**",
     "!*.config.js"
   ],
-  "keywords": [],
   "author": "epilot GmbH",
   "license": "UNLICENSED",
   "peerDependencies": {
