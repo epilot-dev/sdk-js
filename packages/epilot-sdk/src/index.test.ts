@@ -46,7 +46,14 @@ describe('EpilotClient', () => {
       expect(eclient.file).not.toBeNull();
       expect(eclient.organization).not.toBeNull();
       expect(eclient.submission).not.toBeNull();
-      expect(eclient.workflow).not.toBeNull();
+      expect(eclient.emailSettings).not.toBeNull();
+      expect(eclient.emailTemplate).not.toBeNull();
+      expect(eclient.discussion).not.toBeNull();
+      expect(eclient.notification).not.toBeNull();
+      expect(eclient.templateVariables).not.toBeNull();
+      expect(eclient.discussion).not.toBeNull();
+      expect(eclient.notification).not.toBeNull();
+      expect(eclient.message).not.toBeNull();
     });
   });
 

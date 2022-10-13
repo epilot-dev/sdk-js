@@ -1,40 +1,29 @@
-# `@epilot/email-template-client`
+# @epilot/email-template-client
 
-API Client for epilot email template API.
+[![CI](https://github.com/epilot-dev/sdk-js/workflows/CI/badge.svg)](https://github.com/epilot-dev/sdk-js/actions?query=workflow%3ACI)
+[![npm version](https://img.shields.io/npm/v/@epilot/email-template-client.svg)](https://www.npmjs.com/package/@epilot/email-template-client)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@epilot/email-template-client?label=gzip%20bundle)](https://bundlephobia.com/package/@epilot/email-template-client)
+[![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/epilot-dev/sdk-js/blob/main/LICENSE)
+
+API Client for epilot [Email Template API](https://docs.epilot.io/api/email-template).
 
 Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axios)
 
-## Getting Started
-
-Install the package:
+## Installation
 
 ```bash
-npm install --save-dev @epilot/email-template-client
+npm install --save @epilot/email-template-client
 ```
 
-Import the package:
+## Usage
 
 ```typescript
 import { getClient } from '@epilot/email-template-client';
+const emailTemplateClient = getClient();
+
+const getResponse = await emailTemplateClient.getTemplateDetail({ id: 'a10bd0ff-4391-4cfc-88ee-b19d718a9bf7' });
 ```
 
-Use the client:
-```typescript
-// get typed client
-const client = await getClient();
-```
+## Documentation
 
-## BaseURL & Authorization
-
-To pass an authorization header and set up the API url, you can use axios
-defaults:
-
-```typescript
-const client = getClient();
-client.defaults.baseURL = config.ENTITY_API_URL;
-client.defaults.headers.common['authorization'] = `Bearer ${token}`;
-```
-
-## API Docs:
-
-https://docs.api.epilot.io/
+https://docs.epilot.io/docs/messaging/email-templates
