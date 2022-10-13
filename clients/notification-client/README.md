@@ -1,43 +1,29 @@
-# `@epilot/notification-client`
+# @epilot/notification-client
 
-API Client for epilot notification API.
+[![CI](https://github.com/epilot-dev/sdk-js/workflows/CI/badge.svg)](https://github.com/epilot-dev/sdk-js/actions?query=workflow%3ACI)
+[![npm version](https://img.shields.io/npm/v/@epilot/notification-client.svg)](https://www.npmjs.com/package/@epilot/notification-client)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@epilot/notification-client?label=gzip%20bundle)](https://bundlephobia.com/package/@epilot/notification-client)
+[![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/epilot-dev/sdk-js/blob/main/LICENSE)
+
+API Client for epilot [Notification API](https://docs.epilot.io/api/notification).
 
 Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axios)
 
-## Getting Started
-
-Install the package:
+## Installation
 
 ```bash
-npm install --save-dev @epilot/notification-client
+npm install --save @epilot/notification-client
 ```
 
-Import the package:
+## Usage
 
 ```typescript
 import { getClient } from '@epilot/notification-client';
+const notificationClient = getClient();
+
+const getResponse = await notificationClient.getNotifications({ limit: 25 });
 ```
 
-Use the client:
-```typescript
-// get typed client
-const client = await getClient();
+## Documentation
 
-// call an operation
-const res = await client.testS3();
-```
-
-## BaseURL & Authorization
-
-To pass an authorization header and set up the API url, you can use axios
-defaults:
-
-```typescript
-const client = getClient();
-client.defaults.baseURL = config.API_URL;
-client.defaults.headers.common['authorization'] = `Bearer ${token}`;
-```
-
-## API Docs:
-
-https://docs.api.epilot.io/
+https://docs.epilot.io/docs/notification

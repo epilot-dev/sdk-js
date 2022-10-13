@@ -5,23 +5,22 @@
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@epilot/discussion-client?label=gzip%20bundle)](https://bundlephobia.com/package/@epilot/discussion-client)
 [![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/epilot-dev/sdk-js/blob/main/LICENSE)
 
-Client library for epilot [Discussion API](https://docs.epilot.io/api/discussion).
+API Client for epilot [Discussion API](https://docs.epilot.io/api/discussion).
 
 Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axios)
 
 ## Installation
 
-```sh
-npm install --save-dev @epilot/discussion-client
+```bash
+npm install --save @epilot/discussion-client
 ```
 
 ## Usage
 
 ```typescript
 import { getClient } from '@epilot/discussion-client';
-
-const discussionCLient = getClient();
-await discussionClient.createComment(null, {
+const discussionClient = getClient();
+const createResponse = await discussionClient.createComment(null, {
   content: 'Hello World!',
   context_id: '0bb1495f-3e3d-455b-9cc6-6e0c4779b351',
 });
@@ -29,4 +28,4 @@ await discussionClient.createComment(null, {
 
 ## Documentation
 
-https://docs.epilot.io/api/discussion
+https://docs.epilot.io/docs/discussion
