@@ -1,0 +1,494 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Notification API",
+    "version": "1.0.0",
+    "description": "Notification API for epilot 360"
+  },
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Notification",
+      "description": "Notification"
+    }
+  ],
+  "paths": {
+    "/v1/notification/notifications": {
+      "post": {
+        "operationId": "createNotification",
+        "summary": "createNotification",
+        "description": "Create a message that can be displayed in the notification panel.",
+        "tags": [
+          "Notification"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Notification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Success"
+          }
+        }
+      },
+      "get": {
+        "operationId": "getNotifications",
+        "summary": "getNotifications",
+        "description": "Get notifications",
+        "tags": [
+          "Notification"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after_id",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The numbers of items to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "total_unread": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/NotificationItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/notification/notifications/{id}": {
+      "get": {
+        "operationId": "getNotification",
+        "summary": "getNotification",
+        "description": "Get the details of a single notification.",
+        "tags": [
+          "Notification"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Notification Id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/notification/notifications/mark": {
+      "put": {
+        "operationId": "markAllAsRead",
+        "summary": "markAllAsRead",
+        "description": "Mark all as read",
+        "tags": [
+          "Notification"
+        ],
+        "responses": {
+          "204": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/v1/notification/notifications/{id}/mark": {
+      "put": {
+        "operationId": "markAsRead",
+        "summary": "markAsRead",
+        "description": "Mark as read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Numeric ID of the notification to mark as read"
+          }
+        ],
+        "tags": [
+          "Notification"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v1/notification/unreads": {
+      "get": {
+        "operationId": "getTotalUnread",
+        "summary": "getTotalUnread",
+        "description": "Get total unread",
+        "tags": [
+          "Notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "number",
+                  "example": 999
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "EntityOperation": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "operation": {
+            "type": "string",
+            "example": "updateEntity"
+          },
+          "params": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/EntityId"
+              },
+              "slug": {
+                "$ref": "#/components/schemas/EntitySlug"
+              }
+            },
+            "example": {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "slug": "contact"
+            }
+          },
+          "payload": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Entity"
+              },
+              {
+                "example": {
+                  "_schema": "contact",
+                  "_org": "123",
+                  "status": "Inactive"
+                }
+              }
+            ]
+          }
+        },
+        "required": [
+          "entity",
+          "name"
+        ]
+      },
+      "NotificationItem": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/Id"
+              },
+              "notification_id": {
+                "$ref": "#/components/schemas/NotificationId"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "read_state": {
+                "type": "boolean",
+                "example": false
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/NotificationBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "caller": {
+                "$ref": "#/components/schemas/NotificationCallerContext"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "operations": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityOperation"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Notification": {
+        "additionalProperties": true,
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "visibility_user_ids": {
+                "description": "The person who is the corresponding event recipient.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "NotificationBase": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "type": {
+            "description": "Type of notification",
+            "type": "string",
+            "example": "workflow"
+          },
+          "redirect_url": {
+            "description": "Redirect url",
+            "type": "string",
+            "example": "https://epilot.cloud"
+          },
+          "organization_id": {
+            "description": "Organization Id",
+            "type": "string",
+            "example": "206801"
+          },
+          "title": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Title for notification. Supports handlebars syntax.",
+                "example": "My custom notification"
+              },
+              "de": {
+                "type": "string",
+                "description": "Title for notification. Supports handlebars syntax.",
+                "example": "Meine benutzerdefinierte Aktivität"
+              }
+            }
+          },
+          "message": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Message for notification. Supports handlebars syntax.",
+                "example": "{{caller}} did something with {{contact.entity.id}} {{branch.name}}."
+              },
+              "de": {
+                "type": "string",
+                "description": "Message for notification. Supports handlebars syntax.",
+                "example": "{{caller}} habe etwas damit gemacht {{contact.entity.id}} {{branch.name}}."
+              }
+            }
+          },
+          "payload": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true,
+            "example": {
+              "entity": {
+                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                "schema": "contact"
+              }
+            }
+          },
+          "caller": {
+            "$ref": "#/components/schemas/NotificationCallerContext"
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityOperation"
+            }
+          },
+          "force_notify_users": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true,
+            "example": {
+              "12345": {
+                "email": false,
+                "in_app": false
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "message"
+        ]
+      },
+      "EntityId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "Entity": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "Id": {
+        "type": "number",
+        "example": 123456789
+      },
+      "NotificationId": {
+        "type": "number",
+        "example": 123456789
+      },
+      "NotificationCallerContext": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "EpilotAuth": {
+            "type": "object",
+            "properties": {
+              "token": {
+                "type": "object",
+                "properties": {
+                  "sub": {
+                    "type": "string",
+                    "example": "476e9b48-42f4-4234-a2b0-4668b34626ce"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "example@epilot.cloud"
+                  },
+                  "cognito:username": {
+                    "type": "string",
+                    "example": "example@epilot.cloud"
+                  },
+                  "custom:ivy_user_id": {
+                    "type": "string",
+                    "example": "10006129"
+                  }
+                },
+                "example": {
+                  "sub": "476e9b48-42f4-4234-a2b0-4668b34626ce",
+                  "cognito:groups": [
+                    "Administrator"
+                  ],
+                  "cognito:preferred_role": "arn:aws:iam::912468240823:role/base-administrator-role",
+                  "iss": "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_6lZSgmU6D",
+                  "custom:ivy_org_id": "739224",
+                  "cognito:username": "n.ahmad@epilot.cloud",
+                  "custom:ivy_user_id": "10006129",
+                  "cognito:roles": [
+                    "arn:aws:iam::912468240823:role/base-administrator-role"
+                  ],
+                  "aud": "6e0jbdnger7nmoktaaflarue1l",
+                  "event_id": "cd5f5583-d90c-4db5-8e99-5f5dd29a4d75",
+                  "token_use": "id",
+                  "auth_time": 1614333023,
+                  "exp": 1614336623,
+                  "iat": 1614333023,
+                  "email": "n.ahmad@epilot.cloud"
+                }
+              }
+            }
+          }
+        }
+      },
+      "EntitySlug": {
+        "description": "URL-friendly identifier for the entity schema",
+        "type": "string",
+        "example": "contact"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://notification.sls.epilot.io"
+    },
+    {
+      "url": "https://notification.sls.epilot.io"
+    }
+  ]
+}

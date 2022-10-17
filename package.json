@@ -9,7 +9,8 @@
     "test": "lerna run test --stream",
     "lint": "lerna run lint",
     "build": "lerna run build",
-    "postinstall": "lerna bootstrap"
+    "postinstall": "lerna bootstrap",
+    "lint:fix": "eslint \"**/*.{js,ts}\" --fix"
   },
   "keywords": [
     "epilot",

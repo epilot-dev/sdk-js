@@ -1,0 +1,555 @@
+/* eslint-disable */
+import {
+  OpenAPIClient,
+  Parameters,
+  UnknownParamsObject,
+  OperationResponse,
+  AxiosRequestConfig,
+} from 'openapi-client-axios'; 
+
+declare namespace Components {
+  namespace Schemas {
+    export interface Entity {
+      [name: string]: any;
+    }
+    export type EntityId = string; // uuid
+    export interface EntityOperation {
+      entity: EntityId; // uuid
+      /**
+       * example:
+       * updateEntity
+       */
+      operation?: string;
+      /**
+       * example:
+       * {
+       *   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+       *   "slug": "contact"
+       * }
+       */
+      params?: {
+        id?: EntityId; // uuid
+        slug?: EntitySlug;
+      };
+      /**
+       * example:
+       * {
+       *   "_schema": "contact",
+       *   "_org": "123",
+       *   "status": "Inactive"
+       * }
+       */
+      payload?: {
+        [name: string]: any;
+      };
+    }
+    /**
+     * URL-friendly identifier for the entity schema
+     * example:
+     * contact
+     */
+    export type EntitySlug = string;
+    /**
+     * example:
+     * 123456789
+     */
+    export type Id = number;
+    export interface Notification {
+      [name: string]: any;
+      /**
+       * Type of notification
+       * example:
+       * workflow
+       */
+      type: string;
+      /**
+       * Redirect url
+       * example:
+       * https://epilot.cloud
+       */
+      redirect_url?: string;
+      /**
+       * Organization Id
+       * example:
+       * 206801
+       */
+      organization_id?: string;
+      title: {
+        /**
+         * Title for notification. Supports handlebars syntax.
+         * example:
+         * My custom notification
+         */
+        en?: string;
+        /**
+         * Title for notification. Supports handlebars syntax.
+         * example:
+         * Meine benutzerdefinierte Aktivität
+         */
+        de?: string;
+      };
+      message: {
+        /**
+         * Message for notification. Supports handlebars syntax.
+         * example:
+         * {{caller}} did something with {{contact.entity.id}} {{branch.name}}.
+         */
+        en?: string;
+        /**
+         * Message for notification. Supports handlebars syntax.
+         * example:
+         * {{caller}} habe etwas damit gemacht {{contact.entity.id}} {{branch.name}}.
+         */
+        de?: string;
+      };
+      /**
+       * example:
+       * {
+       *   "entity": {
+       *     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+       *     "schema": "contact"
+       *   }
+       * }
+       */
+      payload?: {
+        [name: string]: any;
+      };
+      caller?: NotificationCallerContext;
+      operations?: EntityOperation[];
+      /**
+       * example:
+       * {
+       *   "12345": {
+       *     "email": false,
+       *     "in_app": false
+       *   }
+       * }
+       */
+      force_notify_users?: {
+        [name: string]: any;
+      };
+      /**
+       * The person who is the corresponding event recipient.
+       * example:
+       * [
+       *   "1",
+       *   "2",
+       *   "3",
+       *   "4",
+       *   "5"
+       * ]
+       */
+      visibility_user_ids?: string[];
+    }
+    export interface NotificationBase {
+      [name: string]: any;
+      /**
+       * Type of notification
+       * example:
+       * workflow
+       */
+      type: string;
+      /**
+       * Redirect url
+       * example:
+       * https://epilot.cloud
+       */
+      redirect_url?: string;
+      /**
+       * Organization Id
+       * example:
+       * 206801
+       */
+      organization_id?: string;
+      title: {
+        /**
+         * Title for notification. Supports handlebars syntax.
+         * example:
+         * My custom notification
+         */
+        en?: string;
+        /**
+         * Title for notification. Supports handlebars syntax.
+         * example:
+         * Meine benutzerdefinierte Aktivität
+         */
+        de?: string;
+      };
+      message: {
+        /**
+         * Message for notification. Supports handlebars syntax.
+         * example:
+         * {{caller}} did something with {{contact.entity.id}} {{branch.name}}.
+         */
+        en?: string;
+        /**
+         * Message for notification. Supports handlebars syntax.
+         * example:
+         * {{caller}} habe etwas damit gemacht {{contact.entity.id}} {{branch.name}}.
+         */
+        de?: string;
+      };
+      /**
+       * example:
+       * {
+       *   "entity": {
+       *     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+       *     "schema": "contact"
+       *   }
+       * }
+       */
+      payload?: {
+        [name: string]: any;
+      };
+      caller?: NotificationCallerContext;
+      operations?: EntityOperation[];
+      /**
+       * example:
+       * {
+       *   "12345": {
+       *     "email": false,
+       *     "in_app": false
+       *   }
+       * }
+       */
+      force_notify_users?: {
+        [name: string]: any;
+      };
+    }
+    export interface NotificationCallerContext {
+      [name: string]: any;
+      EpilotAuth?: {
+        /**
+         * example:
+         * {
+         *   "sub": "476e9b48-42f4-4234-a2b0-4668b34626ce",
+         *   "cognito:groups": [
+         *     "Administrator"
+         *   ],
+         *   "cognito:preferred_role": "arn:aws:iam::912468240823:role/base-administrator-role",
+         *   "iss": "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_6lZSgmU6D",
+         *   "custom:ivy_org_id": "739224",
+         *   "cognito:username": "n.ahmad@epilot.cloud",
+         *   "custom:ivy_user_id": "10006129",
+         *   "cognito:roles": [
+         *     "arn:aws:iam::912468240823:role/base-administrator-role"
+         *   ],
+         *   "aud": "6e0jbdnger7nmoktaaflarue1l",
+         *   "event_id": "cd5f5583-d90c-4db5-8e99-5f5dd29a4d75",
+         *   "token_use": "id",
+         *   "auth_time": 1614333023,
+         *   "exp": 1614336623,
+         *   "iat": 1614333023,
+         *   "email": "n.ahmad@epilot.cloud"
+         * }
+         */
+        token?: {
+          /**
+           * example:
+           * 476e9b48-42f4-4234-a2b0-4668b34626ce
+           */
+          sub?: string;
+          /**
+           * example:
+           * example@epilot.cloud
+           */
+          email?: string;
+          /**
+           * example:
+           * example@epilot.cloud
+           */
+          "cognito:username"?: string;
+          /**
+           * example:
+           * 10006129
+           */
+          "custom:ivy_user_id"?: string;
+        };
+      };
+    }
+    /**
+     * example:
+     * 123456789
+     */
+    export type NotificationId = number;
+    export interface NotificationItem {
+      [name: string]: any;
+      id?: Id;
+      notification_id?: NotificationId;
+      timestamp?: string; // date-time
+      /**
+       * example:
+       * false
+       */
+      read_state?: boolean;
+      /**
+       * Type of notification
+       * example:
+       * workflow
+       */
+      type: string;
+      /**
+       * Redirect url
+       * example:
+       * https://epilot.cloud
+       */
+      redirect_url?: string;
+      /**
+       * Organization Id
+       * example:
+       * 206801
+       */
+      organization_id?: string;
+      title: {
+        /**
+         * Title for notification. Supports handlebars syntax.
+         * example:
+         * My custom notification
+         */
+        en?: string;
+        /**
+         * Title for notification. Supports handlebars syntax.
+         * example:
+         * Meine benutzerdefinierte Aktivität
+         */
+        de?: string;
+      };
+      message: {
+        /**
+         * Message for notification. Supports handlebars syntax.
+         * example:
+         * {{caller}} did something with {{contact.entity.id}} {{branch.name}}.
+         */
+        en?: string;
+        /**
+         * Message for notification. Supports handlebars syntax.
+         * example:
+         * {{caller}} habe etwas damit gemacht {{contact.entity.id}} {{branch.name}}.
+         */
+        de?: string;
+      };
+      /**
+       * example:
+       * {
+       *   "entity": {
+       *     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+       *     "schema": "contact"
+       *   }
+       * }
+       */
+      payload?: {
+        [name: string]: any;
+      };
+      caller?: NotificationCallerContext;
+      operations?: EntityOperation[];
+      /**
+       * example:
+       * {
+       *   "12345": {
+       *     "email": false,
+       *     "in_app": false
+       *   }
+       * }
+       */
+      force_notify_users?: {
+        [name: string]: any;
+      };
+    }
+  }
+}
+declare namespace Paths {
+  namespace CreateNotification {
+    export type RequestBody = Components.Schemas.Notification;
+  }
+  namespace GetNotification {
+    namespace Parameters {
+      export type Id = number;
+    }
+    export interface PathParameters {
+      id: Parameters.Id;
+    }
+    namespace Responses {
+      export type $200 = Components.Schemas.NotificationItem;
+    }
+  }
+  namespace GetNotifications {
+    namespace Parameters {
+      export type AfterId = number;
+      export type Limit = number;
+    }
+    export interface QueryParameters {
+      after_id?: Parameters.AfterId;
+      limit?: Parameters.Limit;
+    }
+    namespace Responses {
+      export interface $200 {
+        /**
+         * example:
+         * 1
+         */
+        total?: number;
+        /**
+         * example:
+         * 1
+         */
+        total_unread?: number;
+        results?: Components.Schemas.NotificationItem[];
+      }
+    }
+  }
+  namespace GetTotalUnread {
+    namespace Responses {
+      /**
+       * example:
+       * 999
+       */
+      export type $200 = number;
+    }
+  }
+  namespace MarkAsRead {
+    namespace Parameters {
+      export type Id = number;
+    }
+    export interface PathParameters {
+      id: Parameters.Id;
+    }
+  }
+}
+
+export interface OperationMethods {
+  /**
+   * getNotifications - getNotifications
+   * 
+   * Get notifications
+   */
+  'getNotifications'(
+    parameters?: Parameters<Paths.GetNotifications.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetNotifications.Responses.$200>
+  /**
+   * createNotification - createNotification
+   * 
+   * Create a message that can be displayed in the notification panel.
+   */
+  'createNotification'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateNotification.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
+   * getNotification - getNotification
+   * 
+   * Get the details of a single notification.
+   */
+  'getNotification'(
+    parameters?: Parameters<Paths.GetNotification.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetNotification.Responses.$200>
+  /**
+   * markAllAsRead - markAllAsRead
+   * 
+   * Mark all as read
+   */
+  'markAllAsRead'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
+   * markAsRead - markAsRead
+   * 
+   * Mark as read
+   */
+  'markAsRead'(
+    parameters?: Parameters<Paths.MarkAsRead.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
+   * getTotalUnread - getTotalUnread
+   * 
+   * Get total unread
+   */
+  'getTotalUnread'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetTotalUnread.Responses.$200>
+}
+
+export interface PathsDictionary {
+  ['/v1/notification/notifications']: {
+    /**
+     * createNotification - createNotification
+     * 
+     * Create a message that can be displayed in the notification panel.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateNotification.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
+    /**
+     * getNotifications - getNotifications
+     * 
+     * Get notifications
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetNotifications.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetNotifications.Responses.$200>
+  }
+  ['/v1/notification/notifications/{id}']: {
+    /**
+     * getNotification - getNotification
+     * 
+     * Get the details of a single notification.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetNotification.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetNotification.Responses.$200>
+  }
+  ['/v1/notification/notifications/mark']: {
+    /**
+     * markAllAsRead - markAllAsRead
+     * 
+     * Mark all as read
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
+  }
+  ['/v1/notification/notifications/{id}/mark']: {
+    /**
+     * markAsRead - markAsRead
+     * 
+     * Mark as read
+     */
+    'put'(
+      parameters?: Parameters<Paths.MarkAsRead.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
+  }
+  ['/v1/notification/unreads']: {
+    /**
+     * getTotalUnread - getTotalUnread
+     * 
+     * Get total unread
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetTotalUnread.Responses.$200>
+  }
+}
+
+export type Client = OpenAPIClient<OperationMethods, PathsDictionary>

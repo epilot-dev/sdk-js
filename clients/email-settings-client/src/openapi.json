@@ -1,0 +1,445 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Email settings API",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Email settings",
+      "description": "Email settings service"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "AsOrganization": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v1/email-settings": {
+      "get": {
+        "operationId": "getSettings",
+        "summary": "getSettings",
+        "description": "Get all settings by type",
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "description": "Setting types:\n* signature\n* email_domain\n* email_address\n",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "signature",
+                "email_domain",
+                "email_address",
+                "whitelist_email_address"
+              ]
+            },
+            "example": "signature"
+          },
+          {
+            "name": "id",
+            "description": "ID of setting",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "post": {
+        "operationId": "addSetting",
+        "summary": "addSetting",
+        "description": "Add setting",
+        "tags": [
+          "Settings"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Setting"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSetting",
+        "summary": "deleteSetting",
+        "description": "delete setting by ID and type",
+        "tags": [
+          "Settings"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "signature",
+                    "enum": [
+                      "signature",
+                      "email_domain",
+                      "email_address",
+                      "whitelist_email_address"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Setting"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/v1/email-settings/{id}": {
+      "post": {
+        "operationId": "updateSetting",
+        "summary": "updateSetting",
+        "description": "Update setting by ID",
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "ID of setting",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Setting"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Setting"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/v1/email-settings/domain": {
+      "post": {
+        "operationId": "addDomain",
+        "summary": "addDomain",
+        "description": "Add domain",
+        "tags": [
+          "Domains"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Domain"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDomain",
+        "summary": "deleteDomain",
+        "description": "Delete domain",
+        "tags": [
+          "Domains"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Domain"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/v1/email-settings/domain/name-servers:verify": {
+      "post": {
+        "operationId": "verifyNameServers",
+        "summary": "verifyNameServers",
+        "description": "Verify name servers",
+        "tags": [
+          "Domains"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Domain"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/v1/email-settings/domain:verify": {
+      "post": {
+        "operationId": "verifyDomain",
+        "summary": "verifyDomain",
+        "description": "Verify domain",
+        "tags": [
+          "Domains"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Domain"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "AsOrganization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-org-id",
+        "description": "Set organization id when using internal auth"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenant access",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "SettingsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Setting"
+        }
+      },
+      "Setting": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "example": "signature",
+            "enum": [
+              "signature",
+              "email_domain",
+              "email_address",
+              "whitelist_email_address"
+            ]
+          },
+          "html": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "updated_by": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      },
+      "Domain": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "example": "subdomain.epilot.cloud"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://email-settings.sls.epilot.io"
+    },
+    {
+      "url": "https://email-settings.sls.epilot.io"
+    }
+  ]
+}

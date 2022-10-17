@@ -1,0 +1,1076 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Email template API",
+    "version": "1.0.0-RFC",
+    "description": "Email template API service\n"
+  },
+  "tags": [
+    {
+      "name": "Email templates",
+      "description": "Email template service"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "AsOrganization": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v1/email-template/templates": {
+      "post": {
+        "operationId": "saveTemplate",
+        "summary": "saveTemplate",
+        "description": "Create or update a template. If `id` is provided, it will update the template.",
+        "tags": [
+          "Email templates"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailTemplateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/EmailTemplateEntity"
+                    },
+                    {
+                      "$ref": "#/components/schemas/BaseEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteMultipleEmailTemplates",
+        "summary": "deleteMultipleEmailTemplates",
+        "description": "Immediately and permanently deletes the multiple email templates. This operation cannot be undone.",
+        "tags": [
+          "Email templates"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "entity_ids"
+                ],
+                "properties": {
+                  "entity_ids": {
+                    "description": "List entity IDs",
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": "fc56858e-35b2-4261-97e3-a46bf1e4ccea"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates/{id}": {
+      "get": {
+        "operationId": "getTemplateDetail",
+        "summary": "getTemplateDetail",
+        "description": "Get email template by ID",
+        "tags": [
+          "Email templates"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Template entity ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTemplateResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteEmailTemplate",
+        "summary": "deleteEmailTemplate",
+        "description": "Immediately and permanently deletes the specified email template. This operation cannot be undone.",
+        "tags": [
+          "Email templates"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Email template ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates/attachments/presigned-url": {
+      "post": {
+        "operationId": "createAttachmentUploadUrl",
+        "summary": "createAttachmentUploadUrl",
+        "description": "Create S3 POST presigned URL to upload attachment. The URL is valid in 30 minutes. Maximum file size is 100MB.",
+        "tags": [
+          "Attachments"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresignedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresignedResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates/attachments": {
+      "get": {
+        "operationId": "listAttachments",
+        "summary": "listAttachments",
+        "description": "Get list attachments from static and template document",
+        "tags": [
+          "Attachments"
+        ],
+        "parameters": [
+          {
+            "name": "document_types",
+            "description": "Document types:\n* 0: Static docs\n* 1: Templates\n* Default: 0,1\n",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "0,1"
+          },
+          {
+            "name": "availability_types",
+            "description": "Availability types:\n* 0: Everywhere\n* 1: All Opportunities\n* 2: Specific products\n* Default: 0\n",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "0,1"
+          },
+          {
+            "name": "availability_products",
+            "description": "Availability products",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345,12346"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates/users": {
+      "post": {
+        "operationId": "getCreatedByAndUpdatedBy",
+        "summary": "getCreatedByAndUpdatedBy",
+        "description": "Get list users which create email template",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_ids"
+                ],
+                "properties": {
+                  "entity_ids": {
+                    "description": "List user IDs",
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "example": 20806
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "List attachments",
+                  "type": "array",
+                  "items": null,
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates:replace": {
+      "post": {
+        "operationId": "replaceVariables",
+        "summary": "replaceVariables",
+        "description": "Get template detail and replace all variables (template variables and document generation)",
+        "tags": [
+          "Variables"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email_template_id"
+                ],
+                "properties": {
+                  "email_template_id": {
+                    "type": "string",
+                    "example": "511ceb90-f738-47aa-8b1e-915ace0ae13c"
+                  },
+                  "variable_parameters": {
+                    "$ref": "#/components/schemas/VariableParameters"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTemplateResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates:revert": {
+      "post": {
+        "operationId": "revertToOriginalTemplate",
+        "summary": "revertToOriginalTemplate",
+        "description": "Revert to the original system generated email template",
+        "tags": [
+          "Email templates"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email_template_id"
+                ],
+                "properties": {
+                  "email_template_id": {
+                    "type": "string",
+                    "example": "511ceb90-f738-47aa-8b1e-915ace0ae13c"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates/system": {
+      "post": {
+        "operationId": "createSystemTemplates",
+        "summary": "createSystemTemplates",
+        "description": "create system email templates for an organization",
+        "tags": [
+          "Email templates"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates/system/feature": {
+      "post": {
+        "operationId": "createFeatureSystemTemplates",
+        "summary": "createFeatureSystemTemplates",
+        "description": "create system email templates for an organization based on feature",
+        "tags": [
+          "Email templates"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "featureKey": {
+                    "type": "string",
+                    "example": "end_customer_portal"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Bearer Custom Authorization Token\n\n```\nbtoa(JSON.stringify(\n    {\n        idtoken: $idToken,\n        accesstoken: $accessToken\n    }\n))\n```\n"
+      },
+      "AsOrganization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-org-id",
+        "description": "Set organization id when using internal auth"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenant access",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "BaseEntity": {
+        "type": "object",
+        "required": [
+          "_id",
+          "_title",
+          "_org",
+          "_schema",
+          "_created_at",
+          "_updated_at"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Entity ID",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "_title": {
+            "type": "string",
+            "description": "Entity title"
+          },
+          "_org": {
+            "type": "string",
+            "description": "Ivy Organization ID the entity belongs to",
+            "example": "206801"
+          },
+          "_schema": {
+            "type": "string",
+            "description": "URL-friendly identifier for the entity schema",
+            "example": "message"
+          },
+          "_tags": {
+            "type": "array",
+            "description": "Entity tags",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "automatic email template"
+            ]
+          },
+          "_created_at": {
+            "type": "string",
+            "description": "Created date",
+            "format": "date-time",
+            "example": "2021-02-09T12:41:43.662Z"
+          },
+          "_updated_at": {
+            "type": "string",
+            "description": "Updated date",
+            "format": "date-time",
+            "example": "2021-02-10T09:14:31.990Z"
+          }
+        }
+      },
+      "EmailTemplateRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "subject"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "cd7809ba-a111-4dd9-8d15-18eb4de0faed"
+          },
+          "_tags": {
+            "type": "array",
+            "description": "Entity tags",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "template"
+            ]
+          },
+          "name": {
+            "description": "name",
+            "type": "string",
+            "example": "Order confirmation"
+          },
+          "brand_id": {
+            "description": "Brand ID. Equal 0 if available for All brands",
+            "type": "number",
+            "nullable": true,
+            "example": 0
+          },
+          "from": {
+            "description": "From",
+            "$ref": "#/components/schemas/From"
+          },
+          "to": {
+            "description": "To. This field is required if email template is not created by system",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/To"
+            }
+          },
+          "cc": {
+            "description": "Cc",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/To"
+            }
+          },
+          "bcc": {
+            "description": "Bcc",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/To"
+            }
+          },
+          "subject": {
+            "description": "Subject",
+            "type": "string",
+            "example": "We have received your order!"
+          },
+          "body": {
+            "description": "Body",
+            "type": "string",
+            "example": "Hi Ms Ny Huynh, </br> Thank you for your order. We will contact you shortly"
+          },
+          "attachments": {
+            "type": "array",
+            "nullable": true,
+            "description": "Email template attachments",
+            "items": {
+              "$ref": "#/components/schemas/Attachment"
+            }
+          },
+          "file": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "description": "Entity tags",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "system_template": {
+            "description": "If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...\nRemember to add default content of template to [system-template.ts](https://gitlab.com/e-pilot/product/email-templates/svc-email-templates-api/-/blob/main/lambda/HandlerFunction/src/enum/system-template.ts) enum for revert to original feature\n",
+            "type": "boolean",
+            "example": false
+          },
+          "created_by": {
+            "description": "Created by",
+            "type": "number",
+            "example": 1234
+          },
+          "updated_by": {
+            "description": "Updated by",
+            "type": "number",
+            "example": 1234
+          }
+        }
+      },
+      "EmailTemplateEntity": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "description": "name",
+            "type": "string",
+            "example": "Order confirmation"
+          },
+          "brand_id": {
+            "description": "Brand ID. Equal 0 if available for All brands",
+            "type": "number",
+            "nullable": true,
+            "example": 0
+          },
+          "from": {
+            "description": "From",
+            "$ref": "#/components/schemas/From"
+          },
+          "to": {
+            "description": "To",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/To"
+            }
+          },
+          "cc": {
+            "description": "Cc",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/To"
+            }
+          },
+          "bcc": {
+            "description": "Bcc",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/To"
+            }
+          },
+          "subject": {
+            "description": "Subject",
+            "type": "string",
+            "example": "We have received your order!"
+          },
+          "body": {
+            "description": "Body",
+            "type": "string",
+            "example": "Hi Ms Ny Huynh, </br> Thank you for your order. We will contact you shortly"
+          },
+          "attachments": {
+            "type": "array",
+            "nullable": true,
+            "description": "Email template attachments",
+            "items": {
+              "$ref": "#/components/schemas/Attachment"
+            }
+          },
+          "file": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "description": "Entity tags",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "created_by": {
+            "description": "Created by",
+            "type": "number",
+            "example": 1234
+          },
+          "updated_by": {
+            "description": "Updated by",
+            "type": "number",
+            "example": 1234
+          },
+          "system_template": {
+            "description": "If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...\nRemember to add default content of template to system_template enum for revert to original feature\n",
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "Attachment": {
+        "type": "object",
+        "nullable": true,
+        "required": [
+          "filename",
+          "size",
+          "content_type",
+          "bucket",
+          "object_key"
+        ],
+        "properties": {
+          "cid": {
+            "type": "string",
+            "description": "Attachment ID",
+            "example": "f820ce3b-07b0-45ae-bcc6-babb2f53f79f"
+          },
+          "filename": {
+            "type": "string",
+            "description": "File name",
+            "example": "Produktinformationen_epilot360_Double_Opt_in.pdf"
+          },
+          "size": {
+            "type": "number",
+            "description": "File size in bytes",
+            "example": 451349
+          },
+          "content_type": {
+            "type": "string",
+            "description": "Content type",
+            "example": "application/pdf"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL to download the attachment.",
+            "example": "https://go.epilot.cloud/attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf"
+          },
+          "bucket": {
+            "type": "string",
+            "description": "S3 bucket where file is stored",
+            "example": "893487340562-message-attachment"
+          },
+          "object_key": {
+            "type": "string",
+            "description": "S3 object apiKey",
+            "example": "attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf"
+          },
+          "inline": {
+            "type": "boolean",
+            "description": "If true then this attachment should not be offered for download (at least not in the main attachments list).\\\nThe usecase is CID embedded image (aka inline image).\n",
+            "default": false
+          },
+          "send_as_link": {
+            "type": "boolean",
+            "description": "If true then this attachment is sent via link. The link is already inserted to email body by API caller. In this case, service doesn't process this attachment.",
+            "default": false
+          },
+          "type": {
+            "type": "string",
+            "description": "File type such as Document template, Document,... Use for replace variables on document template",
+            "example": "Document template"
+          },
+          "copy_to_message": {
+            "type": "boolean",
+            "description": "If true then this attachment is copied to the message and replaces corresponding one",
+            "default": true
+          }
+        }
+      },
+      "From": {
+        "type": "object",
+        "required": [
+          "name",
+          "email"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "epilot"
+          },
+          "email": {
+            "type": "string",
+            "example": "no-reply@epilot.cloud"
+          }
+        }
+      },
+      "To": {
+        "type": "object",
+        "required": [
+          "name",
+          "email"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Ny Huynh"
+          },
+          "email": {
+            "type": "string",
+            "example": "ny.huynh@axonactive.com"
+          }
+        }
+      },
+      "PresignedRequest": {
+        "type": "object",
+        "required": [
+          "id",
+          "filename",
+          "content_type"
+        ],
+        "properties": {
+          "id": {
+            "description": "UUID",
+            "type": "string",
+            "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b"
+          },
+          "filename": {
+            "description": "File name",
+            "type": "string",
+            "example": "order.pdf"
+          },
+          "content_type": {
+            "description": "Content type",
+            "type": "string",
+            "example": "application/pdf"
+          }
+        }
+      },
+      "PresignedResponse": {
+        "type": "object",
+        "required": [
+          "download_url",
+          "upload_url"
+        ],
+        "properties": {
+          "download_url": {
+            "type": "string",
+            "description": "URL to download the attachment. This URL is not accessible until attachment is uploaded successfully.",
+            "example": "https://go.epilot.cloud/attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf"
+          },
+          "upload_url": {
+            "description": "Post presigned URL to upload file",
+            "type": "object",
+            "required": [
+              "url",
+              "fields"
+            ],
+            "properties": {
+              "url": {
+                "type": "number",
+                "description": "URL to upload the attachment",
+                "example": "https://s3.eu-central-1.amazonaws.com/893487340562-message-attachment"
+              },
+              "fields": {
+                "type": "object",
+                "description": "Fields are provided by AWS to authenticate and validate the request. All fields should be included in form-data when performing upload request.",
+                "example": {}
+              }
+            }
+          }
+        }
+      },
+      "AttachmentResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "description": "Total attachments",
+            "type": "number",
+            "example": 10
+          },
+          "attachments": {
+            "description": "List attachments",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "filename": {
+                  "description": "File name",
+                  "type": "string",
+                  "example": "order.docx"
+                },
+                "bucket": {
+                  "description": "Bucket name",
+                  "type": "string",
+                  "example": "epilot-playground-upload-document"
+                },
+                "object_key": {
+                  "description": "Object key",
+                  "type": "string",
+                  "example": "9f561bea-f0d9-4e96-b7a9-879fc1643ac0.docx"
+                },
+                "url": {
+                  "description": "URL",
+                  "type": "string",
+                  "example": "https://epilot-playground-upload-document.s3.eu-central-1.amazonaws.com/9f561bea-f0d9-4e96-b7a9-879fc1643ac0.docx"
+                },
+                "document_type": {
+                  "description": "Document type:\n* 0: Static docs\n* 1: Templates\n",
+                  "type": "number",
+                  "example": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User's display name (default: email address)",
+            "example": "Example User"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "example": 1234567890
+          },
+          "preferred_language": {
+            "type": "string",
+            "example": "de"
+          },
+          "image_uri": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "original": {
+                "type": "string",
+                "format": "uri"
+              },
+              "thumbnail_32": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "example": {
+              "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+              "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+            }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "profileImageName"
+                },
+                "value": {
+                  "type": "string",
+                  "example": "avatar.png"
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ]
+            }
+          }
+        }
+      },
+      "VariableParameters": {
+        "type": "object",
+        "properties": {
+          "template_type": {
+            "$ref": "#/components/schemas/TemplateType"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "de"
+            ]
+          },
+          "main_entity_id": {
+            "type": "string",
+            "description": "The main entity ID. Use main entity in order to use the variable without schema slug prefix - or just pass directly to other object ID.",
+            "example": "63753437-c9e2-4e83-82bb-b1c666514561"
+          },
+          "brand_id": {
+            "type": "number",
+            "description": "Brand ID",
+            "nullable": true,
+            "example": 123451
+          },
+          "user_id": {
+            "type": "number",
+            "description": "User ID",
+            "example": 123452
+          },
+          "custom_variables": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "variable": {
+                  "type": "string",
+                  "description": "Template Variable Name",
+                  "example": "{{abc.xyz}}"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value to be Replaced",
+                  "example": "ReplacedValue"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "template_type"
+        ]
+      },
+      "TemplateType": {
+        "type": "string",
+        "enum": [
+          "email",
+          "document"
+        ]
+      },
+      "EmailTemplateResponse": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EmailTemplateEntity"
+              },
+              {
+                "$ref": "#/components/schemas/BaseEntity"
+              }
+            ]
+          },
+          "relations": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://email-template.sls.epilot.io"
+    },
+    {
+      "url": "https://email-template.sls.epilot.io"
+    }
+  ]
+}
