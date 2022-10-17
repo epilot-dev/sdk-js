@@ -974,6 +974,10 @@ declare namespace Components {
              * Id of TargetConfig to run for mapping.
              */
             target_id: string;
+            /**
+             * Version of Entity Mapping Configuration to run for mapping.
+             */
+            version?: number;
         }
         /**
          * Mapping operation nodes are either primitive values or operation node objects
