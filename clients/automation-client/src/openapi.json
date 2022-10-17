@@ -894,6 +894,10 @@
           "target_id": {
             "type": "string",
             "description": "Id of TargetConfig to run for mapping."
+          },
+          "version": {
+            "type": "number",
+            "description": "Version of Entity Mapping Configuration to run for mapping."
           }
         },
         "required": [

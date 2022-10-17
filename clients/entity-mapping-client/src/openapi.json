@@ -191,6 +191,50 @@
         }
       }
     },
+    "/v1/mappings/{id}/versions/{version}": {
+      "get": {
+        "operationId": "getConfigVersion",
+        "summary": "getConfigVersion",
+        "description": "Get specific version of a mapping config by id & version",
+        "tags": [
+          "mappings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Mapping Config Id",
+            "schema": {
+              "type": "string",
+              "example": "uuidv4"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "description": "Version to be loaded",
+            "schema": {
+              "type": "number",
+              "example": 3
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity Mapping Config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/mappings:execute": {
       "post": {
         "operationId": "executeMapping",
@@ -266,24 +310,15 @@
         }
       }
     },
-    "/v1/mappings/{id}/history": {
+    "/v1/mappings/history": {
       "get": {
-        "operationId": "getMappingHistory",
-        "summary": "getMappingHistory",
+        "operationId": "queryMappingHistory",
+        "summary": "queryMappingHistory",
         "description": "Get the Mapping History",
         "tags": [
-          "history"
+          "mappings"
         ],
         "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "description": "the id of the mapping"
-          },
           {
             "in": "query",
             "name": "from",
@@ -303,6 +338,22 @@
             },
             "required": false,
             "description": "filter the history to this date on"
+          },
+          {
+            "in": "query",
+            "name": "targetEntityId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceEntityId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -315,7 +366,7 @@
                     "results": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/MappingHistoryResponse"
+                        "$ref": "#/components/schemas/MappingHistoryResp"
                       }
                     }
                   }
@@ -772,7 +823,7 @@
           }
         },
         "required": [
-          "targetPath",
+          "target",
           "operation"
         ],
         "example": {
@@ -840,6 +891,15 @@
             "description": "Copy JSONPath value from source entity context",
             "type": "string",
             "example": "contact.first_name"
+          },
+          "_template": {
+            "description": "Define handlebars template to output a string",
+            "type": "string",
+            "example": "{{contact.first_name}} {{contact.last_name}}"
+          },
+          "_random": {
+            "description": "Generate random ids / numbers",
+            "$ref": "#/components/schemas/RandomOperation"
           }
         },
         "additionalProperties": true
@@ -862,6 +922,47 @@
           },
           {
             "type": "array"
+          }
+        ]
+      },
+      "RandomOperation": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "uuid",
+                  "nanoid"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "number"
+                ]
+              },
+              "min": {
+                "type": "number",
+                "default": 0
+              },
+              "max": {
+                "type": "number",
+                "default": 1
+              }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -963,25 +1064,54 @@
           "value_json"
         ]
       },
-      "MappingHistoryResponse": {
+      "MappingHistoryResp": {
         "type": "object",
         "properties": {
-          "configId": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingHistoryEntry"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "MappingHistoryEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
             "type": "string",
-            "example": "source#entity_id"
+            "example": "uuidv4"
           },
           "timestamp": {
             "type": "string",
-            "format": "datetime"
+            "format": "ISO datetime"
           },
-          "version": {
-            "type": "string",
-            "example": "v1"
+          "source_entity_snapshot": {
+            "$ref": "#/components/schemas/Entity"
           },
-          "attributes": {
-            "type": "object"
+          "mapped_entities_snapshot": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
+          },
+          "target_configs_snapshot": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TargetConfig"
+            }
           }
-        }
+        },
+        "required": [
+          "id",
+          "timestamp",
+          "source_entity_snapshot",
+          "target_configs_snapshot",
+          "mapped_entities_snapshot"
+        ]
       }
     }
   },
