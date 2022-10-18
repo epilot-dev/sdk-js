@@ -134,7 +134,7 @@ declare namespace Components {
             /**
              * Target JSON path for the attribute to set
              */
-            target?: string;
+            target: string;
             operation: /* Mapping operation nodes are either primitive values or operation node objects */ OperationNode;
             origin?: /* Origin of an attribute. */ AttributeOrigin;
         }
@@ -176,21 +176,19 @@ declare namespace Components {
                 message?: string;
             };
         }
-        export interface MappingHistoryResponse {
+        export interface MappingHistoryEntry {
             /**
              * example:
-             * source#entity_id
+             * uuidv4
              */
-            configId?: string;
-            timestamp?: string; // datetime
-            /**
-             * example:
-             * v1
-             */
-            version?: string;
-            attributes?: {
-                [key: string]: any;
-            };
+            id: string;
+            timestamp: string; // ISO datetime
+            source_entity_snapshot: Entity;
+            mapped_entities_snapshot: Entity[];
+            target_configs_snapshot: TargetConfig[];
+        }
+        export interface MappingHistoryResp {
+            results: MappingHistoryEntry[];
         }
         /**
          * Mapping operation nodes are either primitive values or operation node objects
@@ -213,6 +211,16 @@ declare namespace Components {
              * contact.first_name
              */
             _copy?: string;
+            /**
+             * Define handlebars template to output a string
+             * example:
+             * {{contact.first_name}} {{contact.last_name}}
+             */
+            _template?: string;
+            /**
+             * Generate random ids / numbers
+             */
+            _random?: RandomOperation;
         }
         export interface Owner {
             type: "user" | "internal_service";
@@ -225,6 +233,13 @@ declare namespace Components {
         export type PrimitiveJSONValue = /* Represents any primitive JSON value */ string | boolean | number | {
             [name: string]: any;
         } | any[];
+        export type RandomOperation = {
+            type: "uuid" | "nanoid";
+        } | {
+            type: "number";
+            min?: number;
+            max?: number;
+        };
         export interface RelationAttribute {
             /**
              * Target attribute to store the relation in
@@ -431,22 +446,51 @@ declare namespace Paths {
             export type $200 = Components.Schemas.MappingConfig;
         }
     }
-    namespace GetMappingHistory {
+    namespace GetConfigVersion {
         namespace Parameters {
-            export type From = string; // datetime
+            /**
+             * example:
+             * uuidv4
+             */
             export type Id = string;
-            export type To = string; // datetime
+            /**
+             * example:
+             * 3
+             */
+            export type Version = number;
         }
         export interface PathParameters {
-            id: Parameters.Id;
+            id: /**
+             * example:
+             * uuidv4
+             */
+            Parameters.Id;
+            version: /**
+             * example:
+             * 3
+             */
+            Parameters.Version;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MappingConfig;
+        }
+    }
+    namespace QueryMappingHistory {
+        namespace Parameters {
+            export type From = string; // datetime
+            export type SourceEntityId = string; // uuid
+            export type TargetEntityId = string; // uuid
+            export type To = string; // datetime
         }
         export interface QueryParameters {
             from?: Parameters.From /* datetime */;
             to?: Parameters.To /* datetime */;
+            targetEntityId?: Parameters.TargetEntityId /* uuid */;
+            sourceEntityId?: Parameters.SourceEntityId /* uuid */;
         }
         namespace Responses {
             export interface $200 {
-                results?: Components.Schemas.MappingHistoryResponse[];
+                results?: Components.Schemas.MappingHistoryResp[];
             }
         }
     }
@@ -536,6 +580,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.StoreNewVersion.Responses.$200>
   /**
+   * getConfigVersion - getConfigVersion
+   * 
+   * Get specific version of a mapping config by id & version
+   */
+  'getConfigVersion'(
+    parameters?: Parameters<Paths.GetConfigVersion.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetConfigVersion.Responses.$200>
+  /**
    * executeMapping - executeMapping
    * 
    * Execute entity mapping based on a config
@@ -556,15 +610,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchConfigs.Responses.$200>
   /**
-   * getMappingHistory - getMappingHistory
+   * queryMappingHistory - queryMappingHistory
    * 
    * Get the Mapping History
    */
-  'getMappingHistory'(
-    parameters?: Parameters<Paths.GetMappingHistory.PathParameters & Paths.GetMappingHistory.QueryParameters> | null,
+  'queryMappingHistory'(
+    parameters?: Parameters<Paths.QueryMappingHistory.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetMappingHistory.Responses.$200>
+  ): OperationResponse<Paths.QueryMappingHistory.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -624,6 +678,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.StoreNewVersion.Responses.$200>
   }
+  ['/v1/mappings/{id}/versions/{version}']: {
+    /**
+     * getConfigVersion - getConfigVersion
+     * 
+     * Get specific version of a mapping config by id & version
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetConfigVersion.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetConfigVersion.Responses.$200>
+  }
   ['/v1/mappings:execute']: {
     /**
      * executeMapping - executeMapping
@@ -648,17 +714,17 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchConfigs.Responses.$200>
   }
-  ['/v1/mappings/{id}/history']: {
+  ['/v1/mappings/history']: {
     /**
-     * getMappingHistory - getMappingHistory
+     * queryMappingHistory - queryMappingHistory
      * 
      * Get the Mapping History
      */
     'get'(
-      parameters?: Parameters<Paths.GetMappingHistory.PathParameters & Paths.GetMappingHistory.QueryParameters> | null,
+      parameters?: Parameters<Paths.QueryMappingHistory.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetMappingHistory.Responses.$200>
+    ): OperationResponse<Paths.QueryMappingHistory.Responses.$200>
   }
 }
 
