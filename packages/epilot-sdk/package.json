@@ -61,6 +61,8 @@
     "@epilot/notification-client": "^0.1.4",
     "@epilot/template-variables-client": "^1.6.1",
     "@epilot/email-template-client": "^1.0.4",
-    "@epilot/discussion-client": "^1.4.0"
+    "@epilot/discussion-client": "^1.4.0",
+    "@epilot/partner-directory-client":"^0.2.1"
+
   }
 }
