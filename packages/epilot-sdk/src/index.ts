@@ -34,6 +34,11 @@ import {
   Client as OrganizationClient,
 } from './organization-client';
 import {
+  default as partnerClient,
+  getClient as getPartnerClient,
+  Client as PartnerClient,
+} from './partner-directory-client';
+import {
   default as permissionsClient,
   getClient as getPermissionsClient,
   Client as PermissionsClient,
@@ -68,6 +73,7 @@ export class EpilotClient {
   discussion: DiscussionClient = null;
   notification: NotificationClient = null;
   templateVariables: TemplateVariablesClient = null;
+  partner: PartnerClient = null;
 
   constructor() {
     this.entity = getEntityClient();
@@ -85,6 +91,7 @@ export class EpilotClient {
     this.notification = getNotificationClient();
     this.emailTemplate = getEmailTemplateClient();
     this.templateVariables = getTemplateVariablesClient();
+    this.partner = getPartnerClient();
   }
 
   public authorize(token: string) {
@@ -103,6 +110,7 @@ export class EpilotClient {
     this.notification = authorizeWithToken(this.notification, token);
     this.emailTemplate = authorizeWithToken(this.emailTemplate, token);
     this.templateVariables = authorizeWithToken(this.templateVariables, token);
+    this.partner = authorizeWithToken(this.partner, token);
 
     return this;
   }
@@ -125,6 +133,7 @@ export class EpilotClient {
     this.notification = authorizer.configureClient(this.notification);
     this.emailTemplate = authorizer.configureClient(this.emailTemplate);
     this.templateVariables = authorizer.configureClient(this.templateVariables);
+    this.partner = authorizer.configureClient(this.partner);
 
     return this;
   }
@@ -147,3 +156,4 @@ export { discussionClient };
 export { notificationClient };
 export { emailTemplateClient };
 export { templateVariablesClient };
+export { partnerClient };
