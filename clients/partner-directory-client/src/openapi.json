@@ -1,0 +1,381 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Partner Directory API",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "partners",
+      "description": "Partnes"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/partners/{id}/invite": {
+      "post": {
+        "operationId": "invitePartner",
+        "summary": "invitePartner",
+        "tags": [
+          "partners"
+        ],
+        "description": "Create a new partner in partner directory and send an invite email to accept request",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/PartnerId"
+            },
+            "required": true,
+            "description": "The Id of partner"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerInvitationPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partner"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to invite"
+          }
+        }
+      }
+    },
+    "/v1/partners/{id}/approve": {
+      "post": {
+        "operationId": "approvePartner",
+        "summary": "approvePartner",
+        "tags": [
+          "partners"
+        ],
+        "description": "Approve partner request",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/PartnerId"
+            },
+            "required": true,
+            "description": "The Id of partner"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Approve successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partner"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to approve"
+          }
+        }
+      }
+    },
+    "/v1/partners/{id}/reject": {
+      "post": {
+        "operationId": "rejectPartner",
+        "summary": "rejectPartner",
+        "tags": [
+          "partners"
+        ],
+        "description": "Reject partner request",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/PartnerId"
+            },
+            "required": true,
+            "description": "The Id of partner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partner"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to reject"
+          }
+        }
+      }
+    },
+    "/v1/partners/{id}/invite:resendEmail": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/PartnerId"
+            },
+            "required": true,
+            "description": "The Id of partner"
+          }
+        ],
+        "operationId": "resendPartnerInvitation",
+        "summary": "resendPartnerInvitation",
+        "description": "Resend partner invitation email",
+        "tags": [
+          "partners"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string",
+                    "description": "Language for partner invitation email",
+                    "enum": [
+                      "en",
+                      "de"
+                    ],
+                    "default": "en"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Partner Invitation sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partner"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Partner not found"
+          }
+        }
+      }
+    },
+    "/v1/partner-directory/public/getPartnerByToken": {
+      "get": {
+        "operationId": "getPartnerByToken",
+        "summary": "getPartnerByToken",
+        "description": "Get partner by token",
+        "security": [],
+        "tags": [
+          "partners"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "$ref": "#/components/schemas/InviteToken"
+            },
+            "required": true,
+            "description": "Invite Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partner"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Token not found for the partner"
+          }
+        }
+      }
+    },
+    "/v1/partner-directory/public/activate": {
+      "post": {
+        "operationId": "activatePartner",
+        "summary": "activatePartner",
+        "description": "Activate partner using an invite token",
+        "security": [],
+        "tags": [
+          "partners"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "description": "Invite Token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/InviteToken"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivatePartnerPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Activated successfully"
+          },
+          "404": {
+            "description": "Token not found for the partner"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "InviteToken": {
+        "type": "string"
+      },
+      "Partner": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Partner"
+          },
+          "organization_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2022-02-08T04:44:32.246Z"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description",
+            "example": "Description"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "Company name",
+            "example": "Company name"
+          },
+          "invitation_token": {
+            "description": "Invitation token",
+            "type": "string"
+          },
+          "invitation_email": {
+            "description": "Email using to receive invitation",
+            "type": "string",
+            "format": "email"
+          },
+          "signed_up_email": {
+            "description": "Email using to sign up",
+            "type": "string",
+            "format": "email"
+          },
+          "partner_org_id": {
+            "description": "Target Organization",
+            "type": "string",
+            "example": 123456
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Pending",
+              "Request",
+              "Deleted",
+              "Invited",
+              "Rejected"
+            ]
+          }
+        }
+      },
+      "PartnerId": {
+        "type": "string"
+      },
+      "OrganizationId": {
+        "type": "string"
+      },
+      "ActivatePartnerPayload": {
+        "type": "object",
+        "properties": {
+          "company_name": {
+            "type": "string",
+            "description": "Company name",
+            "example": "Company name"
+          },
+          "signed_up_email": {
+            "description": "Email using to sign up",
+            "type": "string",
+            "format": "email"
+          },
+          "organization_id": {
+            "description": "organization id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "signed_up_email",
+          "organization_id"
+        ]
+      },
+      "PartnerInvitationPayload": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "description": "Language for partner invitation email",
+            "enum": [
+              "en",
+              "de"
+            ],
+            "default": "en"
+          }
+        }
+      }
+    }
+  }
+}
