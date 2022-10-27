@@ -229,8 +229,8 @@ paths:
 
   '/v1/query/credentials:revoke':
     post:
-      operationId: revokeredentials
-      summary: revokeredentials
+      operationId: revokeCredentials
+      summary: revokeCredentials
       description: |
         Revoke credentials for the epilot datalake for connecting other BI tools with Redshift
       tags:
