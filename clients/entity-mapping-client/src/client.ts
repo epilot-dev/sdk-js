@@ -11,8 +11,8 @@ export const getClient = () => {
 
   apiClient.defaults.headers.common = {
     ...(apiClient.defaults.headers.common ?? {}),
-    ...(CorrelationIds.get() || {})
-  }
+    ...(CorrelationIds.get() || {}),
+  };
 
   return apiClient;
 };
