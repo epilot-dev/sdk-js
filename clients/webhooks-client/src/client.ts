@@ -7,15 +7,11 @@ import { Client } from './openapi';
 export const getClient = () => {
   const api = new OpenAPIClientAxios({ definition, quick: true });
   const apiClient = api.initSync<Client>();
-  apiClient.interceptors.request.use((config) => {
-    const correlationHeaders = CorrelationIds.get() || {};
-    config.headers = {
-      ...(config.headers || {}),
-      ...correlationHeaders,
-    };
 
-    return config;
-  });
+  apiClient.defaults.headers.common = {
+    ...(apiClient.defaults.headers.common ?? {}),
+    ...(CorrelationIds.get() || {}),
+  };
 
   return apiClient;
 };

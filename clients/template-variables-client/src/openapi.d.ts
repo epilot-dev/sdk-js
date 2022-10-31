@@ -1,5 +1,5 @@
 /* eslint-disable */
-import {
+import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
@@ -8,418 +8,454 @@ import {
 } from 'openapi-client-axios'; 
 
 declare namespace Components {
-  namespace Schemas {
-    export interface CategoryResult {
-      /**
-       * example:
-       * contact
-       */
-      category?: string;
-      /**
-       * example:
-       * Contact
-       */
-      description?: string;
-    }
-    export interface CustomVariable {
-      /**
-       * ID
-       * example:
-       * rbse777b-3cf8-4bff-bb0c-253fd1123250
-       */
-      id?: string;
-      /**
-       * Custom variable type
-       * example:
-       * rbse777b-3cf8-4bff-bb0c-253fd1123250
-       */
-      type?: "order_table" | "custom";
-      /**
-       * Custom variable name
-       * example:
-       * My Custom table
-       */
-      name?: string;
-      /**
-       * The key which is used for Handlebar variable syntax {{key}}
-       * example:
-       * my_custom_table
-       */
-      key?: string;
-      /**
-       * The helper function parameter's names
-       * example:
-       * [
-       *   "param1",
-       *   "param2"
-       * ]
-       */
-      helper_params?: string[];
-      /**
-       * The helper function logic
-       * example:
-       * return param1 * param2;
-       */
-      helper_logic?: string;
-      /**
-       * Variable configuration
-       * example:
-       * {
-       *   "$ref": "#/components/examples/TableConfig/value"
-       * }
-       */
-      config?: {
-      };
-      /**
-       * Handlebar template that used to generate the variable content
-       * example:
-       * <table style="table-layout: fixed;width: 100%;max-width: 1000px;border-collapse: collapse;">
-       *   <thead>
-       *     <tr style="height: 48px;border-bottom: 1px solid #D5E1ED;">
-       *       {{#each table_config.header.columns as |column|}}
-       *         {{#if column.enable}}
-       *           <th style="{{makeStyle @root.table_config.header.style}};{{makeStyle column.style}};">{{column._label}}</th>
-       *         {{/if}}
-       *       {{/each}}
-       *     </tr>
-       *   </thead>
-       *   <tbody style="vertical-align: baseline  !important;font-weight: 400;font-size: 12px;position: relative;">
-       *     <!-- Start rendering products -->
-       *     {{#each order.products as |product|}}
-       *       {{#if @last}}
-       *         <tr style="height: 48px;;font-size:14px;border-bottom: 1px solid #D5E1ED;">
-       *       {{else}}
-       *         <tr style="height: 48px;;font-size:14px;">
-       *       {{/if}}
-       *         {{#each @root.table_config.header.columns as |column|}}
-       *           {{#if column.enable}}
-       *             {{#if (eq column.id 'item')}}
-       *               <!-- Item -->
-       *               <td style="{{makeStyle @root.table_config.body.product_name.style}}">
-       *                 {{#if @root.table_config.body.product_name.enable}}
-       *                   {{product.name}}
-       *                 {{/if}}
-       *                 {{#if @root.table_config.body.price_description.enable}}
-       *                   <br>
-       *                   <span style="{{makeStyle @root.table_config.body.price_description.style}}">{{product.price.description}}</span>
-       *                 {{/if}}
-       *                 {{#if @root.table_config.body.product_description.enable}}
-       *                   <br>
-       *                   <span style="{{makeStyle @root.table_config.body.product_description.style}}">{{product.description}}</span>
-       *                 {{/if}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'quantity')}}
-       *               <!-- Quantity -->
-       *               <td style="{{makeStyle @root.table_config.body.quantity.style}}">{{product.price.quantity}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'tax')}}
-       *               <!-- Tax -->
-       *               <td style="{{makeStyle @root.table_config.body.tax.style}}">
-       *                 {{product.price.tax_rate}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'unit_amount')}}
-       *               <!-- Unit amount -->
-       *               <td style="{{makeStyle @root.table_config.body.unit_amount.style}}">
-       *                 {{product.price.unit_amount_net}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'net_total')}}
-       *               <!-- Amount Subtotal -->
-       *               <td style="{{makeStyle @root.table_config.body.net_total.style}}">
-       *                 {{product.price.amount_subtotal}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'amount_tax')}}
-       *               <!-- Tax amount-->
-       *               <td style="{{makeStyle @root.table_config.body.amount_tax.style}}">
-       *                 {{product.price.amount_tax}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'gross_total')}}
-       *               <!-- Gross total -->
-       *               <td style="{{makeStyle @root.table_config.body.gross_total.style}}">
-       *                 {{product.price.amount_total}}
-       *                 {{#if @root.table_config.body.payment_type.enable}}
-       *                   {{#if (eq product.price.type 'recurring')}}
-       *                     <br>
-       *                     <span style="{{makeStyle @root.table_config.body.payment_type.style}}">{{product.price.billing_period}}</span>
-       *                   {{/if}}
-       *                 {{/if}}
-       *               </td>
-       *             {{/if}}
-       *           {{/if}}
-       *         {{/each}}
-       *         </tr>
-       *     {{/each}}
-       *     <!-- Finish rendering products -->
-       *     {{#if table_config.footer.gross_total.enable}}
-       *       {{#each order.total_details.recurrences as |item|}}
-       *         <tr style="height: 48px;font-size: 14px;">
-       *           <td style="padding-top: 16px; padding-bottom: 8px; border: none !important; vertical-align: top;" colspan="{{calculate_colspan @root.table_config}}"></td>
-       *           {{#if @root.table_config.footer.payment_type.enable}}
-       *             <td style="{{makeStyle @root.table_config.footer.payment_type.style}}" colspan="2">{{item.billing_period}}</td>
-       *           {{/if}}
-       *           {{#if (isColumnEnabled @root.table_config 'net_total')}}
-       *             {{#if @root.table_config.footer.net_total.enable}}
-       *               <td style="{{makeStyle @root.table_config.footer.net_total.style}}">{{item.amount_subtotal}}</td>
-       *             {{/if}}
-       *           {{/if}}
-       *           <td style="{{makeStyle @root.table_config.footer.gross_total.style}}">{{item.amount_total}}
-       *             {{#if @root.table_config.footer.amount_tax.enable}}
-       *               <br>
-       *               <span style="{{makeStyle @root.table_config.footer.amount_tax.style}}">{{item.full_amount_tax}}</span>
-       *             {{/if}}
-       *           </td>
-       *         </tr>
-       *       {{/each}}
-       *     {{/if}}
-       *     <tr style="height:16px !important;"></tr>
-       *   </tbody>
-       * </table>
-       * 
-       */
-      template?: string;
-      /**
-       * Creation time
-       * example:
-       * 2022-04-19T12:41:43.662Z
-       */
-      created_at?: string;
-      /**
-       * Created by
-       * example:
-       * 100042
-       */
-      created_by?: string;
-      /**
-       * Last update time
-       * example:
-       * 2022-04-20T12:41:43.662Z
-       */
-      updated_at?: string;
-      /**
-       * Updated by
-       * example:
-       * 100042
-       */
-      updated_by?: string;
-    }
-    export interface ExternalCustomVariable {
-      /**
-       * example:
-       * {{craftsmen.invitation_link}}
-       */
-      variable?: string;
-      /**
-       * example:
-       * https://partner.epilot.cloud/activate-account?user_name=htny.pct%2Btet%40gmail.com&confirmation_code=EdXPRW19
-       */
-      value?: string;
-    }
-    export type TemplateType = "email" | "document";
-    export interface VariableContext {
-      /**
-       * example:
-       * https://consent.sls.epilot.io/v1/unsubscribe?token=abc123
-       */
-      unsubscribe_url?: string;
-      /**
-       * example:
-       * {
-       *   "$ref": "#/components/examples/ExampleMain/value"
-       * }
-       */
-      main?: {
-        [name: string]: any;
-      };
-      /**
-       * example:
-       * {
-       *   "$ref": "#/components/examples/ExampleContactEntity/value"
-       * }
-       */
-      contact?: {
-        [name: string]: any;
-      };
-      /**
-       * example:
-       * {
-       *   "$ref": "#/components/examples/ExampleBrand/value"
-       * }
-       */
-      brand?: {
-        [name: string]: any;
-      };
-    }
-    export interface VariableParameters {
-      template_type: TemplateType;
-      language?: "en" | "de";
-      /**
-       * The main entity ID. Use main entity in order to use the variable without schema slug prefix - or just pass directly to other object ID.
-       * example:
-       * 63753437-c9e2-4e83-82bb-b1c666514561
-       */
-      main_entity_id?: string;
-      /**
-       * Brand ID
-       * example:
-       * 123451
-       */
-      brand_id?: number | null;
-      /**
-       * User ID
-       * example:
-       * 50001
-       */
-      user_id?: string | null;
-      /**
-       * Custom variables with specified values form other services.
-       */
-      custom_variables?: ExternalCustomVariable[];
-    }
-    /**
-     * example:
-     * #/components/examples/ExampleVariableResult/value
-     */
-    export interface VariableResult {
-      type?: "simple" | "partial";
-      /**
-       * Payload for the QR data
-       */
-      qrdata?: string;
-      /**
-       * Variable group
-       */
-      group?: string;
-      /**
-       * The value which is used to insert to template
-       */
-      insert?: string;
-      /**
-       * Variable description
-       */
-      description?: string;
-    }
-    export type VariableType = "simple" | "partial";
-  }
-}
-declare namespace Paths {
-  namespace CreateCustomVariable {
-    export type RequestBody = Components.Schemas.CustomVariable;
-  }
-  namespace DeleteCustomVariable {
-    namespace Parameters {
-      export type Id = string;
-    }
-    export interface PathParameters {
-      id: Parameters.Id;
-    }
-  }
-  namespace GenerateQRcode {
-    namespace Parameters {
-      export type Qrdata = string;
-    }
-    export interface QueryParameters {
-      qrdata?: Parameters.Qrdata;
-    }
-  }
-  namespace GetBluePrintTableConfig {
-    namespace Responses {
-      export type $200 = Components.Schemas.CustomVariable;
-    }
-  }
-  namespace GetCategories {
-    namespace Parameters {
-      /**
-       * Language
-       * example:
-       * de
-       */
-      export type Lang = "en" | "de";
-    }
-    export interface QueryParameters {
-      lang?: Parameters.Lang;
-    }
-    namespace Responses {
-      export type $200 = Components.Schemas.CategoryResult[];
-    }
-  }
-  namespace GetCustomVariable {
-    namespace Parameters {
-      export type Id = string;
-    }
-    export interface PathParameters {
-      id: Parameters.Id;
-    }
-    namespace Responses {
-      export type $200 = Components.Schemas.CustomVariable;
-    }
-  }
-  namespace GetCustomVariables {
-    namespace Responses {
-      export type $200 = Components.Schemas.CustomVariable[];
-    }
-  }
-  namespace GetVariableContext {
-    export interface RequestBody {
-      parameters?: Components.Schemas.VariableParameters;
-    }
-    namespace Responses {
-      export type $200 = Components.Schemas.VariableContext;
-    }
-  }
-  namespace ReplaceTemplates {
-    export interface RequestBody {
-      inputs?: string[];
-      parameters?: Components.Schemas.VariableParameters;
-    }
-    namespace Responses {
-      export interface $200 {
+    namespace Schemas {
+        export interface CategoryResult {
+            /**
+             * example:
+             * contact
+             */
+            category?: string;
+            /**
+             * example:
+             * Contact
+             */
+            description?: string;
+        }
+        export interface CustomVariable {
+            /**
+             * ID
+             * example:
+             * rbse777b-3cf8-4bff-bb0c-253fd1123250
+             */
+            id?: string;
+            /**
+             * Custom variable type
+             * example:
+             * rbse777b-3cf8-4bff-bb0c-253fd1123250
+             */
+            type?: "order_table" | "custom";
+            /**
+             * Custom variable name
+             * example:
+             * My Custom table
+             */
+            name?: string;
+            /**
+             * The key which is used for Handlebar variable syntax {{key}}
+             * example:
+             * my_custom_table
+             */
+            key?: string;
+            /**
+             * The helper function parameter's names
+             * example:
+             * [
+             *   "param1",
+             *   "param2"
+             * ]
+             */
+            helper_params?: string[];
+            /**
+             * The helper function logic
+             * example:
+             * return param1 * param2;
+             */
+            helper_logic?: string;
+            /**
+             * Variable configuration
+             * example:
+             * {
+             *   "$ref": "#/components/examples/TableConfig/value"
+             * }
+             */
+            config?: {
+                [key: string]: any;
+            };
+            /**
+             * Handlebar template that used to generate the variable content
+             * example:
+             * <table style="table-layout: fixed;width: 100%;max-width: 1000px;border-collapse: collapse;">
+             *   <thead>
+             *     <tr style="height: 48px;border-bottom: 1px solid #D5E1ED;">
+             *       {{#each table_config.header.columns as |column|}}
+             *         {{#if column.enable}}
+             *           <th style="{{makeStyle @root.table_config.header.style}};{{makeStyle column.style}};">{{column._label}}</th>
+             *         {{/if}}
+             *       {{/each}}
+             *     </tr>
+             *   </thead>
+             *   <tbody style="vertical-align: baseline  !important;font-weight: 400;font-size: 12px;position: relative;">
+             *     <!-- Start rendering products -->
+             *     {{#each order.products as |product|}}
+             *       {{#if @last}}
+             *         <tr style="height: 48px;;font-size:14px;border-bottom: 1px solid #D5E1ED;">
+             *       {{else}}
+             *         <tr style="height: 48px;;font-size:14px;">
+             *       {{/if}}
+             *         {{#each @root.table_config.header.columns as |column|}}
+             *           {{#if column.enable}}
+             *             {{#if (eq column.id 'item')}}
+             *               <!-- Item -->
+             *               <td style="{{makeStyle @root.table_config.body.product_name.style}}">
+             *                 {{#if @root.table_config.body.product_name.enable}}
+             *                   {{product.name}}
+             *                 {{/if}}
+             *                 {{#if @root.table_config.body.price_description.enable}}
+             *                   <br>
+             *                   <span style="{{makeStyle @root.table_config.body.price_description.style}}">{{product.price.description}}</span>
+             *                 {{/if}}
+             *                 {{#if @root.table_config.body.product_description.enable}}
+             *                   <br>
+             *                   <span style="{{makeStyle @root.table_config.body.product_description.style}}">{{product.description}}</span>
+             *                 {{/if}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'quantity')}}
+             *               <!-- Quantity -->
+             *               <td style="{{makeStyle @root.table_config.body.quantity.style}}">{{product.price.quantity}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'tax')}}
+             *               <!-- Tax -->
+             *               <td style="{{makeStyle @root.table_config.body.tax.style}}">
+             *                 {{product.price.tax_rate}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'unit_amount')}}
+             *               <!-- Unit amount -->
+             *               <td style="{{makeStyle @root.table_config.body.unit_amount.style}}">
+             *                 {{product.price.unit_amount_net}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'net_total')}}
+             *               <!-- Amount Subtotal -->
+             *               <td style="{{makeStyle @root.table_config.body.net_total.style}}">
+             *                 {{product.price.amount_subtotal}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'amount_tax')}}
+             *               <!-- Tax amount-->
+             *               <td style="{{makeStyle @root.table_config.body.amount_tax.style}}">
+             *                 {{product.price.amount_tax}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'gross_total')}}
+             *               <!-- Gross total -->
+             *               <td style="{{makeStyle @root.table_config.body.gross_total.style}}">
+             *                 {{product.price.amount_total}}
+             *                 {{#if @root.table_config.body.payment_type.enable}}
+             *                   {{#if (eq product.price.type 'recurring')}}
+             *                     <br>
+             *                     <span style="{{makeStyle @root.table_config.body.payment_type.style}}">{{product.price.billing_period}}</span>
+             *                   {{/if}}
+             *                 {{/if}}
+             *               </td>
+             *             {{/if}}
+             *           {{/if}}
+             *         {{/each}}
+             *         </tr>
+             *     {{/each}}
+             *     <!-- Finish rendering products -->
+             *     {{#if table_config.footer.gross_total.enable}}
+             *       {{#each order.total_details.recurrences as |item|}}
+             *         <tr style="height: 48px;font-size: 14px;">
+             *           <td style="padding-top: 16px; padding-bottom: 8px; border: none !important; vertical-align: top;" colspan="{{calculate_colspan @root.table_config}}"></td>
+             *           {{#if @root.table_config.footer.payment_type.enable}}
+             *             <td style="{{makeStyle @root.table_config.footer.payment_type.style}}" colspan="2">{{item.billing_period}}</td>
+             *           {{/if}}
+             *           {{#if (isColumnEnabled @root.table_config 'net_total')}}
+             *             {{#if @root.table_config.footer.net_total.enable}}
+             *               <td style="{{makeStyle @root.table_config.footer.net_total.style}}">{{item.amount_subtotal}}</td>
+             *             {{/if}}
+             *           {{/if}}
+             *           <td style="{{makeStyle @root.table_config.footer.gross_total.style}}">{{item.amount_total}}
+             *             {{#if @root.table_config.footer.amount_tax.enable}}
+             *               <br>
+             *               <span style="{{makeStyle @root.table_config.footer.amount_tax.style}}">{{item.full_amount_tax}}</span>
+             *             {{/if}}
+             *           </td>
+             *         </tr>
+             *       {{/each}}
+             *     {{/if}}
+             *     <tr style="height:16px !important;"></tr>
+             *   </tbody>
+             * </table>
+             *
+             */
+            template?: string;
+            /**
+             * Creation time
+             * example:
+             * 2022-04-19T12:41:43.662Z
+             */
+            created_at?: string;
+            /**
+             * Created by
+             * example:
+             * 100042
+             */
+            created_by?: string;
+            /**
+             * Last update time
+             * example:
+             * 2022-04-20T12:41:43.662Z
+             */
+            updated_at?: string;
+            /**
+             * Updated by
+             * example:
+             * 100042
+             */
+            updated_by?: string;
+        }
+        export interface ExternalCustomVariable {
+            /**
+             * example:
+             * {{craftsmen.invitation_link}}
+             */
+            variable?: string;
+            /**
+             * example:
+             * https://partner.epilot.cloud/activate-account?user_name=htny.pct%2Btet%40gmail.com&confirmation_code=EdXPRW19
+             */
+            value?: string;
+        }
+        export type TemplateType = "email" | "document";
+        export interface VariableContext {
+            /**
+             * example:
+             * https://consent.sls.epilot.io/v1/unsubscribe?token=abc123
+             */
+            unsubscribe_url?: string;
+            /**
+             * example:
+             * {
+             *   "$ref": "#/components/examples/ExampleMain/value"
+             * }
+             */
+            main?: {
+                [name: string]: any;
+            };
+            /**
+             * example:
+             * {
+             *   "$ref": "#/components/examples/ExampleContactEntity/value"
+             * }
+             */
+            contact?: {
+                [name: string]: any;
+            };
+            /**
+             * example:
+             * {
+             *   "$ref": "#/components/examples/ExampleBrand/value"
+             * }
+             */
+            brand?: {
+                [name: string]: any;
+            };
+        }
+        export interface VariableParameters {
+            template_type: TemplateType;
+            language?: "en" | "de";
+            /**
+             * The main entity ID. Use main entity in order to use the variable without schema slug prefix - or just pass directly to other object ID.
+             * example:
+             * 63753437-c9e2-4e83-82bb-b1c666514561
+             */
+            main_entity_id?: string;
+            /**
+             * Brand ID
+             * example:
+             * 123451
+             */
+            brand_id?: number | null;
+            /**
+             * User ID
+             * example:
+             * 50001
+             */
+            user_id?: string | null;
+            /**
+             * Custom variables with specified values form other services.
+             */
+            custom_variables?: ExternalCustomVariable[];
+        }
         /**
          * example:
-         * "[Brand Name GmbH] Order confirmation",
-         * "Hello Customer Name 
-         * 
-         * <span color="#ccc">Brand Name GmbH</span>
-         * <img src="https://logobucket.s3.amazonaws.com/brandlogo.png" alt="Brand Name"/>
-         * <a href="https://company.com/imprint">imprint</a>
-         * "]
-         * 
+         * #/components/examples/ExampleVariableResult/value
          */
-        outputs?: string[];
-      }
+        export interface VariableResult {
+            type?: "simple" | "partial";
+            /**
+             * Payload for the QR data
+             */
+            qrdata?: string;
+            /**
+             * Variable group
+             */
+            group?: string;
+            /**
+             * The value which is used to insert to template
+             */
+            insert?: string;
+            /**
+             * Variable description
+             */
+            description?: string;
+        }
+        export type VariableType = "simple" | "partial";
     }
-  }
-  namespace SearchVariables {
-    export interface RequestBody {
-      template_type: Components.Schemas.TemplateType;
-      /**
-       * Search string
-       * example:
-       * logo
-       */
-      query: string;
-      from?: number;
-      size?: number;
-      lang?: "en" | "de";
-      entity_schemas?: string[];
+}
+declare namespace Paths {
+    namespace CreateCustomVariable {
+        export type RequestBody = Components.Schemas.CustomVariable;
+        namespace Responses {
+            export interface $201 {
+            }
+            export interface $403 {
+            }
+        }
     }
-    namespace Responses {
-      export type $200 = Components.Schemas.VariableResult[];
+    namespace DeleteCustomVariable {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
     }
-  }
-  namespace UpdateCustomVariable {
-    namespace Parameters {
-      export type Id = string;
+    namespace GenerateQRcode {
+        namespace Parameters {
+            export type Qrdata = string;
+        }
+        export interface QueryParameters {
+            qrdata?: Parameters.Qrdata;
+        }
     }
-    export interface PathParameters {
-      id: Parameters.Id;
+    namespace GetBluePrintTableConfig {
+        namespace Responses {
+            export type $200 = Components.Schemas.CustomVariable;
+            export interface $403 {
+            }
+        }
     }
-    export type RequestBody = Components.Schemas.CustomVariable;
-  }
+    namespace GetCategories {
+        namespace Parameters {
+            /**
+             * Language
+             * example:
+             * de
+             */
+            export type Lang = "en" | "de";
+        }
+        export interface QueryParameters {
+            lang?: /**
+             * Language
+             * example:
+             * de
+             */
+            Parameters.Lang;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.CategoryResult[];
+        }
+    }
+    namespace GetCustomVariable {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.CustomVariable;
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetCustomVariables {
+        namespace Responses {
+            export type $200 = Components.Schemas.CustomVariable[];
+            export interface $403 {
+            }
+        }
+    }
+    namespace GetVariableContext {
+        export interface RequestBody {
+            parameters?: Components.Schemas.VariableParameters;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.VariableContext;
+        }
+    }
+    namespace ReplaceTemplates {
+        export interface RequestBody {
+            inputs?: string[];
+            parameters?: Components.Schemas.VariableParameters;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * "[Brand Name GmbH] Order confirmation",
+                 * "Hello Customer Name
+                 *
+                 * <span color="#ccc">Brand Name GmbH</span>
+                 * <img src="https://logobucket.s3.amazonaws.com/brandlogo.png" alt="Brand Name"/>
+                 * <a href="https://company.com/imprint">imprint</a>
+                 * "]
+                 *
+                 */
+                outputs?: string[];
+            }
+        }
+    }
+    namespace SearchVariables {
+        export interface RequestBody {
+            template_type: Components.Schemas.TemplateType;
+            /**
+             * Search string
+             * example:
+             * logo
+             */
+            query: string;
+            from?: number;
+            size?: number;
+            lang?: "en" | "de";
+            entity_schemas?: string[];
+        }
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * #/components/examples/ExampleVariableResult/value
+             */
+            Components.Schemas.VariableResult[];
+        }
+    }
+    namespace UpdateCustomVariable {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.CustomVariable;
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -498,7 +534,7 @@ export interface OperationMethods {
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateCustomVariable.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.CreateCustomVariable.Responses.$201>
   /**
    * getCustomVariable - Get custom variable
    * 
@@ -518,7 +554,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.UpdateCustomVariable.PathParameters> | null,
     data?: Paths.UpdateCustomVariable.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.UpdateCustomVariable.Responses.$200>
   /**
    * deleteCustomVariable - Delete custom variable
    * 
@@ -528,7 +564,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.DeleteCustomVariable.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.DeleteCustomVariable.Responses.$204>
   /**
    * getBluePrintTableConfig - Get default table config
    * 
@@ -628,7 +664,7 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateCustomVariable.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.CreateCustomVariable.Responses.$201>
   }
   ['/v1/custom-variables/{id}']: {
     /**
@@ -640,7 +676,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.UpdateCustomVariable.PathParameters> | null,
       data?: Paths.UpdateCustomVariable.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.UpdateCustomVariable.Responses.$200>
     /**
      * getCustomVariable - Get custom variable
      * 
@@ -660,7 +696,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.DeleteCustomVariable.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.DeleteCustomVariable.Responses.$204>
   }
   ['/v1/custom-variables/order-table-blueprint']: {
     /**
