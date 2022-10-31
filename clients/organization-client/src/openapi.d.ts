@@ -10,11 +10,11 @@ import type {
 declare namespace Components {
     namespace Schemas {
         export interface Organization {
-            /**
+            id?: /**
              * example:
              * 739224
              */
-            id?: string;
+            OrganizationId;
             type?: "Vendor" | "Partner";
             /**
              * example:
@@ -122,18 +122,14 @@ declare namespace Paths {
     namespace DeleteSettingsValue {
         namespace Parameters {
             export type Key = string;
-            /**
+            export type OrgId = /**
              * example:
              * 739224
              */
-            export type OrgId = string;
+            Components.Schemas.OrganizationId;
         }
         export interface PathParameters {
-            org_id: /**
-             * example:
-             * 739224
-             */
-            Parameters.OrgId;
+            org_id: Parameters.OrgId;
             key: Parameters.Key;
         }
         namespace Responses {
@@ -143,115 +139,32 @@ declare namespace Paths {
     }
     namespace GetOrganization {
         namespace Parameters {
-            /**
+            export type OrgId = /**
              * example:
              * 739224
              */
-            export type OrgId = string;
+            Components.Schemas.OrganizationId;
         }
         export interface PathParameters {
-            org_id: /**
-             * example:
-             * 739224
-             */
-            Parameters.OrgId;
+            org_id: Parameters.OrgId;
         }
         namespace Responses {
-            export interface $200 {
-                /**
-                 * example:
-                 * 739224
-                 */
-                id?: string;
-                type?: "Vendor" | "Partner";
-                /**
-                 * example:
-                 * Epilot
-                 */
-                name?: string | null;
-                /**
-                 * example:
-                 * <p>Thanks</p>
-                 */
-                signature?: string | null;
-                /**
-                 * example:
-                 * EPI
-                 */
-                symbol?: string | null;
-                /**
-                 * example:
-                 * professional
-                 */
-                pricing_tier?: string | null;
-                /**
-                 * example:
-                 * someone@epilot.cloud
-                 */
-                email?: string | null;
-                /**
-                 * example:
-                 * 50
-                 */
-                free_user_limit?: number | null;
-                /**
-                 * example:
-                 * 49123123123
-                 */
-                phone?: string | null;
-                /**
-                 * example:
-                 * https://epilot.cloud
-                 */
-                website?: string | null;
-                address?: {
-                    country?: string | null;
-                    city?: string | null;
-                    postal_code?: string | null;
-                    street?: string | null;
-                    street_number?: string | null;
-                };
-                /**
-                 * example:
-                 * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
-                 */
-                logo_url?: string | null;
-                /**
-                 * example:
-                 * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
-                 */
-                logo_thumbnail_url?: string | null;
-                /**
-                 * example:
-                 * false
-                 */
-                is_unlicensed_org?: boolean | null;
-                /**
-                 * Organization style setting (e.g. font setting)
-                 */
-                style?: {
-                    [name: string]: any;
-                } | null;
-            }
+            export type $200 = Components.Schemas.Organization;
         }
     }
     namespace GetSettings {
         namespace Parameters {
-            /**
+            export type OrgId = /**
              * example:
              * 739224
              */
-            export type OrgId = string;
+            Components.Schemas.OrganizationId;
         }
         export interface PathParameters {
-            org_id: /**
-             * example:
-             * 739224
-             */
-            Parameters.OrgId;
+            org_id: Parameters.OrgId;
         }
         namespace Responses {
-            /**
+            export type $200 = /**
              * example:
              * {
              *   "double_opt_in": {
@@ -259,229 +172,53 @@ declare namespace Paths {
              *   }
              * }
              */
-            export interface $200 {
-                [name: string]: any;
-            }
+            Components.Schemas.Settings;
         }
     }
     namespace PutSettingsValue {
         namespace Parameters {
             export type Key = string;
-            /**
+            export type OrgId = /**
              * example:
              * 739224
              */
-            export type OrgId = string;
+            Components.Schemas.OrganizationId;
         }
         export interface PathParameters {
-            org_id: /**
-             * example:
-             * 739224
-             */
-            Parameters.OrgId;
+            org_id: Parameters.OrgId;
             key: Parameters.Key;
         }
-        /**
-         * example:
-         * {
-         *   "enabled": true
-         * }
-         */
         export type RequestBody = /**
          * example:
          * {
          *   "enabled": true
          * }
          */
-        string | number | boolean | any[] | {
-            [name: string]: any;
-        };
+        Components.Schemas.SettingsValue;
         namespace Responses {
-            /**
-             * example:
-             * {
-             *   "enabled": true
-             * }
-             */
             export type $200 = /**
              * example:
              * {
              *   "enabled": true
              * }
              */
-            string | number | boolean | any[] | {
-                [name: string]: any;
-            };
+            Components.Schemas.SettingsValue;
         }
     }
     namespace UpdateOrganization {
         namespace Parameters {
-            /**
+            export type OrgId = /**
              * example:
              * 739224
              */
-            export type OrgId = string;
+            Components.Schemas.OrganizationId;
         }
         export interface PathParameters {
-            org_id: /**
-             * example:
-             * 739224
-             */
-            Parameters.OrgId;
+            org_id: Parameters.OrgId;
         }
-        export interface RequestBody {
-            /**
-             * example:
-             * 739224
-             */
-            id?: string;
-            type?: "Vendor" | "Partner";
-            /**
-             * example:
-             * Epilot
-             */
-            name?: string | null;
-            /**
-             * example:
-             * <p>Thanks</p>
-             */
-            signature?: string | null;
-            /**
-             * example:
-             * EPI
-             */
-            symbol?: string | null;
-            /**
-             * example:
-             * professional
-             */
-            pricing_tier?: string | null;
-            /**
-             * example:
-             * someone@epilot.cloud
-             */
-            email?: string | null;
-            /**
-             * example:
-             * 50
-             */
-            free_user_limit?: number | null;
-            /**
-             * example:
-             * 49123123123
-             */
-            phone?: string | null;
-            /**
-             * example:
-             * https://epilot.cloud
-             */
-            website?: string | null;
-            address?: {
-                country?: string | null;
-                city?: string | null;
-                postal_code?: string | null;
-                street?: string | null;
-                street_number?: string | null;
-            };
-            /**
-             * example:
-             * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
-             */
-            logo_url?: string | null;
-            /**
-             * example:
-             * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
-             */
-            logo_thumbnail_url?: string | null;
-            /**
-             * example:
-             * false
-             */
-            is_unlicensed_org?: boolean | null;
-            /**
-             * Organization style setting (e.g. font setting)
-             */
-            style?: {
-                [name: string]: any;
-            } | null;
-        }
+        export type RequestBody = Components.Schemas.Organization;
         namespace Responses {
-            export interface $200 {
-                /**
-                 * example:
-                 * 739224
-                 */
-                id?: string;
-                type?: "Vendor" | "Partner";
-                /**
-                 * example:
-                 * Epilot
-                 */
-                name?: string | null;
-                /**
-                 * example:
-                 * <p>Thanks</p>
-                 */
-                signature?: string | null;
-                /**
-                 * example:
-                 * EPI
-                 */
-                symbol?: string | null;
-                /**
-                 * example:
-                 * professional
-                 */
-                pricing_tier?: string | null;
-                /**
-                 * example:
-                 * someone@epilot.cloud
-                 */
-                email?: string | null;
-                /**
-                 * example:
-                 * 50
-                 */
-                free_user_limit?: number | null;
-                /**
-                 * example:
-                 * 49123123123
-                 */
-                phone?: string | null;
-                /**
-                 * example:
-                 * https://epilot.cloud
-                 */
-                website?: string | null;
-                address?: {
-                    country?: string | null;
-                    city?: string | null;
-                    postal_code?: string | null;
-                    street?: string | null;
-                    street_number?: string | null;
-                };
-                /**
-                 * example:
-                 * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
-                 */
-                logo_url?: string | null;
-                /**
-                 * example:
-                 * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
-                 */
-                logo_thumbnail_url?: string | null;
-                /**
-                 * example:
-                 * false
-                 */
-                is_unlicensed_org?: boolean | null;
-                /**
-                 * Organization style setting (e.g. font setting)
-                 */
-                style?: {
-                    [name: string]: any;
-                } | null;
-            }
+            export type $200 = Components.Schemas.Organization;
         }
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@epilot/partner-directory-client",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "API Client for epilot Partner API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,7 +26,6 @@
     "!src",
     "!*.config.js"
   ],
-
   "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git"
@@ -46,6 +45,7 @@
     "axios": "^0.25.0"
   },
   "dependencies": {
+    "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
     "buffer": "^6.0.3",
     "https-browserify": "^1.0.0",
     "openapi-client-axios": "^5.1.2",

@@ -1,3 +1,4 @@
+import CorrelationIds from '@dazn/lambda-powertools-correlation-ids';
 import OpenAPIClientAxios from 'openapi-client-axios';
 
 import definition from './definition';
@@ -9,5 +10,12 @@ export const getClient = () => {
     quick: true,
   });
 
-  return api.initSync<Client>();
+  const apiClient = api.initSync<Client>();
+
+  apiClient.defaults.headers.common = {
+    ...(apiClient.defaults.headers.common ?? {}),
+    ...(CorrelationIds.get() || {}),
+  };
+
+  return apiClient;
 };
