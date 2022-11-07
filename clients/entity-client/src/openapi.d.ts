@@ -1054,6 +1054,25 @@ declare namespace Components {
             classic_view?: string; // uri
         }
         export type EntityId = string; // uuid
+        export interface EntityImportParams {
+            S3Reference: {
+                /**
+                 * example:
+                 * epilot-files-prod
+                 */
+                bucket: string;
+                /**
+                 * example:
+                 * 123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf
+                 */
+                key: string;
+            };
+            /**
+             * example:
+             * contact
+             */
+            schema: string;
+        }
         /**
          * example:
          * {
@@ -1582,6 +1601,9 @@ declare namespace Components {
              */
             sort?: string;
             from?: number;
+            /**
+             * Max search size is 1000 with higher values defaulting to 1000
+             */
             size?: number;
             /**
              * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
@@ -1597,6 +1619,10 @@ declare namespace Components {
              * ]
              */
             fields?: string[];
+            /**
+             * Adds a `_score` number field to results that can be used to rank by match score
+             */
+            include_scores?: boolean;
         }
         export interface EntitySearchResults {
             /**
@@ -2128,6 +2154,10 @@ declare namespace Components {
             protected?: boolean;
             type?: "invitation_email";
         }
+        /**
+         * Pass 'true' to generate import template
+         */
+        export type IsTemplate = boolean;
         /**
          * Link with title and href
          */
@@ -2801,6 +2831,10 @@ declare namespace Components {
              * When enable_relation_tags is set to true the user will be able to set tags(labels) in each relation item.
              */
             enable_relation_tags?: boolean;
+            /**
+             * Optional label for the add button. The translated value for add_button_lable is used, if found else the string is used as is.
+             */
+            add_button_label?: string;
         }
         /**
          * example:
@@ -2841,6 +2875,10 @@ declare namespace Components {
             entity_id: EntityId /* uuid */;
             attribute: string;
             _tags?: string[];
+            /**
+             * Whether this is a reverse relation
+             */
+            reverse?: boolean;
         }
         /**
          * Repeatable (add N number of fields)
@@ -3722,10 +3760,12 @@ declare namespace Paths {
     }
     namespace ExportEntities {
         namespace Parameters {
+            export type IsTemplate = /* Pass 'true' to generate import template */ Components.Schemas.IsTemplate;
             export type JobId = /* Export Job Id to get the result */ Components.Schemas.ExportJobId;
         }
         export interface QueryParameters {
             job_id?: Parameters.JobId;
+            is_template?: Parameters.IsTemplate;
         }
         export type RequestBody = Components.Schemas.EntitySearchParams;
         namespace Responses {
@@ -3851,6 +3891,7 @@ declare namespace Paths {
         namespace Parameters {
             export type Hydrate = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
+            export type IncludeReverse = boolean;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -3864,6 +3905,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             hydrate?: Parameters.Hydrate;
+            include_reverse?: Parameters.IncludeReverse;
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsResp;
@@ -3905,6 +3947,19 @@ declare namespace Paths {
             export interface $200 {
                 versions?: /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem[];
                 drafts?: /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem[];
+            }
+        }
+    }
+    namespace ImportEntities {
+        namespace Parameters {
+            export type JobId = /* Export Job Id to get the result */ Components.Schemas.ExportJobId;
+        }
+        export interface QueryParameters {
+            job_id?: Parameters.JobId;
+        }
+        export type RequestBody = Components.Schemas.EntityImportParams;
+        namespace Responses {
+            export interface $201 {
             }
         }
     }
@@ -4443,7 +4498,12 @@ export interface OperationMethods {
   /**
    * getRelations - getRelations
    * 
-   * It loads 1st level relations for the mentioned entity. You can control whether entire related entity is loaded or not via hydrate param.
+   * Returns 1st level direct relations for an entity.
+   * 
+   * You can control whether to return the full entity or just the relation item with the `?hydrate` query param.
+   * 
+   * Reverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.
+   * 
    */
   'getRelations'(
     parameters?: Parameters<Paths.GetRelations.PathParameters & Paths.GetRelations.QueryParameters> | null,
@@ -4453,7 +4513,7 @@ export interface OperationMethods {
   /**
    * addRelations - addRelations
    * 
-   * It relates one or more entities to some parent entity, by providing meaning for relations via attribute field.
+   * Relates one or more entities to parent entity by adding items to a relation attribute
    */
   'addRelations'(
     parameters?: Parameters<Paths.AddRelations.PathParameters> | null,
@@ -4463,7 +4523,7 @@ export interface OperationMethods {
   /**
    * updateRelation - updateRelation
    * 
-   * It updates a relation between two entities.
+   * Updates an existing relation between two entities.
    */
   'updateRelation'(
     parameters?: Parameters<Paths.UpdateRelation.PathParameters> | null,
@@ -4473,7 +4533,7 @@ export interface OperationMethods {
   /**
    * deleteRelation - deleteRelation
    * 
-   * It deletes a relation between one entity and the other.
+   * Removes relation between two entities
    */
   'deleteRelation'(
     parameters?: Parameters<Paths.DeleteRelation.PathParameters> | null,
@@ -4490,6 +4550,16 @@ export interface OperationMethods {
     data?: Paths.ExportEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExportEntities.Responses.$201>
+  /**
+   * importEntities - importEntities
+   * 
+   * import entity data from
+   */
+  'importEntities'(
+    parameters?: Parameters<Paths.ImportEntities.QueryParameters> | null,
+    data?: Paths.ImportEntities.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ImportEntities.Responses.$201>
 }
 
 export interface PathsDictionary {
@@ -4891,7 +4961,12 @@ export interface PathsDictionary {
     /**
      * getRelations - getRelations
      * 
-     * It loads 1st level relations for the mentioned entity. You can control whether entire related entity is loaded or not via hydrate param.
+     * Returns 1st level direct relations for an entity.
+     * 
+     * You can control whether to return the full entity or just the relation item with the `?hydrate` query param.
+     * 
+     * Reverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetRelations.PathParameters & Paths.GetRelations.QueryParameters> | null,
@@ -4901,7 +4976,7 @@ export interface PathsDictionary {
     /**
      * addRelations - addRelations
      * 
-     * It relates one or more entities to some parent entity, by providing meaning for relations via attribute field.
+     * Relates one or more entities to parent entity by adding items to a relation attribute
      */
     'post'(
       parameters?: Parameters<Paths.AddRelations.PathParameters> | null,
@@ -4913,7 +4988,7 @@ export interface PathsDictionary {
     /**
      * updateRelation - updateRelation
      * 
-     * It updates a relation between two entities.
+     * Updates an existing relation between two entities.
      */
     'put'(
       parameters?: Parameters<Paths.UpdateRelation.PathParameters> | null,
@@ -4923,7 +4998,7 @@ export interface PathsDictionary {
     /**
      * deleteRelation - deleteRelation
      * 
-     * It deletes a relation between one entity and the other.
+     * Removes relation between two entities
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteRelation.PathParameters> | null,
@@ -4942,6 +5017,18 @@ export interface PathsDictionary {
       data?: Paths.ExportEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExportEntities.Responses.$201>
+  }
+  ['/v1/entity:import']: {
+    /**
+     * importEntities - importEntities
+     * 
+     * import entity data from
+     */
+    'post'(
+      parameters?: Parameters<Paths.ImportEntities.QueryParameters> | null,
+      data?: Paths.ImportEntities.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ImportEntities.Responses.$201>
   }
 }
 
