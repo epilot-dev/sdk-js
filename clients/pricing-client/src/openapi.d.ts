@@ -262,6 +262,22 @@ declare namespace Components {
              * The quantity of products being purchased.
              */
             quantity?: number;
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -756,6 +772,22 @@ declare namespace Components {
              * The quantity of products being purchased.
              */
             quantity?: number;
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -1319,7 +1351,7 @@ declare namespace Components {
              *
              */
             OrderStatus;
-            line_items?: /* Tracks a set of product prices, quantities, (discounts) and taxes. */ PriceItems;
+            line_items?: /* A valid set of product prices, quantities, (discounts) and taxes from a client. */ PriceItemsDto;
             /**
              * type of source, e.g. journey or manual
              * example:
@@ -1550,6 +1582,14 @@ declare namespace Components {
              */
             renewal_duration_unit?: "weeks" | "months" | "years";
             /**
+             * The flag for prices that can be influenced by external variables such as user input.
+             */
+            variable_price?: boolean;
+            /**
+             * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
+             */
+            unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l") | string;
+            /**
              * The price creation date
              */
             _created_at?: string;
@@ -1590,6 +1630,57 @@ declare namespace Components {
              */
             _tags?: string[];
         }
+        /**
+         * example:
+         * {
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "value": 1000.245,
+         *   "name": "avg consumption",
+         *   "metadata": {
+         *     "journey_title": "energy journey",
+         *     "step_name": "avg consumption picker"
+         *   }
+         * }
+         */
+        export interface PriceInputMapping {
+            price_id?: string;
+            frequency_unit?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            name?: string;
+            value?: number;
+            metadata?: {
+                [name: string]: string;
+            };
+        }
+        /**
+         * example:
+         * [
+         *   {
+         *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *     "frequency_unit": "weekly",
+         *     "value": 1000.245,
+         *     "name": "avg consumption",
+         *     "metadata": {
+         *       "journey_title": "energy journey",
+         *       "step_name": "avg consumption picker"
+         *     }
+         *   }
+         * ]
+         */
+        export type PriceInputMappings = /**
+         * example:
+         * {
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "value": 1000.245,
+         *   "name": "avg consumption",
+         *   "metadata": {
+         *     "journey_title": "energy journey",
+         *     "step_name": "avg consumption picker"
+         *   }
+         * }
+         */
+        PriceInputMapping[];
         /**
          * Represents a price item
          * example:
@@ -1703,6 +1794,22 @@ declare namespace Components {
              * The quantity of products being purchased.
              */
             quantity?: number;
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -1967,6 +2074,14 @@ declare namespace Components {
                  * The renewal period duration unit
                  */
                 renewal_duration_unit?: "weeks" | "months" | "years";
+                /**
+                 * The flag for prices that can be influenced by external variables such as user input.
+                 */
+                variable_price?: boolean;
+                /**
+                 * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
+                 */
+                unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l") | string;
                 /**
                  * The price creation date
                  */

@@ -191,6 +191,147 @@
                       }
                     ]
                   }
+                },
+                "Order with Simple Prices and Dynamic Pricing": {
+                  "value": {
+                    "status": "quote",
+                    "source_type": "manual",
+                    "expires_at": "2022-06-30T16:17:00.000Z",
+                    "line_items": [
+                      {
+                        "price_id": "632b18b5-3f50-4231-b8d5-f8c33a392ed0",
+                        "product_id": "3d1c9987-a7ae-4c1c-a7ef-e12caccab4e0",
+                        "price_mappings": [
+                          {
+                            "price_id": "632b18b5-3f50-4231-b8d5-f8c33a392ed0",
+                            "frequency_unit": "yearly",
+                            "value": 12000,
+                            "name": "Estimated consumption",
+                            "metadata": {
+                              "journey_title": "P&G",
+                              "step_name": "Number Inputs"
+                            }
+                          }
+                        ],
+                        "quantity": 16
+                      }
+                    ],
+                    "currency": "EUR",
+                    "payment_method": [
+                      {
+                        "type": "IBAN",
+                        "details": {}
+                      }
+                    ],
+                    "billing_contact": {
+                      "$relation": [
+                        {
+                          "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
+                          "_tags": []
+                        }
+                      ]
+                    },
+                    "billing_first_name": "Joao",
+                    "billing_last_name": "Pinho",
+                    "billing_email": "j.pinho@epilot.cloud",
+                    "billing_company_name": "epilot cloud",
+                    "billing_address": [
+                      {
+                        "_tags": [],
+                        "street": "Im Media Park",
+                        "street_number": "8a",
+                        "postal_code": "52000",
+                        "city": "Cologne",
+                        "country": "DE",
+                        "additional_info": ""
+                      }
+                    ],
+                    "delivery_address": [],
+                    "dates": [
+                      {
+                        "_tags": [
+                          "Instalation Date"
+                        ],
+                        "dates": "",
+                        "value": "2022-06-30T16:29:00.000Z"
+                      }
+                    ]
+                  }
+                },
+                "Order with Composite Prices and Dynamic Pricing": {
+                  "value": {
+                    "status": "quote",
+                    "source_type": "manual",
+                    "expires_at": "2022-06-30T16:17:00.000Z",
+                    "line_items": [
+                      {
+                        "price_id": "b3900bf3-020c-4c58-8af9-32f2682929e3",
+                        "product_id": "924f6881-7ae3-4e2e-a1dd-2d81b8fa2e32",
+                        "price_mappings": [
+                          {
+                            "price_id": "6dc88d6f-ba33-45ee-b5d0-62641344a0d9",
+                            "frequency_unit": "yearly",
+                            "value": 12000,
+                            "name": "Estimated consumption",
+                            "metadata": {
+                              "journey_title": "P&G",
+                              "step_name": "Number Inputs"
+                            }
+                          },
+                          {
+                            "price_id": "60eb12cd-703d-4d41-9265-577ff657bfc9",
+                            "value": 10,
+                            "name": "Distance to power meter",
+                            "metadata": {
+                              "journey_title": "P&G",
+                              "step_name": "Number Inputs"
+                            }
+                          }
+                        ],
+                        "quantity": 1
+                      }
+                    ],
+                    "currency": "EUR",
+                    "payment_method": [
+                      {
+                        "type": "IBAN",
+                        "details": {}
+                      }
+                    ],
+                    "billing_contact": {
+                      "$relation": [
+                        {
+                          "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
+                          "_tags": []
+                        }
+                      ]
+                    },
+                    "billing_first_name": "Joao",
+                    "billing_last_name": "Pinho",
+                    "billing_email": "j.pinho@epilot.cloud",
+                    "billing_company_name": "epilot cloud",
+                    "billing_address": [
+                      {
+                        "_tags": [],
+                        "street": "Im Media Park",
+                        "street_number": "8a",
+                        "postal_code": "52000",
+                        "city": "Cologne",
+                        "country": "DE",
+                        "additional_info": ""
+                      }
+                    ],
+                    "delivery_address": [],
+                    "dates": [
+                      {
+                        "_tags": [
+                          "Instalation Date"
+                        ],
+                        "dates": "",
+                        "value": "2022-06-30T16:29:00.000Z"
+                      }
+                    ]
+                  }
                 }
               },
               "schema": {
@@ -1415,6 +1556,30 @@
               "years"
             ]
           },
+          "variable_price": {
+            "description": "The flag for prices that can be influenced by external variables such as user input.",
+            "type": "boolean"
+          },
+          "unit": {
+            "description": "The unit of measurement used for display purposes and possibly for calculations when the price is variable.",
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "built-in units",
+                "enum": [
+                  "kw",
+                  "kwh",
+                  "m",
+                  "m2",
+                  "l"
+                ]
+              },
+              {
+                "type": "string",
+                "description": "user custom unit"
+              }
+            ]
+          },
           "_created_at": {
             "description": "The price creation date",
             "type": "string"
@@ -1564,6 +1729,65 @@
               }
             }
           ]
+        }
+      },
+      "PriceInputMappings": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PriceInputMapping"
+        },
+        "example": [
+          {
+            "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+            "frequency_unit": "weekly",
+            "value": 1000.245,
+            "name": "avg consumption",
+            "metadata": {
+              "journey_title": "energy journey",
+              "step_name": "avg consumption picker"
+            }
+          }
+        ]
+      },
+      "PriceInputMapping": {
+        "type": "object",
+        "properties": {
+          "price_id": {
+            "type": "string"
+          },
+          "frequency_unit": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly",
+              "one_time"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "example": {
+          "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+          "frequency_unit": "weekly",
+          "value": 1000.245,
+          "name": "avg consumption",
+          "metadata": {
+            "journey_title": "energy journey",
+            "step_name": "avg consumption picker"
+          }
         }
       },
       "CatalogSearch": {
@@ -1867,6 +2091,9 @@
             "type": "integer",
             "description": "The quantity of products being purchased."
           },
+          "price_mappings": {
+            "$ref": "#/components/schemas/PriceInputMappings"
+          },
           "description": {
             "type": "string",
             "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
@@ -2142,7 +2369,7 @@
             "$ref": "#/components/schemas/OrderStatus"
           },
           "line_items": {
-            "$ref": "#/components/schemas/PriceItems"
+            "$ref": "#/components/schemas/PriceItemsDto"
           },
           "source_type": {
             "type": "string",
@@ -2973,12 +3200,6 @@
         "value": {
           "mode": "create_order",
           "cart": {
-            "metadata": [
-              {
-                "key": "journey-id",
-                "value": "8d0a2235-97ce-42d0-88a3-e374634ca44e"
-              }
-            ],
             "customer": {
               "first_name": "john",
               "last_name": "doe",
@@ -3005,20 +3226,15 @@
             },
             "line_items": [
               {
-                "quantity": 1,
-                "product": "b7185fb7-b10f-4875-bda7-288631446555",
-                "price": "df240bab-9f71-4a9a-a9e1-59f18827dbf9"
+                "quantity": 3,
+                "product_id": "b7185fb7-b10f-4875-bda7-288631446555",
+                "price_id": "df240bab-9f71-4a9a-a9e1-59f18827dbf9"
               },
               {
-                "quantity": 1,
-                "product": "zzzzzz-b10f-4875-bda7-288631446555",
-                "price": "zzzzz-9f71-4a9a-a9e1-59f18827dbf9"
+                "quantity": 2,
+                "product_id": "607d2952-8f3e-484f-a82b-4880528b7f55",
+                "price_id": "7b028fdf-0b0a-4077-a8f1-d0cbbd14b7cf"
               }
-            ],
-            "files": [
-              "xf240bab-9f71-4a9a-a9e1-59f18827dbf9",
-              "yf240bab-9f71-4a9a-a9e1-59f18827dbf9",
-              "zf240bab-9f71-4a9a-a9e1-59f18827dbf9"
             ]
           }
         }
