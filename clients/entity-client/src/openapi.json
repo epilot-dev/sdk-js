@@ -964,7 +964,7 @@
       "get": {
         "operationId": "getRelations",
         "summary": "getRelations",
-        "description": "It loads 1st level relations for the mentioned entity. You can control whether entire related entity is loaded or not via hydrate param.",
+        "description": "Returns 1st level direct relations for an entity.\n\nYou can control whether to return the full entity or just the relation item with the `?hydrate` query param.\n\nReverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.\n",
         "tags": [
           "Relations"
         ],
@@ -991,6 +991,15 @@
             "in": "query",
             "name": "hydrate",
             "description": "When true, expand relation items with full blown entities.",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_reverse",
+            "description": "When true, includes reverse relations in response (other entities pointing to this entity)",
             "schema": {
               "default": false,
               "type": "boolean"
@@ -1048,7 +1057,7 @@
       "post": {
         "operationId": "addRelations",
         "summary": "addRelations",
-        "description": "It relates one or more entities to some parent entity, by providing meaning for relations via attribute field.",
+        "description": "Relates one or more entities to parent entity by adding items to a relation attribute",
         "tags": [
           "Relations"
         ],
@@ -1119,7 +1128,7 @@
       "put": {
         "operationId": "updateRelation",
         "summary": "updateRelation",
-        "description": "It updates a relation between two entities.",
+        "description": "Updates an existing relation between two entities.",
         "tags": [
           "Relations"
         ],
@@ -1200,7 +1209,7 @@
       "delete": {
         "operationId": "deleteRelation",
         "summary": "deleteRelation",
-        "description": "It deletes a relation between one entity and the other.",
+        "description": "Removes relation between two entities",
         "tags": [
           "Relations"
         ],
@@ -1265,6 +1274,14 @@
             "schema": {
               "$ref": "#/components/schemas/ExportJobId"
             }
+          },
+          {
+            "in": "query",
+            "name": "is_template",
+            "description": "Pass 'true' to generate import template",
+            "schema": {
+              "$ref": "#/components/schemas/IsTemplate"
+            }
           }
         ],
         "requestBody": {
@@ -1279,6 +1296,40 @@
         "responses": {
           "201": {
             "description": "created export url and download url"
+          }
+        }
+      }
+    },
+    "/v1/entity:import": {
+      "post": {
+        "operationId": "importEntities",
+        "summary": "importEntities",
+        "description": "import entity data from",
+        "tags": [
+          "Export"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id",
+            "description": "Import Job Id to get the result",
+            "schema": {
+              "$ref": "#/components/schemas/ExportJobId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityImportParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "created import url and download url"
           }
         }
       }
@@ -1303,6 +1354,10 @@
       "ExportJobId": {
         "description": "Export Job Id to get the result",
         "type": "string"
+      },
+      "IsTemplate": {
+        "description": "Pass 'true' to generate import template",
+        "type": "boolean"
       },
       "SchemaId": {
         "description": "Generated uuid for schema",
@@ -2360,6 +2415,10 @@
                 "type": "boolean",
                 "default": true,
                 "description": "When enable_relation_tags is set to true the user will be able to set tags(labels) in each relation item."
+              },
+              "add_button_label": {
+                "type": "string",
+                "description": "Optional label for the add button. The translated value for add_button_lable is used, if found else the string is used as is."
               }
             }
           }
@@ -3258,6 +3317,10 @@
             "items": {
               "type": "string"
             }
+          },
+          "reverse": {
+            "description": "Whether this is a reverse relation",
+            "type": "boolean"
           }
         },
         "required": [
@@ -3285,7 +3348,8 @@
           "size": {
             "type": "integer",
             "minimum": 1,
-            "default": 10
+            "default": 10,
+            "description": "Max search size is 1000 with higher values defaulting to 1000"
           },
           "hydrate": {
             "type": "boolean",
@@ -3303,10 +3367,45 @@
               "_title",
               "first_name"
             ]
+          },
+          "include_scores": {
+            "type": "boolean",
+            "default": false,
+            "description": "Adds a `_score` number field to results that can be used to rank by match score"
           }
         },
         "required": [
           "q"
+        ]
+      },
+      "EntityImportParams": {
+        "type": "object",
+        "properties": {
+          "S3Reference": {
+            "type": "object",
+            "properties": {
+              "bucket": {
+                "type": "string",
+                "example": "epilot-files-prod"
+              },
+              "key": {
+                "type": "string",
+                "example": "123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+              }
+            },
+            "required": [
+              "bucket",
+              "key"
+            ]
+          },
+          "schema": {
+            "type": "string",
+            "example": "contact"
+          }
+        },
+        "required": [
+          "S3Reference",
+          "schema"
         ]
       },
       "EntitySearchResults": {
