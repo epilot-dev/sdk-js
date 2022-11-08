@@ -512,6 +512,9 @@
             "$ref": "#/components/schemas/EntityOperationTrigger"
           },
           {
+            "$ref": "#/components/schemas/ActivityTrigger"
+          },
+          {
             "$ref": "#/components/schemas/EntityManualTrigger"
           },
           {
@@ -1651,6 +1654,9 @@
           "entity_id": {
             "$ref": "#/components/schemas/EntityId"
           },
+          "activity_id": {
+            "$ref": "#/components/schemas/ActivityId"
+          },
           "entity_snapshot": {
             "$ref": "#/components/schemas/EntityItemSnapshot"
           },
@@ -1731,6 +1737,10 @@
         }
       },
       "EntityId": {
+        "type": "string",
+        "example": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74"
+      },
+      "ActivityId": {
         "type": "string",
         "example": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74"
       },
@@ -1862,6 +1872,45 @@
                     "createEntity",
                     "updateEntity",
                     "deleteEntity"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "configuration"
+        ]
+      },
+      "ActivityTrigger": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "activity"
+            ]
+          },
+          "configuration": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string",
+                "example": "submission"
+              },
+              "types": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "CreateMeterReading",
+                    "UpdateMeterReading",
+                    "MessageActivity",
+                    "EntityCreated",
+                    "EntityUpdated",
+                    "EntityDeleted",
+                    "SyncActivity"
                   ]
                 }
               }
