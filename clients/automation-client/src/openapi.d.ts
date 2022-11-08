@@ -11,6 +11,22 @@ declare namespace Components {
     namespace Schemas {
         /**
          * example:
+         * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+         */
+        export type ActivityId = string;
+        export interface ActivityTrigger {
+            type: "activity";
+            configuration: {
+                /**
+                 * example:
+                 * submission
+                 */
+                schema?: string;
+                types?: ("CreateMeterReading" | "UpdateMeterReading" | "MessageActivity" | "EntityCreated" | "EntityUpdated" | "EntityDeleted" | "SyncActivity")[];
+            };
+        }
+        /**
+         * example:
          * {
          *   "target": {
          *     "schema": "contact",
@@ -274,7 +290,7 @@ declare namespace Components {
          * }
          */
         SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | AutomationAction;
-        export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | EntityOperationTrigger | EntityManualTrigger | ReceivedEmailTrigger;
+        export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
         export interface ApiSubmissionTrigger {
             type: "api_submission";
             configuration: {
@@ -385,6 +401,11 @@ declare namespace Components {
              * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
              */
             EntityId;
+            activity_id?: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            ActivityId;
             entity_snapshot?: EntityItemSnapshot;
             org_id: /**
              * example:
