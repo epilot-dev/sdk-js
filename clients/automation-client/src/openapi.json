@@ -446,7 +446,7 @@
           "actions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AnyAction"
+              "$ref": "#/components/schemas/AnyActionConfig"
             }
           },
           "runs": {
@@ -528,9 +528,6 @@
             "$ref": "#/components/schemas/MapEntityAction"
           },
           {
-            "$ref": "#/components/schemas/FillEntityAction"
-          },
-          {
             "$ref": "#/components/schemas/TriggerWorkflowAction"
           },
           {
@@ -550,7 +547,32 @@
           }
         ]
       },
-      "AutomationAction": {
+      "AnyActionConfig": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/MapEntityActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerWorkflowActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerWebhookActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/CreateDocumentActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/SendEmailActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/CartCheckoutActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          }
+        ]
+      },
+      "AutomationActionConfig": {
         "type": "object",
         "properties": {
           "id": {
@@ -569,6 +591,19 @@
             "type": "object",
             "additionalProperties": true
           },
+          "allow_failure": {
+            "description": "Whether to stop execution in a failed state if this action fails",
+            "type": "boolean"
+          },
+          "created_automatically": {
+            "description": "Flag indicating whether the action was created automatically or manually",
+            "type": "boolean"
+          }
+        }
+      },
+      "AutomationActionExecutionState": {
+        "type": "object",
+        "properties": {
           "execution_status": {
             "$ref": "#/components/schemas/ExecutionStatus"
           },
@@ -578,14 +613,6 @@
           "updated_at": {
             "type": "string"
           },
-          "allow_failure": {
-            "description": "Whether to stop execution in a failed state if this action fails",
-            "type": "boolean"
-          },
-          "created_automatically": {
-            "description": "Flag indicating whether the action was created automatically or manually",
-            "type": "boolean"
-          },
           "outputs": {
             "type": "object",
             "additionalProperties": true,
@@ -593,8 +620,26 @@
           },
           "error_output": {
             "$ref": "#/components/schemas/ErrorOutput"
+          },
+          "retry_strategy": {
+            "type": "string",
+            "description": "different behaviors for retrying failed execution actions.",
+            "enum": [
+              "RETRY_AND_RESUME",
+              "RETRY_AND_STOP"
+            ]
           }
         }
+      },
+      "AutomationAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/AutomationActionExecutionState"
+          }
+        ]
       },
       "ErrorOutput": {
         "type": "object",
@@ -621,6 +666,27 @@
           "TIMEOUT_ERROR",
           "BAD_CONFIG",
           "INTERNAL_ERROR"
+        ]
+      },
+      "CartCheckoutActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "type": "object",
+            "description": "Creates an order entity with prices from journey",
+            "properties": {
+              "type": {
+                "enum": [
+                  "cart-checkout"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/CartCheckoutConfig"
+              }
+            }
+          }
         ]
       },
       "CartCheckoutAction": {
@@ -695,10 +761,10 @@
           }
         }
       },
-      "MapEntityAction": {
+      "MapEntityActionConfig": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/AutomationAction"
+            "$ref": "#/components/schemas/AutomationActionConfig"
           },
           {
             "type": "object",
@@ -709,7 +775,7 @@
                 ]
               },
               "config": {
-                "$ref": "#/components/schemas/MapEntityActionConfig"
+                "$ref": "#/components/schemas/MapEntityConfig"
               }
             }
           }
@@ -832,7 +898,27 @@
           }
         }
       },
-      "MapEntityActionConfig": {
+      "MapEntityAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "map-entity"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/MapEntityConfig"
+              }
+            }
+          }
+        ]
+      },
+      "MapEntityConfig": {
         "type": "object",
         "properties": {
           "mapping_config": {
@@ -907,133 +993,6 @@
           "config_id",
           "target_id"
         ]
-      },
-      "FillEntityAction": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AutomationAction"
-          },
-          {
-            "type": "object",
-            "deprecated": true,
-            "properties": {
-              "type": {
-                "enum": [
-                  "fill-entity"
-                ]
-              },
-              "config": {
-                "$ref": "#/components/schemas/FillEntityConfig"
-              }
-            },
-            "required": [
-              "config"
-            ]
-          }
-        ]
-      },
-      "FillEntityConfig": {
-        "type": "object",
-        "properties": {
-          "mappings": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressMapper"
-            }
-          }
-        },
-        "required": [
-          "mappings"
-        ]
-      },
-      "AddressMapper": {
-        "type": "object",
-        "properties": {
-          "target": {
-            "type": "object",
-            "properties": {
-              "schema": {
-                "type": "string",
-                "description": "find target entity based on schema"
-              },
-              "tag": {
-                "type": "string",
-                "description": "find target entity based on entity tag"
-              },
-              "relation_tag": {
-                "type": "string",
-                "description": "find target entity based on relation tag on main entity relation"
-              },
-              "key": {
-                "type": "string",
-                "description": "target field for where to store this address."
-              },
-              "value_json": {
-                "type": "string",
-                "description": "stringified JSON for how to map address data"
-              },
-              "target_unique": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "Array of keys which should be used when checking for uniqueness. Eg: [country, city, postal_code]\n"
-              }
-            },
-            "required": [
-              "schema",
-              "key",
-              "value_json"
-            ]
-          },
-          "reference": {
-            "type": "object",
-            "properties": {
-              "schema": {
-                "type": "string",
-                "description": "Schema of the entity where the reference will be stored."
-              },
-              "key": {
-                "type": "string",
-                "description": "Field location to store the reference."
-              },
-              "labels": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "Optional relation labels to give meaning to this reference."
-              }
-            },
-            "required": [
-              "schema",
-              "key"
-            ]
-          }
-        },
-        "required": [
-          "target",
-          "reference"
-        ],
-        "example": {
-          "target": {
-            "schema": "contact",
-            "tag": "primary",
-            "key": "address",
-            "value_json": "{\"_tags\": [\"billing\"],\"city\":\"steps[0][Adresse][city]\",\"country\":\"steps[0][Adresse][countryCode]\",\"postal_code\":\"steps[0][Adresse][zipCode]\",\"street\":\"steps[0][Adresse][streetName]\",\"street_number\":\"steps[0][Adresse][houseNumber]\",\"additional_info\":\"steps[0][Adresse][addressExtention]\"}",
-            "target_unique": [
-              "country",
-              "city",
-              "postal_code",
-              "street",
-              "street_number"
-            ]
-          },
-          "reference": {
-            "schema": "opportunity",
-            "key": "billing_address"
-          }
-        }
       },
       "RelationAttribute": {
         "type": "object",
@@ -1300,10 +1259,10 @@
           "value_json"
         ]
       },
-      "SendEmailAction": {
+      "SendEmailActionConfig": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/AutomationAction"
+            "$ref": "#/components/schemas/AutomationActionConfig"
           },
           {
             "type": "object",
@@ -1314,7 +1273,7 @@
                 ]
               },
               "config": {
-                "$ref": "#/components/schemas/SendEmailActionConfig"
+                "$ref": "#/components/schemas/SendEmailConfig"
               }
             }
           }
@@ -1329,7 +1288,27 @@
           }
         }
       },
-      "SendEmailActionConfig": {
+      "SendEmailAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "send-email"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/SendEmailConfig"
+              }
+            }
+          }
+        ]
+      },
+      "SendEmailConfig": {
         "type": "object",
         "properties": {
           "email_template_id": {
@@ -1409,10 +1388,10 @@
           }
         }
       },
-      "CreateDocumentAction": {
+      "CreateDocumentActionConfig": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/AutomationAction"
+            "$ref": "#/components/schemas/AutomationActionConfig"
           },
           {
             "type": "object",
@@ -1444,6 +1423,26 @@
           }
         }
       },
+      "CreateDocumentAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "create-document"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/CreateDocumentConfig"
+              }
+            }
+          }
+        ]
+      },
       "CreateDocumentConfig": {
         "type": "object",
         "properties": {
@@ -1455,10 +1454,10 @@
           }
         }
       },
-      "TriggerWorkflowAction": {
+      "TriggerWorkflowActionConfig": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/AutomationAction"
+            "$ref": "#/components/schemas/AutomationActionConfig"
           },
           {
             "type": "object",
@@ -1505,6 +1504,26 @@
             ]
           }
         }
+      },
+      "TriggerWorkflowAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "trigger-workflow"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/TriggerWorkflowConfig"
+              }
+            }
+          }
+        ]
       },
       "TriggerWorkflowConfig": {
         "type": "object",
@@ -1592,10 +1611,10 @@
           }
         ]
       },
-      "TriggerWebhookAction": {
+      "TriggerWebhookActionConfig": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/AutomationAction"
+            "$ref": "#/components/schemas/AutomationActionConfig"
           },
           {
             "type": "object",
@@ -1606,7 +1625,7 @@
                 ]
               },
               "config": {
-                "$ref": "#/components/schemas/TriggerWebhookActionConfig"
+                "$ref": "#/components/schemas/TriggerWebhookConfig"
               }
             }
           }
@@ -1624,7 +1643,27 @@
           }
         }
       },
-      "TriggerWebhookActionConfig": {
+      "TriggerWebhookAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "trigger-webhook"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/TriggerWebhookConfig"
+              }
+            }
+          }
+        ]
+      },
+      "TriggerWebhookConfig": {
         "type": "object",
         "properties": {
           "entity_sources": {

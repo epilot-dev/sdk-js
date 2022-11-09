@@ -25,72 +25,8 @@ declare namespace Components {
                 types?: ("CreateMeterReading" | "UpdateMeterReading" | "MessageActivity" | "EntityCreated" | "EntityUpdated" | "EntityDeleted" | "SyncActivity")[];
             };
         }
-        /**
-         * example:
-         * {
-         *   "target": {
-         *     "schema": "contact",
-         *     "tag": "primary",
-         *     "key": "address",
-         *     "value_json": "{\"_tags\": [\"billing\"],\"city\":\"steps[0][Adresse][city]\",\"country\":\"steps[0][Adresse][countryCode]\",\"postal_code\":\"steps[0][Adresse][zipCode]\",\"street\":\"steps[0][Adresse][streetName]\",\"street_number\":\"steps[0][Adresse][houseNumber]\",\"additional_info\":\"steps[0][Adresse][addressExtention]\"}",
-         *     "target_unique": [
-         *       "country",
-         *       "city",
-         *       "postal_code",
-         *       "street",
-         *       "street_number"
-         *     ]
-         *   },
-         *   "reference": {
-         *     "schema": "opportunity",
-         *     "key": "billing_address"
-         *   }
-         * }
-         */
-        export interface AddressMapper {
-            target: {
-                /**
-                 * find target entity based on schema
-                 */
-                schema: string;
-                /**
-                 * find target entity based on entity tag
-                 */
-                tag?: string;
-                /**
-                 * find target entity based on relation tag on main entity relation
-                 */
-                relation_tag?: string;
-                /**
-                 * target field for where to store this address.
-                 */
-                key: string;
-                /**
-                 * stringified JSON for how to map address data
-                 */
-                value_json: string;
-                /**
-                 * Array of keys which should be used when checking for uniqueness. Eg: [country, city, postal_code]
-                 *
-                 */
-                target_unique?: string[];
-            };
-            reference: {
-                /**
-                 * Schema of the entity where the reference will be stored.
-                 */
-                schema: string;
-                /**
-                 * Field location to store the reference.
-                 */
-                key: string;
-                /**
-                 * Optional relation labels to give meaning to this reference.
-                 */
-                labels?: string[];
-            };
-        }
-        export type AnyAction = /**
+        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | AutomationAction;
+        export type AnyActionConfig = /**
          * example:
          * {
          *   "id": "2520gja-2sgmsaga-0asg-822jgal",
@@ -210,7 +146,7 @@ declare namespace Components {
          *   }
          * }
          */
-        MapEntityAction | FillEntityAction | /**
+        MapEntityActionConfig | /**
          * example:
          * {
          *   "id": "08g988-ojt2jtaga-292h-8978gsaga",
@@ -244,7 +180,7 @@ declare namespace Components {
          *   }
          * }
          */
-        TriggerWorkflowAction | /**
+        TriggerWorkflowActionConfig | /**
          * example:
          * {
          *   "id": "2520gja-2sgmsaga-0asg-822jgal",
@@ -259,7 +195,7 @@ declare namespace Components {
          *   }
          * }
          */
-        TriggerWebhookAction | /**
+        TriggerWebhookActionConfig | /**
          * example:
          * {
          *   "id": "08g988-ojt2jtaga-292h-8978gsaga",
@@ -277,7 +213,7 @@ declare namespace Components {
          *   }
          * }
          */
-        CreateDocumentAction | /**
+        CreateDocumentActionConfig | /**
          * example:
          * {
          *   "id": "25jga0-gkasl26-0asg-908sgaj2",
@@ -289,7 +225,7 @@ declare namespace Components {
          *   }
          * }
          */
-        SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | AutomationAction;
+        SendEmailActionConfig | /* Creates an order entity with prices from journey */ CartCheckoutActionConfig | AutomationActionConfig;
         export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
         export interface ApiSubmissionTrigger {
             type: "api_submission";
@@ -364,9 +300,6 @@ declare namespace Components {
             config?: {
                 [name: string]: any;
             };
-            execution_status?: ExecutionStatus;
-            started_at?: string;
-            updated_at?: string;
             /**
              * Whether to stop execution in a failed state if this action fails
              */
@@ -375,6 +308,9 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
             /**
              * example:
              * {}
@@ -383,6 +319,52 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
+            /**
+             * different behaviors for retrying failed execution actions.
+             */
+            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+        }
+        export interface AutomationActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: string;
+            config?: {
+                [name: string]: any;
+            };
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+        }
+        export interface AutomationActionExecutionState {
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            /**
+             * different behaviors for retrying failed execution actions.
+             */
+            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
         }
         /**
          * example:
@@ -467,7 +449,7 @@ declare namespace Components {
              * submission
              */
             entity_schema?: string;
-            actions: AnyAction[];
+            actions: AnyActionConfig[];
             /**
              * Number of automation executions that ran
              * example:
@@ -511,9 +493,6 @@ declare namespace Components {
             name?: string;
             type?: "cart-checkout";
             config?: CartCheckoutConfig;
-            execution_status?: ExecutionStatus;
-            started_at?: string;
-            updated_at?: string;
             /**
              * Whether to stop execution in a failed state if this action fails
              */
@@ -522,6 +501,9 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
             /**
              * example:
              * {}
@@ -530,6 +512,36 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
+            /**
+             * different behaviors for retrying failed execution actions.
+             */
+            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+        }
+        /**
+         * Creates an order entity with prices from journey
+         */
+        export interface CartCheckoutActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "cart-checkout";
+            config?: CartCheckoutConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
         }
         export interface CartCheckoutConfig {
             /**
@@ -583,6 +595,44 @@ declare namespace Components {
              */
             source: string;
         }
+        export interface CreateDocumentAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "create-document";
+            config?: CreateDocumentConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            /**
+             * different behaviors for retrying failed execution actions.
+             */
+            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+        }
         /**
          * example:
          * {
@@ -601,7 +651,7 @@ declare namespace Components {
          *   }
          * }
          */
-        export interface CreateDocumentAction {
+        export interface CreateDocumentActionConfig {
             id?: /**
              * example:
              * 9ec3711b-db63-449c-b894-54d5bb622a8f
@@ -615,9 +665,6 @@ declare namespace Components {
             name?: string;
             type?: "create-document";
             config?: CreateDocumentConfig;
-            execution_status?: ExecutionStatus;
-            started_at?: string;
-            updated_at?: string;
             /**
              * Whether to stop execution in a failed state if this action fails
              */
@@ -626,14 +673,6 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
-            /**
-             * example:
-             * {}
-             */
-            outputs?: {
-                [name: string]: any;
-            };
-            error_output?: ErrorOutput;
         }
         export interface CreateDocumentConfig {
             template_id?: string;
@@ -686,65 +725,6 @@ declare namespace Components {
             error_reason: string;
         }
         export type ExecutionStatus = "pending" | "in_progress" | "success" | "failed" | "cancelled";
-        export interface FillEntityAction {
-            id?: /**
-             * example:
-             * 9ec3711b-db63-449c-b894-54d5bb622a8f
-             */
-            AutomationActionId;
-            flow_action_id?: /**
-             * example:
-             * 9ec3711b-db63-449c-b894-54d5bb622a8f
-             */
-            AutomationActionId;
-            name?: string;
-            type?: "fill-entity";
-            config: FillEntityConfig;
-            execution_status?: ExecutionStatus;
-            started_at?: string;
-            updated_at?: string;
-            /**
-             * Whether to stop execution in a failed state if this action fails
-             */
-            allow_failure?: boolean;
-            /**
-             * Flag indicating whether the action was created automatically or manually
-             */
-            created_automatically?: boolean;
-            /**
-             * example:
-             * {}
-             */
-            outputs?: {
-                [name: string]: any;
-            };
-            error_output?: ErrorOutput;
-        }
-        export interface FillEntityConfig {
-            mappings: /**
-             * example:
-             * {
-             *   "target": {
-             *     "schema": "contact",
-             *     "tag": "primary",
-             *     "key": "address",
-             *     "value_json": "{\"_tags\": [\"billing\"],\"city\":\"steps[0][Adresse][city]\",\"country\":\"steps[0][Adresse][countryCode]\",\"postal_code\":\"steps[0][Adresse][zipCode]\",\"street\":\"steps[0][Adresse][streetName]\",\"street_number\":\"steps[0][Adresse][houseNumber]\",\"additional_info\":\"steps[0][Adresse][addressExtention]\"}",
-             *     "target_unique": [
-             *       "country",
-             *       "city",
-             *       "postal_code",
-             *       "street",
-             *       "street_number"
-             *     ]
-             *   },
-             *   "reference": {
-             *     "schema": "opportunity",
-             *     "key": "billing_address"
-             *   }
-             * }
-             */
-            AddressMapper[];
-        }
         export interface FrontendSubmitTrigger {
             type: "frontend_submission";
             configuration: {
@@ -764,6 +744,44 @@ declare namespace Components {
             configuration: {
                 source_id: string; // uuid
             };
+        }
+        export interface MapEntityAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "map-entity";
+            config?: MapEntityConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            /**
+             * different behaviors for retrying failed execution actions.
+             */
+            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
         }
         /**
          * example:
@@ -885,7 +903,7 @@ declare namespace Components {
          *   }
          * }
          */
-        export interface MapEntityAction {
+        export interface MapEntityActionConfig {
             id?: /**
              * example:
              * 9ec3711b-db63-449c-b894-54d5bb622a8f
@@ -898,10 +916,7 @@ declare namespace Components {
             AutomationActionId;
             name?: string;
             type?: "map-entity";
-            config?: MapEntityActionConfig;
-            execution_status?: ExecutionStatus;
-            started_at?: string;
-            updated_at?: string;
+            config?: MapEntityConfig;
             /**
              * Whether to stop execution in a failed state if this action fails
              */
@@ -910,16 +925,8 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
-            /**
-             * example:
-             * {}
-             */
-            outputs?: {
-                [name: string]: any;
-            };
-            error_output?: ErrorOutput;
         }
-        export interface MapEntityActionConfig {
+        export interface MapEntityConfig {
             mapping_config?: MappingConfigRef;
             /**
              * Schema of target entity
@@ -1090,18 +1097,6 @@ declare namespace Components {
             total: number;
             results: AutomationFlow[];
         }
-        /**
-         * example:
-         * {
-         *   "id": "25jga0-gkasl26-0asg-908sgaj2",
-         *   "name": "Send Email",
-         *   "type": "send-email",
-         *   "config": {
-         *     "email_template_id": "gasj02-29ug9asgm-29t9gsaghg2g-pkmbhx2",
-         *     "language_code": "de"
-         *   }
-         * }
-         */
         export interface SendEmailAction {
             id?: /**
              * example:
@@ -1115,10 +1110,7 @@ declare namespace Components {
             AutomationActionId;
             name?: string;
             type?: "send-email";
-            config?: SendEmailActionConfig;
-            execution_status?: ExecutionStatus;
-            started_at?: string;
-            updated_at?: string;
+            config?: SendEmailConfig;
             /**
              * Whether to stop execution in a failed state if this action fails
              */
@@ -1127,6 +1119,9 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
             /**
              * example:
              * {}
@@ -1135,8 +1130,47 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
+            /**
+             * different behaviors for retrying failed execution actions.
+             */
+            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
         }
+        /**
+         * example:
+         * {
+         *   "id": "25jga0-gkasl26-0asg-908sgaj2",
+         *   "name": "Send Email",
+         *   "type": "send-email",
+         *   "config": {
+         *     "email_template_id": "gasj02-29ug9asgm-29t9gsaghg2g-pkmbhx2",
+         *     "language_code": "de"
+         *   }
+         * }
+         */
         export interface SendEmailActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "send-email";
+            config?: SendEmailConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+        }
+        export interface SendEmailConfig {
             email_template_id?: string;
             language_code?: "de" | "en";
             /**
@@ -1229,6 +1263,44 @@ declare namespace Components {
             comparison: Comparison;
             value?: string | number | string[] | number[];
         }
+        export interface TriggerWebhookAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "trigger-webhook";
+            config?: TriggerWebhookConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            /**
+             * different behaviors for retrying failed execution actions.
+             */
+            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+        }
         /**
          * example:
          * {
@@ -1244,7 +1316,7 @@ declare namespace Components {
          *   }
          * }
          */
-        export interface TriggerWebhookAction {
+        export interface TriggerWebhookActionConfig {
             id?: /**
              * example:
              * 9ec3711b-db63-449c-b894-54d5bb622a8f
@@ -1257,10 +1329,7 @@ declare namespace Components {
             AutomationActionId;
             name?: string;
             type?: "trigger-webhook";
-            config?: TriggerWebhookActionConfig;
-            execution_status?: ExecutionStatus;
-            started_at?: string;
-            updated_at?: string;
+            config?: TriggerWebhookConfig;
             /**
              * Whether to stop execution in a failed state if this action fails
              */
@@ -1269,6 +1338,36 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+        }
+        export interface TriggerWebhookConfig {
+            entity_sources?: string[];
+            target_webhook_id?: string;
+        }
+        export interface TriggerWorkflowAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "trigger-workflow";
+            config?: TriggerWorkflowConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
             /**
              * example:
              * {}
@@ -1277,10 +1376,10 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
-        }
-        export interface TriggerWebhookActionConfig {
-            entity_sources?: string[];
-            target_webhook_id?: string;
+            /**
+             * different behaviors for retrying failed execution actions.
+             */
+            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
         }
         /**
          * example:
@@ -1316,7 +1415,7 @@ declare namespace Components {
          *   }
          * }
          */
-        export interface TriggerWorkflowAction {
+        export interface TriggerWorkflowActionConfig {
             id?: /**
              * example:
              * 9ec3711b-db63-449c-b894-54d5bb622a8f
@@ -1330,9 +1429,6 @@ declare namespace Components {
             name?: string;
             type?: "trigger-workflow";
             config?: TriggerWorkflowConfig;
-            execution_status?: ExecutionStatus;
-            started_at?: string;
-            updated_at?: string;
             /**
              * Whether to stop execution in a failed state if this action fails
              */
@@ -1341,14 +1437,6 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
-            /**
-             * example:
-             * {}
-             */
-            outputs?: {
-                [name: string]: any;
-            };
-            error_output?: ErrorOutput;
         }
         /**
          * example:
