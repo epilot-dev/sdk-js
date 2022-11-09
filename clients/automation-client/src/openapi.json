@@ -1946,9 +1946,6 @@
                     "CreateMeterReading",
                     "UpdateMeterReading",
                     "MessageActivity",
-                    "EntityCreated",
-                    "EntityUpdated",
-                    "EntityDeleted",
                     "SyncActivity"
                   ]
                 }
