@@ -22,7 +22,7 @@ declare namespace Components {
                  * submission
                  */
                 schema?: string;
-                types?: ("CreateMeterReading" | "UpdateMeterReading" | "MessageActivity" | "EntityCreated" | "EntityUpdated" | "EntityDeleted" | "SyncActivity")[];
+                types?: ("CreateMeterReading" | "UpdateMeterReading" | "MessageActivity" | "SyncActivity")[];
             };
         }
         export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | AutomationAction;
