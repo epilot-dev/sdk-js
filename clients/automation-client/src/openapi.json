@@ -361,7 +361,7 @@
       "post": {
         "operationId": "retriggerAction",
         "summary": "retriggerAction",
-        "description": "Retrigger a specific automation execution action",
+        "description": "Retry a specific automation execution action which failed / is stuck.",
         "tags": [
           "executions"
         ],
@@ -378,13 +378,23 @@
           {
             "name": "action_id",
             "in": "path",
-            "description": "Id of Action to retrigger",
+            "description": "Id of Action to retry.",
             "schema": {
               "$ref": "#/components/schemas/AutomationActionId"
             },
             "required": true
           }
         ],
+        "requestBody": {
+          "description": "Retry request details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetryReq"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "action re-triggered with success"
@@ -622,14 +632,17 @@
             "$ref": "#/components/schemas/ErrorOutput"
           },
           "retry_strategy": {
-            "type": "string",
-            "description": "different behaviors for retrying failed execution actions.",
-            "enum": [
-              "RETRY_AND_RESUME",
-              "RETRY_AND_STOP"
-            ]
+            "$ref": "#/components/schemas/RetryStrategy"
           }
         }
+      },
+      "RetryStrategy": {
+        "type": "string",
+        "description": "different behaviors for retrying failed execution actions.",
+        "enum": [
+          "RETRY_AND_RESUME",
+          "RETRY_AND_STOP"
+        ]
       },
       "AutomationAction": {
         "allOf": [
@@ -2072,6 +2085,14 @@
           "_created_at",
           "_updated_at"
         ]
+      },
+      "RetryReq": {
+        "type": "object",
+        "properties": {
+          "retry_strategy": {
+            "$ref": "#/components/schemas/RetryStrategy"
+          }
+        }
       }
     }
   },

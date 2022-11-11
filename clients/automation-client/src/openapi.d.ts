@@ -319,10 +319,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
-            /**
-             * different behaviors for retrying failed execution actions.
-             */
-            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
         }
         export interface AutomationActionConfig {
             id?: /**
@@ -361,10 +358,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
-            /**
-             * different behaviors for retrying failed execution actions.
-             */
-            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
         }
         /**
          * example:
@@ -512,10 +506,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
-            /**
-             * different behaviors for retrying failed execution actions.
-             */
-            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
         }
         /**
          * Creates an order entity with prices from journey
@@ -628,10 +619,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
-            /**
-             * different behaviors for retrying failed execution actions.
-             */
-            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
         }
         /**
          * example:
@@ -778,10 +766,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
-            /**
-             * different behaviors for retrying failed execution actions.
-             */
-            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
         }
         /**
          * example:
@@ -1093,6 +1078,13 @@ declare namespace Components {
             };
             mode: "append" | "prepend" | "set";
         }
+        export interface RetryReq {
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+        }
+        /**
+         * different behaviors for retrying failed execution actions.
+         */
+        export type RetryStrategy = "RETRY_AND_RESUME" | "RETRY_AND_STOP";
         export interface SearchAutomationsResp {
             total: number;
             results: AutomationFlow[];
@@ -1130,10 +1122,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
-            /**
-             * different behaviors for retrying failed execution actions.
-             */
-            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
         }
         /**
          * example:
@@ -1296,10 +1285,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
-            /**
-             * different behaviors for retrying failed execution actions.
-             */
-            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
         }
         /**
          * example:
@@ -1376,10 +1362,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             error_output?: ErrorOutput;
-            /**
-             * different behaviors for retrying failed execution actions.
-             */
-            retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
         }
         /**
          * example:
@@ -1609,6 +1592,7 @@ declare namespace Paths {
             execution_id: Parameters.ExecutionId;
             action_id: Parameters.ActionId;
         }
+        export type RequestBody = Components.Schemas.RetryReq;
         namespace Responses {
             export interface $200 {
             }
@@ -1749,11 +1733,11 @@ export interface OperationMethods {
   /**
    * retriggerAction - retriggerAction
    * 
-   * Retrigger a specific automation execution action
+   * Retry a specific automation execution action which failed / is stuck.
    */
   'retriggerAction'(
     parameters?: Parameters<Paths.RetriggerAction.PathParameters> | null,
-    data?: any,
+    data?: Paths.RetriggerAction.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetriggerAction.Responses.$200>
 }
@@ -1861,11 +1845,11 @@ export interface PathsDictionary {
     /**
      * retriggerAction - retriggerAction
      * 
-     * Retrigger a specific automation execution action
+     * Retry a specific automation execution action which failed / is stuck.
      */
     'post'(
       parameters?: Parameters<Paths.RetriggerAction.PathParameters> | null,
-      data?: any,
+      data?: Paths.RetriggerAction.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RetriggerAction.Responses.$200>
   }
