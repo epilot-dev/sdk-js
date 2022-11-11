@@ -2835,6 +2835,10 @@ declare namespace Components {
              * Optional label for the add button. The translated value for add_button_lable is used, if found else the string is used as is.
              */
             add_button_label?: string;
+            /**
+             * Optional placeholder text for the relation search input. The translated value for search_placeholder is used, if found else the string is used as is.
+             */
+            search_placeholder?: string;
         }
         /**
          * example:
@@ -2962,6 +2966,113 @@ declare namespace Components {
              * when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link.
              */
             enable_relation_picker?: boolean;
+        }
+        /**
+         * A saved entity view
+         */
+        export interface SavedView {
+            /**
+             * list of schemas a view can belong to
+             */
+            slug: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug[];
+            /**
+             * User-friendly identifier for the saved view
+             * example:
+             * View listing German customers
+             */
+            name: string;
+            created_by: {
+                /**
+                 * example:
+                 * 10598
+                 */
+                user_id?: string;
+            } | {
+                [name: string]: any;
+                source?: "SYSTEM" | "BLUEPRINT";
+            };
+            /**
+             * example:
+             * {
+             *   "filters": {
+             *     "customer_name": "suresh test",
+             *     "_tags": "360"
+             *   },
+             *   "table_layout": {
+             *     "opportunity": {
+             *       "page": 1,
+             *       "sort": "_created_at:desc",
+             *       "pageSize": 25,
+             *       "columnSettings": []
+             *     }
+             *   }
+             * }
+             */
+            ui_config: {
+                [key: string]: any;
+            };
+        }
+        /**
+         * Generated uuid for a saved view
+         */
+        export type SavedViewId = string; // uuid
+        /**
+         * A saved entity view
+         */
+        export interface SavedViewItem {
+            id?: /* Generated uuid for a saved view */ SavedViewId /* uuid */;
+            created_at?: string;
+            updated_at?: string;
+            /**
+             * list of schemas a view can belong to
+             */
+            slug: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug[];
+            /**
+             * User-friendly identifier for the saved view
+             * example:
+             * View listing German customers
+             */
+            name: string;
+            created_by: {
+                /**
+                 * example:
+                 * 10598
+                 */
+                user_id?: string;
+            } | {
+                [name: string]: any;
+                source?: "SYSTEM" | "BLUEPRINT";
+            };
+            /**
+             * example:
+             * {
+             *   "filters": {
+             *     "customer_name": "suresh test",
+             *     "_tags": "360"
+             *   },
+             *   "table_layout": {
+             *     "opportunity": {
+             *       "page": 1,
+             *       "sort": "_created_at:desc",
+             *       "pageSize": 25,
+             *       "columnSettings": []
+             *     }
+             *   }
+             * }
+             */
+            ui_config: {
+                [key: string]: any;
+            };
         }
         /**
          * Generated uuid for schema
@@ -3686,6 +3797,12 @@ declare namespace Paths {
             export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
         }
     }
+    namespace CreateSavedView {
+        export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
+        namespace Responses {
+            export type $201 = /* A saved entity view */ Components.Schemas.SavedViewItem;
+        }
+    }
     namespace DeleteEntity {
         namespace Parameters {
             export type ActivityId = /**
@@ -3734,6 +3851,18 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $204 {
+            }
+        }
+    }
+    namespace DeleteSavedView {
+        namespace Parameters {
+            export type Id = /* Generated uuid for a saved view */ Components.Schemas.SavedViewId /* uuid */;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
             }
         }
     }
@@ -3911,6 +4040,19 @@ declare namespace Paths {
             export type $200 = Components.Schemas.GetRelationsResp;
         }
     }
+    namespace GetSavedView {
+        namespace Parameters {
+            export type Id = /* Generated uuid for a saved view */ Components.Schemas.SavedViewId /* uuid */;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+                view?: /* A saved entity view */ Components.Schemas.SavedViewItem;
+            }
+        }
+    }
     namespace GetSchema {
         namespace Parameters {
             export type Id = /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
@@ -3960,6 +4102,13 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.EntityImportParams;
         namespace Responses {
             export interface $201 {
+            }
+        }
+    }
+    namespace ListSavedViews {
+        namespace Responses {
+            export interface $200 {
+                results?: /* A saved entity view */ Components.Schemas.SavedViewItem[];
             }
         }
     }
@@ -4054,6 +4203,18 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.RelationItem;
+        }
+    }
+    namespace UpdateSavedView {
+        namespace Parameters {
+            export type Id = /* Generated uuid for a saved view */ Components.Schemas.SavedViewId /* uuid */;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
+        namespace Responses {
+            export type $200 = /* A saved entity view */ Components.Schemas.SavedViewItem;
         }
     }
     namespace UpsertEntity {
@@ -4560,6 +4721,56 @@ export interface OperationMethods {
     data?: Paths.ImportEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ImportEntities.Responses.$201>
+  /**
+   * listSavedViews - listSavedViews
+   * 
+   * Get the Saved Views based on the schema
+   */
+  'listSavedViews'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSavedViews.Responses.$200>
+  /**
+   * createSavedView - createSavedView
+   * 
+   * Creates a new saved view
+   */
+  'createSavedView'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateSavedView.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSavedView.Responses.$201>
+  /**
+   * getSavedView - getSavedView
+   * 
+   * Gets Saved View configuration by id.
+   */
+  'getSavedView'(
+    parameters?: Parameters<Paths.GetSavedView.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSavedView.Responses.$200>
+  /**
+   * updateSavedView - updateSavedView
+   * 
+   * Updates a saved view
+   */
+  'updateSavedView'(
+    parameters?: Parameters<Paths.UpdateSavedView.PathParameters> | null,
+    data?: Paths.UpdateSavedView.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateSavedView.Responses.$200>
+  /**
+   * deleteSavedView - deleteSavedView
+   * 
+   * Deletes a saved view
+   */
+  'deleteSavedView'(
+    parameters?: Parameters<Paths.DeleteSavedView.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteSavedView.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -5029,6 +5240,62 @@ export interface PathsDictionary {
       data?: Paths.ImportEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ImportEntities.Responses.$201>
+  }
+  ['/v1/entity/views']: {
+    /**
+     * listSavedViews - listSavedViews
+     * 
+     * Get the Saved Views based on the schema
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSavedViews.Responses.$200>
+  }
+  ['/v1/entity/view']: {
+    /**
+     * createSavedView - createSavedView
+     * 
+     * Creates a new saved view
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateSavedView.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSavedView.Responses.$201>
+  }
+  ['/v1/entity/view/{id}']: {
+    /**
+     * getSavedView - getSavedView
+     * 
+     * Gets Saved View configuration by id.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSavedView.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSavedView.Responses.$200>
+    /**
+     * updateSavedView - updateSavedView
+     * 
+     * Updates a saved view
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateSavedView.PathParameters> | null,
+      data?: Paths.UpdateSavedView.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateSavedView.Responses.$200>
+    /**
+     * deleteSavedView - deleteSavedView
+     * 
+     * Deletes a saved view
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteSavedView.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteSavedView.Responses.$200>
   }
 }
 
