@@ -2419,6 +2419,10 @@
               "add_button_label": {
                 "type": "string",
                 "description": "Optional label for the add button. The translated value for add_button_lable is used, if found else the string is used as is."
+              },
+              "search_placeholder": {
+                "type": "string",
+                "description": "Optional placeholder text for the relation search input. The translated value for search_placeholder is used, if found else the string is used as is."
               }
             }
           }
