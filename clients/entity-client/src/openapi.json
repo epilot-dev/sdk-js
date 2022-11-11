@@ -25,6 +25,10 @@
     {
       "name": "Export",
       "description": "Export and Import entities via files"
+    },
+    {
+      "name": "Saved Views",
+      "description": "Saved Views for Entities"
     }
   ],
   "security": [
@@ -1333,6 +1337,169 @@
           }
         }
       }
+    },
+    "/v1/entity/views": {
+      "get": {
+        "operationId": "listSavedViews",
+        "summary": "listSavedViews",
+        "description": "Get the Saved Views based on the schema",
+        "tags": [
+          "Saved Views"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SavedViewItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/view": {
+      "post": {
+        "operationId": "createSavedView",
+        "summary": "createSavedView",
+        "description": "Creates a new saved view",
+        "tags": [
+          "Saved Views"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedView"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedViewItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/view/{id}": {
+      "get": {
+        "operationId": "getSavedView",
+        "summary": "getSavedView",
+        "description": "Gets Saved View configuration by id.",
+        "tags": [
+          "Saved Views"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "View id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SavedViewId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "view": {
+                      "$ref": "#/components/schemas/SavedViewItem"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateSavedView",
+        "summary": "updateSavedView",
+        "description": "Updates a saved view",
+        "tags": [
+          "Saved Views"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "View id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SavedViewId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedView"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedViewItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSavedView",
+        "summary": "deleteSavedView",
+        "description": "Deletes a saved view",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "View id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SavedViewId"
+            }
+          }
+        ],
+        "tags": [
+          "Saved Views"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all available saved views"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1388,7 +1555,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "example": "ecommerce_preview"
+              "example": "360_features"
             }
           },
           "name": {
@@ -2419,6 +2586,10 @@
               "add_button_label": {
                 "type": "string",
                 "description": "Optional label for the add button. The translated value for add_button_lable is used, if found else the string is used as is."
+              },
+              "search_placeholder": {
+                "type": "string",
+                "description": "Optional placeholder text for the relation search input. The translated value for search_placeholder is used, if found else the string is used as is."
               }
             }
           }
@@ -3666,6 +3837,101 @@
         "description": "Reference to blueprint",
         "type": "string",
         "format": "uuid"
+      },
+      "SavedViewId": {
+        "description": "Generated uuid for a saved view",
+        "type": "string",
+        "format": "uuid"
+      },
+      "SavedViewItem": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/SavedViewId"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/SavedView"
+          }
+        ]
+      },
+      "SavedView": {
+        "description": "A saved entity view",
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "array",
+            "description": "list of schemas a view can belong to",
+            "items": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          "name": {
+            "description": "User-friendly identifier for the saved view",
+            "type": "string",
+            "example": "View listing German customers"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "object",
+                "description": "A user that created the view",
+                "properties": {
+                  "user_id": {
+                    "type": "string",
+                    "example": "10598"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "description": "A system-created view",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "SYSTEM",
+                      "BLUEPRINT"
+                    ]
+                  }
+                },
+                "additionalProperties": true
+              }
+            ]
+          },
+          "ui_config": {
+            "type": "object",
+            "example": {
+              "filters": {
+                "customer_name": "suresh test",
+                "_tags": "360"
+              },
+              "table_layout": {
+                "opportunity": {
+                  "page": 1,
+                  "sort": "_created_at:desc",
+                  "pageSize": 25,
+                  "columnSettings": []
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "created_by",
+          "ui_config"
+        ]
       }
     },
     "examples": {
