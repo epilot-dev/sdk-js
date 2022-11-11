@@ -2092,6 +2092,7 @@
             "description": "The quantity of products being purchased."
           },
           "price_mappings": {
+            "description": "Price mapping information required to compute totals",
             "$ref": "#/components/schemas/PriceInputMappings"
           },
           "description": {
@@ -2559,6 +2560,10 @@
                 }
               ]
             }
+          },
+          "price_mappings": {
+            "description": "Price mapping information required to compute totals",
+            "$ref": "#/components/schemas/PriceInputMappings"
           }
         }
       },

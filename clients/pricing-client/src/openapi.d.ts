@@ -252,6 +252,25 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            /**
+             * Price mapping information required to compute totals
+             */
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
         }
         /**
          * Represents a valid base price item from a client.
@@ -262,6 +281,9 @@ declare namespace Components {
              * The quantity of products being purchased.
              */
             quantity?: number;
+            /**
+             * Price mapping information required to compute totals
+             */
             price_mappings?: /**
              * example:
              * [
@@ -751,6 +773,22 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
             /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
@@ -1776,6 +1814,22 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
             /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
