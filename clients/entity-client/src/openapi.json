@@ -2457,13 +2457,8 @@
                   "has_one"
                 ]
               },
-              "delete_mode": {
-                "type": "string",
-                "enum": [
-                  "cascade"
-                ]
-              },
               "relation_affinity_mode": {
+                "description": "Weak relation attributes are kept when duplicating an entity. Strong relation attributes are discarded when duplicating an entity.",
                 "type": "string",
                 "enum": [
                   "weak",
@@ -2735,6 +2730,7 @@
                 "type": "boolean"
               },
               "relation_affinity_mode": {
+                "description": "Weak repeatable attributes are kept when duplicating an entity. Strong repeatable attributes are discarded when duplicating an entity.",
                 "type": "string",
                 "enum": [
                   "weak",
