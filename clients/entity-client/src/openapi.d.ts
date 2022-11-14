@@ -2723,7 +2723,9 @@ declare namespace Components {
             protected?: boolean;
             type?: "relation";
             relation_type?: "has_many" | "has_one";
-            delete_mode?: "cascade";
+            /**
+             * Weak relation attributes are kept when duplicating an entity. Strong relation attributes are discarded when duplicating an entity.
+             */
             relation_affinity_mode?: "weak" | "strong";
             /**
              * When enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link.
@@ -2960,6 +2962,9 @@ declare namespace Components {
             protected?: boolean;
             repeatable?: boolean;
             has_primary?: boolean;
+            /**
+             * Weak repeatable attributes are kept when duplicating an entity. Strong repeatable attributes are discarded when duplicating an entity.
+             */
             relation_affinity_mode?: "weak" | "strong";
             type?: "string" | "phone" | "email" | "address" | "relation" | "payment" | "price_component" | "date";
             /**
