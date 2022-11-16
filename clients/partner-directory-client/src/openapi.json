@@ -1,18 +1,22 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Partner Directory API",
+    "title": "Partner API",
+    "description": "Management of Partners in epilot",
     "version": "1.0.0"
   },
   "tags": [
     {
       "name": "partners",
-      "description": "Partnes"
+      "description": "Partners"
     }
   ],
   "security": [
     {
       "EpilotAuth": []
+    },
+    {
+      "AsOrganization": []
     }
   ],
   "paths": {
@@ -189,6 +193,159 @@
         }
       }
     },
+    "/v1/partners/assignables:search": {
+      "post": {
+        "operationId": "searchAssignable",
+        "summary": "searchAssignables",
+        "description": "Search for assignable users/organizations from this organization and Partners\n\nResults can include:\n - Users in your organization\n - Users in partner organizations\n - Partner organizations\n",
+        "tags": [
+          "partners"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "q": {
+                    "description": "search query to filter results",
+                    "type": "string",
+                    "default": ""
+                  },
+                  "from": {
+                    "description": "start results from an offset for pagination",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                  },
+                  "size": {
+                    "description": "limit number of results to return",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "default": 25
+                  },
+                  "org_ids": {
+                    "description": "filter results to specific organizations. defaults to all orgs",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OrganizationId"
+                    }
+                  },
+                  "types": {
+                    "description": "filter results to specific types of assignables. defaults to all types",
+                    "type": "array",
+                    "default": [
+                      "user",
+                      "partner_user",
+                      "partner_organization"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "user",
+                        "partner_user",
+                        "partner_organization"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "q"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of assignable results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "description": "total number of search results",
+                      "type": "integer",
+                      "example": 25
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Assignable"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/partners/assignables:batchGet": {
+      "post": {
+        "operationId": "batchGetAssignable",
+        "summary": "batchGet",
+        "description": "Search for assignable users from this organization by its ids\n",
+        "tags": [
+          "partners"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "minItems": 1,
+                  "type": "object",
+                  "properties": {
+                    "user_id": {
+                      "description": "search query to filter results",
+                      "type": "string"
+                    },
+                    "org_id": {
+                      "description": "start results from an offset for pagination",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "user_id",
+                    "org_id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of assignable results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "description": "total number of search results",
+                      "type": "integer",
+                      "example": 25
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Assignable"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/partner-directory/public/getPartnerByToken": {
       "get": {
         "operationId": "getPartnerByToken",
@@ -273,6 +430,12 @@
         "scheme": "bearer",
         "description": "Authorization header with epilot OAuth2 bearer token",
         "bearerFormat": "JWT"
+      },
+      "AsOrganization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-org-id",
+        "description": "Set organization id when using internal auth"
       }
     },
     "schemas": {
@@ -283,7 +446,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Partner"
+            "$ref": "#/components/schemas/PartnerId"
           },
           "organization_id": {
             "$ref": "#/components/schemas/OrganizationId"
@@ -334,10 +497,12 @@
         }
       },
       "PartnerId": {
-        "type": "string"
+        "type": "string",
+        "example": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc"
       },
       "OrganizationId": {
-        "type": "string"
+        "type": "string",
+        "example": "123"
       },
       "ActivatePartnerPayload": {
         "type": "object",
@@ -375,7 +540,150 @@
             "default": "en"
           }
         }
+      },
+      "Assignable": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AssignableUser"
+          },
+          {
+            "$ref": "#/components/schemas/AssignablePartnerUser"
+          },
+          {
+            "$ref": "#/components/schemas/AssignableOrganization"
+          }
+        ]
+      },
+      "BaseAssignable": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "user"
+          },
+          "display_name": {
+            "type": "string",
+            "example": "Example User"
+          },
+          "image_uri": {
+            "type": "object",
+            "properties": {
+              "original": {
+                "type": "string",
+                "format": "uri",
+                "example": "https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
+              },
+              "thumbnail_32": {
+                "type": "string",
+                "format": "uri",
+                "example": "https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
+              }
+            },
+            "required": [
+              "original"
+            ]
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          }
+        },
+        "required": [
+          "type",
+          "display_name",
+          "org_id"
+        ]
+      },
+      "AssignableUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAssignable"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "user"
+                ],
+                "example": "user"
+              },
+              "display_name": {
+                "type": "string",
+                "example": "Example User"
+              },
+              "user_id": {
+                "type": "string",
+                "example": "456"
+              }
+            }
+          }
+        ]
+      },
+      "AssignablePartnerUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAssignable"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "partner_user"
+                ],
+                "example": "partner_user"
+              },
+              "display_name": {
+                "type": "string",
+                "example": "Example Partner User"
+              },
+              "partner_id": {
+                "$ref": "#/components/schemas/PartnerId"
+              },
+              "user_id": {
+                "type": "string",
+                "example": "456"
+              }
+            }
+          }
+        ]
+      },
+      "AssignableOrganization": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAssignable"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "partner_organization"
+                ],
+                "example": "partner_organization"
+              },
+              "display_name": {
+                "type": "string",
+                "example": "Example Partner Organization"
+              },
+              "partner_id": {
+                "$ref": "#/components/schemas/PartnerId"
+              }
+            }
+          }
+        ]
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://partner-directory-api.sls.epilot.io"
+    },
+    {
+      "url": "https://partner-directory-api.sls.epilot.io"
+    }
+  ]
 }
