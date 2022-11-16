@@ -25,11 +25,160 @@ declare namespace Components {
              */
             organization_id: string;
         }
+        export type Assignable = AssignableUser | AssignablePartnerUser | AssignableOrganization;
+        export interface AssignableOrganization {
+            /**
+             * example:
+             * partner_organization
+             */
+            type: "partner_organization";
+            /**
+             * example:
+             * Example Partner Organization
+             */
+            display_name: string;
+            image_uri?: {
+                /**
+                 * example:
+                 * https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                original: string; // uri
+                /**
+                 * example:
+                 * https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                thumbnail_32?: string; // uri
+            };
+            org_id: /**
+             * example:
+             * 123
+             */
+            OrganizationId;
+            partner_id?: /**
+             * example:
+             * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
+             */
+            PartnerId;
+        }
+        export interface AssignablePartnerUser {
+            /**
+             * example:
+             * partner_user
+             */
+            type: "partner_user";
+            /**
+             * example:
+             * Example Partner User
+             */
+            display_name: string;
+            image_uri?: {
+                /**
+                 * example:
+                 * https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                original: string; // uri
+                /**
+                 * example:
+                 * https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                thumbnail_32?: string; // uri
+            };
+            org_id: /**
+             * example:
+             * 123
+             */
+            OrganizationId;
+            partner_id?: /**
+             * example:
+             * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
+             */
+            PartnerId;
+            /**
+             * example:
+             * 456
+             */
+            user_id?: string;
+        }
+        export interface AssignableUser {
+            /**
+             * example:
+             * user
+             */
+            type: "user";
+            /**
+             * example:
+             * Example User
+             */
+            display_name: string;
+            image_uri?: {
+                /**
+                 * example:
+                 * https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                original: string; // uri
+                /**
+                 * example:
+                 * https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                thumbnail_32?: string; // uri
+            };
+            org_id: /**
+             * example:
+             * 123
+             */
+            OrganizationId;
+            /**
+             * example:
+             * 456
+             */
+            user_id?: string;
+        }
+        export interface BaseAssignable {
+            /**
+             * example:
+             * user
+             */
+            type: string;
+            /**
+             * example:
+             * Example User
+             */
+            display_name: string;
+            image_uri?: {
+                /**
+                 * example:
+                 * https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                original: string; // uri
+                /**
+                 * example:
+                 * https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                thumbnail_32?: string; // uri
+            };
+            org_id: /**
+             * example:
+             * 123
+             */
+            OrganizationId;
+        }
         export type InviteToken = string;
+        /**
+         * example:
+         * 123
+         */
         export type OrganizationId = string;
         export interface Partner {
-            id?: Partner;
-            organization_id?: OrganizationId;
+            id?: /**
+             * example:
+             * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
+             */
+            PartnerId;
+            organization_id?: /**
+             * example:
+             * 123
+             */
+            OrganizationId;
             /**
              * example:
              * 2022-02-08T04:44:32.246Z
@@ -67,6 +216,10 @@ declare namespace Components {
             partner_org_id?: string;
             status?: "Pending" | "Request" | "Deleted" | "Invited" | "Rejected";
         }
+        /**
+         * example:
+         * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
+         */
         export type PartnerId = string;
         export interface PartnerInvitationPayload {
             /**
@@ -94,7 +247,11 @@ declare namespace Paths {
     }
     namespace ApprovePartner {
         namespace Parameters {
-            export type Id = Components.Schemas.PartnerId;
+            export type Id = /**
+             * example:
+             * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
+             */
+            Components.Schemas.PartnerId;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -102,6 +259,29 @@ declare namespace Paths {
         namespace Responses {
             export type $201 = Components.Schemas.Partner;
             export interface $400 {
+            }
+        }
+    }
+    namespace BatchGetAssignable {
+        export type RequestBody = {
+            /**
+             * search query to filter results
+             */
+            user_id: string;
+            /**
+             * start results from an offset for pagination
+             */
+            org_id: string;
+        }[];
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * total number of search results
+                 * example:
+                 * 25
+                 */
+                hits?: number;
+                results?: Components.Schemas.Assignable[];
             }
         }
     }
@@ -120,7 +300,11 @@ declare namespace Paths {
     }
     namespace InvitePartner {
         namespace Parameters {
-            export type Id = Components.Schemas.PartnerId;
+            export type Id = /**
+             * example:
+             * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
+             */
+            Components.Schemas.PartnerId;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -134,7 +318,11 @@ declare namespace Paths {
     }
     namespace RejectPartner {
         namespace Parameters {
-            export type Id = Components.Schemas.PartnerId;
+            export type Id = /**
+             * example:
+             * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
+             */
+            Components.Schemas.PartnerId;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -147,7 +335,11 @@ declare namespace Paths {
     }
     namespace ResendPartnerInvitation {
         namespace Parameters {
-            export type Id = Components.Schemas.PartnerId;
+            export type Id = /**
+             * example:
+             * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
+             */
+            Components.Schemas.PartnerId;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -161,6 +353,45 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.Partner;
             export interface $400 {
+            }
+        }
+    }
+    namespace SearchAssignable {
+        export interface RequestBody {
+            /**
+             * search query to filter results
+             */
+            q: string;
+            /**
+             * start results from an offset for pagination
+             */
+            from?: number;
+            /**
+             * limit number of results to return
+             */
+            size?: number;
+            /**
+             * filter results to specific organizations. defaults to all orgs
+             */
+            org_ids?: /**
+             * example:
+             * 123
+             */
+            Components.Schemas.OrganizationId[];
+            /**
+             * filter results to specific types of assignables. defaults to all types
+             */
+            types?: ("user" | "partner_user" | "partner_organization")[];
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * total number of search results
+                 * example:
+                 * 25
+                 */
+                hits?: number;
+                results?: Components.Schemas.Assignable[];
             }
         }
     }
@@ -207,6 +438,33 @@ export interface OperationMethods {
     data?: Paths.ResendPartnerInvitation.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ResendPartnerInvitation.Responses.$200>
+  /**
+   * searchAssignable - searchAssignables
+   * 
+   * Search for assignable users/organizations from this organization and Partners
+   * 
+   * Results can include:
+   *  - Users in your organization
+   *  - Users in partner organizations
+   *  - Partner organizations
+   * 
+   */
+  'searchAssignable'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchAssignable.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchAssignable.Responses.$200>
+  /**
+   * batchGetAssignable - batchGet
+   * 
+   * Search for assignable users from this organization by its ids
+   * 
+   */
+  'batchGetAssignable'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.BatchGetAssignable.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BatchGetAssignable.Responses.$200>
   /**
    * getPartnerByToken - getPartnerByToken
    * 
@@ -277,6 +535,37 @@ export interface PathsDictionary {
       data?: Paths.ResendPartnerInvitation.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ResendPartnerInvitation.Responses.$200>
+  }
+  ['/v1/partners/assignables:search']: {
+    /**
+     * searchAssignable - searchAssignables
+     * 
+     * Search for assignable users/organizations from this organization and Partners
+     * 
+     * Results can include:
+     *  - Users in your organization
+     *  - Users in partner organizations
+     *  - Partner organizations
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchAssignable.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchAssignable.Responses.$200>
+  }
+  ['/v1/partners/assignables:batchGet']: {
+    /**
+     * batchGetAssignable - batchGet
+     * 
+     * Search for assignable users from this organization by its ids
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.BatchGetAssignable.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BatchGetAssignable.Responses.$200>
   }
   ['/v1/partner-directory/public/getPartnerByToken']: {
     /**
