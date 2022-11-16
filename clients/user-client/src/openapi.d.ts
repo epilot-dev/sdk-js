@@ -9,6 +9,33 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface DataPoint {
+            /**
+             * Organization id
+             * example:
+             * 206801
+             */
+            id?: number;
+            /**
+             * Number of current user
+             * example:
+             * 10
+             */
+            actual_users?: number;
+            /**
+             * Max user last month
+             * example:
+             * 10
+             */
+            max_users_last_month?: number;
+            /**
+             * Max non-billable user last month
+             * example:
+             * 10
+             */
+            non_billable_users_last_month?: number;
+        }
+        export type DataPointsResponse = DataPoint[];
         export type InviteToken = string;
         export type Limit = number;
         export interface LoginParameters {
@@ -275,6 +302,12 @@ declare namespace Components {
             email?: string; // email
             draft_email?: string | null; // email
             /**
+             * User's department
+             * example:
+             * Sales
+             */
+            department?: string | null;
+            /**
              * example:
              * 1234567890
              */
@@ -291,14 +324,24 @@ declare namespace Components {
             token?: string;
             /**
              * example:
-             * <p>Thanks</p>
+             * false
              */
-            signature?: string;
+            mfa_enabled?: boolean;
             /**
              * example:
              * true
              */
-            is_signature_enabled?: boolean;
+            phone_verified?: boolean;
+            /**
+             * example:
+             * <p>Thanks</p>
+             */
+            signature?: string | null;
+            /**
+             * example:
+             * true
+             */
+            is_signature_enabled?: boolean | null;
             /**
              * example:
              * {

@@ -755,6 +755,12 @@
             "nullable": true,
             "format": "email"
           },
+          "department": {
+            "type": "string",
+            "description": "User's department",
+            "nullable": true,
+            "example": "Sales"
+          },
           "phone": {
             "type": "string",
             "nullable": true,
@@ -768,13 +774,23 @@
             "type": "string",
             "example": "65dc527f-cb2d-4158-8f2e-8978dbceb599"
           },
+          "mfa_enabled": {
+            "type": "boolean",
+            "example": false
+          },
+          "phone_verified": {
+            "type": "boolean",
+            "example": true
+          },
           "signature": {
             "type": "string",
-            "example": "<p>Thanks</p>"
+            "example": "<p>Thanks</p>",
+            "nullable": true
           },
           "is_signature_enabled": {
             "type": "boolean",
-            "example": true
+            "example": true,
+            "nullable": true
           },
           "image_uri": {
             "type": "object",
@@ -1135,10 +1151,44 @@
             "nullable": true
           }
         }
+      },
+      "DataPointsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DataPoint"
+        }
+      },
+      "DataPoint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Organization id",
+            "type": "number",
+            "example": 206801
+          },
+          "actual_users": {
+            "description": "Number of current user",
+            "type": "number",
+            "example": 10
+          },
+          "max_users_last_month": {
+            "description": "Max user last month",
+            "type": "number",
+            "example": 10
+          },
+          "non_billable_users_last_month": {
+            "description": "Max non-billable user last month",
+            "type": "number",
+            "example": 10
+          }
+        }
       }
     }
   },
   "servers": [
+    {
+      "url": "https://user.sls.epilot.io"
+    },
     {
       "url": "https://user.sls.epilot.io"
     }
