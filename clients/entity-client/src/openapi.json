@@ -3203,6 +3203,37 @@
               "type": "string"
             }
           },
+          "navbar_actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "params": {
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "label"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "type"
+              ]
+            }
+          },
           "classic_view": {
             "type": "string",
             "format": "uri"
