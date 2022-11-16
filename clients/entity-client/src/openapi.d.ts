@@ -1051,6 +1051,15 @@ declare namespace Components {
                 legacy?: boolean;
             })[];
             row_actions?: string[];
+            navbar_actions?: {
+                type: string;
+                options?: {
+                    label: string;
+                    params?: {
+                        [key: string]: any;
+                    };
+                }[];
+            }[];
             classic_view?: string; // uri
         }
         export type EntityId = string; // uuid
