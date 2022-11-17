@@ -1011,7 +1011,7 @@ declare namespace Components {
                 label?: string;
             };
         }
-        export interface EntityDefaultOverview {
+        export interface EntityDefaultTable {
             view_type?: "default";
             dropdown_items?: ({
                 type?: "entity";
@@ -1060,6 +1060,10 @@ declare namespace Components {
                     };
                 }[];
             }[];
+            /**
+             * Enable the thumbnail column
+             */
+            enable_thumbnails?: boolean;
             classic_view?: string; // uri
         }
         export type EntityId = string; // uuid
@@ -1661,7 +1665,7 @@ declare namespace Components {
          * contact
          */
         export type EntitySlug = string;
-        export type EntityViewConfig = EntityDefaultCreate | EntityDefaultEdit | EntityDefaultOverview | /**
+        export type EntityViewConfig = EntityDefaultCreate | EntityDefaultEdit | EntityDefaultTable | /**
          * example:
          * {
          *   "type": "redirect",
@@ -2167,6 +2171,10 @@ declare namespace Components {
          * Pass 'true' to generate import template
          */
         export type IsTemplate = boolean;
+        /**
+         * Export headers translation Language
+         */
+        export type Language = string;
         /**
          * Link with title and href
          */
@@ -2732,6 +2740,17 @@ declare namespace Components {
             protected?: boolean;
             type?: "relation";
             relation_type?: "has_many" | "has_one";
+            /**
+             * Map of schema slug to target relation attribute
+             * example:
+             * {
+             *   "contact": "account",
+             *   "opportunity": "customer"
+             * }
+             */
+            reverse_attributes?: {
+                [name: string]: string;
+            };
             /**
              * Weak relation attributes are kept when duplicating an entity. Strong relation attributes are discarded when duplicating an entity.
              */
@@ -3905,10 +3924,12 @@ declare namespace Paths {
         namespace Parameters {
             export type IsTemplate = /* Pass 'true' to generate import template */ Components.Schemas.IsTemplate;
             export type JobId = /* Export Job Id to get the result */ Components.Schemas.ExportJobId;
+            export type Language = /* Export headers translation Language */ Components.Schemas.Language;
         }
         export interface QueryParameters {
             job_id?: Parameters.JobId;
             is_template?: Parameters.IsTemplate;
+            language?: Parameters.Language;
         }
         export type RequestBody = Components.Schemas.EntitySearchParams;
         namespace Responses {
