@@ -1286,6 +1286,14 @@
             "schema": {
               "$ref": "#/components/schemas/IsTemplate"
             }
+          },
+          {
+            "in": "query",
+            "name": "language",
+            "description": "Export headers translation language",
+            "schema": {
+              "$ref": "#/components/schemas/Language"
+            }
           }
         ],
         "requestBody": {
@@ -1520,6 +1528,10 @@
     "schemas": {
       "ExportJobId": {
         "description": "Export Job Id to get the result",
+        "type": "string"
+      },
+      "Language": {
+        "description": "Export headers translation Language",
         "type": "string"
       },
       "IsTemplate": {
@@ -4578,6 +4590,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    },
     {
       "url": "https://entity.sls.epilot.io"
     }

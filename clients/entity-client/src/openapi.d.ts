@@ -2168,6 +2168,10 @@ declare namespace Components {
          */
         export type IsTemplate = boolean;
         /**
+         * Export headers translation Language
+         */
+        export type Language = string;
+        /**
          * Link with title and href
          */
         export interface LinkAttribute {
@@ -3905,10 +3909,12 @@ declare namespace Paths {
         namespace Parameters {
             export type IsTemplate = /* Pass 'true' to generate import template */ Components.Schemas.IsTemplate;
             export type JobId = /* Export Job Id to get the result */ Components.Schemas.ExportJobId;
+            export type Language = /* Export headers translation Language */ Components.Schemas.Language;
         }
         export interface QueryParameters {
             job_id?: Parameters.JobId;
             is_template?: Parameters.IsTemplate;
+            language?: Parameters.Language;
         }
         export type RequestBody = Components.Schemas.EntitySearchParams;
         namespace Responses {
