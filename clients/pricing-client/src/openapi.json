@@ -2458,6 +2458,9 @@
             "items": {
               "$ref": "#/components/schemas/PriceItem"
             }
+          },
+          "total_details": {
+            "$ref": "#/components/schemas/TotalDetails"
           }
         }
       },
@@ -2731,6 +2734,9 @@
               "oneOf": [
                 {
                   "$ref": "#/components/schemas/PriceItem"
+                },
+                {
+                  "$ref": "#/components/schemas/CompositePriceItem"
                 }
               ]
             }

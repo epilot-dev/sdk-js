@@ -800,6 +800,7 @@ declare namespace Components {
              * }
              */
             PriceItem[];
+            total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
         }
         /**
          * Represents a composite price input to the pricing library.
@@ -2195,7 +2196,14 @@ declare namespace Components {
              *   "$ref": "#/components/examples/price-item"
              * }
              */
-            PriceItem)[];
+            PriceItem | /**
+             * Represents a composite price input to the pricing library.
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-item"
+             * }
+             */
+            CompositePriceItem)[];
             /**
              * Total of all items before (discounts or) taxes are applied.
              */
