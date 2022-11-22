@@ -1,6 +1,6 @@
 {
   "name": "@epilot/organization-client",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "Client library for epilot Organization API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -51,7 +51,7 @@
     "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
     "buffer": "^6.0.3",
     "https-browserify": "^1.0.0",
-    "openapi-client-axios": "^5.1.2",
+    "openapi-client-axios": "^6.0.0",
     "stream-http": "^3.1.1",
     "url": "^0.11.0",
     "util": "^0.12.3"
@@ -62,7 +62,7 @@
     "copy-webpack-plugin": "^7.0.0",
     "jest": "^26.6.3",
     "json-loader": "^0.5.7",
-    "openapi-client-axios-typegen": "^5.0.1",
+    "openapi-client-axios-typegen": "^6.0.0",
     "openapicmd": "^1.6.2",
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.14",
