@@ -316,6 +316,43 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace AssignThread {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        /**
+         * Entities which thread is assigned to
+         */
+        export type RequestBody = {
+            /**
+             * Entity slug
+             * example:
+             * contact
+             */
+            slug?: string;
+            /**
+             * Entity ID
+             * example:
+             * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+             */
+            entity_id?: string;
+            /**
+             * To indicate this is main entity
+             * example:
+             * true
+             */
+            is_main_entity?: boolean;
+        }[];
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace CreateDraft {
         export type RequestBody = Components.Schemas.MessageRequestParams;
         namespace Responses {
@@ -1422,6 +1459,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MarkUnreadThread.Responses.$204>
   /**
+   * assignThread - assignThread
+   * 
+   * Assign thread to entities
+   */
+  'assignThread'(
+    parameters?: Parameters<Paths.AssignThread.PathParameters> | null,
+    data?: Paths.AssignThread.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AssignThread.Responses.$204>
+  /**
    * createDraft - createDraft
    * 
    * Create a new draft
@@ -1624,6 +1671,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MarkUnreadThread.Responses.$204>
+  }
+  ['/v1/message/threads/{id}/assign']: {
+    /**
+     * assignThread - assignThread
+     * 
+     * Assign thread to entities
+     */
+    'post'(
+      parameters?: Parameters<Paths.AssignThread.PathParameters> | null,
+      data?: Paths.AssignThread.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AssignThread.Responses.$204>
   }
   ['/v1/message/drafts']: {
     /**
