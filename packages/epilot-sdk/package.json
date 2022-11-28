@@ -1,6 +1,6 @@
 {
   "name": "epilot-sdk",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Epilot SDK",
   "main": "index.js",
   "scripts": {
@@ -50,7 +50,7 @@
     "@epilot/email-template-client": "^1.0.5",
     "@epilot/entity-client": "^4.1.7",
     "@epilot/file-client": "^1.4.4",
-    "@epilot/message-client": "^1.1.5",
+    "@epilot/message-client": "^1.1.6",
     "@epilot/notification-client": "^0.1.5",
     "@epilot/organization-client": "^0.6.3",
     "@epilot/partner-directory-client": "^0.2.2",
