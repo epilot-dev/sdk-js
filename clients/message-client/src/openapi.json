@@ -518,6 +518,66 @@
         }
       }
     },
+    "/v1/message/threads/{id}/assign": {
+      "post": {
+        "operationId": "assignThread",
+        "summary": "assignThread",
+        "description": "Assign thread to entities",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Entities which thread is assigned to",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "description": "Entity slug",
+                      "type": "string",
+                      "example": "contact"
+                    },
+                    "entity_id": {
+                      "description": "Entity ID",
+                      "type": "string",
+                      "example": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
+                    },
+                    "is_main_entity": {
+                      "description": "To indicate this is main entity",
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/message/drafts": {
       "post": {
         "operationId": "createDraft",
