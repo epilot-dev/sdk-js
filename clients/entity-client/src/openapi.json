@@ -29,6 +29,10 @@
     {
       "name": "Saved Views",
       "description": "Saved Views for Entities"
+    },
+    {
+      "name": "Taxonomy",
+      "description": "Entity classification with Taxonomies"
     }
   ],
   "security": [
@@ -1508,6 +1512,243 @@
           }
         }
       }
+    },
+    "/v1/entity/listTaxonomies": {
+      "get": {
+        "operationId": "listTaxonomies",
+        "summary": "listTaxonomies",
+        "description": "List taxonomies in an organisation",
+        "tags": [
+          "Taxonomy"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns list of taxonomies in an organisation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Taxonomy"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/taxonomies/{taxonomySlug}": {
+      "get": {
+        "operationId": "getTaxonomy",
+        "summary": "getTaxonomy",
+        "description": "Get taxonomy by slug",
+        "tags": [
+          "Taxonomy"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "taxonomySlug",
+            "description": "Taxonomy slug to return taxonomy for",
+            "schema": {
+              "$ref": "#/components/schemas/TaxonomySlug"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Taxonomy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Taxonomy"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/taxonomies/{taxonomySlug}:autocomplete": {
+      "get": {
+        "operationId": "taxonomyAutocomplete",
+        "summary": "taxonomyAutocomplete",
+        "description": "Taxonomies autocomplete",
+        "tags": [
+          "Taxonomy"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "taxonomySlug",
+            "description": "Limit results to slug",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "description": "Input to autocomplete",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "Minimum number of results to return",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Taxonomy classifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TaxonomyClassification"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/taxonomies/classifications:search": {
+      "post": {
+        "operationId": "taxonomiesClassificationsSearch",
+        "summary": "taxonomiesClassificationsSearch",
+        "description": "List taxonomy classifications in an organisation based on taxonomy slug",
+        "tags": [
+          "Taxonomy"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "taxonomySlug",
+            "description": "Taxonomy slug",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "classificationIds": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ClassificationId"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns list of taxonomy classifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "items": {
+                        "$ref": "#/components/schemas/TaxonomyClassification"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/taxonomies/{taxonomySlug}/classifications": {
+      "post": {
+        "operationId": "updateClassificationsForTaxonomy",
+        "summary": "updateClassificationsForTaxonomy",
+        "description": "Update taxonomies in an organisation based in taxonomy slug",
+        "tags": [
+          "Taxonomy"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "taxonomySlug",
+            "description": "Taxonomy slug",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassificationsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Taxonomies classifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "created": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TaxonomyClassification"
+                      }
+                    },
+                    "updated": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TaxonomyClassification"
+                      }
+                    },
+                    "deleted": {
+                      "type": "object",
+                      "items": "#/components/schemas/ClassificationId"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1966,10 +2207,17 @@
             ]
           },
           "group": {
+            "description": "Which group the attribute should appear in. Accepts group ID or group name",
             "type": "string"
           },
+          "order": {
+            "description": "Attribute sort order (ascending) in group",
+            "type": "integer",
+            "example": 0
+          },
           "layout": {
-            "type": "string"
+            "type": "string",
+            "example": "full_width"
           },
           "hide_label": {
             "type": "boolean",
@@ -3988,6 +4236,97 @@
           "created_by",
           "ui_config"
         ]
+      },
+      "Taxonomy": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/TaxonomySlug"
+          },
+          "name": {
+            "type": "string",
+            "description": "A human friendly name of a Taxonomy e.g. Purpose, Product Category, Folder, Tag",
+            "example": "Purpose"
+          },
+          "plural": {
+            "type": "string",
+            "description": "Plural name of a Taxonomy e.g. Purposes, Product Categories, Folders, Tags",
+            "example": "Purposes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "slug",
+          "name"
+        ]
+      },
+      "TaxonomyClassification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ClassificationId"
+          },
+          "name": {
+            "type": "string",
+            "example": "Wallbox PV"
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassificationId"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ClassificationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "TaxonomySlug": {
+        "type": "string",
+        "description": "URL-friendly name for taxonomy",
+        "example": "purpose"
+      },
+      "ClassificationsUpdate": {
+        "type": "object",
+        "properties": {
+          "create": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxonomyClassification"
+            }
+          },
+          "update": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxonomyClassification"
+            }
+          },
+          "delete": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassificationId"
+            }
+          }
+        }
       }
     },
     "examples": {
