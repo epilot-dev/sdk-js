@@ -158,7 +158,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -245,7 +258,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -318,7 +344,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -431,7 +470,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -486,6 +538,12 @@ declare namespace Components {
             protected?: boolean;
             type?: "boolean";
         }
+        export type ClassificationId = string; // uuid
+        export interface ClassificationsUpdate {
+            create?: TaxonomyClassification[];
+            update?: TaxonomyClassification[];
+            delete?: ClassificationId /* uuid */[];
+        }
         /**
          * An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes)
          */
@@ -507,7 +565,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -583,7 +654,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -661,7 +745,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -737,7 +834,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -823,7 +933,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -1708,7 +1831,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -1960,7 +2096,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -2036,7 +2185,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -2112,7 +2274,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -2196,7 +2371,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -2272,7 +2460,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -2364,7 +2565,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -2441,7 +2655,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -2517,7 +2744,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -2593,7 +2833,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -2685,7 +2938,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -2935,7 +3201,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -3152,7 +3431,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -3236,7 +3528,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -3319,7 +3624,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -3459,7 +3777,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -3516,6 +3847,45 @@ declare namespace Components {
             options?: string[];
             suggestions?: string[];
         }
+        export interface Taxonomy {
+            slug: /**
+             * URL-friendly name for taxonomy
+             * example:
+             * purpose
+             */
+            TaxonomySlug;
+            /**
+             * A human friendly name of a Taxonomy e.g. Purpose, Product Category, Folder, Tag
+             * example:
+             * Purpose
+             */
+            name: string;
+            /**
+             * Plural name of a Taxonomy e.g. Purposes, Product Categories, Folders, Tags
+             * example:
+             * Purposes
+             */
+            plural?: string;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+        }
+        export interface TaxonomyClassification {
+            id?: ClassificationId /* uuid */;
+            /**
+             * example:
+             * Wallbox PV
+             */
+            name: string;
+            parents?: ClassificationId /* uuid */[];
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+        }
+        /**
+         * URL-friendly name for taxonomy
+         * example:
+         * purpose
+         */
+        export type TaxonomySlug = string;
         /**
          * Textarea or text input
          */
@@ -3537,7 +3907,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -3614,7 +3997,20 @@ declare namespace Components {
             default_value?: string | {
                 [name: string]: any;
             } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
             group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
             layout?: string;
             /**
              * When set to true, will hide the label of the field.
@@ -4127,6 +4523,22 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetTaxonomy {
+        namespace Parameters {
+            export type TaxonomySlug = /**
+             * URL-friendly name for taxonomy
+             * example:
+             * purpose
+             */
+            Components.Schemas.TaxonomySlug;
+        }
+        export interface PathParameters {
+            taxonomySlug: Parameters.TaxonomySlug;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Taxonomy;
+        }
+    }
     namespace ImportEntities {
         namespace Parameters {
             export type JobId = /* Export Job Id to get the result */ Components.Schemas.ExportJobId;
@@ -4167,10 +4579,70 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListTaxonomies {
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.Taxonomy[];
+            }
+        }
+    }
     namespace SearchEntities {
         export type RequestBody = Components.Schemas.EntitySearchParams;
         namespace Responses {
             export type $200 = Components.Schemas.EntitySearchResults;
+        }
+    }
+    namespace TaxonomiesClassificationsSearch {
+        namespace Parameters {
+            export type TaxonomySlug = string;
+        }
+        export interface QueryParameters {
+            taxonomySlug: Parameters.TaxonomySlug;
+        }
+        export interface RequestBody {
+            classificationIds?: Components.Schemas.ClassificationId /* uuid */[];
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: any;
+            }
+        }
+    }
+    namespace TaxonomyAutocomplete {
+        namespace Parameters {
+            export type Query = string;
+            export type Size = number;
+            export type TaxonomySlug = string;
+        }
+        export interface PathParameters {
+            taxonomySlug: Parameters.TaxonomySlug;
+        }
+        export interface QueryParameters {
+            query?: Parameters.Query;
+            size?: Parameters.Size;
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.TaxonomyClassification[];
+            }
+        }
+    }
+    namespace UpdateClassificationsForTaxonomy {
+        namespace Parameters {
+            export type TaxonomySlug = string;
+        }
+        export interface PathParameters {
+            taxonomySlug: Parameters.TaxonomySlug;
+        }
+        export type RequestBody = Components.Schemas.ClassificationsUpdate;
+        namespace Responses {
+            export interface $200 {
+                created?: Components.Schemas.TaxonomyClassification[];
+                updated?: Components.Schemas.TaxonomyClassification[];
+                deleted?: {
+                    [key: string]: any;
+                };
+            }
         }
     }
     namespace UpdateEntity {
@@ -4806,6 +5278,56 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSavedView.Responses.$200>
+  /**
+   * listTaxonomies - listTaxonomies
+   * 
+   * List taxonomies in an organisation
+   */
+  'listTaxonomies'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListTaxonomies.Responses.$200>
+  /**
+   * getTaxonomy - getTaxonomy
+   * 
+   * Get taxonomy by slug
+   */
+  'getTaxonomy'(
+    parameters?: Parameters<Paths.GetTaxonomy.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetTaxonomy.Responses.$200>
+  /**
+   * taxonomyAutocomplete - taxonomyAutocomplete
+   * 
+   * Taxonomies autocomplete
+   */
+  'taxonomyAutocomplete'(
+    parameters?: Parameters<Paths.TaxonomyAutocomplete.PathParameters & Paths.TaxonomyAutocomplete.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TaxonomyAutocomplete.Responses.$200>
+  /**
+   * taxonomiesClassificationsSearch - taxonomiesClassificationsSearch
+   * 
+   * List taxonomy classifications in an organisation based on taxonomy slug
+   */
+  'taxonomiesClassificationsSearch'(
+    parameters?: Parameters<Paths.TaxonomiesClassificationsSearch.QueryParameters> | null,
+    data?: Paths.TaxonomiesClassificationsSearch.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TaxonomiesClassificationsSearch.Responses.$200>
+  /**
+   * updateClassificationsForTaxonomy - updateClassificationsForTaxonomy
+   * 
+   * Update taxonomies in an organisation based in taxonomy slug
+   */
+  'updateClassificationsForTaxonomy'(
+    parameters?: Parameters<Paths.UpdateClassificationsForTaxonomy.PathParameters> | null,
+    data?: Paths.UpdateClassificationsForTaxonomy.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -5331,6 +5853,66 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSavedView.Responses.$200>
+  }
+  ['/v1/entity/listTaxonomies']: {
+    /**
+     * listTaxonomies - listTaxonomies
+     * 
+     * List taxonomies in an organisation
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListTaxonomies.Responses.$200>
+  }
+  ['/v1/entity/taxonomies/{taxonomySlug}']: {
+    /**
+     * getTaxonomy - getTaxonomy
+     * 
+     * Get taxonomy by slug
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetTaxonomy.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetTaxonomy.Responses.$200>
+  }
+  ['/v1/entity/taxonomies/{taxonomySlug}:autocomplete']: {
+    /**
+     * taxonomyAutocomplete - taxonomyAutocomplete
+     * 
+     * Taxonomies autocomplete
+     */
+    'get'(
+      parameters?: Parameters<Paths.TaxonomyAutocomplete.PathParameters & Paths.TaxonomyAutocomplete.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TaxonomyAutocomplete.Responses.$200>
+  }
+  ['/v1/entity/taxonomies/classifications:search']: {
+    /**
+     * taxonomiesClassificationsSearch - taxonomiesClassificationsSearch
+     * 
+     * List taxonomy classifications in an organisation based on taxonomy slug
+     */
+    'post'(
+      parameters?: Parameters<Paths.TaxonomiesClassificationsSearch.QueryParameters> | null,
+      data?: Paths.TaxonomiesClassificationsSearch.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TaxonomiesClassificationsSearch.Responses.$200>
+  }
+  ['/v1/entity/taxonomies/{taxonomySlug}/classifications']: {
+    /**
+     * updateClassificationsForTaxonomy - updateClassificationsForTaxonomy
+     * 
+     * Update taxonomies in an organisation based in taxonomy slug
+     */
+    'post'(
+      parameters?: Parameters<Paths.UpdateClassificationsForTaxonomy.PathParameters> | null,
+      data?: Paths.UpdateClassificationsForTaxonomy.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
   }
 }
 
