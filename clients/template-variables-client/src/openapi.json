@@ -532,6 +532,10 @@
             "items": {
               "$ref": "#/components/schemas/ExternalCustomVariable"
             }
+          },
+          "context_data": {
+            "type": "object",
+            "description": "If context data is avaialble, this data will be used for variable replace."
           }
         },
         "required": [

@@ -280,6 +280,12 @@ declare namespace Components {
              * Custom variables with specified values form other services.
              */
             custom_variables?: ExternalCustomVariable[];
+            /**
+             * If context data is avaialble, this data will be used for variable replace.
+             */
+            context_data?: {
+                [key: string]: any;
+            };
         }
         /**
          * example:
