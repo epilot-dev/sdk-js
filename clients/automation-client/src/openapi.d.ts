@@ -703,8 +703,13 @@ declare namespace Components {
                  * example:
                  * submission
                  */
-                schema?: string;
-                operations?: ("createEntity" | "updateEntity" | "deleteEntity")[];
+                schema: string;
+                operations: [
+                    ("createEntity" | "updateEntity" | "deleteEntity"),
+                    ...("createEntity" | "updateEntity" | "deleteEntity")[]
+                ];
+                include_activities?: string[];
+                exclude_activities?: string[];
             };
         }
         export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR";

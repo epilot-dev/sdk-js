@@ -1918,6 +1918,7 @@
               },
               "operations": {
                 "type": "array",
+                "minItems": 1,
                 "items": {
                   "type": "string",
                   "enum": [
@@ -1926,8 +1927,30 @@
                     "deleteEntity"
                   ]
                 }
+              },
+              "include_activities": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": [
+                    "CreateEntity"
+                  ]
+                }
+              },
+              "exclude_activities": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": [
+                    "SyncEntity"
+                  ]
+                }
               }
-            }
+            },
+            "required": [
+              "schema",
+              "operations"
+            ]
           }
         },
         "required": [
@@ -2097,9 +2120,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://automation.sls.epilot.io"
-    },
     {
       "url": "https://automation.sls.epilot.io"
     }

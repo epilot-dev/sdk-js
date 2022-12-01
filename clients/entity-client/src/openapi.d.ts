@@ -236,7 +236,7 @@ declare namespace Components {
             download_url: string;
             alt_text?: string;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute;
         /**
          * Automation entity
          */
@@ -2903,6 +2903,103 @@ declare namespace Components {
             has_primary?: boolean;
         }
         /**
+         * Entity Taxonomy
+         */
+        export interface PurposeAttribute {
+            /**
+             * example:
+             * Wallbox PV
+             */
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: string | {
+                [name: string]: any;
+            } | number | number | boolean | any[];
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
+            group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This attribute should only be active when the setting is enabled
+             * example:
+             * MY_SETTING
+             */
+            setting_flag?: string;
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            id?: ClassificationId /* uuid */;
+            parents?: ClassificationId /* uuid */[];
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            type?: "purpose";
+        }
+        /**
          * example:
          * {
          *   "type": "redirect",
@@ -4071,6 +4168,7 @@ declare namespace Components {
 declare namespace Paths {
     namespace AddRelations {
         namespace Parameters {
+            export type Async = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -4082,6 +4180,9 @@ declare namespace Paths {
         export interface PathParameters {
             slug: Parameters.Slug;
             id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            async?: Parameters.Async;
         }
         export type RequestBody = Components.Schemas.RelationItem[];
         namespace Responses {
@@ -4173,6 +4274,7 @@ declare namespace Paths {
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
             Components.Schemas.ActivityId /* ulid */;
+            export type Async = boolean;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -4185,6 +4287,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             activity_id?: Parameters.ActivityId;
+            async?: Parameters.Async;
         }
         export type RequestBody = Components.Schemas.Entity;
         namespace Responses {
@@ -4262,6 +4365,7 @@ declare namespace Paths {
     }
     namespace DeleteRelation {
         namespace Parameters {
+            export type Async = boolean;
             export type Attribute = string;
             export type EntityId = string;
             export type Id = Components.Schemas.EntityId /* uuid */;
@@ -4277,6 +4381,9 @@ declare namespace Paths {
             id: Parameters.Id;
             attribute: Parameters.Attribute;
             entity_id: Parameters.EntityId;
+        }
+        export interface QueryParameters {
+            async?: Parameters.Async;
         }
         namespace Responses {
             export interface $204 {
@@ -4653,6 +4760,7 @@ declare namespace Paths {
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
             Components.Schemas.ActivityId /* ulid */;
+            export type Async = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -4667,6 +4775,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             activity_id?: Parameters.ActivityId;
+            async?: Parameters.Async;
         }
         export type RequestBody = Components.Schemas.Entity;
         namespace Responses {
@@ -4689,6 +4798,7 @@ declare namespace Paths {
     }
     namespace UpdateRelation {
         namespace Parameters {
+            export type Async = boolean;
             export type Attribute = string;
             export type EntityId = string;
             export type Id = Components.Schemas.EntityId /* uuid */;
@@ -4704,6 +4814,9 @@ declare namespace Paths {
             id: Parameters.Id;
             attribute: Parameters.Attribute;
             entity_id: Parameters.EntityId;
+        }
+        export interface QueryParameters {
+            async?: Parameters.Async;
         }
         export interface RequestBody {
             _tags?: string[];
@@ -4732,6 +4845,7 @@ declare namespace Paths {
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
             Components.Schemas.ActivityId /* ulid */;
+            export type Async = boolean;
             export type DryRun = boolean;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -4746,6 +4860,7 @@ declare namespace Paths {
         export interface QueryParameters {
             activity_id?: Parameters.ActivityId;
             dry_run?: Parameters.DryRun;
+            async?: Parameters.Async;
         }
         export interface RequestBody {
             /**
@@ -5184,7 +5299,7 @@ export interface OperationMethods {
    * Relates one or more entities to parent entity by adding items to a relation attribute
    */
   'addRelations'(
-    parameters?: Parameters<Paths.AddRelations.PathParameters> | null,
+    parameters?: Parameters<Paths.AddRelations.PathParameters & Paths.AddRelations.QueryParameters> | null,
     data?: Paths.AddRelations.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddRelations.Responses.$200>
@@ -5194,7 +5309,7 @@ export interface OperationMethods {
    * Updates an existing relation between two entities.
    */
   'updateRelation'(
-    parameters?: Parameters<Paths.UpdateRelation.PathParameters> | null,
+    parameters?: Parameters<Paths.UpdateRelation.PathParameters & Paths.UpdateRelation.QueryParameters> | null,
     data?: Paths.UpdateRelation.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateRelation.Responses.$200>
@@ -5204,7 +5319,7 @@ export interface OperationMethods {
    * Removes relation between two entities
    */
   'deleteRelation'(
-    parameters?: Parameters<Paths.DeleteRelation.PathParameters> | null,
+    parameters?: Parameters<Paths.DeleteRelation.PathParameters & Paths.DeleteRelation.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteRelation.Responses.$204>
@@ -5747,7 +5862,7 @@ export interface PathsDictionary {
      * Relates one or more entities to parent entity by adding items to a relation attribute
      */
     'post'(
-      parameters?: Parameters<Paths.AddRelations.PathParameters> | null,
+      parameters?: Parameters<Paths.AddRelations.PathParameters & Paths.AddRelations.QueryParameters> | null,
       data?: Paths.AddRelations.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddRelations.Responses.$200>
@@ -5759,7 +5874,7 @@ export interface PathsDictionary {
      * Updates an existing relation between two entities.
      */
     'put'(
-      parameters?: Parameters<Paths.UpdateRelation.PathParameters> | null,
+      parameters?: Parameters<Paths.UpdateRelation.PathParameters & Paths.UpdateRelation.QueryParameters> | null,
       data?: Paths.UpdateRelation.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateRelation.Responses.$200>
@@ -5769,7 +5884,7 @@ export interface PathsDictionary {
      * Removes relation between two entities
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteRelation.PathParameters> | null,
+      parameters?: Parameters<Paths.DeleteRelation.PathParameters & Paths.DeleteRelation.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteRelation.Responses.$204>
