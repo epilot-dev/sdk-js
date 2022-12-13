@@ -163,6 +163,7 @@ declare namespace Components {
                 requirements?: /* describe the requirement for step enablement */ StepRequirement[];
                 executionType?: StepType;
                 sectionId?: string;
+                executionId: string;
                 /**
                  * This field is deprecated. Please use assignedTo
                  */
@@ -179,7 +180,6 @@ declare namespace Components {
                 dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
                 manuallyCreated?: boolean;
                 automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
-                executionId: string;
                 executionName: string;
                 executionStatus: WorkflowStatus;
                 contexts?: {
@@ -238,6 +238,7 @@ declare namespace Components {
             requirements?: /* describe the requirement for step enablement */ StepRequirement[];
             executionType?: StepType;
             sectionId?: string;
+            executionId?: string;
             /**
              * This field is deprecated. Please use assignedTo
              */
@@ -269,6 +270,7 @@ declare namespace Components {
             requirements?: /* describe the requirement for step enablement */ StepRequirement[];
             executionType?: StepType;
             sectionId?: string;
+            executionId: string;
             /**
              * This field is deprecated. Please use assignedTo
              */
@@ -285,7 +287,6 @@ declare namespace Components {
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
-            executionId: string;
             executionName: string;
             executionStatus: WorkflowStatus;
             contexts?: {
@@ -374,6 +375,7 @@ declare namespace Components {
             requirements?: /* describe the requirement for step enablement */ StepRequirement[];
             executionType?: StepType;
             sectionId?: string;
+            executionId?: string;
             /**
              * This field is deprecated. Please use assignedTo
              */
@@ -629,6 +631,7 @@ declare namespace Components {
              * id of the user / partner user who is closing the workflow. For partner pass orgId_userId.
              */
             closedBy?: string;
+            contexts?: WorkflowContext[];
         }
         export interface WorkflowInEntity {
             id?: string;

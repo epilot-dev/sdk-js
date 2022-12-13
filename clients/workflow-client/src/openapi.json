@@ -754,6 +754,12 @@
           "closedBy": {
             "type": "string",
             "description": "id of the user / partner user who is closing the workflow. For partner pass orgId_userId."
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowContext"
+            }
           }
         }
       },
@@ -1161,6 +1167,9 @@
             "type": "object",
             "properties": {
               "sectionId": {
+                "type": "string"
+              },
+              "executionId": {
                 "type": "string"
               },
               "userIds": {
