@@ -426,11 +426,8 @@ declare namespace Components {
          * }
          */
         export interface BaseEntity {
+            [name: string]: any;
             _id: EntityId /* uuid */;
-            /**
-             * Title of entity
-             */
-            _title: string;
             /**
              * Organization Id the entity belongs to
              */
@@ -441,9 +438,13 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
-            _tags?: string[];
-            _created_at: string; // date-time
-            _updated_at: string; // date-time
+            /**
+             * Title of entity
+             */
+            _title: string | null;
+            _tags?: string[] | null;
+            _created_at: string | null; // date-time
+            _updated_at: string | null; // date-time
         }
         /**
          * Reference to blueprint
@@ -1001,8 +1002,40 @@ declare namespace Components {
             protected?: boolean;
             type?: "date" | "datetime";
         }
+        /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         * }
+         */
         export interface Entity {
             [name: string]: any;
+            _id?: EntityId /* uuid */;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org?: string;
+            _schema?: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            /**
+             * Title of entity
+             */
+            _title?: string | null;
+            _tags?: string[] | null;
+            _created_at?: string | null; // date-time
+            _updated_at?: string | null; // date-time
         }
         /**
          * Capabilities the Entity has. Turn features on/off for entities.
@@ -1161,7 +1194,7 @@ declare namespace Components {
                  * Opportunities
                  */
                 title?: string;
-                uri?: string; // uri
+                uri?: string; // uri-reference
                 /**
                  * This dropdown item should only be active when the feature flag is enabled
                  * example:
@@ -1187,7 +1220,7 @@ declare namespace Components {
              * Enable the thumbnail column
              */
             enable_thumbnails?: boolean;
-            classic_view?: string; // uri
+            classic_view?: string; // uri-reference
         }
         export type EntityId = string; // uuid
         export interface EntityImportParams {
@@ -1217,6 +1250,8 @@ declare namespace Components {
          *   "_schema": "contact",
          *   "_tags": [
          *     "example",
+         *     "mock",
+         *     "example",
          *     "mock"
          *   ],
          *   "_created_at": "2021-02-09T12:41:43.662Z",
@@ -1227,10 +1262,6 @@ declare namespace Components {
             [name: string]: any;
             _id: EntityId /* uuid */;
             /**
-             * Title of entity
-             */
-            _title: string;
-            /**
              * Organization Id the entity belongs to
              */
             _org: string;
@@ -1240,9 +1271,13 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
-            _tags?: string[];
-            _created_at: string; // date-time
-            _updated_at: string; // date-time
+            /**
+             * Title of entity
+             */
+            _title: string | null;
+            _tags?: string[] | null;
+            _created_at: string | null; // date-time
+            _updated_at: string | null; // date-time
         }
         export interface EntityOperation {
             entity: EntityId /* uuid */;
@@ -1277,18 +1312,85 @@ declare namespace Components {
             /**
              * example:
              * {
-             *   "_schema": "contact",
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "_org": "123",
+             *   "_schema": "contact",
+             *   "_tags": [
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z",
              *   "status": "Inactive"
              * }
              */
             payload?: {
                 [name: string]: any;
+                _id?: EntityId /* uuid */;
+                /**
+                 * Organization Id the entity belongs to
+                 */
+                _org?: string;
+                _schema?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                /**
+                 * Title of entity
+                 */
+                _title?: string | null;
+                _tags?: string[] | null;
+                _created_at?: string | null; // date-time
+                _updated_at?: string | null; // date-time
             };
             diff?: {
-                added?: Entity;
-                updated?: Entity;
-                deleted?: Entity;
+                added?: /**
+                 * example:
+                 * {
+                 *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                 *   "_org": "123",
+                 *   "_schema": "contact",
+                 *   "_tags": [
+                 *     "example",
+                 *     "mock"
+                 *   ],
+                 *   "_created_at": "2021-02-09T12:41:43.662Z",
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 * }
+                 */
+                Entity;
+                updated?: /**
+                 * example:
+                 * {
+                 *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                 *   "_org": "123",
+                 *   "_schema": "contact",
+                 *   "_tags": [
+                 *     "example",
+                 *     "mock"
+                 *   ],
+                 *   "_created_at": "2021-02-09T12:41:43.662Z",
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 * }
+                 */
+                Entity;
+                deleted?: /**
+                 * example:
+                 * {
+                 *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                 *   "_org": "123",
+                 *   "_schema": "contact",
+                 *   "_tags": [
+                 *     "example",
+                 *     "mock"
+                 *   ],
+                 *   "_created_at": "2021-02-09T12:41:43.662Z",
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 * }
+                 */
+                Entity;
             };
         }
         /**
@@ -1437,6 +1539,7 @@ declare namespace Components {
                     key?: string;
                     default?: string;
                 };
+                _purpose?: ClassificationId /* uuid */[];
             }[];
             /**
              * Custom grid definitions for the layout
@@ -1650,6 +1753,7 @@ declare namespace Components {
                     key?: string;
                     default?: string;
                 };
+                _purpose?: ClassificationId /* uuid */[];
             }[];
             /**
              * Custom grid definitions for the layout
@@ -1773,6 +1877,8 @@ declare namespace Components {
              *   "_org": "123",
              *   "_schema": "contact",
              *   "_tags": [
+             *     "example",
+             *     "mock",
              *     "example",
              *     "mock"
              *   ],
@@ -2058,10 +2164,6 @@ declare namespace Components {
             [name: string]: any;
             _id: EntityId /* uuid */;
             /**
-             * Title of entity
-             */
-            _title: string;
-            /**
              * Organization Id the entity belongs to
              */
             _org: string;
@@ -2071,9 +2173,13 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
-            _tags?: string[];
-            _created_at: string; // date-time
-            _updated_at: string; // date-time
+            /**
+             * Title of entity
+             */
+            _title: string | null;
+            _tags?: string[] | null;
+            _created_at: string | null; // date-time
+            _updated_at: string | null; // date-time
         }
         /**
          * No UI representation
@@ -3183,6 +3289,8 @@ declare namespace Components {
                  *   "_schema": "contact",
                  *   "_tags": [
                  *     "example",
+                 *     "mock",
+                 *     "example",
                  *     "mock"
                  *   ],
                  *   "_created_at": "2021-02-09T12:41:43.662Z",
@@ -3193,10 +3301,6 @@ declare namespace Components {
                     [name: string]: any;
                     _id: EntityId /* uuid */;
                     /**
-                     * Title of entity
-                     */
-                    _title: string;
-                    /**
                      * Organization Id the entity belongs to
                      */
                     _org: string;
@@ -3206,9 +3310,13 @@ declare namespace Components {
                      * contact
                      */
                     EntitySlug;
-                    _tags?: string[];
-                    _created_at: string; // date-time
-                    _updated_at: string; // date-time
+                    /**
+                     * Title of entity
+                     */
+                    _title: string | null;
+                    _tags?: string[] | null;
+                    _created_at: string | null; // date-time
+                    _updated_at: string | null; // date-time
                 };
             }[];
             drawer_size?: "small" | "medium" | "large";
@@ -3248,11 +3356,8 @@ declare namespace Components {
          * }
          */
         export interface RelationEntity {
+            [name: string]: any;
             _id: EntityId /* uuid */;
-            /**
-             * Title of entity
-             */
-            _title: string;
             /**
              * Organization Id the entity belongs to
              */
@@ -3263,9 +3368,13 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
-            _tags?: string[];
-            _created_at: string; // date-time
-            _updated_at: string; // date-time
+            /**
+             * Title of entity
+             */
+            _title: string | null;
+            _tags?: string[] | null;
+            _created_at: string | null; // date-time
+            _updated_at: string | null; // date-time
             $relation?: RelationItem;
         }
         export interface RelationItem {
@@ -3392,9 +3501,21 @@ declare namespace Components {
             /**
              * User-friendly identifier for the saved view
              * example:
-             * View listing German customers
+             * View listing German
              */
             name: string;
+            /**
+             * Organisation ID a view belongs to
+             * example:
+             * 66
+             */
+            org?: string;
+            /**
+             * boolean property for if a view is shared with organisation
+             * example:
+             * true
+             */
+            shared?: boolean;
             created_by: {
                 /**
                  * example:
@@ -3449,9 +3570,21 @@ declare namespace Components {
             /**
              * User-friendly identifier for the saved view
              * example:
-             * View listing German customers
+             * View listing German
              */
             name: string;
+            /**
+             * Organisation ID a view belongs to
+             * example:
+             * 66
+             */
+            org?: string;
+            /**
+             * boolean property for if a view is shared with organisation
+             * example:
+             * true
+             */
+            shared?: boolean;
             created_by: {
                 /**
                  * example:
@@ -4289,7 +4422,21 @@ declare namespace Paths {
             activity_id?: Parameters.ActivityId;
             async?: Parameters.Async;
         }
-        export type RequestBody = Components.Schemas.Entity;
+        export type RequestBody = /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         * }
+         */
+        Components.Schemas.Entity;
         namespace Responses {
             export type $201 = /**
              * example:
@@ -4298,6 +4445,8 @@ declare namespace Paths {
              *   "_org": "123",
              *   "_schema": "contact",
              *   "_tags": [
+             *     "example",
+             *     "mock",
              *     "example",
              *     "mock"
              *   ],
@@ -4484,6 +4633,8 @@ declare namespace Paths {
                  *   "_schema": "contact",
                  *   "_tags": [
                  *     "example",
+                 *     "mock",
+                 *     "example",
                  *     "mock"
                  *   ],
                  *   "_created_at": "2021-02-09T12:41:43.662Z",
@@ -4498,6 +4649,8 @@ declare namespace Paths {
                  *   "_org": "123",
                  *   "_schema": "contact",
                  *   "_tags": [
+                 *     "example",
+                 *     "mock",
                  *     "example",
                  *     "mock"
                  *   ],
@@ -4693,6 +4846,37 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListTaxonomyClassificationsForSchema {
+        namespace Parameters {
+            export type Query = string;
+            export type Size = number;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+            export type TaxonomySlug = /**
+             * URL-friendly name for taxonomy
+             * example:
+             * purpose
+             */
+            Components.Schemas.TaxonomySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            taxonomySlug: Parameters.TaxonomySlug;
+        }
+        export interface QueryParameters {
+            query?: Parameters.Query;
+            size?: Parameters.Size;
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.TaxonomyClassification[];
+            }
+        }
+    }
     namespace SearchEntities {
         export type RequestBody = Components.Schemas.EntitySearchParams;
         namespace Responses {
@@ -4777,7 +4961,21 @@ declare namespace Paths {
             activity_id?: Parameters.ActivityId;
             async?: Parameters.Async;
         }
-        export type RequestBody = Components.Schemas.Entity;
+        export type RequestBody = /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         * }
+         */
+        Components.Schemas.Entity;
         namespace Responses {
             export type $200 = /**
              * example:
@@ -4786,6 +4984,8 @@ declare namespace Paths {
              *   "_org": "123",
              *   "_schema": "contact",
              *   "_tags": [
+             *     "example",
+             *     "mock",
              *     "example",
              *     "mock"
              *   ],
@@ -4870,7 +5070,21 @@ declare namespace Paths {
              * ]
              */
             unique_key: string[];
-            entity: Components.Schemas.Entity;
+            entity: /**
+             * example:
+             * {
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "_org": "123",
+             *   "_schema": "contact",
+             *   "_tags": [
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             * }
+             */
+            Components.Schemas.Entity;
         }
         namespace Responses {
             export type $200 = /**
@@ -4880,6 +5094,8 @@ declare namespace Paths {
              *   "_org": "123",
              *   "_schema": "contact",
              *   "_tags": [
+             *     "example",
+             *     "mock",
              *     "example",
              *     "mock"
              *   ],
@@ -4895,6 +5111,8 @@ declare namespace Paths {
              *   "_org": "123",
              *   "_schema": "contact",
              *   "_tags": [
+             *     "example",
+             *     "mock",
              *     "example",
              *     "mock"
              *   ],
@@ -4970,6 +5188,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaById.Responses.$204>
+  /**
+   * listTaxonomyClassificationsForSchema - listTaxonomyClassificationsForSchema
+   * 
+   * List taxonomy classifications for a given schema
+   */
+  'listTaxonomyClassificationsForSchema'(
+    parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.PathParameters & Paths.ListTaxonomyClassificationsForSchema.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
   /**
    * searchEntities - searchEntities
    * 
@@ -5513,6 +5741,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaById.Responses.$204>
+  }
+  ['/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}']: {
+    /**
+     * listTaxonomyClassificationsForSchema - listTaxonomyClassificationsForSchema
+     * 
+     * List taxonomy classifications for a given schema
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.PathParameters & Paths.ListTaxonomyClassificationsForSchema.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
   }
   ['/v1/entity:search']: {
     /**
