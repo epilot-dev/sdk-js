@@ -278,6 +278,68 @@
         }
       }
     },
+    "/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}": {
+      "get": {
+        "operationId": "listTaxonomyClassificationsForSchema",
+        "summary": "listTaxonomyClassificationsForSchema",
+        "description": "List taxonomy classifications for a given schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "path",
+            "name": "taxonomySlug",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TaxonomySlug"
+            }
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of taxonomy classifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TaxonomyClassification"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/entity:search": {
       "post": {
         "operationId": "searchEntities",
@@ -1996,6 +2058,12 @@
                       "type": "string"
                     }
                   }
+                },
+                "_purpose": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClassificationId"
+                  }
                 }
               },
               "required": [
@@ -3547,7 +3615,7 @@
                         },
                         "uri": {
                           "type": "string",
-                          "format": "uri"
+                          "format": "uri-reference"
                         }
                       }
                     }
@@ -3600,7 +3668,7 @@
           },
           "classic_view": {
             "type": "string",
-            "format": "uri"
+            "format": "uri-reference"
           }
         }
       },
@@ -3703,14 +3771,28 @@
         "format": "uuid"
       },
       "BaseEntity": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "required": [
+              "_id",
+              "_title",
+              "_org",
+              "_schema",
+              "_created_at",
+              "_updated_at"
+            ]
+          }
+        ]
+      },
+      "Entity": {
         "type": "object",
+        "additionalProperties": true,
         "properties": {
           "_id": {
             "$ref": "#/components/schemas/EntityId"
-          },
-          "_title": {
-            "type": "string",
-            "description": "Title of entity"
           },
           "_org": {
             "type": "string",
@@ -3719,29 +3801,29 @@
           "_schema": {
             "$ref": "#/components/schemas/EntitySlug"
           },
+          "_title": {
+            "type": "string",
+            "description": "Title of entity",
+            "nullable": true
+          },
           "_tags": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "nullable": true
           },
           "_created_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "_updated_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           }
         },
-        "required": [
-          "_id",
-          "_title",
-          "_org",
-          "_schema",
-          "_created_at",
-          "_updated_at"
-        ],
         "example": {
           "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
           "_org": "123",
@@ -3753,11 +3835,6 @@
           "_created_at": "2021-02-09T12:41:43.662Z",
           "_updated_at": "2021-02-09T12:41:43.662Z"
         }
-      },
-      "Entity": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true
       },
       "HydratedEntity": {
         "type": "object",
@@ -4269,7 +4346,17 @@
           "name": {
             "description": "User-friendly identifier for the saved view",
             "type": "string",
-            "example": "View listing German customers"
+            "example": "View listing German"
+          },
+          "org": {
+            "description": "Organisation ID a view belongs to",
+            "type": "string",
+            "example": "66"
+          },
+          "shared": {
+            "description": "boolean property for if a view is shared with organisation",
+            "type": "boolean",
+            "example": true
           },
           "created_by": {
             "anyOf": [
@@ -5033,6 +5120,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    },
     {
       "url": "https://entity.sls.epilot.io"
     }
