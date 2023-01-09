@@ -203,6 +203,10 @@ declare namespace Components {
              */
             description?: string;
             /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            long_description?: string;
+            /**
              * The quantity of products being purchased.
              */
             quantity?: number;
@@ -723,6 +727,10 @@ declare namespace Components {
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
+            /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            long_description?: string;
             /**
              * The quantity of products being purchased.
              */
@@ -1765,6 +1773,10 @@ declare namespace Components {
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
+            /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            long_description?: string;
             /**
              * The quantity of products being purchased.
              */

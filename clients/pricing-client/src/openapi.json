@@ -2510,6 +2510,10 @@
             "type": "string",
             "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
           },
+          "long_description": {
+            "type": "string",
+            "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
+          },
           "quantity": {
             "type": "integer",
             "description": "The quantity of products being purchased."
