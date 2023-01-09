@@ -1417,6 +1417,10 @@
             "type": "string",
             "description": "A brief description of the price."
           },
+          "long_description": {
+            "type": "string",
+            "description": "A detailed description of the price. This is shown on the order document and order table."
+          },
           "sales_tax": {
             "deprecated": true,
             "description": "The default tax rate applicable to the product.\nThis field is deprecated, use the new `tax` attribute.\n",
@@ -2507,10 +2511,6 @@
             "$ref": "#/components/schemas/Currency"
           },
           "description": {
-            "type": "string",
-            "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
-          },
-          "long_description": {
             "type": "string",
             "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
           },

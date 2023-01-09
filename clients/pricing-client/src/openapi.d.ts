@@ -203,10 +203,6 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
-             */
-            long_description?: string;
-            /**
              * The quantity of products being purchased.
              */
             quantity?: number;
@@ -727,10 +723,6 @@ declare namespace Components {
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
-            /**
-             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
-             */
-            long_description?: string;
             /**
              * The quantity of products being purchased.
              */
@@ -1518,6 +1510,10 @@ declare namespace Components {
              */
             description?: string;
             /**
+             * A detailed description of the price. This is shown on the order document and order table.
+             */
+            long_description?: string;
+            /**
              * The default tax rate applicable to the product.
              * This field is deprecated, use the new `tax` attribute.
              *
@@ -1774,10 +1770,6 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
-             */
-            long_description?: string;
-            /**
              * The quantity of products being purchased.
              */
             quantity?: number;
@@ -2030,6 +2022,10 @@ declare namespace Components {
                  * A brief description of the price.
                  */
                 description?: string;
+                /**
+                 * A detailed description of the price. This is shown on the order document and order table.
+                 */
+                long_description?: string;
                 /**
                  * The default tax rate applicable to the product.
                  * This field is deprecated, use the new `tax` attribute.
