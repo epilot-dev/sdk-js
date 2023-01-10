@@ -1510,6 +1510,10 @@ declare namespace Components {
              */
             description?: string;
             /**
+             * A detailed description of the price. This is shown on the order document and order table.
+             */
+            long_description?: string;
+            /**
              * The default tax rate applicable to the product.
              * This field is deprecated, use the new `tax` attribute.
              *
@@ -2018,6 +2022,10 @@ declare namespace Components {
                  * A brief description of the price.
                  */
                 description?: string;
+                /**
+                 * A detailed description of the price. This is shown on the order document and order table.
+                 */
+                long_description?: string;
                 /**
                  * The default tax rate applicable to the product.
                  * This field is deprecated, use the new `tax` attribute.
