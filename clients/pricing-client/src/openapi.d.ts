@@ -1536,7 +1536,6 @@ declare namespace Components {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "type": "VAT",
              *   "description": "Tax description",
-             *   "behavior": "Exclusive",
              *   "active": "true",
              *   "region": "DE",
              *   "region_label": "Germany",
@@ -1552,11 +1551,9 @@ declare namespace Components {
              */
             Tax[];
             /**
-             * Specifies whether the price is considered `inclusive` of taxes or `exclusive` of taxes.
-             * One of `inclusive`, `exclusive`, or `unspecified`.
-             *
+             * Specifies whether the price is considered `inclusive` of taxes or not.
              */
-            tax_behavior?: "inclusive" | "exclusive";
+            is_tax_inclusive?: boolean;
             /**
              * Defines the tiered pricing type of the price.
              */
@@ -2049,7 +2046,6 @@ declare namespace Components {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                  *   "type": "VAT",
                  *   "description": "Tax description",
-                 *   "behavior": "Exclusive",
                  *   "active": "true",
                  *   "region": "DE",
                  *   "region_label": "Germany",
@@ -2065,11 +2061,9 @@ declare namespace Components {
                  */
                 Tax[];
                 /**
-                 * Specifies whether the price is considered `inclusive` of taxes or `exclusive` of taxes.
-                 * One of `inclusive`, `exclusive`, or `unspecified`.
-                 *
+                 * Specifies whether the price is considered `inclusive` of taxes or not.
                  */
-                tax_behavior?: "inclusive" | "exclusive";
+                is_tax_inclusive?: boolean;
                 /**
                  * Defines the tiered pricing type of the price.
                  */
@@ -2367,7 +2361,6 @@ declare namespace Components {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
          *   "type": "VAT",
          *   "description": "Tax description",
-         *   "behavior": "Exclusive",
          *   "active": "true",
          *   "region": "DE",
          *   "region_label": "Germany",
@@ -2399,7 +2392,6 @@ declare namespace Components {
             type: "VAT" | "GST" | "Custom";
             description?: string;
             rate: number;
-            behavior: "Exclusive" | "Inclusive" | "exclusive" | "inclusive";
             active?: boolean;
             region?: string;
             region_label?: string;
@@ -2434,7 +2426,6 @@ declare namespace Components {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "type": "VAT",
              *   "description": "Tax description",
-             *   "behavior": "Exclusive",
              *   "active": "true",
              *   "region": "DE",
              *   "region_label": "Germany",
@@ -2485,7 +2476,6 @@ declare namespace Components {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "type": "VAT",
              *   "description": "Tax description",
-             *   "behavior": "Exclusive",
              *   "active": "true",
              *   "region": "DE",
              *   "region_label": "Germany",
