@@ -1452,13 +1452,9 @@
               }
             ]
           },
-          "tax_behavior": {
-            "type": "string",
-            "description": "Specifies whether the price is considered `inclusive` of taxes or `exclusive` of taxes.\nOne of `inclusive`, `exclusive`, or `unspecified`.\n",
-            "enum": [
-              "inclusive",
-              "exclusive"
-            ]
+          "is_tax_inclusive": {
+            "type": "boolean",
+            "description": "Specifies whether the price is considered `inclusive` of taxes or not."
           },
           "tiers_mode": {
             "description": "Defines the tiered pricing type of the price.",
@@ -3096,7 +3092,6 @@
         "required": [
           "type",
           "rate",
-          "behavior",
           "_id",
           "_title",
           "_org",
@@ -3147,15 +3142,6 @@
           "rate": {
             "type": "number"
           },
-          "behavior": {
-            "type": "string",
-            "enum": [
-              "Exclusive",
-              "Inclusive",
-              "exclusive",
-              "inclusive"
-            ]
-          },
           "active": {
             "type": "boolean"
           },
@@ -3170,7 +3156,6 @@
           "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
           "type": "VAT",
           "description": "Tax description",
-          "behavior": "Exclusive",
           "active": "true",
           "region": "DE",
           "region_label": "Germany",
@@ -3305,7 +3290,7 @@
                   "type": "one_time",
                   "active": true,
                   "sales_tax": "standard",
-                  "tax_behavior": "inclusive",
+                  "is_tax_inclusive": true,
                   "description": "Winter Sale",
                   "billing_scheme": "per_unit",
                   "tiers_mode": "Standard",
@@ -3341,7 +3326,7 @@
                   "type": "one_time",
                   "active": true,
                   "sales_tax": "standard",
-                  "tax_behavior": "inclusive",
+                  "is_tax_inclusive": true,
                   "description": "Winter Sale",
                   "billing_scheme": "per_unit",
                   "tiers_mode": "Standard",
@@ -3393,7 +3378,6 @@
                   "tax": {
                     "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
                     "rate": "19",
-                    "behavior": "Inclusive",
                     "_schema": "tax",
                     "_org": "728",
                     "_created_at": "2021-09-24T15:06:13.859Z",
@@ -3413,7 +3397,7 @@
                 "unit_amount_currency": "EUR",
                 "unit_amount_decimal": "1000",
                 "sales_tax": "standard",
-                "tax_behavior": "inclusive",
+                "is_tax_inclusive": true,
                 "price_display_in_journeys": "show_price",
                 "type": "one_time",
                 "billing_period": "weekly",
@@ -3525,7 +3509,6 @@
                   "tax": {
                     "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
                     "rate": "19",
-                    "behavior": "Inclusive",
                     "_schema": "tax",
                     "_org": "728",
                     "_created_at": "2021-09-24T15:06:13.859Z",
@@ -3545,7 +3528,7 @@
                 "unit_amount_currency": "EUR",
                 "unit_amount_decimal": "500",
                 "sales_tax": "standard",
-                "tax_behavior": "inclusive",
+                "is_tax_inclusive": true,
                 "price_display_in_journeys": "show_price",
                 "type": "one_time",
                 "billing_period": "weekly",
@@ -3667,7 +3650,7 @@
                 "renewal_duration_unit": "years",
                 "active": true,
                 "sales_tax": "reduced",
-                "tax_behavior": "inclusive",
+                "is_tax_inclusive": true,
                 "description": "Monthly",
                 "billing_scheme": "per_unit",
                 "tiers_mode": "Standard",
@@ -3765,7 +3748,7 @@
                 "unit_amount_currency": "EUR",
                 "unit_amount_decimal": "99",
                 "sales_tax": "standard",
-                "tax_behavior": "inclusive",
+                "is_tax_inclusive": true,
                 "price_display_in_journeys": "show_price",
                 "type": "recurring",
                 "billing_period": "yearly",
@@ -3826,7 +3809,6 @@
                   "tax": {
                     "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
                     "rate": "19",
-                    "behavior": "Inclusive",
                     "_schema": "tax",
                     "_org": "728",
                     "_created_at": "2021-09-24T15:06:13.859Z",
@@ -4057,7 +4039,6 @@
                       "tax": {
                         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
                         "type": "VAT",
-                        "behavior": "Exclusive",
                         "active": true,
                         "region": "DE",
                         "_schema": "tax",
@@ -4086,7 +4067,6 @@
                       "tax": {
                         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
                         "type": "VAT",
-                        "behavior": "Exclusive",
                         "active": true,
                         "region": "DE",
                         "_schema": "tax",
@@ -4124,7 +4104,6 @@
                         "unit_amount_currency": "EUR",
                         "unit_amount_decimal": "100.00",
                         "sales_tax": "standard",
-                        "tax_behavior": "exclusive",
                         "price_display_in_journeys": "show_price",
                         "type": "one_time",
                         "_schema": "price",
@@ -4159,7 +4138,7 @@
                         "unit_amount_currency": "EUR",
                         "unit_amount_decimal": "100.00",
                         "sales_tax": "standard",
-                        "tax_behavior": "exclusive",
+                        "is_tax_inclusive": false,
                         "price_display_in_journeys": "show_price",
                         "type": "one_time",
                         "_schema": "price",
@@ -4212,7 +4191,7 @@
                 "unit_amount_currency": "EUR",
                 "unit_amount_decimal": "555666.77",
                 "sales_tax": "standard",
-                "tax_behavior": "inclusive",
+                "is_tax_inclusive": true,
                 "price_display_in_journeys": "show_as_starting_price",
                 "type": "one_time",
                 "_schema": "price",
@@ -4317,7 +4296,6 @@
                   "tax": {
                     "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
                     "type": "VAT",
-                    "behavior": "Exclusive",
                     "active": true,
                     "region": "DE",
                     "_schema": "tax",
@@ -4543,7 +4521,7 @@
           "unit_amount_currency": "EUR",
           "unit_amount_decimal": "1000",
           "sales_tax": "standard",
-          "tax_behavior": "inclusive",
+          "is_tax_inclusive": true,
           "price_display_in_journeys": "show_price",
           "type": "one_time",
           "billing_period": "weekly",
@@ -4591,7 +4569,7 @@
                   "unit_amount_currency": "EUR",
                   "unit_amount_decimal": "100.00",
                   "sales_tax": "standard",
-                  "tax_behavior": "exclusive",
+                  "is_tax_inclusive": false,
                   "price_display_in_journeys": "show_price",
                   "type": "one_time",
                   "_schema": "price",
@@ -4626,7 +4604,7 @@
                   "unit_amount_currency": "EUR",
                   "unit_amount_decimal": "100.00",
                   "sales_tax": "standard",
-                  "tax_behavior": "exclusive",
+                  "is_tax_inclusive": false,
                   "price_display_in_journeys": "show_price",
                   "type": "one_time",
                   "_schema": "price",
@@ -4667,7 +4645,6 @@
               "amount": 600,
               "tax": {
                 "active": true,
-                "behavior": "Exclusive",
                 "description": "Without Behaviour",
                 "rate": 6,
                 "region": "DE",
@@ -4688,7 +4665,7 @@
             "unit_amount_currency": "EUR",
             "unit_amount_decimal": "100.00",
             "sales_tax": "standard",
-            "tax_behavior": "exclusive",
+            "is_tax_inclusive": false,
             "price_display_in_journeys": "show_price",
             "type": "one_time",
             "billing_period": "weekly",
