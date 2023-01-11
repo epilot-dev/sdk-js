@@ -332,6 +332,10 @@ declare namespace Components {
              */
             target_unique?: string[];
             /**
+             * Mode of how conditions are considered valid
+             */
+            conditionMode?: "oneOf" | "anyOf" | "allOf";
+            /**
              * Conditions necessary to hold for the target entity to be mapped
              */
             conditions?: MapCondition[];

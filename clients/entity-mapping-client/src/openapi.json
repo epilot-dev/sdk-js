@@ -648,6 +648,15 @@
               "type": "string"
             }
           },
+          "conditionMode": {
+            "description": "Mode of how conditions are considered valid",
+            "type": "string",
+            "enum": [
+              "oneOf",
+              "anyOf",
+              "allOf"
+            ]
+          },
           "conditions": {
             "type": "array",
             "description": "Conditions necessary to hold for the target entity to be mapped",
