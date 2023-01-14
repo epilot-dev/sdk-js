@@ -44,26 +44,28 @@
   },
   "dependencies": {
     "@epilot/auth": "^0.4.0",
-    "@epilot/automation-client": "^2.0.3",
+    "@epilot/automation-client": "^2.1.0",
     "@epilot/discussion-client": "^1.4.2",
     "@epilot/email-settings-client": "^0.0.6",
     "@epilot/email-template-client": "^1.0.6",
-    "@epilot/entity-client": "^4.5.4",
-    "@epilot/entity-mapping-client": "^0.2.2",
+    "@epilot/entity-client": "^4.6.3",
+    "@epilot/entity-mapping-client": "^0.2.3",
     "@epilot/file-client": "^1.4.5",
     "@epilot/message-client": "^1.1.7",
     "@epilot/notification-client": "^0.1.6",
     "@epilot/organization-client": "^0.6.5",
     "@epilot/partner-directory-client": "^0.2.4",
     "@epilot/permissions-client": "^0.8.4",
-    "@epilot/pricing-client": "^2.3.1",
+    "@epilot/pricing-client": "^3.0.0",
     "@epilot/submission-client": "^1.1.5",
     "@epilot/template-variables-client": "^1.7.2",
     "@epilot/user-client": "^3.0.9",
-    "@epilot/webhooks-client": "^2.2.2",
-    "@epilot/workflow-client": "^1.0.2",
+    "@epilot/workflow-client": "^1.0.3",
     "@epilot/workflow-definition-client": "^1.0.2",
     "axios": "^0.25.0",
-    "openapi-client-axios": "^6.0.0"
+    "openapi-client-axios": "^6.1.0"
+  },
+  "overrides": {
+    "axios": "^0.25.0"
   }
 }

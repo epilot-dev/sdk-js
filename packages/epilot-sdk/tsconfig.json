@@ -3,7 +3,7 @@
     "strict": true,
     "target": "es5",
     "module": "commonjs",
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "lib": ["esnext"],
     "esModuleInterop": true,
     "noImplicitAny": true,

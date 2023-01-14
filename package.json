@@ -30,7 +30,7 @@
     "@epilot/eslint-config": "^1.2.10",
     "@types/jest": "^27.4.0",
     "eslint": "^7.32.0",
-    "lerna": "^4.0.0",
+    "lerna": "^6.4.1",
     "typescript": "^4.9.3"
   }
 }
