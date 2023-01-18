@@ -1497,14 +1497,17 @@ declare namespace Components {
              */
             is_composite_price?: boolean;
             /**
-             * Describes how to compute the price per period. Either `per_unit` or `tiered`.
+             * Describes how to compute the price per period. Either `per_unit` or `tiered_graduated`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
-             * - `tiered` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers and tiers_mode attributes.
-             *
-             * ⚠️ Tiered pricing is **not supported** yet.
+             * - `tiered_graduated` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers attributes.
              *
              */
-            billing_scheme?: "per_unit";
+            pricing_model: "per_unit" | "tiered_graduated";
+            /**
+             * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
+             *
+             */
+            tiers?: PriceTier[];
             /**
              * A brief description of the price.
              */
@@ -1554,10 +1557,6 @@ declare namespace Components {
              * Specifies whether the price is considered `inclusive` of taxes or not.
              */
             is_tax_inclusive?: boolean;
-            /**
-             * Defines the tiered pricing type of the price.
-             */
-            tiers_mode?: "standard";
             /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
@@ -2007,14 +2006,17 @@ declare namespace Components {
                  */
                 is_composite_price?: boolean;
                 /**
-                 * Describes how to compute the price per period. Either `per_unit` or `tiered`.
+                 * Describes how to compute the price per period. Either `per_unit` or `tiered_graduated`.
                  * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
-                 * - `tiered` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers and tiers_mode attributes.
-                 *
-                 * ⚠️ Tiered pricing is **not supported** yet.
+                 * - `tiered_graduated` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers attributes.
                  *
                  */
-                billing_scheme?: "per_unit";
+                pricing_model: "per_unit" | "tiered_graduated";
+                /**
+                 * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
+                 *
+                 */
+                tiers?: PriceTier[];
                 /**
                  * A brief description of the price.
                  */
@@ -2064,10 +2066,6 @@ declare namespace Components {
                  * Specifies whether the price is considered `inclusive` of taxes or not.
                  */
                 is_tax_inclusive?: boolean;
-                /**
-                 * Defines the tiered pricing type of the price.
-                 */
-                tiers_mode?: "standard";
                 /**
                  * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
                  */
@@ -2186,7 +2184,14 @@ declare namespace Components {
         /**
          * A valid set of product prices, quantities, (discounts) and taxes from a client.
          */
-        export type PriceItemsDto = (/* Represents a price input to the pricing library. */ PriceItemDto)[];
+        export type PriceItemsDto = (/* Represents a price input to the pricing library. */ PriceItemDto | /* Represents a composite price input to the pricing library. */ CompositePriceItemDto)[];
+        export interface PriceTier {
+            up_to: number | null;
+            flat_fee_amount?: number;
+            flat_fee_amount_decimal?: string;
+            unit_amount: number;
+            unit_amount_decimal: string;
+        }
         /**
          * The result from the calculation of a set of price items.
          */

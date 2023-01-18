@@ -1406,12 +1406,20 @@
             "description": "The flag for prices that contain price components.",
             "type": "boolean"
           },
-          "billing_scheme": {
+          "pricing_model": {
             "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit` or `tiered`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers and tiers_mode attributes.\n\n⚠️ Tiered pricing is **not supported** yet.\n",
+            "description": "Describes how to compute the price per period. Either `per_unit` or `tiered_graduated`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers attributes.\n",
             "enum": [
-              "per_unit"
+              "per_unit",
+              "tiered_graduated"
             ]
+          },
+          "tiers": {
+            "description": "Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceTier"
+            }
           },
           "description": {
             "type": "string",
@@ -1455,13 +1463,6 @@
           "is_tax_inclusive": {
             "type": "boolean",
             "description": "Specifies whether the price is considered `inclusive` of taxes or not."
-          },
-          "tiers_mode": {
-            "description": "Defines the tiered pricing type of the price.",
-            "type": "string",
-            "enum": [
-              "standard"
-            ]
           },
           "type": {
             "type": "string",
@@ -1607,7 +1608,10 @@
               "type": "string"
             }
           }
-        }
+        },
+        "required": [
+          "pricing_model"
+        ]
       },
       "CompositePrice": {
         "type": "object",
@@ -2076,6 +2080,9 @@
           "oneOf": [
             {
               "$ref": "#/components/schemas/PriceItemDto"
+            },
+            {
+              "$ref": "#/components/schemas/CompositePriceItemDto"
             }
           ]
         }
@@ -2178,7 +2185,10 @@
               }
             ]
           }
-        }
+        },
+        "required": [
+          "pricing_model"
+        ]
       },
       "CompositePriceItemDto": {
         "allOf": [
@@ -2594,7 +2604,10 @@
             "type": "boolean",
             "description": "When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'."
           }
-        }
+        },
+        "required": [
+          "pricing_model"
+        ]
       },
       "TaxAmount": {
         "type": "object",
@@ -3187,6 +3200,32 @@
             "type": "string"
           }
         }
+      },
+      "PriceTier": {
+        "type": "object",
+        "properties": {
+          "up_to": {
+            "type": "number",
+            "nullable": true
+          },
+          "flat_fee_amount": {
+            "type": "number"
+          },
+          "flat_fee_amount_decimal": {
+            "type": "string"
+          },
+          "unit_amount": {
+            "type": "number"
+          },
+          "unit_amount_decimal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "unit_amount",
+          "unit_amount_decimal",
+          "up_to"
+        ]
       }
     },
     "examples": {
@@ -3293,7 +3332,6 @@
                   "is_tax_inclusive": true,
                   "description": "Winter Sale",
                   "billing_scheme": "per_unit",
-                  "tiers_mode": "Standard",
                   "_created_at": "2021-11-10T18:02:58.318Z",
                   "_updated_at": "2021-11-10T18:02:58.318Z",
                   "_title": "Winter Sale"
@@ -3329,7 +3367,6 @@
                   "is_tax_inclusive": true,
                   "description": "Winter Sale",
                   "billing_scheme": "per_unit",
-                  "tiers_mode": "Standard",
                   "_created_at": "2021-11-10T18:02:58.318Z",
                   "_updated_at": "2021-11-10T18:02:58.318Z",
                   "_title": "Winter Sale"
@@ -3653,7 +3690,6 @@
                 "is_tax_inclusive": true,
                 "description": "Monthly",
                 "billing_scheme": "per_unit",
-                "tiers_mode": "Standard",
                 "_schema": "price",
                 "_org": "728",
                 "_created_at": "2021-11-10T14:40:27.695Z",
@@ -4543,7 +4579,8 @@
           "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
           "_org": "728",
           "_created_at": "2022-06-03T16:04:10.369Z",
-          "_updated_at": "2022-06-03T16:04:10.369Z"
+          "_updated_at": "2022-06-03T16:04:10.369Z",
+          "pricing_model": "per_unit"
         }
       },
       "composite-price": {
@@ -4687,7 +4724,8 @@
             "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
             "_org": "728",
             "_created_at": "2022-06-03T16:04:10.369Z",
-            "_updated_at": "2022-06-03T16:04:10.369Z"
+            "_updated_at": "2022-06-03T16:04:10.369Z",
+            "pricing_model": "per_unit"
           },
           "_product": {
             "name": "Cool box",
