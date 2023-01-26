@@ -2,60 +2,72 @@ import { authenticate, authorizeWithToken, UsernamePasswordAuthParams } from '@e
 
 import {
   default as automationClient,
-  getClient as getAutomationClient,
+  createClient as createAutomationClient,
   Client as AutomationClient,
 } from './automation-client';
 import {
   default as discussionClient,
-  getClient as getDiscussionClient,
+  createClient as createDiscussionClient,
   Client as DiscussionClient,
 } from './discussion-client';
 import {
   default as emailSettingsClient,
-  getClient as getEmailSettingsClient,
+  createClient as createEmailSettingsClient,
   Client as EmailSettingsClient,
 } from './email-settings-client';
 import {
   default as emailTemplateClient,
-  getClient as getEmailTemplateClient,
+  createClient as createEmailTemplateClient,
   Client as EmailTemplateClient,
 } from './email-template-client';
-import { default as entityClient, getClient as getEntityClient, Client as EntityClient } from './entity-client';
-import { default as fileClient, getClient as getFileClient, Client as FileClient } from './file-client';
-import { default as messageClient, getClient as getMessageClient, Client as MessageClient } from './message-client';
+import { default as entityClient, createClient as createEntityClient, Client as EntityClient } from './entity-client';
+import { default as fileClient, createClient as createFileClient, Client as FileClient } from './file-client';
+import {
+  default as messageClient,
+  createClient as createMessageClient,
+  Client as MessageClient,
+} from './message-client';
 import {
   default as notificationClient,
-  getClient as getNotificationClient,
+  createClient as createNotificationClient,
   Client as NotificationClient,
 } from './notification-client';
 import {
   default as organizationClient,
-  getClient as getOrganizationClient,
+  createClient as createOrganizationClient,
   Client as OrganizationClient,
 } from './organization-client';
 import {
   default as partnerClient,
-  getClient as getPartnerClient,
+  createClient as createPartnerClient,
   Client as PartnerClient,
 } from './partner-directory-client';
 import {
   default as permissionsClient,
-  getClient as getPermissionsClient,
+  createClient as createPermissionsClient,
   Client as PermissionsClient,
 } from './permissions-client';
-import { default as pricingClient, getClient as getPricingClient, Client as PricingClient } from './pricing-client';
+import {
+  default as pricingClient,
+  createClient as createPricingClient,
+  Client as PricingClient,
+} from './pricing-client';
 import {
   default as submissionClient,
-  getClient as getSubmissionClient,
+  createClient as createSubmissionClient,
   Client as SubmissionClient,
 } from './submission-client';
 import {
   default as templateVariablesClient,
-  getClient as getTemplateVariablesClient,
+  createClient as createTemplateVariablesClient,
   Client as TemplateVariablesClient,
 } from './template-variables-client';
-import { default as userClient, getClient as getUserClient, Client as UserClient } from './user-client';
-import { default as workflowClient, getClient as getWorkflowClient, Client as WorkflowClient } from './workflow-client';
+import { default as userClient, createClient as createUserClient, Client as UserClient } from './user-client';
+import {
+  default as workflowClient,
+  createClient as createWorkflowClient,
+  Client as WorkflowClient,
+} from './workflow-client';
 
 export class EpilotClient {
   entity: EntityClient = null;
@@ -76,22 +88,22 @@ export class EpilotClient {
   partner: PartnerClient = null;
 
   constructor() {
-    this.entity = getEntityClient();
-    this.pricing = getPricingClient();
-    this.user = getUserClient();
-    this.file = getFileClient();
-    this.organization = getOrganizationClient();
-    this.workflow = getWorkflowClient();
-    this.permissions = getPermissionsClient();
-    this.submission = getSubmissionClient();
-    this.automation = getAutomationClient();
-    this.message = getMessageClient();
-    this.emailSettings = getEmailSettingsClient();
-    this.discussion = getDiscussionClient();
-    this.notification = getNotificationClient();
-    this.emailTemplate = getEmailTemplateClient();
-    this.templateVariables = getTemplateVariablesClient();
-    this.partner = getPartnerClient();
+    this.entity = createEntityClient();
+    this.pricing = createPricingClient();
+    this.user = createUserClient();
+    this.file = createFileClient();
+    this.organization = createOrganizationClient();
+    this.workflow = createWorkflowClient();
+    this.permissions = createPermissionsClient();
+    this.submission = createSubmissionClient();
+    this.automation = createAutomationClient();
+    this.message = createMessageClient();
+    this.emailSettings = createEmailSettingsClient();
+    this.discussion = createDiscussionClient();
+    this.notification = createNotificationClient();
+    this.emailTemplate = createEmailTemplateClient();
+    this.templateVariables = createTemplateVariablesClient();
+    this.partner = createPartnerClient();
   }
 
   public authorize(token: string) {
