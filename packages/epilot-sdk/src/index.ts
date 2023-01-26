@@ -1,128 +1,92 @@
 import { authenticate, authorizeWithToken, UsernamePasswordAuthParams } from '@epilot/auth';
 
-import {
-  default as automationClient,
-  createClient as createAutomationClient,
-  Client as AutomationClient,
-} from './automation-client';
-import {
-  default as discussionClient,
-  createClient as createDiscussionClient,
-  Client as DiscussionClient,
-} from './discussion-client';
-import {
-  default as emailSettingsClient,
-  createClient as createEmailSettingsClient,
-  Client as EmailSettingsClient,
-} from './email-settings-client';
-import {
-  default as emailTemplateClient,
-  createClient as createEmailTemplateClient,
-  Client as EmailTemplateClient,
-} from './email-template-client';
-import { default as entityClient, createClient as createEntityClient, Client as EntityClient } from './entity-client';
-import { default as fileClient, createClient as createFileClient, Client as FileClient } from './file-client';
-import {
-  default as messageClient,
-  createClient as createMessageClient,
-  Client as MessageClient,
-} from './message-client';
-import {
-  default as notificationClient,
-  createClient as createNotificationClient,
-  Client as NotificationClient,
-} from './notification-client';
-import {
-  default as organizationClient,
-  createClient as createOrganizationClient,
-  Client as OrganizationClient,
-} from './organization-client';
-import {
-  default as partnerClient,
-  createClient as createPartnerClient,
-  Client as PartnerClient,
-} from './partner-directory-client';
-import {
-  default as permissionsClient,
-  createClient as createPermissionsClient,
-  Client as PermissionsClient,
-} from './permissions-client';
-import {
-  default as pricingClient,
-  createClient as createPricingClient,
-  Client as PricingClient,
-} from './pricing-client';
-import {
-  default as submissionClient,
-  createClient as createSubmissionClient,
-  Client as SubmissionClient,
-} from './submission-client';
+import { default as automationClient, getClient as getAutomationClient } from './automation-client';
+import { default as discussionClient, getClient as getDiscussionClient } from './discussion-client';
+import { default as emailSettingsClient, getClient as getEmailSettingsClient } from './email-settings-client';
+import { default as emailTemplateClient, getClient as getEmailTemplateClient } from './email-template-client';
+import { default as entityClient, getClient as getEntityClient } from './entity-client';
+import { default as fileClient, getClient as getFileClient } from './file-client';
+import { default as messageClient, getClient as getMessageClient } from './message-client';
+import { default as notificationClient, getClient as getNotificationClient } from './notification-client';
+import { default as organizationClient, getClient as getOrganizationClient } from './organization-client';
+import { default as partnerClient, getClient as getPartnerClient } from './partner-directory-client';
+import { default as permissionsClient, getClient as getPermissionsClient } from './permissions-client';
+import { default as pricingClient, getClient as getPricingClient } from './pricing-client';
+import { default as submissionClient, getClient as getSubmissionClient } from './submission-client';
 import {
   default as templateVariablesClient,
-  createClient as createTemplateVariablesClient,
-  Client as TemplateVariablesClient,
+  getClient as getTemplateVariablesClient,
 } from './template-variables-client';
-import { default as userClient, createClient as createUserClient, Client as UserClient } from './user-client';
-import {
-  default as workflowClient,
-  createClient as createWorkflowClient,
-  Client as WorkflowClient,
-} from './workflow-client';
+import { default as userClient, getClient as getUserClient } from './user-client';
+import { default as workflowClient, getClient as getWorkflowClient } from './workflow-client';
 
 export class EpilotClient {
-  entity: EntityClient = null;
-  pricing: PricingClient = null;
-  user: UserClient = null;
-  file: FileClient = null;
-  organization: OrganizationClient = null;
-  submission: SubmissionClient = null;
-  workflow: WorkflowClient = null;
-  permissions: PermissionsClient = null;
-  automation: AutomationClient = null;
-  message: MessageClient = null;
-  emailSettings: EmailSettingsClient = null;
-  emailTemplate: EmailTemplateClient = null;
-  discussion: DiscussionClient = null;
-  notification: NotificationClient = null;
-  templateVariables: TemplateVariablesClient = null;
-  partner: PartnerClient = null;
-
-  constructor() {
-    this.entity = createEntityClient();
-    this.pricing = createPricingClient();
-    this.user = createUserClient();
-    this.file = createFileClient();
-    this.organization = createOrganizationClient();
-    this.workflow = createWorkflowClient();
-    this.permissions = createPermissionsClient();
-    this.submission = createSubmissionClient();
-    this.automation = createAutomationClient();
-    this.message = createMessageClient();
-    this.emailSettings = createEmailSettingsClient();
-    this.discussion = createDiscussionClient();
-    this.notification = createNotificationClient();
-    this.emailTemplate = createEmailTemplateClient();
-    this.templateVariables = createTemplateVariablesClient();
-    this.partner = createPartnerClient();
+  get entity() {
+    return getEntityClient();
+  }
+  get pricing() {
+    return getPricingClient();
+  }
+  get user() {
+    return getUserClient();
+  }
+  get file() {
+    return getFileClient();
+  }
+  get organization() {
+    return getOrganizationClient();
+  }
+  get submission() {
+    return getSubmissionClient();
+  }
+  get workflow() {
+    return getWorkflowClient();
+  }
+  get permissions() {
+    return getPermissionsClient();
+  }
+  get automation() {
+    return getAutomationClient();
+  }
+  get message() {
+    return getMessageClient();
+  }
+  get emailSettings() {
+    return getEmailSettingsClient();
+  }
+  get discussion() {
+    return getDiscussionClient();
+  }
+  get notification() {
+    return getNotificationClient();
+  }
+  get emailTemplate() {
+    return getEmailTemplateClient();
+  }
+  get templateVariables() {
+    return getTemplateVariablesClient();
+  }
+  get partner() {
+    return getPartnerClient();
   }
 
   public authorize(token: string) {
-    this.entity = authorizeWithToken(this.entity, token);
-    this.pricing = authorizeWithToken(this.pricing, token);
-    this.user = authorizeWithToken(this.user, token);
-    this.file = authorizeWithToken(this.file, token);
-    this.organization = authorizeWithToken(this.organization, token);
-    this.submission = authorizeWithToken(this.submission, token);
-    this.workflow = authorizeWithToken(this.workflow, token);
-    this.permissions = authorizeWithToken(this.permissions, token);
-    this.automation = authorizeWithToken(this.automation, token);
-    this.message = authorizeWithToken(this.message, token);
-    this.emailSettings = authorizeWithToken(this.emailSettings, token);
-    this.discussion = authorizeWithToken(this.discussion, token);
-    this.notification = authorizeWithToken(this.notification, token);
-    this.emailTemplate = authorizeWithToken(this.emailTemplate, token);
-    this.templateVariables = authorizeWithToken(this.templateVariables, token);
-    this.partner = authorizeWithToken(this.partner, token);
+    authorizeWithToken(this.entity, token);
+    authorizeWithToken(this.pricing, token);
+    authorizeWithToken(this.user, token);
+    authorizeWithToken(this.file, token);
+    authorizeWithToken(this.organization, token);
+    authorizeWithToken(this.submission, token);
+    authorizeWithToken(this.workflow, token);
+    authorizeWithToken(this.permissions, token);
+    authorizeWithToken(this.automation, token);
+    authorizeWithToken(this.message, token);
+    authorizeWithToken(this.emailSettings, token);
+    authorizeWithToken(this.discussion, token);
+    authorizeWithToken(this.notification, token);
+    authorizeWithToken(this.emailTemplate, token);
+    authorizeWithToken(this.templateVariables, token);
+    authorizeWithToken(this.partner, token);
 
     return this;
   }
@@ -130,22 +94,22 @@ export class EpilotClient {
   public async login(credentials: UsernamePasswordAuthParams) {
     const authorizer = await authenticate(credentials);
 
-    this.entity = authorizer.configureClient(this.entity);
-    this.pricing = authorizer.configureClient(this.pricing);
-    this.user = authorizer.configureClient(this.user);
-    this.file = authorizer.configureClient(this.file);
-    this.organization = authorizer.configureClient(this.organization);
-    this.submission = authorizer.configureClient(this.submission);
-    this.workflow = authorizer.configureClient(this.workflow);
-    this.permissions = authorizer.configureClient(this.permissions);
-    this.automation = authorizer.configureClient(this.automation);
-    this.message = authorizer.configureClient(this.message);
-    this.emailSettings = authorizer.configureClient(this.emailSettings);
-    this.discussion = authorizer.configureClient(this.discussion);
-    this.notification = authorizer.configureClient(this.notification);
-    this.emailTemplate = authorizer.configureClient(this.emailTemplate);
-    this.templateVariables = authorizer.configureClient(this.templateVariables);
-    this.partner = authorizer.configureClient(this.partner);
+    authorizer.configureClient(this.entity);
+    authorizer.configureClient(this.pricing);
+    authorizer.configureClient(this.user);
+    authorizer.configureClient(this.file);
+    authorizer.configureClient(this.organization);
+    authorizer.configureClient(this.submission);
+    authorizer.configureClient(this.workflow);
+    authorizer.configureClient(this.permissions);
+    authorizer.configureClient(this.automation);
+    authorizer.configureClient(this.message);
+    authorizer.configureClient(this.emailSettings);
+    authorizer.configureClient(this.discussion);
+    authorizer.configureClient(this.notification);
+    authorizer.configureClient(this.emailTemplate);
+    authorizer.configureClient(this.templateVariables);
+    authorizer.configureClient(this.partner);
 
     return this;
   }

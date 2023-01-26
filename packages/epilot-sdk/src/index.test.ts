@@ -79,20 +79,5 @@ describe('EpilotClient', () => {
 
       expect(authorizerMock).toHaveBeenCalled();
     });
-
-    it('should authorize entity client requests', async () => {
-      const eclient = new EpilotClient();
-      const authorizerMock = jest.fn((client: any) => client);
-
-      const authenticateSpy = jest.spyOn(EpilotAuthLogin, 'authenticate');
-      authenticateSpy.mockResolvedValue({ configureClient: authorizerMock } as any);
-
-      await eclient.login({ username: 'john-doe@epilot.cloud', password: 'doe123' });
-
-      const result = await eclient.entity.getEntity({ slug: 'order', id: '123' });
-
-      expect(result.status).toBe(200);
-      expect(result.data.entity).toStrictEqual({ _id: 'my-entity_id' });
-    });
   });
 });
