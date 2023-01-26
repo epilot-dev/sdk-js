@@ -1,6 +1,6 @@
 {
   "name": "@epilot/email-settings-client",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "API Client for epilot Email Settings API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
