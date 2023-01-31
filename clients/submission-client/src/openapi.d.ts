@@ -78,9 +78,17 @@ declare namespace Components {
                  */
                 filename?: string;
                 /**
-                 * List of tags/labels for files
+                 * List of tags for File entities
                  */
                 _tags?: string[];
+                /**
+                 * Like other entities, file includes _purpose
+                 */
+                _purpose?: string[];
+                /**
+                 * List of relation labels for File attachments
+                 */
+                relation_tags?: string[];
             }[];
         }
         /**
