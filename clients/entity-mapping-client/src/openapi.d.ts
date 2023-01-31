@@ -173,6 +173,7 @@ declare namespace Components {
             target?: TargetConfig;
             error?: {
                 [name: string]: any;
+                isSilent?: boolean;
                 message?: string;
             };
         }
@@ -190,6 +191,70 @@ declare namespace Components {
         export interface MappingHistoryResp {
             results: MappingHistoryEntry[];
         }
+        export interface MappingSource {
+            /**
+             * Key aiming to identify source
+             */
+            key: string;
+            /**
+             * Each item describes a property under the main source and a possibly, a default value for its target attribute
+             */
+            sub_properties?: MappingSourceProperty[];
+            /**
+             * Data Structure type of source
+             */
+            source_type: string;
+            /**
+             * Data Structure Type of the underlaying output value
+             */
+            possible_target_types?: MappingSourceTargetType[];
+            /**
+             * Initial value of a relation to be added
+             */
+            initial_relation?: RelationAttribute;
+            /**
+             * Human readable name of the Source
+             */
+            title: string;
+            /**
+             * Human readable type of the source
+             */
+            sub_title?: string;
+            target_settings?: {
+                /**
+                 * Describes which actions the user can perform on each target, if specified. If not specified, all actions are allowed
+                 */
+                allowed_ui_actions?: "schema-select" | "attribute-select" | "target-delete" | "target-add" | "target";
+                /**
+                 * Whether its a read-only ui or not. Can be each target, or only the first. Overwrites uiActions
+                 */
+                locked?: "each" | "first";
+                /**
+                 * Whether all source mappings flow into a single attribute (e.g. address)
+                 */
+                isSingleTarget?: boolean;
+                /**
+                 * Determines whether a mapping target should be shown or not. Use if there are targets which cannot be manipulated by the UI. E.g journey_data
+                 */
+                visibility?: {
+                    mode: "hide" | "show";
+                    if: {
+                        [name: string]: string;
+                    };
+                    message?: string;
+                };
+            };
+        }
+        export interface MappingSourceProperty {
+            value: string;
+            label: string;
+            initial_target_value?: string;
+            /**
+             * Data Structure Type of the underlaying output value
+             */
+            possible_target_types?: MappingSourceTargetType[];
+        }
+        export type MappingSourceTargetType = "string" | "date" | "datetime" | "boolean" | "number" | "image" | "file" | "address" | "email" | "phone" | "select" | "multiselect";
         /**
          * Mapping operation nodes are either primitive values or operation node objects
          */

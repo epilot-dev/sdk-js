@@ -537,6 +537,9 @@
           "error": {
             "type": "object",
             "properties": {
+              "isSilent": {
+                "type": "boolean"
+              },
               "message": {
                 "type": "string"
               }
@@ -1120,6 +1123,146 @@
           "source_entity_snapshot",
           "target_configs_snapshot",
           "mapped_entities_snapshot"
+        ]
+      },
+      "MappingSource": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Key aiming to identify source"
+          },
+          "sub_properties": {
+            "description": "Each item describes a property under the main source and a possibly, a default value for its target attribute",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingSourceProperty"
+            }
+          },
+          "source_type": {
+            "type": "string",
+            "description": "Data Structure type of source"
+          },
+          "possible_target_types": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingSourceTargetType"
+            },
+            "description": "Data Structure Type of the underlaying output value"
+          },
+          "initial_relation": {
+            "description": "Initial value of a relation to be added",
+            "$ref": "#/components/schemas/RelationAttribute"
+          },
+          "title": {
+            "type": "string",
+            "description": "Human readable name of the Source"
+          },
+          "sub_title": {
+            "type": "string",
+            "description": "Human readable type of the source"
+          },
+          "target_settings": {
+            "type": "object",
+            "properties": {
+              "allowed_ui_actions": {
+                "type": "string",
+                "enum": [
+                  "schema-select",
+                  "attribute-select",
+                  "target-delete",
+                  "target-add",
+                  "target"
+                ],
+                "description": "Describes which actions the user can perform on each target, if specified. If not specified, all actions are allowed"
+              },
+              "locked": {
+                "type": "string",
+                "enum": [
+                  "each",
+                  "first"
+                ],
+                "description": "Whether its a read-only ui or not. Can be each target, or only the first. Overwrites uiActions"
+              },
+              "isSingleTarget": {
+                "type": "boolean",
+                "description": "Whether all source mappings flow into a single attribute (e.g. address)"
+              },
+              "visibility": {
+                "description": "Determines whether a mapping target should be shown or not. Use if there are targets which cannot be manipulated by the UI. E.g journey_data",
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "hide",
+                      "show"
+                    ]
+                  },
+                  "if": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "mode",
+                  "if"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "source_type"
+        ]
+      },
+      "MappingSourceProperty": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "initial_target_value": {
+            "type": "string"
+          },
+          "possible_target_types": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingSourceTargetType"
+            },
+            "description": "Data Structure Type of the underlaying output value"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ]
+      },
+      "MappingSourceTargetType": {
+        "type": "string",
+        "enum": [
+          "string",
+          "date",
+          "datetime",
+          "boolean",
+          "number",
+          "image",
+          "file",
+          "address",
+          "email",
+          "phone",
+          "select",
+          "multiselect"
         ]
       }
     }
