@@ -24,7 +24,7 @@
     "test": "jest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "../../scripts/update-openapi.sh https://docs.api.epilot.io/workflows-definition.yaml",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/workflows-definition.yaml",
     "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
     "build": "tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",
