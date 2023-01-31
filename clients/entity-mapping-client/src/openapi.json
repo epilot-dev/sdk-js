@@ -1166,14 +1166,17 @@
             "type": "object",
             "properties": {
               "allowed_ui_actions": {
-                "type": "string",
-                "enum": [
-                  "schema-select",
-                  "attribute-select",
-                  "target-delete",
-                  "target-add",
-                  "target"
-                ],
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "schema-select",
+                    "attribute-select",
+                    "target-delete",
+                    "target-add",
+                    "target"
+                  ]
+                },
                 "description": "Describes which actions the user can perform on each target, if specified. If not specified, all actions are allowed"
               },
               "locked": {
@@ -1196,7 +1199,8 @@
                     "type": "string",
                     "enum": [
                       "hide",
-                      "show"
+                      "show",
+                      "message"
                     ]
                   },
                   "if": {

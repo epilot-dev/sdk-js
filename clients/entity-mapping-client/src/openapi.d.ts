@@ -224,7 +224,7 @@ declare namespace Components {
                 /**
                  * Describes which actions the user can perform on each target, if specified. If not specified, all actions are allowed
                  */
-                allowed_ui_actions?: "schema-select" | "attribute-select" | "target-delete" | "target-add" | "target";
+                allowed_ui_actions?: ("schema-select" | "attribute-select" | "target-delete" | "target-add" | "target")[];
                 /**
                  * Whether its a read-only ui or not. Can be each target, or only the first. Overwrites uiActions
                  */
@@ -237,7 +237,7 @@ declare namespace Components {
                  * Determines whether a mapping target should be shown or not. Use if there are targets which cannot be manipulated by the UI. E.g journey_data
                  */
                 visibility?: {
-                    mode: "hide" | "show";
+                    mode: "hide" | "show" | "message";
                     if: {
                         [name: string]: string;
                     };
