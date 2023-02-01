@@ -540,12 +540,6 @@
               "type": "string"
             }
           },
-          "_purpose": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
           "access_control": {
             "type": "string",
             "default": "private",

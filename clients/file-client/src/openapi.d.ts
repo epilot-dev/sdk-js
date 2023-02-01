@@ -106,7 +106,6 @@ declare namespace Components {
              */
             filename?: string;
             _tags?: string[];
-            _purpose?: string[];
             access_control?: "private" | "public-read";
         }
         export interface UploadFilePayload {
