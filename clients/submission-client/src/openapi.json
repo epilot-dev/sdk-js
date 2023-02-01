@@ -132,13 +132,6 @@
                     "type": "string"
                   }
                 },
-                "_purpose": {
-                  "type": "array",
-                  "description": "Like other entities, file includes _purpose",
-                  "items": {
-                    "type": "string"
-                  }
-                },
                 "relation_tags": {
                   "type": "array",
                   "description": "List of relation labels for File attachments",
@@ -147,6 +140,7 @@
                   }
                 }
               },
+              "additionalProperties": true,
               "required": [
                 "s3ref"
               ]
