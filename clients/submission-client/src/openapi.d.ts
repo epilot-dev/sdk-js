@@ -72,15 +72,20 @@ declare namespace Components {
              *
              */
             files?: {
+                [name: string]: any;
                 s3ref: /* S3 Reference from File API */ S3Reference;
                 /**
                  * Override the file name
                  */
                 filename?: string;
                 /**
-                 * List of tags/labels for files
+                 * List of tags for File entities
                  */
                 _tags?: string[];
+                /**
+                 * List of relation labels for File attachments
+                 */
+                relation_tags?: string[];
             }[];
         }
         /**

@@ -127,12 +127,20 @@
                 },
                 "_tags": {
                   "type": "array",
-                  "description": "List of tags/labels for files",
+                  "description": "List of tags for File entities",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "relation_tags": {
+                  "type": "array",
+                  "description": "List of relation labels for File attachments",
                   "items": {
                     "type": "string"
                   }
                 }
               },
+              "additionalProperties": true,
               "required": [
                 "s3ref"
               ]
