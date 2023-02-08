@@ -1000,10 +1000,10 @@ declare namespace Components {
         /**
          * Mapping operation nodes are either primitive values or operation node objects
          */
-        export type OperationNode = /* Mapping operation nodes are either primitive values or operation node objects */ OperationObjectNode | /* Represents any primitive JSON value */ PrimitiveJSONValue;
+        export type OperationNode = /* Mapping operation nodes are either primitive values or operation node objects */ OperationObjectNode | PrimitiveJSONValue;
         export interface OperationObjectNode {
             [name: string]: any;
-            _set?: /* Represents any primitive JSON value */ PrimitiveJSONValue;
+            _set?: PrimitiveJSONValue;
             /**
              * Append to array
              */
@@ -1024,12 +1024,7 @@ declare namespace Components {
          * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
          */
         export type OrganizationId = string;
-        /**
-         * Represents any primitive JSON value
-         */
-        export type PrimitiveJSONValue = /* Represents any primitive JSON value */ string | boolean | number | {
-            [name: string]: any;
-        } | any[];
+        export type PrimitiveJSONValue = any;
         export interface ReceivedEmailTrigger {
             type: "received_email";
             configuration: {

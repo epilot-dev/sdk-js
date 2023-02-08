@@ -135,6 +135,12 @@ declare namespace Components {
                 [name: string]: any;
             };
             caller?: ActivityCallerContext;
+            /**
+             * Count of total operations attached to this activity
+             * example:
+             * 1
+             */
+            operations_total?: number;
             operations?: EntityOperation[];
         }
         /**
@@ -155,9 +161,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -190,6 +194,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -227,15 +232,6 @@ declare namespace Components {
             type?: "relation_address";
             has_primary?: boolean;
         }
-        export interface Attachment {
-            key: string;
-            mime: string;
-            name: string;
-            size: number;
-            image_url: string;
-            download_url: string;
-            alt_text?: string;
-        }
         export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute;
         /**
          * Automation entity
@@ -255,9 +251,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -290,6 +284,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -341,9 +336,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -376,6 +369,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -468,9 +462,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -503,6 +495,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -563,9 +556,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -598,6 +589,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -652,9 +644,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -687,6 +677,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -743,9 +734,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -778,6 +767,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -832,9 +822,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -867,6 +855,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -931,9 +920,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -966,6 +953,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -1054,6 +1042,7 @@ declare namespace Components {
              */
             title?: string;
             attributes?: Attribute[];
+            _purpose?: ClassificationId /* uuid */[];
             ui_hooks?: {
                 [name: string]: any;
                 /**
@@ -1542,13 +1531,21 @@ declare namespace Components {
                 _purpose?: ClassificationId /* uuid */[];
             }[];
             /**
-             * Custom grid definitions for the layout
+             * Custom grid definitions for the layout. These settings are composed by managed and un-managed properties:
+             * - Managed Properties: are interpreted and transformed into layout styles
+             * - Un-managed Properties: are appended as styles into the attribute mounting node
+             *
              */
             layout_settings?: {
-                [name: string]: {
-                    grid_gap?: string;
-                    grid_template_columns?: string;
-                };
+                [name: string]: any;
+                /**
+                 * Defines the grid gap for the mounting node of the attribute.
+                 */
+                grid_gap?: string;
+                /**
+                 * Defines the grid column template for the mounting node of the attribute.
+                 */
+                grid_template_columns?: string;
             };
             dialog_config?: {
                 [name: string]: any;
@@ -1756,13 +1753,21 @@ declare namespace Components {
                 _purpose?: ClassificationId /* uuid */[];
             }[];
             /**
-             * Custom grid definitions for the layout
+             * Custom grid definitions for the layout. These settings are composed by managed and un-managed properties:
+             * - Managed Properties: are interpreted and transformed into layout styles
+             * - Un-managed Properties: are appended as styles into the attribute mounting node
+             *
              */
             layout_settings?: {
-                [name: string]: {
-                    grid_gap?: string;
-                    grid_template_columns?: string;
-                };
+                [name: string]: any;
+                /**
+                 * Defines the grid gap for the mounting node of the attribute.
+                 */
+                grid_gap?: string;
+                /**
+                 * Defines the grid column template for the mounting node of the attribute.
+                 */
+                grid_template_columns?: string;
             };
             dialog_config?: {
                 [name: string]: any;
@@ -1934,9 +1939,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -1969,6 +1972,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -2199,9 +2203,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -2234,6 +2236,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -2288,9 +2291,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -2323,6 +2324,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -2377,9 +2379,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -2412,6 +2412,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -2474,9 +2475,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -2509,6 +2508,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -2563,9 +2563,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -2598,6 +2596,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -2668,9 +2667,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -2703,6 +2700,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -2758,9 +2756,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -2793,6 +2789,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -2847,9 +2844,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -2882,6 +2877,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -2936,9 +2932,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -2971,6 +2965,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3030,9 +3025,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -3065,6 +3058,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3138,9 +3132,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -3173,6 +3165,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3404,9 +3397,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -3439,6 +3430,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3658,9 +3650,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -3693,6 +3683,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3755,9 +3746,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -3790,6 +3779,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3851,9 +3841,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -3886,6 +3874,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -4004,9 +3993,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -4039,6 +4026,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -4134,9 +4122,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -4169,6 +4155,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -4224,9 +4211,7 @@ declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
-            default_value?: string | {
-                [name: string]: any;
-            } | number | number | boolean | any[];
+            default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
              */
@@ -4259,6 +4244,7 @@ declare namespace Components {
              *
              */
             render_condition?: string;
+            _purpose?: ClassificationId /* uuid */[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -4457,27 +4443,6 @@ declare namespace Paths {
             Components.Schemas.EntityItem;
         }
     }
-    namespace CreateNewSchemaVersion {
-        namespace Parameters {
-            export type Draft = boolean;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-        }
-        export interface QueryParameters {
-            draft?: Parameters.Draft;
-        }
-        export type RequestBody = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchema;
-        namespace Responses {
-            export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
-        }
-    }
     namespace CreateSavedView {
         export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
         namespace Responses {
@@ -4551,9 +4516,8 @@ declare namespace Paths {
             }
         }
     }
-    namespace DeleteSchemaById {
+    namespace DeleteSchema {
         namespace Parameters {
-            export type Id = /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -4563,9 +4527,6 @@ declare namespace Paths {
         }
         export interface PathParameters {
             slug: Parameters.Slug;
-        }
-        export interface QueryParameters {
-            id: Parameters.Id;
         }
         namespace Responses {
             export interface $204 {
@@ -4597,9 +4558,15 @@ declare namespace Paths {
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
             Components.Schemas.ActivityId /* ulid */;
+            export type OperationsFrom = number;
+            export type OperationsSize = number;
         }
         export interface PathParameters {
             id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            operations_size?: Parameters.OperationsSize;
+            operations_from?: Parameters.OperationsFrom;
         }
         namespace Responses {
             export type $200 = Components.Schemas.ActivityItem;
@@ -4877,6 +4844,27 @@ declare namespace Paths {
             }
         }
     }
+    namespace PutSchema {
+        namespace Parameters {
+            export type Draft = boolean;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        export interface QueryParameters {
+            draft?: Parameters.Draft;
+        }
+        export type RequestBody = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchema;
+        namespace Responses {
+            export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+        }
+    }
     namespace SearchEntities {
         export type RequestBody = Components.Schemas.EntitySearchParams;
         namespace Responses {
@@ -4895,7 +4883,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                results?: any;
+                results?: Components.Schemas.TaxonomyClassification[];
             }
         }
     }
@@ -5131,33 +5119,13 @@ export interface OperationMethods {
   /**
    * listSchemas - listSchemas
    * 
-   * Get the latest version of local schema
+   * Get the latest versions of all schemas
    */
   'listSchemas'(
     parameters?: Parameters<Paths.ListSchemas.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListSchemas.Responses.$200>
-  /**
-   * listSchemaBlueprints - listSchemaBlueprints
-   * 
-   * List canonical versions of all available schemas
-   */
-  'listSchemaBlueprints'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListSchemaBlueprints.Responses.$200>
-  /**
-   * getSchemaVersions - getSchemaVersions
-   * 
-   * Get all versions of this schema ordered by the latest versions including drafts.
-   */
-  'getSchemaVersions'(
-    parameters?: Parameters<Paths.GetSchemaVersions.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
   /**
    * getSchema - getSchema
    * 
@@ -5169,25 +5137,45 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchema.Responses.$200>
   /**
-   * createNewSchemaVersion - createNewSchemaVersion
+   * putSchema - putSchema
    * 
-   * Create new version of the schema and default draft is false.
+   * Create or update a schema with a new version
    */
-  'createNewSchemaVersion'(
-    parameters?: Parameters<Paths.CreateNewSchemaVersion.PathParameters & Paths.CreateNewSchemaVersion.QueryParameters> | null,
-    data?: Paths.CreateNewSchemaVersion.RequestBody,
+  'putSchema'(
+    parameters?: Parameters<Paths.PutSchema.PathParameters & Paths.PutSchema.QueryParameters> | null,
+    data?: Paths.PutSchema.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateNewSchemaVersion.Responses.$200>
+  ): OperationResponse<Paths.PutSchema.Responses.$200>
   /**
-   * deleteSchemaById - deleteSchemaById
+   * deleteSchema - deleteSchema
    * 
-   * Delete schema by Id
+   * Delete a schema, or a specific version of a schema
    */
-  'deleteSchemaById'(
-    parameters?: Parameters<Paths.DeleteSchemaById.PathParameters & Paths.DeleteSchemaById.QueryParameters> | null,
+  'deleteSchema'(
+    parameters?: Parameters<Paths.DeleteSchema.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteSchemaById.Responses.$204>
+  ): OperationResponse<Paths.DeleteSchema.Responses.$204>
+  /**
+   * getSchemaVersions - getSchemaVersions
+   * 
+   * Get all versions of this schema ordered by the latest versions including drafts.
+   */
+  'getSchemaVersions'(
+    parameters?: Parameters<Paths.GetSchemaVersions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
+  /**
+   * listSchemaBlueprints - listSchemaBlueprints
+   * 
+   * List canonical versions of all available schemas
+   */
+  'listSchemaBlueprints'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSchemaBlueprints.Responses.$200>
   /**
    * listTaxonomyClassificationsForSchema - listTaxonomyClassificationsForSchema
    * 
@@ -5481,7 +5469,7 @@ export interface OperationMethods {
    * Get activity by id
    */
   'getActivity'(
-    parameters?: Parameters<Paths.GetActivity.PathParameters> | null,
+    parameters?: Parameters<Paths.GetActivity.PathParameters & Paths.GetActivity.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetActivity.Responses.$200>
@@ -5678,37 +5666,13 @@ export interface PathsDictionary {
     /**
      * listSchemas - listSchemas
      * 
-     * Get the latest version of local schema
+     * Get the latest versions of all schemas
      */
     'get'(
       parameters?: Parameters<Paths.ListSchemas.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListSchemas.Responses.$200>
-  }
-  ['/v1/entity/schemas/blueprints']: {
-    /**
-     * listSchemaBlueprints - listSchemaBlueprints
-     * 
-     * List canonical versions of all available schemas
-     */
-    'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListSchemaBlueprints.Responses.$200>
-  }
-  ['/v1/entity/schemas/{slug}/versions']: {
-    /**
-     * getSchemaVersions - getSchemaVersions
-     * 
-     * Get all versions of this schema ordered by the latest versions including drafts.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetSchemaVersions.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
   }
   ['/v1/entity/schemas/{slug}']: {
     /**
@@ -5722,25 +5686,49 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchema.Responses.$200>
     /**
-     * createNewSchemaVersion - createNewSchemaVersion
+     * putSchema - putSchema
      * 
-     * Create new version of the schema and default draft is false.
+     * Create or update a schema with a new version
      */
     'put'(
-      parameters?: Parameters<Paths.CreateNewSchemaVersion.PathParameters & Paths.CreateNewSchemaVersion.QueryParameters> | null,
-      data?: Paths.CreateNewSchemaVersion.RequestBody,
+      parameters?: Parameters<Paths.PutSchema.PathParameters & Paths.PutSchema.QueryParameters> | null,
+      data?: Paths.PutSchema.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateNewSchemaVersion.Responses.$200>
+    ): OperationResponse<Paths.PutSchema.Responses.$200>
     /**
-     * deleteSchemaById - deleteSchemaById
+     * deleteSchema - deleteSchema
      * 
-     * Delete schema by Id
+     * Delete a schema, or a specific version of a schema
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteSchemaById.PathParameters & Paths.DeleteSchemaById.QueryParameters> | null,
+      parameters?: Parameters<Paths.DeleteSchema.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteSchemaById.Responses.$204>
+    ): OperationResponse<Paths.DeleteSchema.Responses.$204>
+  }
+  ['/v1/entity/schemas/{slug}/versions']: {
+    /**
+     * getSchemaVersions - getSchemaVersions
+     * 
+     * Get all versions of this schema ordered by the latest versions including drafts.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSchemaVersions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
+  }
+  ['/v1/entity/schemas/blueprints']: {
+    /**
+     * listSchemaBlueprints - listSchemaBlueprints
+     * 
+     * List canonical versions of all available schemas
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSchemaBlueprints.Responses.$200>
   }
   ['/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}']: {
     /**
@@ -6050,7 +6038,7 @@ export interface PathsDictionary {
      * Get activity by id
      */
     'get'(
-      parameters?: Parameters<Paths.GetActivity.PathParameters> | null,
+      parameters?: Parameters<Paths.GetActivity.PathParameters & Paths.GetActivity.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetActivity.Responses.$200>

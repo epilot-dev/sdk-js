@@ -48,12 +48,12 @@
       "get": {
         "operationId": "listSchemas",
         "summary": "listSchemas",
-        "description": "Get the latest version of local schema",
+        "description": "Get the latest versions of all schemas",
         "parameters": [
           {
             "in": "query",
             "name": "unpublished",
-            "description": "Includes the unpublished version of unpublished schema",
+            "description": "Return unpublished draft schemas",
             "schema": {
               "type": "boolean",
               "default": false
@@ -72,82 +72,6 @@
                   "type": "object",
                   "properties": {
                     "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/EntitySchemaItem"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/entity/schemas/blueprints": {
-      "get": {
-        "operationId": "listSchemaBlueprints",
-        "summary": "listSchemaBlueprints",
-        "description": "List canonical versions of all available schemas",
-        "tags": [
-          "Schemas"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/EntitySchemaItem"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/entity/schemas/{slug}/versions": {
-      "get": {
-        "operationId": "getSchemaVersions",
-        "summary": "getSchemaVersions",
-        "description": "Get all versions of this schema ordered by the latest versions including drafts.",
-        "tags": [
-          "Schemas"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "versions": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/EntitySchemaItem"
-                      }
-                    },
-                    "drafts": {
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/EntitySchemaItem"
@@ -200,9 +124,9 @@
         }
       },
       "put": {
-        "operationId": "createNewSchemaVersion",
-        "summary": "createNewSchemaVersion",
-        "description": "Create new version of the schema and default draft is false.",
+        "operationId": "putSchema",
+        "summary": "putSchema",
+        "description": "Create or update a schema with a new version",
         "tags": [
           "Schemas"
         ],
@@ -247,9 +171,9 @@
         }
       },
       "delete": {
-        "operationId": "deleteSchemaById",
-        "summary": "deleteSchemaById",
-        "description": "Delete schema by Id",
+        "operationId": "deleteSchema",
+        "summary": "deleteSchema",
+        "description": "Delete a schema, or a specific version of a schema",
         "tags": [
           "Schemas"
         ],
@@ -261,19 +185,87 @@
             "schema": {
               "$ref": "#/components/schemas/EntitySlug"
             }
-          },
-          {
-            "in": "query",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/SchemaId"
-            }
           }
         ],
         "responses": {
           "204": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/{slug}/versions": {
+      "get": {
+        "operationId": "getSchemaVersions",
+        "summary": "getSchemaVersions",
+        "description": "Get all versions of this schema ordered by the latest versions including drafts.",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "versions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntitySchemaItem"
+                      }
+                    },
+                    "drafts": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntitySchemaItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/blueprints": {
+      "get": {
+        "operationId": "listSchemaBlueprints",
+        "summary": "listSchemaBlueprints",
+        "description": "List canonical versions of all available schemas",
+        "tags": [
+          "Schemas"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntitySchemaItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -896,6 +888,27 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/ActivityId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "operations_size",
+            "description": "Maximum number of operations to include in response (default: 10)\n",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000,
+              "default": 25
+            }
+          },
+          {
+            "in": "query",
+            "name": "operations_from",
+            "description": "Pagination offset for operations\n",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
             }
           }
         ],
@@ -1800,6 +1813,7 @@
                   "type": "object",
                   "properties": {
                     "results": {
+                      "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/TaxonomyClassification"
                       }
@@ -2086,16 +2100,16 @@
           },
           "layout_settings": {
             "type": "object",
-            "description": "Custom grid definitions for the layout",
-            "additionalProperties": {
-              "type": "object",
-              "properties": {
-                "grid_gap": {
-                  "type": "string"
-                },
-                "grid_template_columns": {
-                  "type": "string"
-                }
+            "description": "Custom grid definitions for the layout. These settings are composed by managed and un-managed properties:\n- Managed Properties: are interpreted and transformed into layout styles\n- Un-managed Properties: are appended as styles into the attribute mounting node\n",
+            "additionalProperties": true,
+            "properties": {
+              "grid_gap": {
+                "type": "string",
+                "description": "Defines the grid gap for the mounting node of the attribute."
+              },
+              "grid_template_columns": {
+                "type": "string",
+                "description": "Defines the grid column template for the mounting node of the attribute."
               }
             }
           },
@@ -2316,29 +2330,7 @@
             "type": "boolean",
             "default": false
           },
-          "default_value": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "additionalProperties": true
-              },
-              {
-                "type": "integer"
-              },
-              {
-                "type": "number"
-              },
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "array"
-              }
-            ]
-          },
+          "default_value": {},
           "group": {
             "description": "Which group the attribute should appear in. Accepts group ID or group name",
             "type": "string"
@@ -2363,6 +2355,12 @@
           "render_condition": {
             "type": "string",
             "description": "Defines the conditional rendering expression for showing this field.\nWhen a valid expression is parsed, their evaluation defines the visibility of this attribute.\nNote: Empty or invalid expression have no effect on the field visibility.\n"
+          },
+          "_purpose": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassificationId"
+            }
           },
           "constraints": {
             "type": "object",
@@ -3328,41 +3326,6 @@
           }
         ]
       },
-      "Attachment": {
-        "type": "object",
-        "deprecated": true,
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "mime": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "size": {
-            "type": "number"
-          },
-          "image_url": {
-            "type": "string"
-          },
-          "download_url": {
-            "type": "string"
-          },
-          "alt_text": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "key",
-          "mime",
-          "name",
-          "size",
-          "image_url",
-          "download_url"
-        ]
-      },
       "SummaryAttribute": {
         "description": "Represents an expanded version of an attribute to be displayed in the list item summary.\nThis configuration can be used in the following way:\n```js\n{\n  \"label\": \"Price components\"\n  \"value\": \"{{item.prices.length}} price components\"\n  \"show_as_tag\": true\n  \"render_condition\": \"is_composite_price = \"true\"\"\n}\n```\nThe value field supports handlebar expressions from which you can pick any field from the entity state.\n",
         "type": "object",
@@ -3424,6 +3387,12 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Attribute"
+            }
+          },
+          "_purpose": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassificationId"
             }
           },
           "ui_hooks": {
@@ -4291,6 +4260,11 @@
           {
             "type": "object",
             "properties": {
+              "operations_total": {
+                "type": "integer",
+                "description": "Count of total operations attached to this activity",
+                "example": 1
+              },
               "operations": {
                 "type": "array",
                 "items": {
@@ -5120,9 +5094,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }

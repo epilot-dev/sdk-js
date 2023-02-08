@@ -387,6 +387,7 @@
         ],
         "requestBody": {
           "description": "Retry request details.",
+          "required": false,
           "content": {
             "application/json": {
               "schema": {
@@ -1153,27 +1154,7 @@
         },
         "additionalProperties": true
       },
-      "PrimitiveJSONValue": {
-        "description": "Represents any primitive JSON value",
-        "anyOf": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "boolean"
-          },
-          {
-            "type": "number"
-          },
-          {
-            "type": "object",
-            "additionalProperties": true
-          },
-          {
-            "type": "array"
-          }
-        ]
-      },
+      "PrimitiveJSONValue": {},
       "MappingAttribute": {
         "anyOf": [
           {
