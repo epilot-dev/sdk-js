@@ -1,6 +1,6 @@
 {
   "name": "epilot-sdk",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Epilot SDK",
   "main": "index.js",
   "scripts": {
@@ -67,5 +67,6 @@
   },
   "overrides": {
     "axios": "^0.25.0"
-  }
+  },
+  "gitHead": "ae107d0f83073ee8bef10ff51f194ae08a3d2bac"
 }
