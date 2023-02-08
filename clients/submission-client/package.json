@@ -1,6 +1,6 @@
 {
   "name": "@epilot/submission-client",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Client library for epilot Submission API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
