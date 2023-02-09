@@ -2173,6 +2173,9 @@
             "type": "integer",
             "description": "The unit amount value"
           },
+          "unit_amount_currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
           "unit_amount_decimal": {
             "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
             "type": "string"
@@ -2185,10 +2188,7 @@
               }
             ]
           }
-        },
-        "required": [
-          "pricing_model"
-        ]
+        }
       },
       "CompositePriceItemDto": {
         "allOf": [
