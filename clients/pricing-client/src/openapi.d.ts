@@ -1984,6 +1984,14 @@ declare namespace Components {
              * The unit amount value
              */
             unit_amount?: number;
+            unit_amount_currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
             /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
