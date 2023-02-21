@@ -102,6 +102,43 @@ declare namespace Components {
             mapped_entities: Entity[];
             failures?: MappingFailure[];
         }
+        /**
+         * Build relations between a source entity and one or more target entities, dynamically identified
+         */
+        export interface ExecuteRelationsReq {
+            /**
+             * Entity for which to add relations.
+             */
+            source_ref: EntityRef;
+            target?: {
+                /**
+                 * Main Entity from where to locate target entities. Eg. submisssion entity
+                 */
+                main_entity_ref: EntityRef;
+                /**
+                 * Relation mappings
+                 */
+                relation_attributes: RelationAttribute[];
+                /**
+                 * For cases where you want to store a relation between main entity (eg. submission) and current source entity.
+                 */
+                linkback?: {
+                    /**
+                     * Relation attribute on the main entity (submission) where the target entity will be linked. Set to false to disable linkback
+                     *
+                     */
+                    attribute: string;
+                    /**
+                     * Relation tags (labels) to include in main entity linkback relation attribute
+                     */
+                    relation_tags: string[];
+                };
+            };
+            additional_relations?: RelationItem[];
+        }
+        export interface ExecuteRelationsResp {
+            relations?: NewRelationItem[];
+        }
         export interface JourneyRef {
             journey_id?: string;
         }
@@ -255,6 +292,12 @@ declare namespace Components {
             possible_target_types?: MappingSourceTargetType[];
         }
         export type MappingSourceTargetType = "string" | "date" | "datetime" | "boolean" | "number" | "image" | "file" | "address" | "email" | "phone" | "select" | "multiselect";
+        export interface NewRelationItem {
+            source_entity_id: string;
+            target_entity_id: string;
+            relation_attr: string;
+            tags?: string[];
+        }
         /**
          * Mapping operation nodes are either primitive values or operation node objects
          */
@@ -351,6 +394,10 @@ declare namespace Components {
                 [name: string]: any;
             };
             mode: "append" | "prepend" | "set";
+        }
+        export interface RelationItem {
+            entity_id: string;
+            attribute: string;
         }
         export interface SearchMappingReq {
             source?: SourceConfig;
@@ -475,6 +522,12 @@ declare namespace Paths {
         export type RequestBody = /* Pass either source or source_entity */ Components.Schemas.ExecuteMappingReq;
         namespace Responses {
             export type $200 = Components.Schemas.ExecuteMappingResp;
+        }
+    }
+    namespace ExecuteRelations {
+        export type RequestBody = /* Build relations between a source entity and one or more target entities, dynamically identified */ Components.Schemas.ExecuteRelationsReq;
+        namespace Responses {
+            export type $200 = Components.Schemas.ExecuteRelationsResp;
         }
     }
     namespace GetAllVersions {
@@ -688,6 +741,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.QueryMappingHistory.Responses.$200>
+  /**
+   * executeRelations - executeRelations
+   * 
+   * Execute relation mapping between source entity and target entities
+   */
+  'executeRelations'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ExecuteRelations.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ExecuteRelations.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -794,6 +857,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.QueryMappingHistory.Responses.$200>
+  }
+  ['/v1/relations:execute']: {
+    /**
+     * executeRelations - executeRelations
+     * 
+     * Execute relation mapping between source entity and target entities
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ExecuteRelations.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ExecuteRelations.Responses.$200>
   }
 }
 

@@ -376,6 +376,37 @@
           }
         }
       }
+    },
+    "/v1/relations:execute": {
+      "post": {
+        "operationId": "executeRelations",
+        "summary": "executeRelations",
+        "description": "Execute relation mapping between source entity and target entities",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteRelationsReq"
+              }
+            }
+          }
+        },
+        "tags": [
+          "mappings"
+        ],
+        "responses": {
+          "200": {
+            "description": "The relations which were for both source entity and main entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecuteRelationsResp"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -485,6 +516,118 @@
         },
         "required": [
           "type"
+        ]
+      },
+      "ExecuteRelationsReq": {
+        "type": "object",
+        "description": "Build relations between a source entity and one or more target entities, dynamically identified",
+        "properties": {
+          "source_ref": {
+            "$ref": "#/components/schemas/EntityRef",
+            "description": "Entity for which to add relations."
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "main_entity_ref": {
+                "$ref": "#/components/schemas/EntityRef",
+                "description": "Main Entity from where to locate target entities. Eg. submisssion entity"
+              },
+              "relation_attributes": {
+                "type": "array",
+                "description": "Relation mappings",
+                "items": {
+                  "$ref": "#/components/schemas/RelationAttribute"
+                }
+              },
+              "linkback": {
+                "type": "object",
+                "description": "For cases where you want to store a relation between main entity (eg. submission) and current source entity.",
+                "properties": {
+                  "attribute": {
+                    "type": "string",
+                    "default": "mapped_entities",
+                    "description": "Relation attribute on the main entity (submission) where the target entity will be linked. Set to false to disable linkback\n"
+                  },
+                  "relation_tags": {
+                    "type": "array",
+                    "description": "Relation tags (labels) to include in main entity linkback relation attribute",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "attribute",
+                  "relation_tags"
+                ]
+              }
+            },
+            "required": [
+              "main_entity_ref",
+              "relation_attributes"
+            ]
+          },
+          "additional_relations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RelationItem"
+            }
+          }
+        },
+        "required": [
+          "source_ref"
+        ]
+      },
+      "ExecuteRelationsResp": {
+        "type": "object",
+        "properties": {
+          "relations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewRelationItem"
+            }
+          }
+        }
+      },
+      "NewRelationItem": {
+        "type": "object",
+        "properties": {
+          "source_entity_id": {
+            "type": "string"
+          },
+          "target_entity_id": {
+            "type": "string"
+          },
+          "relation_attr": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "source_entity_id",
+          "target_entity_id",
+          "relation_attr"
+        ]
+      },
+      "RelationItem": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "attribute": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "attribute"
         ]
       },
       "ExecuteMappingReq": {
@@ -1273,7 +1416,7 @@
   },
   "servers": [
     {
-      "url": "null"
+      "url": "https://entity-mapping.sls.epilot.io"
     }
   ]
 }
