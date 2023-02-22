@@ -293,7 +293,7 @@ declare namespace Components {
             /**
              * The tags of email template
              */
-            template_tags?: string;
+            template_tags?: string[];
         }
         /**
          * example:

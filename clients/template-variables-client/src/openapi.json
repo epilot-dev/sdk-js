@@ -542,8 +542,11 @@
             "description": "The name of email template"
           },
           "template_tags": {
-            "type": "string",
-            "description": "The tags of email template"
+            "type": "array",
+            "description": "The tags of email template",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
