@@ -286,6 +286,14 @@ declare namespace Components {
             context_data?: {
                 [key: string]: any;
             };
+            /**
+             * The name of email template
+             */
+            template_name?: string;
+            /**
+             * The tags of email template
+             */
+            template_tags?: string[];
         }
         /**
          * example:

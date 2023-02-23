@@ -536,6 +536,17 @@
           "context_data": {
             "type": "object",
             "description": "If context data is avaialble, this data will be used for variable replace."
+          },
+          "template_name": {
+            "type": "string",
+            "description": "The name of email template"
+          },
+          "template_tags": {
+            "type": "array",
+            "description": "The tags of email template",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -1404,9 +1415,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://template-variables-api.sls.epilot.io"
-    },
     {
       "url": "https://template-variables-api.sls.epilot.io"
     }
