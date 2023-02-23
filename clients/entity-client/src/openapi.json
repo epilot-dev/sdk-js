@@ -5096,6 +5096,9 @@
   "servers": [
     {
       "url": "https://entity.sls.epilot.io"
+    },
+    {
+      "url": "https://entity.sls.epilot.io"
     }
   ]
 }
