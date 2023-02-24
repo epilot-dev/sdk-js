@@ -1578,31 +1578,58 @@
           "id": {
             "type": "string"
           },
+          "definition_id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
-          "next_open_step_id": {
-            "type": "string"
-          },
-          "next_open_step_name": {
-            "type": "string"
-          },
-          "next_open_section_id": {
-            "type": "string"
-          },
-          "next_open_section_name": {
-            "type": "string"
-          },
-          "workflow_status": {
+          "status": {
             "$ref": "#/components/schemas/WorkflowStatus"
           },
-          "workflow_assignees": {
+          "assignees": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "workflow_definition_id": {
+          "duedate": {
+            "type": "string"
+          },
+          "last_update_time": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "task_name": {
+            "type": "string"
+          },
+          "task_assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "task_duedate": {
+            "type": "string"
+          },
+          "task_execution_type": {
+            "$ref": "#/components/schemas/StepType"
+          },
+          "phase_id": {
+            "type": "string"
+          },
+          "phase_name": {
+            "type": "string"
+          },
+          "selected_closing_reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          },
+          "closing_reason_description": {
             "type": "string"
           }
         }
