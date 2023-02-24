@@ -1117,6 +1117,42 @@
               "default": false,
               "type": "boolean"
             }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "description": "Starting page number",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "Number of results to return per page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 50
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "description": "List of entity fields to include in results",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "_id",
+                "_schema",
+                "_title"
+              ]
+            }
           }
         ],
         "responses": {

@@ -4676,9 +4676,20 @@ declare namespace Paths {
     }
     namespace GetRelations {
         namespace Parameters {
+            /**
+             * example:
+             * [
+             *   "_id",
+             *   "_schema",
+             *   "_title"
+             * ]
+             */
+            export type Fields = string[];
+            export type From = number;
             export type Hydrate = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type IncludeReverse = boolean;
+            export type Size = number;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -4693,6 +4704,17 @@ declare namespace Paths {
         export interface QueryParameters {
             hydrate?: Parameters.Hydrate;
             include_reverse?: Parameters.IncludeReverse;
+            from?: Parameters.From;
+            size?: Parameters.Size;
+            fields?: /**
+             * example:
+             * [
+             *   "_id",
+             *   "_schema",
+             *   "_title"
+             * ]
+             */
+            Parameters.Fields;
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsResp;
