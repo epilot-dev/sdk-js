@@ -1868,6 +1868,12 @@ declare namespace Components {
              * Adds a `_score` number field to results that can be used to rank by match score
              */
             include_scores?: boolean;
+            /**
+             * Aggregation
+             */
+            aggs?: {
+                [key: string]: any;
+            };
         }
         export interface EntitySearchResults {
             /**
@@ -1892,6 +1898,9 @@ declare namespace Components {
              * }
              */
             EntityItem[];
+            aggregations?: {
+                [key: string]: any;
+            };
         }
         /**
          * URL-friendly identifier for the entity schema

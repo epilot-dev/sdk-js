@@ -3955,7 +3955,7 @@
           },
           "size": {
             "type": "integer",
-            "minimum": 1,
+            "minimum": 0,
             "default": 10,
             "description": "Max search size is 1000 with higher values defaulting to 1000"
           },
@@ -3980,6 +3980,10 @@
             "type": "boolean",
             "default": false,
             "description": "Adds a `_score` number field to results that can be used to rank by match score"
+          },
+          "aggs": {
+            "type": "object",
+            "description": "Aggregation"
           }
         },
         "required": [
@@ -4028,6 +4032,9 @@
             "items": {
               "$ref": "#/components/schemas/EntityItem"
             }
+          },
+          "aggregations": {
+            "type": "object"
           }
         }
       },
