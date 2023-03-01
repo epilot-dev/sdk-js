@@ -13,6 +13,10 @@
     {
       "name": "Settings",
       "description": "Generic key/value store for epilot settings"
+    },
+    {
+      "name": "Organization Settings",
+      "description": "Organisation Settings"
     }
   ],
   "security": [
@@ -348,7 +352,11 @@
             "type": "boolean"
           },
           {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
           },
           {
             "type": "object",
@@ -362,9 +370,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://organization-v2.sls.epilot.io"
-    },
     {
       "url": "https://organization-v2.sls.epilot.io"
     }

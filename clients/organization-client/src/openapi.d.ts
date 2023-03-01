@@ -113,7 +113,9 @@ declare namespace Components {
          *   "enabled": true
          * }
          */
-        string | number | boolean | any[] | {
+        string | number | boolean | {
+            [name: string]: any;
+        }[] | {
             [name: string]: any;
         };
     }
