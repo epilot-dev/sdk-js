@@ -1497,12 +1497,13 @@ declare namespace Components {
              */
             is_composite_price?: boolean;
             /**
-             * Describes how to compute the price per period. Either `per_unit` or `tiered_graduated`.
+             * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
-             * - `tiered_graduated` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers attributes.
+             * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+             * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume";
             /**
              * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
              *
@@ -2014,12 +2015,13 @@ declare namespace Components {
                  */
                 is_composite_price?: boolean;
                 /**
-                 * Describes how to compute the price per period. Either `per_unit` or `tiered_graduated`.
+                 * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
                  * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
-                 * - `tiered_graduated` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers attributes.
+                 * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+                 * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
                  *
                  */
-                pricing_model: "per_unit" | "tiered_graduated";
+                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume";
                 /**
                  * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
                  *
@@ -2194,7 +2196,7 @@ declare namespace Components {
          */
         export type PriceItemsDto = (/* Represents a price input to the pricing library. */ PriceItemDto | /* Represents a composite price input to the pricing library. */ CompositePriceItemDto)[];
         export interface PriceTier {
-            up_to: number | null;
+            up_to?: number | null;
             flat_fee_amount?: number;
             flat_fee_amount_decimal?: string;
             unit_amount: number;
