@@ -1166,6 +1166,110 @@
             }
           }
         }
+      }
+    },
+    "/v2/entity/{slug}/{id}/relations": {
+      "get": {
+        "operationId": "getRelationsV2",
+        "summary": "getRelationsV2",
+        "description": "Returns 1st level direct relations for an entity with pagination.\n\nYou can control whether to return the full entity or just the relation item with the `?hydrate` query param.\n\nReverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.\n",
+        "tags": [
+          "Relations"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity Type",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Entity id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hydrate",
+            "description": "When true, expand relation items with full blown entities.",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "description": "Input to filter search results",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_reverse",
+            "description": "When true, includes reverse relations in response (other entities pointing to this entity)",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "description": "Starting page number",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "Number of results to return per page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 50
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "description": "List of entity fields to include in results",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "_id",
+                "_schema",
+                "_title"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRelationsRespWithPagination"
+                }
+              }
+            }
+          }
+        }
       },
       "post": {
         "operationId": "addRelations",
@@ -3896,6 +4000,18 @@
           ]
         }
       },
+      "GetRelationsRespWithPagination": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "number",
+            "example": 1
+          },
+          "relations": {
+            "$ref": "#/components/schemas/GetRelationsResp"
+          }
+        }
+      },
       "RelationEntity": {
         "allOf": [
           {
@@ -3983,7 +4099,14 @@
           },
           "aggs": {
             "type": "object",
-            "description": "Aggregation"
+            "description": "Aggregation supported by ElasticSearch allows summarizing data as metrics, statistics, or other analytics.",
+            "example": {
+              "contact-count-per-tag": {
+                "terms": {
+                  "field": "_tags.keyword"
+                }
+              }
+            }
           }
         },
         "required": [
@@ -4034,7 +4157,23 @@
             }
           },
           "aggregations": {
-            "type": "object"
+            "type": "object",
+            "example": {
+              "contact-count-per-tag": {
+                "doc_count_error_upper_bound": 0,
+                "sum_other_doc_count": 23,
+                "buckets": [
+                  {
+                    "key": "automation",
+                    "doc_count": 108
+                  },
+                  {
+                    "key": "primary",
+                    "doc_count": 66
+                  }
+                ]
+              }
+            }
           }
         }
       },

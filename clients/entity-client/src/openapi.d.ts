@@ -1869,7 +1869,15 @@ declare namespace Components {
              */
             include_scores?: boolean;
             /**
-             * Aggregation
+             * Aggregation supported by ElasticSearch allows summarizing data as metrics, statistics, or other analytics.
+             * example:
+             * {
+             *   "contact-count-per-tag": {
+             *     "terms": {
+             *       "field": "_tags.keyword"
+             *     }
+             *   }
+             * }
              */
             aggs?: {
                 [key: string]: any;
@@ -1898,6 +1906,25 @@ declare namespace Components {
              * }
              */
             EntityItem[];
+            /**
+             * example:
+             * {
+             *   "contact-count-per-tag": {
+             *     "doc_count_error_upper_bound": 0,
+             *     "sum_other_doc_count": 23,
+             *     "buckets": [
+             *       {
+             *         "key": "automation",
+             *         "doc_count": 108
+             *       },
+             *       {
+             *         "key": "primary",
+             *         "doc_count": 66
+             *       }
+             *     ]
+             *   }
+             * }
+             */
             aggregations?: {
                 [key: string]: any;
             };
@@ -2049,6 +2076,14 @@ declare namespace Components {
          * }
          */
         RelationEntity)[];
+        export interface GetRelationsRespWithPagination {
+            /**
+             * example:
+             * 1
+             */
+            hits?: number;
+            relations?: GetRelationsResp;
+        }
         /**
          * Entity with relation data resolved into the attribute values
          * example:
@@ -4707,6 +4742,54 @@ declare namespace Paths {
             export type $200 = Components.Schemas.GetRelationsResp;
         }
     }
+    namespace GetRelationsV2 {
+        namespace Parameters {
+            /**
+             * example:
+             * [
+             *   "_id",
+             *   "_schema",
+             *   "_title"
+             * ]
+             */
+            export type Fields = string[];
+            export type From = number;
+            export type Hydrate = boolean;
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type IncludeReverse = boolean;
+            export type Query = string;
+            export type Size = number;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            hydrate?: Parameters.Hydrate;
+            query?: Parameters.Query;
+            include_reverse?: Parameters.IncludeReverse;
+            from?: Parameters.From;
+            size?: Parameters.Size;
+            fields?: /**
+             * example:
+             * [
+             *   "_id",
+             *   "_schema",
+             *   "_title"
+             * ]
+             */
+            Parameters.Fields;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.GetRelationsRespWithPagination;
+        }
+    }
     namespace GetSavedView {
         namespace Parameters {
             export type Id = /* Generated uuid for a saved view */ Components.Schemas.SavedViewId /* uuid */;
@@ -5519,6 +5602,21 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelations.Responses.$200>
   /**
+   * getRelationsV2 - getRelationsV2
+   * 
+   * Returns 1st level direct relations for an entity with pagination.
+   * 
+   * You can control whether to return the full entity or just the relation item with the `?hydrate` query param.
+   * 
+   * Reverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.
+   * 
+   */
+  'getRelationsV2'(
+    parameters?: Parameters<Paths.GetRelationsV2.PathParameters & Paths.GetRelationsV2.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
+  /**
    * addRelations - addRelations
    * 
    * Relates one or more entities to parent entity by adding items to a relation attribute
@@ -6093,6 +6191,23 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelations.Responses.$200>
+  }
+  ['/v2/entity/{slug}/{id}/relations']: {
+    /**
+     * getRelationsV2 - getRelationsV2
+     * 
+     * Returns 1st level direct relations for an entity with pagination.
+     * 
+     * You can control whether to return the full entity or just the relation item with the `?hydrate` query param.
+     * 
+     * Reverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetRelationsV2.PathParameters & Paths.GetRelationsV2.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
     /**
      * addRelations - addRelations
      * 
