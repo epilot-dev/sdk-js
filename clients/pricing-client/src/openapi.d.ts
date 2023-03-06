@@ -1840,6 +1840,14 @@ declare namespace Components {
              * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
             on_request_approved?: boolean;
+            /**
+             * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
+             * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+             * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+             * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             *
+             */
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume";
         }
         /**
          * Represents a price input to the pricing library.
