@@ -2181,6 +2181,15 @@
             "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
             "type": "string"
           },
+          "pricing_model": {
+            "type": "string",
+            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n",
+            "enum": [
+              "per_unit",
+              "tiered_graduated",
+              "tiered_volume"
+            ]
+          },
           "_price": {
             "description": "The snapshot of the price linked to the price item.",
             "allOf": [
