@@ -2012,7 +2012,7 @@ declare namespace Components {
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              *
              */
-            pricing_model?: "per_unit" | "tiered_graduated" | "tiered_volume";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume";
             /**
              * The snapshot of the price linked to the price item.
              * example:

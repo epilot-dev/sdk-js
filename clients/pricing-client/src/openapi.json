@@ -2198,7 +2198,10 @@
               }
             ]
           }
-        }
+        },
+        "required": [
+          "pricing_model"
+        ]
       },
       "CompositePriceItemDto": {
         "allOf": [
