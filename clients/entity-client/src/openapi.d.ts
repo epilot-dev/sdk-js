@@ -1,4 +1,4 @@
-/Applications /Library /System /Users /Volumes /bin /cores /dev /etc /home /opt /private /sbin /tmp /usr /var eslint-disable dist/ node_modules/ src/
+/* eslint-disable */
 import type {
   OpenAPIClient,
   Parameters,
