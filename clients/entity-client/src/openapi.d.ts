@@ -4962,6 +4962,70 @@ declare namespace Paths {
             }
         }
     }
+    namespace PatchEntity {
+        namespace Parameters {
+            export type ActivityId = /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            Components.Schemas.ActivityId /* ulid */;
+            export type Async = boolean;
+            export type DryRun = boolean;
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            activity_id?: Parameters.ActivityId;
+            dry_run?: Parameters.DryRun;
+            async?: Parameters.Async;
+        }
+        export type RequestBody = /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         * }
+         */
+        Components.Schemas.Entity;
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * {
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "_org": "123",
+             *   "_schema": "contact",
+             *   "_tags": [
+             *     "example",
+             *     "mock",
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             * }
+             */
+            Components.Schemas.EntityItem;
+            export interface $409 {
+            }
+        }
+    }
     namespace PutSchema {
         namespace Parameters {
             export type Draft = boolean;
@@ -5542,6 +5606,43 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateEntity.Responses.$200>
   /**
+   * patchEntity - patchEntity
+   * 
+   * Partially updates an entity with the passed in entity data.
+   * 
+   * - If an _updated_at is passed and the server contains a newer version of the entity a `409` Error is returned
+   * 
+   * ## Activity
+   * 
+   * If no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityUpdated`
+   * 
+   * ## Relations
+   * 
+   * To create a relation, store a property that defines a `$relation` array.
+   * 
+   * Example:
+   * 
+   * ```json
+   * {
+   *   "contacts": {
+   *     "$relation": [
+   *       { "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6" }
+   *     ]
+   *   }
+   * }
+   * ```
+   * 
+   * The items in `$relation` support two properties:
+   * - `entity_id` - The ID of the entity to link
+   * - `_tags` - Tags or labels for the relation (optional)
+   * 
+   */
+  'patchEntity'(
+    parameters?: Parameters<Paths.PatchEntity.PathParameters & Paths.PatchEntity.QueryParameters> | null,
+    data?: Paths.PatchEntity.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PatchEntity.Responses.$200>
+  /**
    * deleteEntity - deleteEntity
    * 
    * Deletes an Entity
@@ -6119,6 +6220,43 @@ export interface PathsDictionary {
       data?: Paths.UpdateEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateEntity.Responses.$200>
+    /**
+     * patchEntity - patchEntity
+     * 
+     * Partially updates an entity with the passed in entity data.
+     * 
+     * - If an _updated_at is passed and the server contains a newer version of the entity a `409` Error is returned
+     * 
+     * ## Activity
+     * 
+     * If no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityUpdated`
+     * 
+     * ## Relations
+     * 
+     * To create a relation, store a property that defines a `$relation` array.
+     * 
+     * Example:
+     * 
+     * ```json
+     * {
+     *   "contacts": {
+     *     "$relation": [
+     *       { "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6" }
+     *     ]
+     *   }
+     * }
+     * ```
+     * 
+     * The items in `$relation` support two properties:
+     * - `entity_id` - The ID of the entity to link
+     * - `_tags` - Tags or labels for the relation (optional)
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.PatchEntity.PathParameters & Paths.PatchEntity.QueryParameters> | null,
+      data?: Paths.PatchEntity.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PatchEntity.Responses.$200>
     /**
      * deleteEntity - deleteEntity
      * 
