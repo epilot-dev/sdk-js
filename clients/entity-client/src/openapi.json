@@ -697,6 +697,89 @@
           }
         }
       },
+      "patch": {
+        "operationId": "patchEntity",
+        "summary": "patchEntity",
+        "description": "Partially updates an entity with the passed in entity data.\n\n- If an _updated_at is passed and the server contains a newer version of the entity a `409` Error is returned\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityUpdated`\n\n## Relations\n\nTo create a relation, store a property that defines a `$relation` array.\n\nExample:\n\n```json\n{\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\" }\n    ]\n  }\n}\n```\n\nThe items in `$relation` support two properties:\n- `entity_id` - The ID of the entity to link\n- `_tags` - Tags or labels for the relation (optional)\n",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity Schema",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Entity Id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "activity_id",
+            "description": "Activity to include in event feed",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ActivityId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dry_run",
+            "description": "Dry Run mode = returns the patch result but doesn't perform the patch.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "async",
+            "description": "Don't wait for the patch entity to become available in Search API. Useful for large migrations",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              },
+              "example": {},
+              "required": true
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entity was updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityItem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict: newer version exists"
+          }
+        }
+      },
       "delete": {
         "operationId": "deleteEntity",
         "summary": "deleteEntity",
