@@ -75,6 +75,18 @@ declare namespace Components {
              */
             grants: Grant[];
         }
+        /**
+         * Check if attribute equals to any of the values
+         */
+        export interface EqualsCondition {
+            /**
+             * example:
+             * workflows.primary.task_name
+             */
+            attribute: string;
+            operation: "equals";
+            values: any[];
+        }
         export interface Grant {
             /**
              * example:
@@ -87,7 +99,12 @@ declare namespace Components {
              */
             resource?: string;
             effect?: "allow" | "deny";
+            conditions?: /* An additional condition that must be met for the grant */ GrantCondition[];
         }
+        /**
+         * An additional condition that must be met for the grant
+         */
+        export type GrantCondition = /* An additional condition that must be met for the grant */ /* Check if attribute equals to any of the values */ EqualsCondition;
         export interface GrantWithDependencies {
             /**
              * example:
@@ -100,10 +117,23 @@ declare namespace Components {
              */
             resource?: string;
             effect?: "allow" | "deny";
+            conditions?: /* An additional condition that must be met for the grant */ GrantCondition[];
             /**
              * Provided additional dependencies, exploded when storing the role
              */
             dependencies?: Grant[];
+        }
+        /**
+         * All roles attached to an users of an organization
+         */
+        export interface OrgAssignments {
+            organization_id?: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId;
+            assignments?: /* A role attached to an user */ Assignment[];
         }
         /**
          * A role automatically applied to all users in an organization.
@@ -147,6 +177,18 @@ declare namespace Components {
              * List of grants (permissions) applied to the role
              */
             grants: Grant[];
+        }
+        /**
+         * All roles attached to an users of an organization
+         */
+        export interface OrgRoles {
+            organization_id?: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId;
+            roles?: Role[];
         }
         /**
          * Id of an organization

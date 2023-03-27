@@ -180,7 +180,7 @@
               "schema": {
                 "$ref": "#/components/schemas/RolePayload"
               },
-              "examples": {
+              "x-examples": {
                 "User role: manager": {
                   "description": "Example manager role",
                   "value": {
@@ -214,6 +214,20 @@
                         "action": "role:assign"
                       },
                       {
+                        "action": "entity:view",
+                        "resource": "file:*",
+                        "conditions": [
+                          {
+                            "attribute": "_tags",
+                            "operation": "equals",
+                            "values": [
+                              "offer",
+                              "contract"
+                            ]
+                          }
+                        ]
+                      },
+                      {
                         "action": "message:view",
                         "dependencies": [
                           {
@@ -241,9 +255,6 @@
                       },
                       {
                         "action": "workflow:*"
-                      },
-                      {
-                        "action": "journey:*"
                       }
                     ]
                   }
@@ -296,9 +307,6 @@
                       },
                       {
                         "action": "workflow:execution:*"
-                      },
-                      {
-                        "action": "journey:view"
                       }
                     ]
                   }
@@ -685,6 +693,12 @@
               "allow",
               "deny"
             ]
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrantCondition"
+            }
           }
         },
         "required": [
@@ -708,6 +722,51 @@
               }
             }
           }
+        ]
+      },
+      "GrantCondition": {
+        "allOf": [
+          {
+            "description": "An additional condition that must be met for the grant",
+            "type": "object",
+            "required": [
+              "operation"
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EqualsCondition"
+              }
+            ]
+          }
+        ]
+      },
+      "EqualsCondition": {
+        "description": "Check if attribute equals to any of the values",
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "example": "workflows.primary.task_name"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "equals"
+            ]
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "example": "Qualification"
+            }
+          }
+        },
+        "required": [
+          "attribute",
+          "operation",
+          "values"
         ]
       },
       "RoleId": {
@@ -942,6 +1001,36 @@
           }
         }
       },
+      "OrgAssignments": {
+        "type": "object",
+        "description": "All roles attached to an users of an organization",
+        "properties": {
+          "organization_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Assignment"
+            }
+          }
+        }
+      },
+      "OrgRoles": {
+        "type": "object",
+        "description": "All roles attached to an users of an organization",
+        "properties": {
+          "organization_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Role"
+            }
+          }
+        }
+      },
       "Assignments": {
         "type": "array",
         "description": "List of role ids attached to an user",
@@ -1024,6 +1113,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://permissions.sls.epilot.io"
+    },
     {
       "url": "https://permissions.sls.epilot.io"
     }
