@@ -1501,9 +1501,10 @@ declare namespace Components {
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
             /**
              * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
              *
@@ -1845,9 +1846,10 @@ declare namespace Components {
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
         }
         /**
          * Represents a price input to the pricing library.
@@ -2010,9 +2012,10 @@ declare namespace Components {
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             * - `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
             /**
              * The snapshot of the price linked to the price item.
              * example:
@@ -2035,9 +2038,10 @@ declare namespace Components {
                  * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
                  * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
                  * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+                 * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
                  *
                  */
-                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume";
+                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
                 /**
                  * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
                  *
@@ -2215,8 +2219,8 @@ declare namespace Components {
             up_to?: number | null;
             flat_fee_amount?: number;
             flat_fee_amount_decimal?: string;
-            unit_amount: number;
-            unit_amount_decimal: string;
+            unit_amount?: number;
+            unit_amount_decimal?: string;
         }
         /**
          * The result from the calculation of a set of price items.
