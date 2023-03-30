@@ -229,6 +229,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "relation_address";
             has_primary?: boolean;
         }
@@ -319,6 +351,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "automation";
         }
         export interface BaseAttribute {
@@ -404,19 +468,69 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
         }
         /**
          * example:
          * {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
          *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
          *   "_schema": "contact",
          *   "_tags": [
          *     "example",
          *     "mock"
          *   ],
          *   "_created_at": "2021-02-09T12:41:43.662Z",
-         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   }
          * }
          */
         export interface BaseEntity {
@@ -426,6 +540,13 @@ declare namespace Components {
              * Organization Id the entity belongs to
              */
             _org: string;
+            _owners?: /**
+             * The user / organization owning this entity.
+             *
+             * Note: Owner implicitly has access to the entity regardless of ACLs.
+             *
+             */
+            EntityOwner[];
             _schema: /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -439,6 +560,7 @@ declare namespace Components {
             _tags?: string[] | null;
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
+            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
         }
         /**
          * Reference to blueprint
@@ -530,6 +652,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "boolean";
         }
         export type ClassificationId = string; // uuid
@@ -624,6 +778,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "computed";
         }
         /**
@@ -712,6 +898,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type: "consent";
             topic: string;
             identifiers?: string[];
@@ -802,6 +1020,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "country";
         }
         /**
@@ -890,6 +1140,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type: "currency";
             currency_selector_only?: boolean;
             /**
@@ -988,6 +1270,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "date" | "datetime";
         }
         /**
@@ -995,13 +1309,31 @@ declare namespace Components {
          * {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
          *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
          *   "_schema": "contact",
          *   "_tags": [
          *     "example",
          *     "mock"
          *   ],
          *   "_created_at": "2021-02-09T12:41:43.662Z",
-         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   }
          * }
          */
         export interface Entity {
@@ -1011,6 +1343,13 @@ declare namespace Components {
              * Organization Id the entity belongs to
              */
             _org?: string;
+            _owners?: /**
+             * The user / organization owning this entity.
+             *
+             * Note: Owner implicitly has access to the entity regardless of ACLs.
+             *
+             */
+            EntityOwner[];
             _schema?: /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -1024,6 +1363,16 @@ declare namespace Components {
             _tags?: string[] | null;
             _created_at?: string | null; // date-time
             _updated_at?: string | null; // date-time
+            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+        }
+        /**
+         * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+         */
+        export interface EntityAcl {
+            [name: string]: any;
+            view?: string[];
+            edit?: string[];
+            delete?: string[];
         }
         /**
          * Capabilities the Entity has. Turn features on/off for entities.
@@ -1236,6 +1585,16 @@ declare namespace Components {
          * {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
          *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     },
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
          *   "_schema": "contact",
          *   "_tags": [
          *     "example",
@@ -1244,7 +1603,23 @@ declare namespace Components {
          *     "mock"
          *   ],
          *   "_created_at": "2021-02-09T12:41:43.662Z",
-         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789",
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456",
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456",
+         *       "org:456"
+         *     ]
+         *   }
          * }
          */
         export interface EntityItem {
@@ -1254,6 +1629,13 @@ declare namespace Components {
              * Organization Id the entity belongs to
              */
             _org: string;
+            _owners?: /**
+             * The user / organization owning this entity.
+             *
+             * Note: Owner implicitly has access to the entity regardless of ACLs.
+             *
+             */
+            EntityOwner[];
             _schema: /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -1267,6 +1649,7 @@ declare namespace Components {
             _tags?: string[] | null;
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
+            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
         }
         export interface EntityOperation {
             entity: EntityId /* uuid */;
@@ -1303,6 +1686,12 @@ declare namespace Components {
              * {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "_org": "123",
+             *   "_owners": [
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     }
+             *   ],
              *   "_schema": "contact",
              *   "_tags": [
              *     "example",
@@ -1310,6 +1699,18 @@ declare namespace Components {
              *   ],
              *   "_created_at": "2021-02-09T12:41:43.662Z",
              *   "_updated_at": "2021-02-09T12:41:43.662Z",
+             *   "_acl": {
+             *     "view": [
+             *       "org:456",
+             *       "org:789"
+             *     ],
+             *     "edit": [
+             *       "org:456"
+             *     ],
+             *     "delete": [
+             *       "org:456"
+             *     ]
+             *   },
              *   "status": "Inactive"
              * }
              */
@@ -1320,6 +1721,13 @@ declare namespace Components {
                  * Organization Id the entity belongs to
                  */
                 _org?: string;
+                _owners?: /**
+                 * The user / organization owning this entity.
+                 *
+                 * Note: Owner implicitly has access to the entity regardless of ACLs.
+                 *
+                 */
+                EntityOwner[];
                 _schema?: /**
                  * URL-friendly identifier for the entity schema
                  * example:
@@ -1333,6 +1741,7 @@ declare namespace Components {
                 _tags?: string[] | null;
                 _created_at?: string | null; // date-time
                 _updated_at?: string | null; // date-time
+                _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             };
             diff?: {
                 added?: /**
@@ -1340,13 +1749,31 @@ declare namespace Components {
                  * {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                  *   "_org": "123",
+                 *   "_owners": [
+                 *     {
+                 *       "org_id": "123",
+                 *       "user_id": "123"
+                 *     }
+                 *   ],
                  *   "_schema": "contact",
                  *   "_tags": [
                  *     "example",
                  *     "mock"
                  *   ],
                  *   "_created_at": "2021-02-09T12:41:43.662Z",
-                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z",
+                 *   "_acl": {
+                 *     "view": [
+                 *       "org:456",
+                 *       "org:789"
+                 *     ],
+                 *     "edit": [
+                 *       "org:456"
+                 *     ],
+                 *     "delete": [
+                 *       "org:456"
+                 *     ]
+                 *   }
                  * }
                  */
                 Entity;
@@ -1355,13 +1782,31 @@ declare namespace Components {
                  * {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                  *   "_org": "123",
+                 *   "_owners": [
+                 *     {
+                 *       "org_id": "123",
+                 *       "user_id": "123"
+                 *     }
+                 *   ],
                  *   "_schema": "contact",
                  *   "_tags": [
                  *     "example",
                  *     "mock"
                  *   ],
                  *   "_created_at": "2021-02-09T12:41:43.662Z",
-                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z",
+                 *   "_acl": {
+                 *     "view": [
+                 *       "org:456",
+                 *       "org:789"
+                 *     ],
+                 *     "edit": [
+                 *       "org:456"
+                 *     ],
+                 *     "delete": [
+                 *       "org:456"
+                 *     ]
+                 *   }
                  * }
                  */
                 Entity;
@@ -1370,17 +1815,53 @@ declare namespace Components {
                  * {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                  *   "_org": "123",
+                 *   "_owners": [
+                 *     {
+                 *       "org_id": "123",
+                 *       "user_id": "123"
+                 *     }
+                 *   ],
                  *   "_schema": "contact",
                  *   "_tags": [
                  *     "example",
                  *     "mock"
                  *   ],
                  *   "_created_at": "2021-02-09T12:41:43.662Z",
-                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z",
+                 *   "_acl": {
+                 *     "view": [
+                 *       "org:456",
+                 *       "org:789"
+                 *     ],
+                 *     "edit": [
+                 *       "org:456"
+                 *     ],
+                 *     "delete": [
+                 *       "org:456"
+                 *     ]
+                 *   }
                  * }
                  */
                 Entity;
             };
+        }
+        /**
+         * The user / organization owning this entity.
+         *
+         * Note: Owner implicitly has access to the entity regardless of ACLs.
+         *
+         */
+        export interface EntityOwner {
+            /**
+             * example:
+             * 123
+             */
+            org_id: string;
+            /**
+             * example:
+             * 123
+             */
+            user_id?: string;
         }
         /**
          * The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities.
@@ -1935,6 +2416,16 @@ declare namespace Components {
              * {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "_org": "123",
+             *   "_owners": [
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     },
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     }
+             *   ],
              *   "_schema": "contact",
              *   "_tags": [
              *     "example",
@@ -1943,7 +2434,23 @@ declare namespace Components {
              *     "mock"
              *   ],
              *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_updated_at": "2021-02-09T12:41:43.662Z",
+             *   "_acl": {
+             *     "view": [
+             *       "org:456",
+             *       "org:789",
+             *       "org:456",
+             *       "org:789"
+             *     ],
+             *     "edit": [
+             *       "org:456",
+             *       "org:456"
+             *     ],
+             *     "delete": [
+             *       "org:456",
+             *       "org:456"
+             *     ]
+             *   }
              * }
              */
             EntityItem[];
@@ -2069,6 +2576,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type: "image" | "file";
             multiple?: boolean;
             /**
@@ -2092,13 +2631,31 @@ declare namespace Components {
          * {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
          *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
          *   "_schema": "contact",
          *   "_tags": [
          *     "example",
          *     "mock"
          *   ],
          *   "_created_at": "2021-02-09T12:41:43.662Z",
-         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   }
          * }
          */
         RelationEntity)[];
@@ -2114,6 +2671,11 @@ declare namespace Components {
          * Entity with relation data resolved into the attribute values
          * example:
          * {
+         *   "_relations": [
+         *     {
+         *       "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+         *     }
+         *   ],
          *   "status": "active",
          *   "customer_number": "abc123",
          *   "email": [
@@ -2168,6 +2730,9 @@ declare namespace Components {
          */
         export interface HydratedEntity {
             [name: string]: any;
+            _relations: {
+                entity_id: EntityId /* uuid */;
+            }[];
         }
         /**
          * Entity with relation data resolved into the attribute values
@@ -2175,6 +2740,12 @@ declare namespace Components {
          * {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
          *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
          *   "_schema": "contact",
          *   "_tags": [
          *     "example",
@@ -2182,6 +2753,23 @@ declare namespace Components {
          *   ],
          *   "_created_at": "2021-02-09T12:41:43.662Z",
          *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   },
+         *   "_relations": [
+         *     {
+         *       "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+         *     }
+         *   ],
          *   "status": "active",
          *   "customer_number": "abc123",
          *   "email": [
@@ -2241,6 +2829,13 @@ declare namespace Components {
              * Organization Id the entity belongs to
              */
             _org: string;
+            _owners?: /**
+             * The user / organization owning this entity.
+             *
+             * Note: Owner implicitly has access to the entity regardless of ACLs.
+             *
+             */
+            EntityOwner[];
             _schema: /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -2254,6 +2849,10 @@ declare namespace Components {
             _tags?: string[] | null;
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
+            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+            _relations: {
+                entity_id: EntityId /* uuid */;
+            }[];
         }
         /**
          * No UI representation
@@ -2341,6 +2940,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "internal";
         }
         /**
@@ -2429,6 +3060,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "internal_user";
         }
         /**
@@ -2517,6 +3180,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "invitation_email";
         }
         /**
@@ -2613,6 +3308,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "link";
         }
         /**
@@ -2701,6 +3428,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "multiselect" | "checkbox";
             /**
              * controls if the matching of values against the options is case sensitive or not
@@ -2805,6 +3564,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "number";
             format?: string;
         }
@@ -2894,6 +3685,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "ordered_list";
         }
         /**
@@ -2982,6 +3805,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "partner_status";
         }
         /**
@@ -3070,6 +3925,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "relation_payment_method";
             has_primary?: boolean;
         }
@@ -3163,6 +4050,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             id?: ClassificationId /* uuid */;
             parents?: ClassificationId /* uuid */[];
             created_at?: string; // date-time
@@ -3270,6 +4189,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "relation";
             relation_type?: "has_many" | "has_one";
             /**
@@ -3349,6 +4300,16 @@ declare namespace Components {
                  * {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                  *   "_org": "123",
+                 *   "_owners": [
+                 *     {
+                 *       "org_id": "123",
+                 *       "user_id": "123"
+                 *     },
+                 *     {
+                 *       "org_id": "123",
+                 *       "user_id": "123"
+                 *     }
+                 *   ],
                  *   "_schema": "contact",
                  *   "_tags": [
                  *     "example",
@@ -3357,7 +4318,23 @@ declare namespace Components {
                  *     "mock"
                  *   ],
                  *   "_created_at": "2021-02-09T12:41:43.662Z",
-                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z",
+                 *   "_acl": {
+                 *     "view": [
+                 *       "org:456",
+                 *       "org:789",
+                 *       "org:456",
+                 *       "org:789"
+                 *     ],
+                 *     "edit": [
+                 *       "org:456",
+                 *       "org:456"
+                 *     ],
+                 *     "delete": [
+                 *       "org:456",
+                 *       "org:456"
+                 *     ]
+                 *   }
                  * }
                  */
                 new_entity_item?: {
@@ -3367,6 +4344,13 @@ declare namespace Components {
                      * Organization Id the entity belongs to
                      */
                     _org: string;
+                    _owners?: /**
+                     * The user / organization owning this entity.
+                     *
+                     * Note: Owner implicitly has access to the entity regardless of ACLs.
+                     *
+                     */
+                    EntityOwner[];
                     _schema: /**
                      * URL-friendly identifier for the entity schema
                      * example:
@@ -3380,6 +4364,7 @@ declare namespace Components {
                     _tags?: string[] | null;
                     _created_at: string | null; // date-time
                     _updated_at: string | null; // date-time
+                    _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
                 };
             }[];
             drawer_size?: "small" | "medium" | "large";
@@ -3409,13 +4394,31 @@ declare namespace Components {
          * {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
          *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
          *   "_schema": "contact",
          *   "_tags": [
          *     "example",
          *     "mock"
          *   ],
          *   "_created_at": "2021-02-09T12:41:43.662Z",
-         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   }
          * }
          */
         export interface RelationEntity {
@@ -3425,6 +4428,13 @@ declare namespace Components {
              * Organization Id the entity belongs to
              */
             _org: string;
+            _owners?: /**
+             * The user / organization owning this entity.
+             *
+             * Note: Owner implicitly has access to the entity regardless of ACLs.
+             *
+             */
+            EntityOwner[];
             _schema: /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -3438,6 +4448,7 @@ declare namespace Components {
             _tags?: string[] | null;
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
+            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             $relation?: RelationItem;
         }
         export interface RelationItem {
@@ -3535,6 +4546,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             repeatable?: boolean;
             has_primary?: boolean;
             /**
@@ -3788,6 +4831,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "select" | "radio";
             options?: ({
                 value: string;
@@ -3884,6 +4959,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "sequence";
             /**
              * Prefix added before the sequence number
@@ -3979,6 +5086,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "status";
             options?: ((string | null) | {
                 value: string;
@@ -4131,6 +5270,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "tags";
             options?: string[];
             suggestions?: string[];
@@ -4260,6 +5431,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "string";
             multiline?: boolean;
         }
@@ -4349,6 +5552,38 @@ declare namespace Components {
              * Setting to `true` prevents the attribute from being modified / deleted
              */
             protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
             type?: "relation_user";
             multiple?: boolean;
         }
@@ -4483,13 +5718,31 @@ declare namespace Paths {
          * {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
          *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
          *   "_schema": "contact",
          *   "_tags": [
          *     "example",
          *     "mock"
          *   ],
          *   "_created_at": "2021-02-09T12:41:43.662Z",
-         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   }
          * }
          */
         Components.Schemas.Entity;
@@ -4499,6 +5752,16 @@ declare namespace Paths {
              * {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "_org": "123",
+             *   "_owners": [
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     },
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     }
+             *   ],
              *   "_schema": "contact",
              *   "_tags": [
              *     "example",
@@ -4507,7 +5770,23 @@ declare namespace Paths {
              *     "mock"
              *   ],
              *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_updated_at": "2021-02-09T12:41:43.662Z",
+             *   "_acl": {
+             *     "view": [
+             *       "org:456",
+             *       "org:789",
+             *       "org:456",
+             *       "org:789"
+             *     ],
+             *     "edit": [
+             *       "org:456",
+             *       "org:456"
+             *     ],
+             *     "delete": [
+             *       "org:456",
+             *       "org:456"
+             *     ]
+             *   }
              * }
              */
             Components.Schemas.EntityItem;
@@ -4667,6 +5946,16 @@ declare namespace Paths {
                  * {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                  *   "_org": "123",
+                 *   "_owners": [
+                 *     {
+                 *       "org_id": "123",
+                 *       "user_id": "123"
+                 *     },
+                 *     {
+                 *       "org_id": "123",
+                 *       "user_id": "123"
+                 *     }
+                 *   ],
                  *   "_schema": "contact",
                  *   "_tags": [
                  *     "example",
@@ -4675,7 +5964,23 @@ declare namespace Paths {
                  *     "mock"
                  *   ],
                  *   "_created_at": "2021-02-09T12:41:43.662Z",
-                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z",
+                 *   "_acl": {
+                 *     "view": [
+                 *       "org:456",
+                 *       "org:789",
+                 *       "org:456",
+                 *       "org:789"
+                 *     ],
+                 *     "edit": [
+                 *       "org:456",
+                 *       "org:456"
+                 *     ],
+                 *     "delete": [
+                 *       "org:456",
+                 *       "org:456"
+                 *     ]
+                 *   }
                  * }
                  */
                 Components.Schemas.EntityItem;
@@ -4684,6 +5989,16 @@ declare namespace Paths {
                  * {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                  *   "_org": "123",
+                 *   "_owners": [
+                 *     {
+                 *       "org_id": "123",
+                 *       "user_id": "123"
+                 *     },
+                 *     {
+                 *       "org_id": "123",
+                 *       "user_id": "123"
+                 *     }
+                 *   ],
                  *   "_schema": "contact",
                  *   "_tags": [
                  *     "example",
@@ -4692,7 +6007,23 @@ declare namespace Paths {
                  *     "mock"
                  *   ],
                  *   "_created_at": "2021-02-09T12:41:43.662Z",
-                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z",
+                 *   "_acl": {
+                 *     "view": [
+                 *       "org:456",
+                 *       "org:789",
+                 *       "org:456",
+                 *       "org:789"
+                 *     ],
+                 *     "edit": [
+                 *       "org:456",
+                 *       "org:456"
+                 *     ],
+                 *     "delete": [
+                 *       "org:456",
+                 *       "org:456"
+                 *     ]
+                 *   }
                  * }
                  */
                 Components.Schemas.EntityItem[];
@@ -4994,13 +6325,31 @@ declare namespace Paths {
          * {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
          *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
          *   "_schema": "contact",
          *   "_tags": [
          *     "example",
          *     "mock"
          *   ],
          *   "_created_at": "2021-02-09T12:41:43.662Z",
-         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   }
          * }
          */
         Components.Schemas.Entity;
@@ -5010,6 +6359,16 @@ declare namespace Paths {
              * {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "_org": "123",
+             *   "_owners": [
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     },
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     }
+             *   ],
              *   "_schema": "contact",
              *   "_tags": [
              *     "example",
@@ -5018,7 +6377,23 @@ declare namespace Paths {
              *     "mock"
              *   ],
              *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_updated_at": "2021-02-09T12:41:43.662Z",
+             *   "_acl": {
+             *     "view": [
+             *       "org:456",
+             *       "org:789",
+             *       "org:456",
+             *       "org:789"
+             *     ],
+             *     "edit": [
+             *       "org:456",
+             *       "org:456"
+             *     ],
+             *     "delete": [
+             *       "org:456",
+             *       "org:456"
+             *     ]
+             *   }
              * }
              */
             Components.Schemas.EntityItem;
@@ -5136,13 +6511,31 @@ declare namespace Paths {
          * {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
          *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
          *   "_schema": "contact",
          *   "_tags": [
          *     "example",
          *     "mock"
          *   ],
          *   "_created_at": "2021-02-09T12:41:43.662Z",
-         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   }
          * }
          */
         Components.Schemas.Entity;
@@ -5152,6 +6545,16 @@ declare namespace Paths {
              * {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "_org": "123",
+             *   "_owners": [
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     },
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     }
+             *   ],
              *   "_schema": "contact",
              *   "_tags": [
              *     "example",
@@ -5160,7 +6563,23 @@ declare namespace Paths {
              *     "mock"
              *   ],
              *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_updated_at": "2021-02-09T12:41:43.662Z",
+             *   "_acl": {
+             *     "view": [
+             *       "org:456",
+             *       "org:789",
+             *       "org:456",
+             *       "org:789"
+             *     ],
+             *     "edit": [
+             *       "org:456",
+             *       "org:456"
+             *     ],
+             *     "delete": [
+             *       "org:456",
+             *       "org:456"
+             *     ]
+             *   }
              * }
              */
             Components.Schemas.EntityItem;
@@ -5245,13 +6664,31 @@ declare namespace Paths {
              * {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "_org": "123",
+             *   "_owners": [
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     }
+             *   ],
              *   "_schema": "contact",
              *   "_tags": [
              *     "example",
              *     "mock"
              *   ],
              *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_updated_at": "2021-02-09T12:41:43.662Z",
+             *   "_acl": {
+             *     "view": [
+             *       "org:456",
+             *       "org:789"
+             *     ],
+             *     "edit": [
+             *       "org:456"
+             *     ],
+             *     "delete": [
+             *       "org:456"
+             *     ]
+             *   }
              * }
              */
             Components.Schemas.Entity;
@@ -5262,6 +6699,16 @@ declare namespace Paths {
              * {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "_org": "123",
+             *   "_owners": [
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     },
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     }
+             *   ],
              *   "_schema": "contact",
              *   "_tags": [
              *     "example",
@@ -5270,7 +6717,23 @@ declare namespace Paths {
              *     "mock"
              *   ],
              *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_updated_at": "2021-02-09T12:41:43.662Z",
+             *   "_acl": {
+             *     "view": [
+             *       "org:456",
+             *       "org:789",
+             *       "org:456",
+             *       "org:789"
+             *     ],
+             *     "edit": [
+             *       "org:456",
+             *       "org:456"
+             *     ],
+             *     "delete": [
+             *       "org:456",
+             *       "org:456"
+             *     ]
+             *   }
              * }
              */
             Components.Schemas.EntityItem;
@@ -5279,6 +6742,16 @@ declare namespace Paths {
              * {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "_org": "123",
+             *   "_owners": [
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     },
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     }
+             *   ],
              *   "_schema": "contact",
              *   "_tags": [
              *     "example",
@@ -5287,7 +6760,23 @@ declare namespace Paths {
              *     "mock"
              *   ],
              *   "_created_at": "2021-02-09T12:41:43.662Z",
-             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             *   "_updated_at": "2021-02-09T12:41:43.662Z",
+             *   "_acl": {
+             *     "view": [
+             *       "org:456",
+             *       "org:789",
+             *       "org:456",
+             *       "org:789"
+             *     ],
+             *     "edit": [
+             *       "org:456",
+             *       "org:456"
+             *     ],
+             *     "delete": [
+             *       "org:456",
+             *       "org:456"
+             *     ]
+             *   }
              * }
              */
             Components.Schemas.EntityItem;
