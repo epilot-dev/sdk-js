@@ -759,10 +759,10 @@
               "schema": {
                 "$ref": "#/components/schemas/Entity"
               },
-              "example": {},
-              "required": true
+              "example": {}
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -2621,6 +2621,29 @@
             "description": "Setting to `true` prevents the attribute from being modified / deleted",
             "type": "boolean",
             "default": true
+          },
+          "info_helpers": {
+            "description": "A set of configurations meant to document and assist the user in filling the attribute.",
+            "type": "object",
+            "properties": {
+              "hint_text": {
+                "type": "string",
+                "description": "The text to be displayed in the attribute hint helper.\nWhen specified it overrides the `hint_text_key` configuration.\n"
+              },
+              "hint_text_key": {
+                "type": "string",
+                "description": "The key of the hint text to be displayed in the attribute hint helper.\nThe key should be a valid i18n key.\n"
+              },
+              "hint_custom_component": {
+                "type": "string",
+                "description": "The name of the custom component to be used as the hint helper.\nThe component should be registered in the `@epilot360/entity-ui` on the index of the components directory.\nWhen specified it overrides the `hint_text` or `hint_text_key` configuration.\n"
+              },
+              "hint_tooltip_placement": {
+                "type": "string",
+                "description": "The placement of the hint tooltip.\nThe value should be a valid `@mui/core` tooltip placement.\n",
+                "example": "top"
+              }
+            }
           }
         },
         "required": [
@@ -3953,6 +3976,12 @@
             "type": "string",
             "description": "Organization Id the entity belongs to"
           },
+          "_owners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityOwner"
+            }
+          },
           "_schema": {
             "$ref": "#/components/schemas/EntitySlug"
           },
@@ -3977,26 +4006,115 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "_acl": {
+            "$ref": "#/components/schemas/EntityAcl"
           }
         },
         "example": {
           "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
           "_org": "123",
+          "_owners": [
+            {
+              "org_id": "123",
+              "user_id": "123"
+            }
+          ],
           "_schema": "contact",
           "_tags": [
             "example",
             "mock"
           ],
           "_created_at": "2021-02-09T12:41:43.662Z",
-          "_updated_at": "2021-02-09T12:41:43.662Z"
+          "_updated_at": "2021-02-09T12:41:43.662Z",
+          "_acl": {
+            "view": [
+              "org:456",
+              "org:789"
+            ],
+            "edit": [
+              "org:456"
+            ],
+            "delete": [
+              "org:456"
+            ]
+          }
         }
+      },
+      "EntityOwner": {
+        "description": "The user / organization owning this entity.\n\nNote: Owner implicitly has access to the entity regardless of ACLs.\n",
+        "type": "object",
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": "123"
+          },
+          "user_id": {
+            "type": "string",
+            "example": "123"
+          }
+        },
+        "required": [
+          "org_id"
+        ]
+      },
+      "EntityAcl": {
+        "description": "Access control list (ACL) for an entity. Defines sharing access to external orgs or users.",
+        "type": "object",
+        "properties": {
+          "view": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          },
+          "edit": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          },
+          "delete": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          }
+        },
+        "additionalProperties": true
       },
       "HydratedEntity": {
         "type": "object",
         "description": "Entity with relation data resolved into the attribute values",
-        "properties": {},
+        "properties": {
+          "_relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/EntityId"
+                }
+              },
+              "required": [
+                "entity_id"
+              ]
+            }
+          }
+        },
         "additionalProperties": true,
+        "required": [
+          "_relations"
+        ],
         "example": {
+          "_relations": [
+            {
+              "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            }
+          ],
           "status": "active",
           "customer_number": "abc123",
           "email": [
