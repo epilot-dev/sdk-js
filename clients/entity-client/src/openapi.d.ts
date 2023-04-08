@@ -1976,22 +1976,28 @@ declare namespace Components {
                     show_sharing_button?: boolean;
                 };
             };
-            capabilities?: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
+            capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
              * A dictionary of Group Titles and associated settings if present.
              * example:
-             * {
-             *   "Order Info": {
-             *     "expanded": true
+             * [
+             *   {
+             *     "id": "Contact Details",
+             *     "label": "Contact Details",
+             *     "expanded": true,
+             *     "order": 1
              *   },
-             *   "Contact Details": {
+             *   {
+             *     "id": "Address Details",
+             *     "label": "Address Details",
              *     "expanded": false,
+             *     "order": 2,
              *     "info_tooltip_title": {
              *       "key": "partner.partner_information_group_tooltip",
              *       "default": "These informations are provided by the partner company and cannot be edited."
              *     }
              *   }
-             * }
+             * ]
              */
             group_settings?: {
                 label: string;
@@ -2091,7 +2097,7 @@ declare namespace Components {
              *   }
              * ]
              */
-            attributes?: Attribute[];
+            attributes: Attribute[];
             explicit_search_mappings?: /**
              * Advanced: explicit Elasticsearch index mapping definitions for entity data
              *
@@ -2226,22 +2232,28 @@ declare namespace Components {
                     show_sharing_button?: boolean;
                 };
             };
-            capabilities?: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
+            capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
              * A dictionary of Group Titles and associated settings if present.
              * example:
-             * {
-             *   "Order Info": {
-             *     "expanded": true
+             * [
+             *   {
+             *     "id": "Contact Details",
+             *     "label": "Contact Details",
+             *     "expanded": true,
+             *     "order": 1
              *   },
-             *   "Contact Details": {
+             *   {
+             *     "id": "Address Details",
+             *     "label": "Address Details",
              *     "expanded": false,
+             *     "order": 2,
              *     "info_tooltip_title": {
              *       "key": "partner.partner_information_group_tooltip",
              *       "default": "These informations are provided by the partner company and cannot be edited."
              *     }
              *   }
-             * }
+             * ]
              */
             group_settings?: {
                 label: string;
@@ -2341,7 +2353,7 @@ declare namespace Components {
              *   }
              * ]
              */
-            attributes?: Attribute[];
+            attributes: Attribute[];
             explicit_search_mappings?: /**
              * Advanced: explicit Elasticsearch index mapping definitions for entity data
              *

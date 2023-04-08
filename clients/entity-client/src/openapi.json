@@ -2312,18 +2312,24 @@
                 "id"
               ]
             },
-            "example": {
-              "Order Info": {
-                "expanded": true
+            "example": [
+              {
+                "id": "Contact Details",
+                "label": "Contact Details",
+                "expanded": true,
+                "order": 1
               },
-              "Contact Details": {
+              {
+                "id": "Address Details",
+                "label": "Address Details",
                 "expanded": false,
+                "order": 2,
                 "info_tooltip_title": {
                   "key": "partner.partner_information_group_tooltip",
                   "default": "These informations are provided by the partner company and cannot be edited."
                 }
               }
-            }
+            ]
           },
           "layout_settings": {
             "type": "object",
@@ -2401,7 +2407,9 @@
         "required": [
           "slug",
           "name",
-          "plural"
+          "plural",
+          "attributes",
+          "capabilities"
         ]
       },
       "EntitySchemaItem": {
