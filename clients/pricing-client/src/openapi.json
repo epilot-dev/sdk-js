@@ -3371,8 +3371,18 @@
           },
           "unit_amount_decimal": {
             "type": "string"
+          },
+          "display_mode": {
+            "$ref": "#/components/schemas/PriceTierDisplayMode"
           }
         }
+      },
+      "PriceTierDisplayMode": {
+        "type": "string",
+        "enum": [
+          "hidden",
+          "on_request"
+        ]
       }
     },
     "examples": {
