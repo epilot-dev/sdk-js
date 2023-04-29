@@ -88,6 +88,19 @@ declare namespace Components {
             available_end_date?: string; // date
         }
         /**
+         * The availability rule error
+         */
+        export interface AvailabilityFileValidationError {
+            /**
+             * The line number where the error was found
+             */
+            line: number;
+            /**
+             * The error message
+             */
+            msg: string;
+        }
+        /**
          * Availability filters dimensions
          */
         export interface AvailabilityFilters {
@@ -2557,6 +2570,32 @@ declare namespace Components {
                 recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
             };
         }
+        /**
+         * The availability map file result payload
+         * example:
+         * {
+         *   "rules_parsed_count": 8,
+         *   "errors": [
+         *     "File must be UTF-8 encoded",
+         *     "Error on line 3 - street_number must be of type number",
+         *     "Error on line 6 - start_date cant be greater than end_date"
+         *   ]
+         * }
+         */
+        export interface ValidateAvailabilityFileResult {
+            /**
+             * The status of the validation
+             */
+            status: "success" | "error";
+            /**
+             * The number of rules successfully parsed
+             */
+            rules_parsed_count: number;
+            /**
+             * The errors found on the file
+             */
+            errors: /* The availability rule error */ AvailabilityFileValidationError[];
+        }
     }
 }
 declare namespace Paths {
@@ -2681,6 +2720,34 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $ValidateAvailabilityFile {
+        export interface HeaderParameters {
+            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
+        }
+        namespace Parameters {
+            export type Id = string;
+            export type XEpilotOrgID = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * The availability map file result payload
+             * example:
+             * {
+             *   "rules_parsed_count": 8,
+             *   "errors": [
+             *     "File must be UTF-8 encoded",
+             *     "Error on line 3 - street_number must be of type number",
+             *     "Error on line 6 - start_date cant be greater than end_date"
+             *   ]
+             * }
+             */
+            Components.Schemas.ValidateAvailabilityFileResult;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace CreateOrder {
         export type RequestBody = /* Order Entity Payload */ Components.Schemas.OrderPayload;
         namespace Responses {
@@ -2780,6 +2847,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$AvailabilityCheck.Responses.$200>
   /**
+   * $validateAvailabilityFile - validateAvailabilityFile
+   * 
+   * Validates an availability file, it returns an array of errors if the file is invalid
+   */
+  '$validateAvailabilityFile'(
+    parameters?: Parameters<Paths.$ValidateAvailabilityFile.PathParameters & Paths.$ValidateAvailabilityFile.HeaderParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
+  /**
    * $createOpportunity - createOpportunity
    * 
    * This API is Deprecated. Please use the Entity API or Submission API to create opportunities.
@@ -2866,6 +2943,18 @@ export interface PathsDictionary {
       data?: Paths.$AvailabilityCheck.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$AvailabilityCheck.Responses.$200>
+  }
+  ['/v1/validate-availability/{id}']: {
+    /**
+     * $validateAvailabilityFile - validateAvailabilityFile
+     * 
+     * Validates an availability file, it returns an array of errors if the file is invalid
+     */
+    'get'(
+      parameters?: Parameters<Paths.$ValidateAvailabilityFile.PathParameters & Paths.$ValidateAvailabilityFile.HeaderParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
   }
   ['/v1/public/opportunity']: {
     /**

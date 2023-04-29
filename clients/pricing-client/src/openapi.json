@@ -733,6 +733,77 @@
         }
       }
     },
+    "/v1/validate-availability/{id}": {
+      "get": {
+        "description": "Validates an availability file, it returns an array of errors if the file is invalid",
+        "operationId": "$validateAvailabilityFile",
+        "summary": "validateAvailabilityFile",
+        "tags": [
+          "Availability API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Product ID that the Availability File is attached to",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "72c803b2-2e5d-4bd6-bffc-fad998bbbe36"
+          },
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": 739224
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The availability get result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateAvailabilityFileResult"
+                },
+                "examples": {
+                  "Response when file has no errors": {
+                    "value": {
+                      "numberOfRulesParsed": 10,
+                      "errors": []
+                    }
+                  },
+                  "Response when file has errors": {
+                    "value": {
+                      "numberOfRulesParsed": 8,
+                      "errors": [
+                        "File must be UTF-8 encoded",
+                        "Line 3 - Postal code is missing or invalid"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/public/opportunity": {
       "post": {
         "deprecated": true,
@@ -1953,6 +2024,62 @@
               "product_id": "my-product-id-123-2",
               "matching_hits": 0
             }
+          ]
+        }
+      },
+      "AvailabilityFileValidationError": {
+        "description": "The availability rule error",
+        "type": "object",
+        "properties": {
+          "line": {
+            "description": "The line number where the error was found",
+            "type": "number"
+          },
+          "msg": {
+            "description": "The error message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "line",
+          "msg"
+        ]
+      },
+      "ValidateAvailabilityFileResult": {
+        "description": "The availability map file result payload",
+        "type": "object",
+        "properties": {
+          "status": {
+            "description": "The status of the validation",
+            "type": "string",
+            "enum": [
+              "success",
+              "error"
+            ]
+          },
+          "rules_parsed_count": {
+            "description": "The number of rules successfully parsed",
+            "type": "number"
+          },
+          "errors": {
+            "description": "The errors found on the file",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityFileValidationError"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "rules_parsed_count",
+          "errors"
+        ],
+        "example": {
+          "rules_parsed_count": 8,
+          "errors": [
+            "File must be UTF-8 encoded",
+            "Error on line 3 - street_number must be of type number",
+            "Error on line 6 - start_date cant be greater than end_date"
           ]
         }
       },
