@@ -88,19 +88,6 @@ declare namespace Components {
             available_end_date?: string; // date
         }
         /**
-         * The availability rule error
-         */
-        export interface AvailabilityFileValidationError {
-            /**
-             * The line number where the error was found
-             */
-            line: number;
-            /**
-             * The error message
-             */
-            msg: string;
-        }
-        /**
          * Availability filters dimensions
          */
         export interface AvailabilityFilters {
@@ -2571,6 +2558,19 @@ declare namespace Components {
             };
         }
         /**
+         * The availability rule error
+         */
+        export interface ValidateAvailabilityFileError {
+            /**
+             * The line number where the error was found
+             */
+            line: number;
+            /**
+             * The error message
+             */
+            msg: string;
+        }
+        /**
          * The availability map file result payload
          * example:
          * {
@@ -2594,7 +2594,7 @@ declare namespace Components {
             /**
              * The errors found on the file
              */
-            errors: /* The availability rule error */ AvailabilityFileValidationError[];
+            errors: /* The availability rule error */ ValidateAvailabilityFileError[];
         }
     }
 }
