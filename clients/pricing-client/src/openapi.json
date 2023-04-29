@@ -2027,7 +2027,7 @@
           ]
         }
       },
-      "AvailabilityFileValidationError": {
+      "ValidateAvailabilityFileError": {
         "description": "The availability rule error",
         "type": "object",
         "properties": {
@@ -2065,7 +2065,7 @@
             "description": "The errors found on the file",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AvailabilityFileValidationError"
+              "$ref": "#/components/schemas/ValidateAvailabilityFileError"
             }
           }
         },
