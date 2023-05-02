@@ -2221,7 +2221,9 @@ declare namespace Components {
             flat_fee_amount_decimal?: string;
             unit_amount?: number;
             unit_amount_decimal?: string;
+            display_mode?: PriceTierDisplayMode;
         }
+        export type PriceTierDisplayMode = "hidden" | "on_request";
         /**
          * The result from the calculation of a set of price items.
          */
