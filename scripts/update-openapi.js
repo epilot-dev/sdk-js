@@ -40,5 +40,5 @@ execSync([
   '>', RUNTIME_FILE,
 ].join(' '), { stdio: 'inherit' });
 
-console.log('===> Done!')
+console.log('===> Done!');
 process.exit(0);
