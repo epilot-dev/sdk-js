@@ -210,6 +210,34 @@
             "schema": {
               "$ref": "#/components/schemas/EntitySlug"
             }
+          },
+          {
+            "in": "query",
+            "name": "versions_from",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "versions_size",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "drafts_from",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "drafts_size",
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {
