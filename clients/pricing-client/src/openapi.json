@@ -774,13 +774,13 @@
                 "examples": {
                   "Response when file has no errors": {
                     "value": {
-                      "numberOfRulesParsed": 10,
+                      "number_of_rules_parsed": 10,
                       "errors": []
                     }
                   },
                   "Response when file has errors": {
                     "value": {
-                      "numberOfRulesParsed": 8,
+                      "number_of_rules_parsed": 8,
                       "errors": [
                         "File must be UTF-8 encoded",
                         "Line 3 - Postal code is missing or invalid"
@@ -1645,7 +1645,15 @@
                   "kwh",
                   "m",
                   "m2",
-                  "l"
+                  "l",
+                  "cubic-meter",
+                  "cubic-meter-h",
+                  "ls",
+                  "a",
+                  "kva",
+                  "w",
+                  "wp",
+                  "kwp"
                 ]
               },
               {
@@ -2041,7 +2049,6 @@
           }
         },
         "required": [
-          "line",
           "msg"
         ]
       },
@@ -2719,6 +2726,10 @@
           "price_mappings": {
             "description": "Price mapping information required to compute totals",
             "$ref": "#/components/schemas/PriceInputMappings"
+          },
+          "on_request_approved": {
+            "type": "boolean",
+            "description": "When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'."
           }
         }
       },
@@ -2741,10 +2752,6 @@
               "one_time",
               "recurring"
             ]
-          },
-          "on_request_approved": {
-            "type": "boolean",
-            "description": "When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'."
           },
           "pricing_model": {
             "type": "string",
