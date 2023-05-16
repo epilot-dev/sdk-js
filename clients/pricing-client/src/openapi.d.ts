@@ -271,6 +271,10 @@ declare namespace Components {
              * ]
              */
             PriceInputMappings;
+            /**
+             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
+             */
+            on_request_approved?: boolean;
         }
         /**
          * Represents a valid base price item from a client.
@@ -789,6 +793,10 @@ declare namespace Components {
              * ]
              */
             PriceInputMappings;
+            /**
+             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
+             */
+            on_request_approved?: boolean;
             /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
@@ -1629,7 +1637,7 @@ declare namespace Components {
             /**
              * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
              */
-            unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l") | string;
+            unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
             /**
              * The price creation date
              */
@@ -1834,13 +1842,13 @@ declare namespace Components {
              */
             PriceInputMappings;
             /**
-             * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
-             */
-            type?: "one_time" | "recurring";
-            /**
              * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
             on_request_approved?: boolean;
+            /**
+             * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
+             */
+            type?: "one_time" | "recurring";
             /**
              * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
@@ -2166,7 +2174,7 @@ declare namespace Components {
                 /**
                  * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
                  */
-                unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l") | string;
+                unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
                 /**
                  * The price creation date
                  */
@@ -2566,7 +2574,7 @@ declare namespace Components {
             /**
              * The line number where the error was found
              */
-            line: number;
+            line?: number;
             /**
              * The error message
              */
