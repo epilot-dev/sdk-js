@@ -25,6 +25,42 @@ declare namespace Components {
              */
             organization_id: string;
         }
+        export interface Address {
+            /**
+             * Street
+             * example:
+             * Auweg
+             */
+            street?: string;
+            /**
+             * Street
+             * example:
+             * 10
+             */
+            street_number?: string;
+            /**
+             * City
+             * example:
+             * Regensburg
+             */
+            city?: string;
+            /**
+             * Postal code
+             * example:
+             * 93055
+             */
+            postal_code?: string;
+            /**
+             * Country
+             * example:
+             * DE
+             */
+            country?: string;
+        }
+        export type AddressGeolocation = {
+            address?: Address;
+            geolocation?: Geolocation;
+        }[];
         export type Assignable = AssignableUser | AssignablePartnerUser | AssignableOrganization;
         export interface AssignableOrganization {
             /**
@@ -54,11 +90,17 @@ declare namespace Components {
              * 123
              */
             OrganizationId;
-            partner_id?: /**
+            partner_id: /**
              * example:
              * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
              */
             PartnerId;
+            /**
+             * example:
+             * Email of Partner Organization
+             */
+            email?: string;
+            address_geolocations?: Geolocation[];
         }
         export interface AssignablePartnerUser {
             /**
@@ -162,6 +204,20 @@ declare namespace Components {
              */
             OrganizationId;
         }
+        export interface Geolocation {
+            /**
+             * Latitude
+             * example:
+             * 49.013
+             */
+            lat: number;
+            /**
+             * Longitude
+             * example:
+             * 12.101
+             */
+            lng: number;
+        }
         export type InviteToken = string;
         /**
          * example:
@@ -226,6 +282,14 @@ declare namespace Components {
              * Language for partner invitation email
              */
             language?: "en" | "de";
+        }
+        export interface SearchGeolocation {
+            /**
+             * Address text to convert into geolocation coordinates
+             * example:
+             * Auweg 1, 93055 Regensburg, DE
+             */
+            address: string;
         }
     }
 }
@@ -395,6 +459,16 @@ declare namespace Paths {
             }
         }
     }
+    namespace SearchGeolocationForText {
+        export type RequestBody = Components.Schemas.SearchGeolocation;
+        namespace Responses {
+            export type $200 = Components.Schemas.Geolocation;
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -485,6 +559,16 @@ export interface OperationMethods {
     data?: Paths.ActivatePartner.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ActivatePartner.Responses.$200>
+  /**
+   * searchGeolocationForText - searchGeolocationForText
+   * 
+   * Converts a given string, in the format of an address, to geo-location latitude and longitude
+   */
+  'searchGeolocationForText'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchGeolocationForText.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchGeolocationForText.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -590,6 +674,18 @@ export interface PathsDictionary {
       data?: Paths.ActivatePartner.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ActivatePartner.Responses.$200>
+  }
+  ['/v1/geolocation/text:search']: {
+    /**
+     * searchGeolocationForText - searchGeolocationForText
+     * 
+     * Converts a given string, in the format of an address, to geo-location latitude and longitude
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchGeolocationForText.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchGeolocationForText.Responses.$200>
   }
 }
 

@@ -421,6 +421,43 @@
           }
         }
       }
+    },
+    "/v1/geolocation/text:search": {
+      "post": {
+        "operationId": "searchGeolocationForText",
+        "summary": "searchGeolocationForText",
+        "tags": [
+          "partners"
+        ],
+        "description": "Converts a given string, in the format of an address, to geo-location latitude and longitude",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchGeolocation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Geo-location converted from text",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Geolocation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No text provided"
+          },
+          "404": {
+            "description": "No geo-location found for text"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -671,17 +708,105 @@
               },
               "partner_id": {
                 "$ref": "#/components/schemas/PartnerId"
+              },
+              "email": {
+                "type": "string",
+                "example": "Email of Partner Organization"
+              },
+              "address_geolocations": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Geolocation"
+                }
               }
-            }
+            },
+            "required": [
+              "type",
+              "display_name",
+              "partner_id"
+            ]
           }
         ]
+      },
+      "SearchGeolocation": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Address text to convert into geolocation coordinates",
+            "example": "Auweg 1, 93055 Regensburg, DE"
+          }
+        },
+        "required": [
+          "address"
+        ]
+      },
+      "Geolocation": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "Latitude",
+            "example": 49.013
+          },
+          "lng": {
+            "type": "number",
+            "description": "Longitude",
+            "example": 12.101
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ]
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "description": "Street",
+            "example": "Auweg"
+          },
+          "street_number": {
+            "type": "string",
+            "description": "Street",
+            "example": "10"
+          },
+          "city": {
+            "type": "string",
+            "description": "City",
+            "example": "Regensburg"
+          },
+          "postal_code": {
+            "type": "string",
+            "description": "Postal code",
+            "example": "93055"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country",
+            "example": "DE"
+          }
+        }
+      },
+      "AddressGeolocation": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "address": {
+              "$ref": "#/components/schemas/Address"
+            },
+            "geolocation": {
+              "$ref": "#/components/schemas/Geolocation"
+            }
+          }
+        }
       }
     }
   },
   "servers": [
-    {
-      "url": "https://partner-directory-api.sls.epilot.io"
-    },
     {
       "url": "https://partner-directory-api.sls.epilot.io"
     }
