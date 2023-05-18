@@ -713,10 +713,10 @@
                 "type": "string",
                 "example": "Email of Partner Organization"
               },
-              "address_geolocations": {
+              "geolocations": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/Geolocation"
+                  "$ref": "#/components/schemas/AddressGeolocation"
                 }
               }
             },
@@ -753,6 +753,14 @@
             "type": "number",
             "description": "Longitude",
             "example": 12.101
+          },
+          "addressLabel": {
+            "type": "string",
+            "description": "Full address label as returned by the location service"
+          },
+          "relevance": {
+            "type": "number",
+            "description": "Relevance of the result. A number between 0 and 1. Closer to 1 means more relevant"
           }
         },
         "required": [
@@ -791,18 +799,23 @@
         }
       },
       "AddressGeolocation": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "address": {
-              "$ref": "#/components/schemas/Address"
-            },
-            "geolocation": {
-              "$ref": "#/components/schemas/Geolocation"
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "address": {
+                "$ref": "#/components/schemas/Address"
+              }
             }
+          },
+          {
+            "$ref": "#/components/schemas/Geolocation"
           }
-        }
+        ],
+        "required": [
+          "address"
+        ]
       }
     }
   },

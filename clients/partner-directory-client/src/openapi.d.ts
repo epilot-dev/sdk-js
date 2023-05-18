@@ -57,10 +57,29 @@ declare namespace Components {
              */
             country?: string;
         }
-        export type AddressGeolocation = {
-            address?: Address;
-            geolocation?: Geolocation;
-        }[];
+        export interface AddressGeolocation {
+            address: Address;
+            /**
+             * Latitude
+             * example:
+             * 49.013
+             */
+            lat: number;
+            /**
+             * Longitude
+             * example:
+             * 12.101
+             */
+            lng: number;
+            /**
+             * Full address label as returned by the location service
+             */
+            addressLabel?: string;
+            /**
+             * Relevance of the result. A number between 0 and 1. Closer to 1 means more relevant
+             */
+            relevance?: number;
+        }
         export type Assignable = AssignableUser | AssignablePartnerUser | AssignableOrganization;
         export interface AssignableOrganization {
             /**
@@ -100,7 +119,7 @@ declare namespace Components {
              * Email of Partner Organization
              */
             email?: string;
-            address_geolocations?: Geolocation[];
+            geolocations?: AddressGeolocation[];
         }
         export interface AssignablePartnerUser {
             /**
@@ -217,6 +236,14 @@ declare namespace Components {
              * 12.101
              */
             lng: number;
+            /**
+             * Full address label as returned by the location service
+             */
+            addressLabel?: string;
+            /**
+             * Relevance of the result. A number between 0 and 1. Closer to 1 means more relevant
+             */
+            relevance?: number;
         }
         export type InviteToken = string;
         /**
