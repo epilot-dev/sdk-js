@@ -120,6 +120,17 @@ declare namespace Components {
              */
             email?: string;
             geolocations?: AddressGeolocation[];
+            /**
+             * example:
+             * Phone number of Partner
+             */
+            phone?: string;
+            /**
+             * Activity radius, in km, the partner is operating in
+             * example:
+             * 50
+             */
+            activity_radius?: number;
         }
         export interface AssignablePartnerUser {
             /**

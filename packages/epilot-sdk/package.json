@@ -54,7 +54,7 @@
     "@epilot/message-client": "^1.2.2",
     "@epilot/notification-client": "^0.2.2",
     "@epilot/organization-client": "^0.7.3",
-    "@epilot/partner-directory-client": "^0.3.2",
+    "@epilot/partner-directory-client": "^0.4.0",
     "@epilot/permissions-client": "^0.9.2",
     "@epilot/pricing-client": "^3.2.3",
     "@epilot/submission-client": "^1.2.2",

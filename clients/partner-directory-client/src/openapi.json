@@ -718,6 +718,15 @@
                 "items": {
                   "$ref": "#/components/schemas/AddressGeolocation"
                 }
+              },
+              "phone": {
+                "type": "string",
+                "example": "Phone number of Partner"
+              },
+              "activity_radius": {
+                "type": "number",
+                "description": "Activity radius, in km, the partner is operating in",
+                "example": 50
               }
             },
             "required": [
@@ -820,6 +829,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://partner-directory-api.sls.epilot.io"
+    },
     {
       "url": "https://partner-directory-api.sls.epilot.io"
     }
