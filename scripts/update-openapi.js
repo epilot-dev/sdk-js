@@ -12,13 +12,13 @@ const defaultSrc = process.argv[2];
 const overrideSrc = process.argv[3];
 const sourceFile = overrideSrc || defaultSrc;
 
-const OPENAPICMD = 'npx openapi';
+const OPENAPICMD = 'npx openapicmd';
 const OUTPUT_FILE = './src/openapi.json';
 const RUNTIME_FILE = './src/openapi-runtime.json';
 
 // get server from default external source
 console.log(`===> Reading server URL from ${defaultSrc}...`);
-const definitionJSON = execSync(`npx openapi read --json ${defaultSrc}`).toString();
+const definitionJSON = execSync(`${OPENAPICMD} read --json ${defaultSrc}`).toString();
 const serverURL = JSON.parse(definitionJSON).servers?.[0]?.url;
 console.log(`=====>> URL: ${serverURL}`);
 
@@ -27,7 +27,7 @@ console.log(`===> Updating openapi.json from ${sourceFile}...`);
 execSync([
   OPENAPICMD, 'read',
   `--json ${sourceFile}`,
-  serverURL ? `--server ${serverURL}` : '',  
+  serverURL ? `--server ${serverURL}` : '',
   '>', OUTPUT_FILE,
 ].join(' '), { stdio: 'inherit' });
 
