@@ -227,6 +227,50 @@ declare namespace Components {
          */
         SendEmailActionConfig | /* Creates an order entity with prices from journey */ CartCheckoutActionConfig | AutomationActionConfig;
         export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
+        export interface ApiCallerContext {
+            [name: string]: any;
+            EpilotAuth?: {
+                /**
+                 * example:
+                 * {
+                 *   "sub": "476e9b48-42f4-4234-a2b0-4668b34626ce",
+                 *   "iss": "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_6lZSgmU6D",
+                 *   "custom:ivy_org_id": "739224",
+                 *   "cognito:username": "n.ahmad@epilot.cloud",
+                 *   "custom:ivy_user_id": "10006129",
+                 *   "aud": "6e0jbdnger7nmoktaaflarue1l",
+                 *   "event_id": "cd5f5583-d90c-4db5-8e99-5f5dd29a4d75",
+                 *   "token_use": "id",
+                 *   "auth_time": 1614333023,
+                 *   "exp": 1614336623,
+                 *   "iat": 1614333023,
+                 *   "email": "n.ahmad@epilot.cloud"
+                 * }
+                 */
+                token?: {
+                    /**
+                     * example:
+                     * 476e9b48-42f4-4234-a2b0-4668b34626ce
+                     */
+                    sub?: string;
+                    /**
+                     * example:
+                     * example@epilot.cloud
+                     */
+                    email?: string;
+                    /**
+                     * example:
+                     * example@epilot.cloud
+                     */
+                    "cognito:username"?: string;
+                    /**
+                     * example:
+                     * 10006129
+                     */
+                    "custom:ivy_user_id"?: string;
+                };
+            };
+        }
         export interface ApiSubmissionTrigger {
             type: "api_submission";
             configuration: {
@@ -406,6 +450,7 @@ declare namespace Components {
              */
             AutomationActionId;
             actions: AnyAction[];
+            trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation;
         }
         /**
          * example:
@@ -464,6 +509,12 @@ declare namespace Components {
              * user:123
              */
             last_updated_by?: string;
+            /**
+             * Organization the automation flow belongs to
+             * example:
+             * 123
+             */
+            org_id?: string;
         }
         /**
          * example:
@@ -696,6 +747,7 @@ declare namespace Components {
                 schema?: string;
             };
         }
+        export type EntityOperation = "createEntity" | "updateEntity" | "deleteEntity";
         export interface EntityOperationTrigger {
             type: "entity_operation";
             configuration: {
@@ -705,8 +757,8 @@ declare namespace Components {
                  */
                 schema: string;
                 operations: [
-                    ("createEntity" | "updateEntity" | "deleteEntity"),
-                    ...("createEntity" | "updateEntity" | "deleteEntity")[]
+                    EntityOperation,
+                    ...EntityOperation[]
                 ];
                 include_activities?: string[];
                 exclude_activities?: string[];
@@ -1251,6 +1303,58 @@ declare namespace Components {
             source: string;
             comparison: Comparison;
             value?: string | number | string[] | number[];
+        }
+        export interface TriggerEventEntityActivity {
+            type?: "entity_activity";
+            /**
+             * example:
+             * 123
+             */
+            org_id: string;
+            activity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            ActivityId;
+            activity_type: string;
+            entity_id?: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
+        }
+        export interface TriggerEventEntityOperation {
+            type?: "entity_operation";
+            entity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
+            /**
+             * example:
+             * 123
+             */
+            org_id: string;
+            activity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            ActivityId;
+            operation_type: EntityOperation;
+        }
+        export interface TriggerEventManual {
+            type?: "manual";
+            /**
+             * example:
+             * 123
+             */
+            org_id: string;
+            entity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
+            caller?: ApiCallerContext;
         }
         export interface TriggerWebhookAction {
             id?: /**

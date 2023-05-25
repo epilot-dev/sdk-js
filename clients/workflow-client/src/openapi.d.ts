@@ -481,6 +481,10 @@ declare namespace Components {
              */
             enableECPWorkflow?: boolean;
             updateEntityAttributes?: UpdateEntityAttributes[];
+            /**
+             * Version of the workflow execution
+             */
+            version?: number;
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export interface WorkflowExecutionBase {
@@ -518,6 +522,10 @@ declare namespace Components {
              */
             enableECPWorkflow?: boolean;
             updateEntityAttributes?: UpdateEntityAttributes[];
+            /**
+             * Version of the workflow execution
+             */
+            version?: number;
         }
         /**
          * example:
@@ -618,6 +626,10 @@ declare namespace Components {
              */
             enableECPWorkflow?: boolean;
             updateEntityAttributes?: UpdateEntityAttributes[];
+            /**
+             * Version of the workflow execution
+             */
+            version?: number;
             flow: (/* A group of Steps that define the progress of the Workflow */ SectionSimplified | StepSimplified)[];
         }
         export interface WorkflowExecutionUpdateReq {
@@ -635,14 +647,21 @@ declare namespace Components {
         }
         export interface WorkflowInEntity {
             id?: string;
+            definition_id?: string;
             name?: string;
-            next_open_step_id?: string;
-            next_open_step_name?: string;
-            next_open_section_id?: string;
-            next_open_section_name?: string;
-            workflow_status?: WorkflowStatus;
-            workflow_assignees?: string[];
-            workflow_definition_id?: string;
+            status?: WorkflowStatus;
+            assignees?: string[];
+            duedate?: string;
+            last_update_time?: string;
+            task_id?: string;
+            task_name?: string;
+            task_assignees?: string[];
+            task_duedate?: string;
+            task_execution_type?: StepType;
+            phase_id?: string;
+            phase_name?: string;
+            selected_closing_reasons?: ClosingReason[];
+            closing_reason_description?: string;
         }
         export type WorkflowStatus = "STARTED" | "DONE" | "CLOSED";
     }

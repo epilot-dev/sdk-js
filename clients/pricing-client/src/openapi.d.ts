@@ -252,32 +252,6 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
-<<<<<<< HEAD
-            /**
-             * Price mapping information required to compute totals
-             */
-            price_mappings?: /**
-             * example:
-             * [
-             *   {
-             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-             *     "frequency_unit": "weekly",
-             *     "value": 1000.245,
-             *     "name": "avg consumption",
-             *     "metadata": {
-             *       "journey_title": "energy journey",
-             *       "step_name": "avg consumption picker"
-             *     }
-             *   }
-             * ]
-             */
-            PriceInputMappings;
-            /**
-             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
-             */
-            on_request_approved?: boolean;
-=======
->>>>>>> d93048b (Optimise pricing-client)
         }
         /**
          * Represents a valid base price item from a client.
@@ -761,10 +735,6 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
-            /**
-             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
-             */
-            on_request_approved?: boolean;
             /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
@@ -1586,7 +1556,7 @@ declare namespace Components {
             /**
              * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
              */
-            unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
+            unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l") | string;
             /**
              * The price creation date
              */
@@ -1724,25 +1694,13 @@ declare namespace Components {
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
             /**
-             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
-             */
-            on_request_approved?: boolean;
-<<<<<<< HEAD
-            /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
             type?: "one_time" | "recurring";
             /**
-             * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
-             * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
-             * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
-             * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
-             * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
-             *
+             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
-=======
->>>>>>> d93048b (Optimise pricing-client)
+            on_request_approved?: boolean;
         }
         /**
          * Represents a price input to the pricing library.
@@ -2024,7 +1982,7 @@ declare namespace Components {
                 /**
                  * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
                  */
-                unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
+                unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l") | string;
                 /**
                  * The price creation date
                  */
@@ -2405,48 +2363,6 @@ declare namespace Components {
                 recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
             };
         }
-<<<<<<< HEAD
-        /**
-         * The availability rule error
-         */
-        export interface ValidateAvailabilityFileError {
-            /**
-             * The line number where the error was found
-             */
-            line?: number;
-            /**
-             * The error message
-             */
-            msg: string;
-        }
-        /**
-         * The availability map file result payload
-         * example:
-         * {
-         *   "rules_parsed_count": 8,
-         *   "errors": [
-         *     "File must be UTF-8 encoded",
-         *     "Error on line 3 - street_number must be of type number",
-         *     "Error on line 6 - start_date cant be greater than end_date"
-         *   ]
-         * }
-         */
-        export interface ValidateAvailabilityFileResult {
-            /**
-             * The status of the validation
-             */
-            status: "success" | "error";
-            /**
-             * The number of rules successfully parsed
-             */
-            rules_parsed_count: number;
-            /**
-             * The errors found on the file
-             */
-            errors: /* The availability rule error */ ValidateAvailabilityFileError[];
-        }
-=======
->>>>>>> d93048b (Optimise pricing-client)
     }
 }
 declare namespace Paths {

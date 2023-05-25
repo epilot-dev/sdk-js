@@ -598,14 +598,6 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
-    namespace CreateAttachmentUploadUrl {
-        export type RequestBody = Components.Schemas.PresignedRequest;
-        namespace Responses {
-            export type $200 = Components.Schemas.PresignedResponse;
-            export interface $403 {
-            }
-        }
-    }
     namespace CreateFeatureSystemTemplates {
         export interface RequestBody {
             /**
@@ -629,50 +621,6 @@ declare namespace Paths {
             }
         }
     }
-    namespace DeleteEmailTemplate {
-        namespace Parameters {
-            export type Id = string;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        namespace Responses {
-            export interface $204 {
-            }
-            export interface $403 {
-            }
-        }
-    }
-    namespace DeleteMultipleEmailTemplates {
-        export interface RequestBody {
-            /**
-             * List entity IDs
-             */
-            entity_ids: string[];
-        }
-        namespace Responses {
-            export interface $204 {
-            }
-            export interface $403 {
-            }
-        }
-    }
-    namespace GetCreatedByAndUpdatedBy {
-        export interface RequestBody {
-            /**
-             * List user IDs
-             */
-            entity_ids?: number[];
-        }
-        namespace Responses {
-            /**
-             * List attachments
-             */
-            export type $200 = any[];
-            export interface $403 {
-            }
-        }
-    }
     namespace GetTemplateDetail {
         namespace Parameters {
             export type Id = string;
@@ -685,23 +633,6 @@ declare namespace Paths {
             export interface $403 {
             }
             export interface $404 {
-            }
-        }
-    }
-    namespace ListAttachments {
-        namespace Parameters {
-            export type AvailabilityProducts = string;
-            export type AvailabilityTypes = string;
-            export type DocumentTypes = string;
-        }
-        export interface QueryParameters {
-            document_types?: Parameters.DocumentTypes;
-            availability_types?: Parameters.AvailabilityTypes;
-            availability_products?: Parameters.AvailabilityProducts;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.AttachmentResponse;
-            export interface $403 {
             }
         }
     }
@@ -869,16 +800,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SaveTemplate.Responses.$200>
   /**
-   * deleteMultipleEmailTemplates - deleteMultipleEmailTemplates
-   * 
-   * Immediately and permanently deletes the multiple email templates. This operation cannot be undone.
-   */
-  'deleteMultipleEmailTemplates'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.DeleteMultipleEmailTemplates.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteMultipleEmailTemplates.Responses.$204>
-  /**
    * getTemplateDetail - getTemplateDetail
    * 
    * Get email template by ID
@@ -888,46 +809,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetTemplateDetail.Responses.$200>
-  /**
-   * deleteEmailTemplate - deleteEmailTemplate
-   * 
-   * Immediately and permanently deletes the specified email template. This operation cannot be undone.
-   */
-  'deleteEmailTemplate'(
-    parameters?: Parameters<Paths.DeleteEmailTemplate.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteEmailTemplate.Responses.$204>
-  /**
-   * createAttachmentUploadUrl - createAttachmentUploadUrl
-   * 
-   * Create S3 POST presigned URL to upload attachment. The URL is valid in 30 minutes. Maximum file size is 100MB.
-   */
-  'createAttachmentUploadUrl'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.CreateAttachmentUploadUrl.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateAttachmentUploadUrl.Responses.$200>
-  /**
-   * listAttachments - listAttachments
-   * 
-   * Get list attachments from static and template document
-   */
-  'listAttachments'(
-    parameters?: Parameters<Paths.ListAttachments.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListAttachments.Responses.$200>
-  /**
-   * getCreatedByAndUpdatedBy - getCreatedByAndUpdatedBy
-   * 
-   * Get list users which create email template
-   */
-  'getCreatedByAndUpdatedBy'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.GetCreatedByAndUpdatedBy.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetCreatedByAndUpdatedBy.Responses.$200>
   /**
    * replaceVariables - replaceVariables
    * 
@@ -982,16 +863,6 @@ export interface PathsDictionary {
       data?: Paths.SaveTemplate.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SaveTemplate.Responses.$200>
-    /**
-     * deleteMultipleEmailTemplates - deleteMultipleEmailTemplates
-     * 
-     * Immediately and permanently deletes the multiple email templates. This operation cannot be undone.
-     */
-    'delete'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.DeleteMultipleEmailTemplates.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteMultipleEmailTemplates.Responses.$204>
   }
   ['/v1/email-template/templates/{id}']: {
     /**
@@ -1004,52 +875,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetTemplateDetail.Responses.$200>
-    /**
-     * deleteEmailTemplate - deleteEmailTemplate
-     * 
-     * Immediately and permanently deletes the specified email template. This operation cannot be undone.
-     */
-    'delete'(
-      parameters?: Parameters<Paths.DeleteEmailTemplate.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteEmailTemplate.Responses.$204>
-  }
-  ['/v1/email-template/templates/attachments/presigned-url']: {
-    /**
-     * createAttachmentUploadUrl - createAttachmentUploadUrl
-     * 
-     * Create S3 POST presigned URL to upload attachment. The URL is valid in 30 minutes. Maximum file size is 100MB.
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.CreateAttachmentUploadUrl.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateAttachmentUploadUrl.Responses.$200>
-  }
-  ['/v1/email-template/templates/attachments']: {
-    /**
-     * listAttachments - listAttachments
-     * 
-     * Get list attachments from static and template document
-     */
-    'get'(
-      parameters?: Parameters<Paths.ListAttachments.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListAttachments.Responses.$200>
-  }
-  ['/v1/email-template/templates/users']: {
-    /**
-     * getCreatedByAndUpdatedBy - getCreatedByAndUpdatedBy
-     * 
-     * Get list users which create email template
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.GetCreatedByAndUpdatedBy.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetCreatedByAndUpdatedBy.Responses.$200>
   }
   ['/v1/email-template/templates:replace']: {
     /**
