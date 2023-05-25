@@ -1,0 +1,91 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v2/organization/{org_id}": {
+      "get": {
+        "operationId": "getOrganization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "updateOrganization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v2/organization/{org_id}/settings": {
+      "get": {
+        "operationId": "getSettings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v2/organization/{org_id}/settings/{key}": {
+      "put": {
+        "operationId": "putSettingsValue",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSettingsValue",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://organization-v2.sls.epilot.io"
+    }
+  ]
+}

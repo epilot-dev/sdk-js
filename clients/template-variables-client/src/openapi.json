@@ -1417,6 +1417,9 @@
   "servers": [
     {
       "url": "https://template-variables-api.sls.epilot.io"
+    },
+    {
+      "url": "https://template-variables-api.sls.epilot.io"
     }
   ]
 }

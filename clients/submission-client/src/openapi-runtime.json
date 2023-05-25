@@ -1,0 +1,25 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/submission/submissions": {
+      "post": {
+        "operationId": "createSubmission",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://submission.sls.epilot.io"
+    }
+  ]
+}

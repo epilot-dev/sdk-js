@@ -1,0 +1,107 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/webhooks/configured-events": {
+      "get": {
+        "operationId": "getConfiguredEvents"
+      }
+    },
+    "/v1/webhooks/configs": {
+      "get": {
+        "operationId": "getConfigs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "eventName",
+            "required": false
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createConfig",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/webhooks/configs/{configId}": {
+      "get": {
+        "operationId": "getConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "operationId": "updateConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/webhooks/failures": {
+      "get": {
+        "operationId": "getFailures",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "lastLoadedEventId",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "lastLoadedTimestamp",
+            "required": false
+          }
+        ]
+      }
+    },
+    "/v1/webhooks/failures/resend": {
+      "post": {
+        "operationId": "resendFailure",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://webhooks.sls.epilot.io"
+    }
+  ]
+}

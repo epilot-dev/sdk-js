@@ -33,7 +33,7 @@
         "parameters": [
           {
             "name": "type",
-            "description": "Setting types:\n* signature\n* email_domain\n* email_address\n",
+            "description": "Setting types:\n* signature\n* email_domain\n* email_address\n* whitelist_email_address\n",
             "in": "query",
             "required": true,
             "schema": {

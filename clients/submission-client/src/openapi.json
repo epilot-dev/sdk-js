@@ -208,6 +208,9 @@
   "servers": [
     {
       "url": "https://submission.sls.epilot.io"
+    },
+    {
+      "url": "https://submission.sls.epilot.io"
     }
   ]
 }

@@ -1,0 +1,117 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://pricing-api.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/order": {
+      "post": {
+        "operationId": "createOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/order/{id}": {
+      "put": {
+        "operationId": "putOrder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/public/cart:checkout": {
+      "post": {
+        "operationId": "$checkoutCart",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/public/catalog": {
+      "post": {
+        "operationId": "$searchCatalog",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/public/availability:check": {
+      "post": {
+        "operationId": "$availabilityCheck",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/public/opportunity": {
+      "post": {
+        "deprecated": true,
+        "operationId": "$createOpportunity",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {}
+}

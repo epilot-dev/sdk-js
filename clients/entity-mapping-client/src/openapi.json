@@ -1413,10 +1413,5 @@
         ]
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://entity-mapping.sls.epilot.io"
-    }
-  ]
+  }
 }

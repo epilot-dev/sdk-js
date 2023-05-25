@@ -6,7 +6,6 @@ const CopyPlugin = require('copy-webpack-plugin');
 module.exports = {
   entry: './src/definition.ts',
   mode: 'production',
-  resolve: { extensions: ['.ts'] },
   module: {
     rules: [
       {
@@ -18,7 +17,10 @@ module.exports = {
   },
   plugins: [
     new CopyPlugin({
-      patterns: [{ from: '*.d.ts', context: './src' }],
+      patterns: [
+        { from: '*.d.ts', context: './src' },
+        { from: '*.json', context: './src' },
+      ],
     }),
   ],
   output: {

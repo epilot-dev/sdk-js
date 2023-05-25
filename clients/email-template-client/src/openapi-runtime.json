@@ -1,0 +1,72 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/email-template/templates": {
+      "post": {
+        "operationId": "saveTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates/{id}": {
+      "get": {
+        "operationId": "getTemplateDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/email-template/templates:replace": {
+      "post": {
+        "operationId": "replaceVariables",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates:revert": {
+      "post": {
+        "operationId": "revertToOriginalTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates/system": {
+      "post": {
+        "operationId": "createSystemTemplates"
+      }
+    },
+    "/v1/email-template/templates/system/feature": {
+      "post": {
+        "operationId": "createFeatureSystemTemplates",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://email-template.sls.epilot.io"
+    }
+  ]
+}

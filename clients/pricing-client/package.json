@@ -1,6 +1,6 @@
 {
   "name": "@epilot/pricing-client",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "description": "Client for epilot Pricing APIs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -61,8 +61,8 @@
     "copy-webpack-plugin": "^7.0.0",
     "jest": "^26.6.3",
     "json-loader": "^0.5.7",
-    "openapi-client-axios-typegen": "^6.0.0",
-    "openapicmd": "^1.6.2",
+    "openapi-client-axios-typegen": "^7.2.0",
+    "openapicmd": "^1.16.2",
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.14",
     "ts-node": "^9.1.1",

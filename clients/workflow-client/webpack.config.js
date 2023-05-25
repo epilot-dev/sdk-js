@@ -17,7 +17,10 @@ module.exports = {
   },
   plugins: [
     new CopyPlugin({
-      patterns: [{ from: '*.d.ts', context: './src' }],
+      patterns: [
+        { from: '*.d.ts', context: './src' },
+        { from: '*.json', context: './src' },
+      ],
     }),
   ],
   output: {

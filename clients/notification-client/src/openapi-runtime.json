@@ -1,0 +1,72 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/notification/notifications": {
+      "post": {
+        "operationId": "createNotification",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "get": {
+        "operationId": "getNotifications",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after_id"
+          },
+          {
+            "in": "query",
+            "name": "limit"
+          }
+        ]
+      }
+    },
+    "/v1/notification/notifications/{id}": {
+      "get": {
+        "operationId": "getNotification",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/notification/notifications/mark": {
+      "put": {
+        "operationId": "markAllAsRead"
+      }
+    },
+    "/v1/notification/notifications/{id}/mark": {
+      "put": {
+        "operationId": "markAsRead",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/notification/unreads": {
+      "get": {
+        "operationId": "getTotalUnread"
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://notification.sls.epilot.io"
+    }
+  ]
+}

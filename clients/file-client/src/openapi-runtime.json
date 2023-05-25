@@ -1,0 +1,146 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/files/public/upload": {
+      "post": {
+        "operationId": "uploadFilePublic",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/files/upload": {
+      "post": {
+        "operationId": "uploadFile",
+        "parameters": [
+          {
+            "name": "file_entity_id",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/files": {
+      "post": {
+        "operationId": "saveFile",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/files/{id}/download": {
+      "get": {
+        "operationId": "downloadFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "name": "attachment",
+            "in": "query"
+          }
+        ]
+      }
+    },
+    "/v1/files:downloadS3": {
+      "post": {
+        "operationId": "downloadS3File",
+        "parameters": [
+          {
+            "name": "s3_key",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "s3_bucket",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "attachment",
+            "in": "query"
+          }
+        ]
+      }
+    },
+    "/v1/files/{id}/preview": {
+      "get": {
+        "operationId": "previewFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "name": "w",
+            "in": "query"
+          },
+          {
+            "name": "h",
+            "in": "query"
+          }
+        ]
+      }
+    },
+    "/v1/files:previewS3": {
+      "post": {
+        "operationId": "previewS3File",
+        "parameters": [
+          {
+            "name": "w",
+            "in": "query"
+          },
+          {
+            "name": "h",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/files/delete": {
+      "delete": {
+        "operationId": "deleteFile",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://file.sls.epilot.io"
+    }
+  ]
+}
