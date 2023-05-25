@@ -372,6 +372,9 @@
   "servers": [
     {
       "url": "https://organization-v2.sls.epilot.io"
+    },
+    {
+      "url": "https://organization-v2.sls.epilot.io"
     }
   ]
 }

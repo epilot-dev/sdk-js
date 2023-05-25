@@ -1,0 +1,219 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v2/users/public/signup": {
+      "post": {
+        "operationId": "signUpUser",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v2/users/me": {
+      "get": {
+        "operationId": "getMeV2"
+      }
+    },
+    "/v2/users": {
+      "get": {
+        "operationId": "listUsersV2",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false
+          }
+        ]
+      }
+    },
+    "/v2/users/{id}": {
+      "get": {
+        "operationId": "getUserV2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "updateUserV2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteUserV2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v2/users/invite": {
+      "post": {
+        "operationId": "inviteUser",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v2/users/invite:resendEmail": {
+      "post": {
+        "operationId": "resendUserInvitation",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v2/users/public/verifyEmail": {
+      "post": {
+        "operationId": "verifyEmailWithToken",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v2/users/public/activate": {
+      "post": {
+        "operationId": "activateUser",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v2/users/public/username/{username}:getLoginParameters": {
+      "get": {
+        "operationId": "getUserLoginParametersV2",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/users/me": {
+      "get": {
+        "operationId": "getMe"
+      }
+    },
+    "/v1/users": {
+      "get": {
+        "operationId": "listUsers",
+        "parameters": [
+          {
+            "name": "org_ids",
+            "in": "query",
+            "style": "form",
+            "explode": false
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false
+          }
+        ]
+      }
+    },
+    "/v1/users/{id}": {
+      "get": {
+        "operationId": "getUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/users/username/{username}:getLoginParameters": {
+      "get": {
+        "operationId": "getUserLoginParameters",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://user.sls.epilot.io"
+    }
+  ]
+}

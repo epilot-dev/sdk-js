@@ -1,0 +1,141 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/permissions/me": {
+      "get": {
+        "operationId": "listCurrentRoles"
+      }
+    },
+    "/v1/permissions/roles": {
+      "get": {
+        "operationId": "listAllRoles"
+      }
+    },
+    "/v1/permissions/roles:search": {
+      "post": {
+        "operationId": "searchRoles",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/permissions/roles/{roleId}": {
+      "get": {
+        "operationId": "getRole",
+        "parameters": [
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "operationId": "putRole",
+        "parameters": [
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteRole",
+        "parameters": [
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/permissions/refresh": {
+      "get": {
+        "operationId": "refreshPermissions"
+      }
+    },
+    "/v1/permissions/assignments/{userId}": {
+      "get": {
+        "operationId": "getAssignedRolesForUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "operationId": "assignRoles",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/permissions/assignments/{userId}/{roleId}": {
+      "post": {
+        "operationId": "addAssignment",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "removeAssignment",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/permissions/assignments": {
+      "get": {
+        "operationId": "listAllAssignments"
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://permissions.sls.epilot.io"
+    }
+  ]
+}

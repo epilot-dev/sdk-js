@@ -1,0 +1,153 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://entity-mapping.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/mappings": {
+      "post": {
+        "operationId": "storeConfig",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/mappings/{id}": {
+      "get": {
+        "operationId": "getConfig",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "deleteConfig",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/mappings/{id}/versions": {
+      "get": {
+        "operationId": "getAllVersions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "post": {
+        "operationId": "storeNewVersion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/mappings/{id}/versions/{version}": {
+      "get": {
+        "operationId": "getConfigVersion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/mappings:execute": {
+      "post": {
+        "operationId": "executeMapping",
+        "parameters": [
+          {
+            "name": "preview_mode",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/mappings:search": {
+      "post": {
+        "operationId": "searchConfigs",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/mappings/history": {
+      "get": {
+        "operationId": "queryMappingHistory",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "targetEntityId"
+          },
+          {
+            "in": "query",
+            "name": "sourceEntityId"
+          }
+        ]
+      }
+    },
+    "/v1/relations:execute": {
+      "post": {
+        "operationId": "executeRelations",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {}
+}

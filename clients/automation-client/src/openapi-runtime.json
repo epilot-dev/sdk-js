@@ -1,0 +1,155 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/automation/flows": {
+      "get": {
+        "operationId": "searchFlows",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "query"
+          },
+          {
+            "name": "size",
+            "in": "query"
+          },
+          {
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "name": "trigger_source_id",
+            "in": "query"
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createFlow",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/automation/flows/{flow_id}": {
+      "get": {
+        "operationId": "getFlow",
+        "parameters": [
+          {
+            "name": "flow_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "operationId": "putFlow",
+        "parameters": [
+          {
+            "name": "flow_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteFlow",
+        "parameters": [
+          {
+            "name": "flow_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/automation/executions": {
+      "get": {
+        "operationId": "getExecutions",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "query"
+          },
+          {
+            "name": "size",
+            "in": "query"
+          },
+          {
+            "name": "from",
+            "in": "query"
+          }
+        ]
+      },
+      "post": {
+        "operationId": "startExecution",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/automation/executions/{execution_id}": {
+      "get": {
+        "operationId": "getExecution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "cancelExecution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/automation/executions/{execution_id}/{action_id}/retrigger": {
+      "post": {
+        "operationId": "retriggerAction",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://automation.sls.epilot.io"
+    }
+  ]
+}

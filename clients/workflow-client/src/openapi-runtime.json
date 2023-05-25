@@ -1,0 +1,169 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://workflows-execution.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/workflows/executions": {
+      "get": {
+        "operationId": "getExecutions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "context",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "required": false
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createExecution",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/workflows/executions/{executionId}": {
+      "get": {
+        "operationId": "getExecution",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "updateExecution",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteExecution",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/workflows/executions/{executionId}/steps": {
+      "post": {
+        "operationId": "createStep",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/workflows/executions/{executionId}/steps/{stepId}": {
+      "patch": {
+        "operationId": "updateStep",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "stepId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteStep",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "stepId",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/workflows/executions/search": {
+      "post": {
+        "operationId": "searchExecutions",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/workflows/executions/steps/search": {
+      "post": {
+        "operationId": "searchSteps",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/workflows/executions/{executionId}/closing-reasons": {
+      "get": {
+        "operationId": "getClosingReasonExecution",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {}
+}

@@ -1,0 +1,138 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://workflows-definition.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/workflows/limits/max-allowed": {
+      "get": {
+        "operationId": "getMaxAllowedLimit"
+      }
+    },
+    "/v1/workflows/definitions": {
+      "get": {
+        "operationId": "getDefinitions"
+      },
+      "post": {
+        "operationId": "createDefinition",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/workflows/definitions/{definitionId}": {
+      "get": {
+        "operationId": "getDefinition",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definitionId",
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "operationId": "updateDefinition",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definitionId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDefinition",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definitionId",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/workflows/closing-reasons": {
+      "get": {
+        "operationId": "getAllClosingReasons",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "includeInactive",
+            "required": false
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createClosingReason",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/workflows/closing-reasons/{reasonId}": {
+      "patch": {
+        "operationId": "changeReasonStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reasonId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/workflows/definitions/{definitionId}/closing-reasons": {
+      "get": {
+        "operationId": "getWorkflowClosingReasons",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definitionId",
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "setWorkflowClosingReasons",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "definitionId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {}
+}

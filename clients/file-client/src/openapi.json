@@ -611,6 +611,9 @@
   "servers": [
     {
       "url": "https://file.sls.epilot.io"
+    },
+    {
+      "url": "https://file.sls.epilot.io"
     }
   ]
 }

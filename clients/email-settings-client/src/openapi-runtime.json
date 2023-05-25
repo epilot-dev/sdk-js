@@ -1,0 +1,102 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/email-settings": {
+      "get": {
+        "operationId": "getSettings",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "query"
+          }
+        ]
+      },
+      "post": {
+        "operationId": "addSetting",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSetting",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/email-settings/{id}": {
+      "post": {
+        "operationId": "updateSetting",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/email-settings/domain": {
+      "post": {
+        "operationId": "addDomain",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDomain",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/email-settings/domain/name-servers:verify": {
+      "post": {
+        "operationId": "verifyNameServers",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/email-settings/domain:verify": {
+      "post": {
+        "operationId": "verifyDomain",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://email-settings.sls.epilot.io"
+    }
+  ]
+}

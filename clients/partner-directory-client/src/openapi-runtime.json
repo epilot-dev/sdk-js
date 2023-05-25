@@ -1,0 +1,132 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/partners/{id}/invite": {
+      "post": {
+        "operationId": "invitePartner",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/partners/{id}/approve": {
+      "post": {
+        "operationId": "approvePartner",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/partners/{id}/reject": {
+      "post": {
+        "operationId": "rejectPartner",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/partners/{id}/invite:resendEmail": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "operationId": "resendPartnerInvitation",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/partners/assignables:search": {
+      "post": {
+        "operationId": "searchAssignable",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/partners/assignables:batchGet": {
+      "post": {
+        "operationId": "batchGetAssignable",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/partner-directory/public/getPartnerByToken": {
+      "get": {
+        "operationId": "getPartnerByToken",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/partner-directory/public/activate": {
+      "post": {
+        "operationId": "activatePartner",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/geolocation/text:search": {
+      "post": {
+        "operationId": "searchGeolocationForText",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://partner-directory-api.sls.epilot.io"
+    }
+  ]
+}
