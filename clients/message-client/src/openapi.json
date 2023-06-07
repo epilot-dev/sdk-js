@@ -30,8 +30,17 @@
         "operationId": "sendMessage",
         "summary": "sendMessage",
         "description": "Send an email message",
-        "tags": [
-          "Messages"
+        "tags": null,
+        "parameters": [
+          {
+            "in": "query",
+            "name": "do_not_create_entities",
+            "description": "When true, this flag lets the caller to send only the message and by-pass creating the entities.",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
         ],
         "requestBody": {
           "content": {
@@ -1054,10 +1063,6 @@
           },
           "file": {
             "$ref": "#/components/schemas/AttachmentsRelation"
-          },
-          "do_not_create_entities": {
-            "type": "boolean",
-            "description": "This flag lets the caller to send only the message and by-pass creating the entities"
           }
         }
       },

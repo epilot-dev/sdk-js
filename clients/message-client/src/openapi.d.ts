@@ -275,10 +275,6 @@ declare namespace Components {
              */
             bcc?: Address[];
             file?: /* Message attachments */ AttachmentsRelation;
-            /**
-             * This flag lets the caller to send only the message and by-pass creating the entities
-             */
-            do_not_create_entities?: boolean;
         }
         export interface SearchParams {
             /**
@@ -918,6 +914,12 @@ declare namespace Paths {
         }
     }
     namespace SendMessage {
+        namespace Parameters {
+            export type DoNotCreateEntities = boolean;
+        }
+        export interface QueryParameters {
+            do_not_create_entities?: Parameters.DoNotCreateEntities;
+        }
         export type RequestBody = Components.Schemas.MessageRequestParams;
         namespace Responses {
             export interface $201 {
@@ -1323,7 +1325,7 @@ export interface OperationMethods {
    * Send an email message
    */
   'sendMessage'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.SendMessage.QueryParameters> | null,
     data?: Paths.SendMessage.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SendMessage.Responses.$201>
@@ -1502,7 +1504,7 @@ export interface PathsDictionary {
      * Send an email message
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.SendMessage.QueryParameters> | null,
       data?: Paths.SendMessage.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SendMessage.Responses.$201>

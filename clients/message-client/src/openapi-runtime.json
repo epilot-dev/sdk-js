@@ -8,6 +8,12 @@
     "/v1/message/messages": {
       "post": {
         "operationId": "sendMessage",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "do_not_create_entities"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {}
