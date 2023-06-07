@@ -275,6 +275,10 @@ declare namespace Components {
              */
             bcc?: Address[];
             file?: /* Message attachments */ AttachmentsRelation;
+            /**
+             * This flag lets the caller to send only the message and by-pass creating the entities
+             */
+            do_not_create_entities?: boolean;
         }
         export interface SearchParams {
             /**
