@@ -35,7 +35,7 @@
           {
             "in": "query",
             "name": "do_not_create_entities",
-            "description": "When true, this flag lets the caller to send only the message and by-pass creating the entities.",
+            "description": "When true, this flag lets the caller to send only the message and by-pass creating the thread & message entities.",
             "schema": {
               "default": false,
               "type": "boolean"
