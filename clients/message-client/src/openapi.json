@@ -30,8 +30,17 @@
         "operationId": "sendMessage",
         "summary": "sendMessage",
         "description": "Send an email message",
-        "tags": [
-          "Messages"
+        "tags": null,
+        "parameters": [
+          {
+            "in": "query",
+            "name": "do_not_create_entities",
+            "description": "When true, this flag lets the caller to send only the message and by-pass creating the thread & message entities.",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
         ],
         "requestBody": {
           "content": {
@@ -1083,9 +1092,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://message.sls.epilot.io"
-    },
     {
       "url": "https://message.sls.epilot.io"
     }
