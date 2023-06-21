@@ -338,6 +338,10 @@ declare namespace Components {
             _product?: {
                 [name: string]: any;
                 /**
+                 * The description for the product
+                 */
+                description?: string;
+                /**
                  * The product code
                  */
                 code?: string;
@@ -868,6 +872,10 @@ declare namespace Components {
              */
             _product?: {
                 [name: string]: any;
+                /**
+                 * The description for the product
+                 */
+                description?: string;
                 /**
                  * The product code
                  */
@@ -1918,6 +1926,10 @@ declare namespace Components {
             _product?: {
                 [name: string]: any;
                 /**
+                 * The description for the product
+                 */
+                description?: string;
+                /**
                  * The product code
                  */
                 code?: string;
@@ -2270,6 +2282,10 @@ declare namespace Components {
          */
         export interface Product {
             [name: string]: any;
+            /**
+             * The description for the product
+             */
+            description?: string;
             /**
              * The product code
              */

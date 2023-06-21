@@ -933,6 +933,10 @@
           "$ref": "#/components/examples/product"
         },
         "properties": {
+          "description": {
+            "type": "string",
+            "description": "The description for the product"
+          },
           "code": {
             "type": "string",
             "description": "The product code"
