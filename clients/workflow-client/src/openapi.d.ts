@@ -660,6 +660,8 @@ declare namespace Components {
             task_execution_type?: StepType;
             phase_id?: string;
             phase_name?: string;
+            all_participants?: string[];
+            future_participants?: string[];
             selected_closing_reasons?: ClosingReason[];
             closing_reason_description?: string;
         }

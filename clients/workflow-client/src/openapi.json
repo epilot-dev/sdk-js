@@ -1627,6 +1627,18 @@
           "phase_name": {
             "type": "string"
           },
+          "all_participants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "future_participants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "selected_closing_reasons": {
             "type": "array",
             "items": {
