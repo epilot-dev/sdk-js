@@ -208,9 +208,27 @@
           }
         ]
       }
+    },
+    "/v2/users/zendesk/sso/redirect-url": {
+      "get": {
+        "operationId": "redirectToZendesk"
+      }
     }
   },
-  "components": {},
+  "components": {
+    "responses": {
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://user.sls.epilot.io"

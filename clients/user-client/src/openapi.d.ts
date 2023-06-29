@@ -8,6 +8,10 @@ import type {
 } from 'openapi-client-axios'; 
 
 declare namespace Components {
+    namespace Responses {
+        export type InternalServerError = Schemas.ErrorResp;
+        export type Unauthorized = Schemas.ErrorResp;
+    }
     namespace Schemas {
         export interface DataPoint {
             /**
@@ -36,6 +40,12 @@ declare namespace Components {
             non_billable_users_last_month?: number;
         }
         export type DataPointsResponse = DataPoint[];
+        export interface ErrorResp {
+            /**
+             * Error message
+             */
+            message?: string;
+        }
         export type InviteToken = string;
         export type Limit = number;
         export interface LoginParameters {
@@ -508,6 +518,14 @@ declare namespace Paths {
             }
         }
     }
+    namespace RedirectToZendesk {
+        namespace Responses {
+            export interface $301 {
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ResendUserInvitation {
         export interface RequestBody {
             /**
@@ -720,6 +738,14 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUserLoginParameters.Responses.$200>
+  /**
+   * redirectToZendesk - redirectToZendesk
+   */
+  'redirectToZendesk'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
 }
 
 export interface PathsDictionary {
@@ -896,6 +922,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUserLoginParameters.Responses.$200>
+  }
+  ['/v2/users/zendesk/sso/redirect-url']: {
+    /**
+     * redirectToZendesk - redirectToZendesk
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
   }
 }
 
