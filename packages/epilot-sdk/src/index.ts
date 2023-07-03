@@ -1,5 +1,9 @@
 import { authenticate, authorizeWithToken, UsernamePasswordAuthParams } from '@epilot/auth';
 
+import {
+  default as addressSuggestionsClient,
+  getClient as getAddressSuggestionsClient,
+} from './address-suggestions-client';
 import { default as automationClient, getClient as getAutomationClient } from './automation-client';
 import { default as discussionClient, getClient as getDiscussionClient } from './discussion-client';
 import { default as emailSettingsClient, getClient as getEmailSettingsClient } from './email-settings-client';
@@ -70,6 +74,10 @@ export class EpilotClient {
     return getPartnerClient();
   }
 
+  get addressSuggestions() {
+    return getAddressSuggestionsClient();
+  }
+
   public authorize(token: string) {
     authorizeWithToken(this.entity, token);
     authorizeWithToken(this.pricing, token);
@@ -87,6 +95,7 @@ export class EpilotClient {
     authorizeWithToken(this.emailTemplate, token);
     authorizeWithToken(this.templateVariables, token);
     authorizeWithToken(this.partner, token);
+    authorizeWithToken(this.addressSuggestions, token);
 
     return this;
   }
@@ -110,6 +119,7 @@ export class EpilotClient {
     authorizer.configureClient(this.emailTemplate);
     authorizer.configureClient(this.templateVariables);
     authorizer.configureClient(this.partner);
+    authorizer.configureClient(this.addressSuggestions);
 
     return this;
   }
@@ -133,3 +143,4 @@ export { notificationClient };
 export { emailTemplateClient };
 export { templateVariablesClient };
 export { partnerClient };
+export { addressSuggestionsClient };

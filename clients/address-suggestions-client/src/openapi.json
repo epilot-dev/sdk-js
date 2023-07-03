@@ -1,0 +1,274 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Address Suggestions API",
+    "version": "1.0.0",
+    "termsOfService": "https://epilot.cloud/agb",
+    "contact": {
+      "name": "Support",
+      "email": "info@epilot.cloud",
+      "url": "https://help.epilot.cloud"
+    }
+  },
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://address-suggestions-api.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/public/suggestions": {
+      "get": {
+        "description": "get address suggestions for the given file id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "s3FileUrl",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "file s3 reference"
+          },
+          {
+            "in": "query",
+            "name": "postalCodeSearchTerm",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "postal code search term"
+          },
+          {
+            "in": "query",
+            "name": "streetSearchTerm",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "postal code search term"
+          }
+        ],
+        "operationId": "getAddresses",
+        "summary": "get addresses from file",
+        "tags": ["Addresses API"],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Suggestions list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressSuggestions"
+                },
+                "examples": {
+                  "address-suggestions": {
+                    "$ref": "#/components/examples/address-suggestions"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "File not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/suggestions:validate": {
+      "get": {
+        "description": "Validates an addresses file, it returns an array of errors if the file is invalid",
+        "operationId": "validateAddresses",
+        "summary": "validate addresses file",
+        "tags": ["Addresses API"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": 739224
+          },
+          {
+            "in": "query",
+            "name": "s3FileUrl",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "file s3 reference",
+            "example": "https://epilot-dev-user-content.s3.eu-central-1.amazonaws.com/739224/4e7b7d95-ced6-4f5f-9326-0c61f30dcadb/availability-file-template%2520(19).csv"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The addresses validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateAddressSuggestionsFileResult"
+                },
+                "examples": {
+                  "Response when file has no errors": {
+                    "value": {
+                      "number_of_rules_parsed": 10,
+                      "errors": []
+                    }
+                  },
+                  "Response when file has errors": {
+                    "value": {
+                      "number_of_rules_parsed": 8,
+                      "errors": ["File must be UTF-8 encoded", "Line 3 - Postal code is missing or invalid"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Bearer Token"
+      }
+    },
+    "examples": {
+      "address-suggestions": {
+        "value": [
+          {
+            "postal_code": 10115,
+            "city": "Berlin",
+            "street": "Bernauer Str."
+          }
+        ]
+      }
+    },
+    "schemas": {
+      "Error": {
+        "required": ["message"],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "status": {
+            "type": "number",
+            "description": "The HTTP status code"
+          },
+          "cause": {
+            "type": "string",
+            "description": "The cause of the error (visible for bad requests - http 400)"
+          }
+        }
+      },
+      "AddressSuggestion": {
+        "type": "object",
+        "description": "The address suggestions entity",
+        "properties": {
+          "country": {
+            "type": "string",
+            "description": "The country code"
+          },
+          "postal_code": {
+            "type": "string",
+            "description": "The postal code"
+          },
+          "city": {
+            "type": "string",
+            "description": "The city"
+          },
+          "street": {
+            "type": "string",
+            "description": "The street"
+          },
+          "street_number": {
+            "type": "string",
+            "description": "The street number"
+          }
+        }
+      },
+      "AddressSuggestions": {
+        "type": "array",
+        "description": "The address suggestions entity array",
+        "items": {
+          "$ref": "#/components/schemas/AddressSuggestion"
+        }
+      },
+      "ValidateAddressSuggestionsFileResult": {
+        "description": "The availability map file result payload",
+        "type": "object",
+        "properties": {
+          "status": {
+            "description": "The status of the validation",
+            "type": "string",
+            "enum": ["success", "error"]
+          },
+          "rules_parsed_count": {
+            "description": "The number of rules successfully parsed",
+            "type": "number"
+          },
+          "errors": {
+            "description": "The errors found on the file",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressSuggestionError"
+            }
+          }
+        }
+      },
+      "AddressSuggestionError": {
+        "description": "The availability rule error",
+        "type": "object",
+        "properties": {
+          "line": {
+            "description": "The line number where the error was found",
+            "type": "number"
+          },
+          "msg": {
+            "description": "The error message",
+            "type": "string"
+          }
+        },
+        "required": ["msg"]
+      }
+    }
+  }
+}
