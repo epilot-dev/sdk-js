@@ -1,0 +1,59 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://address-suggestions-api.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/public/suggestions": {
+      "get": {
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "s3FileUrl",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "postalCodeSearchTerm",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "streetSearchTerm",
+            "required": false
+          }
+        ],
+        "operationId": "getAddresses"
+      }
+    },
+    "/v1/suggestions:validate": {
+      "get": {
+        "operationId": "validateAddresses",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "s3FileUrl",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {}
+}
