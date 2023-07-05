@@ -637,8 +637,21 @@
           "User V2"
         ],
         "responses": {
-          "301": {
-            "description": "User is confirmed and redirected to the Zendesk portal successfully."
+          "200": {
+            "description": "User is confirmed and returns a redirection url to the Zendesk portal successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "The redirection url to the Zendesk portal."
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"

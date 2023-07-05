@@ -520,7 +520,11 @@ declare namespace Paths {
     }
     namespace RedirectToZendesk {
         namespace Responses {
-            export interface $301 {
+            export interface $200 {
+                /**
+                 * The redirection url to the Zendesk portal.
+                 */
+                url?: string;
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
@@ -745,7 +749,7 @@ export interface OperationMethods {
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.RedirectToZendesk.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -931,7 +935,7 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.RedirectToZendesk.Responses.$200>
   }
 }
 
