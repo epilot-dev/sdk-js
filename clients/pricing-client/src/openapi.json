@@ -2313,6 +2313,10 @@
             "type": "integer",
             "description": "The unit amount value"
           },
+          "unit_amount_gross": {
+            "type": "integer",
+            "description": "The unit gross amount value."
+          },
           "unit_amount_currency": {
             "$ref": "#/components/schemas/Currency"
           },
@@ -2429,6 +2433,10 @@
           "amount_total": {
             "type": "integer",
             "description": "Total of all items, with same recurrence, after (discounts and) taxes are applied."
+          },
+          "unit_amount_gross": {
+            "type": "integer",
+            "description": "The unit gross amount value."
           },
           "amount_tax": {
             "type": "integer",
@@ -2647,6 +2655,11 @@
             "description": "The unit amount value",
             "readOnly": true
           },
+          "unit_amount_gross": {
+            "type": "integer",
+            "description": "The unit gross amount value.",
+            "readOnly": true
+          },
           "amount_subtotal": {
             "type": "integer",
             "description": "Total before any (discounts or) taxes are applied.",
@@ -2847,6 +2860,10 @@
             "type": "integer",
             "description": "Total of all items, with same recurrence, after (discounts and) taxes are applied."
           },
+          "unit_amount_gross": {
+            "type": "integer",
+            "description": "The unit gross amount value."
+          },
           "amount_tax": {
             "type": "integer",
             "description": "Total of all items taxes, with same recurrence."
@@ -2924,6 +2941,10 @@
           "amount_total": {
             "type": "integer",
             "description": "Total of all items after (discounts and) taxes are applied."
+          },
+          "unit_amount_gross": {
+            "type": "integer",
+            "description": "The unit gross amount value."
           },
           "total_details": {
             "$ref": "#/components/schemas/TotalDetails"

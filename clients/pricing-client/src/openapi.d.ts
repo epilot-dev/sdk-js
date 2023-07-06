@@ -175,6 +175,10 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            /**
              * Total before any (discounts or) taxes are applied.
              */
             amount_subtotal?: number;
@@ -703,6 +707,10 @@ declare namespace Components {
              * The unit amount value
              */
             unit_amount?: number;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
             /**
              * Total before any (discounts or) taxes are applied.
              */
@@ -1756,6 +1764,10 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            /**
              * Total before any (discounts or) taxes are applied.
              */
             amount_subtotal?: number;
@@ -2015,6 +2027,10 @@ declare namespace Components {
              * The unit amount value
              */
             unit_amount?: number;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
             unit_amount_currency?: /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
@@ -2271,6 +2287,10 @@ declare namespace Components {
              * Total of all items after (discounts and) taxes are applied.
              */
             amount_total?: number;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
             total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
         }
         /**
@@ -2385,6 +2405,10 @@ declare namespace Components {
              */
             amount_total: number;
             /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            /**
              * Total of all items taxes, with same recurrence.
              */
             amount_tax?: number;
@@ -2409,6 +2433,10 @@ declare namespace Components {
              * Total of all items, with same recurrence, after (discounts and) taxes are applied.
              */
             amount_total: number;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
             /**
              * Total of all items taxes, with same recurrence.
              */
