@@ -149,6 +149,62 @@
         }
       }
     },
+    "/v1/email-template/templates:replaceAsync": {
+      "post": {
+        "operationId": "replaceVariablesAsync",
+        "summary": "replaceVariablesAsync",
+        "description": "This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents. \nOn initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template. \nIf still processing, it returns the jobId and IN-PROGRESS status. Upon completion or failure, it returns the final template or a failure status with reason.\n",
+        "tags": [
+          "Variables"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id",
+            "description": "Job ID for tracking the status of document generation action",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email_template_id"
+                ],
+                "properties": {
+                  "email_template_id": {
+                    "type": "string",
+                    "example": "511ceb90-f738-47aa-8b1e-915ace0ae13c"
+                  },
+                  "variable_parameters": {
+                    "$ref": "#/components/schemas/VariableParameters"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncEmailTemplateResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/email-template/templates:revert": {
       "post": {
         "operationId": "revertToOriginalTemplate",
@@ -349,7 +405,7 @@
             "$ref": "#/components/schemas/From"
           },
           "to": {
-            "description": "To. This field is required if email template is not created by system",
+            "description": "To",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/To"
@@ -856,13 +912,55 @@
             }
           }
         }
+      },
+      "AsyncEmailTemplateResponse": {
+        "type": "object",
+        "required": [
+          "jobId",
+          "status"
+        ],
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "description": "Job ID",
+            "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "STARTED",
+              "PROCESSING",
+              "SUCCESS",
+              "FAILED"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "result": {
+            "entity": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/EmailTemplateEntity"
+                },
+                {
+                  "$ref": "#/components/schemas/BaseEntity"
+                }
+              ]
+            },
+            "relations": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          }
+        }
       }
     }
   },
   "servers": [
-    {
-      "url": "https://email-template.sls.epilot.io"
-    },
     {
       "url": "https://email-template.sls.epilot.io"
     }

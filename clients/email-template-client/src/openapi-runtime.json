@@ -37,6 +37,22 @@
         }
       }
     },
+    "/v1/email-template/templates:replaceAsync": {
+      "post": {
+        "operationId": "replaceVariablesAsync",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v1/email-template/templates:revert": {
       "post": {
         "operationId": "revertToOriginalTemplate",

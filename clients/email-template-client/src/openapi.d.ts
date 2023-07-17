@@ -9,6 +9,20 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface AsyncEmailTemplateResponse {
+            /**
+             * Job ID
+             * example:
+             * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+             */
+            jobId: string;
+            status: "STARTED" | "PROCESSING" | "SUCCESS" | "FAILED";
+            /**
+             * Error message
+             */
+            message?: string;
+            result?: any;
+        }
         export type Attachment = {
             /**
              * Attachment ID
@@ -268,7 +282,7 @@ declare namespace Components {
              */
             from?: From;
             /**
-             * To. This field is required if email template is not created by system
+             * To
              */
             to?: To[];
             /**
@@ -651,6 +665,27 @@ declare namespace Paths {
             }
         }
     }
+    namespace ReplaceVariablesAsync {
+        namespace Parameters {
+            export type JobId = string;
+        }
+        export interface QueryParameters {
+            job_id?: Parameters.JobId;
+        }
+        export interface RequestBody {
+            /**
+             * example:
+             * 511ceb90-f738-47aa-8b1e-915ace0ae13c
+             */
+            email_template_id: string;
+            variable_parameters?: Components.Schemas.VariableParameters;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.AsyncEmailTemplateResponse;
+            export interface $403 {
+            }
+        }
+    }
     namespace RevertToOriginalTemplate {
         export interface RequestBody {
             /**
@@ -820,6 +855,19 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplaceVariables.Responses.$200>
   /**
+   * replaceVariablesAsync - replaceVariablesAsync
+   * 
+   * This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents. 
+   * On initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template. 
+   * If still processing, it returns the jobId and IN-PROGRESS status. Upon completion or failure, it returns the final template or a failure status with reason.
+   * 
+   */
+  'replaceVariablesAsync'(
+    parameters?: Parameters<Paths.ReplaceVariablesAsync.QueryParameters> | null,
+    data?: Paths.ReplaceVariablesAsync.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReplaceVariablesAsync.Responses.$200>
+  /**
    * revertToOriginalTemplate - revertToOriginalTemplate
    * 
    * Revert to the original system generated email template
@@ -887,6 +935,21 @@ export interface PathsDictionary {
       data?: Paths.ReplaceVariables.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ReplaceVariables.Responses.$200>
+  }
+  ['/v1/email-template/templates:replaceAsync']: {
+    /**
+     * replaceVariablesAsync - replaceVariablesAsync
+     * 
+     * This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents. 
+     * On initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template. 
+     * If still processing, it returns the jobId and IN-PROGRESS status. Upon completion or failure, it returns the final template or a failure status with reason.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ReplaceVariablesAsync.QueryParameters> | null,
+      data?: Paths.ReplaceVariablesAsync.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReplaceVariablesAsync.Responses.$200>
   }
   ['/v1/email-template/templates:revert']: {
     /**
