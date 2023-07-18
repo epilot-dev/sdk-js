@@ -141,7 +141,10 @@
                   "Response when file has errors": {
                     "value": {
                       "number_of_rules_parsed": 8,
-                      "errors": ["File must be UTF-8 encoded", "Line 3 - Postal code is missing or invalid"]
+                      "errors": [
+                        "File must be UTF-8 encoded",
+                        "Line 3 - Postal code is missing or invalid"
+                      ]
                     }
                   }
                 }
@@ -264,6 +267,10 @@
           },
           "msg": {
             "description": "The error message",
+            "type": "string"
+          },
+          "data": {
+            "description": "Data related to the error",
             "type": "string"
           }
         },

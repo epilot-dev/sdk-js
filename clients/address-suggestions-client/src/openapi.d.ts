@@ -46,6 +46,10 @@ declare namespace Components {
              * The error message
              */
             msg: string;
+            /**
+             * Data related to the error
+             */
+            data?: string;
         }
         /**
          * The address suggestions entity array
