@@ -66,24 +66,15 @@
   "x-tagGroups": [
     {
       "name": "Commerce Schemas",
-      "tags": [
-        "order_schema",
-        "opportunity_schema"
-      ]
+      "tags": ["order_schema", "opportunity_schema"]
     },
     {
       "name": "Pricing Schemas",
-      "tags": [
-        "product_schema",
-        "simple_price_schema",
-        "dynamic_price_schema"
-      ]
+      "tags": ["product_schema", "simple_price_schema", "dynamic_price_schema"]
     },
     {
       "name": "Examples",
-      "tags": [
-        "order_composite_prices"
-      ]
+      "tags": ["order_composite_prices"]
     },
     {
       "name": "APIs",
@@ -115,9 +106,7 @@
         "description": "Create an order",
         "operationId": "createOrder",
         "summary": "createOrder",
-        "tags": [
-          "Order API"
-        ],
+        "tags": ["Order API"],
         "requestBody": {
           "required": true,
           "content": {
@@ -183,9 +172,7 @@
                     "delivery_address": [],
                     "dates": [
                       {
-                        "_tags": [
-                          "Instalation Date"
-                        ],
+                        "_tags": ["Instalation Date"],
                         "dates": "",
                         "value": "2022-06-30T16:29:00.000Z"
                       }
@@ -249,9 +236,7 @@
                     "delivery_address": [],
                     "dates": [
                       {
-                        "_tags": [
-                          "Instalation Date"
-                        ],
+                        "_tags": ["Instalation Date"],
                         "dates": "",
                         "value": "2022-06-30T16:29:00.000Z"
                       }
@@ -324,9 +309,7 @@
                     "delivery_address": [],
                     "dates": [
                       {
-                        "_tags": [
-                          "Instalation Date"
-                        ],
+                        "_tags": ["Instalation Date"],
                         "dates": "",
                         "value": "2022-06-30T16:29:00.000Z"
                       }
@@ -369,9 +352,7 @@
         "description": "Update an existing Order",
         "operationId": "putOrder",
         "summary": "putOrder",
-        "tags": [
-          "Order API"
-        ],
+        "tags": ["Order API"],
         "parameters": [
           {
             "in": "path",
@@ -452,9 +433,7 @@
                     "delivery_address": [],
                     "dates": [
                       {
-                        "_tags": [
-                          "Instalation Date"
-                        ],
+                        "_tags": ["Instalation Date"],
                         "dates": "",
                         "value": "2022-06-30T16:29:00.000Z"
                       }
@@ -495,9 +474,7 @@
         "operationId": "$checkoutCart",
         "summary": "checkoutCart",
         "security": [],
-        "tags": [
-          "Cart API"
-        ],
+        "tags": ["Cart API"],
         "parameters": [
           {
             "in": "header",
@@ -559,9 +536,7 @@
         "operationId": "$searchCatalog",
         "summary": "searchCatalog",
         "security": [],
-        "tags": [
-          "Catalog API"
-        ],
+        "tags": ["Catalog API"],
         "parameters": [
           {
             "in": "header",
@@ -613,9 +588,7 @@
         "operationId": "$availabilityCheck",
         "summary": "availabilityCheck",
         "security": [],
-        "tags": [
-          "Availability API"
-        ],
+        "tags": ["Availability API"],
         "parameters": [
           {
             "in": "header",
@@ -637,9 +610,7 @@
               "examples": {
                 "Check availability with location dimension": {
                   "value": {
-                    "products": [
-                      "cd75456a-30e4-4912-95be-e743d5ea175b"
-                    ],
+                    "products": ["cd75456a-30e4-4912-95be-e743d5ea175b"],
                     "filters": {
                       "location": {
                         "postal_code": "57008",
@@ -652,9 +623,7 @@
                 },
                 "Check availability with location & available date dimension": {
                   "value": {
-                    "products": [
-                      "cd75456a-30e4-4912-95be-e743d5ea175b"
-                    ],
+                    "products": ["cd75456a-30e4-4912-95be-e743d5ea175b"],
                     "filters": {
                       "location": {
                         "postal_code": "57008",
@@ -699,9 +668,7 @@
                   },
                   "Response with available and unavailable products": {
                     "value": {
-                      "availableProducts": [
-                        "my-product-id-123-2"
-                      ],
+                      "availableProducts": ["my-product-id-123-2"],
                       "checkResults": [
                         {
                           "productId": "my-product-id-123-1",
@@ -738,9 +705,7 @@
         "description": "Validates an availability file, it returns an array of errors if the file is invalid",
         "operationId": "$validateAvailabilityFile",
         "summary": "validateAvailabilityFile",
-        "tags": [
-          "Availability API"
-        ],
+        "tags": ["Availability API"],
         "parameters": [
           {
             "in": "path",
@@ -811,9 +776,7 @@
         "operationId": "$createOpportunity",
         "summary": "createOpportunity",
         "security": [],
-        "tags": [
-          "Deprecated"
-        ],
+        "tags": ["Deprecated"],
         "parameters": [
           {
             "in": "header",
@@ -855,16 +818,11 @@
                       "$relation": [
                         {
                           "entity_id": "c8dbe8f3-28b6-4d77-aae8-47bc24a2532f",
-                          "_tags": [
-                            "journey"
-                          ]
+                          "_tags": ["journey"]
                         }
                       ]
                     },
-                    "_tags": [
-                      "journey",
-                      "ORWNr4iCN"
-                    ]
+                    "_tags": ["journey", "ORWNr4iCN"]
                   }
                 }
               }
@@ -906,9 +864,7 @@
     },
     "schemas": {
       "Error": {
-        "required": [
-          "message"
-        ],
+        "required": ["message"],
         "properties": {
           "message": {
             "type": "string",
@@ -944,10 +900,7 @@
           "type": {
             "type": "string",
             "description": "The type of Product:\n\n| type | description |\n|----| ----|\n| `product` | Represents a physical good |\n| `service` | Represents a service or virtual product |\n",
-            "enum": [
-              "product",
-              "service"
-            ]
+            "enum": ["product", "service"]
           },
           "name": {
             "type": "string",
@@ -1544,10 +1497,7 @@
           "type": {
             "type": "string",
             "description": "One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.",
-            "enum": [
-              "one_time",
-              "recurring"
-            ]
+            "enum": ["one_time", "recurring"]
           },
           "billing_period": {
             "description": "For recurring prices `billing_period` defines the default extent of the recurrence.",
@@ -1589,11 +1539,7 @@
           "billing_duration_unit": {
             "description": "The billing period duration unit",
             "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
+            "enum": ["weeks", "months", "years"]
           },
           "notice_time_amount": {
             "description": "The notice period duration",
@@ -1602,11 +1548,7 @@
           "notice_time_unit": {
             "description": "The notice period duration unit",
             "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
+            "enum": ["weeks", "months", "years"]
           },
           "termination_time_amount": {
             "description": "The termination period duration",
@@ -1615,11 +1557,7 @@
           "termination_time_unit": {
             "description": "The termination period duration unit",
             "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
+            "enum": ["weeks", "months", "years"]
           },
           "renewal_duration_amount": {
             "description": "The renewal period duration",
@@ -1628,11 +1566,7 @@
           "renewal_duration_unit": {
             "description": "The renewal period duration unit",
             "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
+            "enum": ["weeks", "months", "years"]
           },
           "variable_price": {
             "description": "The flag for prices that can be influenced by external variables such as user input.",
@@ -1694,9 +1628,7 @@
             }
           }
         },
-        "required": [
-          "pricing_model"
-        ]
+        "required": ["pricing_model"]
       },
       "CompositePrice": {
         "type": "object",
@@ -1925,9 +1857,7 @@
             }
           }
         },
-        "required": [
-          "q"
-        ]
+        "required": ["q"]
       },
       "CatalogSearchResult": {
         "description": "The query result payload",
@@ -1981,10 +1911,7 @@
             "$ref": "#/components/schemas/AvailabilityFilters"
           }
         },
-        "required": [
-          "products",
-          "filters"
-        ]
+        "required": ["products", "filters"]
       },
       "AvailabilityResult": {
         "description": "The availability check result payload",
@@ -2016,15 +1943,11 @@
                   "additionalProperties": true
                 }
               },
-              "required": [
-                "product_id"
-              ]
+              "required": ["product_id"]
             }
           }
         },
-        "required": [
-          "available_products"
-        ],
+        "required": ["available_products"],
         "example": {
           "available_products": [],
           "check_results": [
@@ -2050,11 +1973,13 @@
           "msg": {
             "description": "The error message",
             "type": "string"
+          },
+          "data": {
+            "description": "Data related with the error",
+            "type": "string"
           }
         },
-        "required": [
-          "msg"
-        ]
+        "required": ["msg"]
       },
       "ValidateAvailabilityFileResult": {
         "description": "The availability map file result payload",
@@ -2063,10 +1988,7 @@
           "status": {
             "description": "The status of the validation",
             "type": "string",
-            "enum": [
-              "success",
-              "error"
-            ]
+            "enum": ["success", "error"]
           },
           "rules_parsed_count": {
             "description": "The number of rules successfully parsed",
@@ -2080,11 +2002,7 @@
             }
           }
         },
-        "required": [
-          "status",
-          "rules_parsed_count",
-          "errors"
-        ],
+        "required": ["status", "rules_parsed_count", "errors"],
         "example": {
           "rules_parsed_count": 8,
           "errors": [
@@ -2160,9 +2078,7 @@
             "additionalProperties": true
           }
         },
-        "required": [
-          "line_items"
-        ]
+        "required": ["line_items"]
       },
       "CheckoutCart": {
         "type": "object",
@@ -2196,21 +2112,11 @@
       "CheckoutMode": {
         "type": "string",
         "description": "The checkout mode for the cart checkout.",
-        "enum": [
-          "create_order",
-          "create_invoice",
-          "create_quote"
-        ]
+        "enum": ["create_order", "create_invoice", "create_quote"]
       },
       "OrderStatus": {
         "type": "string",
-        "enum": [
-          "draft",
-          "quote",
-          "placed",
-          "cancelled",
-          "completed"
-        ],
+        "enum": ["draft", "quote", "placed", "cancelled", "completed"],
         "description": "\n| status      | description |\n|-------------|-------|\n| `draft`     | ​​Starting state for all orders, at this point we can still edit the order |\n| `quote`     | The order is in a quoting phase, bound to an expiration date |\n| `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |\n| `cancelled` | The order has been cancelled |\n| `completed` | The order is now closed and finalized |\n"
       },
       "PriceItemsDto": {
@@ -2304,10 +2210,7 @@
           "type": {
             "type": "string",
             "description": "One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.",
-            "enum": [
-              "one_time",
-              "recurring"
-            ]
+            "enum": ["one_time", "recurring"]
           },
           "unit_amount": {
             "type": "integer",
@@ -2343,9 +2246,7 @@
             ]
           }
         },
-        "required": [
-          "pricing_model"
-        ]
+        "required": ["pricing_model"]
       },
       "CompositePriceItemDto": {
         "allOf": [
@@ -2443,10 +2344,7 @@
             "description": "Total of all items taxes, with same recurrence."
           }
         },
-        "required": [
-          "amount_subtotal",
-          "amount_total"
-        ]
+        "required": ["amount_subtotal", "amount_total"]
       },
       "Cart": {
         "description": "Supports shopping for products and services until ready for checkout.",
@@ -2461,11 +2359,7 @@
             "readOnly": true
           },
           "status": {
-            "enum": [
-              "open",
-              "complete",
-              "expired"
-            ],
+            "enum": ["open", "complete", "expired"],
             "type": "string",
             "readOnly": true,
             "description": "The status of the Cart:\n- open - the cart checkout is still in progress. Payment processing has not started\n- complete - the cart checkout is complete. Payment processing may still be in progress\n- expired - the cart checkout has expired. No further processing will occur\n"
@@ -2765,10 +2659,7 @@
           "type": {
             "type": "string",
             "description": "One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.",
-            "enum": [
-              "one_time",
-              "recurring"
-            ]
+            "enum": ["one_time", "recurring"]
           },
           "pricing_model": {
             "type": "string",
@@ -2781,9 +2672,7 @@
             ]
           }
         },
-        "required": [
-          "pricing_model"
-        ]
+        "required": ["pricing_model"]
       },
       "TaxAmount": {
         "type": "object",
@@ -2869,10 +2758,7 @@
             "description": "Total of all items taxes, with same recurrence."
           }
         },
-        "required": [
-          "amount_subtotal",
-          "amount_total"
-        ]
+        "required": ["amount_subtotal", "amount_total"]
       },
       "TotalDetails": {
         "type": "object",
@@ -2964,11 +2850,7 @@
       },
       "SalesTax": {
         "type": "string",
-        "enum": [
-          "nontaxable",
-          "reduced",
-          "standard"
-        ]
+        "enum": ["nontaxable", "reduced", "standard"]
       },
       "AvailabilityLocation": {
         "type": "object",
@@ -3026,9 +2908,7 @@
             "description": "A value to be matched against the availability window (start & end date)"
           }
         },
-        "required": [
-          "location"
-        ]
+        "required": ["location"]
       },
       "Address": {
         "type": "object",
@@ -3039,9 +2919,7 @@
             "items": {
               "type": "string"
             },
-            "example": [
-              "billing"
-            ]
+            "example": ["billing"]
           },
           "street": {
             "type": "string",
@@ -3168,15 +3046,10 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "bucket",
-                    "key"
-                  ]
+                  "required": ["bucket", "key"]
                 }
               },
-              "required": [
-                "s3ref"
-              ]
+              "required": ["s3ref"]
             }
           },
           "_schema": {
@@ -3259,10 +3132,7 @@
           "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
           "_org": "123",
           "_schema": "contact",
-          "_tags": [
-            "example",
-            "mock"
-          ],
+          "_tags": ["example", "mock"],
           "_created_at": "2021-02-09T12:41:43.662Z",
           "_updated_at": "2021-02-09T12:41:43.662Z"
         }
@@ -3327,11 +3197,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "VAT",
-              "GST",
-              "Custom"
-            ]
+            "enum": ["VAT", "GST", "Custom"]
           },
           "description": {
             "type": "string"
@@ -3358,10 +3224,7 @@
           "region_label": "Germany",
           "_org": "123",
           "_schema": "tax",
-          "_tags": [
-            "example",
-            "mock"
-          ],
+          "_tags": ["example", "mock"],
           "_created_at": "2021-02-09T12:41:43.662Z",
           "_updated_at": "2021-02-09T12:41:43.662Z"
         }
@@ -3374,11 +3237,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "VAT",
-              "GST",
-              "Custom"
-            ]
+            "enum": ["VAT", "GST", "Custom"]
           },
           "_id": {
             "type": "string"
@@ -3411,10 +3270,7 @@
       },
       "PriceTierDisplayMode": {
         "type": "string",
-        "enum": [
-          "hidden",
-          "on_request"
-        ]
+        "enum": ["hidden", "on_request"]
       }
     },
     "examples": {
@@ -3891,14 +3747,8 @@
                 "_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
                 "name": "Smartmeter: Schneider Electric PM5000 LCD Energiemessgerät / 3-phasig",
                 "code": "1312378123",
-                "_tags": [
-                  "wallbox",
-                  "review demo",
-                  "1"
-                ],
-                "categories": [
-                  "Power"
-                ],
+                "_tags": ["wallbox", "review demo", "1"],
+                "categories": ["Power"],
                 "type": "product",
                 "active": true,
                 "feature": [
@@ -4104,9 +3954,7 @@
           "delivery_address": [],
           "dates": [
             {
-              "_tags": [
-                "Instalation Date"
-              ],
+              "_tags": ["Instalation Date"],
               "dates": "",
               "value": "2022-06-30T16:29:00.000Z"
             }
@@ -4184,9 +4032,7 @@
           "delivery_address": [],
           "dates": [
             {
-              "_tags": [
-                "Instalation Date"
-              ],
+              "_tags": ["Instalation Date"],
               "dates": "",
               "value": "2022-06-30T16:29:00.000Z"
             }
@@ -4205,10 +4051,7 @@
               "value": "journey checkout"
             }
           ],
-          "_tags": [
-            "journey",
-            "automation"
-          ],
+          "_tags": ["journey", "automation"],
           "status": "quote",
           "order_number": "OREabZxnO",
           "billing_first_name": "Paulo",
@@ -4615,9 +4458,7 @@
           },
           "dates": [
             {
-              "_tags": [
-                "Installation Date"
-              ],
+              "_tags": ["Installation Date"],
               "dates": "",
               "value": "2022-06-30T15:21:00.000Z"
             }
