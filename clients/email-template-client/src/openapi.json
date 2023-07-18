@@ -916,13 +916,13 @@
       "AsyncEmailTemplateResponse": {
         "type": "object",
         "required": [
-          "jobId",
+          "job_id",
           "status"
         ],
         "properties": {
-          "jobId": {
+          "job_id": {
             "type": "string",
-            "description": "Job ID",
+            "description": "Job ID of the email template that is requested to replace and generate docs",
             "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b"
           },
           "status": {
@@ -937,6 +937,22 @@
           "message": {
             "type": "string",
             "description": "Error message"
+          },
+          "doc_progress_count": {
+            "type": "object",
+            "description": "Progress count of the documents that are needed to generate",
+            "properties": {
+              "total": {
+                "type": "number",
+                "description": "Total count",
+                "example": 10
+              },
+              "completed": {
+                "type": "number",
+                "description": "Completed count",
+                "example": 5
+              }
+            }
           },
           "result": {
             "entity": {

@@ -11,16 +11,33 @@ declare namespace Components {
     namespace Schemas {
         export interface AsyncEmailTemplateResponse {
             /**
-             * Job ID
+             * Job ID of the email template that is requested to replace and generate docs
              * example:
              * 8c086140-f33e-4bb7-a993-50c0f2402c7b
              */
-            jobId: string;
+            job_id: string;
             status: "STARTED" | "PROCESSING" | "SUCCESS" | "FAILED";
             /**
              * Error message
              */
             message?: string;
+            /**
+             * Progress count of the documents that are needed to generate
+             */
+            doc_progress_count?: {
+                /**
+                 * Total count
+                 * example:
+                 * 10
+                 */
+                total?: number;
+                /**
+                 * Completed count
+                 * example:
+                 * 5
+                 */
+                completed?: number;
+            };
             result?: any;
         }
         export type Attachment = {
