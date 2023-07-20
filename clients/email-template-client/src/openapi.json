@@ -932,6 +932,10 @@
           "doc_progress_count": {
             "type": "object",
             "description": "Progress count of the documents that are needed to generate",
+            "required": [
+              "total",
+              "completed"
+            ],
             "properties": {
               "total": {
                 "type": "number",

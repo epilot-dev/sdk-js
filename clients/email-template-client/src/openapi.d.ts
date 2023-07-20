@@ -30,13 +30,13 @@ declare namespace Components {
                  * example:
                  * 10
                  */
-                total?: number;
+                total: number;
                 /**
                  * Completed count
                  * example:
                  * 5
                  */
-                completed?: number;
+                completed: number;
             };
             /**
              * Result of the email template that is replaced along with generated docs
