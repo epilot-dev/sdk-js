@@ -172,9 +172,6 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "email_template_id"
-                ],
                 "properties": {
                   "email_template_id": {
                     "type": "string",
@@ -851,16 +848,10 @@
             "description": "The main entity ID. Use main entity in order to use the variable without schema slug prefix - or just pass directly to other object ID.",
             "example": "63753437-c9e2-4e83-82bb-b1c666514561"
           },
-          "brand_id": {
-            "type": "number",
-            "description": "Brand ID",
-            "nullable": true,
-            "example": 123451
-          },
           "user_id": {
-            "type": "number",
+            "type": "string",
             "description": "User ID",
-            "example": 123452
+            "example": "123452"
           },
           "custom_variables": {
             "type": "array",
@@ -955,20 +946,24 @@
             }
           },
           "result": {
-            "entity": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/EmailTemplateEntity"
-                },
-                {
-                  "$ref": "#/components/schemas/BaseEntity"
+            "type": "object",
+            "description": "Result of the email template that is replaced along with generated docs",
+            "properties": {
+              "entity": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EmailTemplateEntity"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BaseEntity"
+                  }
+                ]
+              },
+              "relations": {
+                "type": "array",
+                "items": {
+                  "type": "object"
                 }
-              ]
-            },
-            "relations": {
-              "type": "array",
-              "items": {
-                "type": "object"
               }
             }
           }

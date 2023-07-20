@@ -38,7 +38,127 @@ declare namespace Components {
                  */
                 completed?: number;
             };
-            result?: any;
+            /**
+             * Result of the email template that is replaced along with generated docs
+             */
+            result?: {
+                entity?: {
+                    /**
+                     * name
+                     * example:
+                     * Order confirmation
+                     */
+                    name: string;
+                    /**
+                     * Brand ID. Equal 0 if available for All brands
+                     * example:
+                     * 0
+                     */
+                    brand_id?: number | null;
+                    from?: From;
+                    /**
+                     * To
+                     */
+                    to?: To[];
+                    /**
+                     * Cc
+                     */
+                    cc?: To[];
+                    /**
+                     * Bcc
+                     */
+                    bcc?: To[];
+                    /**
+                     * Subject
+                     * example:
+                     * We have received your order!
+                     */
+                    subject?: string;
+                    /**
+                     * Body
+                     * example:
+                     * Hi Ms Ny Huynh, </br> Thank you for your order. We will contact you shortly
+                     */
+                    body?: string;
+                    /**
+                     * Email template attachments
+                     */
+                    attachments?: Attachment[] | null;
+                    file?: {
+                        /**
+                         * Entity tags
+                         */
+                        $relation?: {
+                            [key: string]: any;
+                        }[];
+                    };
+                    /**
+                     * Created by
+                     * example:
+                     * 1234
+                     */
+                    created_by?: number;
+                    /**
+                     * Updated by
+                     * example:
+                     * 1234
+                     */
+                    updated_by?: number;
+                    /**
+                     * If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...
+                     * Remember to add default content of template to system_template enum for revert to original feature
+                     *
+                     * example:
+                     * false
+                     */
+                    system_template?: boolean;
+                    /**
+                     * Entity ID
+                     * example:
+                     * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                     */
+                    _id: string;
+                    /**
+                     * Entity title
+                     */
+                    _title: string;
+                    /**
+                     * Ivy Organization ID the entity belongs to
+                     * example:
+                     * 206801
+                     */
+                    _org: string;
+                    /**
+                     * URL-friendly identifier for the entity schema
+                     * example:
+                     * message
+                     */
+                    _schema: string;
+                    /**
+                     * Entity tags
+                     * example:
+                     * [
+                     *   "automatic email template"
+                     * ]
+                     */
+                    _tags?: string[];
+                    /**
+                     * Created date
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _created_at: string; // date-time
+                    /**
+                     * Updated date
+                     * example:
+                     * 2021-02-10T09:14:31.990Z
+                     */
+                    _updated_at: string; // date-time
+                };
+                relations?: {
+                    [key: string]: any;
+                }[];
+            };
         }
         export type Attachment = {
             /**
@@ -600,17 +720,11 @@ declare namespace Components {
              */
             main_entity_id?: string;
             /**
-             * Brand ID
-             * example:
-             * 123451
-             */
-            brand_id?: number | null;
-            /**
              * User ID
              * example:
              * 123452
              */
-            user_id?: number;
+            user_id?: string;
             custom_variables?: {
                 /**
                  * Template Variable Name
@@ -694,7 +808,7 @@ declare namespace Paths {
              * example:
              * 511ceb90-f738-47aa-8b1e-915ace0ae13c
              */
-            email_template_id: string;
+            email_template_id?: string;
             variable_parameters?: Components.Schemas.VariableParameters;
         }
         namespace Responses {
