@@ -247,7 +247,12 @@ declare namespace Components {
                  *   "email": "n.ahmad@epilot.cloud"
                  * }
                  */
-                token?: {
+                claims?: {
+                    /**
+                     * example:
+                     * 10006129
+                     */
+                    userId?: string;
                     /**
                      * example:
                      * 476e9b48-42f4-4234-a2b0-4668b34626ce
@@ -269,6 +274,21 @@ declare namespace Components {
                      */
                     "custom:ivy_user_id"?: string;
                 };
+                /**
+                 * example:
+                 * 10006129
+                 */
+                userId?: string;
+                /**
+                 * example:
+                 * 739224
+                 */
+                organizationId?: string;
+                /**
+                 * example:
+                 * eyJraWQiOi...
+                 */
+                token?: string;
             };
         }
         export interface ApiSubmissionTrigger {

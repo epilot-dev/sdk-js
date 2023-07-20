@@ -1846,9 +1846,13 @@
           "EpilotAuth": {
             "type": "object",
             "properties": {
-              "token": {
+              "claims": {
                 "type": "object",
                 "properties": {
+                  "userId": {
+                    "type": "string",
+                    "example": "10006129"
+                  },
                   "sub": {
                     "type": "string",
                     "example": "476e9b48-42f4-4234-a2b0-4668b34626ce"
@@ -1880,6 +1884,18 @@
                   "iat": 1614333023,
                   "email": "n.ahmad@epilot.cloud"
                 }
+              },
+              "userId": {
+                "type": "string",
+                "example": "10006129"
+              },
+              "organizationId": {
+                "type": "string",
+                "example": "739224"
+              },
+              "token": {
+                "type": "string",
+                "example": "eyJraWQiOi..."
               }
             }
           }
