@@ -149,6 +149,59 @@
         }
       }
     },
+    "/v1/email-template/templates:replaceAsync": {
+      "post": {
+        "operationId": "replaceVariablesAsync",
+        "summary": "replaceVariablesAsync",
+        "description": "This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents. \nOn initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template. \nIf still processing, it returns the jobId and IN-PROGRESS status. Upon completion or failure, it returns the final template or a failure status with reason.\n",
+        "tags": [
+          "Variables"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id",
+            "description": "Job ID for tracking the status of document generation action",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email_template_id": {
+                    "type": "string",
+                    "example": "511ceb90-f738-47aa-8b1e-915ace0ae13c"
+                  },
+                  "variable_parameters": {
+                    "$ref": "#/components/schemas/VariableParameters"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncEmailTemplateResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/email-template/templates:revert": {
       "post": {
         "operationId": "revertToOriginalTemplate",
@@ -349,7 +402,7 @@
             "$ref": "#/components/schemas/From"
           },
           "to": {
-            "description": "To. This field is required if email template is not created by system",
+            "description": "To",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/To"
@@ -795,16 +848,10 @@
             "description": "The main entity ID. Use main entity in order to use the variable without schema slug prefix - or just pass directly to other object ID.",
             "example": "63753437-c9e2-4e83-82bb-b1c666514561"
           },
-          "brand_id": {
-            "type": "number",
-            "description": "Brand ID",
-            "nullable": true,
-            "example": 123451
-          },
           "user_id": {
-            "type": "number",
+            "type": "string",
             "description": "User ID",
-            "example": 123452
+            "example": "123452"
           },
           "custom_variables": {
             "type": "array",
@@ -856,13 +903,79 @@
             }
           }
         }
+      },
+      "AsyncEmailTemplateResponse": {
+        "type": "object",
+        "required": [
+          "job_id",
+          "status"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "Job ID of the email template that is requested to replace and generate docs",
+            "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "STARTED",
+              "PROCESSING",
+              "SUCCESS",
+              "FAILED"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "doc_progress_count": {
+            "type": "object",
+            "description": "Progress count of the documents that are needed to generate",
+            "required": [
+              "total",
+              "completed"
+            ],
+            "properties": {
+              "total": {
+                "type": "number",
+                "description": "Total count",
+                "example": 10
+              },
+              "completed": {
+                "type": "number",
+                "description": "Completed count",
+                "example": 5
+              }
+            }
+          },
+          "result": {
+            "type": "object",
+            "description": "Result of the email template that is replaced along with generated docs",
+            "properties": {
+              "entity": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EmailTemplateEntity"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BaseEntity"
+                  }
+                ]
+              },
+              "relations": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
   "servers": [
-    {
-      "url": "https://email-template.sls.epilot.io"
-    },
     {
       "url": "https://email-template.sls.epilot.io"
     }

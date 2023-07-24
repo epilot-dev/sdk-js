@@ -9,6 +9,157 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface AsyncEmailTemplateResponse {
+            /**
+             * Job ID of the email template that is requested to replace and generate docs
+             * example:
+             * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+             */
+            job_id: string;
+            status: "STARTED" | "PROCESSING" | "SUCCESS" | "FAILED";
+            /**
+             * Error message
+             */
+            message?: string;
+            /**
+             * Progress count of the documents that are needed to generate
+             */
+            doc_progress_count?: {
+                /**
+                 * Total count
+                 * example:
+                 * 10
+                 */
+                total: number;
+                /**
+                 * Completed count
+                 * example:
+                 * 5
+                 */
+                completed: number;
+            };
+            /**
+             * Result of the email template that is replaced along with generated docs
+             */
+            result?: {
+                entity?: {
+                    /**
+                     * name
+                     * example:
+                     * Order confirmation
+                     */
+                    name: string;
+                    /**
+                     * Brand ID. Equal 0 if available for All brands
+                     * example:
+                     * 0
+                     */
+                    brand_id?: number | null;
+                    from?: From;
+                    /**
+                     * To
+                     */
+                    to?: To[];
+                    /**
+                     * Cc
+                     */
+                    cc?: To[];
+                    /**
+                     * Bcc
+                     */
+                    bcc?: To[];
+                    /**
+                     * Subject
+                     * example:
+                     * We have received your order!
+                     */
+                    subject?: string;
+                    /**
+                     * Body
+                     * example:
+                     * Hi Ms Ny Huynh, </br> Thank you for your order. We will contact you shortly
+                     */
+                    body?: string;
+                    /**
+                     * Email template attachments
+                     */
+                    attachments?: Attachment[] | null;
+                    file?: {
+                        /**
+                         * Entity tags
+                         */
+                        $relation?: {
+                            [key: string]: any;
+                        }[];
+                    };
+                    /**
+                     * Created by
+                     * example:
+                     * 1234
+                     */
+                    created_by?: number;
+                    /**
+                     * Updated by
+                     * example:
+                     * 1234
+                     */
+                    updated_by?: number;
+                    /**
+                     * If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...
+                     * Remember to add default content of template to system_template enum for revert to original feature
+                     *
+                     * example:
+                     * false
+                     */
+                    system_template?: boolean;
+                    /**
+                     * Entity ID
+                     * example:
+                     * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                     */
+                    _id: string;
+                    /**
+                     * Entity title
+                     */
+                    _title: string;
+                    /**
+                     * Ivy Organization ID the entity belongs to
+                     * example:
+                     * 206801
+                     */
+                    _org: string;
+                    /**
+                     * URL-friendly identifier for the entity schema
+                     * example:
+                     * message
+                     */
+                    _schema: string;
+                    /**
+                     * Entity tags
+                     * example:
+                     * [
+                     *   "automatic email template"
+                     * ]
+                     */
+                    _tags?: string[];
+                    /**
+                     * Created date
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _created_at: string; // date-time
+                    /**
+                     * Updated date
+                     * example:
+                     * 2021-02-10T09:14:31.990Z
+                     */
+                    _updated_at: string; // date-time
+                };
+                relations?: {
+                    [key: string]: any;
+                }[];
+            };
+        }
         export type Attachment = {
             /**
              * Attachment ID
@@ -268,7 +419,7 @@ declare namespace Components {
              */
             from?: From;
             /**
-             * To. This field is required if email template is not created by system
+             * To
              */
             to?: To[];
             /**
@@ -569,17 +720,11 @@ declare namespace Components {
              */
             main_entity_id?: string;
             /**
-             * Brand ID
-             * example:
-             * 123451
-             */
-            brand_id?: number | null;
-            /**
              * User ID
              * example:
              * 123452
              */
-            user_id?: number;
+            user_id?: string;
             custom_variables?: {
                 /**
                  * Template Variable Name
@@ -647,6 +792,27 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.EmailTemplateResponse;
+            export interface $403 {
+            }
+        }
+    }
+    namespace ReplaceVariablesAsync {
+        namespace Parameters {
+            export type JobId = string;
+        }
+        export interface QueryParameters {
+            job_id?: Parameters.JobId;
+        }
+        export interface RequestBody {
+            /**
+             * example:
+             * 511ceb90-f738-47aa-8b1e-915ace0ae13c
+             */
+            email_template_id?: string;
+            variable_parameters?: Components.Schemas.VariableParameters;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.AsyncEmailTemplateResponse;
             export interface $403 {
             }
         }
@@ -820,6 +986,19 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplaceVariables.Responses.$200>
   /**
+   * replaceVariablesAsync - replaceVariablesAsync
+   * 
+   * This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents. 
+   * On initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template. 
+   * If still processing, it returns the jobId and IN-PROGRESS status. Upon completion or failure, it returns the final template or a failure status with reason.
+   * 
+   */
+  'replaceVariablesAsync'(
+    parameters?: Parameters<Paths.ReplaceVariablesAsync.QueryParameters> | null,
+    data?: Paths.ReplaceVariablesAsync.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReplaceVariablesAsync.Responses.$200>
+  /**
    * revertToOriginalTemplate - revertToOriginalTemplate
    * 
    * Revert to the original system generated email template
@@ -887,6 +1066,21 @@ export interface PathsDictionary {
       data?: Paths.ReplaceVariables.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ReplaceVariables.Responses.$200>
+  }
+  ['/v1/email-template/templates:replaceAsync']: {
+    /**
+     * replaceVariablesAsync - replaceVariablesAsync
+     * 
+     * This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents. 
+     * On initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template. 
+     * If still processing, it returns the jobId and IN-PROGRESS status. Upon completion or failure, it returns the final template or a failure status with reason.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ReplaceVariablesAsync.QueryParameters> | null,
+      data?: Paths.ReplaceVariablesAsync.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReplaceVariablesAsync.Responses.$200>
   }
   ['/v1/email-template/templates:revert']: {
     /**
