@@ -760,6 +760,10 @@
             "items": {
               "$ref": "#/components/schemas/WorkflowContext"
             }
+          },
+          "completedTime": {
+            "type": "string",
+            "description": "Completed time of the workflow execution"
           }
         }
       },
@@ -814,7 +818,7 @@
           },
           "creationTime": {
             "type": "string",
-            "description": "Creation timestamp"
+            "description": "Creation timestamp which will double as started time as well"
           },
           "lastUpdateTime": {
             "type": "string",
@@ -823,6 +827,10 @@
           "dueDate": {
             "type": "string",
             "description": "Due date for finishing the workflow"
+          },
+          "completedTime": {
+            "type": "string",
+            "description": "Completed time of the workflow execution"
           },
           "dynamicDueDate": {
             "$ref": "#/components/schemas/DynamicDueDate"
@@ -1092,6 +1100,15 @@
               "type": "string"
             }
           },
+          "startedTime": {
+            "type": "string"
+          },
+          "completedTime": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SectionStatus"
+          },
           "type": {
             "$ref": "#/components/schemas/ItemType"
           },
@@ -1203,6 +1220,12 @@
               "lastUpdated": {
                 "type": "string"
               },
+              "startedTime": {
+                "type": "string"
+              },
+              "completedTime": {
+                "type": "string"
+              },
               "dueDate": {
                 "type": "string"
               },
@@ -1268,6 +1291,14 @@
           "COMPLETED",
           "SKIPPED",
           "IN_PROGRESS"
+        ]
+      },
+      "SectionStatus": {
+        "type": "string",
+        "enum": [
+          "OPEN",
+          "IN_PROGRESS",
+          "COMPLETED"
         ]
       },
       "StepType": {
@@ -1392,6 +1423,12 @@
           },
           "automationConfig": {
             "$ref": "#/components/schemas/AutomationConfig"
+          },
+          "startedTime": {
+            "type": "string"
+          },
+          "completedTime": {
+            "type": "string"
           }
         },
         "required": [
@@ -1620,6 +1657,9 @@
           },
           "task_execution_type": {
             "$ref": "#/components/schemas/StepType"
+          },
+          "task_status": {
+            "$ref": "#/components/schemas/StepStatus"
           },
           "phase_id": {
             "type": "string"

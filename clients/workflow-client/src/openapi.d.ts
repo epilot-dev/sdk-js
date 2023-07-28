@@ -176,6 +176,8 @@ declare namespace Components {
                 status?: StepStatus;
                 created?: string;
                 lastUpdated?: string;
+                startedTime?: string;
+                completedTime?: string;
                 dueDate?: string;
                 dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
                 manuallyCreated?: boolean;
@@ -206,6 +208,9 @@ declare namespace Components {
              */
             userIds?: number[];
             assignedTo?: string[];
+            startedTime?: string;
+            completedTime?: string;
+            status?: SectionStatus;
             type: ItemType;
             steps: Step[];
         }
@@ -224,6 +229,7 @@ declare namespace Components {
             type: ItemType;
             steps: StepSimplified[];
         }
+        export type SectionStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED";
         export interface Step {
             id: string;
             definitionId?: string;
@@ -251,6 +257,8 @@ declare namespace Components {
             status?: StepStatus;
             created?: string;
             lastUpdated?: string;
+            startedTime?: string;
+            completedTime?: string;
             dueDate?: string;
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
@@ -283,6 +291,8 @@ declare namespace Components {
             status?: StepStatus;
             created?: string;
             lastUpdated?: string;
+            startedTime?: string;
+            completedTime?: string;
             dueDate?: string;
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
@@ -360,6 +370,8 @@ declare namespace Components {
             name?: string;
             position?: StepPositionAt;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
+            startedTime?: string;
+            completedTime?: string;
         }
         export interface UpdateStepResp {
             id: string;
@@ -388,6 +400,8 @@ declare namespace Components {
             status?: StepStatus;
             created?: string;
             lastUpdated?: string;
+            startedTime?: string;
+            completedTime?: string;
             dueDate?: string;
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
@@ -452,7 +466,7 @@ declare namespace Components {
             orgId?: string;
             name?: string;
             /**
-             * Creation timestamp
+             * Creation timestamp which will double as started time as well
              */
             creationTime?: string;
             /**
@@ -463,6 +477,10 @@ declare namespace Components {
              * Due date for finishing the workflow
              */
             dueDate?: string;
+            /**
+             * Completed time of the workflow execution
+             */
+            completedTime?: string;
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             status?: WorkflowStatus;
             trigger?: TriggerType;
@@ -493,7 +511,7 @@ declare namespace Components {
             orgId?: string;
             name?: string;
             /**
-             * Creation timestamp
+             * Creation timestamp which will double as started time as well
              */
             creationTime?: string;
             /**
@@ -504,6 +522,10 @@ declare namespace Components {
              * Due date for finishing the workflow
              */
             dueDate?: string;
+            /**
+             * Completed time of the workflow execution
+             */
+            completedTime?: string;
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             status?: WorkflowStatus;
             trigger?: TriggerType;
@@ -597,7 +619,7 @@ declare namespace Components {
             orgId?: string;
             name?: string;
             /**
-             * Creation timestamp
+             * Creation timestamp which will double as started time as well
              */
             creationTime?: string;
             /**
@@ -608,6 +630,10 @@ declare namespace Components {
              * Due date for finishing the workflow
              */
             dueDate?: string;
+            /**
+             * Completed time of the workflow execution
+             */
+            completedTime?: string;
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             status?: WorkflowStatus;
             trigger?: TriggerType;
@@ -644,6 +670,10 @@ declare namespace Components {
              */
             closedBy?: string;
             contexts?: WorkflowContext[];
+            /**
+             * Completed time of the workflow execution
+             */
+            completedTime?: string;
         }
         export interface WorkflowInEntity {
             id?: string;
@@ -658,6 +688,7 @@ declare namespace Components {
             task_assignees?: string[];
             task_duedate?: string;
             task_execution_type?: StepType;
+            task_status?: StepStatus;
             phase_id?: string;
             phase_name?: string;
             all_participants?: string[];
