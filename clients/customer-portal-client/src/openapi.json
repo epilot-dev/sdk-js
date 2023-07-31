@@ -1,0 +1,4108 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Portal API",
+    "description": "Backend for epilot portals - End Customer Portal & Installer Portal",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "ECP",
+      "description": "APIs defined for a portal user"
+    },
+    {
+      "name": "ECP Admin",
+      "description": "APIs defined for a ECP Admin"
+    },
+    {
+      "name": "Public",
+      "description": "Public APIs"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "PortalAuth": []
+    }
+  ],
+  "paths": {
+    "/v2/portal/portal": {
+      "post": {
+        "operationId": "upsertPortal",
+        "summary": "upsertPortal",
+        "description": "Upserts the settings for a portal of an organization.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "requestBody": {
+          "description": "Portal payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertPortalConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Portal upserted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/user": {
+      "post": {
+        "operationId": "createUser",
+        "summary": "createUser",
+        "description": "Registers a portal user",
+        "security": [],
+        "tags": [
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "requestBody": {
+          "description": "Portal user payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message",
+                    "response"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "User created successfully"
+                      ]
+                    },
+                    "response": {
+                      "$ref": "#/components/schemas/PortalUser"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/sso/user": {
+      "post": {
+        "operationId": "createSSOUser",
+        "summary": "createSSOUser",
+        "description": "Creates a portal user as an SSO user.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "requestBody": {
+          "description": "Portal user payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSSOUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "SSO User created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PortalUser"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/config": {
+      "get": {
+        "operationId": "getPortalConfigByDomain",
+        "summary": "getPortalConfigByDomain",
+        "description": "Retrieves the portal configuration by domain.",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "domain",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "example.com",
+              "description": "Domain of the portal"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal config retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalConfig"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/config": {
+      "get": {
+        "operationId": "getPortalConfig",
+        "summary": "getPortalConfig",
+        "description": "Retrieves the portal configuration.",
+        "tags": [
+          "ECP Admin",
+          "ECP"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          },
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal config retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePortal",
+        "summary": "deletePortal",
+        "description": "Deletes the portal.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Portal deleted successfully."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/portal/config": {
+      "get": {
+        "operationId": "getPublicPortalConfig",
+        "summary": "getPublicPortalConfig",
+        "description": "Retrieves the public portal configuration.",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": 12324,
+              "description": "Organization ID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal config retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalConfig"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/org/portal/config": {
+      "get": {
+        "operationId": "getOrgPortalConfig",
+        "summary": "getOrgPortalConfig",
+        "description": "Retrieves the portal configuration for the organization.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal config retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/configs": {
+      "get": {
+        "operationId": "getAllPortalConfigs",
+        "summary": "getAllPortalConfigs",
+        "description": "Retrieves all portal configurations.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All portal configs retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PortalConfig"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/email-templates": {
+      "post": {
+        "operationId": "upsertEmailTemplates",
+        "summary": "upsertEmailTemplates",
+        "description": "Upserts the email templates of a portal",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "requestBody": {
+          "description": "Email templates payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailTemplates"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upserted email templates of the portal successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message",
+                    "emailTemplates"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "Email Templates upserted successfully"
+                      ]
+                    },
+                    "emailTemplates": {
+                      "$ref": "#/components/schemas/EmailTemplates"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "get": {
+        "operationId": "getEmailTemplates",
+        "summary": "getEmailTemplates",
+        "description": "Retrieves the email templates of a portal",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved the email templates successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTemplates"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public-widgets": {
+      "get": {
+        "operationId": "getPublicPortalWidgets",
+        "summary": "getPublicPortalWidgets",
+        "description": "Retrieves the public widgets of a portal",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Organization ID",
+              "example": 123
+            }
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved the portal public widgets successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertPortalWidget"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/widgets": {
+      "post": {
+        "operationId": "upsertPortalWidget",
+        "summary": "upsertPortalWidget",
+        "description": "Upsert widget for a portal of an organization.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "requestBody": {
+          "description": "Portal widgets payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertPortalWidget"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Portal widget configuration upserted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertPortalWidget"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "get": {
+        "operationId": "getPortalWidgets",
+        "summary": "getPortalWidgets",
+        "description": "Retrieves the widgets of a portal",
+        "tags": [
+          "ECP Admin",
+          "ECP"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          },
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved the portal widgets successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertPortalWidget"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/replace-ecp-template-variables": {
+      "post": {
+        "operationId": "replaceECPTemplateVariables",
+        "summary": "replaceECPTemplateVariables",
+        "description": "Replaces the template variables of a portal",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "ECPVariables payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contactId": {
+                    "type": "string",
+                    "example": "7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51",
+                    "description": "ID of the contact"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Replaced portal template variables successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customerPortal": {
+                      "type": "object",
+                      "properties": {
+                        "invitationLink": {
+                          "type": "string",
+                          "example": "https://end-customer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
+                        }
+                      }
+                    },
+                    "installerPortal": {
+                      "type": "object",
+                      "properties": {
+                        "invitationLink": {
+                          "type": "string",
+                          "example": "https://installer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/org/settings": {
+      "get": {
+        "operationId": "getOrganizationSettings",
+        "summary": "getOrganizationSettings",
+        "description": "Retrieves the organization settings.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved the settings for an organization successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/OrganizationSettings"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/schemas": {
+      "get": {
+        "operationId": "getSchemas",
+        "summary": "getSchemas",
+        "description": "Retrieves the schemas.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved schemas for an organization successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schemas": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Schema"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/extra-permission-attributes": {
+      "get": {
+        "operationId": "extraPermissionAttributes",
+        "summary": "extraPermissionAttributes",
+        "description": "Retrieves the extra permission attributes.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved extra permission attributes successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "contact": {
+                          "$ref": "#/components/schemas/ExtraSchemaAttributes"
+                        },
+                        "contract": {
+                          "$ref": "#/components/schemas/ExtraSchemaAttributes"
+                        },
+                        "order": {
+                          "$ref": "#/components/schemas/ExtraSchemaAttributes"
+                        },
+                        "opportunity": {
+                          "$ref": "#/components/schemas/ExtraSchemaAttributes"
+                        },
+                        "meter": {
+                          "$ref": "#/components/schemas/ExtraSchemaAttributes"
+                        },
+                        "meter_counter": {
+                          "$ref": "#/components/schemas/ExtraSchemaAttributes"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/contact": {
+      "get": {
+        "operationId": "getContact",
+        "summary": "getContact",
+        "description": "Retrieves the contact by ID.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieves the mapped contact of the logged in user successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entity": {
+                      "$ref": "#/components/schemas/Contact"
+                    },
+                    "files": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/File"
+                      }
+                    },
+                    "relations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateContact",
+        "summary": "updateContact",
+        "description": "Updates the contact details.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated the contact details successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Contact"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/ecp/contact": {
+      "get": {
+        "operationId": "getECPContact",
+        "summary": "getECPContact",
+        "description": "Get the Contact by id",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "ID of the mapped contact",
+              "type": "string",
+              "example": 1234
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The contact returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Contact"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/contact/email/count": {
+      "get": {
+        "operationId": "getCountByEmail",
+        "summary": "getCountByEmail",
+        "description": "Check Contact by email",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Portal user Email Address",
+              "example": "test@test.com"
+            }
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Organization ID",
+              "example": 123
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact count for the requested email successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "number",
+                      "description": "Count of Contact",
+                      "example": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/contact/count": {
+      "post": {
+        "operationId": "getContactCount",
+        "summary": "getContactCount",
+        "description": "Check existence of contacts.",
+        "security": [],
+        "tags": [
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "requestBody": {
+          "description": "Request payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactCountRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contact count for the request successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "number",
+                      "description": "Count of Contact",
+                      "example": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/contact/valid/secondary/attributes": {
+      "get": {
+        "operationId": "getValidSecondaryAttributes",
+        "summary": "getValidSecondaryAttributes",
+        "description": "Get valid secondary attributes that are used while mapping a contact on registration",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Valid secondary attributes for the contact entity are returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "Name of the secondary attribute",
+                            "example": "first_name"
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "Type of the secondary attribute",
+                            "example": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/user": {
+      "get": {
+        "operationId": "getPortalUser",
+        "summary": "getPortalUser",
+        "description": "Get the portal user details",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal user returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PortalUser"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updatePortalUser",
+        "summary": "updatePortalUser",
+        "description": "Update the portal user details",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The portal user updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PortalUser"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePortalUser",
+        "summary": "deletePortalUser",
+        "description": "Delete the portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal user deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "User Succesfully Deleted"
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EntityId"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/user/confirm/{id}": {
+      "get": {
+        "operationId": "confirmUser",
+        "summary": "confirmUser",
+        "description": "Confirm a portal user",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of portal user id"
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": 123
+            },
+            "description": "Organization ID"
+          }
+        ],
+        "responses": {
+          "301": {
+            "description": "User is confirmed and redirected to the portal successfully."
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/user/exists": {
+      "get": {
+        "operationId": "userExists",
+        "summary": "userExists",
+        "description": "Checks whether a user exists in the portal",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Email Address of the portal user",
+              "example": "user@example.com"
+            }
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Organization ID",
+              "example": 123
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned whether the user exists in the portal or not successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "exists"
+                  ],
+                  "properties": {
+                    "exists": {
+                      "type": "boolean",
+                      "description": "Whether the user exists in the portal",
+                      "example": true
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/PortalUser"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/configure-distribution": {
+      "get": {
+        "operationId": "configureDistribution",
+        "summary": "configureDistribution",
+        "description": "Configure the distribution for the portal's custom domain",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cloudfront distribution has been configure successfully for the custom domain.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "domainName": {
+                      "type": "string",
+                      "description": "The domain name of the configured distribution",
+                      "example": "dsj8op4ha01jha23.cloudfront.net"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/order": {
+      "get": {
+        "operationId": "getAllOrders",
+        "summary": "getAllOrders",
+        "description": "Get all orders for the portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The orders for the portal user returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Order"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/order/{id}": {
+      "get": {
+        "operationId": "getOrder",
+        "summary": "getOrder",
+        "description": "Get an order by id",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested order has been retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entity": {
+                      "$ref": "#/components/schemas/Order"
+                    },
+                    "files": {
+                      "type": "array",
+                      "description": "The related files of the requested order",
+                      "items": {
+                        "$ref": "#/components/schemas/File"
+                      }
+                    },
+                    "relations": {
+                      "type": "array",
+                      "description": "The related entities of the requested order",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
+                    },
+                    "products": {
+                      "type": "array",
+                      "description": "The related products of the requested order",
+                      "items": {
+                        "$ref": "#/components/schemas/Product"
+                      }
+                    },
+                    "crossSellableProducts": {
+                      "type": "array",
+                      "description": "The related cross sellable products of the requested order",
+                      "items": {
+                        "$ref": "#/components/schemas/Product"
+                      }
+                    },
+                    "workflow": {
+                      "type": "array",
+                      "description": "The related workflows of the requested order",
+                      "items": {
+                        "$ref": "#/components/schemas/WorkflowExecution"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateOrder",
+        "summary": "updateOrder",
+        "description": "Update an order by id",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of order"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated the order details successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/opportunity": {
+      "get": {
+        "operationId": "getAllOpportunities",
+        "summary": "getAllOpportunities",
+        "description": "Get all opportunities of a portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The opportunities is retrieved successfully for the portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Opportunity"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/opportunities/{id}": {
+      "get": {
+        "operationId": "getOpportunity",
+        "summary": "getOpportunity",
+        "description": "Get an opportunity by id",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of opportunity"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The returned opportunities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entity": {
+                      "$ref": "#/components/schemas/Opportunity"
+                    },
+                    "orders": {
+                      "type": "array",
+                      "description": "The related orders of the requested opportunity",
+                      "items": {
+                        "$ref": "#/components/schemas/Order"
+                      }
+                    },
+                    "files": {
+                      "type": "array",
+                      "description": "The related files of the requested opportunity",
+                      "items": {
+                        "$ref": "#/components/schemas/File"
+                      }
+                    },
+                    "relations": {
+                      "type": "array",
+                      "description": "The related entities of the requested opportunity",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
+                    },
+                    "workflow": {
+                      "type": "array",
+                      "description": "The related workflows of the requested opportunity",
+                      "items": {
+                        "$ref": "#/components/schemas/WorkflowExecution"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateOpportunity",
+        "summary": "updateOpportunity",
+        "description": "Update an opportunity by id",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of opportunity"
+          }
+        ],
+        "requestBody": {
+          "description": "Requested opportunity body to update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated the opportunity successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Opportunity"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/contract": {
+      "get": {
+        "operationId": "getAllContracts",
+        "summary": "getAllContracts",
+        "description": "Get all contracts for a portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contracts have been retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Contract"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/contract/{id}": {
+      "get": {
+        "operationId": "getContract",
+        "summary": "getContract",
+        "description": "Get a contract by id",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the contract"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested contract returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entity": {
+                      "$ref": "#/components/schemas/Contract"
+                    },
+                    "orders": {
+                      "type": "array",
+                      "description": "The related orders of the requested contract",
+                      "items": {
+                        "$ref": "#/components/schemas/Order"
+                      }
+                    },
+                    "files": {
+                      "type": "array",
+                      "description": "The related files of the requested contract",
+                      "items": {
+                        "$ref": "#/components/schemas/File"
+                      }
+                    },
+                    "relations": {
+                      "type": "array",
+                      "description": "The related entities of the requested contract",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
+                    },
+                    "workflow": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WorkflowExecution"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateContract",
+        "summary": "updateContract",
+        "description": "Update a contract by id",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the contract"
+          }
+        ],
+        "requestBody": {
+          "description": "Requested contract body to update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated the contract successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Contract"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/entity/identifiers/{slug}": {
+      "get": {
+        "operationId": "getEntityIdentifiers",
+        "summary": "getEntityIdentifiers",
+        "description": "Retrieve a list of entity identifiers used for entity search by portal users.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            },
+            "required": true,
+            "description": "The slug of an entity"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The identifiers of the requested entity returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "The name of the identifier",
+                            "example": "contract_number"
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "The type of the identifier",
+                            "example": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/entity/by-identifiers/{slug}": {
+      "post": {
+        "operationId": "getEntitiesByIdentifiers",
+        "summary": "getEntitiesByIdentifiers",
+        "description": "Get entities by identifiers by portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            },
+            "required": true,
+            "description": "The slug of an entity"
+          }
+        ],
+        "requestBody": {
+          "description": "The entities are retrieved successfully.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity",
+                "example": "```json\n  {\n    \"name\": \"My Contract\",\n    \"contract_number\": \"123\"\n  }\n```\n"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The returned Entities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/entity/add-end-customer/{slug}/{id}": {
+      "put": {
+        "operationId": "addEndCustomerRelationToEntity",
+        "summary": "addEndCustomerRelationToEntity",
+        "description": "Add portal user relation to an entity",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            },
+            "required": true,
+            "description": "The slug of an entity"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the Entity"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal user is added as a relation to the requested entity successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entity": {
+                      "$ref": "#/components/schemas/EntityItem"
+                    },
+                    "relations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/entity/file": {
+      "post": {
+        "operationId": "saveEntityFile",
+        "summary": "saveEntityFile",
+        "description": "Add files to an entity",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "The request of an file entity",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveEntityFile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The files have been saved to the entitiy successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "createdFiles": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/File"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteEntityFile",
+        "summary": "deleteEntityFile",
+        "description": "Delete files from an entity",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Delete file",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteEntityFile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The files are removed from the requested entity successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deletedFiles": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "File ID",
+                        "example": "00250c75-afd4-4c94-ba7a-ba0df638eba5"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/portal/files": {
+      "post": {
+        "operationId": "savePortalFiles",
+        "summary": "savePortalFiles",
+        "description": "Add files to portal",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "portal files request",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavePortalFile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The files have been saved to the portal successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "createdFiles": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/File"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/user/files": {
+      "get": {
+        "operationId": "getAllFiles",
+        "summary": "getAllFiles",
+        "description": "Fetch all documents under the related entities of a contact",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The files have been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/File"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "InvalidRequest": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Could not authenticate the user",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "The user is not allowed to access this resource",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "PortalAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Portal Cognito Token"
+      },
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Bearer Token"
+      },
+      "AsOrganization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-org-id",
+        "description": "Set organization id as internal user"
+      },
+      "AsContact": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-contact-id",
+        "description": "Set contact id as internal user"
+      },
+      "AsCustomer": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-portal-user-id",
+        "description": "Set portal id as customer"
+      }
+    },
+    "schemas": {
+      "ErrorResp": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      },
+      "EmailTemplates": {
+        "type": "object",
+        "description": "Email templates used for authentication and internal processes",
+        "properties": {
+          "confirmAccount": {
+            "type": "string",
+            "description": "ID of the confirmation email template upon registration",
+            "example": "701f089d-6953-48b5-ac35-442de7c59cd3"
+          },
+          "forgotPassword": {
+            "type": "string",
+            "description": "ID of the email template for forgot password",
+            "example": "6538fddb-f0e9-4f0f-af51-6e57891ff20a"
+          },
+          "invitation": {
+            "type": "string",
+            "description": "ID of the email template for invitation",
+            "example": "14ae65fb-0dc1-4863-8743-6bc01da469f6"
+          },
+          "onNewQuote": {
+            "type": "string",
+            "description": "ID of the email template for new quote",
+            "example": "b03e2b88-8f3f-4a93-8118-1fb07e9198a1"
+          },
+          "onMapAPendingUser": {
+            "type": "string",
+            "description": "ID of the email template for mapping a pending portal user with a contact",
+            "example": "940134fa-50f2-4204-a08a-fd3afddbf39a"
+          }
+        }
+      },
+      "DeleteEntityFile": {
+        "type": "object",
+        "required": [
+          "file_entity_ids",
+          "entity_type",
+          "entity_id"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "example": 123456,
+            "description": "Entity ID"
+          },
+          "entity_type": {
+            "type": "string",
+            "example": "order",
+            "description": "Entity type"
+          },
+          "file_entity_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": 12345
+            },
+            "description": "Array of file entity IDs"
+          }
+        }
+      },
+      "SaveEntityFile": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "entity_type",
+          "files"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "example": 123456,
+            "description": "Entity ID"
+          },
+          "entity_type": {
+            "type": "string",
+            "example": "order",
+            "description": "Entity type"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "filename",
+                "s3ref"
+              ],
+              "properties": {
+                "filename": {
+                  "type": "string",
+                  "example": 12345,
+                  "description": "File name"
+                },
+                "file_entity_id": {
+                  "type": "string",
+                  "example": 12345,
+                  "description": "File entity ID"
+                },
+                "document_type": {
+                  "type": "string",
+                  "example": 12345,
+                  "description": "Document type"
+                },
+                "access_control": {
+                  "type": "string",
+                  "default": "private",
+                  "enum": [
+                    "private",
+                    "public-read"
+                  ],
+                  "description": "Access control level for the file"
+                },
+                "_tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": 12345,
+                  "description": "Array of file tags"
+                },
+                "s3ref": {
+                  "type": "object",
+                  "required": [
+                    "bucket",
+                    "key"
+                  ],
+                  "properties": {
+                    "bucket": {
+                      "type": "string",
+                      "example": 12345,
+                      "description": "S3 bucket name"
+                    },
+                    "key": {
+                      "type": "string",
+                      "example": 12345,
+                      "description": "S3 key"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "SavePortalFile": {
+        "type": "object",
+        "required": [
+          "files",
+          "origin"
+        ],
+        "properties": {
+          "origin": {
+            "$ref": "#/components/schemas/Origin",
+            "description": "Origin of the portal"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "file_type"
+              ],
+              "properties": {
+                "filename": {
+                  "type": "string",
+                  "example": 12345,
+                  "description": "File name"
+                },
+                "file_type": {
+                  "type": "string",
+                  "example": "orderRightTeaser",
+                  "description": "File type"
+                },
+                "_tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": 12345,
+                  "description": "Array of file tags"
+                },
+                "s3ref": {
+                  "type": "object",
+                  "required": [
+                    "bucket",
+                    "key"
+                  ],
+                  "properties": {
+                    "bucket": {
+                      "type": "string",
+                      "example": 12345,
+                      "description": "S3 bucket name"
+                    },
+                    "key": {
+                      "type": "string",
+                      "example": 12345,
+                      "description": "S3 key"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ExtraSchemaAttributes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "name",
+            "label",
+            "group"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Attribute name"
+            },
+            "label": {
+              "type": "string",
+              "description": "Attribute label"
+            },
+            "group": {
+              "type": "string",
+              "description": "Attribute group"
+            }
+          }
+        }
+      },
+      "Origin": {
+        "type": "string",
+        "description": "Origin of the portal",
+        "enum": [
+          "END_CUSTOMER_PORTAL",
+          "INSTALLER_PORTAL"
+        ]
+      },
+      "UpsertPortalConfig": {
+        "type": "object",
+        "required": [
+          "design_id"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable/Disable the portal access"
+          },
+          "name": {
+            "type": "string",
+            "description": "A short name to identify your portal",
+            "example": "Installer Portal"
+          },
+          "domain": {
+            "type": "string",
+            "description": "The URL on which the portal is accessible",
+            "example": "abc.com"
+          },
+          "is_epilot_domain": {
+            "type": "boolean",
+            "description": "Mark true if the domain is an Epilot domain"
+          },
+          "design_id": {
+            "type": "string",
+            "description": "ID of the design used to build the portal",
+            "example": "9ba94f20-b872-4217-a259-2a90a8ee1a29"
+          },
+          "default_user_to_notify": {
+            "type": "object",
+            "description": "Default 360 user to notify upon an internal notification",
+            "properties": {
+              "onPendingUser": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AdminUser"
+                },
+                "description": "Default admin users for pending user notification to notify"
+              }
+            }
+          },
+          "self_registration": {
+            "type": "boolean",
+            "description": "Allow portal user self-registration without a mapped contact",
+            "example": false,
+            "deprecated": true
+          },
+          "self_registration_setting": {
+            "type": "string",
+            "enum": [
+              "ALLOW_WITH_CONTACT_CREATION",
+              "ALLOW_WITHOUT_CONTACT_CREATION",
+              "DENY"
+            ]
+          },
+          "cognito_details": {
+            "type": "object",
+            "description": "AWS Cognito Pool details for the portal",
+            "properties": {
+              "cognito_user_pool_client_id": {
+                "type": "string",
+                "example": "6bsd0jkgoie74k2i8mrhc1vest",
+                "description": "Cognito user pool client ID"
+              },
+              "cognito_user_pool_arn": {
+                "type": "string",
+                "example": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
+                "description": "Cognito user pool ARN"
+              },
+              "cognito_user_pool_id": {
+                "type": "string",
+                "example": "eu-central-1_CUEQRNbUb",
+                "description": "Cognito user pool ID"
+              }
+            }
+          },
+          "config": {
+            "type": "string",
+            "description": "Stringified object with configuration details"
+          },
+          "contact_secondary_identifier": {
+            "type": "string",
+            "description": "Secondary identifier to identify a contact other than the email",
+            "example": "full_name",
+            "deprecated": true
+          },
+          "contact_identifiers": {
+            "type": "array",
+            "description": "Identifiers to identify a contact.",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "email",
+              "last_name"
+            ]
+          },
+          "email_templates": {
+            "$ref": "#/components/schemas/EmailTemplates"
+          },
+          "grants": {
+            "type": "array",
+            "description": "Permissions granted to a portal user while accessing entities",
+            "items": {
+              "$ref": "#/components/schemas/Grant"
+            }
+          },
+          "images": {
+            "type": "object",
+            "description": "Teaser & Banner Image web links",
+            "properties": {
+              "orderLeftTeaser": {
+                "type": "string",
+                "nullable": true,
+                "example": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg",
+                "description": "URL of the order left teaser image"
+              },
+              "orderRightTeaser": {
+                "type": "string",
+                "nullable": true,
+                "example": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg",
+                "description": "URL of the order right teaser image"
+              },
+              "welcomeBanner": {
+                "type": "string",
+                "nullable": true,
+                "example": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg",
+                "description": "URL of the welcome banner image"
+              }
+            }
+          },
+          "entity_identifiers": {
+            "type": "object",
+            "description": "Identifiers used to identify an entity by a portal user",
+            "properties": {
+              "type": {
+                "type": "object",
+                "properties": {
+                  "isEnabled": {
+                    "type": "boolean",
+                    "description": "Enable/Disable the entity identifier"
+                  },
+                  "attributes": {
+                    "type": "array",
+                    "description": "Attributes used to identify an entity",
+                    "items": {
+                      "type": "string",
+                      "example": "contract_number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "entity_actions": {
+            "type": "array",
+            "description": "Journey actions allowed on an entity by a portal user",
+            "items": {
+              "type": "object",
+              "properties": {
+                "journey_id": {
+                  "type": "string"
+                },
+                "slug": {
+                  "$ref": "#/components/schemas/EntitySlug"
+                },
+                "action_Label": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string"
+                    },
+                    "de": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PortalConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpsertPortalConfig"
+          },
+          {
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": 12345,
+                "description": "ID of the organization"
+              },
+              "org_name": {
+                "type": "string",
+                "description": "Name of the organization",
+                "example": "ABC Company"
+              },
+              "origin": {
+                "$ref": "#/components/schemas/Origin"
+              },
+              "org_settings": {
+                "type": "object",
+                "description": "Organization settings",
+                "properties": {
+                  "canary": {
+                    "type": "object",
+                    "description": "Canary feature flag",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Enable/Disable the canary feature"
+                      }
+                    }
+                  },
+                  "release_candidate": {
+                    "type": "object",
+                    "description": "Release candidate settings",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Enable/Disable the release candidate feature"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "UpsertPortalWidget": {
+        "type": "object",
+        "required": [
+          "widgets"
+        ],
+        "properties": {
+          "widgets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortalWidget"
+            }
+          }
+        }
+      },
+      "WidgetBase": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "listIndex"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ACTION_WIDGET",
+              "CONTENT_WIDGET",
+              "ENTITY_WIDGET",
+              "TEASER_WIDGET"
+            ]
+          },
+          "listIndex": {
+            "type": "integer",
+            "description": "Index of the widget in the list, used for ordering (left or right)"
+          },
+          "headline": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              }
+            }
+          },
+          "subHeadline": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "EntityWidget": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WidgetBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "WidgetAction": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              }
+            }
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "url"
+        ]
+      },
+      "ActionWidget": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WidgetBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "actions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/WidgetAction"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "TeaserWidget": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ActionWidget"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "left": {
+                "type": "object",
+                "properties": {
+                  "show": {
+                    "type": "boolean"
+                  },
+                  "showButton": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "right": {
+                "type": "object",
+                "properties": {
+                  "show": {
+                    "type": "boolean"
+                  },
+                  "showButton": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ContentWidget": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WidgetBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "PortalWidget": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/EntityWidget"
+          },
+          {
+            "$ref": "#/components/schemas/ContentWidget"
+          },
+          {
+            "$ref": "#/components/schemas/ActionWidget"
+          },
+          {
+            "$ref": "#/components/schemas/TeaserWidget"
+          }
+        ]
+      },
+      "ContactCountRequest": {
+        "type": "object",
+        "required": [
+          "contactIdentifiers",
+          "orgId"
+        ],
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "example": 728,
+            "description": "ID of the organization"
+          },
+          "contactIdentifiers": {
+            "type": "object",
+            "description": "Identifiers to identify a contact",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UserRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "testemail921@yopmail.com",
+            "description": "User's email address"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "John",
+            "description": "First Name of the portal user"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Doe",
+            "description": "Last Name of the portal user"
+          }
+        }
+      },
+      "CreateUserRequest": {
+        "required": [
+          "email",
+          "orgId",
+          "password"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UserRequest"
+          },
+          {
+            "properties": {
+              "orgId": {
+                "type": "string",
+                "example": 728,
+                "description": "ID of the organization"
+              },
+              "password": {
+                "type": "string",
+                "example": "124n$aAJs*d41h4",
+                "description": "User's password"
+              },
+              "secondaryIdentifier": {
+                "type": "string",
+                "example": 123456,
+                "description": "Secondary identifier to identify a contact"
+              },
+              "contactIdentifiers": {
+                "type": "object",
+                "description": "Identifiers to identify a contact",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "contactId": {
+                "type": "string",
+                "example": 123456,
+                "description": "ID of the contact"
+              }
+            }
+          }
+        ]
+      },
+      "CreateSSOUserRequest": {
+        "required": [
+          "email"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UserRequest"
+          }
+        ]
+      },
+      "OrganizationSettings": {
+        "type": "object",
+        "properties": {
+          "automation_entity_mapping": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable automation entity mapping"
+              }
+            }
+          },
+          "automation_preview": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable automation preview"
+              }
+            }
+          },
+          "central_inbox_preview_setting": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable central inbox preview setting"
+              }
+            }
+          },
+          "contracts_preview_setting": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable contracts preview setting"
+              }
+            }
+          },
+          "disable_ivy": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable Ivy"
+              }
+            }
+          },
+          "double_opt_in": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable double opt-in"
+              }
+            }
+          },
+          "ecommerce_catalog_preview": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable ecommerce catalog preview"
+              }
+            }
+          },
+          "ecommerce_opportunities_preview": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable ecommerce opportunities preview"
+              }
+            }
+          },
+          "ecommerce_preview": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable ecommerce preview"
+              }
+            }
+          },
+          "end_customer_portal": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable end customer portal"
+              }
+            }
+          },
+          "installer_portal": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable installer portal"
+              }
+            }
+          },
+          "entity_schema_builder": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable entity schema builder"
+              }
+            }
+          },
+          "logic_editor_preview": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable logic editor preview"
+              }
+            }
+          },
+          "new_navigation": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable new navigation"
+              }
+            }
+          },
+          "partnering": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable partnering"
+              }
+            }
+          },
+          "product-availability": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable product availability"
+              }
+            }
+          },
+          "sso": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable single sign-on (SSO)"
+              }
+            }
+          },
+          "submission_preview": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable submission preview"
+              }
+            }
+          },
+          "user_roles_preview": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Enable/Disable user roles preview"
+              }
+            }
+          }
+        }
+      },
+      "AuthConfig": {
+        "type": "object",
+        "properties": {
+          "user_pool_id": {
+            "type": "string",
+            "example": "eu-central-1_CUEQRNbUb",
+            "description": "AWS Cognito User Pool ID"
+          },
+          "user_pool_client_id": {
+            "type": "string",
+            "example": "6bsd0jkgoie74k2i8mrhc1vest",
+            "description": "AWS Cognito User Pool Client ID"
+          },
+          "user_pool_identity_pool_id": {
+            "type": "string",
+            "example": "eu-central-1:a63af1f7-ab86-4ab5-a0eb-f461cb37c2b1",
+            "description": "AWS Cognito User Pool Identity Pool ID"
+          },
+          "portal_id": {
+            "type": "string",
+            "example": "7h2hwdj7hhjsdcjkq03eidna3ep",
+            "description": "Portal ID"
+          }
+        },
+        "required": [
+          "user_pool_id",
+          "user_pool_client_id",
+          "portal_id"
+        ]
+      },
+      "Exists": {
+        "type": "object",
+        "required": [
+          "exists"
+        ],
+        "properties": {
+          "exists": {
+            "type": "boolean",
+            "description": "Indicate whether the item exists"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Indicate whether the item is active"
+          }
+        },
+        "example": {
+          "exists": true,
+          "active": false
+        }
+      },
+      "EntitySlug": {
+        "description": "URL-friendly identifier for the entity schema",
+        "type": "string",
+        "enum": [
+          "contact",
+          "contract",
+          "file",
+          "order",
+          "opportunity",
+          "product",
+          "price",
+          "meter",
+          "meter_counter"
+        ],
+        "example": "contact"
+      },
+      "EntityId": {
+        "type": "string",
+        "description": "Entity ID",
+        "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      },
+      "BaseEntity": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "Entity ID",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "_title": {
+            "type": "string",
+            "description": "Title of the entity",
+            "example": "Example Entity"
+          },
+          "_org": {
+            "type": "string",
+            "description": "Organization ID the entity belongs to",
+            "example": "123"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of entity tags",
+            "example": [
+              "example",
+              "mock"
+            ]
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp of the entity",
+            "example": "2021-02-09T12:41:43.662Z"
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp of the entity",
+            "example": "2021-02-09T12:41:43.662Z"
+          }
+        },
+        "required": [
+          "_id",
+          "_title",
+          "_org",
+          "_created_at",
+          "_updated_at"
+        ]
+      },
+      "Schema": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Slug of the schema",
+            "example": "contact"
+          }
+        },
+        "additionalProperties": true
+      },
+      "Entity": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "EntityItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema"
+            ],
+            "properties": {
+              "_schema": {
+                "$ref": "#/components/schemas/EntitySlug",
+                "description": "Entity schema identifier"
+              }
+            }
+          }
+        ]
+      },
+      "PortalUser": {
+        "description": "The portal user entity",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema"
+            ],
+            "properties": {
+              "_schema": {
+                "type": "string",
+                "enum": [
+                  "portal_user"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "Contact": {
+        "description": "The mapped contact of the portal user",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema"
+            ],
+            "properties": {
+              "_schema": {
+                "type": "string",
+                "enum": [
+                  "contact"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "Order": {
+        "description": "The order entity",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema"
+            ],
+            "properties": {
+              "_schema": {
+                "type": "string",
+                "enum": [
+                  "order"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "Opportunity": {
+        "description": "The opportunity entity",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema"
+            ],
+            "properties": {
+              "_schema": {
+                "type": "string",
+                "enum": [
+                  "opportunity"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "Contract": {
+        "description": "The contract entity",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema"
+            ],
+            "properties": {
+              "_schema": {
+                "type": "string",
+                "enum": [
+                  "contract"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "File": {
+        "description": "The file entity",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema"
+            ],
+            "properties": {
+              "_schema": {
+                "type": "string",
+                "enum": [
+                  "file"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "Product": {
+        "description": "The product entity",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema"
+            ],
+            "properties": {
+              "_schema": {
+                "type": "string",
+                "enum": [
+                  "product"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "AdminUser": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "user",
+            "nullable": true
+          },
+          "user_id": {
+            "type": "string",
+            "example": "123456"
+          },
+          "display_name": {
+            "type": "string",
+            "example": "John",
+            "nullable": true
+          },
+          "image_uri": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "original": {
+                "type": "string",
+                "example": "https://fuafjvoHKsu.cloudimg.io/v7/e-mage-sam-bucket-dev.s3.eu-central-1.amazonaws.com/files/fuafjvoHKsudhfagweucjasdvga/original",
+                "nullable": true
+              },
+              "thumbnail_32": {
+                "type": "string",
+                "example": "https://fuafjvoHKsu.cloudimg.io/v7/e-mage-sam-bucket-dev.s3.eu-central-1.amazonaws.com/files/fuafjvoHKsudhfagweucjasdvga/original?w=32&h=32",
+                "nullable": true
+              },
+              "thumbnail_64": {
+                "type": "string",
+                "example": "https://fuafjvoHKsu.cloudimg.io/v7/e-mage-sam-bucket-dev.s3.eu-central-1.amazonaws.com/files/fuafjvoHKsudhfagweucjasdvga/original?w=64&h=64",
+                "nullable": true
+              },
+              "key": {
+                "type": "string",
+                "example": "fuafjvoHKsudhfagweucjasdvga",
+                "nullable": true
+              }
+            }
+          },
+          "org_id": {
+            "type": "string",
+            "example": "123"
+          },
+          "email": {
+            "type": "string",
+            "example": "j.doe@epilot.cloud",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "example": "12345 67890",
+            "nullable": true
+          }
+        }
+      },
+      "Grant": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "example": "entity-read",
+            "description": "Action for granting permission"
+          },
+          "resource": {
+            "type": "string",
+            "example": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
+            "description": "Resource for granting permission"
+          },
+          "effect": {
+            "type": "string",
+            "default": "allow",
+            "enum": [
+              "allow",
+              "deny"
+            ],
+            "description": "Effect of the permission"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "WorkflowExecution": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true,
+        "example": {
+          "id": "8gja72h6kas6h",
+          "name": "Lead Qualification",
+          "trigger": "MANUAL",
+          "status": "STARTED",
+          "creationTime": "2021-04-27T12:01:13.000Z",
+          "lastUpdateTime": "2021-04-27T12:01:13.000Z",
+          "dueDate": "2021-04-27T12:01:13.000Z",
+          "assignedTo": [
+            "252",
+            "29052"
+          ],
+          "flow": [
+            {
+              "id": "sectionId1",
+              "name": "Initial Information Gathering",
+              "steps": [
+                {
+                  "id": "sada5641f3a21",
+                  "name": "Call client and confirm address and product",
+                  "status": "ASSIGNED",
+                  "assignedTo": [
+                    "11"
+                  ]
+                },
+                {
+                  "id": "sada5641f3a22",
+                  "name": "Check product availability",
+                  "status": "UNASSIGNED"
+                },
+                {
+                  "id": "sada5641f3a23",
+                  "name": "Send email confirming contact with the client",
+                  "status": "SKIPPED"
+                }
+              ]
+            },
+            {
+              "id": "firstLevelStepId1",
+              "name": "Print and send catalog",
+              "status": "SKIPPED",
+              "dueDate": "2023-01-15T20:00:00"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://customer-portal-api.sls.epilot.io"
+    }
+  ]
+}

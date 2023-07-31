@@ -54,6 +54,7 @@
     "@epilot/entity-mapping-client": "^0.5.0",
     "@epilot/file-client": "^1.6.0",
     "@epilot/message-client": "^1.3.0",
+    "@epilot/metering-client": "^0.2.8",
     "@epilot/notification-client": "^0.3.0",
     "@epilot/organization-client": "^0.8.0",
     "@epilot/partner-directory-client": "^0.5.0",
