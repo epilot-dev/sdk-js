@@ -1,0 +1,73 @@
+{
+  "name": "@epilot/metering-client",
+  "version": "0.2.8",
+  "description": "API Client for epilot Metering API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git",
+    "directory": "clients/metering-client"
+  },
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/metering-client#readme",
+  "keywords": [
+    "epilot",
+    "sdk",
+    "metering"
+  ],
+  "scripts": {
+    "test": "jest",
+    "typescript": "tsc",
+    "bundle-definition": "webpack",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/metering.yaml",
+    "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
+    "build": "tsc && npm run bundle-definition",
+    "build:watch": "npm run build && tsc -w",
+    "prepublishOnly": "npm run typegen && npm run build",
+    "lint": "../../node_modules/eslint/bin/eslint.js src"
+  },
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "**/*.json",
+    "**/*.js",
+    "**/*.d.ts",
+    "!*.test.*",
+    "!**/*.test.*",
+    "!node_modules",
+    "!src",
+    "!src/**",
+    "!*.config.js"
+  ],
+  "author": "epilot GmbH",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "axios": "^0.25.0"
+  },
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "https-browserify": "^1.0.0",
+    "openapi-client-axios": "^6.0.0",
+    "stream-http": "^3.1.1",
+    "url": "^0.11.0",
+    "util": "^0.12.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.20",
+    "axios": "^0.25.0",
+    "copy-webpack-plugin": "^7.0.0",
+    "jest": "^26.6.3",
+    "json-loader": "^0.5.7",
+    "openapi-client-axios-typegen": "^6.0.0",
+    "openapicmd": "^1.8.2",
+    "ts-jest": "^26.5.6",
+    "ts-loader": "^8.3.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.5.4",
+    "webpack": "^5.18.0",
+    "webpack-cli": "^4.4.0"
+  }
+}
