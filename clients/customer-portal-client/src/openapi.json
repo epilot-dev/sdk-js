@@ -2571,6 +2571,28 @@
             "PortalAuth": []
           }
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "number",
+              "description": "Initial offset to set for the search results",
+              "example": 0
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "number",
+              "description": "Size of the search results",
+              "example": 0
+            },
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "The files have been fetched successfully.",
@@ -2582,8 +2604,63 @@
                     "files": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/File"
+                        "$ref": "#/components/schemas/DashboardFile"
                       }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/user/file/{id}": {
+      "get": {
+        "operationId": "getFileById",
+        "summary": "getFileById",
+        "description": "Fetch a document with ID",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The Id of a file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The files have been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "$ref": "#/components/schemas/DashboardFile"
                     }
                   }
                 }
@@ -3956,6 +4033,67 @@
                 "enum": [
                   "product"
                 ]
+              }
+            }
+          }
+        ]
+      },
+      "DashboardFile": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/File"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string",
+                "example": "document.pdf"
+              },
+              "access_control": {
+                "type": "string",
+                "default": "private",
+                "enum": [
+                  "private",
+                  "public-read"
+                ]
+              },
+              "public_url": {
+                "description": "Direct URL for file (public only if file access control is public-read)",
+                "type": "string",
+                "format": "url",
+                "example": "https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+              },
+              "type": {
+                "description": "Human readable type for file",
+                "type": "string",
+                "enum": [
+                  "document",
+                  "document_template",
+                  "text",
+                  "image",
+                  "video",
+                  "audio",
+                  "spreadsheet",
+                  "presentation",
+                  "font",
+                  "archive",
+                  "application",
+                  "unknown"
+                ]
+              },
+              "mime_type": {
+                "type": "string",
+                "description": "MIME type of the file",
+                "example": "application/pdf"
+              },
+              "parent_id": {
+                "type": "string",
+                "description": "The ID of the parent entity",
+                "example": "d8dffa9a-6c90-4c4e-b8d1-032194b25526"
+              },
+              "parent_schema": {
+                "$ref": "#/components/schemas/EntitySlug"
               }
             }
           }
