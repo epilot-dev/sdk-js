@@ -355,6 +355,86 @@ declare namespace Components {
              */
             contactId?: string;
         }
+        /**
+         * The file entity
+         */
+        export interface DashboardFile {
+            [name: string]: any;
+            _id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId;
+            /**
+             * Title of the entity
+             * example:
+             * Example Entity
+             */
+            _title: string;
+            /**
+             * Organization ID the entity belongs to
+             * example:
+             * 123
+             */
+            _org: string;
+            /**
+             * Array of entity tags
+             * example:
+             * [
+             *   "example",
+             *   "mock"
+             * ]
+             */
+            _tags?: string[];
+            /**
+             * Creation timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _created_at: string; // date-time
+            /**
+             * Last update timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _updated_at: string; // date-time
+            _schema: "file";
+            /**
+             * example:
+             * document.pdf
+             */
+            filename?: string;
+            access_control?: "private" | "public-read";
+            /**
+             * Direct URL for file (public only if file access control is public-read)
+             * example:
+             * https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf
+             */
+            public_url?: string; // url
+            /**
+             * Human readable type for file
+             */
+            type?: "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown";
+            /**
+             * MIME type of the file
+             * example:
+             * application/pdf
+             */
+            mime_type?: string;
+            /**
+             * The ID of the parent entity
+             * example:
+             * d8dffa9a-6c90-4c4e-b8d1-032194b25526
+             */
+            parent_id?: string;
+            parent_schema?: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+        }
         export interface DeleteEntityFile {
             /**
              * Entity ID
@@ -1637,9 +1717,37 @@ declare namespace Paths {
         }
     }
     namespace GetAllFiles {
+        namespace Parameters {
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 0
+             */
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            from: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size: /**
+             * Size of the search results
+             * example:
+             * 0
+             */
+            Parameters.Size;
+        }
         namespace Responses {
             export interface $200 {
-                files?: /* The file entity */ Components.Schemas.File[];
+                files?: /* The file entity */ Components.Schemas.DashboardFile[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -1942,6 +2050,28 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetFileById {
+        namespace Parameters {
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+                file?: /* The file entity */ Components.Schemas.DashboardFile;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -2983,10 +3113,20 @@ export interface OperationMethods {
    * Fetch all documents under the related entities of a contact
    */
   'getAllFiles'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.GetAllFiles.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllFiles.Responses.$200>
+  /**
+   * getFileById - getFileById
+   * 
+   * Fetch a document with ID
+   */
+  'getFileById'(
+    parameters?: Parameters<Paths.GetFileById.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFileById.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -3517,10 +3657,22 @@ export interface PathsDictionary {
      * Fetch all documents under the related entities of a contact
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.GetAllFiles.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllFiles.Responses.$200>
+  }
+  ['/v2/portal/user/file/{id}']: {
+    /**
+     * getFileById - getFileById
+     * 
+     * Fetch a document with ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFileById.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFileById.Responses.$200>
   }
 }
 
