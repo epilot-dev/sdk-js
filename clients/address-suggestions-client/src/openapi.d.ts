@@ -110,12 +110,8 @@ declare namespace Paths {
         }
     }
     namespace ValidateAddresses {
-        export interface HeaderParameters {
-            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
-        }
         namespace Parameters {
             export type S3FileUrl = string;
-            export type XEpilotOrgID = string;
         }
         export interface QueryParameters {
             s3FileUrl: Parameters.S3FileUrl;
@@ -144,7 +140,7 @@ export interface OperationMethods {
    * Validates an addresses file, it returns an array of errors if the file is invalid
    */
   'validateAddresses'(
-    parameters?: Parameters<Paths.ValidateAddresses.QueryParameters & Paths.ValidateAddresses.HeaderParameters> | null,
+    parameters?: Parameters<Paths.ValidateAddresses.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ValidateAddresses.Responses.$200>
@@ -170,7 +166,7 @@ export interface PathsDictionary {
      * Validates an addresses file, it returns an array of errors if the file is invalid
      */
     'get'(
-      parameters?: Parameters<Paths.ValidateAddresses.QueryParameters & Paths.ValidateAddresses.HeaderParameters> | null,
+      parameters?: Parameters<Paths.ValidateAddresses.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ValidateAddresses.Responses.$200>
