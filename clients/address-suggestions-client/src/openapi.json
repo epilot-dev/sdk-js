@@ -53,6 +53,16 @@
           },
           {
             "in": "query",
+            "name": "countryCodeSearchTerm",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "country code search term",
+            "example": "de"
+          },
+          {
+            "in": "query",
             "name": "postalCodeSearchTerm",
             "required": false,
             "schema": {
@@ -68,7 +78,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "postal code search term"
+            "description": "street search term"
           }
         ],
         "operationId": "getAddresses",

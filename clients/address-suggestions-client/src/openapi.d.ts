@@ -94,6 +94,7 @@ declare namespace Paths {
             "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
         }
         namespace Parameters {
+            export type CountryCodeSearchTerm = string;
             export type PostalCodeSearchTerm = string;
             export type S3FileUrl = string;
             export type StreetSearchTerm = string;
@@ -101,6 +102,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             s3FileUrl: Parameters.S3FileUrl;
+            countryCodeSearchTerm?: Parameters.CountryCodeSearchTerm;
             postalCodeSearchTerm?: Parameters.PostalCodeSearchTerm;
             streetSearchTerm?: Parameters.StreetSearchTerm;
         }

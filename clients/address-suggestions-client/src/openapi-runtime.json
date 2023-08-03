@@ -25,6 +25,11 @@
           },
           {
             "in": "query",
+            "name": "countryCodeSearchTerm",
+            "required": false
+          },
+          {
+            "in": "query",
             "name": "postalCodeSearchTerm",
             "required": false
           },
