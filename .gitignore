@@ -3,3 +3,4 @@ npm_debug.log*
 .eslintcache
 dist
 *.log
+.idea
