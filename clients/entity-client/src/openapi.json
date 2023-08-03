@@ -1669,16 +1669,16 @@
     "/v1/entity:import": {
       "post": {
         "operationId": "importEntities",
-        "summary": "importEntities",
-        "description": "import entity data from",
+        "summary": "Import Entities",
+        "description": "This endpoint enables the import of entities into the platform.\nThe entities should be provided in a CSV format inside an S3 bucket.\nThis API will return the `job_id`` which can be used to fetch the status of the import process.\n",
         "tags": [
-          "Export"
+          "Entity Import"
         ],
         "parameters": [
           {
             "in": "query",
             "name": "job_id",
-            "description": "Import Job Id to get the result",
+            "description": "The ID of the import job. This ID is used to track the progress and fetch the result of the import operation.",
             "schema": {
               "$ref": "#/components/schemas/ExportJobId"
             }
@@ -1695,7 +1695,7 @@
         },
         "responses": {
           "201": {
-            "description": "created import url and download url"
+            "description": "The import operation was initiated successfully.\nThe response includes the URLs for the files containing the successful and failed imported entities.\n"
           }
         }
       }
@@ -2121,8 +2121,9 @@
     },
     "schemas": {
       "ExportJobId": {
-        "description": "Export Job Id to get the result",
-        "type": "string"
+        "description": "The unique identifier of the import job.",
+        "type": "string",
+        "example": "abc123"
       },
       "Language": {
         "description": "Export headers translation Language",
@@ -2940,10 +2941,17 @@
                       "type": "object",
                       "properties": {
                         "value": {
+                          "description": "The stored value of the option",
                           "type": "string"
                         },
                         "title": {
+                          "description": "The displayed title of the option",
                           "type": "string"
+                        },
+                        "hidden": {
+                          "description": "If true, the option will not be displayed in the UI",
+                          "type": "boolean",
+                          "default": false
                         }
                       },
                       "required": [
@@ -3958,6 +3966,14 @@
                 "type": "string"
               }
             }
+          },
+          "summary_attributes": {
+            "description": "List of attribute names that we show in the summary header",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "email"
+            }
           }
         }
       },
@@ -4357,27 +4373,32 @@
             "properties": {
               "bucket": {
                 "type": "string",
-                "example": "epilot-files-prod"
+                "description": "The name of the S3 bucket where the JSON file for import is stored.",
+                "example": "my-bucket"
               },
               "key": {
                 "type": "string",
-                "example": "123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+                "description": "The key or path to the JSON file within the S3 bucket.",
+                "example": "imports/my-import.json"
               }
             },
             "required": [
               "bucket",
               "key"
-            ]
+            ],
+            "description": "The S3 bucket and key where the JSON file for import is located."
           },
           "schema": {
             "type": "string",
+            "description": "The schema of the entities being imported. This must match the schema of the entities on the platform.",
             "example": "contact"
           }
         },
         "required": [
           "S3Reference",
           "schema"
-        ]
+        ],
+        "description": "The parameters for importing entities."
       },
       "EntitySearchResults": {
         "type": "object",
@@ -5477,9 +5498,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }
