@@ -18,6 +18,12 @@
   "servers": [
     {
       "url": "https://address-suggestions-api.sls.epilot.io"
+    },
+    {
+      "url": "https://address-suggestions-api.sls.epilot.io"
+    },
+    {
+      "url": "https://address-suggestions-api.sls.epilot.io"
     }
   ],
   "paths": {
@@ -32,7 +38,8 @@
             "schema": {
               "type": "string"
             },
-            "required": true
+            "required": true,
+            "example": 739224
           },
           {
             "in": "query",
@@ -41,7 +48,18 @@
             "schema": {
               "type": "string"
             },
-            "description": "file s3 reference"
+            "description": "file s3 reference",
+            "example": "https://epilot-dev-user-content.s3.eu-central-1.amazonaws.com/739224/0a3639af-d4c3-4f96-bfc1-9dcbafdfaa42/availability-file-template%2520(13).csv"
+          },
+          {
+            "in": "query",
+            "name": "countryCodeSearchTerm",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "country code search term",
+            "example": "de"
           },
           {
             "in": "query",
@@ -50,7 +68,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "postal code search term"
+            "description": "postal code search term",
+            "example": 506
           },
           {
             "in": "query",
@@ -59,12 +78,14 @@
             "schema": {
               "type": "string"
             },
-            "description": "postal code search term"
+            "description": "street search term"
           }
         ],
         "operationId": "getAddresses",
         "summary": "get addresses from file",
-        "tags": ["Addresses API"],
+        "tags": [
+          "Addresses API"
+        ],
         "security": [],
         "responses": {
           "200": {
@@ -100,18 +121,10 @@
         "description": "Validates an addresses file, it returns an array of errors if the file is invalid",
         "operationId": "validateAddresses",
         "summary": "validate addresses file",
-        "tags": ["Addresses API"],
+        "tags": [
+          "Addresses API"
+        ],
         "parameters": [
-          {
-            "in": "header",
-            "name": "X-Epilot-Org-ID",
-            "description": "The target Organization Id represented by the caller",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "example": 739224
-          },
           {
             "in": "query",
             "name": "s3FileUrl",
@@ -186,7 +199,9 @@
     },
     "schemas": {
       "Error": {
-        "required": ["message"],
+        "required": [
+          "message"
+        ],
         "properties": {
           "message": {
             "type": "string",
@@ -242,7 +257,10 @@
           "status": {
             "description": "The status of the validation",
             "type": "string",
-            "enum": ["success", "error"]
+            "enum": [
+              "success",
+              "error"
+            ]
           },
           "rules_parsed_count": {
             "description": "The number of rules successfully parsed",
@@ -274,7 +292,9 @@
             "type": "string"
           }
         },
-        "required": ["msg"]
+        "required": [
+          "msg"
+        ]
       }
     }
   }

@@ -1,6 +1,6 @@
 {
   "name": "@epilot/address-suggestions-client",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "Client for epilot Address Suggestions API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,7 +21,7 @@
   "scripts": {
     "test": "jest",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js http://localhost:3001/openapi.json",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/address-suggestions-api.yaml",
     "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
     "build": "tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",

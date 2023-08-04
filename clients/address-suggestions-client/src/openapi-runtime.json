@@ -25,6 +25,11 @@
           },
           {
             "in": "query",
+            "name": "countryCodeSearchTerm",
+            "required": false
+          },
+          {
+            "in": "query",
             "name": "postalCodeSearchTerm",
             "required": false
           },
@@ -41,11 +46,6 @@
       "get": {
         "operationId": "validateAddresses",
         "parameters": [
-          {
-            "in": "header",
-            "name": "X-Epilot-Org-ID",
-            "required": true
-          },
           {
             "in": "query",
             "name": "s3FileUrl",
