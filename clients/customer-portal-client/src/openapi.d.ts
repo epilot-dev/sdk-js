@@ -355,86 +355,6 @@ declare namespace Components {
              */
             contactId?: string;
         }
-        /**
-         * The file entity
-         */
-        export interface DashboardFile {
-            [name: string]: any;
-            _id: /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            EntityId;
-            /**
-             * Title of the entity
-             * example:
-             * Example Entity
-             */
-            _title: string;
-            /**
-             * Organization ID the entity belongs to
-             * example:
-             * 123
-             */
-            _org: string;
-            /**
-             * Array of entity tags
-             * example:
-             * [
-             *   "example",
-             *   "mock"
-             * ]
-             */
-            _tags?: string[];
-            /**
-             * Creation timestamp of the entity
-             * example:
-             * 2021-02-09T12:41:43.662Z
-             */
-            _created_at: string; // date-time
-            /**
-             * Last update timestamp of the entity
-             * example:
-             * 2021-02-09T12:41:43.662Z
-             */
-            _updated_at: string; // date-time
-            _schema: "file";
-            /**
-             * example:
-             * document.pdf
-             */
-            filename?: string;
-            access_control?: "private" | "public-read";
-            /**
-             * Direct URL for file (public only if file access control is public-read)
-             * example:
-             * https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf
-             */
-            public_url?: string; // url
-            /**
-             * Human readable type for file
-             */
-            type?: "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown";
-            /**
-             * MIME type of the file
-             * example:
-             * application/pdf
-             */
-            mime_type?: string;
-            /**
-             * The ID of the parent entity
-             * example:
-             * d8dffa9a-6c90-4c4e-b8d1-032194b25526
-             */
-            parent_id?: string;
-            parent_schema?: /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            EntitySlug;
-        }
         export interface DeleteEntityFile {
             /**
              * Entity ID
@@ -650,6 +570,88 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
             _schema: "file";
+        }
+        /**
+         * The file entity
+         */
+        export interface FileItem {
+            [name: string]: any;
+            _id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId;
+            /**
+             * Title of the entity
+             * example:
+             * Example Entity
+             */
+            _title: string;
+            /**
+             * Organization ID the entity belongs to
+             * example:
+             * 123
+             */
+            _org: string;
+            /**
+             * Array of entity tags
+             * example:
+             * [
+             *   "example",
+             *   "mock"
+             * ]
+             */
+            _tags?: string[];
+            /**
+             * Creation timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _created_at: string; // date-time
+            /**
+             * Last update timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _updated_at: string; // date-time
+            _schema: "file";
+            /**
+             * example:
+             * document.pdf
+             */
+            filename?: string;
+            access_control?: "private" | "public-read";
+            /**
+             * Direct URL for file (public only if file access control is public-read)
+             * example:
+             * https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf
+             */
+            public_url?: string; // url
+            /**
+             * Human readable type for file
+             */
+            type?: "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown";
+            /**
+             * MIME type of the file
+             * example:
+             * application/pdf
+             */
+            mime_type?: string;
+            _relations?: {
+                /**
+                 * The ID of the parent entity
+                 * example:
+                 * d8dffa9a-6c90-4c4e-b8d1-032194b25526
+                 */
+                entity_id?: string;
+                _schema?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+            }[];
         }
         export interface Grant {
             /**
@@ -1747,7 +1749,13 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                files?: /* The file entity */ Components.Schemas.DashboardFile[];
+                results?: /* The file entity */ Components.Schemas.FileItem[];
+                /**
+                 * Total number of files for pagination
+                 * example:
+                 * 50
+                 */
+                hits?: number;
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -2067,7 +2075,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                file?: /* The file entity */ Components.Schemas.DashboardFile;
+                file?: /* The file entity */ Components.Schemas.FileItem;
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
