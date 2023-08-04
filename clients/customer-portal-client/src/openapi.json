@@ -2601,11 +2601,16 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "files": {
+                    "results": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/DashboardFile"
+                        "$ref": "#/components/schemas/FileItem"
                       }
+                    },
+                    "hits": {
+                      "type": "number",
+                      "description": "Total number of files for pagination",
+                      "example": 50
                     }
                   }
                 }
@@ -2660,7 +2665,7 @@
                   "type": "object",
                   "properties": {
                     "file": {
-                      "$ref": "#/components/schemas/DashboardFile"
+                      "$ref": "#/components/schemas/FileItem"
                     }
                   }
                 }
@@ -4038,7 +4043,7 @@
           }
         ]
       },
-      "DashboardFile": {
+      "FileItem": {
         "allOf": [
           {
             "$ref": "#/components/schemas/File"
@@ -4087,13 +4092,21 @@
                 "description": "MIME type of the file",
                 "example": "application/pdf"
               },
-              "parent_id": {
-                "type": "string",
-                "description": "The ID of the parent entity",
-                "example": "d8dffa9a-6c90-4c4e-b8d1-032194b25526"
-              },
-              "parent_schema": {
-                "$ref": "#/components/schemas/EntitySlug"
+              "_relations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string",
+                      "description": "The ID of the parent entity",
+                      "example": "d8dffa9a-6c90-4c4e-b8d1-032194b25526"
+                    },
+                    "_schema": {
+                      "$ref": "#/components/schemas/EntitySlug"
+                    }
+                  }
+                }
               }
             }
           }
