@@ -1458,6 +1458,7 @@ declare namespace Components {
             last_name?: string;
         }
         export interface WidgetAction {
+            type?: "link" | "journey";
             label: {
                 en?: string;
                 de?: string;

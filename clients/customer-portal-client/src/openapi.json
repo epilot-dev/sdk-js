@@ -3330,6 +3330,13 @@
       "WidgetAction": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "link",
+              "journey"
+            ]
+          },
           "label": {
             "type": "object",
             "properties": {
@@ -4252,6 +4259,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://customer-portal-api.sls.epilot.io"
+    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }
