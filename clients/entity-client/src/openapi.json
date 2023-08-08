@@ -2706,7 +2706,10 @@
               "multiline": {
                 "type": "boolean"
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -2725,7 +2728,10 @@
                   "link"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -2744,7 +2750,10 @@
                   "internal"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -2763,7 +2772,10 @@
                   "boolean"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -2783,7 +2795,10 @@
                   "datetime"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -2802,7 +2817,10 @@
                   "country"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -2851,7 +2869,10 @@
                 "type": "boolean",
                 "description": "Allow arbitrary input values in addition to provided options"
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -2910,7 +2931,10 @@
                 "type": "boolean",
                 "description": "Allow arbitrary input values in addition to provided options"
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -2961,7 +2985,10 @@
                   ]
                 }
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -2989,7 +3016,10 @@
                 "type": "integer",
                 "minimum": 0
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3118,7 +3148,10 @@
             "type": "string",
             "description": "An hint on how to display the summary field"
           }
-        }
+        },
+        "required": [
+          "type"
+        ]
       },
       "RelationAttribute": {
         "allOf": [
@@ -3283,7 +3316,10 @@
                 "type": "string",
                 "description": "Optional placeholder text for the relation search input. The translated value for search_placeholder is used, if found else the string is used as is."
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3306,7 +3342,10 @@
                 "type": "boolean",
                 "default": false
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3328,7 +3367,10 @@
               "has_primary": {
                 "type": "boolean"
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3350,7 +3392,10 @@
               "has_primary": {
                 "type": "boolean"
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3369,7 +3414,10 @@
                   "invitation_email"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3388,7 +3436,10 @@
                   "automation"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3407,7 +3458,10 @@
                   "internal_user"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3429,7 +3483,10 @@
                   "purpose"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3474,7 +3531,10 @@
                 "default": true,
                 "description": "when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link."
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3505,7 +3565,10 @@
                   "type": "string"
                 }
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3527,7 +3590,10 @@
               "format": {
                 "type": "string"
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3578,7 +3644,10 @@
                   "ordered_list"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3597,7 +3666,10 @@
                   "computed"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3616,7 +3688,10 @@
                   "partner_status"
                 ]
               }
-            }
+            },
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -3654,6 +3729,7 @@
           }
         },
         "required": [
+          "type",
           "label",
           "value"
         ]

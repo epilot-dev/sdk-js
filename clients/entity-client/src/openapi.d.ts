@@ -261,7 +261,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "relation_address";
+            type: "relation_address";
             has_primary?: boolean;
         }
         export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute;
@@ -383,7 +383,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "automation";
+            type: "automation";
         }
         export interface BaseAttribute {
             name: string;
@@ -684,7 +684,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "boolean";
+            type: "boolean";
         }
         export type ClassificationId = string; // uuid
         export interface ClassificationsUpdate {
@@ -810,7 +810,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "computed";
+            type: "computed";
         }
         /**
          * Consent Management
@@ -1052,7 +1052,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "country";
+            type: "country";
         }
         /**
          * Currency input
@@ -1302,7 +1302,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "date" | "datetime";
+            type: "date" | "datetime";
         }
         /**
          * example:
@@ -2999,7 +2999,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "internal";
+            type: "internal";
         }
         /**
          * Epilot internal user info
@@ -3119,7 +3119,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "internal_user";
+            type: "internal_user";
         }
         /**
          * Email address for send invitation
@@ -3239,7 +3239,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "invitation_email";
+            type: "invitation_email";
         }
         /**
          * Pass 'true' to generate import template
@@ -3367,7 +3367,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "link";
+            type: "link";
         }
         /**
          * Multi Choice Selection
@@ -3487,7 +3487,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "multiselect" | "checkbox";
+            type: "multiselect" | "checkbox";
             /**
              * controls if the matching of values against the options is case sensitive or not
              */
@@ -3623,7 +3623,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "number";
+            type: "number";
             format?: string;
         }
         /**
@@ -3744,7 +3744,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "ordered_list";
+            type: "ordered_list";
         }
         /**
          * Partner Status
@@ -3864,7 +3864,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "partner_status";
+            type: "partner_status";
         }
         /**
          * Reference to a payment method attribute of another entity
@@ -3984,7 +3984,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "relation_payment_method";
+            type: "relation_payment_method";
             has_primary?: boolean;
         }
         /**
@@ -4113,7 +4113,7 @@ declare namespace Components {
             parents?: ClassificationId /* uuid */[];
             created_at?: string; // date-time
             updated_at?: string; // date-time
-            type?: "purpose";
+            type: "purpose";
         }
         /**
          * example:
@@ -4248,7 +4248,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "relation";
+            type: "relation";
             relation_type?: "has_many" | "has_one";
             /**
              * Map of schema slug to target relation attribute
@@ -4611,7 +4611,7 @@ declare namespace Components {
              * Weak repeatable attributes are kept when duplicating an entity. Strong repeatable attributes are discarded when duplicating an entity.
              */
             relation_affinity_mode?: "weak" | "strong";
-            type?: "string" | "phone" | "email" | "address" | "relation" | "payment" | "price_component" | "date";
+            type: "string" | "phone" | "email" | "address" | "relation" | "payment" | "price_component" | "date";
             /**
              * when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link.
              */
@@ -4890,7 +4890,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "select" | "radio";
+            type: "select" | "radio";
             options?: ({
                 value: string;
                 title?: string;
@@ -5018,7 +5018,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "sequence";
+            type: "sequence";
             /**
              * Prefix added before the sequence number
              * example:
@@ -5145,7 +5145,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "status";
+            type: "status";
             options?: ((string | null) | {
                 /**
                  * The stored value of the option
@@ -5339,7 +5339,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "tags";
+            type: "tags";
             options?: string[];
             suggestions?: string[];
         }
@@ -5500,7 +5500,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "string";
+            type: "string";
             multiline?: boolean;
         }
         /**
@@ -5621,7 +5621,7 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "relation_user";
+            type: "relation_user";
             multiple?: boolean;
         }
     }
