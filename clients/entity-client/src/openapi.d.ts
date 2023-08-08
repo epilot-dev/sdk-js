@@ -1504,6 +1504,10 @@ declare namespace Components {
                 icon?: string;
                 label?: string;
             };
+            /**
+             * List of attribute names that we show in the summary header
+             */
+            summary_attributes?: string[];
         }
         export interface EntityDefaultTable {
             view_type?: "default";
@@ -1561,20 +1565,29 @@ declare namespace Components {
             classic_view?: string; // uri-reference
         }
         export type EntityId = string; // uuid
+        /**
+         * The parameters for importing entities.
+         */
         export interface EntityImportParams {
+            /**
+             * The S3 bucket and key where the JSON file for import is located.
+             */
             S3Reference: {
                 /**
+                 * The name of the S3 bucket where the JSON file for import is stored.
                  * example:
-                 * epilot-files-prod
+                 * my-bucket
                  */
                 bucket: string;
                 /**
+                 * The key or path to the JSON file within the S3 bucket.
                  * example:
-                 * 123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf
+                 * imports/my-import.json
                  */
                 key: string;
             };
             /**
+             * The schema of the entities being imported. This must match the schema of the entities on the platform.
              * example:
              * contact
              */
@@ -2499,7 +2512,9 @@ declare namespace Components {
             view_type?: "disabled";
         }
         /**
-         * Export Job Id to get the result
+         * The unique identifier of the import job.
+         * example:
+         * abc123
          */
         export type ExportJobId = string;
         /**
@@ -5132,8 +5147,18 @@ declare namespace Components {
             };
             type?: "status";
             options?: ((string | null) | {
+                /**
+                 * The stored value of the option
+                 */
                 value: string;
+                /**
+                 * The displayed title of the option
+                 */
                 title?: string;
+                /**
+                 * If true, the option will not be displayed in the UI
+                 */
+                hidden?: boolean;
             })[];
         }
         /**
@@ -5897,7 +5922,12 @@ declare namespace Paths {
     namespace ExportEntities {
         namespace Parameters {
             export type IsTemplate = /* Pass 'true' to generate import template */ Components.Schemas.IsTemplate;
-            export type JobId = /* Export Job Id to get the result */ Components.Schemas.ExportJobId;
+            export type JobId = /**
+             * The unique identifier of the import job.
+             * example:
+             * abc123
+             */
+            Components.Schemas.ExportJobId;
             export type Language = /* Export headers translation Language */ Components.Schemas.Language;
         }
         export interface QueryParameters {
@@ -6194,15 +6224,25 @@ declare namespace Paths {
     }
     namespace GetSchemaVersions {
         namespace Parameters {
+            export type DraftsFrom = number;
+            export type DraftsSize = number;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
              * contact
              */
             Components.Schemas.EntitySlug;
+            export type VersionsFrom = number;
+            export type VersionsSize = number;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
+        }
+        export interface QueryParameters {
+            versions_from?: Parameters.VersionsFrom;
+            versions_size?: Parameters.VersionsSize;
+            drafts_from?: Parameters.DraftsFrom;
+            drafts_size?: Parameters.DraftsSize;
         }
         namespace Responses {
             export interface $200 {
@@ -6229,12 +6269,17 @@ declare namespace Paths {
     }
     namespace ImportEntities {
         namespace Parameters {
-            export type JobId = /* Export Job Id to get the result */ Components.Schemas.ExportJobId;
+            export type JobId = /**
+             * The unique identifier of the import job.
+             * example:
+             * abc123
+             */
+            Components.Schemas.ExportJobId;
         }
         export interface QueryParameters {
             job_id?: Parameters.JobId;
         }
-        export type RequestBody = Components.Schemas.EntityImportParams;
+        export type RequestBody = /* The parameters for importing entities. */ Components.Schemas.EntityImportParams;
         namespace Responses {
             export interface $201 {
             }
@@ -6845,7 +6890,7 @@ export interface OperationMethods {
    * Get all versions of this schema ordered by the latest versions including drafts.
    */
   'getSchemaVersions'(
-    parameters?: Parameters<Paths.GetSchemaVersions.PathParameters> | null,
+    parameters?: Parameters<Paths.GetSchemaVersions.PathParameters & Paths.GetSchemaVersions.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
@@ -7285,9 +7330,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExportEntities.Responses.$201>
   /**
-   * importEntities - importEntities
+   * importEntities - Import Entities
    * 
-   * import entity data from
+   * This endpoint enables the import of entities into the platform.
+   * The entities should be provided in a CSV format inside an S3 bucket.
+   * This API will return the `job_id`` which can be used to fetch the status of the import process.
+   * 
    */
   'importEntities'(
     parameters?: Parameters<Paths.ImportEntities.QueryParameters> | null,
@@ -7448,7 +7496,7 @@ export interface PathsDictionary {
      * Get all versions of this schema ordered by the latest versions including drafts.
      */
     'get'(
-      parameters?: Parameters<Paths.GetSchemaVersions.PathParameters> | null,
+      parameters?: Parameters<Paths.GetSchemaVersions.PathParameters & Paths.GetSchemaVersions.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
@@ -7920,9 +7968,12 @@ export interface PathsDictionary {
   }
   ['/v1/entity:import']: {
     /**
-     * importEntities - importEntities
+     * importEntities - Import Entities
      * 
-     * import entity data from
+     * This endpoint enables the import of entities into the platform.
+     * The entities should be provided in a CSV format inside an S3 bucket.
+     * This API will return the `job_id`` which can be used to fetch the status of the import process.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.ImportEntities.QueryParameters> | null,
