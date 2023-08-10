@@ -235,9 +235,7 @@ declare namespace Components {
                 en?: string;
                 de?: string;
             };
-            address?: string;
-            phone?: string;
-            email?: string;
+            content?: string;
         }
         /**
          * The contract entity

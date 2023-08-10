@@ -3417,13 +3417,7 @@
           {
             "type": "object",
             "properties": {
-              "address": {
-                "type": "string"
-              },
-              "phone": {
-                "type": "string"
-              },
-              "email": {
+              "content": {
                 "type": "string"
               }
             }
