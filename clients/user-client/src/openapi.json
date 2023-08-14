@@ -628,64 +628,9 @@
           }
         }
       }
-    },
-    "/v2/users/zendesk/sso/redirect-url": {
-      "get": {
-        "operationId": "redirectToZendesk",
-        "summary": "redirectToZendesk",
-        "tags": [
-          "User V2"
-        ],
-        "responses": {
-          "200": {
-            "description": "User is confirmed and returns a redirection url to the Zendesk portal successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "url": {
-                      "type": "string",
-                      "description": "The redirection url to the Zendesk portal."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
     }
   },
   "components": {
-    "responses": {
-      "Unauthorized": {
-        "description": "Could not authenticate the user",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResp"
-            }
-          }
-        }
-      },
-      "InternalServerError": {
-        "description": "Internal Server Error",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResp"
-            }
-          }
-        }
-      }
-    },
     "securitySchemes": {
       "EpilotAuth": {
         "type": "http",
@@ -695,15 +640,6 @@
       }
     },
     "schemas": {
-      "ErrorResp": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string",
-            "description": "Error message"
-          }
-        }
-      },
       "PartnerInvitationToken": {
         "type": "string"
       },
