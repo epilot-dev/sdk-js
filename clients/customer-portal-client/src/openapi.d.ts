@@ -18,7 +18,7 @@ declare namespace Components {
     namespace Schemas {
         export interface ActionWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -222,7 +222,7 @@ declare namespace Components {
         }
         export interface ContentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -371,6 +371,22 @@ declare namespace Components {
              */
             file_entity_ids: string[];
         }
+        export interface DocumentWidget {
+            id: string;
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            /**
+             * Index of the widget in the list, used for ordering (left or right)
+             */
+            listIndex: number;
+            headline?: {
+                en?: string;
+                de?: string;
+            };
+            subHeadline?: {
+                en?: string;
+                de?: string;
+            };
+        }
         /**
          * Email templates used for authentication and internal processes
          */
@@ -471,7 +487,7 @@ declare namespace Components {
         export type EntitySlug = "contact" | "contract" | "file" | "order" | "opportunity" | "product" | "price" | "meter" | "meter_counter";
         export interface EntityWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1108,7 +1124,7 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "portal_user";
         }
-        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget;
+        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget;
         /**
          * The product entity
          */
@@ -1264,7 +1280,7 @@ declare namespace Components {
         }
         export interface TeaserWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1465,7 +1481,7 @@ declare namespace Components {
         }
         export interface WidgetBase {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
