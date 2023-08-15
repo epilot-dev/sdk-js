@@ -3281,7 +3281,8 @@
               "ACTION_WIDGET",
               "CONTENT_WIDGET",
               "ENTITY_WIDGET",
-              "TEASER_WIDGET"
+              "TEASER_WIDGET",
+              "DOCUMENT_WIDGET"
             ]
           },
           "listIndex": {
@@ -3424,6 +3425,13 @@
           }
         ]
       },
+      "DocumentWidget": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WidgetBase"
+          }
+        ]
+      },
       "PortalWidget": {
         "anyOf": [
           {
@@ -3437,6 +3445,9 @@
           },
           {
             "$ref": "#/components/schemas/TeaserWidget"
+          },
+          {
+            "$ref": "#/components/schemas/DocumentWidget"
           }
         ]
       },
@@ -4253,9 +4264,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://customer-portal-api.sls.epilot.io"
-    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }
