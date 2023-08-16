@@ -5155,10 +5155,6 @@ declare namespace Components {
                  * The displayed title of the option
                  */
                 title?: string;
-                /**
-                 * If true, the option will not be displayed in the UI
-                 */
-                hidden?: boolean;
             })[];
         }
         /**
