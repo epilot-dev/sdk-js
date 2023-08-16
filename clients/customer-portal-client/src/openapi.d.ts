@@ -425,6 +425,32 @@ declare namespace Components {
         export interface Entity {
             [name: string]: any;
         }
+        export interface EntityFileCount {
+            /**
+             * The ID of the parent entity
+             * example:
+             * d8dffa9a-6c90-4c4e-b8d1-032194b25526
+             */
+            entity_id: string;
+            _schema: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            /**
+             * The title of the parent entity
+             * example:
+             * Opportunity ABC
+             */
+            _title?: string;
+            /**
+             * Number of files associated with the entity and shared with portal user
+             * example:
+             * 2
+             */
+            file_count: number;
+        }
         /**
          * Entity ID
          * example:
@@ -665,6 +691,12 @@ declare namespace Components {
                  * contact
                  */
                 EntitySlug;
+                /**
+                 * The title of the parent entity
+                 * example:
+                 * Opportunity ABC
+                 */
+                _title?: string;
             }[];
         }
         export interface Grant {
@@ -1736,6 +1768,14 @@ declare namespace Paths {
     namespace GetAllFiles {
         namespace Parameters {
             /**
+             * example:
+             * [
+             *   "4910096f-000a-4504-bf5a-d3774ec3032a",
+             *   "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
+             * ]
+             */
+            export type EntityIds = string[];
+            /**
              * Initial offset to set for the search results
              * example:
              * 0
@@ -1761,6 +1801,14 @@ declare namespace Paths {
              * 0
              */
             Parameters.Size;
+            entity_ids?: /**
+             * example:
+             * [
+             *   "4910096f-000a-4504-bf5a-d3774ec3032a",
+             *   "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
+             * ]
+             */
+            Parameters.EntityIds;
         }
         namespace Responses {
             export interface $200 {
@@ -2092,6 +2140,15 @@ declare namespace Paths {
             export interface $200 {
                 file?: /* The file entity */ Components.Schemas.FileItem;
             }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetFilesCountByEntity {
+        namespace Responses {
+            export type $200 = Components.Schemas.EntityFileCount[];
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -3150,6 +3207,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFileById.Responses.$200>
+  /**
+   * getFilesCountByEntity - getFileCountByEntity
+   * 
+   * Fetch file counts for all ECP user related entities
+   */
+  'getFilesCountByEntity'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFilesCountByEntity.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -3696,6 +3763,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFileById.Responses.$200>
+  }
+  ['/v2/portal/user/files/count-by-entity']: {
+    /**
+     * getFilesCountByEntity - getFileCountByEntity
+     * 
+     * Fetch file counts for all ECP user related entities
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFilesCountByEntity.Responses.$200>
   }
 }
 

@@ -2591,6 +2591,21 @@
               "example": 0
             },
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "entity_ids",
+            "description": "List of entity ids to filter the results",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "4910096f-000a-4504-bf5a-d3774ec3032a",
+                "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
+              ]
+            }
           }
         ],
         "responses": {
@@ -2667,6 +2682,48 @@
                     "file": {
                       "$ref": "#/components/schemas/FileItem"
                     }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/user/files/count-by-entity": {
+      "get": {
+        "operationId": "getFilesCountByEntity",
+        "summary": "getFileCountByEntity",
+        "description": "Fetch file counts for all ECP user related entities",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file counts have been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntityFileCount"
                   }
                 }
               }
@@ -4116,6 +4173,11 @@
                     },
                     "_schema": {
                       "$ref": "#/components/schemas/EntitySlug"
+                    },
+                    "_title": {
+                      "type": "string",
+                      "description": "The title of the parent entity",
+                      "example": "Opportunity ABC"
                     }
                   }
                 }
@@ -4123,6 +4185,34 @@
             }
           }
         ]
+      },
+      "EntityFileCount": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "file_count",
+          "_schema"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "description": "The ID of the parent entity",
+            "example": "d8dffa9a-6c90-4c4e-b8d1-032194b25526"
+          },
+          "_schema": {
+            "$ref": "#/components/schemas/EntitySlug"
+          },
+          "_title": {
+            "type": "string",
+            "description": "The title of the parent entity",
+            "example": "Opportunity ABC"
+          },
+          "file_count": {
+            "type": "integer",
+            "description": "Number of files associated with the entity and shared with portal user",
+            "example": 2
+          }
+        }
       },
       "AdminUser": {
         "type": "object",
