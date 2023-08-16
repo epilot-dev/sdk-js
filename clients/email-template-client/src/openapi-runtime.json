@@ -39,7 +39,7 @@
     },
     "/v1/email-template/templates:replaceAsync": {
       "post": {
-        "operationId": "replaceVariablesAsync",
+        "operationId": "replaceVariablesAndGenerateDocsAsync",
         "parameters": [
           {
             "in": "query",

@@ -796,7 +796,7 @@ declare namespace Paths {
             }
         }
     }
-    namespace ReplaceVariablesAsync {
+    namespace ReplaceVariablesAndGenerateDocsAsync {
         namespace Parameters {
             export type JobId = string;
         }
@@ -986,18 +986,18 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplaceVariables.Responses.$200>
   /**
-   * replaceVariablesAsync - replaceVariablesAsync
+   * replaceVariablesAndGenerateDocsAsync - replaceVariablesAndGenerateDocsAsync
    * 
    * This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents. 
    * On initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template. 
    * If still processing, it returns the jobId and IN-PROGRESS status. Upon completion or failure, it returns the final template or a failure status with reason.
    * 
    */
-  'replaceVariablesAsync'(
-    parameters?: Parameters<Paths.ReplaceVariablesAsync.QueryParameters> | null,
-    data?: Paths.ReplaceVariablesAsync.RequestBody,
+  'replaceVariablesAndGenerateDocsAsync'(
+    parameters?: Parameters<Paths.ReplaceVariablesAndGenerateDocsAsync.QueryParameters> | null,
+    data?: Paths.ReplaceVariablesAndGenerateDocsAsync.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ReplaceVariablesAsync.Responses.$200>
+  ): OperationResponse<Paths.ReplaceVariablesAndGenerateDocsAsync.Responses.$200>
   /**
    * revertToOriginalTemplate - revertToOriginalTemplate
    * 
@@ -1069,7 +1069,7 @@ export interface PathsDictionary {
   }
   ['/v1/email-template/templates:replaceAsync']: {
     /**
-     * replaceVariablesAsync - replaceVariablesAsync
+     * replaceVariablesAndGenerateDocsAsync - replaceVariablesAndGenerateDocsAsync
      * 
      * This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents. 
      * On initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template. 
@@ -1077,10 +1077,10 @@ export interface PathsDictionary {
      * 
      */
     'post'(
-      parameters?: Parameters<Paths.ReplaceVariablesAsync.QueryParameters> | null,
-      data?: Paths.ReplaceVariablesAsync.RequestBody,
+      parameters?: Parameters<Paths.ReplaceVariablesAndGenerateDocsAsync.QueryParameters> | null,
+      data?: Paths.ReplaceVariablesAndGenerateDocsAsync.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ReplaceVariablesAsync.Responses.$200>
+    ): OperationResponse<Paths.ReplaceVariablesAndGenerateDocsAsync.Responses.$200>
   }
   ['/v1/email-template/templates:revert']: {
     /**
