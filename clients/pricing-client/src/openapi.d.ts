@@ -496,19 +496,13 @@ declare namespace Components {
             files?: string[];
             status?: /**
              *
-             * | status                 | description |
-             * |-------------|----------|
-             * | `new`                  | Starting state for all orders, at this point we can still edit the order |
-             * | `draft`                | old value of 'new' |
-             * | `in_progress`          | The order is open to accept by user |
-             * | `open_for_acceptance`  | old value of 'in_progress' |
-             * | `offer`                | The order is in a quoting phase, bound to an expiration date |
-             * | `quote`                | old value of offer |
-             * | `order_accepted`       | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
-             * | `placed`               | old value of order_accepted |
-             * | `lost     `            | The order has been cancelled |
-             * | `cancelled`            | old value of lost |
-             * | `complete`             | The order is now closed and finalized |
+             * | status      | description |
+             * |-------------|-------|
+             * | `draft`     | ​​Starting state for all orders, at this point we can still edit the order |
+             * | `quote`     | The order is in a quoting phase, bound to an expiration date |
+             * | `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
+             * | `cancelled` | The order has been cancelled |
+             * | `completed` | The order is now closed and finalized |
              *
              */
             OrderStatus;
@@ -1279,19 +1273,13 @@ declare namespace Components {
             cart_id?: string;
             status?: /**
              *
-             * | status                 | description |
-             * |-------------|----------|
-             * | `new`                  | Starting state for all orders, at this point we can still edit the order |
-             * | `draft`                | old value of 'new' |
-             * | `in_progress`          | The order is open to accept by user |
-             * | `open_for_acceptance`  | old value of 'in_progress' |
-             * | `offer`                | The order is in a quoting phase, bound to an expiration date |
-             * | `quote`                | old value of offer |
-             * | `order_accepted`       | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
-             * | `placed`               | old value of order_accepted |
-             * | `lost     `            | The order has been cancelled |
-             * | `cancelled`            | old value of lost |
-             * | `complete`             | The order is now closed and finalized |
+             * | status      | description |
+             * |-------------|-------|
+             * | `draft`     | ​​Starting state for all orders, at this point we can still edit the order |
+             * | `quote`     | The order is in a quoting phase, bound to an expiration date |
+             * | `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
+             * | `cancelled` | The order has been cancelled |
+             * | `completed` | The order is now closed and finalized |
              *
              */
             OrderStatus;
@@ -1416,19 +1404,13 @@ declare namespace Components {
             [name: string]: any;
             status?: /**
              *
-             * | status                 | description |
-             * |-------------|----------|
-             * | `new`                  | Starting state for all orders, at this point we can still edit the order |
-             * | `draft`                | old value of 'new' |
-             * | `in_progress`          | The order is open to accept by user |
-             * | `open_for_acceptance`  | old value of 'in_progress' |
-             * | `offer`                | The order is in a quoting phase, bound to an expiration date |
-             * | `quote`                | old value of offer |
-             * | `order_accepted`       | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
-             * | `placed`               | old value of order_accepted |
-             * | `lost     `            | The order has been cancelled |
-             * | `cancelled`            | old value of lost |
-             * | `complete`             | The order is now closed and finalized |
+             * | status      | description |
+             * |-------------|-------|
+             * | `draft`     | ​​Starting state for all orders, at this point we can still edit the order |
+             * | `quote`     | The order is in a quoting phase, bound to an expiration date |
+             * | `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
+             * | `cancelled` | The order has been cancelled |
+             * | `completed` | The order is now closed and finalized |
              *
              */
             OrderStatus;
@@ -1495,22 +1477,16 @@ declare namespace Components {
         }
         /**
          *
-         * | status                 | description |
-         * |-------------|----------|
-         * | `new`                  | Starting state for all orders, at this point we can still edit the order |
-         * | `draft`                | old value of 'new' |
-         * | `in_progress`          | The order is open to accept by user |
-         * | `open_for_acceptance`  | old value of 'in_progress' |
-         * | `offer`                | The order is in a quoting phase, bound to an expiration date |
-         * | `quote`                | old value of offer |
-         * | `order_accepted`       | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
-         * | `placed`               | old value of order_accepted |
-         * | `lost     `            | The order has been cancelled |
-         * | `cancelled`            | old value of lost |
-         * | `complete`             | The order is now closed and finalized |
+         * | status      | description |
+         * |-------------|-------|
+         * | `draft`     | ​​Starting state for all orders, at this point we can still edit the order |
+         * | `quote`     | The order is in a quoting phase, bound to an expiration date |
+         * | `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
+         * | `cancelled` | The order has been cancelled |
+         * | `completed` | The order is now closed and finalized |
          *
          */
-        export type OrderStatus = "draft" | "new" | "open_for_acceptance" | "in_progress" | "quote" | "offer" | "placed" | "order_accepted" | "cancelled" | "lost" | "complete";
+        export type OrderStatus = "draft" | "quote" | "placed" | "cancelled" | "completed";
         /**
          * A PaymentMethod represent your customer's payment instruments.
          *
