@@ -2210,18 +2210,12 @@
         "type": "string",
         "enum": [
           "draft",
-          "new",
-          "open_for_acceptance",
-          "in_progress",
           "quote",
-          "offer",
           "placed",
-          "order_accepted",
           "cancelled",
-          "lost",
-          "complete"
+          "completed"
         ],
-        "description": "\n| status                 | description |\n|-------------|----------|\n| `new`                  | Starting state for all orders, at this point we can still edit the order |\n| `draft`                | old value of 'new' |\n| `in_progress`          | The order is open to accept by user |\n| `open_for_acceptance`  | old value of 'in_progress' |\n| `offer`                | The order is in a quoting phase, bound to an expiration date |\n| `quote`                | old value of offer |\n| `order_accepted`       | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |\n| `placed`               | old value of order_accepted |\n| `lost     `            | The order has been cancelled |\n| `cancelled`            | old value of lost |\n| `complete`             | The order is now closed and finalized |\n"
+        "description": "\n| status      | description |\n|-------------|-------|\n| `draft`     | ​​Starting state for all orders, at this point we can still edit the order |\n| `quote`     | The order is in a quoting phase, bound to an expiration date |\n| `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |\n| `cancelled` | The order has been cancelled |\n| `completed` | The order is now closed and finalized |\n"
       },
       "PriceItemsDto": {
         "description": "A valid set of product prices, quantities, (discounts) and taxes from a client.",
