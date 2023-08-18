@@ -12,6 +12,19 @@ declare namespace Components {
         export interface DeleteFilePayload {
             s3ref: S3Reference;
         }
+        export type DownloadFilesPayload = {
+            id: /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            FileEntityId;
+            /**
+             * File version
+             * example:
+             * 0
+             */
+            version?: number;
+        }[];
         export interface FileEntity {
             _id?: /**
              * example:
@@ -158,6 +171,19 @@ declare namespace Paths {
             }
         }
     }
+    namespace DownloadFiles {
+        export type RequestBody = Components.Schemas.DownloadFilesPayload;
+        namespace Responses {
+            export type $200 = {
+                /**
+                 * example:
+                 * https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123
+                 */
+                download_url?: string; // uri
+                file_entity_id?: string; // uuid
+            }[];
+        }
+    }
     namespace DownloadS3File {
         namespace Parameters {
             export type Attachment = boolean;
@@ -197,6 +223,28 @@ declare namespace Paths {
             version?: Parameters.Version;
             w?: Parameters.W;
             h?: Parameters.H;
+        }
+    }
+    namespace PreviewPublicFile {
+        namespace Parameters {
+            export type H = number;
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+            export type OrgId = string;
+            export type Version = number;
+            export type W = number;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            version?: Parameters.Version;
+            w?: Parameters.W;
+            h?: Parameters.H;
+            org_id?: Parameters.OrgId;
         }
     }
     namespace PreviewS3File {
@@ -349,6 +397,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DownloadFile.Responses.$200>
   /**
+   * downloadFiles - downloadFiles
+   * 
+   * Generate pre-signed download S3 urls for multiple files
+   */
+  'downloadFiles'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.DownloadFiles.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DownloadFiles.Responses.$200>
+  /**
    * downloadS3File - downloadS3File
    * 
    * Generate pre-signed download S3 url for a file
@@ -365,6 +423,16 @@ export interface OperationMethods {
    */
   'previewFile'(
     parameters?: Parameters<Paths.PreviewFile.PathParameters & Paths.PreviewFile.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
+   * previewPublicFile - previewPublicFile
+   * 
+   * Generate thumbnail preview for a public file entity
+   */
+  'previewPublicFile'(
+    parameters?: Parameters<Paths.PreviewPublicFile.PathParameters & Paths.PreviewPublicFile.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
@@ -450,6 +518,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DownloadFile.Responses.$200>
   }
+  ['/v1/files/download']: {
+    /**
+     * downloadFiles - downloadFiles
+     * 
+     * Generate pre-signed download S3 urls for multiple files
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.DownloadFiles.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DownloadFiles.Responses.$200>
+  }
   ['/v1/files:downloadS3']: {
     /**
      * downloadS3File - downloadS3File
@@ -470,6 +550,18 @@ export interface PathsDictionary {
      */
     'get'(
       parameters?: Parameters<Paths.PreviewFile.PathParameters & Paths.PreviewFile.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
+  }
+  ['/v1/files/public/{id}/preview']: {
+    /**
+     * previewPublicFile - previewPublicFile
+     * 
+     * Generate thumbnail preview for a public file entity
+     */
+    'get'(
+      parameters?: Parameters<Paths.PreviewPublicFile.PathParameters & Paths.PreviewPublicFile.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
