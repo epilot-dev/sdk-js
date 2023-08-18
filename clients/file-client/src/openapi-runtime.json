@@ -61,6 +61,16 @@
         ]
       }
     },
+    "/v1/files/download": {
+      "post": {
+        "operationId": "downloadFiles",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v1/files:downloadS3": {
       "post": {
         "operationId": "downloadS3File",
@@ -101,6 +111,34 @@
           },
           {
             "name": "h",
+            "in": "query"
+          }
+        ]
+      }
+    },
+    "/v1/files/public/{id}/preview": {
+      "get": {
+        "operationId": "previewPublicFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "name": "w",
+            "in": "query"
+          },
+          {
+            "name": "h",
+            "in": "query"
+          },
+          {
+            "name": "org_id",
             "in": "query"
           }
         ]

@@ -225,6 +225,51 @@
         }
       }
     },
+    "/v1/files/download": {
+      "post": {
+        "operationId": "downloadFiles",
+        "summary": "downloadFiles",
+        "description": "Generate pre-signed download S3 urls for multiple files",
+        "tags": [
+          "files"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadFilesPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated download urls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "download_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+                      },
+                      "file_entity_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/files:downloadS3": {
       "post": {
         "operationId": "downloadS3File",
@@ -327,6 +372,69 @@
         "responses": {
           "200": {
             "description": "Generated thumbnail image",
+            "content": {
+              "image/png": {},
+              "image/jpeg": {}
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/public/{id}/preview": {
+      "get": {
+        "operationId": "previewPublicFile",
+        "summary": "previewPublicFile",
+        "description": "Generate thumbnail preview for a public file entity",
+        "security": [],
+        "tags": [
+          "files"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "index of file version",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "w",
+            "in": "query",
+            "description": "width",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "h",
+            "in": "query",
+            "description": "height",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "org_id",
+            "in": "query",
+            "description": "Org id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generated thumbnail image for a public file",
             "content": {
               "image/png": {},
               "image/jpeg": {}
@@ -503,6 +611,25 @@
           "filename"
         ]
       },
+      "DownloadFilesPayload": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/components/schemas/FileEntityId"
+            },
+            "version": {
+              "type": "integer",
+              "description": "File version",
+              "example": 0
+            }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      },
       "SaveFilePayload": {
         "type": "object",
         "properties": {
@@ -609,9 +736,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://file.sls.epilot.io"
-    },
     {
       "url": "https://file.sls.epilot.io"
     }
