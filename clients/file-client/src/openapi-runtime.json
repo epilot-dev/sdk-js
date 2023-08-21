@@ -61,7 +61,7 @@
         ]
       }
     },
-    "/v1/files/download": {
+    "/v1/files:downloadFiles": {
       "post": {
         "operationId": "downloadFiles",
         "requestBody": {

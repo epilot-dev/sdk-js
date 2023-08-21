@@ -518,7 +518,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DownloadFile.Responses.$200>
   }
-  ['/v1/files/download']: {
+  ['/v1/files:downloadFiles']: {
     /**
      * downloadFiles - downloadFiles
      * 
