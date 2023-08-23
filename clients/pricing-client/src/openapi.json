@@ -2428,7 +2428,14 @@
           },
           "billing_period": {
             "type": "string",
-            "description": "The price billing period."
+            "description": "The price billing period.",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly"
+            ]
           },
           "amount_subtotal": {
             "type": "integer",
@@ -2854,7 +2861,14 @@
           },
           "billing_period": {
             "type": "string",
-            "description": "The price billing period."
+            "description": "The price billing period.",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly"
+            ]
           },
           "amount_subtotal": {
             "type": "integer",
@@ -2962,8 +2976,7 @@
           "monthly",
           "every_quarter",
           "every_6_months",
-          "yearly",
-          "one_time"
+          "yearly"
         ]
       },
       "SalesTax": {
