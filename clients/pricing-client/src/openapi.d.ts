@@ -424,7 +424,7 @@ declare namespace Components {
                 _updated_at?: string;
             };
         }
-        export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+        export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
         /**
          * Supports shopping for products and services until ready for checkout.
          */
@@ -2424,7 +2424,7 @@ declare namespace Components {
             /**
              * The price billing period.
              */
-            billing_period?: string;
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
             /**
              * Total of all items, with same recurrence, before (discounts or) taxes are applied.
              */
