@@ -2706,6 +2706,7 @@ declare namespace Paths {
              * 123
              */
             export type OrgId = string;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
         }
         export interface QueryParameters {
             email: /**
@@ -2720,6 +2721,7 @@ declare namespace Paths {
              * 123
              */
             Parameters.OrgId;
+            origin?: Parameters.Origin;
         }
         namespace Responses {
             export interface $200 {
