@@ -1506,6 +1506,15 @@
               "description": "Organization ID",
               "example": 123
             }
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false,
+            "description": "Checkes if user exists in the given portal origin. If not provided, checks in all origins.",
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            }
           }
         ],
         "responses": {

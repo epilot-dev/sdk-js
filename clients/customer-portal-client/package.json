@@ -4,28 +4,28 @@
   "description": "API Client for epilot portal API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "repository": {	
-    "type": "git",	
-    "url": "git+https://github.com/epilot-dev/sdk-js.git",	
-    "directory": "clients/customer-portal-client"	
-  },	
-  "bugs": {	
-    "url": "https://github.com/epilot-dev/sdk-js/issues"	
-  },	
-  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/customer-portal-client#readme",	
-  "keywords": [	
-    "epilot",	
-    "sdk",	
-    "customer-portal"	
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git",
+    "directory": "clients/customer-portal-client"
+  },
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/customer-portal-client#readme",
+  "keywords": [
+    "epilot",
+    "sdk",
+    "customer-portal"
   ],
   "scripts": {
     "test": "jest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/customer-portal.yaml",	
-    "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",	
-    "build": "tsc && npm run bundle-definition",	
-    "build:watch": "npm run build && tsc -w",	
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/customer-portal.yaml",
+    "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
+    "build": "tsc && npm run bundle-definition",
+    "build:watch": "npm run build && tsc -w",
     "prepublishOnly": "npm run typegen && npm run build",
     "lint": "../../node_modules/eslint/bin/eslint.js src"
   },
@@ -62,7 +62,7 @@
     "jest": "^26.6.3",
     "json-loader": "^0.5.7",
     "openapi-client-axios-typegen": "^5.3.1",
-    "openapicmd": "^1.6.2",
+    "openapicmd": "^1.17.0",
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.14",
     "ts-node": "^9.1.1",
