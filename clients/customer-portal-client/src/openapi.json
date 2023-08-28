@@ -3397,6 +3397,9 @@
       "WidgetAction": {
         "type": "object",
         "properties": {
+          "_id": {
+            "type": "string"
+          },
           "type": {
             "type": "string",
             "enum": [
@@ -3420,8 +3423,10 @@
           }
         },
         "required": [
+          "type",
           "label",
-          "url"
+          "url",
+          "_id"
         ]
       },
       "ActionWidget": {
@@ -4363,6 +4368,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://customer-portal-api.sls.epilot.io"
+    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }
