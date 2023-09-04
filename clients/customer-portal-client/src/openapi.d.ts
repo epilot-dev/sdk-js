@@ -973,6 +973,15 @@ declare namespace Components {
             self_registration?: boolean;
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
             /**
+             * Feature settings for the portal
+             */
+            feature_settings?: {
+                /**
+                 * Start page feature flag
+                 */
+                start_page?: boolean;
+            };
+            /**
              * AWS Cognito Pool details for the portal
              */
             cognito_details?: {
@@ -1378,6 +1387,15 @@ declare namespace Components {
              */
             self_registration?: boolean;
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            /**
+             * Feature settings for the portal
+             */
+            feature_settings?: {
+                /**
+                 * Start page feature flag
+                 */
+                start_page?: boolean;
+            };
             /**
              * AWS Cognito Pool details for the portal
              */
