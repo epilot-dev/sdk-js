@@ -3139,6 +3139,16 @@
               "DENY"
             ]
           },
+          "feature_settings": {
+            "type": "object",
+            "description": "Feature settings for the portal",
+            "properties": {
+              "start_page": {
+                "type": "boolean",
+                "description": "Start page feature flag"
+              }
+            }
+          },
           "cognito_details": {
             "type": "object",
             "description": "AWS Cognito Pool details for the portal",
@@ -4368,9 +4378,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://customer-portal-api.sls.epilot.io"
-    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }
