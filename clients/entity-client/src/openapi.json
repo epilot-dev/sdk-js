@@ -1151,10 +1151,19 @@
           {
             "in": "query",
             "name": "type",
-            "description": "Activity type",
+            "description": "Filter by activity type",
             "schema": {
               "type": "string",
               "example": "SyncActivity"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_relations",
+            "description": "Include activities from related entities",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -1863,6 +1872,36 @@
         }
       }
     },
+    "/v1/entity/views/favorites": {
+      "get": {
+        "operationId": "listFavoriteViewsForUser",
+        "summary": "listFavoriteViewsForUser",
+        "description": "Get the Favorite Saved Views for user based on the schema",
+        "tags": [
+          "Saved Views"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SavedViewItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/entity/listTaxonomies": {
       "get": {
         "operationId": "listTaxonomies",
@@ -2558,6 +2597,9 @@
           },
           {
             "$ref": "#/components/schemas/PurposeAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/ParterOrganisationAttribute"
           }
         ]
       },
@@ -2947,11 +2989,6 @@
                         "title": {
                           "description": "The displayed title of the option",
                           "type": "string"
-                        },
-                        "hidden": {
-                          "description": "If true, the option will not be displayed in the UI",
-                          "type": "boolean",
-                          "default": false
                         }
                       },
                       "required": [
@@ -3305,6 +3342,25 @@
               "multiple": {
                 "type": "boolean",
                 "default": false
+              }
+            }
+          }
+        ]
+      },
+      "ParterOrganisationAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Shared Partner Organisations",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "partner_organisation"
+                ]
               }
             }
           }
@@ -4734,6 +4790,14 @@
             "description": "boolean property for if a view is shared with organisation",
             "type": "boolean",
             "example": true
+          },
+          "isFavoritedBy": {
+            "description": "List of users (IDs) that have favorited the view",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": 11701
+            }
           },
           "created_by": {
             "anyOf": [

@@ -408,6 +408,10 @@
           {
             "in": "query",
             "name": "type"
+          },
+          {
+            "in": "query",
+            "name": "include_relations"
           }
         ]
       }
@@ -660,6 +664,11 @@
             "required": true
           }
         ]
+      }
+    },
+    "/v1/entity/views/favorites": {
+      "get": {
+        "operationId": "listFavoriteViewsForUser"
       }
     },
     "/v1/entity/listTaxonomies": {
