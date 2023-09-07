@@ -2599,7 +2599,7 @@
             "$ref": "#/components/schemas/PurposeAttribute"
           },
           {
-            "$ref": "#/components/schemas/ParterOrganisationAttribute"
+            "$ref": "#/components/schemas/PartnerOrganisationAttribute"
           }
         ]
       },
@@ -3347,7 +3347,7 @@
           }
         ]
       },
-      "ParterOrganisationAttribute": {
+      "PartnerOrganisationAttribute": {
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseAttribute"
