@@ -2292,6 +2292,14 @@ declare namespace Components {
              */
             unit_amount_gross?: number;
             total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
         }
         /**
          * The product entity
