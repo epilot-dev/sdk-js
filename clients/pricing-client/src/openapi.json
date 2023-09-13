@@ -2885,6 +2885,10 @@
           "amount_tax": {
             "type": "integer",
             "description": "Total of all items taxes, with same recurrence."
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency",
+            "description": "Currency"
           }
         },
         "required": [
