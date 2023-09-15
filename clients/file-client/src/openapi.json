@@ -8,12 +8,19 @@
   "tags": [
     {
       "name": "files",
-      "description": "Files"
+      "description": "Files API"
+    },
+    {
+      "name": "session",
+      "description": "Session API for cookie authentication"
     }
   ],
   "security": [
     {
       "EpilotAuth": []
+    },
+    {
+      "CookieAuth": []
     }
   ],
   "paths": {
@@ -150,6 +157,58 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SaveFilePayload"
+              },
+              "examples": {
+                "S3File": {
+                  "description": "Standard epilot file entity with S3 Ref",
+                  "value": {
+                    "file_entity_id": "string",
+                    "document_type": "document",
+                    "filename": "document.pdf",
+                    "_tags": [
+                      "string"
+                    ],
+                    "access_control": "private",
+                    "s3ref": {
+                      "bucket": "epilot-files-prod",
+                      "key": "123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+                    }
+                  }
+                },
+                "CustomFile": {
+                  "description": "Custom file entity with custom download url",
+                  "value": {
+                    "file_entity_id": "string",
+                    "document_type": "document",
+                    "filename": "document.pdf",
+                    "_tags": [
+                      "string"
+                    ],
+                    "access_control": "private",
+                    "custom_download_url": "https://some-api-url.com/download?file_id=123",
+                    "shared_with_end_customer": true
+                  }
+                },
+                "CustomFileWithRelations": {
+                  "description": "Custom file entity with custom download url",
+                  "value": {
+                    "file_entity_id": "string",
+                    "document_type": "document",
+                    "filename": "document.pdf",
+                    "_tags": [
+                      "string"
+                    ],
+                    "access_control": "private",
+                    "custom_download_url": "https://some-api-url.com/download?file_id=123",
+                    "shared_with_end_customer": true,
+                    "relations": [
+                      {
+                        "entity_id": "77a1e0cc-7b92-4d41-8cce-eefd317ec004",
+                        "_schema": "contact"
+                      }
+                    ]
+                  }
+                }
               }
             }
           }
@@ -444,6 +503,59 @@
       }
     },
     "/v1/files:previewS3": {
+      "get": {
+        "operationId": "previewS3FileGet",
+        "summary": "previewS3FileGet",
+        "description": "Get thumbnail preview from an s3 reference for a file entity",
+        "tags": [
+          "files"
+        ],
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "description": "s3 key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bucket",
+            "in": "query",
+            "description": "s3 bucket",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "w",
+            "in": "query",
+            "description": "width",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "h",
+            "in": "query",
+            "description": "height",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generated thumbnail image",
+            "content": {
+              "image/png": {},
+              "image/jpeg": {}
+            }
+          }
+        }
+      },
       "post": {
         "operationId": "previewS3File",
         "summary": "previewS3File",
@@ -512,6 +624,34 @@
           }
         }
       }
+    },
+    "/v1/files/session": {
+      "get": {
+        "operationId": "getSession",
+        "summary": "getSession",
+        "description": "Start a browser session by setting passed Authorization token in a server side cookie.\n\nAllows using preview urls directly in img src for private files using cookie authentication.\n",
+        "tags": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Session started successfully"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSession",
+        "summary": "deleteSession",
+        "description": "End browser session by deleting token cookie",
+        "tags": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Session deleted successfully"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -521,9 +661,24 @@
         "scheme": "bearer",
         "description": "Authorization header with epilot OAuth2 bearer token",
         "bearerFormat": "JWT"
+      },
+      "CookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "token",
+        "description": "Cookie with epilot OAuth2 token"
       }
     },
     "schemas": {
+      "EntityId": {
+        "type": "string",
+        "example": "ef7d985c-2385-44f4-9c71-ae06a52264f8"
+      },
+      "EntitySlug": {
+        "description": "URL-friendly identifier for the entity schema",
+        "type": "string",
+        "example": "contact"
+      },
       "FileEntityId": {
         "type": "string",
         "example": "ef7d985c-2385-44f4-9c71-ae06a52264f8"
@@ -630,12 +785,9 @@
           ]
         }
       },
-      "SaveFilePayload": {
+      "CommonSaveFilePayload": {
         "type": "object",
         "properties": {
-          "s3ref": {
-            "$ref": "#/components/schemas/S3Reference"
-          },
           "file_entity_id": {
             "type": "string",
             "description": "if passed, adds a new version to existing file entity"
@@ -674,11 +826,63 @@
               "private",
               "public-read"
             ]
+          },
+          "relations": {
+            "type": "array",
+            "description": "List of entities to relate the file to",
+            "items": {
+              "$ref": "#/components/schemas/FileRelationItem"
+            }
           }
         },
-        "additionalProperties": true,
-        "required": [
-          "s3ref"
+        "additionalProperties": true
+      },
+      "SaveS3FilePayload": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonSaveFilePayload"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "s3ref": {
+                "$ref": "#/components/schemas/S3Reference"
+              }
+            },
+            "required": [
+              "s3ref"
+            ]
+          }
+        ]
+      },
+      "SaveCustomFilePayload": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonSaveFilePayload"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "custom_download_url": {
+                "description": "Custom external download url used for the file",
+                "type": "string",
+                "format": "url"
+              }
+            },
+            "required": [
+              "custom_download_url"
+            ]
+          }
+        ]
+      },
+      "SaveFilePayload": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/SaveS3FilePayload"
+          },
+          {
+            "$ref": "#/components/schemas/SaveCustomFilePayload"
+          }
         ]
       },
       "DeleteFilePayload": {
@@ -732,10 +936,33 @@
             }
           }
         ]
+      },
+      "FileRelationItem": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "_schema": {
+            "$ref": "#/components/schemas/EntitySlug"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "entity_id"
+        ]
       }
     }
   },
   "servers": [
+    {
+      "url": "https://file.sls.epilot.io"
+    },
     {
       "url": "https://file.sls.epilot.io"
     }

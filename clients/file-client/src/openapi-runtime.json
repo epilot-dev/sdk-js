@@ -145,6 +145,29 @@
       }
     },
     "/v1/files:previewS3": {
+      "get": {
+        "operationId": "previewS3FileGet",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "bucket",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "w",
+            "in": "query"
+          },
+          {
+            "name": "h",
+            "in": "query"
+          }
+        ]
+      },
       "post": {
         "operationId": "previewS3File",
         "parameters": [
@@ -172,6 +195,14 @@
             "application/json": {}
           }
         }
+      }
+    },
+    "/v1/files/session": {
+      "get": {
+        "operationId": "getSession"
+      },
+      "delete": {
+        "operationId": "deleteSession"
       }
     }
   },

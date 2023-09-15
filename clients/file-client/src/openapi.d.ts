@@ -9,6 +9,25 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface CommonSaveFilePayload {
+            [name: string]: any;
+            /**
+             * if passed, adds a new version to existing file entity
+             */
+            file_entity_id?: string;
+            document_type?: "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown";
+            /**
+             * example:
+             * document.pdf
+             */
+            filename?: string;
+            _tags?: string[];
+            access_control?: "private" | "public-read";
+            /**
+             * List of entities to relate the file to
+             */
+            relations?: FileRelationItem[];
+        }
         export interface DeleteFilePayload {
             s3ref: S3Reference;
         }
@@ -25,6 +44,17 @@ declare namespace Components {
              */
             version?: number;
         }[];
+        /**
+         * example:
+         * ef7d985c-2385-44f4-9c71-ae06a52264f8
+         */
+        export type EntityId = string;
+        /**
+         * URL-friendly identifier for the entity schema
+         * example:
+         * contact
+         */
+        export type EntitySlug = string;
         export interface FileEntity {
             _id?: /**
              * example:
@@ -93,6 +123,20 @@ declare namespace Components {
              */
             mime_type?: string;
         }
+        export interface FileRelationItem {
+            entity_id: /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            EntityId;
+            _schema?: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            _tags?: string[];
+        }
         export interface S3Reference {
             /**
              * example:
@@ -105,9 +149,8 @@ declare namespace Components {
              */
             key: string;
         }
-        export interface SaveFilePayload {
+        export interface SaveCustomFilePayload {
             [name: string]: any;
-            s3ref: S3Reference;
             /**
              * if passed, adds a new version to existing file entity
              */
@@ -120,6 +163,35 @@ declare namespace Components {
             filename?: string;
             _tags?: string[];
             access_control?: "private" | "public-read";
+            /**
+             * List of entities to relate the file to
+             */
+            relations?: FileRelationItem[];
+            /**
+             * Custom external download url used for the file
+             */
+            custom_download_url: string; // url
+        }
+        export type SaveFilePayload = SaveS3FilePayload | SaveCustomFilePayload;
+        export interface SaveS3FilePayload {
+            [name: string]: any;
+            /**
+             * if passed, adds a new version to existing file entity
+             */
+            file_entity_id?: string;
+            document_type?: "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown";
+            /**
+             * example:
+             * document.pdf
+             */
+            filename?: string;
+            _tags?: string[];
+            access_control?: "private" | "public-read";
+            /**
+             * List of entities to relate the file to
+             */
+            relations?: FileRelationItem[];
+            s3ref: S3Reference;
         }
         export interface UploadFilePayload {
             /**
@@ -139,6 +211,12 @@ declare namespace Components {
 declare namespace Paths {
     namespace DeleteFile {
         export type RequestBody = Components.Schemas.DeleteFilePayload;
+        namespace Responses {
+            export interface $200 {
+            }
+        }
+    }
+    namespace DeleteSession {
         namespace Responses {
             export interface $200 {
             }
@@ -205,6 +283,12 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetSession {
+        namespace Responses {
+            export interface $200 {
+            }
+        }
+    }
     namespace PreviewFile {
         namespace Parameters {
             export type H = number;
@@ -257,6 +341,20 @@ declare namespace Paths {
             h?: Parameters.H;
         }
         export type RequestBody = Components.Schemas.S3Reference;
+    }
+    namespace PreviewS3FileGet {
+        namespace Parameters {
+            export type Bucket = string;
+            export type H = number;
+            export type Key = string;
+            export type W = number;
+        }
+        export interface QueryParameters {
+            key: Parameters.Key;
+            bucket: Parameters.Bucket;
+            w?: Parameters.W;
+            h?: Parameters.H;
+        }
     }
     namespace SaveFile {
         export type RequestBody = Components.Schemas.SaveFilePayload;
@@ -437,6 +535,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
   /**
+   * previewS3FileGet - previewS3FileGet
+   * 
+   * Get thumbnail preview from an s3 reference for a file entity
+   */
+  'previewS3FileGet'(
+    parameters?: Parameters<Paths.PreviewS3FileGet.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
    * previewS3File - previewS3File
    * 
    * Generate thumbnail preview from an s3 reference for a file entity
@@ -456,6 +564,29 @@ export interface OperationMethods {
     data?: Paths.DeleteFile.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteFile.Responses.$200>
+  /**
+   * getSession - getSession
+   * 
+   * Start a browser session by setting passed Authorization token in a server side cookie.
+   * 
+   * Allows using preview urls directly in img src for private files using cookie authentication.
+   * 
+   */
+  'getSession'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSession.Responses.$200>
+  /**
+   * deleteSession - deleteSession
+   * 
+   * End browser session by deleting token cookie
+   */
+  'deleteSession'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteSession.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -568,6 +699,16 @@ export interface PathsDictionary {
   }
   ['/v1/files:previewS3']: {
     /**
+     * previewS3FileGet - previewS3FileGet
+     * 
+     * Get thumbnail preview from an s3 reference for a file entity
+     */
+    'get'(
+      parameters?: Parameters<Paths.PreviewS3FileGet.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
+    /**
      * previewS3File - previewS3File
      * 
      * Generate thumbnail preview from an s3 reference for a file entity
@@ -589,6 +730,31 @@ export interface PathsDictionary {
       data?: Paths.DeleteFile.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteFile.Responses.$200>
+  }
+  ['/v1/files/session']: {
+    /**
+     * getSession - getSession
+     * 
+     * Start a browser session by setting passed Authorization token in a server side cookie.
+     * 
+     * Allows using preview urls directly in img src for private files using cookie authentication.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSession.Responses.$200>
+    /**
+     * deleteSession - deleteSession
+     * 
+     * End browser session by deleting token cookie
+     */
+    'delete'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteSession.Responses.$200>
   }
 }
 
