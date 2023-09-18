@@ -100,6 +100,7 @@ declare namespace Components {
             orgId?: string;
             eventId?: string;
             creationTimestamp?: string;
+            webhookConfigId?: string;
         }
         /**
          * Response for get errors request.
@@ -509,6 +510,112 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace GetFailuresForConfig {
+        namespace Parameters {
+            export type ConfigId = string;
+            export type LastLoadedEventId = string;
+            export type LastLoadedTimestamp = string;
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+        }
+        export interface QueryParameters {
+            lastLoadedEventId?: Parameters.LastLoadedEventId;
+            lastLoadedTimestamp?: Parameters.LastLoadedTimestamp;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Response for get errors request.
+             * example:
+             * {
+             *   "failures": [
+             *     {
+             *       "eventName": "customer_request_created,",
+             *       "eventId": "12e8726b-071b-4c42-9221-8caae0d14863",
+             *       "errorCode": "502",
+             *       "webhookConfigId": "kreauMGUr55nDoVviaaBLG",
+             *       "creationTimestamp": "2021-04-13T17:43:40.576Z",
+             *       "orgId": "728",
+             *       "errorPayload": "Failed to store data",
+             *       "url": "https://63b2de56be27.ngrok.io",
+             *       "payload": {
+             *         "metadata": {
+             *           "action": "created",
+             *           "creation_timestamp": "2021-04-13T17:43:40.576Z",
+             *           "event_name": "customer_request_created",
+             *           "object": "customer_request",
+             *           "organization_id": "728",
+             *           "version": "1.0.0"
+             *         },
+             *         "customer_request": {
+             *           "id": "TEST",
+             *           "payment_details": {
+             *             "account_owner_name": "Test",
+             *             "bank_name": "Test Bank",
+             *             "bic": "BIC",
+             *             "iban": "IBAN",
+             *             "payment_method": "sepa"
+             *           },
+             *           "request_items": [
+             *             {
+             *               "id": "TEST",
+             *               "otherProp1": "test1",
+             *               "otherProp2": "test2"
+             *             }
+             *           ]
+             *         }
+             *       }
+             *     },
+             *     {
+             *       "eventName": "customer_request_created",
+             *       "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
+             *       "errorCode": "404",
+             *       "webhookConfigId": "xrExypA8HBWEtK9AXfU2de",
+             *       "creationTimestamp": "2021-04-13T17:43:40.576Z",
+             *       "orgId": "728",
+             *       "errorPayload": "Tunnel ef68038e3af9.ngrok.io not found",
+             *       "url": "https://ef68038e3af9.ngrok.io",
+             *       "payload": {
+             *         "metadata": {
+             *           "action": "created",
+             *           "creation_timestamp": "2021-04-13T17:43:40.576Z",
+             *           "event_name": "customer_request_created",
+             *           "object": "customer_request",
+             *           "organization_id": "728",
+             *           "version": "1.0.0"
+             *         },
+             *         "customer_request": {
+             *           "id": "TEST",
+             *           "payment_details": {
+             *             "account_owner_name": "Test",
+             *             "bank_name": "Test Bank",
+             *             "bic": "BIC",
+             *             "iban": "IBAN",
+             *             "payment_method": "sepa"
+             *           },
+             *           "request_items": [
+             *             {
+             *               "id": "TEST",
+             *               "otherProp1": "test1",
+             *               "otherProp2": true
+             *             }
+             *           ]
+             *         }
+             *       }
+             *     }
+             *   ],
+             *   "lastLoadedKey": {
+             *     "orgId": 6122,
+             *     "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
+             *     "creationTimestamp": "2022:01:01T00:00:00.000Z"
+             *   }
+             * }
+             */
+            Components.Schemas.FailuresResp;
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace ResendFailure {
         export type RequestBody = /* Failures stored in the database. */ Components.Schemas.FailureEntry;
         namespace Responses {
@@ -643,6 +750,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteConfig.Responses.$204>
   /**
+   * getFailuresForConfig - getFailuresForConfig
+   * 
+   * Get failed deliveries for a given config id
+   */
+  'getFailuresForConfig'(
+    parameters?: Parameters<Paths.GetFailuresForConfig.PathParameters & Paths.GetFailuresForConfig.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFailuresForConfig.Responses.$200>
+  /**
    * getFailures - getFailures
    * 
    * Get saved failures from the webhooks DB, in a paginated way
@@ -730,6 +847,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteConfig.Responses.$204>
+  }
+  ['/v1/webhooks/configs/{configId}/failures']: {
+    /**
+     * getFailuresForConfig - getFailuresForConfig
+     * 
+     * Get failed deliveries for a given config id
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFailuresForConfig.PathParameters & Paths.GetFailuresForConfig.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFailuresForConfig.Responses.$200>
   }
   ['/v1/webhooks/failures']: {
     /**

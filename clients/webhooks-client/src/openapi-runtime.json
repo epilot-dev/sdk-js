@@ -69,6 +69,28 @@
         ]
       }
     },
+    "/v1/webhooks/configs/{configId}/failures": {
+      "get": {
+        "operationId": "getFailuresForConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "lastLoadedEventId",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "lastLoadedTimestamp",
+            "required": false
+          }
+        ]
+      }
+    },
     "/v1/webhooks/failures": {
       "get": {
         "operationId": "getFailures",
