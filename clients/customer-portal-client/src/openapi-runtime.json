@@ -508,24 +508,6 @@
         ]
       }
     },
-    "/v2/portal/entity/activity": {
-      "put": {
-        "operationId": "createCustomEntityActivity",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "entities",
-            "style": "form",
-            "explode": false
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
     "/v2/portal/entity/file": {
       "post": {
         "operationId": "saveEntityFile",

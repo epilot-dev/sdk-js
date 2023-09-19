@@ -33,133 +33,6 @@ declare namespace Components {
             };
             actions?: WidgetAction[];
         }
-        export interface Activity {
-            /**
-             * example:
-             * MyCustomActivity
-             */
-            type: string;
-            /**
-             * Title for activity. Supports handlebars syntax.
-             * example:
-             * My custom activity
-             */
-            title: string;
-            /**
-             * Message for activity. Supports handlebars syntax.
-             * example:
-             * {{caller}} did something with {{entity payload.entity.id}}.
-             */
-            message: string;
-            /**
-             * example:
-             * {
-             *   "entity": {
-             *     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-             *     "schema": "contact"
-             *   }
-             * }
-             */
-            payload?: {
-                [name: string]: any;
-            };
-        }
-        export interface ActivityCallerContext {
-            [name: string]: any;
-            PortalAuth?: {
-                /**
-                 * example:
-                 * {
-                 *   "cognito:username": "john@doe.com",
-                 *   "custom:contact_entity_id": "7579d22f-9400-41d1-b460-04730239ee91",
-                 *   "custom:org_id": "123456",
-                 *   "custom:origin": "END_CUSTOMER_PORTAL",
-                 *   "custom:portal_user_id": "06c78f9d-af75-4483-893d-a3fad524400f",
-                 *   "email": "john@doe.com",
-                 *   "email_verified": true,
-                 *   "exp": 1694693219,
-                 *   "iat": 1694689619,
-                 *   "sub": "8cc73157-3dc4-47f3-b163-d3a5039bba72"
-                 * }
-                 */
-                token?: {
-                    /**
-                     * example:
-                     * 8cc73157-3dc4-47f3-b163-d3a5039bba72
-                     */
-                    sub?: string;
-                    /**
-                     * example:
-                     * john@doe.com
-                     */
-                    email?: string;
-                    /**
-                     * example:
-                     * john@doe.com
-                     */
-                    "cognito:username"?: string;
-                    /**
-                     * example:
-                     * 06c78f9d-af75-4483-893d-a3fad524400f
-                     */
-                    "custom:portal_user_id"?: string;
-                    /**
-                     * example:
-                     * 7579d22f-9400-41d1-b460-04730239ee91
-                     */
-                    "custom:contact_entity_id"?: string;
-                };
-            };
-        }
-        /**
-         * See https://github.com/ulid/spec
-         * example:
-         * 01F130Q52Q6MWSNS8N2AVXV4JN
-         */
-        export type ActivityId = string; // ulid
-        export interface ActivityItem {
-            _id?: /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            ActivityId /* ulid */;
-            timestamp?: string; // date-time
-            /**
-             * example:
-             * MyCustomActivity
-             */
-            type: string;
-            /**
-             * Title for activity. Supports handlebars syntax.
-             * example:
-             * My custom activity
-             */
-            title: string;
-            /**
-             * Message for activity. Supports handlebars syntax.
-             * example:
-             * {{caller}} did something with {{entity payload.entity.id}}.
-             */
-            message: string;
-            /**
-             * example:
-             * {
-             *   "entity": {
-             *     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-             *     "schema": "contact"
-             *   }
-             * }
-             */
-            payload?: {
-                [name: string]: any;
-                entity?: {
-                    id?: string;
-                    schema?: string;
-                };
-                caller?: ActivityCallerContext;
-            };
-        }
         export interface AdminUser {
             [name: string]: any;
             /**
@@ -1809,26 +1682,6 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace CreateCustomEntityActivity {
-        namespace Parameters {
-            export type Entities = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId[];
-        }
-        export interface QueryParameters {
-            entities?: Parameters.Entities;
-        }
-        export type RequestBody = Components.Schemas.Activity;
-        namespace Responses {
-            export type $201 = Components.Schemas.ActivityItem;
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
     namespace CreateSSOUser {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -3326,16 +3179,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddEndCustomerRelationToEntity.Responses.$200>
   /**
-   * createCustomEntityActivity - createCustomEntityActivity
-   * 
-   * Create a custom activity that can be displayed in activity feed of an entity.
-   */
-  'createCustomEntityActivity'(
-    parameters?: Parameters<Paths.CreateCustomEntityActivity.QueryParameters> | null,
-    data?: Paths.CreateCustomEntityActivity.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateCustomEntityActivity.Responses.$201>
-  /**
    * saveEntityFile - saveEntityFile
    * 
    * Add files to an entity
@@ -3883,18 +3726,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddEndCustomerRelationToEntity.Responses.$200>
-  }
-  ['/v2/portal/entity/activity']: {
-    /**
-     * createCustomEntityActivity - createCustomEntityActivity
-     * 
-     * Create a custom activity that can be displayed in activity feed of an entity.
-     */
-    'put'(
-      parameters?: Parameters<Paths.CreateCustomEntityActivity.QueryParameters> | null,
-      data?: Paths.CreateCustomEntityActivity.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateCustomEntityActivity.Responses.$201>
   }
   ['/v2/portal/entity/file']: {
     /**

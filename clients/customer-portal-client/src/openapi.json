@@ -2384,70 +2384,6 @@
         }
       }
     },
-    "/v2/portal/entity/activity": {
-      "put": {
-        "operationId": "createCustomEntityActivity",
-        "summary": "createCustomEntityActivity",
-        "description": "Create a custom activity that can be displayed in activity feed of an entity.",
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "entities",
-            "description": "Comma-separated list of entities which the activity primarily concerns",
-            "style": "form",
-            "explode": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/EntityId"
-              }
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Activity",
-                "required": [
-                  "type",
-                  "message"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ActivityItem"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/v2/portal/entity/file": {
       "post": {
         "operationId": "saveEntityFile",
@@ -4200,138 +4136,6 @@
           }
         ]
       },
-      "ActivityId": {
-        "type": "string",
-        "format": "ulid",
-        "description": "See https://github.com/ulid/spec",
-        "example": "01F130Q52Q6MWSNS8N2AVXV4JN"
-      },
-      "ActivityCallerContext": {
-        "type": "object",
-        "additionalProperties": true,
-        "properties": {
-          "PortalAuth": {
-            "type": "object",
-            "properties": {
-              "token": {
-                "type": "object",
-                "properties": {
-                  "sub": {
-                    "type": "string",
-                    "example": "8cc73157-3dc4-47f3-b163-d3a5039bba72"
-                  },
-                  "email": {
-                    "type": "string",
-                    "example": "john@doe.com"
-                  },
-                  "cognito:username": {
-                    "type": "string",
-                    "example": "john@doe.com"
-                  },
-                  "custom:portal_user_id": {
-                    "type": "string",
-                    "example": "06c78f9d-af75-4483-893d-a3fad524400f"
-                  },
-                  "custom:contact_entity_id": {
-                    "type": "string",
-                    "example": "7579d22f-9400-41d1-b460-04730239ee91"
-                  }
-                },
-                "example": {
-                  "cognito:username": "john@doe.com",
-                  "custom:contact_entity_id": "7579d22f-9400-41d1-b460-04730239ee91",
-                  "custom:org_id": "123456",
-                  "custom:origin": "END_CUSTOMER_PORTAL",
-                  "custom:portal_user_id": "06c78f9d-af75-4483-893d-a3fad524400f",
-                  "email": "john@doe.com",
-                  "email_verified": true,
-                  "exp": 1694693219,
-                  "iat": 1694689619,
-                  "sub": "8cc73157-3dc4-47f3-b163-d3a5039bba72"
-                }
-              }
-            }
-          }
-        }
-      },
-      "Activity": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "example": "MyCustomActivity"
-          },
-          "title": {
-            "type": "string",
-            "description": "Title for activity. Supports handlebars syntax.",
-            "example": "My custom activity"
-          },
-          "message": {
-            "type": "string",
-            "description": "Message for activity. Supports handlebars syntax.",
-            "example": "{{caller}} did something with {{entity payload.entity.id}}."
-          },
-          "payload": {
-            "type": "object",
-            "properties": {},
-            "additionalProperties": true,
-            "example": {
-              "entity": {
-                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "schema": "contact"
-              }
-            }
-          }
-        },
-        "required": [
-          "type",
-          "title",
-          "message"
-        ]
-      },
-      "ActivityItem": {
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "_id": {
-                "$ref": "#/components/schemas/ActivityId"
-              },
-              "timestamp": {
-                "type": "string",
-                "format": "date-time"
-              }
-            }
-          },
-          {
-            "$ref": "#/components/schemas/Activity"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "payload": {
-                "type": "object",
-                "properties": {
-                  "entity": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "schema": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "caller": {
-                    "$ref": "#/components/schemas/ActivityCallerContext"
-                  }
-                }
-              }
-            }
-          }
-        ]
-      },
       "FileItem": {
         "allOf": [
           {
@@ -4574,6 +4378,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://customer-portal-api.sls.epilot.io"
+    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }
