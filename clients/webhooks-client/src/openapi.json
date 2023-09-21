@@ -307,6 +307,78 @@
         }
       }
     },
+    "/v1/webhooks/configs/{configId}/failures": {
+      "get": {
+        "operationId": "getFailuresForConfig",
+        "summary": "getFailuresForConfig",
+        "description": "Get failed deliveries for a given config id",
+        "tags": [
+          "webhooks"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          },
+          {
+            "in": "query",
+            "name": "lastLoadedEventId",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Optional Key. To be provided when loading paginated data. It is always returned initially by this API, if pagination is needed.",
+            "example": "1f143bd2-f816-4d7d-b33d-056db6e1ef7b"
+          },
+          {
+            "in": "query",
+            "name": "lastLoadedTimestamp",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailuresResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No configuration found for this id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/webhooks/failures": {
       "get": {
         "operationId": "getFailures",
@@ -638,6 +710,9 @@
             "type": "string"
           },
           "creationTimestamp": {
+            "type": "string"
+          },
+          "webhookConfigId": {
             "type": "string"
           }
         }
