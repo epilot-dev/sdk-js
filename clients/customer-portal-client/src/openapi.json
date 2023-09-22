@@ -1613,6 +1613,28 @@
             "PortalAuth": []
           }
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "number",
+              "description": "Initial offset to set for the search results",
+              "example": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "number",
+              "description": "Size of the search results",
+              "example": 100,
+              "default": 100
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "The orders for the portal user returned successfully.",
@@ -1809,6 +1831,28 @@
             "PortalAuth": []
           }
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "number",
+              "description": "Initial offset to set for the search results",
+              "example": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "number",
+              "description": "Size of the search results",
+              "example": 100,
+              "default": 100
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "The opportunities is retrieved successfully for the portal user.",
@@ -2001,6 +2045,28 @@
         "security": [
           {
             "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "number",
+              "description": "Initial offset to set for the search results",
+              "example": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "number",
+              "description": "Size of the search results",
+              "example": 100,
+              "default": 100
+            }
           }
         ],
         "responses": {
@@ -3337,6 +3403,64 @@
                 }
               }
             }
+          },
+          "entity_edit_rules": {
+            "type": "array",
+            "description": "Rules for editing an entity by a portal user",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slug": {
+                  "$ref": "#/components/schemas/EntitySlug",
+                  "example": "contract"
+                },
+                "attribute": {
+                  "type": "string",
+                  "example": "first_name"
+                },
+                "rule_type": {
+                  "type": "string",
+                  "enum": [
+                    "cadence",
+                    "relative_to_current_value",
+                    "days_before_date",
+                    "overdue_payments"
+                  ]
+                },
+                "cadence_period_type": {
+                  "type": "string",
+                  "enum": [
+                    "days",
+                    "weeks",
+                    "months"
+                  ]
+                },
+                "cadence_period": {
+                  "type": "number",
+                  "example": 1
+                },
+                "changes_allowed": {
+                  "type": "integer",
+                  "example": 1
+                },
+                "grace_period": {
+                  "type": "integer",
+                  "example": 1
+                },
+                "allowed_increment": {
+                  "type": "string",
+                  "example": "10%"
+                },
+                "allowed_decrement": {
+                  "type": "string",
+                  "example": "10%"
+                },
+                "number_of_days_before_restriction": {
+                  "type": "integer",
+                  "example": 10
+                }
+              }
+            }
           }
         }
       },
@@ -4574,9 +4698,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://customer-portal-api.sls.epilot.io"
-    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }

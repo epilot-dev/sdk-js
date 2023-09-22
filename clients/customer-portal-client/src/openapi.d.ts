@@ -1210,6 +1210,54 @@ declare namespace Components {
                 };
             }[];
             /**
+             * Rules for editing an entity by a portal user
+             */
+            entity_edit_rules?: {
+                slug?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                /**
+                 * example:
+                 * first_name
+                 */
+                attribute?: string;
+                rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments";
+                cadence_period_type?: "days" | "weeks" | "months";
+                /**
+                 * example:
+                 * 1
+                 */
+                cadence_period?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                changes_allowed?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                grace_period?: number;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_increment?: string;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_decrement?: string;
+                /**
+                 * example:
+                 * 10
+                 */
+                number_of_days_before_restriction?: number;
+            }[];
+            /**
              * ID of the organization
              * example:
              * 12345
@@ -1624,6 +1672,58 @@ declare namespace Components {
                     de?: string;
                 };
             }[];
+            /**
+             * Rules for editing an entity by a portal user
+             */
+            entity_edit_rules?: {
+                /**
+                 * example:
+                 * contract
+                 */
+                slug?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                /**
+                 * example:
+                 * first_name
+                 */
+                attribute?: string;
+                rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments";
+                cadence_period_type?: "days" | "weeks" | "months";
+                /**
+                 * example:
+                 * 1
+                 */
+                cadence_period?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                changes_allowed?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                grace_period?: number;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_increment?: string;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_decrement?: string;
+                /**
+                 * example:
+                 * 10
+                 */
+                number_of_days_before_restriction?: number;
+            }[];
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -1922,6 +2022,34 @@ declare namespace Paths {
         }
     }
     namespace GetAllContracts {
+        namespace Parameters {
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            Parameters.Size;
+        }
         namespace Responses {
             export interface $200 {
                 data?: /* The contract entity */ Components.Schemas.Contract[];
@@ -1993,6 +2121,34 @@ declare namespace Paths {
         }
     }
     namespace GetAllOpportunities {
+        namespace Parameters {
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            Parameters.Size;
+        }
         namespace Responses {
             export interface $200 {
                 data?: /* The opportunity entity */ Components.Schemas.Opportunity[];
@@ -2004,6 +2160,34 @@ declare namespace Paths {
         }
     }
     namespace GetAllOrders {
+        namespace Parameters {
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            Parameters.Size;
+        }
         namespace Responses {
             export interface $200 {
                 data?: /* The order entity */ Components.Schemas.Order[];
@@ -3211,7 +3395,7 @@ export interface OperationMethods {
    * Get all orders for the portal user
    */
   'getAllOrders'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.GetAllOrders.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllOrders.Responses.$200>
@@ -3241,7 +3425,7 @@ export interface OperationMethods {
    * Get all opportunities of a portal user
    */
   'getAllOpportunities'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.GetAllOpportunities.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllOpportunities.Responses.$200>
@@ -3271,7 +3455,7 @@ export interface OperationMethods {
    * Get all contracts for a portal user
    */
   'getAllContracts'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.GetAllContracts.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllContracts.Responses.$200>
@@ -3753,7 +3937,7 @@ export interface PathsDictionary {
      * Get all orders for the portal user
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.GetAllOrders.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllOrders.Responses.$200>
@@ -3787,7 +3971,7 @@ export interface PathsDictionary {
      * Get all opportunities of a portal user
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.GetAllOpportunities.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllOpportunities.Responses.$200>
@@ -3821,7 +4005,7 @@ export interface PathsDictionary {
      * Get all contracts for a portal user
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.GetAllContracts.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllContracts.Responses.$200>
