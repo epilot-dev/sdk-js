@@ -4576,6 +4576,9 @@
   "servers": [
     {
       "url": "https://customer-portal-api.sls.epilot.io"
+    },
+    {
+      "url": "https://customer-portal-api.sls.epilot.io"
     }
   ]
 }
