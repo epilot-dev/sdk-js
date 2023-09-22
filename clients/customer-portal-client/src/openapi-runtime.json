@@ -365,7 +365,17 @@
     },
     "/v2/portal/order": {
       "get": {
-        "operationId": "getAllOrders"
+        "operationId": "getAllOrders",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          }
+        ]
       }
     },
     "/v2/portal/order/{id}": {
@@ -397,7 +407,17 @@
     },
     "/v2/portal/opportunity": {
       "get": {
-        "operationId": "getAllOpportunities"
+        "operationId": "getAllOpportunities",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          }
+        ]
       }
     },
     "/v2/portal/opportunities/{id}": {
@@ -430,7 +450,17 @@
     },
     "/v2/portal/contract": {
       "get": {
-        "operationId": "getAllContracts"
+        "operationId": "getAllContracts",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          }
+        ]
       }
     },
     "/v2/portal/contract/{id}": {
