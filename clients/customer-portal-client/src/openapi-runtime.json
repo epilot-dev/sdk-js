@@ -369,11 +369,13 @@
         "parameters": [
           {
             "in": "query",
-            "name": "from"
+            "name": "from",
+            "required": false
           },
           {
             "in": "query",
-            "name": "size"
+            "name": "size",
+            "required": false
           }
         ]
       }
@@ -411,11 +413,13 @@
         "parameters": [
           {
             "in": "query",
-            "name": "from"
+            "name": "from",
+            "required": false
           },
           {
             "in": "query",
-            "name": "size"
+            "name": "size",
+            "required": false
           }
         ]
       }
@@ -454,11 +458,13 @@
         "parameters": [
           {
             "in": "query",
-            "name": "from"
+            "name": "from",
+            "required": false
           },
           {
             "in": "query",
-            "name": "size"
+            "name": "size",
+            "required": false
           }
         ]
       }

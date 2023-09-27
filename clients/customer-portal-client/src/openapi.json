@@ -1617,6 +1617,7 @@
           {
             "in": "query",
             "name": "from",
+            "required": false,
             "schema": {
               "type": "number",
               "description": "Initial offset to set for the search results",
@@ -1627,6 +1628,7 @@
           {
             "in": "query",
             "name": "size",
+            "required": false,
             "schema": {
               "type": "number",
               "description": "Size of the search results",
@@ -1835,6 +1837,7 @@
           {
             "in": "query",
             "name": "from",
+            "required": false,
             "schema": {
               "type": "number",
               "description": "Initial offset to set for the search results",
@@ -1845,6 +1848,7 @@
           {
             "in": "query",
             "name": "size",
+            "required": false,
             "schema": {
               "type": "number",
               "description": "Size of the search results",
@@ -2051,6 +2055,7 @@
           {
             "in": "query",
             "name": "from",
+            "required": false,
             "schema": {
               "type": "number",
               "description": "Initial offset to set for the search results",
@@ -2061,6 +2066,7 @@
           {
             "in": "query",
             "name": "size",
+            "required": false,
             "schema": {
               "type": "number",
               "description": "Size of the search results",
@@ -3411,8 +3417,7 @@
               "type": "object",
               "properties": {
                 "slug": {
-                  "$ref": "#/components/schemas/EntitySlug",
-                  "example": "contract"
+                  "$ref": "#/components/schemas/EntitySlug"
                 },
                 "attribute": {
                   "type": "string",
@@ -4698,6 +4703,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://customer-portal-api.sls.epilot.io"
+    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }
