@@ -1676,10 +1676,6 @@ declare namespace Components {
              * Rules for editing an entity by a portal user
              */
             entity_edit_rules?: {
-                /**
-                 * example:
-                 * contract
-                 */
                 slug?: /**
                  * URL-friendly identifier for the entity schema
                  * example:
