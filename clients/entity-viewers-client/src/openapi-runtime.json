@@ -1,0 +1,74 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/viewers/{entity_schema}/{entity_id}": {
+      "get": {
+        "operationId": "getEntityViewActions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_schema",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/viewers/{entity_schema}/{entity_id}/{action}": {
+      "post": {
+        "operationId": "trackEntityViewAction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_schema",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "untrackEntityViewAction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_schema",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://entity-viewers.sls.epilot.io"
+    }
+  ]
+}
