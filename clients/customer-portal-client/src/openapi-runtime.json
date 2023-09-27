@@ -630,6 +630,23 @@
       "get": {
         "operationId": "getFilesCountByEntity"
       }
+    },
+    "/v2/portal/billing/events": {
+      "get": {
+        "operationId": "getBillingEvents"
+      }
+    },
+    "/v2/billing/customers/{customer_entity_id}/balance": {
+      "get": {
+        "operationId": "getCustomerBalance",
+        "parameters": [
+          {
+            "name": "customer_entity_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
     }
   },
   "components": {
