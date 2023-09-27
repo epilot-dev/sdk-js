@@ -211,6 +211,15 @@ declare namespace Components {
             httpMethod: HttpMethod;
         }
         /**
+         * Configuration for the webhook payload
+         */
+        export interface PayloadConfiguration {
+            hydrate_entity?: boolean;
+            include_relations?: boolean;
+            include_activity?: boolean;
+            include_changed_attributes?: boolean;
+        }
+        /**
          * example:
          * {
          *   "eventName": "CustomerRequest_Created",
@@ -248,6 +257,7 @@ declare namespace Components {
             enabled?: boolean;
             auth: Auth;
             filter?: Filter;
+            payloadConfiguration?: /* Configuration for the webhook payload */ PayloadConfiguration;
         }
     }
 }

@@ -645,6 +645,9 @@
           },
           "filter": {
             "$ref": "#/components/schemas/Filter"
+          },
+          "payloadConfiguration": {
+            "$ref": "#/components/schemas/PayloadConfiguration"
           }
         },
         "required": [
@@ -864,6 +867,24 @@
         "properties": {
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "PayloadConfiguration": {
+        "type": "object",
+        "description": "Configuration for the webhook payload",
+        "properties": {
+          "hydrate_entity": {
+            "type": "boolean"
+          },
+          "include_relations": {
+            "type": "boolean"
+          },
+          "include_activity": {
+            "type": "boolean"
+          },
+          "include_changed_attributes": {
+            "type": "boolean"
           }
         }
       }
