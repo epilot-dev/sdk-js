@@ -4465,7 +4465,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBillingEvents.Responses.$200>
   }
-  ['/v2/billing/customers/{customer_entity_id}/balance']: {
+  ['/v2/portal/billing/customers/{customer_entity_id}/balance']: {
     /**
      * getCustomerBalance - getCustomerBalance
      * 
