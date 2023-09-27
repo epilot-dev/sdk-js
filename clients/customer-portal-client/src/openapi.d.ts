@@ -241,6 +241,87 @@ declare namespace Components {
              */
             portal_id: string;
         }
+        export interface Balance {
+            /**
+             * Current balance of the customer in cents. (precision 2)
+             * example:
+             * 8990
+             */
+            balance?: number;
+            /**
+             * Current balance of the customer in decimal string representation.
+             * example:
+             * 89.90
+             */
+            balance_decimal?: number;
+            balance_currency?: /**
+             * Currency code in ISO 4217 format
+             * example:
+             * EUR
+             */
+            Currency;
+        }
+        /**
+         * A base billing event to be inherited by all billing events.
+         */
+        export interface BaseBillingEvent {
+            [name: string]: any;
+            _id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId;
+            /**
+             * Title of the entity
+             * example:
+             * Example Entity
+             */
+            _title: string;
+            /**
+             * Organization ID the entity belongs to
+             * example:
+             * 123
+             */
+            _org: string;
+            /**
+             * Array of entity tags
+             * example:
+             * [
+             *   "example",
+             *   "mock"
+             * ]
+             */
+            _tags?: string[];
+            /**
+             * Creation timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _created_at: string; // date-time
+            /**
+             * Last update timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _updated_at: string; // date-time
+            /**
+             * Unique identifier for event, used to reference the event to a 3rd party resource such as a SAP Installment.
+             * example:
+             * d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e
+             */
+            external_id?: string;
+            contract: {
+                $relation?: {
+                    /**
+                     * Entity ID for the related contract.
+                     * example:
+                     * f589786b-3024-43cd-9cb3-5a3c953f2896
+                     */
+                    entity_id?: string;
+                }[];
+            };
+        }
         export interface BaseEntity {
             /**
              * Entity ID
@@ -287,6 +368,10 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
         }
+        /**
+         * An entity that describes a billing event such as a future installment or a reimbursement back to the customer.
+         */
+        export type BillingEvent = /* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ /* An entity that describes an installment billing event. */ InstallmentEvent | /* An entity that describes a reimbursement billing event. */ ReimbursementEvent;
         /**
          * The mapped contact of the portal user
          */
@@ -480,6 +565,12 @@ declare namespace Components {
              */
             contactId?: string;
         }
+        /**
+         * Currency code in ISO 4217 format
+         * example:
+         * EUR
+         */
+        export type Currency = string;
         export interface DeleteEntityFile {
             /**
              * Entity ID
@@ -843,6 +934,99 @@ declare namespace Components {
              * Effect of the permission
              */
             effect?: "allow" | "deny";
+        }
+        /**
+         * An entity that describes an installment billing event.
+         */
+        export interface InstallmentEvent {
+            [name: string]: any;
+            _id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId;
+            /**
+             * Title of the entity
+             * example:
+             * Example Entity
+             */
+            _title: string;
+            /**
+             * Organization ID the entity belongs to
+             * example:
+             * 123
+             */
+            _org: string;
+            /**
+             * Array of entity tags
+             * example:
+             * [
+             *   "example",
+             *   "mock"
+             * ]
+             */
+            _tags?: string[];
+            /**
+             * Creation timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _created_at: string; // date-time
+            /**
+             * Last update timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _updated_at: string; // date-time
+            /**
+             * Unique identifier for event, used to reference the event to a 3rd party resource such as a SAP Installment.
+             * example:
+             * d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e
+             */
+            external_id?: string;
+            contract: {
+                $relation?: {
+                    /**
+                     * Entity ID for the related contract.
+                     * example:
+                     * f589786b-3024-43cd-9cb3-5a3c953f2896
+                     */
+                    entity_id?: string;
+                }[];
+            };
+            /**
+             * Type of the billing event.
+             * example:
+             * installment
+             */
+            type: "installment";
+            /**
+             * Amount to be paid in cents i.e. precision 2
+             * example:
+             * 10050
+             */
+            billing_amount?: number;
+            billing_currency?: /**
+             * Currency code in ISO 4217 format
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * Date on which the installment is due.
+             */
+            due_date: string; // date
+            /**
+             * Date on which the installment is paid by the customer.
+             */
+            paid_date?: string; // date
+            /**
+             * Amount to be paid in cents in decimal string representation
+             * example:
+             * 100.50
+             */
+            billing_amount_decimal?: string;
         }
         /**
          * The opportunity entity
@@ -1386,6 +1570,77 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
             _schema: "product";
+        }
+        /**
+         * An entity that describes a reimbursement billing event.
+         */
+        export interface ReimbursementEvent {
+            [name: string]: any;
+            _id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId;
+            /**
+             * Title of the entity
+             * example:
+             * Example Entity
+             */
+            _title: string;
+            /**
+             * Organization ID the entity belongs to
+             * example:
+             * 123
+             */
+            _org: string;
+            /**
+             * Array of entity tags
+             * example:
+             * [
+             *   "example",
+             *   "mock"
+             * ]
+             */
+            _tags?: string[];
+            /**
+             * Creation timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _created_at: string; // date-time
+            /**
+             * Last update timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _updated_at: string; // date-time
+            /**
+             * Unique identifier for event, used to reference the event to a 3rd party resource such as a SAP Installment.
+             * example:
+             * d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e
+             */
+            external_id?: string;
+            contract: {
+                $relation?: {
+                    /**
+                     * Entity ID for the related contract.
+                     * example:
+                     * f589786b-3024-43cd-9cb3-5a3c953f2896
+                     */
+                    entity_id?: string;
+                }[];
+            };
+            /**
+             * Type of the billing event.
+             * example:
+             * reimbursement
+             */
+            type: "reimbursement";
+            /**
+             * Date on which the customer is reimbursed.
+             */
+            paid_date?: string; // date
         }
         export interface SaveEntityFile {
             /**
@@ -2203,6 +2458,19 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetBillingEvents {
+        namespace Responses {
+            export interface $200 {
+                results?: /* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ Components.Schemas.BillingEvent[];
+                /**
+                 * Total number of billing events for pagination
+                 * example:
+                 * 50
+                 */
+                hits?: number;
+            }
+        }
+    }
     namespace GetContact {
         namespace Responses {
             export interface $200 {
@@ -2360,6 +2628,25 @@ declare namespace Paths {
                 count?: number;
             }
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetCustomerBalance {
+        namespace Parameters {
+            /**
+             * example:
+             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
+             */
+            export type CustomerEntityId = string;
+        }
+        export interface PathParameters {
+            customer_entity_id: /**
+             * example:
+             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
+             */
+            Parameters.CustomerEntityId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Balance;
         }
     }
     namespace GetECPContact {
@@ -3575,6 +3862,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFilesCountByEntity.Responses.$200>
+  /**
+   * getBillingEvents - getBillingEvents
+   * 
+   * Fetch billing events for a portal user
+   */
+  'getBillingEvents'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBillingEvents.Responses.$200>
+  /**
+   * getCustomerBalance - getCustomerBalance
+   * 
+   * Get total balance across all contracts and orders of a customer entity.
+   */
+  'getCustomerBalance'(
+    parameters?: Parameters<Paths.GetCustomerBalance.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCustomerBalance.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -4145,6 +4452,30 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFilesCountByEntity.Responses.$200>
+  }
+  ['/v2/portal/billing/events']: {
+    /**
+     * getBillingEvents - getBillingEvents
+     * 
+     * Fetch billing events for a portal user
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBillingEvents.Responses.$200>
+  }
+  ['/v2/portal/billing/customers/{customer_entity_id}/balance']: {
+    /**
+     * getCustomerBalance - getCustomerBalance
+     * 
+     * Get total balance across all contracts and orders of a customer entity.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetCustomerBalance.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCustomerBalance.Responses.$200>
   }
 }
 

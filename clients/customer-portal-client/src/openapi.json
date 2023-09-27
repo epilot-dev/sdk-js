@@ -2888,6 +2888,85 @@
           }
         }
       }
+    },
+    "/v2/portal/billing/events": {
+      "get": {
+        "operationId": "getBillingEvents",
+        "summary": "getBillingEvents",
+        "description": "Fetch billing events for a portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The billing events have been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BillingEvent"
+                      }
+                    },
+                    "hits": {
+                      "type": "number",
+                      "description": "Total number of billing events for pagination",
+                      "example": 50
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/portal/billing/customers/{customer_entity_id}/balance": {
+      "get": {
+        "operationId": "getCustomerBalance",
+        "summary": "getCustomerBalance",
+        "description": "Get total balance across all contracts and orders of a customer entity.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Balance"
+        ],
+        "parameters": [
+          {
+            "name": "customer_entity_id",
+            "in": "path",
+            "description": "Customer entity ID (contact or account)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Balance"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4699,13 +4778,168 @@
             }
           ]
         }
+      },
+      "BaseBillingEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ],
+        "description": "A base billing event to be inherited by all billing events.",
+        "type": "object",
+        "required": [
+          "type",
+          "contract"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "external_id": {
+            "type": "string",
+            "description": "Unique identifier for event, used to reference the event to a 3rd party resource such as a SAP Installment.",
+            "example": "d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e"
+          },
+          "contract": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string",
+                      "description": "Entity ID for the related contract.",
+                      "example": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "InstallmentEvent": {
+        "description": "An entity that describes an installment billing event.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseBillingEvent"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "installment"
+                ],
+                "description": "Type of the billing event.",
+                "example": "installment"
+              },
+              "billing_amount": {
+                "type": "integer",
+                "description": "Amount to be paid in cents i.e. precision 2",
+                "example": 10050
+              },
+              "billing_currency": {
+                "$ref": "#/components/schemas/Currency"
+              },
+              "due_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Date on which the installment is due."
+              },
+              "paid_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Date on which the installment is paid by the customer."
+              }
+            },
+            "required": [
+              "due_date"
+            ]
+          }
+        ],
+        "properties": {
+          "billing_amount_decimal": {
+            "type": "string",
+            "description": "Amount to be paid in cents in decimal string representation",
+            "example": "100.50"
+          }
+        }
+      },
+      "ReimbursementEvent": {
+        "description": "An entity that describes a reimbursement billing event.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseBillingEvent"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "reimbursement"
+                ],
+                "description": "Type of the billing event.",
+                "example": "reimbursement"
+              },
+              "paid_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Date on which the customer is reimbursed."
+              }
+            }
+          }
+        ]
+      },
+      "BillingEvent": {
+        "description": "An entity that describes a billing event such as a future installment or a reimbursement back to the customer.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/InstallmentEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ReimbursementEvent"
+          }
+        ],
+        "properties": {
+          "billing_amount_decimal": {
+            "type": "string",
+            "description": "Amount to be paid in cents in decimal string representation",
+            "example": "100.50"
+          }
+        }
+      },
+      "Balance": {
+        "type": "object",
+        "properties": {
+          "balance": {
+            "type": "integer",
+            "description": "Current balance of the customer in cents. (precision 2)",
+            "example": 8990
+          },
+          "balance_decimal": {
+            "type": "number",
+            "description": "Current balance of the customer in decimal string representation.",
+            "example": "89.90"
+          },
+          "balance_currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        }
+      },
+      "Currency": {
+        "type": "string",
+        "description": "Currency code in ISO 4217 format",
+        "example": "EUR"
       }
     }
   },
   "servers": [
-    {
-      "url": "https://customer-portal-api.sls.epilot.io"
-    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }

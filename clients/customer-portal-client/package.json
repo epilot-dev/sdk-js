@@ -1,6 +1,6 @@
 {
   "name": "@epilot/customer-portal-client",
-  "version": "0.8.49",
+  "version": "0.8.50",
   "description": "API Client for epilot portal API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
