@@ -2459,6 +2459,29 @@ declare namespace Paths {
         }
     }
     namespace GetBillingEvents {
+        namespace Parameters {
+            /**
+             * List billing events for all contracts/orders of specific customer
+             */
+            export type CustomerId = string;
+            /**
+             * List billing events after this date
+             */
+            export type DateAfter = string; // date-time
+            /**
+             * List billing events before this date
+             */
+            export type DateBefore = string; // date-time
+            export type EntityId = string[];
+            export type EventType = ("installment" | "reimbursement")[];
+        }
+        export interface QueryParameters {
+            entity_id?: Parameters.EntityId;
+            event_type?: Parameters.EventType;
+            date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
+            date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;
+            customer_id: /* List billing events for all contracts/orders of specific customer */ Parameters.CustomerId;
+        }
         namespace Responses {
             export interface $200 {
                 results?: /* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ Components.Schemas.BillingEvent[];
@@ -3868,7 +3891,7 @@ export interface OperationMethods {
    * Fetch billing events for a portal user
    */
   'getBillingEvents'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.GetBillingEvents.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBillingEvents.Responses.$200>
@@ -4460,7 +4483,7 @@ export interface PathsDictionary {
      * Fetch billing events for a portal user
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.GetBillingEvents.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBillingEvents.Responses.$200>
