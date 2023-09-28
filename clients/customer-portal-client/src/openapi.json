@@ -2902,6 +2902,61 @@
             "PortalAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "Entity ID to filter by"
+              }
+            }
+          },
+          {
+            "name": "event_type",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "installment",
+                  "reimbursement"
+                ],
+                "description": "Type of billing event to filter by"
+              }
+            }
+          },
+          {
+            "name": "date_after",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "List billing events after this date"
+            }
+          },
+          {
+            "name": "date_before",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "List billing events before this date"
+            }
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "List billing events for all contracts/orders of specific customer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "The billing events have been fetched successfully.",

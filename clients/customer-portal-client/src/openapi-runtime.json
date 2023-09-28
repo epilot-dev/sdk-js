@@ -633,7 +633,30 @@
     },
     "/v2/portal/billing/events": {
       "get": {
-        "operationId": "getBillingEvents"
+        "operationId": "getBillingEvents",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "query"
+          },
+          {
+            "name": "event_type",
+            "in": "query"
+          },
+          {
+            "name": "date_after",
+            "in": "query"
+          },
+          {
+            "name": "date_before",
+            "in": "query"
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "required": true
+          }
+        ]
       }
     },
     "/v2/portal/billing/customers/{customer_entity_id}/balance": {
