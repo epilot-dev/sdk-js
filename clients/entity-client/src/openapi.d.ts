@@ -2693,7 +2693,7 @@ declare namespace Components {
             enable_description?: boolean;
             default_access_control?: "public-read" | "private";
         }
-        export interface GetRelationsCount {
+        export interface GetRelatedEntitiesCountByEntityId {
             /**
              * example:
              * 1
@@ -6404,7 +6404,7 @@ declare namespace Paths {
             export type $200 = Components.Schemas.GetRelationsResp;
         }
     }
-    namespace GetRelationsCount {
+    namespace GetRelatedEntitiesCountByEntityId {
         namespace Parameters {
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
@@ -6419,7 +6419,7 @@ declare namespace Paths {
             id: Parameters.Id;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.GetRelationsCount;
+            export type $200 = Components.Schemas.GetRelatedEntitiesCountByEntityId;
         }
     }
     namespace GetRelationsV2 {
@@ -7595,16 +7595,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
   /**
-   * getRelationsCount - getRelationsCount
+   * getRelatedEntitiesCountByEntityId - getRelatedEntitiesCountByEntityId
    * 
-   * Returns the count of all relations for an entity - includes both direct and reverse relations.
+   * Returns the amount of unique related entities for an entity - includes direct and reverse relations.
    * 
    */
-  'getRelationsCount'(
-    parameters?: Parameters<Paths.GetRelationsCount.PathParameters> | null,
+  'getRelatedEntitiesCountByEntityId'(
+    parameters?: Parameters<Paths.GetRelatedEntitiesCountByEntityId.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetRelationsCount.Responses.$200>
+  ): OperationResponse<Paths.GetRelatedEntitiesCountByEntityId.Responses.$200>
   /**
    * updateRelation - updateRelation
    * 
@@ -8250,16 +8250,16 @@ export interface PathsDictionary {
   }
   ['/v2/entity/{slug}/{id}/relations/count']: {
     /**
-     * getRelationsCount - getRelationsCount
+     * getRelatedEntitiesCountByEntityId - getRelatedEntitiesCountByEntityId
      * 
-     * Returns the count of all relations for an entity - includes both direct and reverse relations.
+     * Returns the amount of unique related entities for an entity - includes direct and reverse relations
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetRelationsCount.PathParameters> | null,
+      parameters?: Parameters<Paths.GetRelatedEntitiesCountByEntityId.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetRelationsCount.Responses.$200>
+    ): OperationResponse<Paths.GetRelatedEntitiesCountByEntityId.Responses.$200>
   }
   ['/v1/entity/{slug}/{id}/relations/{attribute}/{entity_id}']: {
     /**

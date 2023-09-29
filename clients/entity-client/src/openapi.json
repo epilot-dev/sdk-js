@@ -1482,9 +1482,9 @@
     },
     "/v2/entity/{slug}/{id}/relations/count": {
       "get": {
-        "operationId": "getRelationsCount",
-        "summary": "getRelationsCount",
-        "description": "Returns the count of all relations for an entity - includes both direct and reverse relations.\n",
+        "operationId": "getRelatedEntitiesCountByEntityId",
+        "summary": "getRelatedEntitiesCountByEntityId",
+        "description": "Returns the amount of unique related entities for an entity - includes direct and reverse relations.\n",
         "tags": [
           "Relations"
         ],
@@ -1514,7 +1514,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetRelationsCount"
+                  "$ref": "#/components/schemas/GetRelatedEntitiesCount"
                 }
               }
             }
@@ -4394,7 +4394,7 @@
           }
         }
       },
-      "GetRelationsCount": {
+      "GetRelatedEntitiesCount": {
         "type": "object",
         "properties": {
           "hits": {

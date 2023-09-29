@@ -514,7 +514,7 @@
     },
     "/v2/entity/{slug}/{id}/relations/count": {
       "get": {
-        "operationId": "getRelationsCount",
+        "operationId": "getRelatedEntitiesCountByEntityId",
         "parameters": [
           {
             "in": "path",
