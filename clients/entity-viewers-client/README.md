@@ -34,7 +34,7 @@ defaults:
 
 ```typescript
 const client = getClient();
-client.defaults.baseURL = config.CUSTOMER_PORTAL_API;
+client.defaults.baseURL = config.ENTITY_VIEWERS_API;
 client.defaults.headers['authorization'] = `Bearer ${token}`;
 ```
 
