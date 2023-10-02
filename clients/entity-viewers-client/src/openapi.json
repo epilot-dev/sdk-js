@@ -1,0 +1,306 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Entity Viewers API",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Viewers",
+      "description": "Manage entity viewers"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v1/viewers/{entity_schema}/{entity_id}": {
+      "get": {
+        "operationId": "getEntityViewActions",
+        "summary": "getEntityViewActions",
+        "description": "Get entity view actions for the current user.",
+        "tags": [
+          "Viewers"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the entity"
+          },
+          {
+            "in": "path",
+            "name": "entity_schema",
+            "schema": {
+              "$ref": "#/components/schemas/EntitySchema"
+            },
+            "required": true,
+            "description": "Entity schema"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all user's view actions for entity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ViewActionItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/viewers/{entity_schema}/{entity_id}/{action}": {
+      "post": {
+        "operationId": "trackEntityViewAction",
+        "summary": "trackEntityViewAction",
+        "description": "Track a view action for the current user. E.g. seen or downloaded.",
+        "tags": [
+          "Viewers"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action",
+            "schema": {
+              "$ref": "#/components/schemas/ActionType"
+            },
+            "required": true,
+            "description": "The view action"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the entity"
+          },
+          {
+            "in": "path",
+            "name": "entity_schema",
+            "schema": {
+              "$ref": "#/components/schemas/EntitySchema"
+            },
+            "required": true,
+            "description": "Entity schema"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The view action created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewActionItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "untrackEntityViewAction",
+        "summary": "untrackEntityViewAction",
+        "description": "Remove a previously viewed track action for the current user.",
+        "tags": [
+          "Viewers"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action",
+            "schema": {
+              "$ref": "#/components/schemas/ActionType"
+            },
+            "required": true,
+            "description": "The view action"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the entity"
+          },
+          {
+            "in": "path",
+            "name": "entity_schema",
+            "schema": {
+              "$ref": "#/components/schemas/EntitySchema"
+            },
+            "required": true,
+            "description": "Entity schema"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The view action removed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewActionItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "EntityId": {
+        "type": "string",
+        "description": "Entity ID",
+        "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      },
+      "EntitySchema": {
+        "description": "URL-friendly identifier for the entity schema",
+        "type": "string",
+        "example": "opportunity"
+      },
+      "ActionType": {
+        "description": "The view action",
+        "type": "string",
+        "example": "seen",
+        "enum": [
+          "seen",
+          "downloaded"
+        ]
+      },
+      "ViewActionItem": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/UserViewActionItem"
+          },
+          {
+            "$ref": "#/components/schemas/PortalUserViewActionItem"
+          }
+        ]
+      },
+      "BaseViewActionItem": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "$ref": "#/components/schemas/EntitySchema"
+          },
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "entity_org": {
+            "type": "string",
+            "example": "739224",
+            "description": "Organization id of the entity"
+          },
+          "action": {
+            "$ref": "#/components/schemas/ActionType"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user_org": {
+            "type": "string",
+            "example": "989123",
+            "description": "Organization id of the acting user"
+          }
+        }
+      },
+      "UserViewActionItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseViewActionItem"
+          },
+          {
+            "type": "object",
+            "required": [
+              "user_id",
+              "schema",
+              "entity_id",
+              "entity_org",
+              "action",
+              "timestamp"
+            ],
+            "properties": {
+              "user_id": {
+                "type": "string",
+                "description": "Epilot user id",
+                "example": "123"
+              }
+            }
+          }
+        ]
+      },
+      "PortalUserViewActionItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseViewActionItem"
+          },
+          {
+            "type": "object",
+            "required": [
+              "portal_user_id",
+              "schema",
+              "entity_id",
+              "entity_org",
+              "action",
+              "timestamp"
+            ],
+            "properties": {
+              "portal_user_id": {
+                "type": "string",
+                "description": "Portal user id",
+                "example": "123"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://entity-viewers.sls.epilot.io"
+    },
+    {
+      "url": "https://entity-viewers.sls.epilot.io"
+    }
+  ]
+}

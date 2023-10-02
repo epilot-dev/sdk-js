@@ -1,28 +1,28 @@
 {
-  "name": "@epilot/customer-portal-client",
-  "version": "0.8.52",
-  "description": "API Client for epilot portal API",
+  "name": "@epilot/entity-viewers-client",
+  "version": "1.0.0",
+  "description": "API Client for epilot entity-viewers API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git",
-    "directory": "clients/customer-portal-client"
+    "directory": "clients/entity-viewers-client"
   },
   "bugs": {
     "url": "https://github.com/epilot-dev/sdk-js/issues"
   },
-  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/customer-portal-client#readme",
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/entity-viewers-client#readme",
   "keywords": [
     "epilot",
     "sdk",
-    "customer-portal"
+    "entity-viewers"
   ],
   "scripts": {
     "test": "jest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/customer-portal.yaml",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/entity-viewers.yaml",
     "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
     "build": "tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",
