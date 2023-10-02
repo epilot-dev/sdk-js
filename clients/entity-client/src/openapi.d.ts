@@ -158,6 +158,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -280,6 +284,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -397,6 +405,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -581,6 +593,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -707,6 +723,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -827,6 +847,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -949,6 +973,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -1069,6 +1097,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -1199,6 +1231,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -2532,6 +2568,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -2652,6 +2692,13 @@ declare namespace Components {
              */
             enable_description?: boolean;
             default_access_control?: "public-read" | "private";
+        }
+        export interface GetRelatedEntitiesCount {
+            /**
+             * example:
+             * 1
+             */
+            hits?: number;
         }
         export type GetRelationsResp = (RelationItem | /**
          * example:
@@ -2896,6 +2943,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -3016,6 +3067,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -3136,6 +3191,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -3264,6 +3323,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -3384,6 +3447,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -3520,6 +3587,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -3641,6 +3712,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -3761,6 +3836,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -3881,6 +3960,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -4001,6 +4084,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -4126,6 +4213,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -4265,6 +4356,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -4622,6 +4717,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -4915,6 +5014,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -5043,6 +5146,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -5170,6 +5277,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -5360,6 +5471,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -5521,6 +5636,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -5642,6 +5761,10 @@ declare namespace Components {
              * Render as a column in table views. When defined, overrides `hidden`
              */
             show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
@@ -5753,6 +5876,12 @@ declare namespace Components {
 declare namespace Paths {
     namespace AddRelations {
         namespace Parameters {
+            export type ActivityId = /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
@@ -5768,6 +5897,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             async?: Parameters.Async;
+            activity_id?: Parameters.ActivityId;
         }
         export type RequestBody = Components.Schemas.RelationItem[];
         namespace Responses {
@@ -5989,6 +6119,12 @@ declare namespace Paths {
     }
     namespace DeleteRelation {
         namespace Parameters {
+            export type ActivityId = /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
             export type Attribute = string;
             export type EntityId = string;
@@ -6008,6 +6144,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             async?: Parameters.Async;
+            activity_id?: Parameters.ActivityId;
         }
         namespace Responses {
             export interface $204 {
@@ -6241,6 +6378,24 @@ declare namespace Paths {
                 total?: number;
                 results?: Components.Schemas.ActivityItem[];
             }
+        }
+    }
+    namespace GetRelatedEntitiesCount {
+        namespace Parameters {
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.GetRelatedEntitiesCount;
         }
     }
     namespace GetRelations {
@@ -6777,6 +6932,12 @@ declare namespace Paths {
     }
     namespace UpdateRelation {
         namespace Parameters {
+            export type ActivityId = /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
             export type Attribute = string;
             export type EntityId = string;
@@ -6796,6 +6957,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             async?: Parameters.Async;
+            activity_id?: Parameters.ActivityId;
         }
         export interface RequestBody {
             _tags?: string[];
@@ -7432,6 +7594,17 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
+  /**
+   * getRelatedEntitiesCount - getRelatedEntitiesCount
+   * 
+   * Returns the amount of unique related entities for an entity - includes direct and reverse relations.
+   * 
+   */
+  'getRelatedEntitiesCount'(
+    parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRelatedEntitiesCount.Responses.$200>
   /**
    * updateRelation - updateRelation
    * 
@@ -8074,6 +8247,19 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
+  }
+  ['/v2/entity/{slug}/{id}/relations/count']: {
+    /**
+     * getRelatedEntitiesCount - getRelatedEntitiesCount
+     * 
+     * Returns the amount of unique related entities for an entity - includes direct and reverse relations.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRelatedEntitiesCount.Responses.$200>
   }
   ['/v1/entity/{slug}/{id}/relations/{attribute}/{entity_id}']: {
     /**

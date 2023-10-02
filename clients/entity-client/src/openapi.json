@@ -1322,6 +1322,15 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "in": "query",
+            "name": "activity_id",
+            "description": "Activity to include in event feed",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ActivityId"
+            }
           }
         ],
         "requestBody": {
@@ -1471,6 +1480,48 @@
         }
       }
     },
+    "/v2/entity/{slug}/{id}/relations/count": {
+      "get": {
+        "operationId": "getRelatedEntitiesCount",
+        "summary": "getRelatedEntitiesCount",
+        "description": "Returns the amount of unique related entities for an entity - includes direct and reverse relations.\n",
+        "tags": [
+          "Relations"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity Type",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Entity id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRelatedEntitiesCount"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/entity/{slug}/{id}/relations/{attribute}/{entity_id}": {
       "put": {
         "operationId": "updateRelation",
@@ -1524,6 +1575,15 @@
             "schema": {
               "type": "boolean",
               "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "activity_id",
+            "description": "Activity to include in event feed",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ActivityId"
             }
           }
         ],
@@ -1615,6 +1675,15 @@
             "schema": {
               "type": "boolean",
               "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "activity_id",
+            "description": "Activity to include in event feed",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ActivityId"
             }
           }
         ],
@@ -2623,6 +2692,11 @@
           "show_in_table": {
             "description": "Render as a column in table views. When defined, overrides `hidden`",
             "type": "boolean"
+          },
+          "sortable": {
+            "description": "Allow sorting by this attribute in table views if `show_in_table` is true",
+            "type": "boolean",
+            "default": true
           },
           "required": {
             "type": "boolean",
@@ -4317,6 +4391,15 @@
           },
           "relations": {
             "$ref": "#/components/schemas/GetRelationsResp"
+          }
+        }
+      },
+      "GetRelatedEntitiesCount": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "integer",
+            "example": 1
           }
         }
       },

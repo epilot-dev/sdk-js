@@ -457,6 +457,11 @@
             "in": "query",
             "name": "async",
             "required": false
+          },
+          {
+            "in": "query",
+            "name": "activity_id",
+            "required": false
           }
         ],
         "requestBody": {
@@ -507,6 +512,23 @@
         ]
       }
     },
+    "/v2/entity/{slug}/{id}/relations/count": {
+      "get": {
+        "operationId": "getRelatedEntitiesCount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
     "/v1/entity/{slug}/{id}/relations/{attribute}/{entity_id}": {
       "put": {
         "operationId": "updateRelation",
@@ -534,6 +556,11 @@
           {
             "in": "query",
             "name": "async",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "activity_id",
             "required": false
           }
         ],
@@ -569,6 +596,11 @@
           {
             "in": "query",
             "name": "async",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "activity_id",
             "required": false
           }
         ]
