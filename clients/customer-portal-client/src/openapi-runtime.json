@@ -631,21 +631,15 @@
         "operationId": "getFilesCountByEntity"
       }
     },
-    "/v2/portal/billing/events": {
-      "get": {
-        "operationId": "getBillingEvents"
-      }
-    },
-    "/v2/portal/billing/customers/{customer_entity_id}/balance": {
-      "get": {
-        "operationId": "getCustomerBalance",
-        "parameters": [
-          {
-            "name": "customer_entity_id",
-            "in": "path",
-            "required": true
+    "/v2/portal/admin:login-as-user": {
+      "post": {
+        "operationId": "loginToPortalAsUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
           }
-        ]
+        }
       }
     }
   },
