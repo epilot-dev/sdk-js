@@ -2693,7 +2693,7 @@ declare namespace Components {
             enable_description?: boolean;
             default_access_control?: "public-read" | "private";
         }
-        export interface GetRelatedEntitiesCountByEntityId {
+        export interface GetRelatedEntitiesCount {
             /**
              * example:
              * 1
@@ -6380,6 +6380,24 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetRelatedEntitiesCount {
+        namespace Parameters {
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.GetRelatedEntitiesCount;
+        }
+    }
     namespace GetRelations {
         namespace Parameters {
             export type Hydrate = boolean;
@@ -6402,24 +6420,6 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsResp;
-        }
-    }
-    namespace GetRelatedEntitiesCountByEntityId {
-        namespace Parameters {
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.GetRelatedEntitiesCountByEntityId;
         }
     }
     namespace GetRelationsV2 {
@@ -7595,16 +7595,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
   /**
-   * getRelatedEntitiesCountByEntityId - getRelatedEntitiesCountByEntityId
+   * getRelatedEntitiesCount - getRelatedEntitiesCount
    * 
    * Returns the amount of unique related entities for an entity - includes direct and reverse relations.
    * 
    */
-  'getRelatedEntitiesCountByEntityId'(
-    parameters?: Parameters<Paths.GetRelatedEntitiesCountByEntityId.PathParameters> | null,
+  'getRelatedEntitiesCount'(
+    parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetRelatedEntitiesCountByEntityId.Responses.$200>
+  ): OperationResponse<Paths.GetRelatedEntitiesCount.Responses.$200>
   /**
    * updateRelation - updateRelation
    * 
@@ -8250,16 +8250,16 @@ export interface PathsDictionary {
   }
   ['/v2/entity/{slug}/{id}/relations/count']: {
     /**
-     * getRelatedEntitiesCountByEntityId - getRelatedEntitiesCountByEntityId
+     * getRelatedEntitiesCount - getRelatedEntitiesCount
      * 
-     * Returns the amount of unique related entities for an entity - includes direct and reverse relations
+     * Returns the amount of unique related entities for an entity - includes direct and reverse relations.
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetRelatedEntitiesCountByEntityId.PathParameters> | null,
+      parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetRelatedEntitiesCountByEntityId.Responses.$200>
+    ): OperationResponse<Paths.GetRelatedEntitiesCount.Responses.$200>
   }
   ['/v1/entity/{slug}/{id}/relations/{attribute}/{entity_id}']: {
     /**
