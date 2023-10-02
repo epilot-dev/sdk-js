@@ -514,7 +514,7 @@
     },
     "/v2/entity/{slug}/{id}/relations/count": {
       "get": {
-        "operationId": "getRelatedEntitiesCountByEntityId",
+        "operationId": "getRelatedEntitiesCount",
         "parameters": [
           {
             "in": "path",
@@ -775,10 +775,5 @@
       }
     }
   },
-  "components": {},
-  "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    }
-  ]
+  "components": {}
 }

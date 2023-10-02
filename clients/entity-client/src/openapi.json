@@ -1482,8 +1482,8 @@
     },
     "/v2/entity/{slug}/{id}/relations/count": {
       "get": {
-        "operationId": "getRelatedEntitiesCountByEntityId",
-        "summary": "getRelatedEntitiesCountByEntityId",
+        "operationId": "getRelatedEntitiesCount",
+        "summary": "getRelatedEntitiesCount",
         "description": "Returns the amount of unique related entities for an entity - includes direct and reverse relations.\n",
         "tags": [
           "Relations"
@@ -4398,7 +4398,7 @@
         "type": "object",
         "properties": {
           "hits": {
-            "type": "number",
+            "type": "integer",
             "example": 1
           }
         }
@@ -5643,10 +5643,5 @@
         }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    }
-  ]
+  }
 }
