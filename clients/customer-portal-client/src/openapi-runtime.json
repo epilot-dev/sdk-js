@@ -626,9 +626,61 @@
         ]
       }
     },
+    "/v2/portal/user/file/{id}/downloaded": {
+      "post": {
+        "operationId": "trackFileDownloaded",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
     "/v2/portal/user/files/count-by-entity": {
       "get": {
         "operationId": "getFilesCountByEntity"
+      }
+    },
+    "/v2/portal/billing/events": {
+      "get": {
+        "operationId": "getBillingEvents",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "query"
+          },
+          {
+            "name": "event_type",
+            "in": "query"
+          },
+          {
+            "name": "date_after",
+            "in": "query"
+          },
+          {
+            "name": "date_before",
+            "in": "query"
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v2/portal/billing/customers/{customer_entity_id}/balance": {
+      "get": {
+        "operationId": "getCustomerBalance",
+        "parameters": [
+          {
+            "name": "customer_entity_id",
+            "in": "path",
+            "required": true
+          }
+        ]
       }
     },
     "/v2/portal/admin:login-as-user": {
