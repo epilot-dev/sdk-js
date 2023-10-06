@@ -2989,7 +2989,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "format": "date-time",
+              "format": "date",
               "description": "List billing events after this date"
             }
           },
@@ -2998,7 +2998,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "format": "date-time",
+              "format": "date",
               "description": "List billing events before this date"
             }
           },
@@ -4963,6 +4963,19 @@
         ],
         "additionalProperties": true,
         "properties": {
+          "billing_amount": {
+            "type": "integer",
+            "description": "Amount to be paid in cents i.e. precision 2",
+            "example": 10050
+          },
+          "billing_amount_decimal": {
+            "type": "string",
+            "description": "Amount to be paid in cents in decimal string representation",
+            "example": "100.50"
+          },
+          "billing_currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
           "external_id": {
             "type": "string",
             "description": "Unique identifier for event, used to reference the event to a 3rd party resource such as a SAP Installment.",
@@ -5005,14 +5018,6 @@
                 "description": "Type of the billing event.",
                 "example": "installment"
               },
-              "billing_amount": {
-                "type": "integer",
-                "description": "Amount to be paid in cents i.e. precision 2",
-                "example": 10050
-              },
-              "billing_currency": {
-                "$ref": "#/components/schemas/Currency"
-              },
               "due_date": {
                 "type": "string",
                 "format": "date",
@@ -5053,6 +5058,11 @@
                 ],
                 "description": "Type of the billing event.",
                 "example": "reimbursement"
+              },
+              "due_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Date on which the installment is due."
               },
               "paid_date": {
                 "type": "string",

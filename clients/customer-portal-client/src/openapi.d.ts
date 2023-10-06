@@ -306,6 +306,24 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
             /**
+             * Amount to be paid in cents i.e. precision 2
+             * example:
+             * 10050
+             */
+            billing_amount?: number;
+            /**
+             * Amount to be paid in cents in decimal string representation
+             * example:
+             * 100.50
+             */
+            billing_amount_decimal?: string;
+            billing_currency?: /**
+             * Currency code in ISO 4217 format
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
              * Unique identifier for event, used to reference the event to a 3rd party resource such as a SAP Installment.
              * example:
              * d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e
@@ -984,6 +1002,24 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
             /**
+             * Amount to be paid in cents i.e. precision 2
+             * example:
+             * 10050
+             */
+            billing_amount?: number;
+            /**
+             * Amount to be paid in cents in decimal string representation
+             * example:
+             * 100.50
+             */
+            billing_amount_decimal?: string;
+            billing_currency?: /**
+             * Currency code in ISO 4217 format
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
              * Unique identifier for event, used to reference the event to a 3rd party resource such as a SAP Installment.
              * example:
              * d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e
@@ -1006,18 +1042,6 @@ declare namespace Components {
              */
             type: "installment";
             /**
-             * Amount to be paid in cents i.e. precision 2
-             * example:
-             * 10050
-             */
-            billing_amount?: number;
-            billing_currency?: /**
-             * Currency code in ISO 4217 format
-             * example:
-             * EUR
-             */
-            Currency;
-            /**
              * Date on which the installment is due.
              */
             due_date: string; // date
@@ -1025,12 +1049,6 @@ declare namespace Components {
              * Date on which the installment is paid by the customer.
              */
             paid_date?: string; // date
-            /**
-             * Amount to be paid in cents in decimal string representation
-             * example:
-             * 100.50
-             */
-            billing_amount_decimal?: string;
         }
         /**
          * The opportunity entity
@@ -1620,6 +1638,24 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
             /**
+             * Amount to be paid in cents i.e. precision 2
+             * example:
+             * 10050
+             */
+            billing_amount?: number;
+            /**
+             * Amount to be paid in cents in decimal string representation
+             * example:
+             * 100.50
+             */
+            billing_amount_decimal?: string;
+            billing_currency?: /**
+             * Currency code in ISO 4217 format
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
              * Unique identifier for event, used to reference the event to a 3rd party resource such as a SAP Installment.
              * example:
              * d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e
@@ -1641,6 +1677,10 @@ declare namespace Components {
              * reimbursement
              */
             type: "reimbursement";
+            /**
+             * Date on which the installment is due.
+             */
+            due_date?: string; // date
             /**
              * Date on which the customer is reimbursed.
              */
@@ -2468,19 +2508,19 @@ declare namespace Paths {
             /**
              * List billing events after this date
              */
-            export type DateAfter = string; // date-time
+            export type DateAfter = string; // date
             /**
              * List billing events before this date
              */
-            export type DateBefore = string; // date-time
+            export type DateBefore = string; // date
             export type EntityId = string[];
             export type EventType = ("installment" | "reimbursement")[];
         }
         export interface QueryParameters {
             entity_id?: Parameters.EntityId;
             event_type?: Parameters.EventType;
-            date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
-            date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;
+            date_after?: /* List billing events after this date */ Parameters.DateAfter /* date */;
+            date_before?: /* List billing events before this date */ Parameters.DateBefore /* date */;
             customer_id: Parameters.CustomerId;
         }
         namespace Responses {
