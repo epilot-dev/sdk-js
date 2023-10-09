@@ -3948,6 +3948,13 @@
           }
         ]
       },
+      "PaymentWidget": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WidgetBase"
+          }
+        ]
+      },
       "PortalWidget": {
         "anyOf": [
           {
