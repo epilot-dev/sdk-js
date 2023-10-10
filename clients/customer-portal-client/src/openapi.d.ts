@@ -1262,6 +1262,22 @@ declare namespace Components {
          * Origin of the portal
          */
         export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
+        export interface PaymentWidget {
+            id: string;
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            /**
+             * Index of the widget in the list, used for ordering (left or right)
+             */
+            listIndex: number;
+            headline?: {
+                en?: string;
+                de?: string;
+            };
+            subHeadline?: {
+                en?: string;
+                de?: string;
+            };
+        }
         export interface PortalConfig {
             /**
              * Enable/Disable the portal access
