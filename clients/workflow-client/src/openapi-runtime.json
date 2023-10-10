@@ -143,6 +143,7 @@
     },
     "/v1/workflows/executions/steps/search": {
       "post": {
+        "deprecated": true,
         "operationId": "searchSteps",
         "requestBody": {
           "required": true,
