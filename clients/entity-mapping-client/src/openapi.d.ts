@@ -265,7 +265,7 @@ declare namespace Components {
                 /**
                  * Whether its a read-only ui or not. Can be each target, or only the first. Overwrites uiActions
                  */
-                locked?: "each" | "first";
+                locked?: "each" | "first" | "system_recommendation";
                 /**
                  * Whether all source mappings flow into a single attribute (e.g. address)
                  */
@@ -286,6 +286,10 @@ declare namespace Components {
             value: string;
             label: string;
             initial_target_value?: string;
+            /**
+             * Whether the raw value should be used, or whether the value is enriched by a path
+             */
+            raw?: boolean;
             /**
              * Data Structure Type of the underlaying output value
              */
