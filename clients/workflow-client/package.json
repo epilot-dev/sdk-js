@@ -26,7 +26,7 @@
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/workflows-execution.yaml",
     "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
-    "build": "tsc && export NODE_OPTIONS=--openssl-legacy-provider && npm run bundle-definition",
+    "build": "tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",
     "prepublishOnly": "npm run typegen && npm run build",
     "lint": "../../node_modules/eslint/bin/eslint.js src"
