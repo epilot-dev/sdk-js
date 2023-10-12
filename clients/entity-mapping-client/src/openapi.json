@@ -1326,7 +1326,8 @@
                 "type": "string",
                 "enum": [
                   "each",
-                  "first"
+                  "first",
+                  "system_recommendation"
                 ],
                 "description": "Whether its a read-only ui or not. Can be each target, or only the first. Overwrites uiActions"
               },
@@ -1381,6 +1382,10 @@
           },
           "initial_target_value": {
             "type": "string"
+          },
+          "raw": {
+            "type": "boolean",
+            "description": "Whether the raw value should be used, or whether the value is enriched by a path"
           },
           "possible_target_types": {
             "type": "array",
