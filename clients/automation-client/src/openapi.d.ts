@@ -226,7 +226,125 @@ declare namespace Components {
          * }
          */
         SendEmailActionConfig | /* Creates an order entity with prices from journey */ CartCheckoutActionConfig | AutomationActionConfig;
-        export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
+        export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | /**
+         * - If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.
+         * - The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`
+         *   | Comparison             | Example                                             | Rule syntax                                              |
+         *   |------------------------|-----------------------------------------------------|----------------------------------------------------------|
+         *   | Null                   | first_name is null                                  | `"first_name": [ null ]`                                 |
+         *   | Empty                  | last_name is empty                                  | `"last_name": [""]`                                      |
+         *   | Equals                 | email is "j.doe@email.com"                          | `"email": [ "j.doe@email.com" ]`                         |
+         *   | Equals (ignore case)   | first_name is "John"                                | `"first_name": [ { "equals-ignore-case": "john" } ]`     |
+         *   | And                    | fist_name is "John" and last_name is "Doe"          | `"first_name": [ "John" ], "last_name": ["Doe"]`         |
+         *   | Or                     | PaymentType is "Invoice" or "SEPA"                  | `"PaymentType": [ "invoice", "sepa"]`                    |
+         *   | Or (multiple fields)   | first_name is "John", or last_name is "Doe".        | `"$or": [ { "first_name": [ "John" ] }, { "last_name": [ "Doe" ] } ]` |
+         *   | Not                    | status is anything but "cancelled"                  | `"status": [ { "anything-but": [ "cancelled" ] } ]`      |
+         *   | Numeric (equals)       | Price is 100                                        | `"Price": [ { "numeric": [ "=", 100 ] } ]`               |
+         *   | Numeric (range)        | Price is more than 10, and less than or equal to 20 | `"Price": [ { "numeric": [ ">", 10, "<=", 20 ] } ]`      |
+         *   | Exists                 | ProductName exists                                  | `"ProductName": [ { "exists": true } ]`                  |
+         *   | Does not exist         | ProductName does not exist                          | `"ProductName": [ { "exists": false } ]`                 |
+         *   | Begins with            | OpportunityNumber starts with OPP-                  | `"opportunity_number": [ { "prefix": "OPP-" } ]`         |
+         *   | Ends with              | FileName ends with a .png extension                 | `"filename": [ { "suffix": ".png" } ]`                   |
+         *   - To run the execution on all update events
+         *     ```
+         *       {
+         *         "type": "filter_entity_event",
+         *         "configuration": {
+         *           "operation": {
+         *             "operation": ["updateEntity"]
+         *           }
+         *         }
+         *       }
+         *     ```
+         *   - To run the execution only when the updates are from a portal user
+         *     ```
+         *       {
+         *         "type": "filter_entity_event",
+         *         "configuration": {
+         *           "operation": {
+         *             "operation": ["updateEntity"]
+         *           },
+         *           "activity": {
+         *             "type": "EntityUpdatedFromPortal"
+         *           }
+         *         }
+         *       }
+         *     ```
+         *   - To run the execution only when there is an update on a specific attribute
+         *     ```
+         *       Only starts the automation when the email on a contact is changed
+         *       {
+         *         "type": "filter_entity_event",
+         *         "configuration": {
+         *           "operation": {
+         *             "operation": ["updateEntity"],
+         *             "payload": {
+         *               "_schema": ["contact"]
+         *             },
+         *             "diff": {
+         *               "updated": {
+         *                 "email": [{ "exists": true }]
+         *               }
+         *             }
+         *           }
+         *         }
+         *       }
+         *     ```
+         *     - To run the execution only when a specific attribute is altered(created/updated/deleted)
+         *       ```
+         *         Only starts the automation when a price is altered on a contract
+         *         {
+         *           "type": "filter_entity_event",
+         *           "configuration": {
+         *             "operation": {
+         *               "payload": {
+         *                 "_schema": ["contract"]
+         *               },
+         *               "diff": {
+         *                 // Whether he first_name has been added, updated, or removed
+         *                 $or: [
+         *                   {
+         *                     'added.first_name': [{ exists: true }]
+         *                   },
+         *                   {
+         *                     'updated.first_name': [{ exists: true }]
+         *                   },
+         *                   {
+         *                     'deleted.first_name': [{ exists: true }]
+         *                   }
+         *                 ]
+         *               }
+         *             }
+         *           }
+         *         }
+         *       ```
+         *     - To run the execution if an attribute is changed from one state to another
+         *       ```
+         *         Only starts the automation when the order status changes from `open_for_acceptance` to `placed`
+         *         {
+         *           "type": "filter_entity_event",
+         *           "configuration": {
+         *             "operation": {
+         *               "operation": ["updateEntity"],
+         *               "payload": {
+         *                 "_schema": ["order"],
+         *                 "status": ["placed"]
+         *               },
+         *               "diff": {
+         *                 "updated": {
+         *                   "status": ["open_for_acceptance"]
+         *                 }
+         *               }
+         *             }
+         *           }
+         *         }
+         *       ```
+         *
+         */
+        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
+        export interface AnythingButCondition {
+            "anything-but"?: string[];
+        }
         export interface ApiCallerContext {
             [name: string]: any;
             EpilotAuth?: {
@@ -737,6 +855,9 @@ declare namespace Components {
             template_id?: string;
             filename?: string;
         }
+        export type DiffAdded = FilterConditionOnEvent;
+        export type DiffDeleted = FilterConditionOnEvent;
+        export type DiffUpdated = FilterConditionOnEvent;
         /**
          * example:
          * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
@@ -768,6 +889,121 @@ declare namespace Components {
             };
         }
         export type EntityOperation = "createEntity" | "updateEntity" | "deleteEntity";
+        /**
+         * - If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.
+         * - The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`
+         *   | Comparison             | Example                                             | Rule syntax                                              |
+         *   |------------------------|-----------------------------------------------------|----------------------------------------------------------|
+         *   | Null                   | first_name is null                                  | `"first_name": [ null ]`                                 |
+         *   | Empty                  | last_name is empty                                  | `"last_name": [""]`                                      |
+         *   | Equals                 | email is "j.doe@email.com"                          | `"email": [ "j.doe@email.com" ]`                         |
+         *   | Equals (ignore case)   | first_name is "John"                                | `"first_name": [ { "equals-ignore-case": "john" } ]`     |
+         *   | And                    | fist_name is "John" and last_name is "Doe"          | `"first_name": [ "John" ], "last_name": ["Doe"]`         |
+         *   | Or                     | PaymentType is "Invoice" or "SEPA"                  | `"PaymentType": [ "invoice", "sepa"]`                    |
+         *   | Or (multiple fields)   | first_name is "John", or last_name is "Doe".        | `"$or": [ { "first_name": [ "John" ] }, { "last_name": [ "Doe" ] } ]` |
+         *   | Not                    | status is anything but "cancelled"                  | `"status": [ { "anything-but": [ "cancelled" ] } ]`      |
+         *   | Numeric (equals)       | Price is 100                                        | `"Price": [ { "numeric": [ "=", 100 ] } ]`               |
+         *   | Numeric (range)        | Price is more than 10, and less than or equal to 20 | `"Price": [ { "numeric": [ ">", 10, "<=", 20 ] } ]`      |
+         *   | Exists                 | ProductName exists                                  | `"ProductName": [ { "exists": true } ]`                  |
+         *   | Does not exist         | ProductName does not exist                          | `"ProductName": [ { "exists": false } ]`                 |
+         *   | Begins with            | OpportunityNumber starts with OPP-                  | `"opportunity_number": [ { "prefix": "OPP-" } ]`         |
+         *   | Ends with              | FileName ends with a .png extension                 | `"filename": [ { "suffix": ".png" } ]`                   |
+         *   - To run the execution on all update events
+         *     ```
+         *       {
+         *         "type": "filter_entity_event",
+         *         "configuration": {
+         *           "operation": {
+         *             "operation": ["updateEntity"]
+         *           }
+         *         }
+         *       }
+         *     ```
+         *   - To run the execution only when the updates are from a portal user
+         *     ```
+         *       {
+         *         "type": "filter_entity_event",
+         *         "configuration": {
+         *           "operation": {
+         *             "operation": ["updateEntity"]
+         *           },
+         *           "activity": {
+         *             "type": "EntityUpdatedFromPortal"
+         *           }
+         *         }
+         *       }
+         *     ```
+         *   - To run the execution only when there is an update on a specific attribute
+         *     ```
+         *       Only starts the automation when the email on a contact is changed
+         *       {
+         *         "type": "filter_entity_event",
+         *         "configuration": {
+         *           "operation": {
+         *             "operation": ["updateEntity"],
+         *             "payload": {
+         *               "_schema": ["contact"]
+         *             },
+         *             "diff": {
+         *               "updated": {
+         *                 "email": [{ "exists": true }]
+         *               }
+         *             }
+         *           }
+         *         }
+         *       }
+         *     ```
+         *     - To run the execution only when a specific attribute is altered(created/updated/deleted)
+         *       ```
+         *         Only starts the automation when a price is altered on a contract
+         *         {
+         *           "type": "filter_entity_event",
+         *           "configuration": {
+         *             "operation": {
+         *               "payload": {
+         *                 "_schema": ["contract"]
+         *               },
+         *               "diff": {
+         *                 // Whether he first_name has been added, updated, or removed
+         *                 $or: [
+         *                   {
+         *                     'added.first_name': [{ exists: true }]
+         *                   },
+         *                   {
+         *                     'updated.first_name': [{ exists: true }]
+         *                   },
+         *                   {
+         *                     'deleted.first_name': [{ exists: true }]
+         *                   }
+         *                 ]
+         *               }
+         *             }
+         *           }
+         *         }
+         *       ```
+         *     - To run the execution if an attribute is changed from one state to another
+         *       ```
+         *         Only starts the automation when the order status changes from `open_for_acceptance` to `placed`
+         *         {
+         *           "type": "filter_entity_event",
+         *           "configuration": {
+         *             "operation": {
+         *               "operation": ["updateEntity"],
+         *               "payload": {
+         *                 "_schema": ["order"],
+         *                 "status": ["placed"]
+         *               },
+         *               "diff": {
+         *                 "updated": {
+         *                   "status": ["open_for_acceptance"]
+         *                 }
+         *               }
+         *             }
+         *           }
+         *         }
+         *       ```
+         *
+         */
         export interface EntityOperationTrigger {
             type: "entity_operation";
             configuration: {
@@ -775,14 +1011,70 @@ declare namespace Components {
                  * example:
                  * submission
                  */
-                schema: string;
-                operations: [
+                schema?: string;
+                operations?: [
                     EntityOperation,
                     ...EntityOperation[]
                 ];
                 include_activities?: string[];
                 exclude_activities?: string[];
+                filter_config?: {
+                    operation?: {
+                        /**
+                         * Filter on operation type. If not specified, all operations will be matched on execution.
+                         * Example:
+                         *   1. Filter all the createEntity/updateEntity operations
+                         *   ```
+                         *     {
+                         *       "operation":{
+                         *         "operation": ["createEntity", "updateEntity"]
+                         *       }
+                         *     }
+                         *   ```
+                         *
+                         */
+                        operation?: EntityOperation[];
+                        payload?: FilterConditionOnEvent;
+                        diff?: OrConditionForDiff | {
+                            added?: FilterConditionOnEvent;
+                            updated?: FilterConditionOnEvent;
+                            deleted?: FilterConditionOnEvent;
+                        };
+                    };
+                    activity?: {
+                        /**
+                         * Filter on activity type. If not specified, all activities will be matched on execution.
+                         * Example:
+                         *   1. Filter the events when an entity is updated from portal
+                         *     ```
+                         *       {
+                         *         "activity":{
+                         *           "type": ["EntityUpdatedFromPortal"]
+                         *         }
+                         *       }
+                         *     ```
+                         *   2. Filter the events when either a doc is uploaded/removed on an entity from a portal
+                         *     ```
+                         *       {
+                         *         "activity":{
+                         *           "type": ["DocUploadedFromPortal", "DocRemovedFromPortal"]
+                         *         }
+                         *       }
+                         *     ```
+                         *
+                         * example:
+                         * [
+                         *   "EntityUpdatedFromPortal",
+                         *   "EntityUpdatedFromPortal"
+                         * ]
+                         */
+                        type?: string[];
+                    };
+                };
             };
+        }
+        export interface EqualsIgnoreCaseCondition {
+            "equals-ignore-case"?: string;
         }
         export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR";
         export interface ErrorOutput {
@@ -790,6 +1082,12 @@ declare namespace Components {
             error_reason: string;
         }
         export type ExecutionStatus = "pending" | "in_progress" | "success" | "failed" | "cancelled";
+        export interface ExistsCondition {
+            exists?: boolean;
+        }
+        export type FilterConditionOnEvent = OrCondition | {
+            [name: string]: (string | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition)[];
+        };
         export interface FrontendSubmitTrigger {
             type: "frontend_submission";
             configuration: {
@@ -1069,6 +1367,9 @@ declare namespace Components {
              */
             version?: number;
         }
+        export interface NumericCondition {
+            numeric?: (string | number)[];
+        }
         /**
          * Mapping operation nodes are either primitive values or operation node objects
          */
@@ -1091,11 +1392,20 @@ declare namespace Components {
              */
             _copy?: string;
         }
+        export interface OrCondition {
+            $or?: FilterConditionOnEvent[];
+        }
+        export interface OrConditionForDiff {
+            $or?: (FilterConditionOnEvent | FilterConditionOnEvent | FilterConditionOnEvent)[];
+        }
         /**
          * example:
          * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
          */
         export type OrganizationId = string;
+        export interface PrefixCondition {
+            prefix?: string;
+        }
         export type PrimitiveJSONValue = any;
         export interface ReceivedEmailTrigger {
             type: "received_email";
@@ -1311,6 +1621,9 @@ declare namespace Components {
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
             AutomationFlowId;
+        }
+        export interface SuffixCondition {
+            suffix?: string;
         }
         /**
          * example:
