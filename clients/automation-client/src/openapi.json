@@ -2184,6 +2184,7 @@
                   "enum": [
                     "CreateMeterReading",
                     "UpdateMeterReading",
+                    "DocDownloadedFromPortal",
                     "MessageActivity",
                     "SyncActivity"
                   ]
