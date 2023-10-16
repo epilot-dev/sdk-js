@@ -105,22 +105,18 @@ declare namespace Components {
              *       "name": "Initial Information Gathering",
              *       "steps": [
              *         {
-             *           "id": "sada5641f3a21",
-             *           "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-1ragw"
+             *           "id": "sada5641f3a21"
              *         },
              *         {
-             *           "id": "sada5641f3a22",
-             *           "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-sga72"
+             *           "id": "sada5641f3a22"
              *         },
              *         {
-             *           "id": "sada5641f3a23",
-             *           "entityRefId": "s9guauj2-sgha8h2t2kl-1589y15n-asjo2t"
+             *           "id": "sada5641f3a23"
              *         }
              *       ]
              *     },
              *     {
-             *       "id": "firstLevelStepId1",
-             *       "entityRefId": "sgja902tk-sgha8h2t2kl-1589y15n-asfsah2"
+             *       "id": "firstLevelStepId1"
              *     }
              *   ]
              * }
@@ -152,7 +148,10 @@ declare namespace Components {
             results?: {
                 id: string;
                 definitionId?: string;
-                entityRefId: string;
+                /**
+                 * This field is deprecated. It will be soon removed. Please use only id.
+                 */
+                entityRefId?: string;
                 name: string;
                 type: ItemType;
                 ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
@@ -233,7 +232,10 @@ declare namespace Components {
         export interface Step {
             id: string;
             definitionId?: string;
-            entityRefId: string;
+            /**
+             * This field is deprecated. It will be soon removed. Please use only id.
+             */
+            entityRefId?: string;
             name: string;
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
@@ -267,7 +269,10 @@ declare namespace Components {
         export interface StepExtended {
             id: string;
             definitionId?: string;
-            entityRefId: string;
+            /**
+             * This field is deprecated. It will be soon removed. Please use only id.
+             */
+            entityRefId?: string;
             name: string;
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
@@ -307,6 +312,9 @@ declare namespace Components {
         }
         export interface StepId {
             id?: string;
+            /**
+             * This field is deprecated. It will be soon removed. Please use only id.
+             */
             entityRefId?: string;
         }
         export interface StepPositionAt {
@@ -324,7 +332,10 @@ declare namespace Components {
         export interface StepSimplified {
             id: string;
             definitionId?: string;
-            entityRefId: string;
+            /**
+             * This field is deprecated. It will be soon removed. Please use only id.
+             */
+            entityRefId?: string;
             name: string;
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
@@ -354,7 +365,11 @@ declare namespace Components {
             };
         }
         export interface UpdateStepReq {
-            entityRefId: string;
+            stepId?: string;
+            /**
+             * This field is deprecated. Please use stepId
+             */
+            entityRefId?: string;
             /**
              * This field is deprecated. Please use assignedTo
              */
@@ -376,7 +391,10 @@ declare namespace Components {
         export interface UpdateStepResp {
             id: string;
             definitionId?: string;
-            entityRefId: string;
+            /**
+             * This field is deprecated. It will be soon removed. Please use only id.
+             */
+            entityRefId?: string;
             name: string;
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
@@ -593,22 +611,18 @@ declare namespace Components {
          *       "name": "Initial Information Gathering",
          *       "steps": [
          *         {
-         *           "id": "sada5641f3a21",
-         *           "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-1ragw"
+         *           "id": "sada5641f3a21"
          *         },
          *         {
-         *           "id": "sada5641f3a22",
-         *           "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-sga72"
+         *           "id": "sada5641f3a22"
          *         },
          *         {
-         *           "id": "sada5641f3a23",
-         *           "entityRefId": "s9guauj2-sgha8h2t2kl-1589y15n-asjo2t"
+         *           "id": "sada5641f3a23"
          *         }
          *       ]
          *     },
          *     {
-         *       "id": "firstLevelStepId1",
-         *       "entityRefId": "sgja902tk-sgha8h2t2kl-1589y15n-asfsah2"
+         *       "id": "firstLevelStepId1"
          *     }
          *   ]
          * }
@@ -683,6 +697,7 @@ declare namespace Components {
             assignees?: string[];
             duedate?: string;
             last_update_time?: string;
+            progress?: number;
             task_id?: string;
             task_name?: string;
             task_assignees?: string[];
@@ -691,6 +706,8 @@ declare namespace Components {
             task_status?: StepStatus;
             phase_id?: string;
             phase_name?: string;
+            phase_assignees?: string[];
+            phase_progress?: number;
             all_participants?: string[];
             future_participants?: string[];
             selected_closing_reasons?: ClosingReason[];
@@ -922,22 +939,18 @@ declare namespace Paths {
              *       "name": "Initial Information Gathering",
              *       "steps": [
              *         {
-             *           "id": "sada5641f3a21",
-             *           "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-1ragw"
+             *           "id": "sada5641f3a21"
              *         },
              *         {
-             *           "id": "sada5641f3a22",
-             *           "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-sga72"
+             *           "id": "sada5641f3a22"
              *         },
              *         {
-             *           "id": "sada5641f3a23",
-             *           "entityRefId": "s9guauj2-sgha8h2t2kl-1589y15n-asjo2t"
+             *           "id": "sada5641f3a23"
              *         }
              *       ]
              *     },
              *     {
-             *       "id": "firstLevelStepId1",
-             *       "entityRefId": "sgja902tk-sgha8h2t2kl-1589y15n-asfsah2"
+             *       "id": "firstLevelStepId1"
              *     }
              *   ]
              * }

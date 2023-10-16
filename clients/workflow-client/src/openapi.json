@@ -387,7 +387,7 @@
               "examples": {
                 "dynamicDueDate": {
                   "value": {
-                    "entityRefId": "string",
+                    "stepId": "string",
                     "assignedTo": [
                       "10010730"
                     ],
@@ -563,6 +563,7 @@
     },
     "/v1/workflows/executions/steps/search": {
       "post": {
+        "deprecated": true,
         "operationId": "searchSteps",
         "summary": "searchSteps",
         "description": "Search workflow execution steps by different filters.",
@@ -914,22 +915,18 @@
               "name": "Initial Information Gathering",
               "steps": [
                 {
-                  "id": "sada5641f3a21",
-                  "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-1ragw"
+                  "id": "sada5641f3a21"
                 },
                 {
-                  "id": "sada5641f3a22",
-                  "entityRefId": "s9guauj2-ghsa82ht2kgma-1589y15n-sga72"
+                  "id": "sada5641f3a22"
                 },
                 {
-                  "id": "sada5641f3a23",
-                  "entityRefId": "s9guauj2-sgha8h2t2kl-1589y15n-asjo2t"
+                  "id": "sada5641f3a23"
                 }
               ]
             },
             {
-              "id": "firstLevelStepId1",
-              "entityRefId": "sgja902tk-sgha8h2t2kl-1589y15n-asfsah2"
+              "id": "firstLevelStepId1"
             }
           ]
         }
@@ -1133,7 +1130,9 @@
             "type": "string"
           },
           "entityRefId": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true,
+            "description": "This field is deprecated. It will be soon removed. Please use only id."
           }
         }
       },
@@ -1147,7 +1146,9 @@
             "type": "string"
           },
           "entityRefId": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true,
+            "description": "This field is deprecated. It will be soon removed. Please use only id."
           },
           "name": {
             "type": "string"
@@ -1174,7 +1175,6 @@
         },
         "required": [
           "id",
-          "entityRefId",
           "name",
           "type"
         ]
@@ -1385,8 +1385,13 @@
       "UpdateStepReq": {
         "type": "object",
         "properties": {
-          "entityRefId": {
+          "stepId": {
             "type": "string"
+          },
+          "entityRefId": {
+            "type": "string",
+            "deprecated": true,
+            "description": "This field is deprecated. Please use stepId"
           },
           "userIds": {
             "type": "array",
@@ -1430,10 +1435,7 @@
           "completedTime": {
             "type": "string"
           }
-        },
-        "required": [
-          "entityRefId"
-        ]
+        }
       },
       "StepPositionAt": {
         "type": "object",
@@ -1640,6 +1642,9 @@
           "last_update_time": {
             "type": "string"
           },
+          "progress": {
+            "type": "number"
+          },
           "task_id": {
             "type": "string"
           },
@@ -1666,6 +1671,15 @@
           },
           "phase_name": {
             "type": "string"
+          },
+          "phase_assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phase_progress": {
+            "type": "number"
           },
           "all_participants": {
             "type": "array",
