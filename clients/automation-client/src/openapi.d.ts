@@ -1065,10 +1065,11 @@ declare namespace Components {
                          * example:
                          * [
                          *   "EntityUpdatedFromPortal",
-                         *   "EntityUpdatedFromPortal"
+                         *   "EntityUpdated",
+                         *   "DocUploadedFromPortal"
                          * ]
                          */
-                        type?: string[];
+                        type?: (string | EqualsIgnoreCaseCondition | AnythingButCondition | ExistsCondition | PrefixCondition | SuffixCondition)[];
                     };
                 };
             };
