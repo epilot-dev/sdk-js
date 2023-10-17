@@ -1546,6 +1546,10 @@ declare namespace Components {
             email_template_id?: string;
             language_code?: "de" | "en";
             /**
+             * Send an email exclusively to the portal user if they are registered on the portal.
+             */
+            notify_portal_user_only?: boolean;
+            /**
              * Include extra file attachments in sent email.
              *
              * Attachments in email template will be sent regardless of this configuration.

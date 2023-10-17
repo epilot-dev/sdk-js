@@ -1327,6 +1327,11 @@
               "en"
             ]
           },
+          "notify_portal_user_only": {
+            "type": "boolean",
+            "description": "Send an email exclusively to the portal user if they are registered on the portal.",
+            "default": false
+          },
           "attachments": {
             "type": "array",
             "description": "Include extra file attachments in sent email.\n\nAttachments in email template will be sent regardless of this configuration.\n",
