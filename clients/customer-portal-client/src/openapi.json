@@ -1065,7 +1065,7 @@
             "$ref": "#/components/responses/Unauthorized"
           },
           "403": {
-            "$ref": "#/components/responses/Forbidden"
+            "$ref": "#/components/responses/ForbiddenByRule"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -2241,7 +2241,7 @@
             "$ref": "#/components/responses/Unauthorized"
           },
           "403": {
-            "$ref": "#/components/responses/Forbidden"
+            "$ref": "#/components/responses/ForbiddenByRule"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -3164,6 +3164,23 @@
           }
         }
       },
+      "ForbiddenByRule": {
+        "description": "The user is not allowed to access this resource",
+        "content": {
+          "application/json": {
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "$ref": "#/components/schemas/FailedRuleErrorResp"
+                }
+              ]
+            }
+          }
+        }
+      },
       "NotFound": {
         "description": "The specified resource was not found",
         "content": {
@@ -3222,6 +3239,19 @@
           "message": {
             "type": "string",
             "description": "Error message"
+          }
+        }
+      },
+      "FailedRuleErrorResp": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "failed_rule": {
+            "type": "object",
+            "description": "Failed validation rule"
           }
         }
       },
@@ -3865,6 +3895,28 @@
           },
           "url": {
             "type": "string"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "attribute": {
+                  "type": "string"
+                },
+                "attribute_value": {
+                  "type": "string"
+                },
+                "entity": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "attribute",
+                "attribute_value",
+                "entity"
+              ]
+            }
           }
         },
         "required": [

@@ -10,6 +10,7 @@ import type {
 declare namespace Components {
     namespace Responses {
         export type Forbidden = Schemas.ErrorResp;
+        export type ForbiddenByRule = Schemas.ErrorResp | Schemas.FailedRuleErrorResp;
         export type InternalServerError = Schemas.ErrorResp;
         export type InvalidRequest = Schemas.ErrorResp;
         export type NotFound = Schemas.ErrorResp;
@@ -801,6 +802,18 @@ declare namespace Components {
              */
             group: string;
         }[];
+        export interface FailedRuleErrorResp {
+            /**
+             * Error message
+             */
+            message?: string;
+            /**
+             * Failed validation rule
+             */
+            failed_rule?: {
+                [key: string]: any;
+            };
+        }
         /**
          * The file entity
          */
@@ -2067,6 +2080,11 @@ declare namespace Components {
                 de?: string;
             };
             url: string;
+            rules?: {
+                attribute: string;
+                attribute_value: string;
+                entity: string;
+            }[];
         }
         export interface WidgetBase {
             id: string;
@@ -3312,7 +3330,7 @@ declare namespace Paths {
                 data?: /* The mapped contact of the portal user */ Components.Schemas.Contact;
             }
             export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
+            export type $403 = Components.Responses.ForbiddenByRule;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -3335,7 +3353,7 @@ declare namespace Paths {
                 data?: /* The contract entity */ Components.Schemas.Contract;
             }
             export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
+            export type $403 = Components.Responses.ForbiddenByRule;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
