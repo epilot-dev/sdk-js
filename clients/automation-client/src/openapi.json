@@ -2139,12 +2139,31 @@
                       "type": {
                         "type": "array",
                         "items": {
-                          "type": "string",
-                          "example": "EntityUpdatedFromPortal"
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "$ref": "#/components/schemas/EqualsIgnoreCaseCondition"
+                            },
+                            {
+                              "$ref": "#/components/schemas/AnythingButCondition"
+                            },
+                            {
+                              "$ref": "#/components/schemas/ExistsCondition"
+                            },
+                            {
+                              "$ref": "#/components/schemas/PrefixCondition"
+                            },
+                            {
+                              "$ref": "#/components/schemas/SuffixCondition"
+                            }
+                          ]
                         },
                         "example": [
                           "EntityUpdatedFromPortal",
-                          "EntityUpdatedFromPortal"
+                          "EntityUpdated",
+                          "DocUploadedFromPortal"
                         ],
                         "description": "Filter on activity type. If not specified, all activities will be matched on execution.\nExample:\n  1. Filter the events when an entity is updated from portal\n    ```\n      { \n        \"activity\":{\n          \"type\": [\"EntityUpdatedFromPortal\"]\n        }\n      }\n    ```\n  2. Filter the events when either a doc is uploaded/removed on an entity from a portal\n    ```\n      { \n        \"activity\":{\n          \"type\": [\"DocUploadedFromPortal\", \"DocRemovedFromPortal\"]\n        }\n      }\n    ```\n"
                       }
