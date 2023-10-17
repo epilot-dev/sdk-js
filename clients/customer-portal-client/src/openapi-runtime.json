@@ -712,6 +712,11 @@
           "application/json": {}
         }
       },
+      "ForbiddenByRule": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "NotFound": {
         "content": {
           "application/json": {}
