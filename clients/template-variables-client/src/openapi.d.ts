@@ -277,6 +277,12 @@ declare namespace Components {
              */
             user_id?: string | null;
             /**
+             * Organization ID of the user
+             * example:
+             * 729224
+             */
+            user_org_id?: string | null;
+            /**
              * Custom variables with specified values form other services.
              */
             custom_variables?: ExternalCustomVariable[];
@@ -294,6 +300,12 @@ declare namespace Components {
              * The tags of email template
              */
             template_tags?: string[];
+            /**
+             * The version of the variables syntax supported. Default is 1.0
+             * example:
+             * 2
+             */
+            variables_version?: string;
         }
         /**
          * example:
