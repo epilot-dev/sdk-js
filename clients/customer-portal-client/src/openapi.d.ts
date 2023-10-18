@@ -658,6 +658,12 @@ declare namespace Components {
              * 940134fa-50f2-4204-a08a-fd3afddbf39a
              */
             onMapAPendingUser?: string;
+            /**
+             * ID of the email template for document upload
+             * example:
+             * c8ee93c0-8158-4da7-82f3-114f0c7b20ff
+             */
+            onDocUpload?: string;
         }
         export interface Entity {
             [name: string]: any;
