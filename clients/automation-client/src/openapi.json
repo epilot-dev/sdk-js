@@ -1913,7 +1913,8 @@
           "in_progress",
           "success",
           "failed",
-          "cancelled"
+          "cancelled",
+          "skipped"
         ]
       },
       "GetExecutionsResp": {

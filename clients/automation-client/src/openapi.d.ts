@@ -1082,7 +1082,7 @@ declare namespace Components {
             error_code: ErrorCode;
             error_reason: string;
         }
-        export type ExecutionStatus = "pending" | "in_progress" | "success" | "failed" | "cancelled";
+        export type ExecutionStatus = "pending" | "in_progress" | "success" | "failed" | "cancelled" | "skipped";
         export interface ExistsCondition {
             exists?: boolean;
         }
