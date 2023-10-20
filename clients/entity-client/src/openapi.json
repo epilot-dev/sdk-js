@@ -1295,7 +1295,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetRelationsRespWithPagination"
+                  "$ref": "#/components/schemas/GetRelationsResp"
                 },
                 "example": [
                   {

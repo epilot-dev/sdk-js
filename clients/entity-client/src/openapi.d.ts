@@ -6441,7 +6441,7 @@ declare namespace Paths {
             exclude_schemas?: Parameters.ExcludeSchemas;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.GetRelationsRespWithPagination;
+            export type $200 = Components.Schemas.GetRelationsResp;
         }
     }
     namespace GetRelationsV2 {
