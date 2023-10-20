@@ -1237,6 +1237,56 @@
               "default": false,
               "type": "boolean"
             }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "description": "Starting page number",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "Number of results to return per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_schemas",
+            "description": "Filter results to only include schemas",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/EntitySlug"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "exclude_schemas",
+            "description": "Filter results to exclude schemas",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/EntitySlug"
+              }
+            }
           }
         ],
         "responses": {
@@ -1245,7 +1295,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetRelationsResp"
+                  "$ref": "#/components/schemas/GetRelationsRespWithPagination"
                 },
                 "example": [
                   {
@@ -1492,7 +1542,7 @@
           {
             "in": "path",
             "name": "slug",
-            "description": "Entity Type",
+            "description": "Entity Schema",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/EntitySlug"
@@ -1505,6 +1555,21 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "exclude_schemas",
+            "description": "To be excluded from the count by given schemas",
+            "required": false,
+            "style": "form",
+            "example": "<url>/count?exclude_schemas=file,message",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],

@@ -6382,6 +6382,7 @@ declare namespace Paths {
     }
     namespace GetRelatedEntitiesCount {
         namespace Parameters {
+            export type ExcludeSchemas = string[];
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -6394,15 +6395,32 @@ declare namespace Paths {
             slug: Parameters.Slug;
             id: Parameters.Id;
         }
+        export interface QueryParameters {
+            exclude_schemas?: Parameters.ExcludeSchemas;
+        }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelatedEntitiesCount;
         }
     }
     namespace GetRelations {
         namespace Parameters {
+            export type ExcludeSchemas = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug[];
+            export type From = number;
             export type Hydrate = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type IncludeReverse = boolean;
+            export type IncludeSchemas = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug[];
+            export type Size = number;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -6417,9 +6435,13 @@ declare namespace Paths {
         export interface QueryParameters {
             hydrate?: Parameters.Hydrate;
             include_reverse?: Parameters.IncludeReverse;
+            from?: Parameters.From;
+            size?: Parameters.Size;
+            include_schemas?: Parameters.IncludeSchemas;
+            exclude_schemas?: Parameters.ExcludeSchemas;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.GetRelationsResp;
+            export type $200 = Components.Schemas.GetRelationsRespWithPagination;
         }
     }
     namespace GetRelationsV2 {
@@ -7601,7 +7623,7 @@ export interface OperationMethods {
    * 
    */
   'getRelatedEntitiesCount'(
-    parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters> | null,
+    parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters & Paths.GetRelatedEntitiesCount.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelatedEntitiesCount.Responses.$200>
@@ -8256,7 +8278,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters> | null,
+      parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters & Paths.GetRelatedEntitiesCount.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelatedEntitiesCount.Responses.$200>
