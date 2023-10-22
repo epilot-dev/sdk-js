@@ -6492,6 +6492,48 @@ declare namespace Paths {
             export type $200 = Components.Schemas.GetRelationsRespWithPagination;
         }
     }
+    namespace GetRelationsV3 {
+        namespace Parameters {
+            export type ExcludeSchemas = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug[];
+            export type From = number;
+            export type Hydrate = boolean;
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type IncludeReverse = boolean;
+            export type IncludeSchemas = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug[];
+            export type Size = number;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            hydrate?: Parameters.Hydrate;
+            include_reverse?: Parameters.IncludeReverse;
+            from?: Parameters.From;
+            size?: Parameters.Size;
+            include_schemas?: Parameters.IncludeSchemas;
+            exclude_schemas?: Parameters.ExcludeSchemas;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.GetRelationsRespWithPagination;
+        }
+    }
     namespace GetSavedView {
         namespace Parameters {
             export type Id = /* Generated uuid for a saved view */ Components.Schemas.SavedViewId /* uuid */;
@@ -7617,6 +7659,21 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
   /**
+   * getRelationsV3 - getRelationsV3
+   * 
+   * Returns 1st level direct relations for an entity with pagination.
+   * 
+   * You can control whether to return the full entity or just the relation item with the `?hydrate` query param.
+   * 
+   * Reverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.
+   * 
+   */
+  'getRelationsV3'(
+    parameters?: Parameters<Paths.GetRelationsV3.PathParameters & Paths.GetRelationsV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRelationsV3.Responses.$200>
+  /**
    * getRelatedEntitiesCount - getRelatedEntitiesCount
    * 
    * Returns the amount of unique related entities for an entity - includes direct and reverse relations.
@@ -8269,6 +8326,23 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
+  }
+  ['/v3/entity/{slug}/{id}/relations']: {
+    /**
+     * getRelationsV3 - getRelationsV3
+     * 
+     * Returns 1st level direct relations for an entity with pagination.
+     * 
+     * You can control whether to return the full entity or just the relation item with the `?hydrate` query param.
+     * 
+     * Reverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetRelationsV3.PathParameters & Paths.GetRelationsV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRelationsV3.Responses.$200>
   }
   ['/v2/entity/{slug}/{id}/relations/count']: {
     /**

@@ -1530,6 +1530,116 @@
         }
       }
     },
+    "/v3/entity/{slug}/{id}/relations": {
+      "get": {
+        "operationId": "getRelationsV3",
+        "summary": "getRelationsV3",
+        "description": "Returns 1st level direct relations for an entity with pagination.\n\nYou can control whether to return the full entity or just the relation item with the `?hydrate` query param.\n\nReverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.\n",
+        "tags": [
+          "Relations"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity Type",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Entity id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hydrate",
+            "description": "When true, expand relation items with full blown entities.",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_reverse",
+            "description": "When true, includes reverse relations in response (other entities pointing to this entity)",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "description": "Starting page number",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "Number of results to return per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_schemas",
+            "description": "Filter results to only include schemas",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/EntitySlug"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "exclude_schemas",
+            "description": "Filter results to exclude schemas",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/EntitySlug"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRelationsRespWithPagination"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/entity/{slug}/{id}/relations/count": {
       "get": {
         "operationId": "getRelatedEntitiesCount",

@@ -535,6 +535,54 @@
         ]
       }
     },
+    "/v3/entity/{slug}/{id}/relations": {
+      "get": {
+        "operationId": "getRelationsV3",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "hydrate"
+          },
+          {
+            "in": "query",
+            "name": "include_reverse"
+          },
+          {
+            "in": "query",
+            "name": "from"
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "include_schemas",
+            "required": false,
+            "style": "form",
+            "explode": false
+          },
+          {
+            "in": "query",
+            "name": "exclude_schemas",
+            "required": false,
+            "style": "form",
+            "explode": false
+          }
+        ]
+      }
+    },
     "/v2/entity/{slug}/{id}/relations/count": {
       "get": {
         "operationId": "getRelatedEntitiesCount",
