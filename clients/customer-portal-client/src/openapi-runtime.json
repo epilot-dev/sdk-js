@@ -544,6 +544,47 @@
         ]
       }
     },
+    "/v2/portal/entity/{slug}/{id}/activity": {
+      "get": {
+        "operationId": "getEntityActivityFeed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "after"
+          },
+          {
+            "in": "query",
+            "name": "before"
+          },
+          {
+            "in": "query",
+            "name": "from"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          },
+          {
+            "in": "query",
+            "name": "type"
+          },
+          {
+            "in": "query",
+            "name": "include_relations"
+          }
+        ]
+      }
+    },
     "/v2/portal/entity/activity": {
       "put": {
         "operationId": "createCustomEntityActivity",
