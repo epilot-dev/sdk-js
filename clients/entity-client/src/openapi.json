@@ -2516,19 +2516,6 @@
                   }
                 ]
               },
-              "single_view": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/EntityDefaultEdit"
-                  },
-                  {
-                    "$ref": "#/components/schemas/RedirectEntityView"
-                  },
-                  {
-                    "$ref": "#/components/schemas/EntityViewDisabled"
-                  }
-                ]
-              },
               "list_item": {
                 "type": "object",
                 "properties": {
@@ -2545,6 +2532,12 @@
                           "example": "email"
                         }
                       ]
+                    }
+                  },
+                  "quick_actions": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityAction"
                     }
                   }
                 }
@@ -3406,6 +3399,34 @@
           }
         }
       },
+      "EntityAction": {
+        "type": "object",
+        "description": "An entity action configured from the entity schema",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "A unique action name",
+            "example": "preview_file"
+          },
+          "label": {
+            "type": "string",
+            "example": "Preview File"
+          },
+          "icon": {
+            "type": "string",
+            "example": "visibility"
+          },
+          "permission": {
+            "type": "string",
+            "example": "entity:edit",
+            "description": "Permission required to show the action.\nIf not provided, the action will be shown to all users.\n"
+          }
+        },
+        "required": [
+          "action",
+          "label"
+        ]
+      },
       "RelationAttribute": {
         "allOf": [
           {
@@ -4173,7 +4194,21 @@
           "row_actions": {
             "type": "array",
             "items": {
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "view",
+                    "edit",
+                    "duplicate",
+                    "delete",
+                    "share"
+                  ]
+                },
+                {
+                  "$ref": "#/components/schemas/EntityAction"
+                }
+              ]
             }
           },
           "navbar_actions": {

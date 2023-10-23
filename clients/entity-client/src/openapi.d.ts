@@ -1411,6 +1411,35 @@ declare namespace Components {
             delete?: string[];
         }
         /**
+         * An entity action configured from the entity schema
+         */
+        export interface EntityAction {
+            /**
+             * A unique action name
+             * example:
+             * preview_file
+             */
+            action: string;
+            /**
+             * example:
+             * Preview File
+             */
+            label: string;
+            /**
+             * example:
+             * visibility
+             */
+            icon?: string;
+            /**
+             * Permission required to show the action.
+             * If not provided, the action will be shown to all users.
+             *
+             * example:
+             * entity:edit
+             */
+            permission?: string;
+        }
+        /**
          * Capabilities the Entity has. Turn features on/off for entities.
          */
         export interface EntityCapability {
@@ -1584,7 +1613,7 @@ declare namespace Components {
                  */
                 legacy?: boolean;
             })[];
-            row_actions?: string[];
+            row_actions?: (("view" | "edit" | "duplicate" | "delete" | "share") | /* An entity action configured from the entity schema */ EntityAction)[];
             navbar_actions?: {
                 type: string;
                 options?: {
@@ -1991,14 +2020,6 @@ declare namespace Components {
                  * }
                  */
                 RedirectEntityView | EntityViewDisabled;
-                single_view?: EntityDefaultEdit | /**
-                 * example:
-                 * {
-                 *   "type": "redirect",
-                 *   "route": "/app/pricing-hub/product/:entityId"
-                 * }
-                 */
-                RedirectEntityView | EntityViewDisabled;
                 list_item?: {
                     summary_attributes?: (/**
                      * Represents an expanded version of an attribute to be displayed in the list item summary.
@@ -2015,6 +2036,7 @@ declare namespace Components {
                      *
                      */
                     SummaryAttribute | string)[];
+                    quick_actions?: /* An entity action configured from the entity schema */ EntityAction[];
                 };
                 sharing?: {
                     /**
@@ -2247,14 +2269,6 @@ declare namespace Components {
                  * }
                  */
                 RedirectEntityView | EntityViewDisabled;
-                single_view?: EntityDefaultEdit | /**
-                 * example:
-                 * {
-                 *   "type": "redirect",
-                 *   "route": "/app/pricing-hub/product/:entityId"
-                 * }
-                 */
-                RedirectEntityView | EntityViewDisabled;
                 list_item?: {
                     summary_attributes?: (/**
                      * Represents an expanded version of an attribute to be displayed in the list item summary.
@@ -2271,6 +2285,7 @@ declare namespace Components {
                      *
                      */
                     SummaryAttribute | string)[];
+                    quick_actions?: /* An entity action configured from the entity schema */ EntityAction[];
                 };
                 sharing?: {
                     /**
