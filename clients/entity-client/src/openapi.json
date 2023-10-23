@@ -2516,6 +2516,19 @@
                   }
                 ]
               },
+              "single_view": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityDefaultEdit"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RedirectEntityView"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EntityViewDisabled"
+                  }
+                ]
+              },
               "list_item": {
                 "type": "object",
                 "properties": {
@@ -4194,16 +4207,9 @@
           "row_actions": {
             "type": "array",
             "items": {
-              "anyOf": [
+              "oneOf": [
                 {
-                  "type": "string",
-                  "enum": [
-                    "view",
-                    "edit",
-                    "duplicate",
-                    "delete",
-                    "share"
-                  ]
+                  "type": "string"
                 },
                 {
                   "$ref": "#/components/schemas/EntityAction"
@@ -4267,17 +4273,6 @@
             "additionalProperties": {
               "type": "string"
             }
-          },
-          "table_menu_options": {
-            "type": "object",
-            "properties": {
-              "icon": {
-                "type": "string"
-              },
-              "label": {
-                "type": "string"
-              }
-            }
           }
         }
       },
@@ -4294,17 +4289,6 @@
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
-          },
-          "table_menu_options": {
-            "type": "object",
-            "properties": {
-              "icon": {
-                "type": "string"
-              },
-              "label": {
-                "type": "string"
-              }
             }
           },
           "summary_attributes": {

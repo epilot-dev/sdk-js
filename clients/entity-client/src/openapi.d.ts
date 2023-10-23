@@ -1555,19 +1555,11 @@ declare namespace Components {
             search_params?: {
                 [name: string]: string;
             };
-            table_menu_options?: {
-                icon?: string;
-                label?: string;
-            };
         }
         export interface EntityDefaultEdit {
             view_type?: "default";
             search_params?: {
                 [name: string]: string;
-            };
-            table_menu_options?: {
-                icon?: string;
-                label?: string;
             };
             /**
              * List of attribute names that we show in the summary header
@@ -1613,7 +1605,7 @@ declare namespace Components {
                  */
                 legacy?: boolean;
             })[];
-            row_actions?: (("view" | "edit" | "duplicate" | "delete" | "share") | /* An entity action configured from the entity schema */ EntityAction)[];
+            row_actions?: (string | /* An entity action configured from the entity schema */ EntityAction)[];
             navbar_actions?: {
                 type: string;
                 options?: {
@@ -2020,6 +2012,14 @@ declare namespace Components {
                  * }
                  */
                 RedirectEntityView | EntityViewDisabled;
+                single_view?: EntityDefaultEdit | /**
+                 * example:
+                 * {
+                 *   "type": "redirect",
+                 *   "route": "/app/pricing-hub/product/:entityId"
+                 * }
+                 */
+                RedirectEntityView | EntityViewDisabled;
                 list_item?: {
                     summary_attributes?: (/**
                      * Represents an expanded version of an attribute to be displayed in the list item summary.
@@ -2262,6 +2262,14 @@ declare namespace Components {
                  */
                 RedirectEntityView | EntityViewDisabled;
                 edit_view?: EntityDefaultEdit | /**
+                 * example:
+                 * {
+                 *   "type": "redirect",
+                 *   "route": "/app/pricing-hub/product/:entityId"
+                 * }
+                 */
+                RedirectEntityView | EntityViewDisabled;
+                single_view?: EntityDefaultEdit | /**
                  * example:
                  * {
                  *   "type": "redirect",
