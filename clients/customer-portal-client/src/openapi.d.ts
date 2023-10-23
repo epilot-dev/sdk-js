@@ -1837,14 +1837,13 @@ declare namespace Components {
                 en?: string;
                 de?: string;
             };
-            actions?: WidgetAction[];
-            left?: {
-                show?: boolean;
-                showButton?: boolean;
-            };
-            right?: {
-                show?: boolean;
-                showButton?: boolean;
+            imageUrl?: string;
+            button?: {
+                label?: {
+                    en?: string;
+                    de?: string;
+                };
+                url?: string;
             };
         }
         export interface UpsertPortalConfig {
