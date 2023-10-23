@@ -4057,30 +4057,30 @@
       "TeaserWidget": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/ActionWidget"
+            "$ref": "#/components/schemas/WidgetBase"
           },
           {
             "type": "object",
             "properties": {
-              "left": {
-                "type": "object",
-                "properties": {
-                  "show": {
-                    "type": "boolean"
-                  },
-                  "showButton": {
-                    "type": "boolean"
-                  }
-                }
+              "imageUrl": {
+                "type": "string"
               },
-              "right": {
+              "button": {
                 "type": "object",
                 "properties": {
-                  "show": {
-                    "type": "boolean"
+                  "label": {
+                    "type": "object",
+                    "properties": {
+                      "en": {
+                        "type": "string"
+                      },
+                      "de": {
+                        "type": "string"
+                      }
+                    }
                   },
-                  "showButton": {
-                    "type": "boolean"
+                  "url": {
+                    "type": "string"
                   }
                 }
               }
