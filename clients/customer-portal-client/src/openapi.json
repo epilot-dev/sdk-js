@@ -3664,6 +3664,10 @@
               "start_page": {
                 "type": "boolean",
                 "description": "Start page feature flag"
+              },
+              "billing": {
+                "type": "boolean",
+                "description": "Billing feature flag"
               }
             }
           },
