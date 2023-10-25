@@ -1342,6 +1342,10 @@ declare namespace Components {
                  * Start page feature flag
                  */
                 start_page?: boolean;
+                /**
+                 * Billing feature flag
+                 */
+                billing?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -1897,6 +1901,10 @@ declare namespace Components {
                  * Start page feature flag
                  */
                 start_page?: boolean;
+                /**
+                 * Billing feature flag
+                 */
+                billing?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
