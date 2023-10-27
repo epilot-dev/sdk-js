@@ -706,11 +706,6 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    }
-  ],
   "components": {
     "parameters": {
       "EntityIdPathParam": {
@@ -785,5 +780,10 @@
         "required": false
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    }
+  ]
 }
