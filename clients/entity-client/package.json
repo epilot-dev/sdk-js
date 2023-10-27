@@ -1,6 +1,6 @@
 {
   "name": "@epilot/entity-client",
-  "version": "4.16.1",
+  "version": "4.17.0",
   "description": "JavaScript client library for the epilot Core Entity API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
     "test": "jest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/entity.yaml",
+    "openapi": "node ../../scripts/update-openapi.js /Users/hansweber/Developer/entity-api/lambda/ApiHandlerFunction/openapi.yml",
     "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
     "build": "tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",
