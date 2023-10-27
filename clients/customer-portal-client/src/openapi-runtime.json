@@ -734,6 +734,21 @@
           }
         }
       }
+    },
+    "/v2/portal/entity/access": {
+      "post": {
+        "operationId": "triggerEntityAccess",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "query"
+          },
+          {
+            "name": "schema",
+            "in": "query"
+          }
+        ]
+      }
     }
   },
   "components": {

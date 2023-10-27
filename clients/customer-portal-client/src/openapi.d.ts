@@ -3382,6 +3382,40 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace TriggerEntityAccess {
+        namespace Parameters {
+            /**
+             * example:
+             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
+             */
+            export type EntityId = string;
+            /**
+             * example:
+             * contract
+             */
+            export type Schema = string;
+        }
+        export interface QueryParameters {
+            entity_id?: /**
+             * example:
+             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
+             */
+            Parameters.EntityId;
+            schema?: /**
+             * example:
+             * contract
+             */
+            Parameters.Schema;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Event ID returned by event bus.
+                 */
+                eventId?: string;
+            }
+        }
+    }
     namespace UpdateContact {
         export type RequestBody = Components.Schemas.Entity;
         namespace Responses {
@@ -4114,6 +4148,16 @@ export interface OperationMethods {
     data?: Paths.LoginToPortalAsUser.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.LoginToPortalAsUser.Responses.$200>
+  /**
+   * triggerEntityAccess - triggerEntityAccess
+   * 
+   * Trigger entity access event for a portal user
+   */
+  'triggerEntityAccess'(
+    parameters?: Parameters<Paths.TriggerEntityAccess.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TriggerEntityAccess.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -4748,6 +4792,18 @@ export interface PathsDictionary {
       data?: Paths.LoginToPortalAsUser.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.LoginToPortalAsUser.Responses.$200>
+  }
+  ['/v2/portal/entity/access']: {
+    /**
+     * triggerEntityAccess - triggerEntityAccess
+     * 
+     * Trigger entity access event for a portal user
+     */
+    'post'(
+      parameters?: Parameters<Paths.TriggerEntityAccess.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TriggerEntityAccess.Responses.$200>
   }
 }
 
