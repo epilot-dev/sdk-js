@@ -21,9 +21,7 @@
         "operationId": "getSchema",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
             "in": "query",
@@ -35,9 +33,7 @@
         "operationId": "putSchema",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
             "in": "query",
@@ -54,9 +50,7 @@
         "operationId": "deleteSchema",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           }
         ]
       }
@@ -66,9 +60,7 @@
         "operationId": "getSchemaVersions",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
             "in": "query",
@@ -99,14 +91,10 @@
         "operationId": "listTaxonomyClassificationsForSchema",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "taxonomySlug",
-            "required": true
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
           },
           {
             "in": "query",
@@ -134,19 +122,13 @@
         "operationId": "createEntity",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "required": false
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
-            "in": "query",
-            "name": "async",
-            "required": false
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
         "requestBody": {
@@ -161,24 +143,16 @@
         "operationId": "upsertEntity",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "required": false
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
-            "in": "query",
-            "name": "dry_run",
-            "required": false
+            "$ref": "#/components/parameters/DryRunQueryParam"
           },
           {
-            "in": "query",
-            "name": "async",
-            "required": false
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
         "requestBody": {
@@ -193,18 +167,13 @@
         "operationId": "getEntity",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "query",
-            "name": "hydrate"
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           }
         ]
       },
@@ -212,24 +181,16 @@
         "operationId": "updateEntity",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "required": false
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
-            "in": "query",
-            "name": "async",
-            "required": false
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
         "requestBody": {
@@ -242,29 +203,19 @@
         "operationId": "patchEntity",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "required": false
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
-            "in": "query",
-            "name": "dry_run",
-            "required": false
+            "$ref": "#/components/parameters/DryRunQueryParam"
           },
           {
-            "in": "query",
-            "name": "async",
-            "required": false
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
         "requestBody": {
@@ -278,19 +229,13 @@
         "operationId": "deleteEntity",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "required": false
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ]
       }
@@ -342,9 +287,7 @@
         "operationId": "getActivity",
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/ActivityIdPathParam"
           },
           {
             "in": "query",
@@ -362,9 +305,7 @@
         "operationId": "attachActivity",
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/ActivityIdPathParam"
           },
           {
             "in": "query",
@@ -380,14 +321,10 @@
         "operationId": "getEntityActivityFeed",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
             "in": "query",
@@ -398,8 +335,7 @@
             "name": "before"
           },
           {
-            "in": "query",
-            "name": "from"
+            "$ref": "#/components/parameters/FromPageQueryParam"
           },
           {
             "in": "query",
@@ -421,26 +357,19 @@
         "operationId": "getRelations",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "hydrate"
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
-            "in": "query",
-            "name": "include_reverse"
+            "$ref": "#/components/parameters/IncludeReverseQueryParam"
           },
           {
-            "in": "query",
-            "name": "from"
+            "$ref": "#/components/parameters/FromPageQueryParam"
           },
           {
             "in": "query",
@@ -448,18 +377,10 @@
             "required": false
           },
           {
-            "in": "query",
-            "name": "include_schemas",
-            "required": false,
-            "style": "form",
-            "explode": false
+            "$ref": "#/components/parameters/IncludeSchemasQueryParam"
           },
           {
-            "in": "query",
-            "name": "exclude_schemas",
-            "required": false,
-            "style": "form",
-            "explode": false
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
           }
         ]
       },
@@ -467,24 +388,16 @@
         "operationId": "addRelations",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "async",
-            "required": false
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "required": false
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "requestBody": {
@@ -499,30 +412,23 @@
         "operationId": "getRelationsV2",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "hydrate"
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
             "in": "query",
             "name": "query"
           },
           {
-            "in": "query",
-            "name": "include_reverse"
+            "$ref": "#/components/parameters/IncludeReverseQueryParam"
           },
           {
-            "in": "query",
-            "name": "from"
+            "$ref": "#/components/parameters/FromPageQueryParam"
           },
           {
             "in": "query",
@@ -540,26 +446,19 @@
         "operationId": "getRelationsV3",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "hydrate"
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
-            "in": "query",
-            "name": "include_reverse"
+            "$ref": "#/components/parameters/IncludeReverseQueryParam"
           },
           {
-            "in": "query",
-            "name": "from"
+            "$ref": "#/components/parameters/FromPageQueryParam"
           },
           {
             "in": "query",
@@ -567,18 +466,10 @@
             "required": false
           },
           {
-            "in": "query",
-            "name": "include_schemas",
-            "required": false,
-            "style": "form",
-            "explode": false
+            "$ref": "#/components/parameters/IncludeSchemasQueryParam"
           },
           {
-            "in": "query",
-            "name": "exclude_schemas",
-            "required": false,
-            "style": "form",
-            "explode": false
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
           }
         ]
       }
@@ -588,21 +479,13 @@
         "operationId": "getRelatedEntitiesCount",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "exclude_schemas",
-            "required": false,
-            "style": "form",
-            "explode": false
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
           }
         ]
       }
@@ -612,14 +495,10 @@
         "operationId": "updateRelation",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
             "in": "path",
@@ -632,14 +511,10 @@
             "required": true
           },
           {
-            "in": "query",
-            "name": "async",
-            "required": false
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "required": false
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "requestBody": {
@@ -652,14 +527,10 @@
         "operationId": "deleteRelation",
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
             "in": "path",
@@ -672,14 +543,10 @@
             "required": true
           },
           {
-            "in": "query",
-            "name": "async",
-            "required": false
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "required": false
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ]
       }
@@ -744,9 +611,7 @@
         "operationId": "getSavedView",
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
           }
         ]
       },
@@ -754,9 +619,7 @@
         "operationId": "updateSavedView",
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
           }
         ],
         "requestBody": {
@@ -769,9 +632,7 @@
         "operationId": "deleteSavedView",
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "required": true
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
           }
         ]
       }
@@ -791,9 +652,7 @@
         "operationId": "getTaxonomy",
         "parameters": [
           {
-            "in": "path",
-            "name": "taxonomySlug",
-            "required": true
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
           }
         ]
       }
@@ -803,9 +662,7 @@
         "operationId": "taxonomyAutocomplete",
         "parameters": [
           {
-            "in": "path",
-            "name": "taxonomySlug",
-            "required": true
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
           },
           {
             "in": "query",
@@ -823,9 +680,7 @@
         "operationId": "taxonomiesClassificationsSearch",
         "parameters": [
           {
-            "in": "query",
-            "name": "taxonomySlug",
-            "required": true
+            "$ref": "#/components/parameters/TaxonomySlugQueryParam"
           }
         ],
         "requestBody": {
@@ -840,9 +695,7 @@
         "operationId": "updateClassificationsForTaxonomy",
         "parameters": [
           {
-            "in": "path",
-            "name": "taxonomySlug",
-            "required": true
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
           }
         ],
         "requestBody": {
@@ -853,7 +706,81 @@
       }
     }
   },
-  "components": {},
+  "components": {
+    "parameters": {
+      "EntityIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
+      "EntitySlugPathParam": {
+        "name": "slug",
+        "in": "path",
+        "required": true
+      },
+      "TaxonomySlugQueryParam": {
+        "name": "taxonomySlug",
+        "in": "query",
+        "required": true
+      },
+      "TaxonomySlugPathParam": {
+        "name": "taxonomySlug",
+        "in": "path",
+        "required": true
+      },
+      "SavedViewIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
+      "AsyncOperationQueryParam": {
+        "name": "async",
+        "in": "query",
+        "required": false
+      },
+      "HydrateEntitiesQueryParam": {
+        "name": "hydrate",
+        "in": "query"
+      },
+      "ActivityIdQueryParam": {
+        "name": "activity_id",
+        "in": "query",
+        "required": false
+      },
+      "ActivityIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
+      "FromPageQueryParam": {
+        "name": "from",
+        "in": "query"
+      },
+      "IncludeReverseQueryParam": {
+        "name": "include_reverse",
+        "in": "query"
+      },
+      "IncludeSchemasQueryParam": {
+        "name": "include_schemas",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false
+      },
+      "ExcludeSchemasQueryParam": {
+        "name": "exclude_schemas",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false
+      },
+      "DryRunQueryParam": {
+        "name": "dry_run",
+        "in": "query",
+        "required": false
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://entity.sls.epilot.io"

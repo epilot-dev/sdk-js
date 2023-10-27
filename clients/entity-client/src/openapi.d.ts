@@ -8,6 +8,65 @@ import type {
 } from 'openapi-client-axios'; 
 
 declare namespace Components {
+    namespace Parameters {
+        export type ActivityIdPathParam = /**
+         * See https://github.com/ulid/spec
+         * example:
+         * 01F130Q52Q6MWSNS8N2AVXV4JN
+         */
+        Schemas.ActivityId /* ulid */;
+        export type ActivityIdQueryParam = /**
+         * See https://github.com/ulid/spec
+         * example:
+         * 01F130Q52Q6MWSNS8N2AVXV4JN
+         */
+        Schemas.ActivityId /* ulid */;
+        export type AsyncOperationQueryParam = boolean;
+        export type DryRunQueryParam = boolean;
+        export type EntityIdPathParam = Schemas.EntityId /* uuid */;
+        export type EntitySlugPathParam = /**
+         * URL-friendly identifier for the entity schema
+         * example:
+         * contact
+         */
+        Schemas.EntitySlug;
+        export type ExcludeSchemasQueryParam = /**
+         * URL-friendly identifier for the entity schema
+         * example:
+         * contact
+         */
+        Schemas.EntitySlug[];
+        export type FromPageQueryParam = number;
+        export type HydrateEntitiesQueryParam = boolean;
+        export type IncludeReverseQueryParam = boolean;
+        export type IncludeSchemasQueryParam = /**
+         * URL-friendly identifier for the entity schema
+         * example:
+         * contact
+         */
+        Schemas.EntitySlug[];
+        export type SavedViewIdPathParam = /* Generated uuid for a saved view */ Schemas.SavedViewId /* uuid */;
+        export type TaxonomySlugPathParam = string;
+        export type TaxonomySlugQueryParam = string;
+    }
+    export interface PathParameters {
+        EntityIdPathParam?: Parameters.EntityIdPathParam;
+        EntitySlugPathParam?: Parameters.EntitySlugPathParam;
+        TaxonomySlugPathParam?: Parameters.TaxonomySlugPathParam;
+        SavedViewIdPathParam?: Parameters.SavedViewIdPathParam;
+        ActivityIdPathParam?: Parameters.ActivityIdPathParam;
+    }
+    export interface QueryParameters {
+        TaxonomySlugQueryParam?: Parameters.TaxonomySlugQueryParam;
+        AsyncOperationQueryParam?: Parameters.AsyncOperationQueryParam;
+        HydrateEntitiesQueryParam?: Parameters.HydrateEntitiesQueryParam;
+        ActivityIdQueryParam?: Parameters.ActivityIdQueryParam;
+        FromPageQueryParam?: Parameters.FromPageQueryParam;
+        IncludeReverseQueryParam?: Parameters.IncludeReverseQueryParam;
+        IncludeSchemasQueryParam?: Parameters.IncludeSchemasQueryParam;
+        ExcludeSchemasQueryParam?: Parameters.ExcludeSchemasQueryParam;
+        DryRunQueryParam?: Parameters.DryRunQueryParam;
+    }
     namespace Schemas {
         export interface Activity {
             /**
@@ -5899,28 +5958,10 @@ declare namespace Components {
 declare namespace Paths {
     namespace AddRelations {
         namespace Parameters {
-            export type ActivityId = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
-            export type Async = boolean;
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
-        }
-        export interface QueryParameters {
-            async?: Parameters.Async;
-            activity_id?: Parameters.ActivityId;
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.EntityIdPathParam;
+            export type $2 = Components.Parameters.AsyncOperationQueryParam;
+            export type $3 = Components.Parameters.ActivityIdQueryParam;
         }
         export type RequestBody = Components.Schemas.RelationItem[];
         namespace Responses {
@@ -5929,16 +5970,8 @@ declare namespace Paths {
     }
     namespace AttachActivity {
         namespace Parameters {
+            export type $0 = Components.Parameters.ActivityIdPathParam;
             export type Entities = Components.Schemas.EntityId /* uuid */[];
-            export type Id = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
         }
         export interface QueryParameters {
             entities?: Parameters.Entities;
@@ -6006,26 +6039,9 @@ declare namespace Paths {
     }
     namespace CreateEntity {
         namespace Parameters {
-            export type ActivityId = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
-            export type Async = boolean;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-        }
-        export interface QueryParameters {
-            activity_id?: Parameters.ActivityId;
-            async?: Parameters.Async;
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.ActivityIdQueryParam;
+            export type $2 = Components.Parameters.AsyncOperationQueryParam;
         }
         export type RequestBody = /**
          * example:
@@ -6114,26 +6130,9 @@ declare namespace Paths {
     }
     namespace DeleteEntity {
         namespace Parameters {
-            export type ActivityId = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
-        }
-        export interface QueryParameters {
-            activity_id?: Parameters.ActivityId;
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.EntityIdPathParam;
+            export type $2 = Components.Parameters.ActivityIdQueryParam;
         }
         namespace Responses {
             export interface $200 {
@@ -6142,32 +6141,16 @@ declare namespace Paths {
     }
     namespace DeleteRelation {
         namespace Parameters {
-            export type ActivityId = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
-            export type Async = boolean;
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.EntityIdPathParam;
+            export type $4 = Components.Parameters.AsyncOperationQueryParam;
+            export type $5 = Components.Parameters.ActivityIdQueryParam;
             export type Attribute = string;
             export type EntityId = string;
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
         }
         export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
             attribute: Parameters.Attribute;
             entity_id: Parameters.EntityId;
-        }
-        export interface QueryParameters {
-            async?: Parameters.Async;
-            activity_id?: Parameters.ActivityId;
         }
         namespace Responses {
             export interface $204 {
@@ -6176,10 +6159,7 @@ declare namespace Paths {
     }
     namespace DeleteSavedView {
         namespace Parameters {
-            export type Id = /* Generated uuid for a saved view */ Components.Schemas.SavedViewId /* uuid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
+            export type $0 = Components.Parameters.SavedViewIdPathParam;
         }
         namespace Responses {
             export interface $200 {
@@ -6188,15 +6168,7 @@ declare namespace Paths {
     }
     namespace DeleteSchema {
         namespace Parameters {
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
+            export type $0 = Components.Parameters.EntitySlugPathParam;
         }
         namespace Responses {
             export interface $204 {
@@ -6227,17 +6199,9 @@ declare namespace Paths {
     }
     namespace GetActivity {
         namespace Parameters {
-            export type Id = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
+            export type $0 = Components.Parameters.ActivityIdPathParam;
             export type OperationsFrom = number;
             export type OperationsSize = number;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
         }
         export interface QueryParameters {
             operations_size?: Parameters.OperationsSize;
@@ -6249,21 +6213,9 @@ declare namespace Paths {
     }
     namespace GetEntity {
         namespace Parameters {
-            export type Hydrate = boolean;
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
-        }
-        export interface QueryParameters {
-            hydrate?: Parameters.Hydrate;
+            export type $0 = Components.Parameters.EntityIdPathParam;
+            export type $1 = Components.Parameters.EntitySlugPathParam;
+            export type $2 = Components.Parameters.HydrateEntitiesQueryParam;
         }
         namespace Responses {
             export interface $200 {
@@ -6358,32 +6310,22 @@ declare namespace Paths {
     }
     namespace GetEntityActivityFeed {
         namespace Parameters {
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.EntityIdPathParam;
+            export type $4 = Components.Parameters.FromPageQueryParam;
             export type After = string; // date-time
             export type Before = string; // date-time
-            export type From = number;
-            export type Id = Components.Schemas.EntityId /* uuid */;
             export type IncludeRelations = boolean;
             export type Size = number;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
             /**
              * example:
              * SyncActivity
              */
             export type Type = string;
         }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
-        }
         export interface QueryParameters {
             after?: Parameters.After /* date-time */;
             before?: Parameters.Before /* date-time */;
-            from?: Parameters.From;
             size?: Parameters.Size;
             type?: /**
              * example:
@@ -6405,21 +6347,9 @@ declare namespace Paths {
     }
     namespace GetRelatedEntitiesCount {
         namespace Parameters {
-            export type ExcludeSchemas = string[];
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
-        }
-        export interface QueryParameters {
-            exclude_schemas?: Parameters.ExcludeSchemas;
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.EntityIdPathParam;
+            export type $2 = Components.Parameters.ExcludeSchemasQueryParam;
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelatedEntitiesCount;
@@ -6427,41 +6357,17 @@ declare namespace Paths {
     }
     namespace GetRelations {
         namespace Parameters {
-            export type ExcludeSchemas = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug[];
-            export type From = number;
-            export type Hydrate = boolean;
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type IncludeReverse = boolean;
-            export type IncludeSchemas = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug[];
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.EntityIdPathParam;
+            export type $2 = Components.Parameters.HydrateEntitiesQueryParam;
+            export type $3 = Components.Parameters.IncludeReverseQueryParam;
+            export type $4 = Components.Parameters.FromPageQueryParam;
+            export type $6 = Components.Parameters.IncludeSchemasQueryParam;
+            export type $7 = Components.Parameters.ExcludeSchemasQueryParam;
             export type Size = number;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
         }
         export interface QueryParameters {
-            hydrate?: Parameters.Hydrate;
-            include_reverse?: Parameters.IncludeReverse;
-            from?: Parameters.From;
             size?: Parameters.Size;
-            include_schemas?: Parameters.IncludeSchemas;
-            exclude_schemas?: Parameters.ExcludeSchemas;
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsResp;
@@ -6469,6 +6375,11 @@ declare namespace Paths {
     }
     namespace GetRelationsV2 {
         namespace Parameters {
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.EntityIdPathParam;
+            export type $2 = Components.Parameters.HydrateEntitiesQueryParam;
+            export type $4 = Components.Parameters.IncludeReverseQueryParam;
+            export type $5 = Components.Parameters.FromPageQueryParam;
             /**
              * example:
              * [
@@ -6478,28 +6389,11 @@ declare namespace Paths {
              * ]
              */
             export type Fields = string[];
-            export type From = number;
-            export type Hydrate = boolean;
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type IncludeReverse = boolean;
             export type Query = string;
             export type Size = number;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
         }
         export interface QueryParameters {
-            hydrate?: Parameters.Hydrate;
             query?: Parameters.Query;
-            include_reverse?: Parameters.IncludeReverse;
-            from?: Parameters.From;
             size?: Parameters.Size;
             fields?: /**
              * example:
@@ -6517,41 +6411,17 @@ declare namespace Paths {
     }
     namespace GetRelationsV3 {
         namespace Parameters {
-            export type ExcludeSchemas = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug[];
-            export type From = number;
-            export type Hydrate = boolean;
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type IncludeReverse = boolean;
-            export type IncludeSchemas = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug[];
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.EntityIdPathParam;
+            export type $2 = Components.Parameters.HydrateEntitiesQueryParam;
+            export type $3 = Components.Parameters.IncludeReverseQueryParam;
+            export type $4 = Components.Parameters.FromPageQueryParam;
+            export type $6 = Components.Parameters.IncludeSchemasQueryParam;
+            export type $7 = Components.Parameters.ExcludeSchemasQueryParam;
             export type Size = number;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
         }
         export interface QueryParameters {
-            hydrate?: Parameters.Hydrate;
-            include_reverse?: Parameters.IncludeReverse;
-            from?: Parameters.From;
             size?: Parameters.Size;
-            include_schemas?: Parameters.IncludeSchemas;
-            exclude_schemas?: Parameters.ExcludeSchemas;
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsRespWithPagination;
@@ -6559,10 +6429,7 @@ declare namespace Paths {
     }
     namespace GetSavedView {
         namespace Parameters {
-            export type Id = /* Generated uuid for a saved view */ Components.Schemas.SavedViewId /* uuid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
+            export type $0 = Components.Parameters.SavedViewIdPathParam;
         }
         namespace Responses {
             export interface $200 {
@@ -6572,16 +6439,8 @@ declare namespace Paths {
     }
     namespace GetSchema {
         namespace Parameters {
+            export type $0 = Components.Parameters.EntitySlugPathParam;
             export type Id = /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
         }
         export interface QueryParameters {
             id?: Parameters.Id;
@@ -6592,19 +6451,11 @@ declare namespace Paths {
     }
     namespace GetSchemaVersions {
         namespace Parameters {
+            export type $0 = Components.Parameters.EntitySlugPathParam;
             export type DraftsFrom = number;
             export type DraftsSize = number;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
             export type VersionsFrom = number;
             export type VersionsSize = number;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
         }
         export interface QueryParameters {
             versions_from?: Parameters.VersionsFrom;
@@ -6621,15 +6472,7 @@ declare namespace Paths {
     }
     namespace GetTaxonomy {
         namespace Parameters {
-            export type TaxonomySlug = /**
-             * URL-friendly name for taxonomy
-             * example:
-             * purpose
-             */
-            Components.Schemas.TaxonomySlug;
-        }
-        export interface PathParameters {
-            taxonomySlug: Parameters.TaxonomySlug;
+            export type $0 = Components.Parameters.TaxonomySlugPathParam;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Taxonomy;
@@ -6696,24 +6539,10 @@ declare namespace Paths {
     }
     namespace ListTaxonomyClassificationsForSchema {
         namespace Parameters {
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.TaxonomySlugPathParam;
             export type Query = string;
             export type Size = number;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-            export type TaxonomySlug = /**
-             * URL-friendly name for taxonomy
-             * example:
-             * purpose
-             */
-            Components.Schemas.TaxonomySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            taxonomySlug: Parameters.TaxonomySlug;
         }
         export interface QueryParameters {
             query?: Parameters.Query;
@@ -6727,30 +6556,11 @@ declare namespace Paths {
     }
     namespace PatchEntity {
         namespace Parameters {
-            export type ActivityId = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
-            export type Async = boolean;
-            export type DryRun = boolean;
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
-        }
-        export interface QueryParameters {
-            activity_id?: Parameters.ActivityId;
-            dry_run?: Parameters.DryRun;
-            async?: Parameters.Async;
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.EntityIdPathParam;
+            export type $2 = Components.Parameters.ActivityIdQueryParam;
+            export type $3 = Components.Parameters.DryRunQueryParam;
+            export type $4 = Components.Parameters.AsyncOperationQueryParam;
         }
         export type RequestBody = /**
          * example:
@@ -6835,16 +6645,8 @@ declare namespace Paths {
     }
     namespace PutSchema {
         namespace Parameters {
+            export type $0 = Components.Parameters.EntitySlugPathParam;
             export type Draft = boolean;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
         }
         export interface QueryParameters {
             draft?: Parameters.Draft;
@@ -6862,10 +6664,7 @@ declare namespace Paths {
     }
     namespace TaxonomiesClassificationsSearch {
         namespace Parameters {
-            export type TaxonomySlug = string;
-        }
-        export interface QueryParameters {
-            taxonomySlug: Parameters.TaxonomySlug;
+            export type $0 = Components.Parameters.TaxonomySlugQueryParam;
         }
         export interface RequestBody {
             classificationIds?: Components.Schemas.ClassificationId /* uuid */[];
@@ -6878,12 +6677,9 @@ declare namespace Paths {
     }
     namespace TaxonomyAutocomplete {
         namespace Parameters {
+            export type $0 = Components.Parameters.TaxonomySlugPathParam;
             export type Query = string;
             export type Size = number;
-            export type TaxonomySlug = string;
-        }
-        export interface PathParameters {
-            taxonomySlug: Parameters.TaxonomySlug;
         }
         export interface QueryParameters {
             query?: Parameters.Query;
@@ -6897,10 +6693,7 @@ declare namespace Paths {
     }
     namespace UpdateClassificationsForTaxonomy {
         namespace Parameters {
-            export type TaxonomySlug = string;
-        }
-        export interface PathParameters {
-            taxonomySlug: Parameters.TaxonomySlug;
+            export type $0 = Components.Parameters.TaxonomySlugPathParam;
         }
         export type RequestBody = Components.Schemas.ClassificationsUpdate;
         namespace Responses {
@@ -6915,28 +6708,10 @@ declare namespace Paths {
     }
     namespace UpdateEntity {
         namespace Parameters {
-            export type ActivityId = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
-            export type Async = boolean;
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
-        }
-        export interface QueryParameters {
-            activity_id?: Parameters.ActivityId;
-            async?: Parameters.Async;
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.EntityIdPathParam;
+            export type $2 = Components.Parameters.ActivityIdQueryParam;
+            export type $3 = Components.Parameters.AsyncOperationQueryParam;
         }
         export type RequestBody = /**
          * example:
@@ -7019,32 +6794,16 @@ declare namespace Paths {
     }
     namespace UpdateRelation {
         namespace Parameters {
-            export type ActivityId = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
-            export type Async = boolean;
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.EntityIdPathParam;
+            export type $4 = Components.Parameters.AsyncOperationQueryParam;
+            export type $5 = Components.Parameters.ActivityIdQueryParam;
             export type Attribute = string;
             export type EntityId = string;
-            export type Id = Components.Schemas.EntityId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
         }
         export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
             attribute: Parameters.Attribute;
             entity_id: Parameters.EntityId;
-        }
-        export interface QueryParameters {
-            async?: Parameters.Async;
-            activity_id?: Parameters.ActivityId;
         }
         export interface RequestBody {
             _tags?: string[];
@@ -7055,10 +6814,7 @@ declare namespace Paths {
     }
     namespace UpdateSavedView {
         namespace Parameters {
-            export type Id = /* Generated uuid for a saved view */ Components.Schemas.SavedViewId /* uuid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
+            export type $0 = Components.Parameters.SavedViewIdPathParam;
         }
         export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
         namespace Responses {
@@ -7067,28 +6823,10 @@ declare namespace Paths {
     }
     namespace UpsertEntity {
         namespace Parameters {
-            export type ActivityId = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
-            export type Async = boolean;
-            export type DryRun = boolean;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-        }
-        export interface QueryParameters {
-            activity_id?: Parameters.ActivityId;
-            dry_run?: Parameters.DryRun;
-            async?: Parameters.Async;
+            export type $0 = Components.Parameters.EntitySlugPathParam;
+            export type $1 = Components.Parameters.ActivityIdQueryParam;
+            export type $2 = Components.Parameters.DryRunQueryParam;
+            export type $3 = Components.Parameters.AsyncOperationQueryParam;
         }
         export interface RequestBody {
             /**
@@ -7242,7 +6980,7 @@ export interface OperationMethods {
    * By default gets the latest version of the Schema and to get the specific version of schema pass the id.
    */
   'getSchema'(
-    parameters?: Parameters<Paths.GetSchema.PathParameters & Paths.GetSchema.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetSchema.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchema.Responses.$200>
@@ -7252,7 +6990,7 @@ export interface OperationMethods {
    * Create or update a schema with a new version
    */
   'putSchema'(
-    parameters?: Parameters<Paths.PutSchema.PathParameters & Paths.PutSchema.QueryParameters> | null,
+    parameters?: Parameters<Paths.PutSchema.QueryParameters> | null,
     data?: Paths.PutSchema.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PutSchema.Responses.$200>
@@ -7262,7 +7000,7 @@ export interface OperationMethods {
    * Delete a schema, or a specific version of a schema
    */
   'deleteSchema'(
-    parameters?: Parameters<Paths.DeleteSchema.PathParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchema.Responses.$204>
@@ -7272,7 +7010,7 @@ export interface OperationMethods {
    * Get all versions of this schema ordered by the latest versions including drafts.
    */
   'getSchemaVersions'(
-    parameters?: Parameters<Paths.GetSchemaVersions.PathParameters & Paths.GetSchemaVersions.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetSchemaVersions.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
@@ -7292,7 +7030,7 @@ export interface OperationMethods {
    * List taxonomy classifications for a given schema
    */
   'listTaxonomyClassificationsForSchema'(
-    parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.PathParameters & Paths.ListTaxonomyClassificationsForSchema.QueryParameters> | null,
+    parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
@@ -7402,7 +7140,7 @@ export interface OperationMethods {
    * 
    */
   'createEntity'(
-    parameters?: Parameters<Paths.CreateEntity.PathParameters & Paths.CreateEntity.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateEntity.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateEntity.Responses.$201>
@@ -7421,7 +7159,7 @@ export interface OperationMethods {
    * 
    */
   'upsertEntity'(
-    parameters?: Parameters<Paths.UpsertEntity.PathParameters & Paths.UpsertEntity.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.UpsertEntity.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpsertEntity.Responses.$200 | Paths.UpsertEntity.Responses.$201>
@@ -7494,7 +7232,7 @@ export interface OperationMethods {
    * 
    */
   'getEntity'(
-    parameters?: Parameters<Paths.GetEntity.PathParameters & Paths.GetEntity.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntity.Responses.$200>
@@ -7529,7 +7267,7 @@ export interface OperationMethods {
    * 
    */
   'updateEntity'(
-    parameters?: Parameters<Paths.UpdateEntity.PathParameters & Paths.UpdateEntity.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.UpdateEntity.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateEntity.Responses.$200>
@@ -7566,7 +7304,7 @@ export interface OperationMethods {
    * 
    */
   'patchEntity'(
-    parameters?: Parameters<Paths.PatchEntity.PathParameters & Paths.PatchEntity.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.PatchEntity.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PatchEntity.Responses.$200>
@@ -7581,7 +7319,7 @@ export interface OperationMethods {
    * 
    */
   'deleteEntity'(
-    parameters?: Parameters<Paths.DeleteEntity.PathParameters & Paths.DeleteEntity.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteEntity.Responses.$200>
@@ -7616,7 +7354,7 @@ export interface OperationMethods {
    * Get activity by id
    */
   'getActivity'(
-    parameters?: Parameters<Paths.GetActivity.PathParameters & Paths.GetActivity.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetActivity.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetActivity.Responses.$200>
@@ -7626,7 +7364,7 @@ export interface OperationMethods {
    * Attach existing activity to entity activity feeds
    */
   'attachActivity'(
-    parameters?: Parameters<Paths.AttachActivity.PathParameters & Paths.AttachActivity.QueryParameters> | null,
+    parameters?: Parameters<Paths.AttachActivity.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AttachActivity.Responses.$200>
@@ -7637,7 +7375,7 @@ export interface OperationMethods {
    * 
    */
   'getEntityActivityFeed'(
-    parameters?: Parameters<Paths.GetEntityActivityFeed.PathParameters & Paths.GetEntityActivityFeed.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetEntityActivityFeed.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
@@ -7652,7 +7390,7 @@ export interface OperationMethods {
    * 
    */
   'getRelations'(
-    parameters?: Parameters<Paths.GetRelations.PathParameters & Paths.GetRelations.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetRelations.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelations.Responses.$200>
@@ -7662,7 +7400,7 @@ export interface OperationMethods {
    * Relates one or more entities to parent entity by adding items to a relation attribute
    */
   'addRelations'(
-    parameters?: Parameters<Paths.AddRelations.PathParameters & Paths.AddRelations.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.AddRelations.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddRelations.Responses.$200>
@@ -7677,7 +7415,7 @@ export interface OperationMethods {
    * 
    */
   'getRelationsV2'(
-    parameters?: Parameters<Paths.GetRelationsV2.PathParameters & Paths.GetRelationsV2.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetRelationsV2.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
@@ -7692,7 +7430,7 @@ export interface OperationMethods {
    * 
    */
   'getRelationsV3'(
-    parameters?: Parameters<Paths.GetRelationsV3.PathParameters & Paths.GetRelationsV3.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetRelationsV3.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelationsV3.Responses.$200>
@@ -7703,7 +7441,7 @@ export interface OperationMethods {
    * 
    */
   'getRelatedEntitiesCount'(
-    parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters & Paths.GetRelatedEntitiesCount.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelatedEntitiesCount.Responses.$200>
@@ -7713,7 +7451,7 @@ export interface OperationMethods {
    * Updates an existing relation between two entities.
    */
   'updateRelation'(
-    parameters?: Parameters<Paths.UpdateRelation.PathParameters & Paths.UpdateRelation.QueryParameters> | null,
+    parameters?: Parameters<Paths.UpdateRelation.PathParameters> | null,
     data?: Paths.UpdateRelation.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateRelation.Responses.$200>
@@ -7723,7 +7461,7 @@ export interface OperationMethods {
    * Removes relation between two entities
    */
   'deleteRelation'(
-    parameters?: Parameters<Paths.DeleteRelation.PathParameters & Paths.DeleteRelation.QueryParameters> | null,
+    parameters?: Parameters<Paths.DeleteRelation.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteRelation.Responses.$204>
@@ -7776,7 +7514,7 @@ export interface OperationMethods {
    * Gets Saved View configuration by id.
    */
   'getSavedView'(
-    parameters?: Parameters<Paths.GetSavedView.PathParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSavedView.Responses.$200>
@@ -7786,7 +7524,7 @@ export interface OperationMethods {
    * Updates a saved view
    */
   'updateSavedView'(
-    parameters?: Parameters<Paths.UpdateSavedView.PathParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.UpdateSavedView.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateSavedView.Responses.$200>
@@ -7796,7 +7534,7 @@ export interface OperationMethods {
    * Deletes a saved view
    */
   'deleteSavedView'(
-    parameters?: Parameters<Paths.DeleteSavedView.PathParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSavedView.Responses.$200>
@@ -7826,7 +7564,7 @@ export interface OperationMethods {
    * Get taxonomy by slug
    */
   'getTaxonomy'(
-    parameters?: Parameters<Paths.GetTaxonomy.PathParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetTaxonomy.Responses.$200>
@@ -7836,7 +7574,7 @@ export interface OperationMethods {
    * Taxonomies autocomplete
    */
   'taxonomyAutocomplete'(
-    parameters?: Parameters<Paths.TaxonomyAutocomplete.PathParameters & Paths.TaxonomyAutocomplete.QueryParameters> | null,
+    parameters?: Parameters<Paths.TaxonomyAutocomplete.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TaxonomyAutocomplete.Responses.$200>
@@ -7846,7 +7584,7 @@ export interface OperationMethods {
    * List taxonomy classifications in an organisation based on taxonomy slug
    */
   'taxonomiesClassificationsSearch'(
-    parameters?: Parameters<Paths.TaxonomiesClassificationsSearch.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.TaxonomiesClassificationsSearch.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TaxonomiesClassificationsSearch.Responses.$200>
@@ -7856,7 +7594,7 @@ export interface OperationMethods {
    * Update taxonomies in an organisation based in taxonomy slug
    */
   'updateClassificationsForTaxonomy'(
-    parameters?: Parameters<Paths.UpdateClassificationsForTaxonomy.PathParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.UpdateClassificationsForTaxonomy.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
@@ -7882,7 +7620,7 @@ export interface PathsDictionary {
      * By default gets the latest version of the Schema and to get the specific version of schema pass the id.
      */
     'get'(
-      parameters?: Parameters<Paths.GetSchema.PathParameters & Paths.GetSchema.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetSchema.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchema.Responses.$200>
@@ -7892,7 +7630,7 @@ export interface PathsDictionary {
      * Create or update a schema with a new version
      */
     'put'(
-      parameters?: Parameters<Paths.PutSchema.PathParameters & Paths.PutSchema.QueryParameters> | null,
+      parameters?: Parameters<Paths.PutSchema.QueryParameters> | null,
       data?: Paths.PutSchema.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PutSchema.Responses.$200>
@@ -7902,7 +7640,7 @@ export interface PathsDictionary {
      * Delete a schema, or a specific version of a schema
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteSchema.PathParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchema.Responses.$204>
@@ -7914,7 +7652,7 @@ export interface PathsDictionary {
      * Get all versions of this schema ordered by the latest versions including drafts.
      */
     'get'(
-      parameters?: Parameters<Paths.GetSchemaVersions.PathParameters & Paths.GetSchemaVersions.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetSchemaVersions.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
@@ -7938,7 +7676,7 @@ export interface PathsDictionary {
      * List taxonomy classifications for a given schema
      */
     'get'(
-      parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.PathParameters & Paths.ListTaxonomyClassificationsForSchema.QueryParameters> | null,
+      parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
@@ -8052,7 +7790,7 @@ export interface PathsDictionary {
      * 
      */
     'post'(
-      parameters?: Parameters<Paths.CreateEntity.PathParameters & Paths.CreateEntity.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateEntity.Responses.$201>
@@ -8073,7 +7811,7 @@ export interface PathsDictionary {
      * 
      */
     'patch'(
-      parameters?: Parameters<Paths.UpsertEntity.PathParameters & Paths.UpsertEntity.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.UpsertEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpsertEntity.Responses.$200 | Paths.UpsertEntity.Responses.$201>
@@ -8148,7 +7886,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetEntity.PathParameters & Paths.GetEntity.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntity.Responses.$200>
@@ -8183,7 +7921,7 @@ export interface PathsDictionary {
      * 
      */
     'put'(
-      parameters?: Parameters<Paths.UpdateEntity.PathParameters & Paths.UpdateEntity.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.UpdateEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateEntity.Responses.$200>
@@ -8220,7 +7958,7 @@ export interface PathsDictionary {
      * 
      */
     'patch'(
-      parameters?: Parameters<Paths.PatchEntity.PathParameters & Paths.PatchEntity.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.PatchEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchEntity.Responses.$200>
@@ -8235,7 +7973,7 @@ export interface PathsDictionary {
      * 
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteEntity.PathParameters & Paths.DeleteEntity.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteEntity.Responses.$200>
@@ -8276,7 +8014,7 @@ export interface PathsDictionary {
      * Get activity by id
      */
     'get'(
-      parameters?: Parameters<Paths.GetActivity.PathParameters & Paths.GetActivity.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetActivity.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetActivity.Responses.$200>
@@ -8288,7 +8026,7 @@ export interface PathsDictionary {
      * Attach existing activity to entity activity feeds
      */
     'post'(
-      parameters?: Parameters<Paths.AttachActivity.PathParameters & Paths.AttachActivity.QueryParameters> | null,
+      parameters?: Parameters<Paths.AttachActivity.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AttachActivity.Responses.$200>
@@ -8301,7 +8039,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetEntityActivityFeed.PathParameters & Paths.GetEntityActivityFeed.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetEntityActivityFeed.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
@@ -8318,7 +8056,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetRelations.PathParameters & Paths.GetRelations.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetRelations.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelations.Responses.$200>
@@ -8328,7 +8066,7 @@ export interface PathsDictionary {
      * Relates one or more entities to parent entity by adding items to a relation attribute
      */
     'post'(
-      parameters?: Parameters<Paths.AddRelations.PathParameters & Paths.AddRelations.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.AddRelations.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddRelations.Responses.$200>
@@ -8345,7 +8083,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetRelationsV2.PathParameters & Paths.GetRelationsV2.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetRelationsV2.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
@@ -8362,7 +8100,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetRelationsV3.PathParameters & Paths.GetRelationsV3.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetRelationsV3.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelationsV3.Responses.$200>
@@ -8375,7 +8113,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters & Paths.GetRelatedEntitiesCount.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelatedEntitiesCount.Responses.$200>
@@ -8387,7 +8125,7 @@ export interface PathsDictionary {
      * Updates an existing relation between two entities.
      */
     'put'(
-      parameters?: Parameters<Paths.UpdateRelation.PathParameters & Paths.UpdateRelation.QueryParameters> | null,
+      parameters?: Parameters<Paths.UpdateRelation.PathParameters> | null,
       data?: Paths.UpdateRelation.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateRelation.Responses.$200>
@@ -8397,7 +8135,7 @@ export interface PathsDictionary {
      * Removes relation between two entities
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteRelation.PathParameters & Paths.DeleteRelation.QueryParameters> | null,
+      parameters?: Parameters<Paths.DeleteRelation.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteRelation.Responses.$204>
@@ -8460,7 +8198,7 @@ export interface PathsDictionary {
      * Gets Saved View configuration by id.
      */
     'get'(
-      parameters?: Parameters<Paths.GetSavedView.PathParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSavedView.Responses.$200>
@@ -8470,7 +8208,7 @@ export interface PathsDictionary {
      * Updates a saved view
      */
     'put'(
-      parameters?: Parameters<Paths.UpdateSavedView.PathParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.UpdateSavedView.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateSavedView.Responses.$200>
@@ -8480,7 +8218,7 @@ export interface PathsDictionary {
      * Deletes a saved view
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteSavedView.PathParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSavedView.Responses.$200>
@@ -8516,7 +8254,7 @@ export interface PathsDictionary {
      * Get taxonomy by slug
      */
     'get'(
-      parameters?: Parameters<Paths.GetTaxonomy.PathParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetTaxonomy.Responses.$200>
@@ -8528,7 +8266,7 @@ export interface PathsDictionary {
      * Taxonomies autocomplete
      */
     'get'(
-      parameters?: Parameters<Paths.TaxonomyAutocomplete.PathParameters & Paths.TaxonomyAutocomplete.QueryParameters> | null,
+      parameters?: Parameters<Paths.TaxonomyAutocomplete.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TaxonomyAutocomplete.Responses.$200>
@@ -8540,7 +8278,7 @@ export interface PathsDictionary {
      * List taxonomy classifications in an organisation based on taxonomy slug
      */
     'post'(
-      parameters?: Parameters<Paths.TaxonomiesClassificationsSearch.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.TaxonomiesClassificationsSearch.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TaxonomiesClassificationsSearch.Responses.$200>
@@ -8552,7 +8290,7 @@ export interface PathsDictionary {
      * Update taxonomies in an organisation based in taxonomy slug
      */
     'post'(
-      parameters?: Parameters<Paths.UpdateClassificationsForTaxonomy.PathParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.UpdateClassificationsForTaxonomy.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
