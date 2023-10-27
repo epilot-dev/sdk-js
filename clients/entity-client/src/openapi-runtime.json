@@ -707,6 +707,11 @@
     }
   },
   "components": {
+    "servers": [
+      {
+        "url": "https://entity.sls.epilot.io"
+      }
+    ],
     "parameters": {
       "EntityIdPathParam": {
         "name": "id",
