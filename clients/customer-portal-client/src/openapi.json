@@ -1547,6 +1547,72 @@
         }
       }
     },
+    "/v2/portal/registered/users": {
+      "get": {
+        "operationId": "getRegisteredUsers",
+        "summary": "getRegisteredUsers",
+        "description": "Returns the registered emails on any portal from the given emails",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "emails": {
+                    "type": "array",
+                    "example": [
+                      "john@doe.com"
+                    ],
+                    "description": "Emails array to check if they're registered on a portal",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returned whether the user exists in the portal or not successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "emails"
+                  ],
+                  "properties": {
+                    "emails": {
+                      "type": "array",
+                      "example": [
+                        "john@doe.com"
+                      ],
+                      "description": "Registered emails on a portal",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/configure-distribution": {
       "get": {
         "operationId": "configureDistribution",
