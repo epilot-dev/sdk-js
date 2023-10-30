@@ -3240,6 +3240,59 @@
           }
         }
       }
+    },
+    "/v2/portal/entity/access": {
+      "post": {
+        "operationId": "triggerEntityAccess",
+        "summary": "triggerEntityAccess",
+        "description": "Trigger entity access event for a portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "query",
+            "description": "entity ID",
+            "schema": {
+              "type": "string",
+              "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
+            }
+          },
+          {
+            "name": "schema",
+            "in": "query",
+            "description": "entity schema",
+            "schema": {
+              "type": "string",
+              "example": "contract"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The event has been triggered successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "eventId": {
+                      "type": "string",
+                      "description": "Event ID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
