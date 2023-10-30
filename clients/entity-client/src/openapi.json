@@ -95,12 +95,7 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
             "in": "query",
@@ -132,12 +127,7 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
             "in": "query",
@@ -179,12 +169,7 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           }
         ],
         "responses": {
@@ -204,12 +189,7 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
             "in": "query",
@@ -308,20 +288,10 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "taxonomySlug",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/TaxonomySlug"
-            }
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
           },
           {
             "in": "query",
@@ -406,32 +376,13 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Schema",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
-            "in": "query",
-            "name": "async",
-            "description": "Don't wait for updated entity to become available in Search API. Useful for large migrations",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
         "requestBody": {
@@ -502,42 +453,16 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Schema",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
-            "in": "query",
-            "name": "dry_run",
-            "description": "Dry Run mode = return matched entities but don't update them.",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
+            "$ref": "#/components/parameters/DryRunQueryParam"
           },
           {
-            "in": "query",
-            "name": "async",
-            "description": "Don't wait for updated entity to become available in Search API. Useful for large migrations",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
         "requestBody": {
@@ -605,31 +530,13 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "query",
-            "name": "hydrate",
-            "description": "When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.",
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           }
         ],
         "responses": {
@@ -665,41 +572,16 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
-            "in": "query",
-            "name": "async",
-            "description": "Don't wait for updated entity to become available in Search API. Useful for large migrations",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
         "requestBody": {
@@ -734,51 +616,19 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Schema",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "description": "Entity Id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
-            "in": "query",
-            "name": "dry_run",
-            "description": "Dry Run mode = returns the patch result but doesn't perform the patch.",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
+            "$ref": "#/components/parameters/DryRunQueryParam"
           },
           {
-            "in": "query",
-            "name": "async",
-            "description": "Don't wait for the patch entity to become available in Search API. Useful for large migrations",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
         "requestBody": {
@@ -817,30 +667,13 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "responses": {
@@ -993,13 +826,7 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "description": "Activity Id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
+            "$ref": "#/components/parameters/ActivityIdPathParam"
           },
           {
             "in": "query",
@@ -1047,13 +874,7 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "description": "Activity Id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
+            "$ref": "#/components/parameters/ActivityIdPathParam"
           },
           {
             "in": "query",
@@ -1093,22 +914,10 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
             "in": "query",
@@ -1129,14 +938,7 @@
             }
           },
           {
-            "in": "query",
-            "name": "from",
-            "description": "start from page",
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0
-            }
+            "$ref": "#/components/parameters/FromPageQueryParam"
           },
           {
             "in": "query",
@@ -1203,40 +1005,37 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeReverseQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FromPageQueryParam"
           },
           {
             "in": "query",
-            "name": "hydrate",
-            "description": "When true, expand relation items with full blown entities.",
+            "name": "size",
+            "description": "Number of results to return per page",
+            "required": false,
             "schema": {
-              "default": false,
-              "type": "boolean"
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
             }
           },
           {
-            "in": "query",
-            "name": "include_reverse",
-            "description": "When true, includes reverse relations in response (other entities pointing to this entity)",
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
+            "$ref": "#/components/parameters/IncludeSchemasQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
           }
         ],
         "responses": {
@@ -1296,41 +1095,16 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "async",
-            "description": "Don't wait for updated entity to become available in Search API. Useful for large migrations",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "requestBody": {
@@ -1386,31 +1160,13 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
-            "in": "query",
-            "name": "hydrate",
-            "description": "When true, expand relation items with full blown entities.",
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
             "in": "query",
@@ -1421,23 +1177,10 @@
             }
           },
           {
-            "in": "query",
-            "name": "include_reverse",
-            "description": "When true, includes reverse relations in response (other entities pointing to this entity)",
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
+            "$ref": "#/components/parameters/IncludeReverseQueryParam"
           },
           {
-            "in": "query",
-            "name": "from",
-            "description": "Starting page number",
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0
-            }
+            "$ref": "#/components/parameters/FromPageQueryParam"
           },
           {
             "in": "query",
@@ -1446,6 +1189,7 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
+              "maximum": 1000,
               "default": 50
             }
           },
@@ -1480,6 +1224,63 @@
         }
       }
     },
+    "/v3/entity/{slug}/{id}/relations": {
+      "get": {
+        "operationId": "getRelationsV3",
+        "summary": "getRelationsV3",
+        "description": "Returns 1st level direct relations for an entity with pagination.\n\nYou can control whether to return the full entity or just the relation item with the `?hydrate` query param.\n\nReverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.\n",
+        "tags": [
+          "Relations"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeReverseQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FromPageQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "Number of results to return per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IncludeSchemasQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRelationsRespWithPagination"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/entity/{slug}/{id}/relations/count": {
       "get": {
         "operationId": "getRelatedEntitiesCount",
@@ -1490,22 +1291,13 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
           }
         ],
         "responses": {
@@ -1532,22 +1324,10 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
             "in": "path",
@@ -1568,23 +1348,10 @@
             }
           },
           {
-            "in": "query",
-            "name": "async",
-            "description": "Don't wait for updated entity to become available in Search API. Useful for large migrations",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "requestBody": {
@@ -1632,22 +1399,10 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "slug",
-            "description": "Entity Type",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            }
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "id",
-            "description": "Entity id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            }
+            "$ref": "#/components/parameters/EntityIdPathParam"
           },
           {
             "in": "path",
@@ -1668,23 +1423,10 @@
             }
           },
           {
-            "in": "query",
-            "name": "async",
-            "description": "Don't wait for updated entity to become available in Search API. Useful for large migrations",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           },
           {
-            "in": "query",
-            "name": "activity_id",
-            "description": "Activity to include in event feed",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ActivityId"
-            }
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "responses": {
@@ -1849,13 +1591,7 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "description": "View id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/SavedViewId"
-            }
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
           }
         ],
         "responses": {
@@ -1885,13 +1621,7 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "description": "View id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/SavedViewId"
-            }
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
           }
         ],
         "requestBody": {
@@ -1922,13 +1652,7 @@
         "description": "Deletes a saved view",
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "description": "View id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/SavedViewId"
-            }
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
           }
         ],
         "tags": [
@@ -2011,13 +1735,7 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "taxonomySlug",
-            "description": "Taxonomy slug to return taxonomy for",
-            "schema": {
-              "$ref": "#/components/schemas/TaxonomySlug"
-            },
-            "required": true
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
           }
         ],
         "responses": {
@@ -2044,13 +1762,7 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "taxonomySlug",
-            "description": "Limit results to slug",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
           },
           {
             "in": "query",
@@ -2101,13 +1813,7 @@
         ],
         "parameters": [
           {
-            "in": "query",
-            "name": "taxonomySlug",
-            "description": "Taxonomy slug",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
+            "$ref": "#/components/parameters/TaxonomySlugQueryParam"
           }
         ],
         "requestBody": {
@@ -2159,13 +1865,7 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "taxonomySlug",
-            "description": "Taxonomy slug",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
           }
         ],
         "requestBody": {
@@ -2370,6 +2070,12 @@
                           "example": "email"
                         }
                       ]
+                    }
+                  },
+                  "quick_actions": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityAction"
                     }
                   }
                 }
@@ -3231,6 +2937,34 @@
           }
         }
       },
+      "EntityAction": {
+        "type": "object",
+        "description": "An entity action configured from the entity schema",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "A unique action name",
+            "example": "preview_file"
+          },
+          "label": {
+            "type": "string",
+            "example": "Preview File"
+          },
+          "icon": {
+            "type": "string",
+            "example": "visibility"
+          },
+          "permission": {
+            "type": "string",
+            "example": "entity:edit",
+            "description": "Permission required to show the action.\nIf not provided, the action will be shown to all users.\n"
+          }
+        },
+        "required": [
+          "action",
+          "label"
+        ]
+      },
       "RelationAttribute": {
         "allOf": [
           {
@@ -3998,7 +3732,14 @@
           "row_actions": {
             "type": "array",
             "items": {
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/components/schemas/EntityAction"
+                }
+              ]
             }
           },
           "navbar_actions": {
@@ -4057,17 +3798,6 @@
             "additionalProperties": {
               "type": "string"
             }
-          },
-          "table_menu_options": {
-            "type": "object",
-            "properties": {
-              "icon": {
-                "type": "string"
-              },
-              "label": {
-                "type": "string"
-              }
-            }
           }
         }
       },
@@ -4084,17 +3814,6 @@
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
-          },
-          "table_menu_options": {
-            "type": "object",
-            "properties": {
-              "icon": {
-                "type": "string"
-              },
-              "label": {
-                "type": "string"
-              }
             }
           },
           "summary_attributes": {
@@ -5028,6 +4747,148 @@
         }
       }
     },
+    "parameters": {
+      "EntityIdPathParam": {
+        "name": "id",
+        "description": "Entity id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/EntityId"
+        }
+      },
+      "EntitySlugPathParam": {
+        "name": "slug",
+        "description": "Entity Type",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/EntitySlug"
+        }
+      },
+      "TaxonomySlugQueryParam": {
+        "name": "taxonomySlug",
+        "description": "Taxonomy slug",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "TaxonomySlugPathParam": {
+        "name": "taxonomySlug",
+        "description": "Taxonomy slug",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "SavedViewIdPathParam": {
+        "name": "id",
+        "description": "View id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/SavedViewId"
+        }
+      },
+      "AsyncOperationQueryParam": {
+        "name": "async",
+        "description": "Don't wait for updated entity to become available in Search API. Useful for large migrations",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "HydrateEntitiesQueryParam": {
+        "name": "hydrate",
+        "description": "When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.",
+        "in": "query",
+        "schema": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "ActivityIdQueryParam": {
+        "name": "activity_id",
+        "description": "Activity to include in event feed",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/ActivityId"
+        }
+      },
+      "ActivityIdPathParam": {
+        "name": "id",
+        "description": "Activity Id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/ActivityId"
+        }
+      },
+      "FromPageQueryParam": {
+        "name": "from",
+        "description": "Starting page number",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        }
+      },
+      "IncludeReverseQueryParam": {
+        "name": "include_reverse",
+        "description": "When true, includes reverse relations in response (other entities pointing to this entity)",
+        "in": "query",
+        "schema": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "IncludeSchemasQueryParam": {
+        "name": "include_schemas",
+        "description": "Filter results to only include schemas",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/EntitySlug"
+          }
+        }
+      },
+      "ExcludeSchemasQueryParam": {
+        "name": "exclude_schemas",
+        "description": "Filter results to exclude schemas",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "example": "<url>/<operation>?exclude_schemas=file,message",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/EntitySlug"
+          }
+        }
+      },
+      "DryRunQueryParam": {
+        "name": "dry_run",
+        "description": "Dry Run mode = return results but does not perform the operation.",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
     "examples": {
       "TaxEntity": {
         "description": "Example of a Tax Rate entity",
@@ -5643,10 +5504,5 @@
         }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    }
-  ]
+  }
 }
