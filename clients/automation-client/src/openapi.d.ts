@@ -653,6 +653,10 @@ declare namespace Components {
              * 123
              */
             org_id?: string;
+            /**
+             * Determines if the flow is a system generated flow
+             */
+            system_flow?: boolean;
         }
         /**
          * example:

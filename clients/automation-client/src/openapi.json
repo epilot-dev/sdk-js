@@ -494,6 +494,10 @@
             "example": "123",
             "description": "Organization the automation flow belongs to",
             "readOnly": true
+          },
+          "system_flow": {
+            "type": "boolean",
+            "description": "Determines if the flow is a system generated flow"
           }
         },
         "required": [
