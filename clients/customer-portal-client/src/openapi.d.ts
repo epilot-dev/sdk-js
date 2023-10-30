@@ -3410,7 +3410,7 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 /**
-                 * Event ID returned by event bus.
+                 * Event ID
                  */
                 eventId?: string;
             }

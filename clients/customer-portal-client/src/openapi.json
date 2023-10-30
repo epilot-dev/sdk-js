@@ -3276,7 +3276,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The event has been sent to the event bus bus successfully.",
+            "description": "The event has been triggered successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3284,7 +3284,7 @@
                   "properties": {
                     "eventId": {
                       "type": "string",
-                      "description": "Event ID returned by event bus."
+                      "description": "Event ID"
                     }
                   }
                 }
