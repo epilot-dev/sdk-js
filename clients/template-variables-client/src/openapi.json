@@ -526,6 +526,12 @@
             "description": "User ID",
             "example": 50001
           },
+          "user_org_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Organization ID of the user",
+            "example": 729224
+          },
           "custom_variables": {
             "type": "array",
             "description": "Custom variables with specified values form other services.",
@@ -547,6 +553,11 @@
             "items": {
               "type": "string"
             }
+          },
+          "variables_version": {
+            "type": "string",
+            "description": "The version of the variables syntax supported. Default is 1.0",
+            "example": 2
           }
         },
         "required": [
@@ -1415,9 +1426,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://template-variables-api.sls.epilot.io"
-    },
     {
       "url": "https://template-variables-api.sls.epilot.io"
     }

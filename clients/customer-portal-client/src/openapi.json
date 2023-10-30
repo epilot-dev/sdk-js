@@ -2456,6 +2456,116 @@
         }
       }
     },
+    "/v2/portal/entity/{slug}/{id}/activity": {
+      "get": {
+        "operationId": "getEntityActivityFeed",
+        "summary": "getEntityActivityFeed",
+        "description": "Get activity feed for an entity\n",
+        "tags": [
+          "Activity"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity Type",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Entity id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "after",
+            "description": "Get activities after this timestamp",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "before",
+            "description": "get activities before this timestamp",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "description": "start from page",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "max number of results to return",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 25
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "description": "Filter by activity type",
+            "schema": {
+              "type": "string",
+              "example": "SyncActivity"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_relations",
+            "description": "Include activities from related entities",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ActivityItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/portal/entity/activity": {
       "put": {
         "operationId": "createCustomEntityActivity",
@@ -3130,6 +3240,59 @@
           }
         }
       }
+    },
+    "/v2/portal/entity/access": {
+      "post": {
+        "operationId": "triggerEntityAccess",
+        "summary": "triggerEntityAccess",
+        "description": "Trigger entity access event for a portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "query",
+            "description": "entity ID",
+            "schema": {
+              "type": "string",
+              "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
+            }
+          },
+          {
+            "name": "schema",
+            "in": "query",
+            "description": "entity schema",
+            "schema": {
+              "type": "string",
+              "example": "contract"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The event has been triggered successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "eventId": {
+                      "type": "string",
+                      "description": "Event ID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3554,6 +3717,10 @@
               "start_page": {
                 "type": "boolean",
                 "description": "Start page feature flag"
+              },
+              "billing": {
+                "type": "boolean",
+                "description": "Billing feature flag"
               }
             }
           },
@@ -3947,30 +4114,30 @@
       "TeaserWidget": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/ActionWidget"
+            "$ref": "#/components/schemas/WidgetBase"
           },
           {
             "type": "object",
             "properties": {
-              "left": {
-                "type": "object",
-                "properties": {
-                  "show": {
-                    "type": "boolean"
-                  },
-                  "showButton": {
-                    "type": "boolean"
-                  }
-                }
+              "imageUrl": {
+                "type": "string"
               },
-              "right": {
+              "button": {
                 "type": "object",
                 "properties": {
-                  "show": {
-                    "type": "boolean"
+                  "label": {
+                    "type": "object",
+                    "properties": {
+                      "en": {
+                        "type": "string"
+                      },
+                      "de": {
+                        "type": "string"
+                      }
+                    }
                   },
-                  "showButton": {
-                    "type": "boolean"
+                  "url": {
+                    "type": "string"
                   }
                 }
               }

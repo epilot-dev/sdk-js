@@ -1342,6 +1342,10 @@ declare namespace Components {
                  * Start page feature flag
                  */
                 start_page?: boolean;
+                /**
+                 * Billing feature flag
+                 */
+                billing?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -1837,14 +1841,13 @@ declare namespace Components {
                 en?: string;
                 de?: string;
             };
-            actions?: WidgetAction[];
-            left?: {
-                show?: boolean;
-                showButton?: boolean;
-            };
-            right?: {
-                show?: boolean;
-                showButton?: boolean;
+            imageUrl?: string;
+            button?: {
+                label?: {
+                    en?: string;
+                    de?: string;
+                };
+                url?: string;
             };
         }
         export interface UpsertPortalConfig {
@@ -1898,6 +1901,10 @@ declare namespace Components {
                  * Start page feature flag
                  */
                 start_page?: boolean;
+                /**
+                 * Billing feature flag
+                 */
+                billing?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -2821,6 +2828,58 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetEntityActivityFeed {
+        namespace Parameters {
+            export type After = string; // date-time
+            export type Before = string; // date-time
+            export type From = number;
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId;
+            export type IncludeRelations = boolean;
+            export type Size = number;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+            /**
+             * example:
+             * SyncActivity
+             */
+            export type Type = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            after?: Parameters.After /* date-time */;
+            before?: Parameters.Before /* date-time */;
+            from?: Parameters.From;
+            size?: Parameters.Size;
+            type?: /**
+             * example:
+             * SyncActivity
+             */
+            Parameters.Type;
+            include_relations?: Parameters.IncludeRelations;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * 1
+                 */
+                total?: number;
+                results?: Components.Schemas.ActivityItem[];
+            }
+        }
+    }
     namespace GetEntityIdentifiers {
         namespace Parameters {
             export type Slug = /**
@@ -3321,6 +3380,40 @@ declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace TriggerEntityAccess {
+        namespace Parameters {
+            /**
+             * example:
+             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
+             */
+            export type EntityId = string;
+            /**
+             * example:
+             * contract
+             */
+            export type Schema = string;
+        }
+        export interface QueryParameters {
+            entity_id?: /**
+             * example:
+             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
+             */
+            Parameters.EntityId;
+            schema?: /**
+             * example:
+             * contract
+             */
+            Parameters.Schema;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Event ID
+                 */
+                eventId?: string;
+            }
         }
     }
     namespace UpdateContact {
@@ -3932,6 +4025,17 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddEndCustomerRelationToEntity.Responses.$200>
   /**
+   * getEntityActivityFeed - getEntityActivityFeed
+   * 
+   * Get activity feed for an entity
+   * 
+   */
+  'getEntityActivityFeed'(
+    parameters?: Parameters<Paths.GetEntityActivityFeed.PathParameters & Paths.GetEntityActivityFeed.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
+  /**
    * createCustomEntityActivity - createCustomEntityActivity
    * 
    * Create a custom activity that can be displayed in activity feed of an entity.
@@ -4044,6 +4148,16 @@ export interface OperationMethods {
     data?: Paths.LoginToPortalAsUser.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.LoginToPortalAsUser.Responses.$200>
+  /**
+   * triggerEntityAccess - triggerEntityAccess
+   * 
+   * Trigger entity access event for a portal user
+   */
+  'triggerEntityAccess'(
+    parameters?: Parameters<Paths.TriggerEntityAccess.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TriggerEntityAccess.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -4533,6 +4647,19 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddEndCustomerRelationToEntity.Responses.$200>
   }
+  ['/v2/portal/entity/{slug}/{id}/activity']: {
+    /**
+     * getEntityActivityFeed - getEntityActivityFeed
+     * 
+     * Get activity feed for an entity
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEntityActivityFeed.PathParameters & Paths.GetEntityActivityFeed.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
+  }
   ['/v2/portal/entity/activity']: {
     /**
      * createCustomEntityActivity - createCustomEntityActivity
@@ -4665,6 +4792,18 @@ export interface PathsDictionary {
       data?: Paths.LoginToPortalAsUser.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.LoginToPortalAsUser.Responses.$200>
+  }
+  ['/v2/portal/entity/access']: {
+    /**
+     * triggerEntityAccess - triggerEntityAccess
+     * 
+     * Trigger entity access event for a portal user
+     */
+    'post'(
+      parameters?: Parameters<Paths.TriggerEntityAccess.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TriggerEntityAccess.Responses.$200>
   }
 }
 
