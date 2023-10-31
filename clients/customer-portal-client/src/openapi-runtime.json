@@ -307,6 +307,23 @@
         "operationId": "deletePortalUser"
       }
     },
+    "/v2/porta/users/by-related-entity": {
+      "get": {
+        "operationId": "fetchPortalUsersByRelatedEntity",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "slug",
+            "required": true
+          }
+        ]
+      }
+    },
     "/v2/portal/user/confirm/{id}": {
       "get": {
         "operationId": "confirmUser",

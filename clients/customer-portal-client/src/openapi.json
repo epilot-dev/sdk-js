@@ -1429,6 +1429,68 @@
         }
       }
     },
+    "/v2/porta/users/by-related-entity": {
+      "get": {
+        "operationId": "fetchPortalUsersByRelatedEntity",
+        "summary": "fetchPortalUsersByRelatedEntity",
+        "description": "Get all users for a given entity",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the portal users under the given entity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "portalUsers": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PortalUser"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/user/confirm/{id}": {
       "get": {
         "operationId": "confirmUser",
@@ -4733,15 +4795,179 @@
           },
           {
             "type": "object",
-            "required": [
-              "_schema"
-            ],
             "properties": {
-              "_schema": {
+              "contract_name": {
+                "type": "string",
+                "description": "The name of the contract.",
+                "example": "Grid Contract"
+              },
+              "contract_number": {
+                "type": "string",
+                "description": "The unique identifier of the contract.",
+                "example": "12345"
+              },
+              "status": {
                 "type": "string",
                 "enum": [
-                  "contract"
-                ]
+                  "draft",
+                  "in_approval_process",
+                  "approved",
+                  "active",
+                  "deactivated",
+                  "revoked",
+                  "terminated",
+                  "expired"
+                ],
+                "default": "draft",
+                "description": "The status of the contract.",
+                "example": "approved"
+              },
+              "description": {
+                "type": "string",
+                "description": "A brief description of the contract.",
+                "example": "This contract is for the supply of widgets."
+              },
+              "account_number": {
+                "type": "string",
+                "description": "The account number associated with the contract.",
+                "example": "67890"
+              },
+              "branch": {
+                "type": "string",
+                "enum": [
+                  "power",
+                  "gas",
+                  "water",
+                  "waste_water",
+                  "district_heating"
+                ],
+                "description": "The branch associated with the contract.",
+                "example": "power"
+              },
+              "billing_address": {
+                "type": "string",
+                "description": "The billing address associated with the contract.",
+                "example": "123 Main St, Anytown"
+              },
+              "delivery_address": {
+                "type": "string",
+                "description": "The delivery address associated with the contract.",
+                "example": "456 Elm St, Anytown"
+              },
+              "additional_addresses": {
+                "type": "string",
+                "description": "Any additional addresses associated with the contract.",
+                "example": "789 Oak St, Anytown"
+              },
+              "termination_date": {
+                "type": "string",
+                "description": "The date on which the contract was terminated.",
+                "example": "2022-01-01"
+              },
+              "termination_reason": {
+                "type": "string",
+                "description": "The reason for the termination of the contract.",
+                "example": "Non-payment"
+              },
+              "billing_period": {
+                "type": "string",
+                "enum": [
+                  "weekly",
+                  "monthly",
+                  "every_quarter",
+                  "every_6_months",
+                  "yearly"
+                ],
+                "default": "weekly",
+                "description": "The billing period associated with the contract.",
+                "example": "monthly"
+              },
+              "billing_duration_amount": {
+                "type": "number",
+                "minimum": 0,
+                "description": "The duration of the billing period.",
+                "example": 30
+              },
+              "renewal_duration_amount": {
+                "type": "number",
+                "minimum": 0,
+                "description": "The duration of the renewal period.",
+                "example": 365
+              },
+              "renewal_duration_unit": {
+                "type": "string",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ],
+                "default": "months",
+                "description": "The unit of time for the renewal period.",
+                "example": "years"
+              },
+              "notice_time_amount": {
+                "type": "number",
+                "minimum": 0,
+                "description": "The amount of notice required for termination of the contract.",
+                "example": 30
+              },
+              "notice_time_unit": {
+                "type": "string",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ],
+                "default": "months",
+                "description": "The unit of time for the notice period.",
+                "example": "months"
+              },
+              "start_date": {
+                "type": "string",
+                "description": "The start date of the contract.",
+                "example": "2021-01-01"
+              },
+              "billing_schedule_by_month_day": {
+                "type": "integer",
+                "description": "Defines the day of the month in which the installments are due.",
+                "minimum": 1,
+                "maximum": 31,
+                "example": 2
+              },
+              "billing_schedule_start_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Defines the start date for the billing schedule",
+                "example": "2020-01-01T00:00:00.000Z"
+              },
+              "billing_schedule_end_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Defines the end date for the billing schedule",
+                "example": "2020-01-01T00:00:00.000Z"
+              },
+              "installment_amount": {
+                "type": "integer",
+                "description": "Set amount for installments in cents. (precision 2)",
+                "example": 10050
+              },
+              "installment_amount_decimal": {
+                "type": "string",
+                "description": "Set amount for installments in decimal string representation.",
+                "example": "100.50"
+              },
+              "balance": {
+                "type": "integer",
+                "description": "Current balance of the contract in cents. (precision 2)",
+                "example": 8990
+              },
+              "balance_amount_decimal": {
+                "type": "string",
+                "description": "Current balance of the contract in decimal string representation.",
+                "example": "89.90"
+              },
+              "balance_currency": {
+                "$ref": "#/components/schemas/Currency"
               }
             }
           }
