@@ -512,7 +512,162 @@ declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
-            _schema: "contract";
+            /**
+             * The name of the contract.
+             * example:
+             * Grid Contract
+             */
+            contract_name?: string;
+            /**
+             * The unique identifier of the contract.
+             * example:
+             * 12345
+             */
+            contract_number?: string;
+            /**
+             * The status of the contract.
+             * example:
+             * approved
+             */
+            status?: "draft" | "in_approval_process" | "approved" | "active" | "deactivated" | "revoked" | "terminated" | "expired";
+            /**
+             * A brief description of the contract.
+             * example:
+             * This contract is for the supply of widgets.
+             */
+            description?: string;
+            /**
+             * The account number associated with the contract.
+             * example:
+             * 67890
+             */
+            account_number?: string;
+            /**
+             * The branch associated with the contract.
+             * example:
+             * power
+             */
+            branch?: "power" | "gas" | "water" | "waste_water" | "district_heating";
+            /**
+             * The billing address associated with the contract.
+             * example:
+             * 123 Main St, Anytown
+             */
+            billing_address?: string;
+            /**
+             * The delivery address associated with the contract.
+             * example:
+             * 456 Elm St, Anytown
+             */
+            delivery_address?: string;
+            /**
+             * Any additional addresses associated with the contract.
+             * example:
+             * 789 Oak St, Anytown
+             */
+            additional_addresses?: string;
+            /**
+             * The date on which the contract was terminated.
+             * example:
+             * 2022-01-01
+             */
+            termination_date?: string;
+            /**
+             * The reason for the termination of the contract.
+             * example:
+             * Non-payment
+             */
+            termination_reason?: string;
+            /**
+             * The billing period associated with the contract.
+             * example:
+             * monthly
+             */
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
+            /**
+             * The duration of the billing period.
+             * example:
+             * 30
+             */
+            billing_duration_amount?: number;
+            /**
+             * The duration of the renewal period.
+             * example:
+             * 365
+             */
+            renewal_duration_amount?: number;
+            /**
+             * The unit of time for the renewal period.
+             * example:
+             * years
+             */
+            renewal_duration_unit?: "weeks" | "months" | "years";
+            /**
+             * The amount of notice required for termination of the contract.
+             * example:
+             * 30
+             */
+            notice_time_amount?: number;
+            /**
+             * The unit of time for the notice period.
+             * example:
+             * months
+             */
+            notice_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The start date of the contract.
+             * example:
+             * 2021-01-01
+             */
+            start_date?: string;
+            /**
+             * Defines the day of the month in which the installments are due.
+             * example:
+             * 2
+             */
+            billing_schedule_by_month_day?: number;
+            /**
+             * Defines the start date for the billing schedule
+             * example:
+             * 2020-01-01T00:00:00.000Z
+             */
+            billing_schedule_start_date?: string; // date
+            /**
+             * Defines the end date for the billing schedule
+             * example:
+             * 2020-01-01T00:00:00.000Z
+             */
+            billing_schedule_end_date?: string; // date
+            /**
+             * Set amount for installments in cents. (precision 2)
+             * example:
+             * 10050
+             */
+            installment_amount?: number;
+            /**
+             * Set amount for installments in decimal string representation.
+             * example:
+             * 100.50
+             */
+            installment_amount_decimal?: string;
+            /**
+             * Current balance of the contract in cents. (precision 2)
+             * example:
+             * 8990
+             */
+            balance?: number;
+            /**
+             * Current balance of the contract in decimal string representation.
+             * example:
+             * 89.90
+             */
+            balance_amount_decimal?: string;
+            balance_currency?: /**
+             * Currency code in ISO 4217 format
+             * example:
+             * EUR
+             */
+            Currency;
         }
         export interface CreateSSOUserRequest {
             /**
@@ -2357,6 +2512,34 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace FetchPortalUsersByRelatedEntity {
+        namespace Parameters {
+            export type EntityId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface QueryParameters {
+            entity_id: Parameters.EntityId;
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            export interface $200 {
+                portalUsers?: /* The portal user entity */ Components.Schemas.PortalUser[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetAllContracts {
         namespace Parameters {
             /**
@@ -3875,6 +4058,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortalUser.Responses.$200>
   /**
+   * fetchPortalUsersByRelatedEntity - fetchPortalUsersByRelatedEntity
+   * 
+   * Get all users for a given entity
+   */
+  'fetchPortalUsersByRelatedEntity'(
+    parameters?: Parameters<Paths.FetchPortalUsersByRelatedEntity.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.FetchPortalUsersByRelatedEntity.Responses.$200>
+  /**
    * confirmUser - confirmUser
    * 
    * Confirm a portal user
@@ -4472,6 +4665,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortalUser.Responses.$200>
+  }
+  ['/v2/porta/users/by-related-entity']: {
+    /**
+     * fetchPortalUsersByRelatedEntity - fetchPortalUsersByRelatedEntity
+     * 
+     * Get all users for a given entity
+     */
+    'get'(
+      parameters?: Parameters<Paths.FetchPortalUsersByRelatedEntity.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.FetchPortalUsersByRelatedEntity.Responses.$200>
   }
   ['/v2/portal/user/confirm/{id}']: {
     /**
