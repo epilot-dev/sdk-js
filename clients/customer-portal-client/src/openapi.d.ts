@@ -897,6 +897,38 @@ declare namespace Components {
              */
             EntitySlug;
         }
+        export interface EntitySearchParams {
+            slug: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            /**
+             * example:
+             * _created_at:desc
+             */
+            sort?: string;
+            from?: number;
+            /**
+             * Max search size is 1000 with higher values defaulting to 1000
+             */
+            size?: number;
+            /**
+             * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
+             */
+            hydrate?: boolean;
+            /**
+             * List of entity fields to include in search results
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name"
+             * ]
+             */
+            fields?: string[];
+        }
         /**
          * URL-friendly identifier for the entity schema
          * example:
@@ -3543,6 +3575,24 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SearchPortalUserEntities {
+        export type RequestBody = Components.Schemas.EntitySearchParams;
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.EntityItem[];
+                /**
+                 * Total number of entities for pagination
+                 * example:
+                 * 50
+                 */
+                hits?: number;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace TrackFileDownloaded {
         namespace Parameters {
             export type Id = /**
@@ -4351,6 +4401,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerEntityAccess.Responses.$200>
+  /**
+   * searchPortalUserEntities - searchPortalUserEntities
+   * 
+   * Search all entities of a portal user
+   */
+  'searchPortalUserEntities'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchPortalUserEntities.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -5009,6 +5069,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TriggerEntityAccess.Responses.$200>
+  }
+  ['/v2/portal/entity:search']: {
+    /**
+     * searchPortalUserEntities - searchPortalUserEntities
+     * 
+     * Search all entities of a portal user
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchPortalUserEntities.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
   }
 }
 

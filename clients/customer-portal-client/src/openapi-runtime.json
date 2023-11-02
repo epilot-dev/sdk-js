@@ -766,6 +766,16 @@
           }
         ]
       }
+    },
+    "/v2/portal/entity:search": {
+      "post": {
+        "operationId": "searchPortalUserEntities",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
     }
   },
   "components": {
