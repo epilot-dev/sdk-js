@@ -3355,6 +3355,67 @@
           }
         }
       }
+    },
+    "/v2/portal/entity:search": {
+      "post": {
+        "operationId": "searchPortalUserEntities",
+        "summary": "searchPortalUserEntities",
+        "description": "Search all entities of a portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntitySearchParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The entities is retrieved successfully for the portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
+                    },
+                    "hits": {
+                      "type": "number",
+                      "description": "Total number of entities for pagination",
+                      "example": 50
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5565,6 +5626,49 @@
         "type": "string",
         "description": "Currency code in ISO 4217 format",
         "example": "EUR"
+      },
+      "EntitySearchParams": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/EntitySlug"
+          },
+          "sort": {
+            "type": "string",
+            "example": "_created_at:desc"
+          },
+          "from": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 10,
+            "description": "Max search size is 1000 with higher values defaulting to 1000"
+          },
+          "hydrate": {
+            "type": "boolean",
+            "description": "When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.",
+            "default": false
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of entity fields to include in search results",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "_id",
+              "_title",
+              "first_name"
+            ]
+          }
+        },
+        "required": [
+          "slug"
+        ]
       }
     }
   },
