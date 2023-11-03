@@ -2628,6 +2628,112 @@
         }
       }
     },
+    "/v2/portal/{slug}/{id}:validateRule": {
+      "get": {
+        "operationId": "validateCadenceEntityEditRules",
+        "summary": "validateCadenceEntityEditRules",
+        "description": "Validate if cadence rule is valid for an entity\n",
+        "tags": [
+          "ECP"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity Type",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Entity id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "attribute",
+            "description": "Get activities after this timestamp",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "isBlockedByRules": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "failedRule": {
+                      "$ref": "#/components/schemas/EntityEditRule"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/portal/entities-by-payment/{id}": {
+      "get": {
+        "operationId": "searchPaymentRelationsInEntities",
+        "summary": "searchPaymentRelationsInEntities",
+        "description": "Search for entities that have the payment relation with the given payment id\n",
+        "tags": [
+          "ECP"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Entity id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entities that have the payment relation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
+                    },
+                    "hits": {
+                      "type": "number",
+                      "description": "Total number of files for entities found",
+                      "example": 50
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/portal/entity/activity": {
       "put": {
         "operationId": "createCustomEntityActivity",
@@ -5172,6 +5278,41 @@
           "title",
           "message"
         ]
+      },
+      "EntityEditRule": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/EntitySlug"
+          },
+          "attribute": {
+            "type": "string"
+          },
+          "rule_type": {
+            "type": "string"
+          },
+          "cadence_period_type": {
+            "type": "string"
+          },
+          "changes_allowed": {
+            "type": "number"
+          },
+          "cadence_period": {
+            "type": "number"
+          },
+          "allowed_decrement": {
+            "type": "string"
+          },
+          "allowed_increment": {
+            "type": "string"
+          },
+          "number_of_days_before_restriction": {
+            "type": "number"
+          },
+          "grace_period": {
+            "type": "number"
+          }
+        }
       },
       "ActivityItem": {
         "allOf": [
