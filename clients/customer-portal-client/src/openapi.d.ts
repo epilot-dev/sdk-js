@@ -823,6 +823,23 @@ declare namespace Components {
         export interface Entity {
             [name: string]: any;
         }
+        export interface EntityEditRule {
+            slug?: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            attribute?: string;
+            rule_type?: string;
+            cadence_period_type?: string;
+            changes_allowed?: number;
+            cadence_period?: number;
+            allowed_decrement?: string;
+            allowed_increment?: string;
+            number_of_days_before_restriction?: number;
+            grace_period?: number;
+        }
         export interface EntityFileCount {
             /**
              * The ID of the parent entity
@@ -3606,6 +3623,30 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SearchPaymentRelationsInEntities {
+        namespace Parameters {
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.EntityItem[];
+                /**
+                 * Total number of files for entities found
+                 * example:
+                 * 50
+                 */
+                hits?: number;
+            }
+        }
+    }
     namespace SearchPortalUserEntities {
         export type RequestBody = Components.Schemas.EntitySearchParams;
         namespace Responses {
@@ -3863,6 +3904,40 @@ declare namespace Paths {
                 user?: /* The portal user entity */ Components.Schemas.PortalUser;
             }
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ValidateCadenceEntityEditRules {
+        namespace Parameters {
+            export type Attribute = string; // date-time
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            attribute?: Parameters.Attribute /* date-time */;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * false
+                 */
+                isBlockedByRules?: boolean;
+                failedRule?: Components.Schemas.EntityEditRule;
+            }
         }
     }
 }
@@ -4319,6 +4394,28 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
+  /**
+   * validateCadenceEntityEditRules - validateCadenceEntityEditRules
+   * 
+   * Validate if cadence rule is valid for an entity
+   * 
+   */
+  'validateCadenceEntityEditRules'(
+    parameters?: Parameters<Paths.ValidateCadenceEntityEditRules.PathParameters & Paths.ValidateCadenceEntityEditRules.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateCadenceEntityEditRules.Responses.$200>
+  /**
+   * searchPaymentRelationsInEntities - searchPaymentRelationsInEntities
+   * 
+   * Search for entities that have the payment relation with the given payment id
+   * 
+   */
+  'searchPaymentRelationsInEntities'(
+    parameters?: Parameters<Paths.SearchPaymentRelationsInEntities.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchPaymentRelationsInEntities.Responses.$200>
   /**
    * createCustomEntityActivity - createCustomEntityActivity
    * 
@@ -4977,6 +5074,32 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
+  }
+  ['/v2/portal/{slug}/{id}:validateRule']: {
+    /**
+     * validateCadenceEntityEditRules - validateCadenceEntityEditRules
+     * 
+     * Validate if cadence rule is valid for an entity
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ValidateCadenceEntityEditRules.PathParameters & Paths.ValidateCadenceEntityEditRules.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateCadenceEntityEditRules.Responses.$200>
+  }
+  ['/v2/portal/entities-by-payment/{id}']: {
+    /**
+     * searchPaymentRelationsInEntities - searchPaymentRelationsInEntities
+     * 
+     * Search for entities that have the payment relation with the given payment id
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.SearchPaymentRelationsInEntities.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchPaymentRelationsInEntities.Responses.$200>
   }
   ['/v2/portal/entity/activity']: {
     /**

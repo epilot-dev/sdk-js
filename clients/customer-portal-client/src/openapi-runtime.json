@@ -612,6 +612,39 @@
         ]
       }
     },
+    "/v2/portal/{slug}/{id}:validateRule": {
+      "get": {
+        "operationId": "validateCadenceEntityEditRules",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "attribute"
+          }
+        ]
+      }
+    },
+    "/v2/portal/entities-by-payment/{id}": {
+      "get": {
+        "operationId": "searchPaymentRelationsInEntities",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
     "/v2/portal/entity/activity": {
       "put": {
         "operationId": "createCustomEntityActivity",
