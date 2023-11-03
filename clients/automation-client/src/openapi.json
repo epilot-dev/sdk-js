@@ -625,6 +625,21 @@
           "created_automatically": {
             "description": "Flag indicating whether the action was created automatically or manually",
             "type": "boolean"
+          },
+          "reason": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "Why the action has to be skipped/failed",
+                "example": "There are no registered portal users for the given emails, hence skipping the action"
+              },
+              "payload": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Extra metadata about the skipping reason - such as a certain condition not met, etc."
+              }
+            }
           }
         }
       },

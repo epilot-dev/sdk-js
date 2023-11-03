@@ -490,6 +490,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -527,6 +541,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
         }
         export interface AutomationActionExecutionState {
             execution_status?: ExecutionStatus;
@@ -688,6 +716,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -726,6 +768,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
         }
         export interface CartCheckoutConfig {
             /**
@@ -801,6 +857,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -854,6 +924,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
         }
         export interface CreateDocumentConfig {
             template_id?: string;
@@ -1135,6 +1219,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1290,6 +1388,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
         }
         export interface MapEntityConfig {
             mapping_config?: MappingConfigRef;
@@ -1498,6 +1610,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1545,6 +1671,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
         }
         export interface SendEmailConfig {
             email_template_id?: string;
@@ -1720,6 +1860,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1770,6 +1924,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
         }
         export interface TriggerWebhookConfig {
             entity_sources?: string[];
@@ -1797,6 +1965,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1866,6 +2048,20 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
         }
         /**
          * example:
