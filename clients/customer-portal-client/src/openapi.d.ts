@@ -4809,7 +4809,7 @@ export interface PathsDictionary {
      * 
      * Returns the registered emails on any portal from the given emails
      */
-    'get'(
+    'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.GetRegisteredUsers.RequestBody,
       config?: AxiosRequestConfig  

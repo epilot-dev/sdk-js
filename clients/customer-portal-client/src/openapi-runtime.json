@@ -369,7 +369,7 @@
       }
     },
     "/v2/portal/registered/users": {
-      "get": {
+      "post": {
         "operationId": "getRegisteredUsers",
         "requestBody": {
           "content": {

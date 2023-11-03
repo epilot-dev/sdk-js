@@ -1610,7 +1610,7 @@
       }
     },
     "/v2/portal/registered/users": {
-      "get": {
+      "post": {
         "operationId": "getRegisteredUsers",
         "summary": "getRegisteredUsers",
         "description": "Returns the registered emails on any portal from the given emails",
