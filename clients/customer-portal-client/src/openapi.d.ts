@@ -813,6 +813,12 @@ declare namespace Components {
              * 940134fa-50f2-4204-a08a-fd3afddbf39a
              */
             onMapAPendingUser?: string;
+            /**
+             * ID of the email template for document upload
+             * example:
+             * c8ee93c0-8158-4da7-82f3-114f0c7b20ff
+             */
+            onDocUpload?: string;
         }
         export interface Entity {
             [name: string]: any;
@@ -3485,6 +3491,31 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetRegisteredUsers {
+        export interface RequestBody {
+            /**
+             * Emails array to check if they're registered on a portal
+             * example:
+             * [
+             *   "john@doe.com"
+             * ]
+             */
+            emails?: string[];
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Registered emails on a portal
+                 * example:
+                 * [
+                 *   "john@doe.com"
+                 * ]
+                 */
+                emails: string[];
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetSchemas {
         namespace Responses {
             export interface $200 {
@@ -4213,6 +4244,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UserExists.Responses.$200>
   /**
+   * getRegisteredUsers - getRegisteredUsers
+   * 
+   * Returns the registered emails on any portal from the given emails
+   */
+  'getRegisteredUsers'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetRegisteredUsers.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRegisteredUsers.Responses.$200>
+  /**
    * configureDistribution - configureDistribution
    * 
    * Configure the distribution for the portal's custom domain
@@ -4858,6 +4899,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UserExists.Responses.$200>
+  }
+  ['/v2/portal/registered/users']: {
+    /**
+     * getRegisteredUsers - getRegisteredUsers
+     * 
+     * Returns the registered emails on any portal from the given emails
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetRegisteredUsers.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRegisteredUsers.Responses.$200>
   }
   ['/v2/portal/configure-distribution']: {
     /**

@@ -1609,6 +1609,72 @@
         }
       }
     },
+    "/v2/portal/registered/users": {
+      "post": {
+        "operationId": "getRegisteredUsers",
+        "summary": "getRegisteredUsers",
+        "description": "Returns the registered emails on any portal from the given emails",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "emails": {
+                    "type": "array",
+                    "example": [
+                      "john@doe.com"
+                    ],
+                    "description": "Emails array to check if they're registered on a portal",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returned whether the user exists in the portal or not successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "emails"
+                  ],
+                  "properties": {
+                    "emails": {
+                      "type": "array",
+                      "example": [
+                        "john@doe.com"
+                      ],
+                      "description": "Registered emails on a portal",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/configure-distribution": {
       "get": {
         "operationId": "configureDistribution",
@@ -3675,6 +3741,11 @@
             "type": "string",
             "description": "ID of the email template for mapping a pending portal user with a contact",
             "example": "940134fa-50f2-4204-a08a-fd3afddbf39a"
+          },
+          "onDocUpload": {
+            "type": "string",
+            "description": "ID of the email template for document upload",
+            "example": "c8ee93c0-8158-4da7-82f3-114f0c7b20ff"
           }
         }
       },
