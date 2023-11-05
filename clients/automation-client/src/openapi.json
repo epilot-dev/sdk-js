@@ -494,6 +494,10 @@
             "example": "123",
             "description": "Organization the automation flow belongs to",
             "readOnly": true
+          },
+          "system_flow": {
+            "type": "boolean",
+            "description": "Determines if the flow is a system generated flow"
           }
         },
         "required": [
@@ -621,6 +625,21 @@
           "created_automatically": {
             "description": "Flag indicating whether the action was created automatically or manually",
             "type": "boolean"
+          },
+          "reason": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "Why the action has to be skipped/failed",
+                "example": "There are no registered portal users for the given emails, hence skipping the action"
+              },
+              "payload": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Extra metadata about the skipping reason - such as a certain condition not met, etc."
+              }
+            }
           }
         }
       },
@@ -1327,6 +1346,11 @@
               "en"
             ]
           },
+          "notify_portal_user_only": {
+            "type": "boolean",
+            "description": "Send an email exclusively to the portal user if they are registered on the portal.",
+            "default": false
+          },
           "attachments": {
             "type": "array",
             "description": "Include extra file attachments in sent email.\n\nAttachments in email template will be sent regardless of this configuration.\n",
@@ -1908,7 +1932,8 @@
           "in_progress",
           "success",
           "failed",
-          "cancelled"
+          "cancelled",
+          "skipped"
         ]
       },
       "GetExecutionsResp": {
