@@ -183,6 +183,10 @@ declare namespace Components {
              */
             amount_subtotal?: number;
             /**
+             * Total tax amount for this line item.
+             */
+            amount_tax?: number;
+            /**
              * Net unit amount without taxes or discounts.
              */
             unit_amount_net?: number;
@@ -715,6 +719,10 @@ declare namespace Components {
              * Total before any (discounts or) taxes are applied.
              */
             amount_subtotal?: number;
+            /**
+             * Total tax amount for this line item.
+             */
+            amount_tax?: number;
             /**
              * Net unit amount without taxes or discounts.
              */
@@ -1771,6 +1779,10 @@ declare namespace Components {
              * Total before any (discounts or) taxes are applied.
              */
             amount_subtotal?: number;
+            /**
+             * Total tax amount for this line item.
+             */
+            amount_tax?: number;
             /**
              * Net unit amount without taxes or discounts.
              */

@@ -2676,6 +2676,10 @@
             "description": "Total before any (discounts or) taxes are applied.",
             "readOnly": true
           },
+          "amount_tax": {
+            "type": "integer",
+            "description": "Total tax amount for this line item."
+          },
           "unit_amount_net": {
             "type": "integer",
             "description": "Net unit amount without taxes or discounts.",
