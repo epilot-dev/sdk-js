@@ -2291,6 +2291,10 @@ declare namespace Components {
              * The unit gross amount value.
              */
             unit_amount_gross?: number;
+            /**
+             * This is the sum of all the price item tax amounts.
+             */
+            amount_tax?: number;
             total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
             currency?: /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.

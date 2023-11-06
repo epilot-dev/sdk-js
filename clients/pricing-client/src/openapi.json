@@ -2968,6 +2968,10 @@
             "type": "integer",
             "description": "The unit gross amount value."
           },
+          "amount_tax": {
+            "type": "integer",
+            "description": "This is the sum of all the price item tax amounts."
+          },
           "total_details": {
             "$ref": "#/components/schemas/TotalDetails"
           },
