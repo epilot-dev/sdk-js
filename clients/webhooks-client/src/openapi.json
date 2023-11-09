@@ -648,6 +648,9 @@
           },
           "payloadConfiguration": {
             "$ref": "#/components/schemas/PayloadConfiguration"
+          },
+          "enableStaticIP": {
+            "type": "boolean"
           }
         },
         "required": [

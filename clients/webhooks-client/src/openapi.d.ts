@@ -258,6 +258,7 @@ declare namespace Components {
             auth: Auth;
             filter?: Filter;
             payloadConfiguration?: /* Configuration for the webhook payload */ PayloadConfiguration;
+            enableStaticIP?: boolean;
         }
     }
 }
