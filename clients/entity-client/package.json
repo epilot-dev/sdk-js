@@ -25,7 +25,7 @@
     "typescript": "tsc",
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/entity.yaml",
-    "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ../../../entity-api/lambda/ApiHandlerFunction/openapi.yml >> src/openapi.d.ts",
+    "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
     "build": "tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",
     "release-alpha": "npm version prerelease --preid alpha",
