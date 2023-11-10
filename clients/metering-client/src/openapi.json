@@ -593,7 +593,7 @@
             "in": "query",
             "name": "start_date",
             "required": false,
-            "description": "If not provided, the system will default to the date 10 years ago.",
+            "description": "If not provided, the system will default to 2000-01-01.",
             "schema": {
               "type": "string",
               "example": "2022-10-01"
@@ -902,7 +902,7 @@
             "in": "query",
             "name": "start_date",
             "required": false,
-            "description": "If not provided, the system will default to the date 10 years ago.",
+            "description": "If not provided, the system will default to 2000-01-01.",
             "schema": {
               "type": "string",
               "example": "2022-10-01"
