@@ -61,12 +61,12 @@
     "copy-webpack-plugin": "^7.0.0",
     "jest": "^26.6.3",
     "json-loader": "^0.5.7",
-    "openapi-client-axios-typegen": "^6.0.0",
+    "openapi-client-axios-typegen": "^5.3.1",
     "openapicmd": "^1.17.0",
-    "ts-jest": "^26.5.6",
-    "ts-loader": "^8.3.0",
+    "ts-jest": "^26.5.0",
+    "ts-loader": "^8.0.14",
     "ts-node": "^9.1.1",
-    "typescript": "^4.5.4",
+    "typescript": "^4.1.3",
     "webpack": "^5.18.0",
     "webpack-cli": "^4.4.0"
   }
