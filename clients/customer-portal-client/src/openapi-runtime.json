@@ -204,7 +204,6 @@
       "post": {
         "operationId": "replaceECPTemplateVariables",
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {}
           }
@@ -805,6 +804,10 @@
           },
           {
             "name": "schema",
+            "in": "query"
+          },
+          {
+            "name": "origin",
             "in": "query"
           }
         ]

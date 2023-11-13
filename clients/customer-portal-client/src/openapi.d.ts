@@ -3569,12 +3569,14 @@ declare namespace Paths {
     }
     namespace ReplaceECPTemplateVariables {
         export interface RequestBody {
-            /**
-             * ID of the contact
-             * example:
-             * 7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51
-             */
-            contactId?: string;
+            [name: string]: {
+                /**
+                 * ID of the contact
+                 * example:
+                 * 7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51
+                 */
+                _id?: string;
+            };
         }
         namespace Responses {
             export interface $200 {
@@ -3584,6 +3586,11 @@ declare namespace Paths {
                      * https://end-customer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com
                      */
                     invitationLink?: string;
+                    /**
+                     * example:
+                     * https://end-customer-portal.ecp.dev.epilot.io/documents
+                     */
+                    newDocumentLink?: string;
                 };
                 installerPortal?: {
                     /**
@@ -3591,6 +3598,11 @@ declare namespace Paths {
                      * https://installer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com
                      */
                     invitationLink?: string;
+                    /**
+                     * example:
+                     * https://installer-portal.ecp.dev.epilot.io/documents
+                     */
+                    newDocumentLink?: string;
                 };
             }
             export type $401 = Components.Responses.Unauthorized;
@@ -3696,6 +3708,11 @@ declare namespace Paths {
             export type EntityId = string;
             /**
              * example:
+             * END_CUSTOMER_PORTAL
+             */
+            export type Origin = string;
+            /**
+             * example:
              * contract
              */
             export type Schema = string;
@@ -3711,6 +3728,11 @@ declare namespace Paths {
              * contract
              */
             Parameters.Schema;
+            origin?: /**
+             * example:
+             * END_CUSTOMER_PORTAL
+             */
+            Parameters.Origin;
         }
         namespace Responses {
             export interface $200 {

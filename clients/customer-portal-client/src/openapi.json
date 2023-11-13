@@ -779,16 +779,18 @@
         ],
         "requestBody": {
           "description": "ECPVariables payload",
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {
-                  "contactId": {
-                    "type": "string",
-                    "example": "7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51",
-                    "description": "ID of the contact"
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "example": "7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51",
+                      "description": "ID of the contact"
+                    }
                   }
                 }
               }
@@ -809,6 +811,10 @@
                         "invitationLink": {
                           "type": "string",
                           "example": "https://end-customer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
+                        },
+                        "newDocumentLink": {
+                          "type": "string",
+                          "example": "https://end-customer-portal.ecp.dev.epilot.io/documents"
                         }
                       }
                     },
@@ -818,6 +824,10 @@
                         "invitationLink": {
                           "type": "string",
                           "example": "https://installer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
+                        },
+                        "newDocumentLink": {
+                          "type": "string",
+                          "example": "https://installer-portal.ecp.dev.epilot.io/documents"
                         }
                       }
                     }
@@ -3492,7 +3502,7 @@
           {
             "name": "entity_id",
             "in": "query",
-            "description": "entity ID",
+            "description": "Entity ID",
             "schema": {
               "type": "string",
               "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
@@ -3501,10 +3511,19 @@
           {
             "name": "schema",
             "in": "query",
-            "description": "entity schema",
+            "description": "Entity schema",
             "schema": {
               "type": "string",
               "example": "contract"
+            }
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "description": "Portal origin",
+            "schema": {
+              "type": "string",
+              "example": "END_CUSTOMER_PORTAL"
             }
           }
         ],
