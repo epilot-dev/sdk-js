@@ -24,6 +24,7 @@ declare namespace Components {
         export type AsyncOperationQueryParam = boolean;
         export type DryRunQueryParam = boolean;
         export type EntityIdPathParam = Schemas.EntityId /* uuid */;
+        export type EntityRelationsModeQueryParam = string;
         export type EntitySlugPathParam = /**
          * URL-friendly identifier for the entity schema
          * example:
@@ -65,6 +66,7 @@ declare namespace Components {
         IncludeReverseQueryParam?: Parameters.IncludeReverseQueryParam;
         IncludeSchemasQueryParam?: Parameters.IncludeSchemasQueryParam;
         ExcludeSchemasQueryParam?: Parameters.ExcludeSchemasQueryParam;
+        EntityRelationsModeQueryParam?: Parameters.EntityRelationsModeQueryParam;
         DryRunQueryParam?: Parameters.DryRunQueryParam;
     }
     namespace Schemas {
@@ -6596,6 +6598,7 @@ declare namespace Paths {
              * contact
              */
             Components.Schemas.EntitySlug[];
+            export type Mode = string;
             export type Size = number;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -6615,6 +6618,7 @@ declare namespace Paths {
             size?: Parameters.Size;
             include_schemas?: Parameters.IncludeSchemas;
             exclude_schemas?: Parameters.ExcludeSchemas;
+            mode?: Parameters.Mode;
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsRespWithPagination;

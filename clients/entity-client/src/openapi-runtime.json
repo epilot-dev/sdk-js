@@ -470,6 +470,9 @@
           },
           {
             "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityRelationsModeQueryParam"
           }
         ]
       }
@@ -773,6 +776,11 @@
         "required": false,
         "style": "form",
         "explode": false
+      },
+      "EntityRelationsModeQueryParam": {
+        "name": "mode",
+        "in": "query",
+        "required": false
       },
       "DryRunQueryParam": {
         "name": "dry_run",

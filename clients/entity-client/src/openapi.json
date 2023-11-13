@@ -1265,6 +1265,9 @@
           },
           {
             "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityRelationsModeQueryParam"
           }
         ],
         "responses": {
@@ -3777,10 +3780,6 @@
             "description": "Enable the thumbnail column",
             "type": "boolean",
             "default": false
-          },
-          "classic_view": {
-            "type": "string",
-            "format": "uri-reference"
           }
         }
       },
@@ -4878,6 +4877,16 @@
           }
         }
       },
+      "EntityRelationsModeQueryParam": {
+        "name": "mode",
+        "description": "Return relations based on direct, reverse, or both mode",
+        "in": "query",
+        "required": false,
+        "example": "<url>/<operation>?mode=direct",
+        "schema": {
+          "type": "string"
+        }
+      },
       "DryRunQueryParam": {
         "name": "dry_run",
         "description": "Dry Run mode = return results but does not perform the operation.",
@@ -5504,5 +5513,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    }
+  ]
 }
