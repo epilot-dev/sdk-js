@@ -888,6 +888,12 @@
           },
           "include_changed_attributes": {
             "type": "boolean"
+          },
+          "include_relation_schemas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }

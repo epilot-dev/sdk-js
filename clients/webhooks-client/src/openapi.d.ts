@@ -218,6 +218,7 @@ declare namespace Components {
             include_relations?: boolean;
             include_activity?: boolean;
             include_changed_attributes?: boolean;
+            include_relation_schemas?: string[];
         }
         /**
          * example:
