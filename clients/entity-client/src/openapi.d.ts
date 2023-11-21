@@ -6723,6 +6723,17 @@ declare namespace Paths {
         }
     }
     namespace ListSavedViews {
+        namespace Parameters {
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface QueryParameters {
+            slug?: Parameters.Slug;
+        }
         namespace Responses {
             export interface $200 {
                 results?: /* A saved entity view */ Components.Schemas.SavedViewItem[];
@@ -7813,7 +7824,7 @@ export interface OperationMethods {
    * Get the Saved Views based on the schema
    */
   'listSavedViews'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.ListSavedViews.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListSavedViews.Responses.$200>
@@ -8493,7 +8504,7 @@ export interface PathsDictionary {
      * Get the Saved Views based on the schema
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.ListSavedViews.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListSavedViews.Responses.$200>

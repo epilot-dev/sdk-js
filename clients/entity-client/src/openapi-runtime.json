@@ -596,7 +596,14 @@
     },
     "/v1/entity/views": {
       "get": {
-        "operationId": "listSavedViews"
+        "operationId": "listSavedViews",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "slug",
+            "required": false
+          }
+        ]
       }
     },
     "/v1/entity/view": {

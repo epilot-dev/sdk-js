@@ -1531,6 +1531,17 @@
         "tags": [
           "Saved Views"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "slug",
+            "description": "Return views belonging to this schema",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
