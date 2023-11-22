@@ -30,6 +30,14 @@ declare namespace Components {
             username: string;
             password?: string;
         }
+        /**
+         * Custom key/value pair of either type body, query or header
+         */
+        export interface CustomOAuthParameter {
+            type: "body" | "query" | "header";
+            key: string;
+            value: string;
+        }
         export interface ErrorResp {
             message?: string;
         }
@@ -209,6 +217,7 @@ declare namespace Components {
              */
             endpoint: string;
             httpMethod: HttpMethod;
+            customParameterList?: /* Custom key/value pair of either type body, query or header */ CustomOAuthParameter[];
         }
         /**
          * Configuration for the webhook payload
@@ -218,7 +227,6 @@ declare namespace Components {
             include_relations?: boolean;
             include_activity?: boolean;
             include_changed_attributes?: boolean;
-            include_relation_schemas?: string[];
         }
         /**
          * example:
