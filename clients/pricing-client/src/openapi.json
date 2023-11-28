@@ -1303,11 +1303,6 @@
         "example": {
           "$ref": "#/components/examples/order-with-simple-prices"
         },
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Amounts"
-          }
-        ],
         "properties": {
           "order_number": {
             "type": "string",
@@ -1427,6 +1422,16 @@
                 }
               }
             }
+          },
+          "amount_subtotal": {
+            "readOnly": true,
+            "type": "integer",
+            "description": "Total of all items before (discounts or) taxes are applied."
+          },
+          "amount_total": {
+            "readOnly": true,
+            "type": "integer",
+            "description": "Total of all items after (discounts and) taxes are applied."
           },
           "total_details": {
             "$ref": "#/components/schemas/TotalDetails"
@@ -2416,11 +2421,6 @@
       "RecurrenceAmountDto": {
         "type": "object",
         "description": "An amount associated with a specific recurrence.",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Amounts"
-          }
-        ],
         "properties": {
           "type": {
             "type": "string",
@@ -2437,6 +2437,14 @@
               "yearly"
             ]
           },
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total of all items, with same recurrence, before (discounts or) taxes are applied."
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total of all items, with same recurrence, after (discounts and) taxes are applied."
+          },
           "unit_amount_gross": {
             "type": "integer",
             "description": "The unit gross amount value."
@@ -2448,9 +2456,7 @@
         },
         "required": [
           "amount_subtotal",
-          "amount_total",
-          "amount_subtotal_decimal",
-          "amount_total_decimal"
+          "amount_total"
         ]
       },
       "Cart": {
@@ -2863,11 +2869,6 @@
         "type": "object",
         "description": "An amount associated with a specific recurrence.",
         "readOnly": true,
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Amounts"
-          }
-        ],
         "properties": {
           "type": {
             "type": "string",
@@ -2884,6 +2885,14 @@
               "yearly"
             ]
           },
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total of all items, with same recurrence, before (discounts or) taxes are applied."
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total of all items, with same recurrence, after (discounts and) taxes are applied."
+          },
           "unit_amount_gross": {
             "type": "integer",
             "description": "The unit gross amount value."
@@ -2899,9 +2908,7 @@
         },
         "required": [
           "amount_subtotal",
-          "amount_total",
-          "amount_subtotal_decimal",
-          "amount_total_decimal"
+          "amount_total"
         ]
       },
       "TotalDetails": {
@@ -2950,11 +2957,6 @@
       "PricingDetails": {
         "type": "object",
         "description": "The result from the calculation of a set of price items.",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Amounts"
-          }
-        ],
         "properties": {
           "items": {
             "type": "array",
@@ -2968,6 +2970,14 @@
                 }
               ]
             }
+          },
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total of all items before (discounts or) taxes are applied."
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total of all items after (discounts and) taxes are applied."
           },
           "unit_amount_gross": {
             "type": "integer",
