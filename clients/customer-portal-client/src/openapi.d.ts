@@ -390,7 +390,14 @@ declare namespace Components {
         /**
          * An entity that describes a billing event such as a future installment or a reimbursement back to the customer.
          */
-        export type BillingEvent = /* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ /* An entity that describes an installment billing event. */ InstallmentEvent | /* An entity that describes a reimbursement billing event. */ ReimbursementEvent;
+        export type BillingEvent = {
+            /**
+             * Amount to be paid in cents in decimal string representation
+             * example:
+             * 100.50
+             */
+            billing_amount_decimal?: string;
+        } & (/* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ /* An entity that describes an installment billing event. */ InstallmentEvent | /* An entity that describes a reimbursement billing event. */ ReimbursementEvent);
         /**
          * The mapped contact of the portal user
          */
@@ -3687,13 +3694,17 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace TriggerEntityAccess {
+    namespace TriggerEntityAccessEvent {
         namespace Parameters {
             /**
              * example:
              * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
              */
             export type EntityId = string;
+            /**
+             * Origin of the portal
+             */
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
             /**
              * example:
              * contract
@@ -3711,6 +3722,7 @@ declare namespace Paths {
              * contract
              */
             Parameters.Schema;
+            origin?: /* Origin of the portal */ Parameters.Origin;
         }
         namespace Responses {
             export interface $200 {
@@ -4530,15 +4542,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.LoginToPortalAsUser.Responses.$200>
   /**
-   * triggerEntityAccess - triggerEntityAccess
+   * triggerEntityAccessEvent - triggerEntityAccessEvent
    * 
    * Trigger entity access event for a portal user
    */
-  'triggerEntityAccess'(
-    parameters?: Parameters<Paths.TriggerEntityAccess.QueryParameters> | null,
+  'triggerEntityAccessEvent'(
+    parameters?: Parameters<Paths.TriggerEntityAccessEvent.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.TriggerEntityAccess.Responses.$200>
+  ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
   /**
    * searchPortalUserEntities - searchPortalUserEntities
    * 
@@ -5236,15 +5248,15 @@ export interface PathsDictionary {
   }
   ['/v2/portal/entity/access']: {
     /**
-     * triggerEntityAccess - triggerEntityAccess
+     * triggerEntityAccessEvent - triggerEntityAccessEvent
      * 
      * Trigger entity access event for a portal user
      */
     'post'(
-      parameters?: Parameters<Paths.TriggerEntityAccess.QueryParameters> | null,
+      parameters?: Parameters<Paths.TriggerEntityAccessEvent.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.TriggerEntityAccess.Responses.$200>
+    ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
   }
   ['/v2/portal/entity:search']: {
     /**
