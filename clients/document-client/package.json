@@ -13,8 +13,7 @@
     "build": "tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",
     "release-alpha": "npm version prerelease --preid alpha",
-    "lint": "../../node_modules/eslint/bin/eslint.js src",
-    "prepublishOnly": "npm run build"
+    "lint": "../../node_modules/eslint/bin/eslint.js src"
   },
   "files": [
     "*.js",
