@@ -4,15 +4,17 @@
     "title": "",
     "version": ""
   },
-  "servers": [
-    {
-      "url": "https://entity-mapping.sls.epilot.io"
-    }
-  ],
   "paths": {
     "/v1/mappings": {
       "post": {
         "operationId": "storeConfig",
+        "parameters": [
+          {
+            "name": "with_id",
+            "in": "query",
+            "required": false
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {}
