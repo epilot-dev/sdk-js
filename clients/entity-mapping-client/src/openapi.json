@@ -16,6 +16,12 @@
       "EpilotAuth": []
     }
   ],
+  "servers": [
+    {
+      "url": "https://http://entity-mapping.sls.epilot.io/",
+      "description": "Production Server"
+    }
+  ],
   "paths": {
     "/v1/mappings": {
       "post": {
