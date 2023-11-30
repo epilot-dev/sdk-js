@@ -996,6 +996,9 @@
               "flowId"
             ]
           },
+          "journey": {
+            "$ref": "#/components/schemas/StepJourney"
+          },
           "order": {
             "type": "number"
           },
@@ -1031,6 +1034,9 @@
             "$ref": "#/components/schemas/ItemType"
           },
           "ecp": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "installer": {
             "$ref": "#/components/schemas/ECPDetails"
           }
         },
@@ -1084,12 +1090,32 @@
           "AUTOMATION"
         ]
       },
+      "StepJourney": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "journeyId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "ECPDetails": {
         "type": "object",
         "description": "Details regarding ECP for the workflow step",
         "properties": {
           "label": {
             "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "journey": {
+            "$ref": "#/components/schemas/StepJourney"
           }
         }
       },
