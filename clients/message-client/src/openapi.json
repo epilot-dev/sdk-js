@@ -587,6 +587,56 @@
         }
       }
     },
+    "/v1/message/threads/{id}/assign:users": {
+      "post": {
+        "operationId": "assignUsers",
+        "summary": "assignUsers",
+        "description": "Assign users to thread for receiving notifications. \nThe operation replaces all existing assigned users in thread.\n",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "User IDs of users assigned to thread",
+                "type": "object",
+                "properties": {
+                  "assigned_to": {
+                    "type": "array",
+                    "description": "IDs of users assigned to thread",
+                    "items": {
+                      "type": "string",
+                      "example": "206801"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/message/drafts": {
       "post": {
         "operationId": "createDraft",
@@ -1092,6 +1142,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://message.sls.epilot.io"
+    },
     {
       "url": "https://message.sls.epilot.io"
     }
