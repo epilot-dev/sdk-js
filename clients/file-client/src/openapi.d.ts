@@ -170,7 +170,7 @@ declare namespace Components {
             /**
              * Custom external download url used for the file
              */
-            custom_download_url: string; // url
+            custom_download_url: string; // uri
         }
         export type SaveFilePayload = SaveS3FilePayload | SaveCustomFilePayload;
         export interface SaveS3FilePayload {
@@ -205,6 +205,14 @@ declare namespace Components {
              * application/pdf
              */
             mime_type?: string;
+        }
+        export interface VerifyCustomDownloadUrlPayload {
+            /**
+             * Custom external download url with signature and expiration time
+             * example:
+             * https://some-api-url.com?file_id=123&expires_at=1699273500029&signature=abcdefg
+             */
+            custom_download_url: string; // uri
         }
     }
 }
@@ -440,6 +448,14 @@ declare namespace Paths {
             }
         }
     }
+    namespace VerifyCustomDownloadUrl {
+        export type RequestBody = Components.Schemas.VerifyCustomDownloadUrlPayload;
+        namespace Responses {
+            export interface $200 {
+                valid?: boolean;
+            }
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -494,6 +510,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DownloadFile.Responses.$200>
+  /**
+   * verifyCustomDownloadUrl - verifyCustomDownloadUrl
+   * 
+   * Verify a pre-signed custom download url for a file
+   */
+  'verifyCustomDownloadUrl'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.VerifyCustomDownloadUrl.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.VerifyCustomDownloadUrl.Responses.$200>
   /**
    * downloadFiles - downloadFiles
    * 
@@ -648,6 +674,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DownloadFile.Responses.$200>
+  }
+  ['/v1/files/download:verify']: {
+    /**
+     * verifyCustomDownloadUrl - verifyCustomDownloadUrl
+     * 
+     * Verify a pre-signed custom download url for a file
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.VerifyCustomDownloadUrl.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.VerifyCustomDownloadUrl.Responses.$200>
   }
   ['/v1/files:downloadFiles']: {
     /**
