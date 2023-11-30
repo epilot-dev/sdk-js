@@ -162,6 +162,28 @@
         }
       }
     },
+    "/v2/entity/{slug}/{id}": {
+      "get": {
+        "operationId": "getEntityV2",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "style": "form",
+            "explode": false
+          }
+        ]
+      }
+    },
     "/v1/entity/{slug}/{id}": {
       "get": {
         "operationId": "getEntity",
@@ -455,7 +477,7 @@
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
-            "$ref": "#/components/parameters/IncludeReverseQueryParam"
+            "$ref": "#/components/parameters/IncludeReverseDeprecatedQueryParam"
           },
           {
             "$ref": "#/components/parameters/FromPageQueryParam"
@@ -765,6 +787,11 @@
       "FromPageQueryParam": {
         "name": "from",
         "in": "query"
+      },
+      "IncludeReverseDeprecatedQueryParam": {
+        "name": "include_reverse",
+        "in": "query",
+        "deprecated": true
       },
       "IncludeReverseQueryParam": {
         "name": "include_reverse",
