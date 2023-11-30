@@ -24,7 +24,7 @@ declare namespace Components {
         export type AsyncOperationQueryParam = boolean;
         export type DryRunQueryParam = boolean;
         export type EntityIdPathParam = Schemas.EntityId /* uuid */;
-        export type EntityRelationsModeQueryParam = string;
+        export type EntityRelationsModeQueryParam = "direct" | "reverse" | "both";
         export type EntitySlugPathParam = /**
          * URL-friendly identifier for the entity schema
          * example:
@@ -39,6 +39,7 @@ declare namespace Components {
         Schemas.EntitySlug[];
         export type FromPageQueryParam = number;
         export type HydrateEntitiesQueryParam = boolean;
+        export type IncludeReverseDeprecatedQueryParam = boolean;
         export type IncludeReverseQueryParam = boolean;
         export type IncludeSchemasQueryParam = /**
          * URL-friendly identifier for the entity schema
@@ -63,6 +64,7 @@ declare namespace Components {
         HydrateEntitiesQueryParam?: Parameters.HydrateEntitiesQueryParam;
         ActivityIdQueryParam?: Parameters.ActivityIdQueryParam;
         FromPageQueryParam?: Parameters.FromPageQueryParam;
+        IncludeReverseDeprecatedQueryParam?: Parameters.IncludeReverseDeprecatedQueryParam;
         IncludeReverseQueryParam?: Parameters.IncludeReverseQueryParam;
         IncludeSchemasQueryParam?: Parameters.IncludeSchemasQueryParam;
         ExcludeSchemasQueryParam?: Parameters.ExcludeSchemasQueryParam;
@@ -2520,16 +2522,24 @@ declare namespace Components {
              * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
              */
             hydrate?: boolean;
-            /**
-             * List of entity fields to include in search results
+            fields?: /**
+             * List of entity fields to include or exclude in the response
+             *
+             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+             *
+             * Globbing and globstart (**) is supported for nested fields.
+             *
              * example:
              * [
              *   "_id",
              *   "_title",
-             *   "first_name"
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
              * ]
              */
-            fields?: string[];
+            FieldsParam;
             /**
              * Adds a `_score` number field to results that can be used to rank by match score
              */
@@ -2636,6 +2646,24 @@ declare namespace Components {
          * abc123
          */
         export type ExportJobId = string;
+        /**
+         * List of entity fields to include or exclude in the response
+         *
+         * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+         *
+         * Globbing and globstart (**) is supported for nested fields.
+         *
+         * example:
+         * [
+         *   "_id",
+         *   "_title",
+         *   "first_name",
+         *   "account",
+         *   "!account.*._files",
+         *   "**._product"
+         * ]
+         */
+        export type FieldsParam = string[];
         /**
          * File or Image Attachment
          */
@@ -6463,6 +6491,89 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetEntityV2 {
+        namespace Parameters {
+            export type Fields = /**
+             * List of entity fields to include or exclude in the response
+             *
+             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+             *
+             * Globbing and globstart (**) is supported for nested fields.
+             *
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
+             * ]
+             */
+            Components.Schemas.FieldsParam;
+            export type Hydrate = boolean;
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            slug: Parameters.Slug;
+        }
+        export interface QueryParameters {
+            hydrate?: Parameters.Hydrate;
+            fields?: Parameters.Fields;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * {
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "_org": "123",
+             *   "_owners": [
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     },
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     }
+             *   ],
+             *   "_schema": "contact",
+             *   "_tags": [
+             *     "example",
+             *     "mock",
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z",
+             *   "_acl": {
+             *     "view": [
+             *       "org:456",
+             *       "org:789",
+             *       "org:456",
+             *       "org:789"
+             *     ],
+             *     "edit": [
+             *       "org:456",
+             *       "org:456"
+             *     ],
+             *     "delete": [
+             *       "org:456",
+             *       "org:456"
+             *     ]
+             *   }
+             * }
+             */
+            Components.Schemas.EntityItem;
+        }
+    }
     namespace GetRelatedEntitiesCount {
         namespace Parameters {
             export type ExcludeSchemas = /**
@@ -6534,15 +6645,24 @@ declare namespace Paths {
     }
     namespace GetRelationsV2 {
         namespace Parameters {
-            /**
+            export type Fields = /**
+             * List of entity fields to include or exclude in the response
+             *
+             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+             *
+             * Globbing and globstart (**) is supported for nested fields.
+             *
              * example:
              * [
              *   "_id",
-             *   "_schema",
-             *   "_title"
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
              * ]
              */
-            export type Fields = string[];
+            Components.Schemas.FieldsParam;
             export type From = number;
             export type Hydrate = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
@@ -6566,15 +6686,7 @@ declare namespace Paths {
             include_reverse?: Parameters.IncludeReverse;
             from?: Parameters.From;
             size?: Parameters.Size;
-            fields?: /**
-             * example:
-             * [
-             *   "_id",
-             *   "_schema",
-             *   "_title"
-             * ]
-             */
-            Parameters.Fields;
+            fields?: Parameters.Fields;
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsRespWithPagination;
@@ -6598,7 +6710,7 @@ declare namespace Paths {
              * contact
              */
             Components.Schemas.EntitySlug[];
-            export type Mode = string;
+            export type Mode = "direct" | "reverse" | "both";
             export type Size = number;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -7494,6 +7606,19 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpsertEntity.Responses.$200 | Paths.UpsertEntity.Responses.$201>
   /**
+   * getEntityV2 - getEntityV2
+   * 
+   * Gets Entity by id.
+   * 
+   * Supports `hydrate` and `fields` parameters to control the shape of the response.
+   * 
+   */
+  'getEntityV2'(
+    parameters?: Parameters<Paths.GetEntityV2.PathParameters & Paths.GetEntityV2.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEntityV2.Responses.$200>
+  /**
    * getEntity - getEntity
    * 
    * Gets Entity and relations by id.
@@ -8145,6 +8270,21 @@ export interface PathsDictionary {
       data?: Paths.UpsertEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpsertEntity.Responses.$200 | Paths.UpsertEntity.Responses.$201>
+  }
+  ['/v2/entity/{slug}/{id}']: {
+    /**
+     * getEntityV2 - getEntityV2
+     * 
+     * Gets Entity by id.
+     * 
+     * Supports `hydrate` and `fields` parameters to control the shape of the response.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEntityV2.PathParameters & Paths.GetEntityV2.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEntityV2.Responses.$200>
   }
   ['/v1/entity/{slug}/{id}']: {
     /**

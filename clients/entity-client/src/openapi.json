@@ -520,6 +520,49 @@
         }
       }
     },
+    "/v2/entity/{slug}/{id}": {
+      "get": {
+        "operationId": "getEntityV2",
+        "summary": "getEntityV2",
+        "description": "Gets Entity by id.\n\nSupports `hydrate` and `fields` parameters to control the shape of the response.\n",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "description": "List of entity fields to include in results",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "$ref": "#/components/schemas/FieldsParam"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/entity/{slug}/{id}": {
       "get": {
         "operationId": "getEntity",
@@ -1198,15 +1241,7 @@
             "name": "fields",
             "description": "List of entity fields to include in results",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "example": [
-                "_id",
-                "_schema",
-                "_title"
-              ]
+              "$ref": "#/components/schemas/FieldsParam"
             }
           }
         ],
@@ -1243,7 +1278,7 @@
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
-            "$ref": "#/components/parameters/IncludeReverseQueryParam"
+            "$ref": "#/components/parameters/IncludeReverseDeprecatedQueryParam"
           },
           {
             "$ref": "#/components/parameters/FromPageQueryParam"
@@ -4201,16 +4236,7 @@
             "default": false
           },
           "fields": {
-            "type": "array",
-            "description": "List of entity fields to include in search results",
-            "items": {
-              "type": "string"
-            },
-            "example": [
-              "_id",
-              "_title",
-              "first_name"
-            ]
+            "$ref": "#/components/schemas/FieldsParam"
           },
           "include_scores": {
             "type": "boolean",
@@ -4231,6 +4257,21 @@
         },
         "required": [
           "q"
+        ]
+      },
+      "FieldsParam": {
+        "type": "array",
+        "description": "List of entity fields to include or exclude in the response\n\nUse ! to exclude fields, e.g. `!_id` to exclude the `_id` field.\n\nGlobbing and globstart (**) is supported for nested fields.\n",
+        "items": {
+          "type": "string"
+        },
+        "example": [
+          "_id",
+          "_title",
+          "first_name",
+          "account",
+          "!account.*._files",
+          "**._product"
         ]
       },
       "EntityImportParams": {
@@ -4850,6 +4891,16 @@
           "default": 0
         }
       },
+      "IncludeReverseDeprecatedQueryParam": {
+        "name": "include_reverse",
+        "description": "When true, includes reverse relations in response (other entities pointing to this entity)  \n*It gets overriden by mode query parameter.*\n",
+        "in": "query",
+        "deprecated": true,
+        "schema": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
       "IncludeReverseQueryParam": {
         "name": "include_reverse",
         "description": "When true, includes reverse relations in response (other entities pointing to this entity)",
@@ -4866,6 +4917,7 @@
         "required": false,
         "style": "form",
         "explode": false,
+        "example": "contact,account",
         "schema": {
           "type": "array",
           "items": {
@@ -4880,7 +4932,7 @@
         "required": false,
         "style": "form",
         "explode": false,
-        "example": "<url>/<operation>?exclude_schemas=file,message",
+        "example": "file,message",
         "schema": {
           "type": "array",
           "items": {
@@ -4890,12 +4942,16 @@
       },
       "EntityRelationsModeQueryParam": {
         "name": "mode",
-        "description": "Return relations based on direct, reverse, or both mode",
+        "description": "Options to determine how relations will be included in the result.  \n*It overrides the include_reverse query param.*  \nExplanation of possible options:    \n- direct: include relations to which the searched entity refers  \n- reverse: include relations that refer to the entity you are looking for  \n- both: both direct and reverse relations\n",
         "in": "query",
         "required": false,
-        "example": "<url>/<operation>?mode=direct",
         "schema": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "direct",
+            "reverse",
+            "both"
+          ]
         }
       },
       "DryRunQueryParam": {
