@@ -107,6 +107,9 @@
     },
     {
       "url": "https://pricing-api.sls.epilot.io"
+    },
+    {
+      "url": "https://pricing-api.sls.epilot.io"
     }
   ],
   "paths": {
@@ -147,147 +150,6 @@
                       {
                         "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
                         "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
-                        "quantity": 1
-                      }
-                    ],
-                    "currency": "EUR",
-                    "payment_method": [
-                      {
-                        "type": "IBAN",
-                        "details": {}
-                      }
-                    ],
-                    "billing_contact": {
-                      "$relation": [
-                        {
-                          "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
-                          "_tags": []
-                        }
-                      ]
-                    },
-                    "billing_first_name": "Joao",
-                    "billing_last_name": "Pinho",
-                    "billing_email": "j.pinho@epilot.cloud",
-                    "billing_company_name": "epilot cloud",
-                    "billing_address": [
-                      {
-                        "_tags": [],
-                        "street": "Im Media Park",
-                        "street_number": "8a",
-                        "postal_code": "52000",
-                        "city": "Cologne",
-                        "country": "DE",
-                        "additional_info": ""
-                      }
-                    ],
-                    "delivery_address": [],
-                    "dates": [
-                      {
-                        "_tags": [
-                          "Instalation Date"
-                        ],
-                        "dates": "",
-                        "value": "2022-06-30T16:29:00.000Z"
-                      }
-                    ]
-                  }
-                },
-                "Order with Simple Prices and Dynamic Pricing": {
-                  "value": {
-                    "status": "quote",
-                    "source_type": "manual",
-                    "expires_at": "2022-06-30T16:17:00.000Z",
-                    "line_items": [
-                      {
-                        "price_id": "632b18b5-3f50-4231-b8d5-f8c33a392ed0",
-                        "product_id": "3d1c9987-a7ae-4c1c-a7ef-e12caccab4e0",
-                        "price_mappings": [
-                          {
-                            "price_id": "632b18b5-3f50-4231-b8d5-f8c33a392ed0",
-                            "frequency_unit": "yearly",
-                            "value": 12000,
-                            "name": "Estimated consumption",
-                            "metadata": {
-                              "journey_title": "P&G",
-                              "step_name": "Number Inputs"
-                            }
-                          }
-                        ],
-                        "quantity": 16
-                      }
-                    ],
-                    "currency": "EUR",
-                    "payment_method": [
-                      {
-                        "type": "IBAN",
-                        "details": {}
-                      }
-                    ],
-                    "billing_contact": {
-                      "$relation": [
-                        {
-                          "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
-                          "_tags": []
-                        }
-                      ]
-                    },
-                    "billing_first_name": "Joao",
-                    "billing_last_name": "Pinho",
-                    "billing_email": "j.pinho@epilot.cloud",
-                    "billing_company_name": "epilot cloud",
-                    "billing_address": [
-                      {
-                        "_tags": [],
-                        "street": "Im Media Park",
-                        "street_number": "8a",
-                        "postal_code": "52000",
-                        "city": "Cologne",
-                        "country": "DE",
-                        "additional_info": ""
-                      }
-                    ],
-                    "delivery_address": [],
-                    "dates": [
-                      {
-                        "_tags": [
-                          "Instalation Date"
-                        ],
-                        "dates": "",
-                        "value": "2022-06-30T16:29:00.000Z"
-                      }
-                    ]
-                  }
-                },
-                "Order with Composite Prices and Dynamic Pricing": {
-                  "value": {
-                    "status": "quote",
-                    "source_type": "manual",
-                    "expires_at": "2022-06-30T16:17:00.000Z",
-                    "line_items": [
-                      {
-                        "price_id": "b3900bf3-020c-4c58-8af9-32f2682929e3",
-                        "product_id": "924f6881-7ae3-4e2e-a1dd-2d81b8fa2e32",
-                        "price_mappings": [
-                          {
-                            "price_id": "6dc88d6f-ba33-45ee-b5d0-62641344a0d9",
-                            "frequency_unit": "yearly",
-                            "value": 12000,
-                            "name": "Estimated consumption",
-                            "metadata": {
-                              "journey_title": "P&G",
-                              "step_name": "Number Inputs"
-                            }
-                          },
-                          {
-                            "price_id": "60eb12cd-703d-4d41-9265-577ff657bfc9",
-                            "value": 10,
-                            "name": "Distance to power meter",
-                            "metadata": {
-                              "journey_title": "P&G",
-                              "step_name": "Number Inputs"
-                            }
-                          }
-                        ],
                         "quantity": 1
                       }
                     ],
@@ -733,77 +595,6 @@
         }
       }
     },
-    "/v1/validate-availability/{id}": {
-      "get": {
-        "description": "Validates an availability file, it returns an array of errors if the file is invalid",
-        "operationId": "$validateAvailabilityFile",
-        "summary": "validateAvailabilityFile",
-        "tags": [
-          "Availability API"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "Product ID that the Availability File is attached to",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "example": "72c803b2-2e5d-4bd6-bffc-fad998bbbe36"
-          },
-          {
-            "in": "header",
-            "name": "X-Epilot-Org-ID",
-            "description": "The target Organization Id represented by the caller",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "example": 739224
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The availability get result",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidateAvailabilityFileResult"
-                },
-                "examples": {
-                  "Response when file has no errors": {
-                    "value": {
-                      "number_of_rules_parsed": 10,
-                      "errors": []
-                    }
-                  },
-                  "Response when file has errors": {
-                    "value": {
-                      "number_of_rules_parsed": 8,
-                      "errors": [
-                        "File must be UTF-8 encoded",
-                        "Line 3 - Postal code is missing or invalid"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid payload",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/public/opportunity": {
       "post": {
         "deprecated": true,
@@ -933,10 +724,6 @@
           "$ref": "#/components/examples/product"
         },
         "properties": {
-          "description": {
-            "type": "string",
-            "description": "The description for the product"
-          },
           "code": {
             "type": "string",
             "description": "The product code"
@@ -1481,30 +1268,16 @@
             "description": "The flag for prices that contain price components.",
             "type": "boolean"
           },
-          "pricing_model": {
+          "billing_scheme": {
             "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n",
+            "description": "Describes how to compute the price per period. Either `per_unit` or `tiered`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers and tiers_mode attributes.\n\n⚠️ Tiered pricing is **not supported** yet.\n",
             "enum": [
-              "per_unit",
-              "tiered_graduated",
-              "tiered_volume",
-              "tiered_flatfee"
+              "per_unit"
             ]
-          },
-          "tiers": {
-            "description": "Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.\n",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PriceTier"
-            }
           },
           "description": {
             "type": "string",
             "description": "A brief description of the price."
-          },
-          "long_description": {
-            "type": "string",
-            "description": "A detailed description of the price. This is shown on the order document and order table."
           },
           "sales_tax": {
             "deprecated": true,
@@ -1537,9 +1310,20 @@
               }
             ]
           },
-          "is_tax_inclusive": {
-            "type": "boolean",
-            "description": "Specifies whether the price is considered `inclusive` of taxes or not."
+          "tax_behavior": {
+            "type": "string",
+            "description": "Specifies whether the price is considered `inclusive` of taxes or `exclusive` of taxes.\nOne of `inclusive`, `exclusive`, or `unspecified`.\n",
+            "enum": [
+              "inclusive",
+              "exclusive"
+            ]
+          },
+          "tiers_mode": {
+            "description": "Defines the tiered pricing type of the price.",
+            "type": "string",
+            "enum": [
+              "standard"
+            ]
           },
           "type": {
             "type": "string",
@@ -1649,15 +1433,7 @@
                   "kwh",
                   "m",
                   "m2",
-                  "l",
-                  "cubic-meter",
-                  "cubic-meter-h",
-                  "ls",
-                  "a",
-                  "kva",
-                  "w",
-                  "wp",
-                  "kwp"
+                  "l"
                 ]
               },
               {
@@ -1693,10 +1469,7 @@
               "type": "string"
             }
           }
-        },
-        "required": [
-          "pricing_model"
-        ]
+        }
       },
       "CompositePrice": {
         "type": "object",
@@ -1818,65 +1591,6 @@
               }
             }
           ]
-        }
-      },
-      "PriceInputMappings": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/PriceInputMapping"
-        },
-        "example": [
-          {
-            "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-            "frequency_unit": "weekly",
-            "value": 1000.245,
-            "name": "avg consumption",
-            "metadata": {
-              "journey_title": "energy journey",
-              "step_name": "avg consumption picker"
-            }
-          }
-        ]
-      },
-      "PriceInputMapping": {
-        "type": "object",
-        "properties": {
-          "price_id": {
-            "type": "string"
-          },
-          "frequency_unit": {
-            "type": "string",
-            "enum": [
-              "weekly",
-              "monthly",
-              "every_quarter",
-              "every_6_months",
-              "yearly",
-              "one_time"
-            ]
-          },
-          "name": {
-            "type": "string"
-          },
-          "value": {
-            "type": "number"
-          },
-          "metadata": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        },
-        "example": {
-          "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-          "frequency_unit": "weekly",
-          "value": 1000.245,
-          "name": "avg consumption",
-          "metadata": {
-            "journey_title": "energy journey",
-            "step_name": "avg consumption picker"
-          }
         }
       },
       "CatalogSearch": {
@@ -2039,65 +1753,6 @@
           ]
         }
       },
-      "ValidateAvailabilityFileError": {
-        "description": "The availability rule error",
-        "type": "object",
-        "properties": {
-          "line": {
-            "description": "The line number where the error was found",
-            "type": "number"
-          },
-          "msg": {
-            "description": "The error message",
-            "type": "string"
-          },
-          "data": {
-            "description": "Data related to the error",
-            "type": "string"
-          }
-        },
-        "required": [
-          "msg"
-        ]
-      },
-      "ValidateAvailabilityFileResult": {
-        "description": "The availability map file result payload",
-        "type": "object",
-        "properties": {
-          "status": {
-            "description": "The status of the validation",
-            "type": "string",
-            "enum": [
-              "success",
-              "error"
-            ]
-          },
-          "rules_parsed_count": {
-            "description": "The number of rules successfully parsed",
-            "type": "number"
-          },
-          "errors": {
-            "description": "The errors found on the file",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ValidateAvailabilityFileError"
-            }
-          }
-        },
-        "required": [
-          "status",
-          "rules_parsed_count",
-          "errors"
-        ],
-        "example": {
-          "rules_parsed_count": 8,
-          "errors": [
-            "File must be UTF-8 encoded",
-            "Error on line 3 - street_number must be of type number",
-            "Error on line 6 - start_date cant be greater than end_date"
-          ]
-        }
-      },
       "CartDto": {
         "description": "A valid cart payload from a client.",
         "properties": {
@@ -2221,12 +1876,9 @@
         "description": "A valid set of product prices, quantities, (discounts) and taxes from a client.",
         "type": "array",
         "items": {
-          "anyOf": [
+          "oneOf": [
             {
               "$ref": "#/components/schemas/PriceItemDto"
-            },
-            {
-              "$ref": "#/components/schemas/CompositePriceItemDto"
             }
           ]
         }
@@ -2241,10 +1893,6 @@
           "quantity": {
             "type": "integer",
             "description": "The quantity of products being purchased."
-          },
-          "price_mappings": {
-            "description": "Price mapping information required to compute totals",
-            "$ref": "#/components/schemas/PriceInputMappings"
           },
           "description": {
             "type": "string",
@@ -2317,26 +1965,9 @@
             "type": "integer",
             "description": "The unit amount value"
           },
-          "unit_amount_gross": {
-            "type": "integer",
-            "description": "The unit gross amount value."
-          },
-          "unit_amount_currency": {
-            "$ref": "#/components/schemas/Currency"
-          },
           "unit_amount_decimal": {
             "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
             "type": "string"
-          },
-          "pricing_model": {
-            "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n",
-            "enum": [
-              "per_unit",
-              "tiered_graduated",
-              "tiered_volume",
-              "tiered_flatfee"
-            ]
           },
           "_price": {
             "description": "The snapshot of the price linked to the price item.",
@@ -2346,10 +1977,7 @@
               }
             ]
           }
-        },
-        "required": [
-          "pricing_model"
-        ]
+        }
       },
       "CompositePriceItemDto": {
         "allOf": [
@@ -2428,14 +2056,7 @@
           },
           "billing_period": {
             "type": "string",
-            "description": "The price billing period.",
-            "enum": [
-              "weekly",
-              "monthly",
-              "every_quarter",
-              "every_6_months",
-              "yearly"
-            ]
+            "description": "The price billing period."
           },
           "amount_subtotal": {
             "type": "integer",
@@ -2444,10 +2065,6 @@
           "amount_total": {
             "type": "integer",
             "description": "Total of all items, with same recurrence, after (discounts and) taxes are applied."
-          },
-          "unit_amount_gross": {
-            "type": "integer",
-            "description": "The unit gross amount value."
           },
           "amount_tax": {
             "type": "integer",
@@ -2461,11 +2078,6 @@
       },
       "Cart": {
         "description": "Supports shopping for products and services until ready for checkout.",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Amounts"
-          }
-        ],
         "properties": {
           "id": {
             "type": "string",
@@ -2500,6 +2112,16 @@
           },
           "line_items": {
             "$ref": "#/components/schemas/PriceItems"
+          },
+          "amount_subtotal": {
+            "readOnly": true,
+            "type": "integer",
+            "description": "Total of all items before (discounts or) taxes are applied."
+          },
+          "amount_total": {
+            "readOnly": true,
+            "type": "integer",
+            "description": "Total of all items after (discounts and) taxes are applied."
           },
           "total_details": {
             "$ref": "#/components/schemas/TotalDetails"
@@ -2547,7 +2169,7 @@
             "$ref": "#/components/schemas/OrderStatus"
           },
           "line_items": {
-            "$ref": "#/components/schemas/PriceItemsDto"
+            "$ref": "#/components/schemas/PriceItems"
           },
           "source_type": {
             "type": "string",
@@ -2635,9 +2257,6 @@
             "items": {
               "$ref": "#/components/schemas/PriceItem"
             }
-          },
-          "total_details": {
-            "$ref": "#/components/schemas/TotalDetails"
           }
         }
       },
@@ -2647,13 +2266,8 @@
         "example": {
           "$ref": "#/components/examples/price-item"
         },
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Amounts"
-          }
-        ],
         "properties": {
-          "_id": {
+          "id": {
             "type": "string",
             "description": "price item id",
             "readOnly": true
@@ -2666,14 +2280,10 @@
             "description": "The unit amount value",
             "readOnly": true
           },
-          "unit_amount_gross": {
+          "amount_subtotal": {
             "type": "integer",
-            "description": "The unit gross amount value.",
+            "description": "Total before any (discounts or) taxes are applied.",
             "readOnly": true
-          },
-          "amount_tax": {
-            "type": "integer",
-            "description": "Total tax amount for this line item."
           },
           "unit_amount_net": {
             "type": "integer",
@@ -2683,6 +2293,11 @@
           "unit_amount_decimal": {
             "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
             "type": "string"
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total after (discounts and) taxes.",
+            "readOnly": true
           },
           "currency": {
             "$ref": "#/components/schemas/Currency"
@@ -2744,35 +2359,6 @@
                 }
               ]
             }
-          },
-          "price_mappings": {
-            "description": "Price mapping information required to compute totals",
-            "$ref": "#/components/schemas/PriceInputMappings"
-          },
-          "on_request_approved": {
-            "type": "boolean",
-            "description": "When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'."
-          }
-        }
-      },
-      "Amounts": {
-        "type": "object",
-        "properties": {
-          "amount_subtotal": {
-            "type": "integer",
-            "description": "Total of all items before (discounts or) taxes are applied."
-          },
-          "amount_subtotal_decimal": {
-            "type": "string",
-            "description": "Total of all items before (discounts or) taxes are applied, as a string with all the decimal places."
-          },
-          "amount_total": {
-            "type": "integer",
-            "description": "Total of all items after (discounts and) taxes are applied."
-          },
-          "amount_total_decimal": {
-            "type": "string",
-            "description": "Total of all items after (discounts and) taxes are applied, as a string with all the decimal places."
           }
         }
       },
@@ -2796,20 +2382,11 @@
               "recurring"
             ]
           },
-          "pricing_model": {
-            "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n",
-            "enum": [
-              "per_unit",
-              "tiered_graduated",
-              "tiered_volume",
-              "tiered_flatfee"
-            ]
+          "on_request_approved": {
+            "type": "boolean",
+            "description": "When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'."
           }
-        },
-        "required": [
-          "pricing_model"
-        ]
+        }
       },
       "TaxAmount": {
         "type": "object",
@@ -2876,14 +2453,7 @@
           },
           "billing_period": {
             "type": "string",
-            "description": "The price billing period.",
-            "enum": [
-              "weekly",
-              "monthly",
-              "every_quarter",
-              "every_6_months",
-              "yearly"
-            ]
+            "description": "The price billing period."
           },
           "amount_subtotal": {
             "type": "integer",
@@ -2893,17 +2463,9 @@
             "type": "integer",
             "description": "Total of all items, with same recurrence, after (discounts and) taxes are applied."
           },
-          "unit_amount_gross": {
-            "type": "integer",
-            "description": "The unit gross amount value."
-          },
           "amount_tax": {
             "type": "integer",
             "description": "Total of all items taxes, with same recurrence."
-          },
-          "currency": {
-            "$ref": "#/components/schemas/Currency",
-            "description": "Currency"
           }
         },
         "required": [
@@ -2964,9 +2526,6 @@
               "oneOf": [
                 {
                   "$ref": "#/components/schemas/PriceItem"
-                },
-                {
-                  "$ref": "#/components/schemas/CompositePriceItem"
                 }
               ]
             }
@@ -2979,19 +2538,8 @@
             "type": "integer",
             "description": "Total of all items after (discounts and) taxes are applied."
           },
-          "unit_amount_gross": {
-            "type": "integer",
-            "description": "The unit gross amount value."
-          },
-          "amount_tax": {
-            "type": "integer",
-            "description": "This is the sum of all the price item tax amounts."
-          },
           "total_details": {
             "$ref": "#/components/schemas/TotalDetails"
-          },
-          "currency": {
-            "$ref": "#/components/schemas/Currency"
           }
         }
       },
@@ -3002,7 +2550,8 @@
           "monthly",
           "every_quarter",
           "every_6_months",
-          "yearly"
+          "yearly",
+          "one_time"
         ]
       },
       "SalesTax": {
@@ -3332,6 +2881,7 @@
         "required": [
           "type",
           "rate",
+          "behavior",
           "_id",
           "_title",
           "_org",
@@ -3382,6 +2932,15 @@
           "rate": {
             "type": "number"
           },
+          "behavior": {
+            "type": "string",
+            "enum": [
+              "Exclusive",
+              "Inclusive",
+              "exclusive",
+              "inclusive"
+            ]
+          },
           "active": {
             "type": "boolean"
           },
@@ -3396,6 +2955,7 @@
           "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
           "type": "VAT",
           "description": "Tax description",
+          "behavior": "Exclusive",
           "active": "true",
           "region": "DE",
           "region_label": "Germany",
@@ -3427,37 +2987,6 @@
             "type": "string"
           }
         }
-      },
-      "PriceTier": {
-        "type": "object",
-        "properties": {
-          "up_to": {
-            "type": "number",
-            "nullable": true
-          },
-          "flat_fee_amount": {
-            "type": "number"
-          },
-          "flat_fee_amount_decimal": {
-            "type": "string"
-          },
-          "unit_amount": {
-            "type": "number"
-          },
-          "unit_amount_decimal": {
-            "type": "string"
-          },
-          "display_mode": {
-            "$ref": "#/components/schemas/PriceTierDisplayMode"
-          }
-        }
-      },
-      "PriceTierDisplayMode": {
-        "type": "string",
-        "enum": [
-          "hidden",
-          "on_request"
-        ]
       }
     },
     "examples": {
@@ -3561,9 +3090,10 @@
                   "type": "one_time",
                   "active": true,
                   "sales_tax": "standard",
-                  "is_tax_inclusive": true,
+                  "tax_behavior": "inclusive",
                   "description": "Winter Sale",
                   "billing_scheme": "per_unit",
+                  "tiers_mode": "Standard",
                   "_created_at": "2021-11-10T18:02:58.318Z",
                   "_updated_at": "2021-11-10T18:02:58.318Z",
                   "_title": "Winter Sale"
@@ -3596,9 +3126,10 @@
                   "type": "one_time",
                   "active": true,
                   "sales_tax": "standard",
-                  "is_tax_inclusive": true,
+                  "tax_behavior": "inclusive",
                   "description": "Winter Sale",
                   "billing_scheme": "per_unit",
+                  "tiers_mode": "Standard",
                   "_created_at": "2021-11-10T18:02:58.318Z",
                   "_updated_at": "2021-11-10T18:02:58.318Z",
                   "_title": "Winter Sale"
@@ -3647,6 +3178,7 @@
                   "tax": {
                     "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
                     "rate": "19",
+                    "behavior": "Inclusive",
                     "_schema": "tax",
                     "_org": "728",
                     "_created_at": "2021-09-24T15:06:13.859Z",
@@ -3666,7 +3198,7 @@
                 "unit_amount_currency": "EUR",
                 "unit_amount_decimal": "1000",
                 "sales_tax": "standard",
-                "is_tax_inclusive": true,
+                "tax_behavior": "inclusive",
                 "price_display_in_journeys": "show_price",
                 "type": "one_time",
                 "billing_period": "weekly",
@@ -3778,6 +3310,7 @@
                   "tax": {
                     "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
                     "rate": "19",
+                    "behavior": "Inclusive",
                     "_schema": "tax",
                     "_org": "728",
                     "_created_at": "2021-09-24T15:06:13.859Z",
@@ -3797,7 +3330,7 @@
                 "unit_amount_currency": "EUR",
                 "unit_amount_decimal": "500",
                 "sales_tax": "standard",
-                "is_tax_inclusive": true,
+                "tax_behavior": "inclusive",
                 "price_display_in_journeys": "show_price",
                 "type": "one_time",
                 "billing_period": "weekly",
@@ -3919,9 +3452,10 @@
                 "renewal_duration_unit": "years",
                 "active": true,
                 "sales_tax": "reduced",
-                "is_tax_inclusive": true,
+                "tax_behavior": "inclusive",
                 "description": "Monthly",
                 "billing_scheme": "per_unit",
+                "tiers_mode": "Standard",
                 "_schema": "price",
                 "_org": "728",
                 "_created_at": "2021-11-10T14:40:27.695Z",
@@ -4016,7 +3550,7 @@
                 "unit_amount_currency": "EUR",
                 "unit_amount_decimal": "99",
                 "sales_tax": "standard",
-                "is_tax_inclusive": true,
+                "tax_behavior": "inclusive",
                 "price_display_in_journeys": "show_price",
                 "type": "recurring",
                 "billing_period": "yearly",
@@ -4077,6 +3611,7 @@
                   "tax": {
                     "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
                     "rate": "19",
+                    "behavior": "Inclusive",
                     "_schema": "tax",
                     "_org": "728",
                     "_created_at": "2021-09-24T15:06:13.859Z",
@@ -4307,6 +3842,7 @@
                       "tax": {
                         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
                         "type": "VAT",
+                        "behavior": "Exclusive",
                         "active": true,
                         "region": "DE",
                         "_schema": "tax",
@@ -4335,6 +3871,7 @@
                       "tax": {
                         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
                         "type": "VAT",
+                        "behavior": "Exclusive",
                         "active": true,
                         "region": "DE",
                         "_schema": "tax",
@@ -4372,6 +3909,7 @@
                         "unit_amount_currency": "EUR",
                         "unit_amount_decimal": "100.00",
                         "sales_tax": "standard",
+                        "tax_behavior": "exclusive",
                         "price_display_in_journeys": "show_price",
                         "type": "one_time",
                         "_schema": "price",
@@ -4406,7 +3944,7 @@
                         "unit_amount_currency": "EUR",
                         "unit_amount_decimal": "100.00",
                         "sales_tax": "standard",
-                        "is_tax_inclusive": false,
+                        "tax_behavior": "exclusive",
                         "price_display_in_journeys": "show_price",
                         "type": "one_time",
                         "_schema": "price",
@@ -4459,7 +3997,7 @@
                 "unit_amount_currency": "EUR",
                 "unit_amount_decimal": "555666.77",
                 "sales_tax": "standard",
-                "is_tax_inclusive": true,
+                "tax_behavior": "inclusive",
                 "price_display_in_journeys": "show_as_starting_price",
                 "type": "one_time",
                 "_schema": "price",
@@ -4564,6 +4102,7 @@
                   "tax": {
                     "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
                     "type": "VAT",
+                    "behavior": "Exclusive",
                     "active": true,
                     "region": "DE",
                     "_schema": "tax",
@@ -4789,7 +4328,7 @@
           "unit_amount_currency": "EUR",
           "unit_amount_decimal": "1000",
           "sales_tax": "standard",
-          "is_tax_inclusive": true,
+          "tax_behavior": "inclusive",
           "price_display_in_journeys": "show_price",
           "type": "one_time",
           "billing_period": "weekly",
@@ -4811,8 +4350,7 @@
           "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
           "_org": "728",
           "_created_at": "2022-06-03T16:04:10.369Z",
-          "_updated_at": "2022-06-03T16:04:10.369Z",
-          "pricing_model": "per_unit"
+          "_updated_at": "2022-06-03T16:04:10.369Z"
         }
       },
       "composite-price": {
@@ -4838,7 +4376,7 @@
                   "unit_amount_currency": "EUR",
                   "unit_amount_decimal": "100.00",
                   "sales_tax": "standard",
-                  "is_tax_inclusive": false,
+                  "tax_behavior": "exclusive",
                   "price_display_in_journeys": "show_price",
                   "type": "one_time",
                   "_schema": "price",
@@ -4873,7 +4411,7 @@
                   "unit_amount_currency": "EUR",
                   "unit_amount_decimal": "100.00",
                   "sales_tax": "standard",
-                  "is_tax_inclusive": false,
+                  "tax_behavior": "exclusive",
                   "price_display_in_journeys": "show_price",
                   "type": "one_time",
                   "_schema": "price",
@@ -4914,6 +4452,7 @@
               "amount": 600,
               "tax": {
                 "active": true,
+                "behavior": "Exclusive",
                 "description": "Without Behaviour",
                 "rate": 6,
                 "region": "DE",
@@ -4934,7 +4473,7 @@
             "unit_amount_currency": "EUR",
             "unit_amount_decimal": "100.00",
             "sales_tax": "standard",
-            "is_tax_inclusive": false,
+            "tax_behavior": "exclusive",
             "price_display_in_journeys": "show_price",
             "type": "one_time",
             "billing_period": "weekly",
@@ -4956,8 +4495,7 @@
             "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
             "_org": "728",
             "_created_at": "2022-06-03T16:04:10.369Z",
-            "_updated_at": "2022-06-03T16:04:10.369Z",
-            "pricing_model": "per_unit"
+            "_updated_at": "2022-06-03T16:04:10.369Z"
           },
           "_product": {
             "name": "Cool box",
