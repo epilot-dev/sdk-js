@@ -1159,6 +1159,9 @@
           "ecp": {
             "$ref": "#/components/schemas/ECPDetails"
           },
+          "installer": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
           "enabled": {
             "type": "boolean"
           },
@@ -1242,6 +1245,9 @@
               "automationConfig": {
                 "description": "Configuration for automated steps",
                 "$ref": "#/components/schemas/AutomationConfig"
+              },
+              "journey": {
+                "$ref": "#/components/schemas/StepJourney"
               }
             }
           }
@@ -1308,6 +1314,20 @@
           "AUTOMATION"
         ]
       },
+      "StepJourney": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "journeyId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "AutomationConfig": {
         "type": "object",
         "description": "Configuration for automation execution to run",
@@ -1335,6 +1355,12 @@
         "properties": {
           "label": {
             "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "journey": {
+            "$ref": "#/components/schemas/StepJourney"
           }
         }
       },
