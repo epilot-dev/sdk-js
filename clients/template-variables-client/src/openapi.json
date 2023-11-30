@@ -14,6 +14,9 @@
   "security": [
     {
       "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
     }
   ],
   "paths": {
@@ -30,13 +33,7 @@
             "name": "lang",
             "in": "query",
             "schema": {
-              "type": "string",
-              "enum": [
-                "en",
-                "de"
-              ],
-              "description": "Language",
-              "example": "de"
+              "$ref": "#/components/schemas/Language"
             }
           }
         ],
@@ -131,11 +128,7 @@
                     "default": 25
                   },
                   "lang": {
-                    "type": "string",
-                    "enum": [
-                      "en",
-                      "de"
-                    ]
+                    "$ref": "#/components/schemas/Language"
                   },
                   "entity_schemas": {
                     "type": "array",
@@ -492,10 +485,22 @@
       "EpilotAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Epilot Bearer Token"
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization",
+        "name": "x-ivy-org-id",
+        "in": "header",
+        "type": "apiKey"
       }
     },
     "schemas": {
+      "Language": {
+        "type": "string",
+        "description": "2-letter language code (ISO 639-1)",
+        "default": "de"
+      },
       "VariableParameters": {
         "type": "object",
         "properties": {
@@ -503,11 +508,7 @@
             "$ref": "#/components/schemas/TemplateType"
           },
           "language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "de"
-            ]
+            "$ref": "#/components/schemas/Language"
           },
           "main_entity_id": {
             "type": "string",
@@ -1426,6 +1427,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://template-variables-api.sls.epilot.io"
+    },
     {
       "url": "https://template-variables-api.sls.epilot.io"
     }
