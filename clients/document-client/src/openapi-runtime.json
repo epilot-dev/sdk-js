@@ -1,0 +1,45 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/documents:generate": {
+      "post": {
+        "operationId": "generateDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v2/documents:generate": {
+      "post": {
+        "operationId": "generateDocumentV2",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id"
+          },
+          {
+            "in": "query",
+            "name": "mode"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://document.sls.epilot.io"
+    }
+  ]
+}
