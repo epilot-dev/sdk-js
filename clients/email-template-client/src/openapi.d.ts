@@ -43,13 +43,18 @@ declare namespace Components {
              */
             result?: {
                 entity?: {
-                    [name: string]: any;
                     /**
                      * name
                      * example:
                      * Order confirmation
                      */
                     name: string;
+                    /**
+                     * Brand ID. Equal 0 if available for All brands
+                     * example:
+                     * 0
+                     */
+                    brand_id?: number | null;
                     from?: From;
                     /**
                      * To
@@ -310,13 +315,18 @@ declare namespace Components {
             _updated_at: string; // date-time
         }
         export interface EmailTemplateEntity {
-            [name: string]: any;
             /**
              * name
              * example:
              * Order confirmation
              */
             name: string;
+            /**
+             * Brand ID. Equal 0 if available for All brands
+             * example:
+             * 0
+             */
+            brand_id?: number | null;
             /**
              * From
              */
@@ -379,7 +389,6 @@ declare namespace Components {
             system_template?: boolean;
         }
         export interface EmailTemplateRequest {
-            [name: string]: any;
             /**
              * example:
              * cd7809ba-a111-4dd9-8d15-18eb4de0faed
@@ -399,6 +408,12 @@ declare namespace Components {
              * Order confirmation
              */
             name: string;
+            /**
+             * Brand ID. Equal 0 if available for All brands
+             * example:
+             * 0
+             */
+            brand_id?: number | null;
             /**
              * From
              */
@@ -462,13 +477,18 @@ declare namespace Components {
         }
         export interface EmailTemplateResponse {
             entity?: {
-                [name: string]: any;
                 /**
                  * name
                  * example:
                  * Order confirmation
                  */
                 name: string;
+                /**
+                 * Brand ID. Equal 0 if available for All brands
+                 * example:
+                 * 0
+                 */
+                brand_id?: number | null;
                 from?: From;
                 /**
                  * To
@@ -816,13 +836,18 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.EmailTemplateRequest;
         namespace Responses {
             export interface $200 {
-                [name: string]: any;
                 /**
                  * name
                  * example:
                  * Order confirmation
                  */
                 name: string;
+                /**
+                 * Brand ID. Equal 0 if available for All brands
+                 * example:
+                 * 0
+                 */
+                brand_id?: number | null;
                 from?: Components.Schemas.From;
                 /**
                  * To
