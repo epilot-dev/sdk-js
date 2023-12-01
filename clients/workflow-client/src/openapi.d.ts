@@ -61,6 +61,8 @@ declare namespace Components {
          */
         export interface ECPDetails {
             label?: string;
+            name?: string;
+            journey?: StepJourney;
         }
         export interface ErrorResp {
             message?: string;
@@ -155,6 +157,7 @@ declare namespace Components {
                 name: string;
                 type: ItemType;
                 ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+                installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
                 /**
                  * enabled flag results from calculating the requirements
                  */
@@ -181,6 +184,7 @@ declare namespace Components {
                 dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
                 manuallyCreated?: boolean;
                 automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
+                journey?: StepJourney;
                 executionName: string;
                 executionStatus: WorkflowStatus;
                 contexts?: {
@@ -239,6 +243,7 @@ declare namespace Components {
             name: string;
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             /**
              * enabled flag results from calculating the requirements
              */
@@ -265,6 +270,7 @@ declare namespace Components {
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
+            journey?: StepJourney;
         }
         export interface StepExtended {
             id: string;
@@ -276,6 +282,7 @@ declare namespace Components {
             name: string;
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             /**
              * enabled flag results from calculating the requirements
              */
@@ -302,6 +309,7 @@ declare namespace Components {
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
+            journey?: StepJourney;
             executionName: string;
             executionStatus: WorkflowStatus;
             contexts?: {
@@ -316,6 +324,11 @@ declare namespace Components {
              * This field is deprecated. It will be soon removed. Please use only id.
              */
             entityRefId?: string;
+        }
+        export interface StepJourney {
+            id?: string;
+            journeyId?: string;
+            name?: string;
         }
         export interface StepPositionAt {
             index: number;
@@ -339,6 +352,7 @@ declare namespace Components {
             name: string;
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             enabled?: boolean;
             requirements?: /* describe the requirement for step enablement */ StepRequirement[];
             /**
@@ -398,6 +412,7 @@ declare namespace Components {
             name: string;
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             /**
              * enabled flag results from calculating the requirements
              */
@@ -424,6 +439,7 @@ declare namespace Components {
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
+            journey?: StepJourney;
         }
         export interface WorkflowContext {
             id: string;

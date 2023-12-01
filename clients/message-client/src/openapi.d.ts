@@ -353,6 +353,29 @@ declare namespace Paths {
             }
         }
     }
+    namespace AssignUsers {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        /**
+         * User IDs of users assigned to thread
+         */
+        export interface RequestBody {
+            /**
+             * IDs of users assigned to thread
+             */
+            assigned_to?: string[];
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace CreateDraft {
         export type RequestBody = Components.Schemas.MessageRequestParams;
         namespace Responses {
@@ -1475,6 +1498,18 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AssignThread.Responses.$204>
   /**
+   * assignUsers - assignUsers
+   * 
+   * Assign users to thread for receiving notifications. 
+   * The operation replaces all existing assigned users in thread.
+   * 
+   */
+  'assignUsers'(
+    parameters?: Parameters<Paths.AssignUsers.PathParameters> | null,
+    data?: Paths.AssignUsers.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AssignUsers.Responses.$204>
+  /**
    * createDraft - createDraft
    * 
    * Create a new draft
@@ -1689,6 +1724,20 @@ export interface PathsDictionary {
       data?: Paths.AssignThread.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AssignThread.Responses.$204>
+  }
+  ['/v1/message/threads/{id}/assign:users']: {
+    /**
+     * assignUsers - assignUsers
+     * 
+     * Assign users to thread for receiving notifications. 
+     * The operation replaces all existing assigned users in thread.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.AssignUsers.PathParameters> | null,
+      data?: Paths.AssignUsers.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AssignUsers.Responses.$204>
   }
   ['/v1/message/drafts']: {
     /**

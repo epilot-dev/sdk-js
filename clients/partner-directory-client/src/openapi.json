@@ -238,14 +238,16 @@
                     "default": [
                       "user",
                       "partner_user",
-                      "partner_organization"
+                      "partner_organization",
+                      "ecp"
                     ],
                     "items": {
                       "type": "string",
                       "enum": [
                         "user",
                         "partner_user",
-                        "partner_organization"
+                        "partner_organization",
+                        "ecp"
                       ]
                     }
                   }
@@ -302,17 +304,16 @@
                   "type": "object",
                   "properties": {
                     "user_id": {
-                      "description": "search query to filter results",
+                      "description": "user id of assignable",
                       "type": "string"
                     },
                     "org_id": {
-                      "description": "start results from an offset for pagination",
+                      "description": "organization id of assignable (optional, defaults to caller org)",
                       "type": "string"
                     }
                   },
                   "required": [
-                    "user_id",
-                    "org_id"
+                    "user_id"
                   ]
                 }
               }
@@ -588,6 +589,9 @@
           },
           {
             "$ref": "#/components/schemas/AssignableOrganization"
+          },
+          {
+            "$ref": "#/components/schemas/AssignableEcpPlaceholder"
           }
         ]
       },
@@ -733,6 +737,42 @@
               "type",
               "display_name",
               "partner_id"
+            ]
+          }
+        ]
+      },
+      "AssignableEcpPlaceholder": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAssignable"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ecp"
+                ],
+                "example": "ecp"
+              },
+              "display_name": {
+                "type": "string",
+                "example": "Example Ecp Placeholder"
+              },
+              "user_id": {
+                "type": "string",
+                "example": "456"
+              },
+              "email": {
+                "type": "string",
+                "example": "Email of ECP Placeholder"
+              }
+            },
+            "required": [
+              "type",
+              "display_name",
+              "user_id"
             ]
           }
         ]

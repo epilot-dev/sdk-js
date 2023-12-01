@@ -797,7 +797,7 @@
     },
     "/v2/portal/entity/access": {
       "post": {
-        "operationId": "triggerEntityAccess",
+        "operationId": "triggerEntityAccessEvent",
         "parameters": [
           {
             "name": "entity_id",
@@ -805,6 +805,10 @@
           },
           {
             "name": "schema",
+            "in": "query"
+          },
+          {
+            "name": "origin",
             "in": "query"
           }
         ]

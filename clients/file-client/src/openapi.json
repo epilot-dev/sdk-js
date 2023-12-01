@@ -284,6 +284,42 @@
         }
       }
     },
+    "/v1/files/download:verify": {
+      "post": {
+        "operationId": "verifyCustomDownloadUrl",
+        "summary": "verifyCustomDownloadUrl",
+        "description": "Verify a pre-signed custom download url for a file",
+        "tags": [
+          "files"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyCustomDownloadUrlPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Download Url matches signature and has not expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/files:downloadFiles": {
       "post": {
         "operationId": "downloadFiles",
@@ -866,7 +902,7 @@
               "custom_download_url": {
                 "description": "Custom external download url used for the file",
                 "type": "string",
-                "format": "url"
+                "format": "uri"
               }
             },
             "required": [
@@ -894,6 +930,20 @@
         },
         "required": [
           "s3ref"
+        ]
+      },
+      "VerifyCustomDownloadUrlPayload": {
+        "type": "object",
+        "properties": {
+          "custom_download_url": {
+            "description": "Custom external download url with signature and expiration time",
+            "type": "string",
+            "format": "uri",
+            "example": "https://some-api-url.com?file_id=123&expires_at=1699273500029&signature=abcdefg"
+          }
+        },
+        "required": [
+          "custom_download_url"
         ]
       },
       "S3Reference": {

@@ -3477,8 +3477,8 @@
     },
     "/v2/portal/entity/access": {
       "post": {
-        "operationId": "triggerEntityAccess",
-        "summary": "triggerEntityAccess",
+        "operationId": "triggerEntityAccessEvent",
+        "summary": "triggerEntityAccessEvent",
         "description": "Trigger entity access event for a portal user",
         "tags": [
           "ECP"
@@ -3492,7 +3492,7 @@
           {
             "name": "entity_id",
             "in": "query",
-            "description": "entity ID",
+            "description": "Entity ID",
             "schema": {
               "type": "string",
               "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
@@ -3501,10 +3501,19 @@
           {
             "name": "schema",
             "in": "query",
-            "description": "entity schema",
+            "description": "Entity schema",
             "schema": {
               "type": "string",
               "example": "contract"
+            }
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "description": "Portal origin",
+            "schema": {
+              "$ref": "#/components/schemas/Origin",
+              "description": "Origin of the portal"
             }
           }
         ],
@@ -5885,6 +5894,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://customer-portal-api.sls.epilot.io"
+    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }

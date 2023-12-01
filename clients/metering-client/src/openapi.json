@@ -1515,6 +1515,9 @@
   "servers": [
     {
       "url": "https://metering.sls.epilot.io"
+    },
+    {
+      "url": "https://metering.sls.epilot.io"
     }
   ]
 }

@@ -67,11 +67,12 @@ declare namespace Components {
             [name: string]: any;
             _id?: string;
             _schema?: string;
-            _title?: string;
+            _title?: string | null;
             _org?: string;
-            _tags?: string[];
-            _created_at?: string;
-            _updated_at?: string;
+            _tags?: string[] | null;
+            _created_at?: string | null;
+            _updated_at?: string | null;
+            required?: any;
         }
         export interface EntityRef {
             /**
@@ -265,7 +266,7 @@ declare namespace Components {
                 /**
                  * Whether its a read-only ui or not. Can be each target, or only the first. Overwrites uiActions
                  */
-                locked?: "each" | "first" | "system_recommendation";
+                locked?: "each" | "first";
                 /**
                  * Whether all source mappings flow into a single attribute (e.g. address)
                  */
@@ -286,10 +287,6 @@ declare namespace Components {
             value: string;
             label: string;
             initial_target_value?: string;
-            /**
-             * Whether the raw value should be used, or whether the value is enriched by a path
-             */
-            raw?: boolean;
             /**
              * Data Structure Type of the underlaying output value
              */
@@ -627,6 +624,12 @@ declare namespace Paths {
         }
     }
     namespace StoreConfig {
+        namespace Parameters {
+            export type WithId = string;
+        }
+        export interface QueryParameters {
+            with_id?: Parameters.WithId;
+        }
         export type RequestBody = Components.Schemas.MappingConfig;
         namespace Responses {
             export type $201 = Components.Schemas.MappingConfig;
@@ -661,7 +664,7 @@ export interface OperationMethods {
    * Store new MappingConfig
    */
   'storeConfig'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.StoreConfig.QueryParameters> | null,
     data?: Paths.StoreConfig.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.StoreConfig.Responses.$201>
@@ -765,7 +768,7 @@ export interface PathsDictionary {
      * Store new MappingConfig
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.StoreConfig.QueryParameters> | null,
       data?: Paths.StoreConfig.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.StoreConfig.Responses.$201>

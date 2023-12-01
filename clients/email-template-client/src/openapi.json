@@ -391,6 +391,12 @@
             "type": "string",
             "example": "Order confirmation"
           },
+          "brand_id": {
+            "description": "Brand ID. Equal 0 if available for All brands",
+            "type": "number",
+            "nullable": true,
+            "example": 0
+          },
           "from": {
             "description": "From",
             "$ref": "#/components/schemas/From"
@@ -461,8 +467,7 @@
             "type": "number",
             "example": 1234
           }
-        },
-        "additionalProperties": true
+        }
       },
       "EmailTemplateEntity": {
         "type": "object",
@@ -474,6 +479,12 @@
             "description": "name",
             "type": "string",
             "example": "Order confirmation"
+          },
+          "brand_id": {
+            "description": "Brand ID. Equal 0 if available for All brands",
+            "type": "number",
+            "nullable": true,
+            "example": 0
           },
           "from": {
             "description": "From",
@@ -545,8 +556,7 @@
             "type": "boolean",
             "example": false
           }
-        },
-        "additionalProperties": true
+        }
       },
       "Attachment": {
         "type": "object",
@@ -966,6 +976,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://email-template.sls.epilot.io"
+    },
     {
       "url": "https://email-template.sls.epilot.io"
     }

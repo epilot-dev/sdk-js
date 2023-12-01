@@ -220,6 +220,10 @@ declare namespace Components {
              */
             value?: string;
         }
+        /**
+         * 2-letter language code (ISO 639-1)
+         */
+        export type Language = string;
         export type TemplateType = "email" | "document";
         export interface VariableContext {
             /**
@@ -257,7 +261,7 @@ declare namespace Components {
         }
         export interface VariableParameters {
             template_type: TemplateType;
-            language?: "en" | "de";
+            language?: /* 2-letter language code (ISO 639-1) */ Language;
             /**
              * The main entity ID. Use main entity in order to use the variable without schema slug prefix - or just pass directly to other object ID.
              * example:
@@ -374,20 +378,10 @@ declare namespace Paths {
     }
     namespace GetCategories {
         namespace Parameters {
-            /**
-             * Language
-             * example:
-             * de
-             */
-            export type Lang = "en" | "de";
+            export type Lang = /* 2-letter language code (ISO 639-1) */ Components.Schemas.Language;
         }
         export interface QueryParameters {
-            lang?: /**
-             * Language
-             * example:
-             * de
-             */
-            Parameters.Lang;
+            lang?: Parameters.Lang;
         }
         namespace Responses {
             export type $200 = Components.Schemas.CategoryResult[];
@@ -456,7 +450,7 @@ declare namespace Paths {
             query: string;
             from?: number;
             size?: number;
-            lang?: "en" | "de";
+            lang?: /* 2-letter language code (ISO 639-1) */ Components.Schemas.Language;
             entity_schemas?: string[];
         }
         namespace Responses {

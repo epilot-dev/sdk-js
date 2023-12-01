@@ -61,6 +61,16 @@
         ]
       }
     },
+    "/v1/files/download:verify": {
+      "post": {
+        "operationId": "verifyCustomDownloadUrl",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v1/files:downloadFiles": {
       "post": {
         "operationId": "downloadFiles",

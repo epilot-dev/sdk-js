@@ -177,6 +177,12 @@ declare namespace Components {
              * List of grants (permissions) applied to the role
              */
             grants: Grant[];
+            /**
+             * The pricing tier of the organization this root role is based on
+             * example:
+             * Professional
+             */
+            pricing_tier?: string;
         }
         /**
          * All roles attached to an users of an organization
@@ -330,6 +336,12 @@ declare namespace Components {
              * List of grants (permissions) applied to the role
              */
             grants: GrantWithDependencies[];
+            /**
+             * The pricing tier of the organization this root role is based on
+             * example:
+             * Professional
+             */
+            pricing_tier?: string;
         } | {
             id: /**
              * Format: <organization_id>:<slug>
