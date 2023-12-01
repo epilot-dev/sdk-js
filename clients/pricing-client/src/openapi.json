@@ -2049,6 +2049,11 @@
       "RecurrenceAmountDto": {
         "type": "object",
         "description": "An amount associated with a specific recurrence.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Amounts"
+          }
+        ],
         "properties": {
           "type": {
             "type": "string",
@@ -2056,15 +2061,18 @@
           },
           "billing_period": {
             "type": "string",
-            "description": "The price billing period."
+            "description": "The price billing period.",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly"
+            ]
           },
-          "amount_subtotal": {
+          "unit_amount_gross": {
             "type": "integer",
-            "description": "Total of all items, with same recurrence, before (discounts or) taxes are applied."
-          },
-          "amount_total": {
-            "type": "integer",
-            "description": "Total of all items, with same recurrence, after (discounts and) taxes are applied."
+            "description": "The unit gross amount value."
           },
           "amount_tax": {
             "type": "integer",
@@ -2073,7 +2081,9 @@
         },
         "required": [
           "amount_subtotal",
-          "amount_total"
+          "amount_total",
+          "amount_subtotal_decimal",
+          "amount_total_decimal"
         ]
       },
       "Cart": {
@@ -2446,6 +2456,11 @@
         "type": "object",
         "description": "An amount associated with a specific recurrence.",
         "readOnly": true,
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Amounts"
+          }
+        ],
         "properties": {
           "type": {
             "type": "string",
@@ -2453,15 +2468,18 @@
           },
           "billing_period": {
             "type": "string",
-            "description": "The price billing period."
+            "description": "The price billing period.",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly"
+            ]
           },
-          "amount_subtotal": {
+          "unit_amount_gross": {
             "type": "integer",
-            "description": "Total of all items, with same recurrence, before (discounts or) taxes are applied."
-          },
-          "amount_total": {
-            "type": "integer",
-            "description": "Total of all items, with same recurrence, after (discounts and) taxes are applied."
+            "description": "The unit gross amount value."
           },
           "amount_tax": {
             "type": "integer",
@@ -2470,7 +2488,9 @@
         },
         "required": [
           "amount_subtotal",
-          "amount_total"
+          "amount_total",
+          "amount_subtotal_decimal",
+          "amount_total_decimal"
         ]
       },
       "TotalDetails": {

@@ -2145,6 +2145,22 @@ declare namespace Components {
          */
         export interface RecurrenceAmount {
             /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal: string;
+            /**
              * The price type.
              */
             type?: string;
@@ -2153,23 +2169,43 @@ declare namespace Components {
              */
             billing_period?: string;
             /**
-             * Total of all items, with same recurrence, before (discounts or) taxes are applied.
+             * The unit gross amount value.
              */
-            amount_subtotal: number;
-            /**
-             * Total of all items, with same recurrence, after (discounts and) taxes are applied.
-             */
-            amount_total: number;
+            unit_amount_gross?: number;
             /**
              * Total of all items taxes, with same recurrence.
              */
             amount_tax?: number;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
         }
         /**
          * An amount associated with a specific recurrence.
          */
         export interface RecurrenceAmountDto {
             /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal: string;
+            /**
              * The price type.
              */
             type?: string;
@@ -2178,13 +2214,9 @@ declare namespace Components {
              */
             billing_period?: string;
             /**
-             * Total of all items, with same recurrence, before (discounts or) taxes are applied.
+             * The unit gross amount value.
              */
-            amount_subtotal: number;
-            /**
-             * Total of all items, with same recurrence, after (discounts and) taxes are applied.
-             */
-            amount_total: number;
+            unit_amount_gross?: number;
             /**
              * Total of all items taxes, with same recurrence.
              */
