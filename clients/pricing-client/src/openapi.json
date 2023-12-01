@@ -2453,7 +2453,9 @@
         },
         "required": [
           "amount_subtotal",
-          "amount_total"
+          "amount_total",
+          "amount_subtotal_decimal",
+          "amount_total_decimal"
         ]
       },
       "Cart": {

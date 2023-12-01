@@ -2511,7 +2511,7 @@ declare namespace Components {
             /**
              * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
              */
-            amount_subtotal_decimal?: string;
+            amount_subtotal_decimal: string;
             /**
              * Total of all items after (discounts and) taxes are applied.
              */
@@ -2519,7 +2519,7 @@ declare namespace Components {
             /**
              * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
              */
-            amount_total_decimal?: string;
+            amount_total_decimal: string;
             /**
              * The price type.
              */
