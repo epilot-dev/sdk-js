@@ -1,0 +1,796 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Billing API",
+    "description": "API to manage billing data for epilot contracts and orders",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Billing Events",
+      "description": "Manage installments, payments and reimbursements"
+    },
+    {
+      "name": "Contracts",
+      "description": "Manage contracts within 360"
+    },
+    {
+      "name": "Balance",
+      "description": "Get customer balance"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/billing/events": {
+      "get": {
+        "operationId": "getBillingEvents",
+        "summary": "getBillingEvents",
+        "description": "Get and filter billing events such as installments and reimbursements.",
+        "tags": [
+          "Billing Events"
+        ],
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Get billing events by entity ID"
+            }
+          },
+          {
+            "name": "event_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "installment",
+                "reimbursement"
+              ],
+              "description": "Type of billing event to filter by"
+            }
+          },
+          {
+            "name": "date_after",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "List billing events after this date"
+            }
+          },
+          {
+            "name": "date_before",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "List billing events before this date"
+            }
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "List billing events for all contracts/orders of specific customer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of billing events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "type": "integer"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BillingEvent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/billing/events/{id}": {
+      "patch": {
+        "operationId": "updateBillingEvent",
+        "summary": "updateBillingEvent",
+        "description": "Update an existing billing event.",
+        "tags": [
+          "Billing Events"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the billing event to update",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BillingEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Billing Event updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingEvent"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBillingEvent",
+        "summary": "deleteBillingEvent",
+        "description": "Delete an existing billing event.",
+        "tags": [
+          "Billing Events"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the billing event to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Billing Event deleted successfully"
+          }
+        }
+      }
+    },
+    "/v1/billing/events/{event_type}": {
+      "post": {
+        "operationId": "createBillingEvent",
+        "summary": "createBillingEvent",
+        "description": "Create a new billing event.",
+        "parameters": [
+          {
+            "name": "event_type",
+            "in": "path",
+            "required": true,
+            "description": "The billing event type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "installment",
+                "reimbursement"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "Billing Events"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BillingEvent"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Billing event created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BillingEvent"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/billing/contracts": {
+      "post": {
+        "operationId": "createContractEntity",
+        "summary": "createContractEntity",
+        "description": "Create a new contract entity.",
+        "tags": [
+          "Contracts"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Contract"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Contract created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/billing/contracts/{id}": {
+      "patch": {
+        "operationId": "updateContractEntity",
+        "summary": "updateContractEntity",
+        "description": "Update an existing contract entity.",
+        "tags": [
+          "Contracts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the contract entity to update",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Contract"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contract updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteContractEntity",
+        "summary": "deleteContractEntity",
+        "description": "Delete an existing contract entity.",
+        "tags": [
+          "Contracts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the contract entity to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Contract deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/billing/customers/{id}/balance": {
+      "get": {
+        "operationId": "getCustomerBalance",
+        "summary": "getCustomerBalance",
+        "description": "Get total balance across all contracts and orders of a customer entity.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Balance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Customer entity ID (contact or account)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Balance"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot 360 Bearer Token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "BaseEntity": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "_title": {
+            "type": "string",
+            "description": "Title of entity"
+          },
+          "_org": {
+            "type": "string",
+            "description": "Organization Id the entity belongs to"
+          },
+          "_schema": {
+            "$ref": "#/components/schemas/EntitySlug"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_created_at": {
+            "type": "string"
+          },
+          "_updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "EntityId": {
+        "type": "string",
+        "description": "Entity ID",
+        "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      },
+      "EntitySlug": {
+        "description": "URL-friendly identifier for the entity schema",
+        "type": "string",
+        "enum": [
+          "contact",
+          "contract",
+          "file",
+          "order",
+          "opportunity",
+          "product",
+          "price",
+          "meter",
+          "meter_counter",
+          "billing_event"
+        ],
+        "example": "contact"
+      },
+      "EntityRelationItem": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "description": "Entity ID for the related contract.",
+            "example": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+          }
+        }
+      },
+      "BaseBillingEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          }
+        ],
+        "description": "A base billing event to be inherited by all billing events.",
+        "type": "object",
+        "required": [
+          "type",
+          "contract"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "billing_amount": {
+            "type": "integer",
+            "description": "Amount to be paid in cents i.e. precision 2",
+            "example": 10050
+          },
+          "billing_amount_decimal": {
+            "type": "string",
+            "description": "Amount to be paid in cents in decimal string representation",
+            "example": "100.50"
+          },
+          "billing_currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "external_id": {
+            "type": "string",
+            "description": "Unique identifier for event, used to reference the event to a 3rd party resource such as a SAP Installment.",
+            "example": "d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e"
+          },
+          "contract": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelationItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "InstallmentEvent": {
+        "description": "An entity that describes an installment billing event.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseBillingEvent"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "installment"
+                ],
+                "description": "Type of the billing event.",
+                "example": "installment"
+              },
+              "due_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Date on which the installment is due."
+              },
+              "paid_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Date on which the installment is paid by the customer."
+              }
+            },
+            "required": [
+              "due_date"
+            ]
+          }
+        ]
+      },
+      "ReimbursementEvent": {
+        "description": "An entity that describes a reimbursement billing event.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseBillingEvent"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "reimbursement"
+                ],
+                "description": "Type of the billing event.",
+                "example": "reimbursement"
+              },
+              "paid_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Date on which the customer is reimbursed."
+              }
+            }
+          }
+        ]
+      },
+      "BillingEvent": {
+        "description": "An entity that describes a billing event such as a future installment or a reimbursement back to the customer.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/InstallmentEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ReimbursementEvent"
+          }
+        ]
+      },
+      "Contract": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "contract_name": {
+                "type": "string",
+                "description": "The name of the contract.",
+                "example": "Grid Contract"
+              },
+              "contract_number": {
+                "type": "string",
+                "description": "The unique identifier of the contract.",
+                "example": "12345"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "in_approval_process",
+                  "approved",
+                  "active",
+                  "deactivated",
+                  "revoked",
+                  "terminated",
+                  "expired"
+                ],
+                "default": "draft",
+                "description": "The status of the contract.",
+                "example": "approved"
+              },
+              "description": {
+                "type": "string",
+                "description": "A brief description of the contract.",
+                "example": "This contract is for the supply of widgets."
+              },
+              "account_number": {
+                "type": "string",
+                "description": "The account number associated with the contract.",
+                "example": "67890"
+              },
+              "branch": {
+                "type": "string",
+                "enum": [
+                  "power",
+                  "gas",
+                  "water",
+                  "waste_water",
+                  "district_heating"
+                ],
+                "description": "The branch associated with the contract.",
+                "example": "power"
+              },
+              "billing_address": {
+                "type": "string",
+                "description": "The billing address associated with the contract.",
+                "example": "123 Main St, Anytown"
+              },
+              "delivery_address": {
+                "type": "string",
+                "description": "The delivery address associated with the contract.",
+                "example": "456 Elm St, Anytown"
+              },
+              "additional_addresses": {
+                "type": "string",
+                "description": "Any additional addresses associated with the contract.",
+                "example": "789 Oak St, Anytown"
+              },
+              "termination_date": {
+                "type": "string",
+                "description": "The date on which the contract was terminated.",
+                "example": "2022-01-01"
+              },
+              "termination_reason": {
+                "type": "string",
+                "description": "The reason for the termination of the contract.",
+                "example": "Non-payment"
+              },
+              "billing_period": {
+                "type": "string",
+                "enum": [
+                  "weekly",
+                  "monthly",
+                  "every_quarter",
+                  "every_6_months",
+                  "yearly"
+                ],
+                "default": "weekly",
+                "description": "The billing period associated with the contract.",
+                "example": "monthly"
+              },
+              "billing_duration_amount": {
+                "type": "number",
+                "minimum": 0,
+                "description": "The duration of the billing period.",
+                "example": 30
+              },
+              "renewal_duration_amount": {
+                "type": "number",
+                "minimum": 0,
+                "description": "The duration of the renewal period.",
+                "example": 365
+              },
+              "renewal_duration_unit": {
+                "type": "string",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ],
+                "default": "months",
+                "description": "The unit of time for the renewal period.",
+                "example": "years"
+              },
+              "notice_time_amount": {
+                "type": "number",
+                "minimum": 0,
+                "description": "The amount of notice required for termination of the contract.",
+                "example": 30
+              },
+              "notice_time_unit": {
+                "type": "string",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ],
+                "default": "months",
+                "description": "The unit of time for the notice period.",
+                "example": "months"
+              },
+              "start_date": {
+                "type": "string",
+                "description": "The start date of the contract.",
+                "example": "2021-01-01"
+              },
+              "billing_schedule_by_month_day": {
+                "type": "integer",
+                "description": "Defines the day of the month in which the installments are due.",
+                "minimum": 1,
+                "maximum": 31,
+                "example": 2
+              },
+              "billing_schedule_start_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Defines the start date for the billing schedule",
+                "example": "2020-01-01T00:00:00.000Z"
+              },
+              "billing_schedule_end_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Defines the end date for the billing schedule",
+                "example": "2020-01-01T00:00:00.000Z"
+              },
+              "installment_amount": {
+                "type": "integer",
+                "description": "Set amount for installments in cents. (precision 2)",
+                "example": 10050
+              },
+              "installment_amount_decimal": {
+                "type": "string",
+                "description": "Set amount for installments in decimal string representation.",
+                "example": "100.50"
+              },
+              "balance": {
+                "type": "integer",
+                "description": "Current balance of the contract in cents. (precision 2)",
+                "example": 8990
+              },
+              "balance_amount_decimal": {
+                "type": "string",
+                "description": "Current balance of the contract in decimal string representation.",
+                "example": "89.90"
+              },
+              "balance_currency": {
+                "$ref": "#/components/schemas/Currency"
+              }
+            }
+          }
+        ]
+      },
+      "ContractItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Contract"
+          }
+        ],
+        "required": [
+          "_id",
+          "_title",
+          "_org",
+          "_created_at",
+          "_updated_at"
+        ]
+      },
+      "Balance": {
+        "type": "object",
+        "properties": {
+          "balance": {
+            "type": "integer",
+            "description": "Current balance of the customer in cents. (precision 2)",
+            "example": 8990
+          },
+          "balance_decimal": {
+            "type": "string",
+            "description": "Current balance of the customer in decimal string representation.",
+            "example": "89.90"
+          },
+          "balance_currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        }
+      },
+      "Currency": {
+        "type": "string",
+        "description": "Currency code in ISO 4217 format",
+        "example": "EUR"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://billing.sls.epilot.io"
+    }
+  ]
+}
