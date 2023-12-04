@@ -766,8 +766,7 @@
           },
           {
             "name": "customer_id",
-            "in": "query",
-            "required": true
+            "in": "query"
           }
         ]
       }
@@ -777,7 +776,7 @@
         "operationId": "getCustomerBalance",
         "parameters": [
           {
-            "name": "customer_entity_id",
+            "name": "customer_id",
             "in": "path",
             "required": true
           }
