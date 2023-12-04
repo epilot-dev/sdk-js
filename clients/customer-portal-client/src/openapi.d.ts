@@ -390,7 +390,14 @@ declare namespace Components {
         /**
          * An entity that describes a billing event such as a future installment or a reimbursement back to the customer.
          */
-        export type BillingEvent = /* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ /* An entity that describes an installment billing event. */ InstallmentEvent | /* An entity that describes a reimbursement billing event. */ ReimbursementEvent;
+        export type BillingEvent = {
+            /**
+             * Amount to be paid in cents in decimal string representation
+             * example:
+             * 100.50
+             */
+            billing_amount_decimal?: string;
+        } & (/* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ /* An entity that describes an installment billing event. */ InstallmentEvent | /* An entity that describes a reimbursement billing event. */ ReimbursementEvent);
         /**
          * The mapped contact of the portal user
          */
@@ -5221,7 +5228,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBillingEvents.Responses.$200>
   }
-  ['/v2/portal/billing/customers/{customer_entity_id}/balance']: {
+  ['/v2/portal/billing/customers/{customer_id}/balance']: {
     /**
      * getCustomerBalance - getCustomerBalance
      * 

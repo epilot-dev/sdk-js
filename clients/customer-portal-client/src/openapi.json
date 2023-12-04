@@ -3376,7 +3376,7 @@
         }
       }
     },
-    "/v2/portal/billing/customers/{customer_entity_id}/balance": {
+    "/v2/portal/billing/customers/{customer_id}/balance": {
       "get": {
         "operationId": "getCustomerBalance",
         "summary": "getCustomerBalance",
