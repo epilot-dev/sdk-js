@@ -3306,26 +3306,20 @@
             "name": "entity_id",
             "in": "query",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "description": "Entity ID to filter by"
-              }
+              "type": "string",
+              "description": "Get billing events by entity ID"
             }
           },
           {
             "name": "event_type",
             "in": "query",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "installment",
-                  "reimbursement"
-                ],
-                "description": "Type of billing event to filter by"
-              }
+              "type": "string",
+              "enum": [
+                "installment",
+                "reimbursement"
+              ],
+              "description": "Type of billing event to filter by"
             }
           },
           {
@@ -3333,7 +3327,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "format": "date",
+              "format": "date-time",
               "description": "List billing events after this date"
             }
           },
@@ -3342,16 +3336,16 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "format": "date",
+              "format": "date-time",
               "description": "List billing events before this date"
             }
           },
           {
             "name": "customer_id",
             "in": "query",
-            "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "List billing events for all contracts/orders of specific customer"
             }
           }
         ],
@@ -3397,7 +3391,7 @@
         ],
         "parameters": [
           {
-            "name": "customer_entity_id",
+            "name": "customer_id",
             "in": "path",
             "description": "Customer entity ID (contact or account)",
             "required": true,
@@ -5894,9 +5888,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://customer-portal-api.sls.epilot.io"
-    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }
