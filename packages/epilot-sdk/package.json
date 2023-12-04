@@ -46,6 +46,7 @@
     "@epilot/address-suggestions-client": "^0.1.0",
     "@epilot/auth": "^0.5.3",
     "@epilot/automation-client": "^2.6.0",
+    "@epilot/billing-client": "^0.1.0",
     "@epilot/customer-portal-client": "^0.10.0",
     "@epilot/discussion-client": "^1.7.0",
     "@epilot/email-settings-client": "^0.3.0",
