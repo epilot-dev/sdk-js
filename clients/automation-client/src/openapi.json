@@ -694,6 +694,10 @@
           },
           "error_reason": {
             "type": "string"
+          },
+          "error_info": {
+            "type": "object",
+            "additionalProperties": true
           }
         },
         "required": [
@@ -2126,7 +2130,7 @@
                     "properties": {
                       "operation": {
                         "type": "array",
-                        "description": "Filter on operation type. If not specified, all operations will be matched on execution.\nExample:\n  1. Filter all the createEntity/updateEntity operations \n  ```\n    { \n      \"operation\":{\n        \"operation\": [\"createEntity\", \"updateEntity\"]\n      }\n    }\n  ```\n",
+                        "description": "Filter on operation type. If not specified, all operations will be matched on execution.\nExample:\n  1. Filter all the createEntity/updateEntity operations\n  ```\n    {\n      \"operation\":{\n        \"operation\": [\"createEntity\", \"updateEntity\"]\n      }\n    }\n  ```\n",
                         "items": {
                           "$ref": "#/components/schemas/EntityOperation"
                         }
@@ -2193,7 +2197,7 @@
                           "EntityUpdated",
                           "DocUploadedFromPortal"
                         ],
-                        "description": "Filter on activity type. If not specified, all activities will be matched on execution.\nExample:\n  1. Filter the events when an entity is updated from portal\n    ```\n      { \n        \"activity\":{\n          \"type\": [\"EntityUpdatedFromPortal\"]\n        }\n      }\n    ```\n  2. Filter the events when either a doc is uploaded/removed on an entity from a portal\n    ```\n      { \n        \"activity\":{\n          \"type\": [\"DocUploadedFromPortal\", \"DocRemovedFromPortal\"]\n        }\n      }\n    ```\n"
+                        "description": "Filter on activity type. If not specified, all activities will be matched on execution.\nExample:\n  1. Filter the events when an entity is updated from portal\n    ```\n      {\n        \"activity\":{\n          \"type\": [\"EntityUpdatedFromPortal\"]\n        }\n      }\n    ```\n  2. Filter the events when either a doc is uploaded/removed on an entity from a portal\n    ```\n      {\n        \"activity\":{\n          \"type\": [\"DocUploadedFromPortal\", \"DocRemovedFromPortal\"]\n        }\n      }\n    ```\n"
                       }
                     }
                   }
@@ -2333,7 +2337,7 @@
           },
           {
             "type": "object",
-            "description": "- Filter on entity payload that is modified. If not specified, entire entity be matched on execution.\n  Example:\n    ```\n    {\n      \"operation\": {\n        \"payload\": {\n          \"_schema\": [\"contact\"]\n          \"address\": { \n            \"country\": [\"Germany\"] \n          }\n          age: [ { \"numeric\": [ \">\", 25, \"<=\", 35 ] } ]\n        }\n      }\n    }\n",
+            "description": "- Filter on entity payload that is modified. If not specified, entire entity be matched on execution.\n  Example:\n    ```\n    {\n      \"operation\": {\n        \"payload\": {\n          \"_schema\": [\"contact\"]\n          \"address\": {\n            \"country\": [\"Germany\"]\n          }\n          age: [ { \"numeric\": [ \">\", 25, \"<=\", 35 ] } ]\n        }\n      }\n    }\n",
             "additionalProperties": {
               "type": "array",
               "items": {
@@ -2529,9 +2533,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://automation.sls.epilot.io"
-    },
     {
       "url": "https://automation.sls.epilot.io"
     }

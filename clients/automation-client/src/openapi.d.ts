@@ -1171,6 +1171,9 @@ declare namespace Components {
         export interface ErrorOutput {
             error_code: ErrorCode;
             error_reason: string;
+            error_info?: {
+                [name: string]: any;
+            };
         }
         export type ExecutionStatus = "pending" | "in_progress" | "success" | "failed" | "cancelled" | "skipped";
         export interface ExistsCondition {
