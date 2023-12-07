@@ -390,7 +390,14 @@ declare namespace Components {
         /**
          * An entity that describes a billing event such as a future installment or a reimbursement back to the customer.
          */
-        export type BillingEvent = /* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ /* An entity that describes an installment billing event. */ InstallmentEvent | /* An entity that describes a reimbursement billing event. */ ReimbursementEvent;
+        export type BillingEvent = {
+            /**
+             * Amount to be paid in cents in decimal string representation
+             * example:
+             * 100.50
+             */
+            billing_amount_decimal?: string;
+        } & (/* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ /* An entity that describes an installment billing event. */ InstallmentEvent | /* An entity that describes a reimbursement billing event. */ ReimbursementEvent);
         /**
          * The mapped contact of the portal user
          */
@@ -2784,10 +2791,6 @@ declare namespace Paths {
     namespace GetBillingEvents {
         namespace Parameters {
             /**
-             * List billing events for all contracts/orders of specific customer
-             */
-            export type CustomerId = string;
-            /**
              * List billing events after this date
              */
             export type DateAfter = string; // date-time
@@ -2809,7 +2812,6 @@ declare namespace Paths {
             event_type?: /* Type of billing event to filter by */ Parameters.EventType;
             date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
             date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;
-            customer_id?: /* List billing events for all contracts/orders of specific customer */ Parameters.CustomerId;
         }
         namespace Responses {
             export interface $200 {
@@ -2983,20 +2985,6 @@ declare namespace Paths {
         }
     }
     namespace GetCustomerBalance {
-        namespace Parameters {
-            /**
-             * example:
-             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
-             */
-            export type CustomerId = string;
-        }
-        export interface PathParameters {
-            customer_id: /**
-             * example:
-             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
-             */
-            Parameters.CustomerId;
-        }
         namespace Responses {
             export type $200 = Components.Schemas.Balance;
         }
@@ -4526,7 +4514,7 @@ export interface OperationMethods {
    * Get total balance across all contracts and orders of a customer entity.
    */
   'getCustomerBalance'(
-    parameters?: Parameters<Paths.GetCustomerBalance.PathParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCustomerBalance.Responses.$200>
@@ -5221,14 +5209,14 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBillingEvents.Responses.$200>
   }
-  ['/v2/portal/billing/customers/{customer_entity_id}/balance']: {
+  ['/v2/portal/billing/customers/balance']: {
     /**
      * getCustomerBalance - getCustomerBalance
      * 
      * Get total balance across all contracts and orders of a customer entity.
      */
     'get'(
-      parameters?: Parameters<Paths.GetCustomerBalance.PathParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCustomerBalance.Responses.$200>
