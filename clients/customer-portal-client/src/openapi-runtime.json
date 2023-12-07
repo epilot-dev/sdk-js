@@ -763,24 +763,13 @@
           {
             "name": "date_before",
             "in": "query"
-          },
-          {
-            "name": "customer_id",
-            "in": "query"
           }
         ]
       }
     },
-    "/v2/portal/billing/customers/{customer_entity_id}/balance": {
+    "/v2/portal/billing/customers/balance": {
       "get": {
-        "operationId": "getCustomerBalance",
-        "parameters": [
-          {
-            "name": "customer_id",
-            "in": "path",
-            "required": true
-          }
-        ]
+        "operationId": "getCustomerBalance"
       }
     },
     "/v2/portal/admin:login-as-user": {
