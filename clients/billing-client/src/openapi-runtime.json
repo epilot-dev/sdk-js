@@ -24,10 +24,6 @@
           {
             "name": "date_before",
             "in": "query"
-          },
-          {
-            "name": "customer_id",
-            "in": "query"
           }
         ]
       }

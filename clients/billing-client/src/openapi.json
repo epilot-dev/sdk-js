@@ -71,14 +71,6 @@
               "format": "date-time",
               "description": "List billing events before this date"
             }
-          },
-          {
-            "name": "customer_id",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "description": "List billing events for all contracts/orders of specific customer"
-            }
           }
         ],
         "responses": {
@@ -703,44 +695,22 @@
                 "description": "The start date of the contract.",
                 "example": "2021-01-01"
               },
-              "billing_schedule_by_month_day": {
+              "billing_due_day": {
                 "type": "integer",
                 "description": "Defines the day of the month in which the installments are due.",
                 "minimum": 1,
                 "maximum": 31,
                 "example": 2
               },
-              "billing_schedule_start_date": {
-                "type": "string",
-                "format": "date-time",
-                "description": "Defines the start date for the billing schedule",
-                "example": "2020-01-01T00:00:00.000Z"
-              },
-              "billing_schedule_end_date": {
-                "type": "string",
-                "format": "date-time",
-                "description": "Defines the end date for the billing schedule",
-                "example": "2020-01-01T00:00:00.000Z"
-              },
               "installment_amount": {
                 "type": "integer",
                 "description": "Set amount for installments in cents. (precision 2)",
                 "example": 10050
               },
-              "installment_amount_decimal": {
-                "type": "string",
-                "description": "Set amount for installments in decimal string representation.",
-                "example": "100.50"
-              },
               "balance": {
                 "type": "integer",
                 "description": "Current balance of the contract in cents. (precision 2)",
                 "example": 8990
-              },
-              "balance_amount_decimal": {
-                "type": "string",
-                "description": "Current balance of the contract in decimal string representation.",
-                "example": "89.90"
               },
               "balance_currency": {
                 "$ref": "#/components/schemas/Currency"
