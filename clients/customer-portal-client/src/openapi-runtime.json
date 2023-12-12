@@ -5,746 +5,7 @@
     "version": ""
   },
   "paths": {
-    "/v2/portal/portal": {
-      "post": {
-        "operationId": "upsertPortal",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/public/user": {
-      "post": {
-        "operationId": "createUser",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/sso/user": {
-      "post": {
-        "operationId": "createSSOUser",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/public/config": {
-      "get": {
-        "operationId": "getPortalConfigByDomain",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "domain",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/config": {
-      "get": {
-        "operationId": "getPortalConfig",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": false
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "deletePortal",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/public/portal/config": {
-      "get": {
-        "operationId": "getPublicPortalConfig",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "org_id",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/org/portal/config": {
-      "get": {
-        "operationId": "getOrgPortalConfig",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/configs": {
-      "get": {
-        "operationId": "getAllPortalConfigs"
-      }
-    },
-    "/v2/portal/email-templates": {
-      "post": {
-        "operationId": "upsertEmailTemplates",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      },
-      "get": {
-        "operationId": "getEmailTemplates",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/public-widgets": {
-      "get": {
-        "operationId": "getPublicPortalWidgets",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "org_id",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/widgets": {
-      "post": {
-        "operationId": "upsertPortalWidget",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      },
-      "get": {
-        "operationId": "getPortalWidgets",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": false
-          }
-        ]
-      }
-    },
-    "/v2/portal/replace-ecp-template-variables": {
-      "post": {
-        "operationId": "replaceECPTemplateVariables",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/org/settings": {
-      "get": {
-        "operationId": "getOrganizationSettings"
-      }
-    },
-    "/v2/portal/schemas": {
-      "get": {
-        "operationId": "getSchemas"
-      }
-    },
-    "/v2/portal/extra-permission-attributes": {
-      "get": {
-        "operationId": "extraPermissionAttributes"
-      }
-    },
-    "/v2/portal/contact": {
-      "get": {
-        "operationId": "getContact"
-      },
-      "patch": {
-        "operationId": "updateContact",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/ecp/contact": {
-      "get": {
-        "operationId": "getECPContact",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "id",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/contact/email/count": {
-      "get": {
-        "operationId": "getCountByEmail",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "email",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "org_id",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/public/contact/count": {
-      "post": {
-        "operationId": "getContactCount",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/contact/valid/secondary/attributes": {
-      "get": {
-        "operationId": "getValidSecondaryAttributes"
-      }
-    },
-    "/v2/portal/user": {
-      "get": {
-        "operationId": "getPortalUser"
-      },
-      "patch": {
-        "operationId": "updatePortalUser",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      },
-      "delete": {
-        "operationId": "deletePortalUser"
-      }
-    },
-    "/v2/porta/users/by-related-entity": {
-      "get": {
-        "operationId": "fetchPortalUsersByRelatedEntity",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "entity_id",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "slug",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/user/confirm/{id}": {
-      "get": {
-        "operationId": "confirmUser",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "org_id",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/public/user/exists": {
-      "get": {
-        "operationId": "userExists",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "email",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "org_id",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "origin",
-            "required": false
-          }
-        ]
-      }
-    },
-    "/v2/portal/registered/users": {
-      "post": {
-        "operationId": "getRegisteredUsers",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/configure-distribution": {
-      "get": {
-        "operationId": "configureDistribution",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/order": {
-      "get": {
-        "operationId": "getAllOrders",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false
-          }
-        ]
-      }
-    },
-    "/v2/portal/order/{id}": {
-      "get": {
-        "operationId": "getOrder",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ]
-      },
-      "patch": {
-        "operationId": "updateOrder",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/opportunity": {
-      "get": {
-        "operationId": "getAllOpportunities",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false
-          }
-        ]
-      }
-    },
-    "/v2/portal/opportunities/{id}": {
-      "get": {
-        "operationId": "getOpportunity",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ]
-      },
-      "patch": {
-        "operationId": "updateOpportunity",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/contract": {
-      "get": {
-        "operationId": "getAllContracts",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false
-          }
-        ]
-      }
-    },
-    "/v2/portal/contract/{id}": {
-      "get": {
-        "operationId": "getContract",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ]
-      },
-      "patch": {
-        "operationId": "updateContract",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/entity/identifiers/{slug}": {
-      "get": {
-        "operationId": "getEntityIdentifiers",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/entity/by-identifiers/{slug}": {
-      "post": {
-        "operationId": "getEntitiesByIdentifiers",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/entity/add-end-customer/{slug}/{id}": {
-      "put": {
-        "operationId": "addEndCustomerRelationToEntity",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "required": true
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/entity/{slug}/{id}/activity": {
-      "get": {
-        "operationId": "getEntityActivityFeed",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "required": true
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "after"
-          },
-          {
-            "in": "query",
-            "name": "before"
-          },
-          {
-            "in": "query",
-            "name": "from"
-          },
-          {
-            "in": "query",
-            "name": "size"
-          },
-          {
-            "in": "query",
-            "name": "type"
-          },
-          {
-            "in": "query",
-            "name": "include_relations"
-          }
-        ]
-      }
-    },
-    "/v2/portal/{slug}/{id}:validateRule": {
-      "get": {
-        "operationId": "validateCadenceEntityEditRules",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "required": true
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "attribute"
-          }
-        ]
-      }
-    },
-    "/v2/portal/entities-by-payment/{id}": {
-      "get": {
-        "operationId": "searchPaymentRelationsInEntities",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/entity/activity": {
-      "put": {
-        "operationId": "createCustomEntityActivity",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "entities",
-            "style": "form",
-            "explode": false
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/entity/file": {
-      "post": {
-        "operationId": "saveEntityFile",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      },
-      "delete": {
-        "operationId": "deleteEntityFile",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/portal/files": {
-      "post": {
-        "operationId": "savePortalFiles",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/portal/user/files": {
-      "get": {
-        "operationId": "getAllFiles",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "entity_ids"
-          }
-        ]
-      }
-    },
-    "/v2/portal/user/file/{id}": {
-      "get": {
-        "operationId": "getFileById",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/user/file/{id}/downloaded": {
-      "post": {
-        "operationId": "trackFileDownloaded",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/user/files/count-by-entity": {
-      "get": {
-        "operationId": "getFilesCountByEntity"
-      }
-    },
-    "/v2/portal/billing/events": {
+    "/v1/billing/events": {
       "get": {
         "operationId": "getBillingEvents",
         "parameters": [
@@ -763,18 +24,52 @@
           {
             "name": "date_before",
             "in": "query"
+          },
+          {
+            "name": "customer_id",
+            "in": "query"
           }
         ]
       }
     },
-    "/v2/portal/billing/customers/balance": {
-      "get": {
-        "operationId": "getCustomerBalance"
+    "/v1/billing/events/{id}": {
+      "patch": {
+        "operationId": "updateBillingEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBillingEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
       }
     },
-    "/v2/portal/admin:login-as-user": {
+    "/v1/billing/events/{event_type}": {
       "post": {
-        "operationId": "loginToPortalAsUser",
+        "operationId": "createBillingEvent",
+        "parameters": [
+          {
+            "name": "event_type",
+            "in": "path",
+            "required": true
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -783,70 +78,59 @@
         }
       }
     },
-    "/v2/portal/entity/access": {
+    "/v1/billing/contracts": {
       "post": {
-        "operationId": "triggerEntityAccessEvent",
-        "parameters": [
-          {
-            "name": "entity_id",
-            "in": "query"
-          },
-          {
-            "name": "schema",
-            "in": "query"
-          },
-          {
-            "name": "origin",
-            "in": "query"
-          }
-        ]
-      }
-    },
-    "/v2/portal/entity:search": {
-      "post": {
-        "operationId": "searchPortalUserEntities",
+        "operationId": "createContractEntity",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
         }
       }
-    }
-  },
-  "components": {
-    "responses": {
-      "InvalidRequest": {
-        "content": {
-          "application/json": {}
+    },
+    "/v1/billing/contracts/{id}": {
+      "patch": {
+        "operationId": "updateContractEntity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
         }
       },
-      "Unauthorized": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "Forbidden": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "ForbiddenByRule": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "NotFound": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "InternalServerError": {
-        "content": {
-          "application/json": {}
-        }
+      "delete": {
+        "operationId": "deleteContractEntity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/billing/customers/{id}/balance": {
+      "get": {
+        "operationId": "getCustomerBalance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
       }
     }
   },
+  "components": {},
   "servers": [
     {
       "url": "https://customer-portal-api.sls.epilot.io"
