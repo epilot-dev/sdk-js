@@ -646,7 +646,7 @@ declare namespace Paths {
     namespace GetBillingEvents {
         namespace Parameters {
             /**
-             * List billing events for all contracts of specific customer
+             * List billing events for all contracts/orders of specific customer
              */
             export type CustomerId = string;
             /**
@@ -671,7 +671,7 @@ declare namespace Paths {
             event_type?: /* Type of billing event to filter by */ Parameters.EventType;
             date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
             date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;
-            customer_id?: /* List billing events for all contracts of specific customer */ Parameters.CustomerId;
+            customer_id?: /* List billing events for all contracts/orders of specific customer */ Parameters.CustomerId;
         }
         namespace Responses {
             export interface $200 {

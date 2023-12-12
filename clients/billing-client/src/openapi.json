@@ -77,7 +77,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "List billing events for all contracts of specific customer"
+              "description": "List billing events for all contracts/orders of specific customer"
             }
           }
         ],
@@ -339,11 +339,6 @@
         "operationId": "getCustomerBalance",
         "summary": "getCustomerBalance",
         "description": "Get total balance across all contracts and orders of a customer entity.",
-        "security": [
-          {
-            "EpilotAuth": []
-          }
-        ],
         "tags": [
           "Balance"
         ],
