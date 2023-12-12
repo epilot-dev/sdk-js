@@ -632,19 +632,7 @@ declare namespace Components {
              * example:
              * 2
              */
-            billing_schedule_by_month_day?: number;
-            /**
-             * Defines the start date for the billing schedule
-             * example:
-             * 2020-01-01T00:00:00.000Z
-             */
-            billing_schedule_start_date?: string; // date
-            /**
-             * Defines the end date for the billing schedule
-             * example:
-             * 2020-01-01T00:00:00.000Z
-             */
-            billing_schedule_end_date?: string; // date
+            billing_due_day?: number;
             /**
              * Set amount for installments in cents. (precision 2)
              * example:
@@ -652,23 +640,11 @@ declare namespace Components {
              */
             installment_amount?: number;
             /**
-             * Set amount for installments in decimal string representation.
-             * example:
-             * 100.50
-             */
-            installment_amount_decimal?: string;
-            /**
              * Current balance of the contract in cents. (precision 2)
              * example:
              * 8990
              */
             balance?: number;
-            /**
-             * Current balance of the contract in decimal string representation.
-             * example:
-             * 89.90
-             */
-            balance_amount_decimal?: string;
             balance_currency?: /**
              * Currency code in ISO 4217 format
              * example:
