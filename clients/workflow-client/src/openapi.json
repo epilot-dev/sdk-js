@@ -1641,6 +1641,20 @@
           }
         }
       },
+      "PhaseInEntity": {
+        "type": "object",
+        "properties": {
+          "phase_id": {
+            "type": "string"
+          },
+          "phase_name": {
+            "type": "string"
+          },
+          "phase_progress": {
+            "type": "number"
+          }
+        }
+      },
       "WorkflowInEntity": {
         "type": "object",
         "properties": {
@@ -1706,6 +1720,12 @@
           },
           "phase_progress": {
             "type": "number"
+          },
+          "phases_in_progress": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhaseInEntity"
+            }
           },
           "all_participants": {
             "type": "array",

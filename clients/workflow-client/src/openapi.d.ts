@@ -82,6 +82,11 @@ declare namespace Components {
             orgId?: string;
             creationTime?: string;
         }
+        export interface PhaseInEntity {
+            phase_id?: string;
+            phase_name?: string;
+            phase_progress?: number;
+        }
         export interface SearchExecutionsReq {
             name?: string;
             status?: WorkflowStatus;
@@ -724,6 +729,7 @@ declare namespace Components {
             phase_name?: string;
             phase_assignees?: string[];
             phase_progress?: number;
+            phases_in_progress?: PhaseInEntity[];
             all_participants?: string[];
             future_participants?: string[];
             selected_closing_reasons?: ClosingReason[];
