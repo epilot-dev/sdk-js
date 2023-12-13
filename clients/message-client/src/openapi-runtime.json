@@ -219,6 +219,18 @@
       "post": {
         "operationId": "sendDraft"
       }
+    },
+    "/v2/message/messages/{id}": {
+      "get": {
+        "operationId": "getMessageV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
     }
   },
   "components": {},

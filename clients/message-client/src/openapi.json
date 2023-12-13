@@ -30,7 +30,9 @@
         "operationId": "sendMessage",
         "summary": "sendMessage",
         "description": "Send an email message",
-        "tags": null,
+        "tags": [
+          "Messages"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -138,6 +140,18 @@
                       "$ref": "#/components/schemas/Message"
                     }
                   ]
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to download URL",
+            "headers": {
+              "Location": {
+                "description": "Download URL",
+                "schema": {
+                  "type": "string",
+                  "example": "https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html"
                 }
               }
             }
@@ -709,6 +723,46 @@
           }
         }
       }
+    },
+    "/v2/message/messages/{id}": {
+      "get": {
+        "operationId": "getMessageV2",
+        "summary": "getMessageV2",
+        "description": "Get an email message by id",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Message ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/MessageV2"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -946,6 +1000,28 @@
           }
         }
       },
+      "MessageV2": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Message"
+          }
+        ],
+        "properties": {
+          "html_ommitted": {
+            "type": "boolean",
+            "description": "If true then html is not provided and must be downloaded using the html_download_url",
+            "default": false
+          },
+          "html_download_url": {
+            "type": "string",
+            "description": "HTML body download URL",
+            "example": "https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html"
+          }
+        }
+      },
       "Address": {
         "type": "object",
         "required": [
@@ -1142,9 +1218,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://message.sls.epilot.io"
-    },
     {
       "url": "https://message.sls.epilot.io"
     }
