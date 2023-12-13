@@ -730,8 +730,6 @@ declare namespace Components {
             phase_assignees?: string[];
             phase_progress?: number;
             phases_in_progress?: PhaseInEntity[];
-            all_participants?: string[];
-            future_participants?: string[];
             selected_closing_reasons?: ClosingReason[];
             closing_reason_description?: string;
         }
