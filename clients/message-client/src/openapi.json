@@ -122,12 +122,13 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "4d74976d-fb64-47fd-85e2-65eea140f5eb"
             }
           }
         ],
         "responses": {
-          "201": {
+          "200": {
             "description": "Success",
             "content": {
               "application/json": {
@@ -145,13 +146,13 @@
             }
           },
           "302": {
-            "description": "Redirect to download URL",
+            "description": "Redirect to V2 API to fetch the download URL",
             "headers": {
               "Location": {
-                "description": "Download URL",
+                "description": "V2 API",
                 "schema": {
                   "type": "string",
-                  "example": "https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html"
+                  "example": "https://message.sls.epilot.io/v2/messages/4d74976d-fb64-47fd-85e2-65eea140f5eb"
                 }
               }
             }
@@ -728,7 +729,7 @@
       "get": {
         "operationId": "getMessageV2",
         "summary": "getMessageV2",
-        "description": "Get an email message by id",
+        "description": "- Fetches message by ID\n- If the message html is omitted on the entity, then it keeps the content on the message as a signed url\n  {\n    ...\n    _id: \"4d74976d-fb64-47fd-85e2-65eea140f5eb\",\n    _schema: \"message\",\n    _org: \"org-123\",\n    html_omitted: true,\n    html_download_url: \"https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html\"\n  }\n",
         "tags": [
           "Messages"
         ],
@@ -739,12 +740,13 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "4d74976d-fb64-47fd-85e2-65eea140f5eb"
             }
           }
         ],
         "responses": {
-          "201": {
+          "200": {
             "description": "Success",
             "content": {
               "application/json": {
@@ -1010,7 +1012,7 @@
           }
         ],
         "properties": {
-          "html_ommitted": {
+          "html_omitted": {
             "type": "boolean",
             "description": "If true then html is not provided and must be downloaded using the html_download_url",
             "default": false

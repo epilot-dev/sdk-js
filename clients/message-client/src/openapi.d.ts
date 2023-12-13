@@ -402,7 +402,7 @@ declare namespace Components {
             /**
              * If true then html is not provided and must be downloaded using the html_download_url
              */
-            html_ommitted?: boolean;
+            html_omitted?: boolean;
             /**
              * HTML body download URL
              * example:
@@ -671,13 +671,21 @@ declare namespace Paths {
     }
     namespace GetMessage {
         namespace Parameters {
+            /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
             export type Id = string;
         }
         export interface PathParameters {
-            id: Parameters.Id;
+            id: /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
+            Parameters.Id;
         }
         namespace Responses {
-            export interface $201 {
+            export interface $200 {
                 /**
                  * Entity ID
                  * example:
@@ -809,13 +817,21 @@ declare namespace Paths {
     }
     namespace GetMessageV2 {
         namespace Parameters {
+            /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
             export type Id = string;
         }
         export interface PathParameters {
-            id: Parameters.Id;
+            id: /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
+            Parameters.Id;
         }
         namespace Responses {
-            export interface $201 {
+            export interface $200 {
                 /**
                  * Entity ID
                  * example:
@@ -941,7 +957,7 @@ declare namespace Paths {
                 /**
                  * If true then html is not provided and must be downloaded using the html_download_url
                  */
-                html_ommitted?: boolean;
+                html_omitted?: boolean;
                 /**
                  * HTML body download URL
                  * example:
@@ -1643,7 +1659,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.GetMessage.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetMessage.Responses.$201>
+  ): OperationResponse<Paths.GetMessage.Responses.$200>
   /**
    * deleteMessage - deleteMessage
    * 
@@ -1814,13 +1830,23 @@ export interface OperationMethods {
   /**
    * getMessageV2 - getMessageV2
    * 
-   * Get an email message by id
+   * - Fetches message by ID
+   * - If the message html is omitted on the entity, then it keeps the content on the message as a signed url
+   *   {
+   *     ...
+   *     _id: "4d74976d-fb64-47fd-85e2-65eea140f5eb",
+   *     _schema: "message",
+   *     _org: "org-123",
+   *     html_omitted: true,
+   *     html_download_url: "https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html"
+   *   }
+   * 
    */
   'getMessageV2'(
     parameters?: Parameters<Paths.GetMessageV2.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetMessageV2.Responses.$201>
+  ): OperationResponse<Paths.GetMessageV2.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1856,7 +1882,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.GetMessage.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetMessage.Responses.$201>
+    ): OperationResponse<Paths.GetMessage.Responses.$200>
     /**
      * deleteMessage - deleteMessage
      * 
@@ -2059,13 +2085,23 @@ export interface PathsDictionary {
     /**
      * getMessageV2 - getMessageV2
      * 
-     * Get an email message by id
+     * - Fetches message by ID
+     * - If the message html is omitted on the entity, then it keeps the content on the message as a signed url
+     *   {
+     *     ...
+     *     _id: "4d74976d-fb64-47fd-85e2-65eea140f5eb",
+     *     _schema: "message",
+     *     _org: "org-123",
+     *     html_omitted: true,
+     *     html_download_url: "https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html"
+     *   }
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetMessageV2.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetMessageV2.Responses.$201>
+    ): OperationResponse<Paths.GetMessageV2.Responses.$200>
   }
 }
 
