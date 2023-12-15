@@ -3571,6 +3571,92 @@
           }
         }
       }
+    },
+    "/v2/portal/internal": {
+      "get": {
+        "operationId": "listPortalsInternal",
+        "summary": "listPortalsInternal",
+        "description": "List all portals (internal API)",
+        "x-internal": true,
+        "tags": [
+          "Internal"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Initial offset to set for the search results",
+              "example": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Size of the search results",
+              "example": 25,
+              "default": 25
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "description": "List of fields to return in response",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "id",
+                "name",
+                "origin",
+                "enabled",
+                "domain"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of portals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "type": "number",
+                      "description": "Total number of portals for pagination",
+                      "example": 50
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PortalConfig"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4201,6 +4287,12 @@
               "id": {
                 "type": "string",
                 "example": 12345,
+                "description": "ID of the organization",
+                "deprecated": true
+              },
+              "organization_id": {
+                "type": "string",
+                "example": 12345,
                 "description": "ID of the organization"
               },
               "org_name": {
@@ -4473,6 +4565,9 @@
           },
           {
             "$ref": "#/components/schemas/DocumentWidget"
+          },
+          {
+            "$ref": "#/components/schemas/PaymentWidget"
           }
         ]
       },
