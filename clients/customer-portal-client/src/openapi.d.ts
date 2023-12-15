@@ -1696,6 +1696,12 @@ declare namespace Components {
              */
             id?: string;
             /**
+             * ID of the organization
+             * example:
+             * 12345
+             */
+            organization_id?: string;
+            /**
              * Name of the organization
              * example:
              * ABC Company
@@ -1772,7 +1778,7 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "portal_user";
         }
-        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget;
+        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget;
         /**
          * The product entity
          */
@@ -3521,6 +3527,71 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListPortalsInternal {
+        namespace Parameters {
+            /**
+             * List of fields to return in response
+             * example:
+             * [
+             *   "id",
+             *   "name",
+             *   "origin",
+             *   "enabled",
+             *   "domain"
+             * ]
+             */
+            export type Fields = string[];
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 25
+             */
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 25
+             */
+            Parameters.Size;
+            fields?: /**
+             * List of fields to return in response
+             * example:
+             * [
+             *   "id",
+             *   "name",
+             *   "origin",
+             *   "enabled",
+             *   "domain"
+             * ]
+             */
+            Parameters.Fields;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Total number of portals for pagination
+                 * example:
+                 * 50
+                 */
+                hits?: number;
+                results?: Components.Schemas.PortalConfig[];
+            }
+        }
+    }
     namespace LoginToPortalAsUser {
         export interface RequestBody {
             /**
@@ -4527,6 +4598,16 @@ export interface OperationMethods {
     data?: Paths.SearchPortalUserEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
+  /**
+   * listPortalsInternal - listPortalsInternal
+   * 
+   * List all portals (internal API)
+   */
+  'listPortalsInternal'(
+    parameters?: Parameters<Paths.ListPortalsInternal.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPortalsInternal.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -5235,6 +5316,18 @@ export interface PathsDictionary {
       data?: Paths.SearchPortalUserEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
+  }
+  ['/v2/portal/internal']: {
+    /**
+     * listPortalsInternal - listPortalsInternal
+     * 
+     * List all portals (internal API)
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListPortalsInternal.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPortalsInternal.Responses.$200>
   }
 }
 

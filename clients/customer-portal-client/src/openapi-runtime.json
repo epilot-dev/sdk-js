@@ -811,6 +811,30 @@
           }
         }
       }
+    },
+    "/v2/portal/internal": {
+      "get": {
+        "operationId": "listPortalsInternal",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "style": "form",
+            "explode": false
+          }
+        ]
+      }
     }
   },
   "components": {
