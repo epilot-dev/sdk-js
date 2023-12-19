@@ -688,6 +688,153 @@
           }
         }
       }
+    },
+    "/v1/files/{id}/public/links": {
+      "post": {
+        "operationId": "generatePublicLink",
+        "summary": "generatePublicLink",
+        "description": "Generates a public link to access the private files\n",
+        "tags": [
+          "files"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Returns the public link which can be used to access the file later",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "https://file.sls.epilot.io/v1/files/public/links/3ef5c6d9-818d-45e6-8efb-b1de59079a1c/invoice-2023-12.pdf"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "getAllPublicLinksForFile",
+        "summary": "getAllPublicLinksForFile",
+        "description": "Not yet implemented; This API would fetches all the public links that are previously generated for a file",
+        "x-not-implemented": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of the file entity",
+              "example": "13d22918-36bd-4227-9ad4-2cb978788c8d"
+            }
+          }
+        ],
+        "tags": [
+          "files"
+        ],
+        "responses": {
+          "200": {
+            "description": "Public links of a file retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PublicLink"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/public/links/{id}/{filename}": {
+      "get": {
+        "operationId": "accessPublicLink",
+        "summary": "accessPublicLink",
+        "security": [],
+        "description": "Redirects to a accessible signed url for the respective file associated to the public link",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Id of the publicly generated link",
+              "example": "13d22918-36bd-4227-9ad4-2cb978788c8d"
+            }
+          },
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Name of the file",
+              "example": "invoice-2023-12.pdf"
+            }
+          }
+        ],
+        "tags": [
+          "files"
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to signed URL where the caller can access the file"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "revokePublicLink",
+        "summary": "revokePublicLink",
+        "security": [],
+        "description": "Not yet implemented; This operation would revokes a given public link by ID",
+        "x-not-implemented": true,
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Id of the publicly generated link",
+              "example": "13d22918-36bd-4227-9ad4-2cb978788c8d"
+            }
+          }
+        ],
+        "tags": [
+          "files"
+        ],
+        "responses": {
+          "204": {
+            "description": "Revokes a public link successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "https://file.sls.epilot.io/v1/files/public/links/3ef5c6d9-818d-45e6-8efb-b1de59079a1c"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1006,13 +1153,29 @@
         "required": [
           "entity_id"
         ]
+      },
+      "PublicLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the public link",
+            "example": "3ef5c6d9-818d-45e6-8efb-b1de59079a1c"
+          },
+          "link": {
+            "type": "string",
+            "description": "Public link of the file",
+            "example": "https://file.sls.epilot.io/v1/files/public/links/3ef5c6d9-818d-45e6-8efb-b1de59079a1c"
+          },
+          "last_accessed_at": {
+            "type": "string",
+            "description": "The most recent timestamp when the file was accessed"
+          }
+        }
       }
     }
   },
   "servers": [
-    {
-      "url": "https://file.sls.epilot.io"
-    },
     {
       "url": "https://file.sls.epilot.io"
     }

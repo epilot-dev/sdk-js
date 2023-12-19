@@ -214,6 +214,55 @@
       "delete": {
         "operationId": "deleteSession"
       }
+    },
+    "/v1/files/{id}/public/links": {
+      "post": {
+        "operationId": "generatePublicLink",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "get": {
+        "operationId": "getAllPublicLinksForFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/files/public/links/{id}/{filename}": {
+      "get": {
+        "operationId": "accessPublicLink",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "revokePublicLink",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
     }
   },
   "components": {},
