@@ -66,7 +66,7 @@
     "node-fetch": "^3.2.10",
     "openapi-client-axios": "^7.5.1",
     "openapi-client-axios-typegen": "^7.4.1",
-    "openapicmd": "^1.16.2",
+    "openapicmd": "^2.1.0",
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.14",
     "ts-node": "^10.9.1",

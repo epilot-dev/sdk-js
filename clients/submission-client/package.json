@@ -63,7 +63,7 @@
     "jest": "^26.6.3",
     "json-loader": "^0.5.7",
     "openapi-client-axios-typegen": "^7.4.1",
-    "openapicmd": "^1.16.2",
+    "openapicmd": "^2.1.0",
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.14",
     "ts-node": "^10.9.1",
