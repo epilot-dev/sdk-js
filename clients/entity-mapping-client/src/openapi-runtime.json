@@ -4,11 +4,6 @@
     "title": "",
     "version": ""
   },
-  "servers": [
-    {
-      "url": "https://http://entity-mapping.sls.epilot.io/"
-    }
-  ],
   "paths": {
     "/v1/mappings": {
       "post": {
@@ -156,5 +151,10 @@
       }
     }
   },
-  "components": {}
+  "components": {},
+  "servers": [
+    {
+      "url": "https://entity-mapping.sls.epilot.io/"
+    }
+  ]
 }

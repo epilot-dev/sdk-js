@@ -102,6 +102,7 @@ declare namespace Components {
         export interface ExecuteMappingResp {
             mapped_entities: Entity[];
             failures?: MappingFailure[];
+            warnings?: MappingWarning[];
         }
         /**
          * Build relations between a source entity and one or more target entities, dynamically identified
@@ -293,6 +294,11 @@ declare namespace Components {
             possible_target_types?: MappingSourceTargetType[];
         }
         export type MappingSourceTargetType = "string" | "date" | "datetime" | "boolean" | "number" | "image" | "file" | "address" | "email" | "phone" | "select" | "multiselect";
+        export interface MappingWarning {
+            explanation: string;
+            context?: string;
+            id?: string;
+        }
         export interface NewRelationItem {
             source_entity_id: string;
             target_entity_id: string;

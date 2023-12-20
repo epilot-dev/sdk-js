@@ -16,12 +16,6 @@
       "EpilotAuth": []
     }
   ],
-  "servers": [
-    {
-      "url": "https://http://entity-mapping.sls.epilot.io/",
-      "description": "Production Server"
-    }
-  ],
   "paths": {
     "/v1/mappings": {
       "post": {
@@ -682,6 +676,12 @@
             "items": {
               "$ref": "#/components/schemas/MappingFailure"
             }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingWarning"
+            }
           }
         },
         "required": [
@@ -707,6 +707,23 @@
             "additionalProperties": true
           }
         }
+      },
+      "MappingWarning": {
+        "type": "object",
+        "properties": {
+          "explanation": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "explanation"
+        ]
       },
       "Entity": {
         "type": "object",
@@ -1441,5 +1458,10 @@
         ]
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://entity-mapping.sls.epilot.io/"
+    }
+  ]
 }
