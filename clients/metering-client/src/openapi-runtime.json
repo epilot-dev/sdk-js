@@ -10,6 +10,18 @@
         "operationId": "getCustomerMeters"
       }
     },
+    "/v1/metering/contract/meters/{contract_id}": {
+      "get": {
+        "operationId": "getMetersByContractId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true
+          }
+        ]
+      }
+    },
     "/v1/metering/meter/{id}": {
       "patch": {
         "operationId": "updateMeter",
@@ -248,11 +260,6 @@
         }
       },
       "Forbidden": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "NotFound": {
         "content": {
           "application/json": {}
         }
