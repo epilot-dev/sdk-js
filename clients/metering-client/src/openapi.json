@@ -70,6 +70,64 @@
         }
       }
     },
+    "/v1/metering/contract/meters/{contract_id}": {
+      "get": {
+        "operationId": "getMetersByContractId",
+        "summary": "getMetersByContractId",
+        "description": "Retrieves all meters related to a contract.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the Contract."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Meters related to the contract retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Meter"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/metering/meter/{id}": {
       "patch": {
         "operationId": "updateMeter",
@@ -1008,16 +1066,6 @@
           }
         }
       },
-      "NotFound": {
-        "description": "The specified resource was not found",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResp"
-            }
-          }
-        }
-      },
       "InternalServerError": {
         "description": "Internal Server Error",
         "content": {
@@ -1055,11 +1103,6 @@
       },
       "EntityId": {
         "type": "string"
-      },
-      "EntitySlug": {
-        "description": "URL-friendly identifier for the entity schema",
-        "type": "string",
-        "example": "contact"
       },
       "BaseEntity": {
         "type": "object",
@@ -1513,9 +1556,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://metering.sls.epilot.io"
-    },
     {
       "url": "https://metering.sls.epilot.io"
     }

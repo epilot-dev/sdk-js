@@ -12,7 +12,6 @@ declare namespace Components {
         export type Forbidden = Schemas.ErrorResp;
         export type InternalServerError = Schemas.ErrorResp;
         export type InvalidRequest = Schemas.ErrorResp;
-        export type NotFound = Schemas.ErrorResp;
         export type Unauthorized = Schemas.ErrorResp;
     }
     namespace Schemas {
@@ -107,12 +106,6 @@ declare namespace Components {
             entity_id?: string;
             _slug?: "contact" | "contract";
         }
-        /**
-         * URL-friendly identifier for the entity schema
-         * example:
-         * contact
-         */
-        export type EntitySlug = string;
         export interface ErrorResp {
             /**
              * Error message
@@ -656,6 +649,23 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetMetersByContractId {
+        namespace Parameters {
+            export type ContractId = Components.Schemas.EntityId;
+        }
+        export interface PathParameters {
+            contract_id: Parameters.ContractId;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.Meter[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetReadingsByInterval {
         namespace Parameters {
             export type CounterId = Components.Schemas.Id;
@@ -794,6 +804,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCustomerMeters.Responses.$200>
+  /**
+   * getMetersByContractId - getMetersByContractId
+   * 
+   * Retrieves all meters related to a contract.
+   */
+  'getMetersByContractId'(
+    parameters?: Parameters<Paths.GetMetersByContractId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMetersByContractId.Responses.$200>
   /**
    * getMeter - Get Meter
    * 
@@ -934,6 +954,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCustomerMeters.Responses.$200>
+  }
+  ['/v1/metering/contract/meters/{contract_id}']: {
+    /**
+     * getMetersByContractId - getMetersByContractId
+     * 
+     * Retrieves all meters related to a contract.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMetersByContractId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMetersByContractId.Responses.$200>
   }
   ['/v1/metering/meter/{id}']: {
     /**
