@@ -33,17 +33,11 @@
         "parameters": [
           {
             "name": "type",
-            "description": "Setting types:\n* signature\n* email_domain\n* email_address\n* whitelist_email_address\n",
+            "description": "Setting types:\n* signature\n* email_domain\n* email_address\n* whitelist_email_address\n* restrict_duplicates_within\n - 10s\n - 5m\n - 1d\n - 5000 // It converts to 5 seconds.When expressed as a numerical value, it will be interpreted as being in milliseconds.\n",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "enum": [
-                "signature",
-                "email_domain",
-                "email_address",
-                "whitelist_email_address"
-              ]
+              "$ref": "#/components/schemas/SettingType"
             },
             "example": "signature"
           },
@@ -129,14 +123,7 @@
                 ],
                 "properties": {
                   "type": {
-                    "type": "string",
-                    "example": "signature",
-                    "enum": [
-                      "signature",
-                      "email_domain",
-                      "email_address",
-                      "whitelist_email_address"
-                    ]
+                    "$ref": "#/components/schemas/SettingType"
                   }
                 }
               }
@@ -380,6 +367,60 @@
           "$ref": "#/components/schemas/Setting"
         }
       },
+      "SignatureSetting": {
+        "type": "string",
+        "description": "Setting that allows to add a signature.",
+        "enum": [
+          "signature"
+        ]
+      },
+      "EmailDomainSetting": {
+        "type": "string",
+        "description": "Setting that allows to add a custom domain. For e.g; doe.com",
+        "enum": [
+          "email_domain"
+        ]
+      },
+      "EmailAddressSetting": {
+        "type": "string",
+        "description": "Setting that allows to add an email address on the custom domain. For e.g; john@doe.com",
+        "enum": [
+          "email_address"
+        ]
+      },
+      "WhitelistEmailAddressSetting": {
+        "type": "string",
+        "description": "- Setting that specifies a list of addresses exempt from being flagged as duplicate emails.\n- An email will be flagged as a duplicate if it has the same content and is sent to the same recipient within the time frame specified in the RestrictDuplicatesWithinSetting.\n",
+        "enum": [
+          "whitelist_email_address"
+        ]
+      },
+      "RestrictDuplicatesWithinSetting": {
+        "type": "string",
+        "description": "- Restrict duplicates within:\n  * 10s\n  * 5m\n  * 1d\n  * 5000 // It converts to 5 seconds.When expressed as a numerical value, it will be interpreted as being in milliseconds.\n- Defaults to 3 minutes\n",
+        "enum": [
+          "restrict_duplicates_within"
+        ]
+      },
+      "SettingType": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/SignatureSetting"
+          },
+          {
+            "$ref": "#/components/schemas/EmailDomainSetting"
+          },
+          {
+            "$ref": "#/components/schemas/EmailAddressSetting"
+          },
+          {
+            "$ref": "#/components/schemas/WhitelistEmailAddressSetting"
+          },
+          {
+            "$ref": "#/components/schemas/RestrictDuplicatesWithinSetting"
+          }
+        ]
+      },
       "Setting": {
         "type": "object",
         "required": [
@@ -396,14 +437,10 @@
             "type": "string"
           },
           "type": {
-            "type": "string",
-            "example": "signature",
-            "enum": [
-              "signature",
-              "email_domain",
-              "email_address",
-              "whitelist_email_address"
-            ]
+            "$ref": "#/components/schemas/SettingType"
+          },
+          "value": {
+            "type": "string"
           },
           "html": {
             "type": "string"
@@ -435,9 +472,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://email-settings.sls.epilot.io"
-    },
     {
       "url": "https://email-settings.sls.epilot.io"
     }
