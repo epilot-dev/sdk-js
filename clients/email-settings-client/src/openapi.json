@@ -33,7 +33,7 @@
         "parameters": [
           {
             "name": "type",
-            "description": "Setting types:\n* signature\n* email_domain\n* email_address\n* whitelist_email_address\n* restrict_duplicates_within\n - 10s\n - 5m\n - 1d\n - 5000 // It converts to 5 seconds.When expressed as a numerical value, it will be interpreted as being in milliseconds.\n",
+            "description": "Setting types:\n* signature\n* email_domain\n* email_address\n* whitelist_email_address\n* restrict_duplicates_within\n",
             "in": "query",
             "required": true,
             "schema": {
@@ -124,6 +124,11 @@
                 "properties": {
                   "type": {
                     "$ref": "#/components/schemas/SettingType"
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "ID of setting",
+                    "example": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
                   }
                 }
               }
@@ -362,10 +367,17 @@
     },
     "schemas": {
       "SettingsResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Setting"
-        }
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Setting"
+            }
+          },
+          {
+            "$ref": "#/components/schemas/Setting"
+          }
+        ]
       },
       "SignatureSetting": {
         "type": "string",
@@ -397,7 +409,7 @@
       },
       "RestrictDuplicatesWithinSetting": {
         "type": "string",
-        "description": "- Restrict duplicates within:\n  * 10s\n  * 5m\n  * 1d\n  * 5000 // It converts to 5 seconds.When expressed as a numerical value, it will be interpreted as being in milliseconds.\n- Defaults to 3 minutes\n",
+        "description": "- Restrict duplicates within:\n  * 10s\n  * 5m\n  * 1d\n  * 5000 // It converts to 5 seconds.When expressed as a numerical value, it will be interpreted as being in milliseconds.\n- Defaults to 3 minutes\n- Negative values will be treated same as positive values\n- If not set, defaults to 3 min\n- If set as 0, then the no email will be treated as a duplicate\n- Cannot have multiple values\n",
         "enum": [
           "restrict_duplicates_within"
         ]

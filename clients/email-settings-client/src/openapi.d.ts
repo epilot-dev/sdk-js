@@ -31,6 +31,10 @@ declare namespace Components {
          *   * 1d
          *   * 5000 // It converts to 5 seconds.When expressed as a numerical value, it will be interpreted as being in milliseconds.
          * - Defaults to 3 minutes
+         * - Negative values will be treated same as positive values
+         * - If not set, defaults to 3 min
+         * - If set as 0, then the no email will be treated as a duplicate
+         * - Cannot have multiple values
          *
          */
         export type RestrictDuplicatesWithinSetting = "restrict_duplicates_within";
@@ -59,10 +63,14 @@ declare namespace Components {
          *   * 1d
          *   * 5000 // It converts to 5 seconds.When expressed as a numerical value, it will be interpreted as being in milliseconds.
          * - Defaults to 3 minutes
+         * - Negative values will be treated same as positive values
+         * - If not set, defaults to 3 min
+         * - If set as 0, then the no email will be treated as a duplicate
+         * - Cannot have multiple values
          *
          */
         RestrictDuplicatesWithinSetting;
-        export type SettingsResponse = Setting[];
+        export type SettingsResponse = Setting[] | Setting;
         /**
          * Setting that allows to add a signature.
          */
@@ -110,6 +118,12 @@ declare namespace Paths {
     namespace DeleteSetting {
         export interface RequestBody {
             type: Components.Schemas.SettingType;
+            /**
+             * ID of setting
+             * example:
+             * a10bd0ff-4391-4cfc-88ee-b19d718a9bf7
+             */
+            id: string;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Setting;
