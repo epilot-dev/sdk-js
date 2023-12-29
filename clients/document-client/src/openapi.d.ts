@@ -70,6 +70,12 @@ declare namespace Components {
                  */
                 right?: number;
             };
+            /**
+             * Display margin guidelines
+             * example:
+             * true
+             */
+            display_margin_guidelines?: boolean;
         }
     }
 }
