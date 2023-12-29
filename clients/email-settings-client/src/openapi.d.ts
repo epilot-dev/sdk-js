@@ -16,23 +16,71 @@ declare namespace Components {
              */
             domain?: string;
         }
+        /**
+         * Setting that allows to add an email address on the custom domain. For e.g; john@doe.com
+         */
+        export type EmailAddressSetting = "email_address";
+        /**
+         * Setting that allows to add a custom domain. For e.g; doe.com
+         */
+        export type EmailDomainSetting = "email_domain";
+        /**
+         * - Restrict duplicates within:
+         *   * 10s
+         *   * 5m
+         *   * 1d
+         *   * 5000 // It converts to 5 seconds.When expressed as a numerical value, it will be interpreted as being in milliseconds.
+         * - Defaults to 3 minutes
+         * - Negative values will be treated same as positive values
+         * - If not set, defaults to 3 min
+         * - If set as 0, then the no email will be treated as a duplicate
+         * - Cannot have multiple values
+         *
+         */
+        export type RestrictDuplicatesWithinSetting = "restrict_duplicates_within";
         export interface Setting {
             [name: string]: any;
             id?: string;
             name?: string;
             org_id?: string;
-            /**
-             * example:
-             * signature
-             */
-            type: "signature" | "email_domain" | "email_address" | "whitelist_email_address";
+            type: SettingType;
+            value?: string;
             html?: string;
             created_at?: string;
             updated_at?: string;
             created_by?: string;
             updated_by?: string;
         }
-        export type SettingsResponse = Setting[];
+        export type SettingType = /* Setting that allows to add a signature. */ SignatureSetting | /* Setting that allows to add a custom domain. For e.g; doe.com */ EmailDomainSetting | /* Setting that allows to add an email address on the custom domain. For e.g; john@doe.com */ EmailAddressSetting | /**
+         * - Setting that specifies a list of addresses exempt from being flagged as duplicate emails.
+         * - An email will be flagged as a duplicate if it has the same content and is sent to the same recipient within the time frame specified in the RestrictDuplicatesWithinSetting.
+         *
+         */
+        WhitelistEmailAddressSetting | /**
+         * - Restrict duplicates within:
+         *   * 10s
+         *   * 5m
+         *   * 1d
+         *   * 5000 // It converts to 5 seconds.When expressed as a numerical value, it will be interpreted as being in milliseconds.
+         * - Defaults to 3 minutes
+         * - Negative values will be treated same as positive values
+         * - If not set, defaults to 3 min
+         * - If set as 0, then the no email will be treated as a duplicate
+         * - Cannot have multiple values
+         *
+         */
+        RestrictDuplicatesWithinSetting;
+        export type SettingsResponse = Setting[] | Setting;
+        /**
+         * Setting that allows to add a signature.
+         */
+        export type SignatureSetting = "signature";
+        /**
+         * - Setting that specifies a list of addresses exempt from being flagged as duplicate emails.
+         * - An email will be flagged as a duplicate if it has the same content and is sent to the same recipient within the time frame specified in the RestrictDuplicatesWithinSetting.
+         *
+         */
+        export type WhitelistEmailAddressSetting = "whitelist_email_address";
     }
 }
 declare namespace Paths {
@@ -69,11 +117,13 @@ declare namespace Paths {
     }
     namespace DeleteSetting {
         export interface RequestBody {
+            type: Components.Schemas.SettingType;
             /**
+             * ID of setting
              * example:
-             * signature
+             * a10bd0ff-4391-4cfc-88ee-b19d718a9bf7
              */
-            type: "signature" | "email_domain" | "email_address" | "whitelist_email_address";
+            id: string;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Setting;
@@ -86,7 +136,7 @@ declare namespace Paths {
     namespace GetSettings {
         namespace Parameters {
             export type Id = string;
-            export type Type = "signature" | "email_domain" | "email_address" | "whitelist_email_address";
+            export type Type = Components.Schemas.SettingType;
         }
         export interface QueryParameters {
             type: Parameters.Type;
