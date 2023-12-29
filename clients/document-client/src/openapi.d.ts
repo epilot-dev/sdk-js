@@ -9,6 +9,22 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface ErrorOutput {
+            /**
+             * Error message
+             */
+            error_message?: string;
+            /**
+             * Error code
+             */
+            error_code?: "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR";
+            /**
+             * Error details
+             */
+            error_details?: {
+                [name: string]: any;
+            }[];
+        }
         export interface S3Reference {
             /**
              * example:
@@ -20,6 +36,40 @@ declare namespace Components {
              * uploads/my-template.pdf
              */
             key: string;
+        }
+        /**
+         * Template Settings for document generation
+         */
+        export interface TemplateSettings {
+            /**
+             * Custom margins for the document
+             */
+            custom_margins?: {
+                /**
+                 * Top margin in cm
+                 * example:
+                 * 2.54
+                 */
+                top?: number;
+                /**
+                 * Bottom margin in cm
+                 * example:
+                 * 2.54
+                 */
+                bottom?: number;
+                /**
+                 * Left margin in cm
+                 * example:
+                 * 1.27
+                 */
+                left?: number;
+                /**
+                 * Right margin in cm
+                 * example:
+                 * 1.27
+                 */
+                right?: number;
+            };
         }
     }
 }
@@ -130,6 +180,7 @@ declare namespace Paths {
             variable_payload?: {
                 additionalProperties?: string;
             };
+            template_settings?: /* Template Settings for document generation */ Components.Schemas.TemplateSettings;
         }
         namespace Responses {
             export interface $200 {
@@ -194,6 +245,7 @@ declare namespace Paths {
                         s3ref?: Components.Schemas.S3Reference;
                     };
                 };
+                error_output?: Components.Schemas.ErrorOutput;
                 /**
                  * List of variables and its corresponding replaced values from the document template
                  */

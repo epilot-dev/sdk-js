@@ -183,6 +183,9 @@
                         "type": "string"
                       }
                     }
+                  },
+                  "template_settings": {
+                    "$ref": "#/components/schemas/TemplateSettings"
                   }
                 },
                 "required": [
@@ -276,6 +279,9 @@
                         }
                       }
                     },
+                    "error_output": {
+                      "$ref": "#/components/schemas/ErrorOutput"
+                    },
                     "variable_payload": {
                       "description": "List of variables and its corresponding replaced values from the document template",
                       "type": "object",
@@ -320,13 +326,73 @@
           "bucket",
           "key"
         ]
+      },
+      "ErrorOutput": {
+        "type": "object",
+        "properties": {
+          "error_message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "error_code": {
+            "description": "Error code",
+            "type": "string",
+            "enum": [
+              "PARSE_ERROR",
+              "DOC_TO_PDF_CONVERT_ERROR",
+              "INTERNAL_ERROR"
+            ]
+          },
+          "error_details": {
+            "description": "Error details",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "TemplateSettings": {
+        "type": "object",
+        "description": "Template Settings for document generation",
+        "properties": {
+          "custom_margins": {
+            "description": "Custom margins for the document",
+            "type": "object",
+            "properties": {
+              "top": {
+                "description": "Top margin in cm",
+                "type": "number",
+                "example": 2.54
+              },
+              "bottom": {
+                "description": "Bottom margin in cm",
+                "type": "number",
+                "example": 2.54
+              },
+              "left": {
+                "description": "Left margin in cm",
+                "type": "number",
+                "example": 1.27
+              },
+              "right": {
+                "description": "Right margin in cm",
+                "type": "number",
+                "example": 1.27
+              }
+            },
+            "display_margin_guidelines": {
+              "description": "Display margin guidelines",
+              "type": "boolean",
+              "example": true
+            }
+          }
+        }
       }
     }
   },
   "servers": [
-    {
-      "url": "https://document.sls.epilot.io"
-    },
     {
       "url": "https://document.sls.epilot.io"
     }
