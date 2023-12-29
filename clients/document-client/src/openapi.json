@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.0.2",
   "info": {
     "title": "Document API",
     "version": "1.0.0",
@@ -381,12 +381,12 @@
                 "type": "number",
                 "example": 1.27
               }
-            },
-            "display_margin_guidelines": {
-              "description": "Display margin guidelines",
-              "type": "boolean",
-              "example": true
             }
+          },
+          "display_margin_guidelines": {
+            "description": "Display margin guidelines",
+            "type": "boolean",
+            "example": true
           }
         }
       }
