@@ -1153,6 +1153,9 @@
           "name": {
             "type": "string"
           },
+          "description": {
+            "$ref": "#/components/schemas/StepDescription"
+          },
           "type": {
             "$ref": "#/components/schemas/ItemType"
           },
@@ -1364,6 +1367,18 @@
           }
         }
       },
+      "StepDescription": {
+        "type": "object",
+        "description": "Longer information regarding Task",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
       "ItemType": {
         "type": "string",
         "enum": [
@@ -1476,13 +1491,6 @@
         },
         "required": [
           "index"
-        ]
-      },
-      "UpdateStepResp": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Step"
-          }
         ]
       },
       "SearchStepsResp": {
@@ -1652,89 +1660,6 @@
           },
           "phase_progress": {
             "type": "number"
-          }
-        }
-      },
-      "WorkflowInEntity": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "definition_id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "$ref": "#/components/schemas/WorkflowStatus"
-          },
-          "assignees": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "duedate": {
-            "type": "string"
-          },
-          "last_update_time": {
-            "type": "string"
-          },
-          "progress": {
-            "type": "number"
-          },
-          "task_id": {
-            "type": "string"
-          },
-          "task_name": {
-            "type": "string"
-          },
-          "task_assignees": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "task_duedate": {
-            "type": "string"
-          },
-          "task_execution_type": {
-            "$ref": "#/components/schemas/StepType"
-          },
-          "task_status": {
-            "$ref": "#/components/schemas/StepStatus"
-          },
-          "phase_id": {
-            "type": "string"
-          },
-          "phase_name": {
-            "type": "string"
-          },
-          "phase_assignees": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "phase_progress": {
-            "type": "number"
-          },
-          "phases_in_progress": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PhaseInEntity"
-            }
-          },
-          "selected_closing_reasons": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ClosingReason"
-            }
-          },
-          "closing_reason_description": {
-            "type": "string"
           }
         }
       },
