@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.0.2",
   "info": {
     "title": "Document API",
     "version": "1.0.0",
@@ -144,50 +144,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string",
-                    "default": "de",
-                    "description": "Language to use for variables"
-                  },
-                  "template_document": {
-                    "description": "Input template document",
-                    "type": "object",
-                    "properties": {
-                      "filename": {
-                        "type": "string",
-                        "description": "Document original filename",
-                        "example": "my-template-{{order.order_number}}.docx"
-                      },
-                      "s3ref": {
-                        "$ref": "#/components/schemas/S3Reference"
-                      }
-                    }
-                  },
-                  "context_entity_id": {
-                    "type": "string",
-                    "description": "Entity to use for variable context",
-                    "example": "bcd0aab9-b544-42b0-8bfb-6d449d02eacc"
-                  },
-                  "user_id": {
-                    "type": "string",
-                    "description": "User Id for variable context",
-                    "example": 100321
-                  },
-                  "variable_payload": {
-                    "description": "Custom values for variables in the template. Takes the higher precedence than others.",
-                    "type": "object",
-                    "properties": {
-                      "additionalProperties": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "required": [
-                  "template_document"
-                ]
+                "$ref": "#/components/schemas/DocumentGenerationV2Request"
               }
             }
           }
@@ -198,94 +155,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "job_id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "job_status": {
-                      "description": "Status of the job",
-                      "type": "string",
-                      "enum": [
-                        "STARTED",
-                        "PROCESSING",
-                        "SUCCESS",
-                        "FAILED"
-                      ]
-                    },
-                    "message": {
-                      "description": "A message explaining the progress",
-                      "type": "string"
-                    },
-                    "pdf_output": {
-                      "type": "object",
-                      "properties": {
-                        "preview_url": {
-                          "description": "Pre-signed S3 GET URL for PDF preview",
-                          "type": "string",
-                          "example": "https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.pdf"
-                        },
-                        "output_document": {
-                          "type": "object",
-                          "properties": {
-                            "filename": {
-                              "description": "Generated document filename for PDF",
-                              "type": "string",
-                              "example": "my-template-OR-001.pdf"
-                            },
-                            "s3ref": {
-                              "$ref": "#/components/schemas/S3Reference"
-                            }
-                          },
-                          "example": {
-                            "s3ref": {
-                              "bucket": "document-api-preview-prod",
-                              "key": "preview/my-template.pdf"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "docx_output": {
-                      "type": "object",
-                      "properties": {
-                        "preview_url": {
-                          "description": "Pre-signed S3 GET URL for DOCX preview",
-                          "type": "string",
-                          "example": "https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.docx"
-                        },
-                        "output_document": {
-                          "type": "object",
-                          "properties": {
-                            "filename": {
-                              "description": "Generated document filename for DOCX",
-                              "type": "string",
-                              "example": "my-template-OR-001.docx"
-                            },
-                            "s3ref": {
-                              "$ref": "#/components/schemas/S3Reference"
-                            }
-                          },
-                          "example": {
-                            "s3ref": {
-                              "bucket": "document-api-preview-prod",
-                              "key": "preview/my-template.docx"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "variable_payload": {
-                      "description": "List of variables and its corresponding replaced values from the document template",
-                      "type": "object",
-                      "properties": {
-                        "additionalProperties": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/DocumentGenerationV2Response"
                 }
               }
             }
@@ -320,13 +190,218 @@
           "bucket",
           "key"
         ]
+      },
+      "ErrorOutput": {
+        "type": "object",
+        "properties": {
+          "error_message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "error_code": {
+            "description": "Error code",
+            "type": "string",
+            "enum": [
+              "PARSE_ERROR",
+              "DOC_TO_PDF_CONVERT_ERROR",
+              "INTERNAL_ERROR"
+            ]
+          },
+          "error_details": {
+            "description": "Error details",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "TemplateSettings": {
+        "type": "object",
+        "description": "Template Settings for document generation",
+        "properties": {
+          "custom_margins": {
+            "description": "Custom margins for the document",
+            "type": "object",
+            "properties": {
+              "top": {
+                "description": "Top margin in cm",
+                "type": "number",
+                "example": 2.54
+              },
+              "bottom": {
+                "description": "Bottom margin in cm",
+                "type": "number",
+                "example": 2.54
+              },
+              "left": {
+                "description": "Left margin in cm",
+                "type": "number",
+                "example": 1.27
+              },
+              "right": {
+                "description": "Right margin in cm",
+                "type": "number",
+                "example": 1.27
+              }
+            }
+          },
+          "display_margin_guidelines": {
+            "description": "Display margin guidelines",
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "DocumentGenerationV2Request": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "default": "de",
+            "description": "Language to use for variables"
+          },
+          "template_document": {
+            "description": "Input template document",
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string",
+                "description": "Document original filename",
+                "example": "my-template-{{order.order_number}}.docx"
+              },
+              "s3ref": {
+                "$ref": "#/components/schemas/S3Reference"
+              }
+            }
+          },
+          "context_entity_id": {
+            "type": "string",
+            "description": "Entity to use for variable context",
+            "example": "bcd0aab9-b544-42b0-8bfb-6d449d02eacc"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User Id for variable context",
+            "example": 100321
+          },
+          "variable_payload": {
+            "description": "Custom values for variables in the template. Takes the higher precedence than others.",
+            "type": "object",
+            "properties": {
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "template_settings": {
+            "$ref": "#/components/schemas/TemplateSettings"
+          }
+        },
+        "required": [
+          "template_document"
+        ]
+      },
+      "DocumentGenerationV2Response": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "job_status": {
+            "description": "Status of the job",
+            "type": "string",
+            "enum": [
+              "STARTED",
+              "PROCESSING",
+              "SUCCESS",
+              "FAILED"
+            ]
+          },
+          "message": {
+            "description": "A message explaining the progress",
+            "type": "string"
+          },
+          "pdf_output": {
+            "type": "object",
+            "properties": {
+              "preview_url": {
+                "description": "Pre-signed S3 GET URL for PDF preview",
+                "type": "string",
+                "example": "https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.pdf"
+              },
+              "output_document": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "description": "Generated document filename for PDF",
+                    "type": "string",
+                    "example": "my-template-OR-001.pdf"
+                  },
+                  "s3ref": {
+                    "$ref": "#/components/schemas/S3Reference"
+                  }
+                },
+                "example": {
+                  "s3ref": {
+                    "bucket": "document-api-preview-prod",
+                    "key": "preview/my-template.pdf"
+                  }
+                }
+              }
+            }
+          },
+          "docx_output": {
+            "type": "object",
+            "properties": {
+              "preview_url": {
+                "description": "Pre-signed S3 GET URL for DOCX preview",
+                "type": "string",
+                "example": "https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.docx"
+              },
+              "output_document": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "description": "Generated document filename for DOCX",
+                    "type": "string",
+                    "example": "my-template-OR-001.docx"
+                  },
+                  "s3ref": {
+                    "$ref": "#/components/schemas/S3Reference"
+                  }
+                },
+                "example": {
+                  "s3ref": {
+                    "bucket": "document-api-preview-prod",
+                    "key": "preview/my-template.docx"
+                  }
+                }
+              }
+            }
+          },
+          "error_output": {
+            "$ref": "#/components/schemas/ErrorOutput"
+          },
+          "variable_payload": {
+            "description": "List of variables and its corresponding replaced values from the document template",
+            "type": "object",
+            "properties": {
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "template_settings": {
+            "$ref": "#/components/schemas/TemplateSettings"
+          }
+        }
       }
     }
   },
   "servers": [
-    {
-      "url": "https://document.sls.epilot.io"
-    },
     {
       "url": "https://document.sls.epilot.io"
     }
