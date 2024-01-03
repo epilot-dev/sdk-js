@@ -55,8 +55,10 @@ declare namespace Components {
          * Details regarding ECP for the workflow step
          */
         export interface ECPDetails {
+            enabled?: boolean;
             label?: string;
             name?: string;
+            description?: string;
             journey?: StepJourney;
         }
         export interface ErrorResp {
@@ -83,6 +85,7 @@ declare namespace Components {
         export interface Step {
             id?: string;
             name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
             executionType?: StepType;
             automationConfig?: {
                 /**
@@ -110,6 +113,13 @@ declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+        }
+        /**
+         * Longer information regarding Task
+         */
+        export interface StepDescription {
+            enabled?: boolean;
+            value?: string;
         }
         export interface StepJourney {
             id?: string;
