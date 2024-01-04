@@ -19,7 +19,7 @@ declare namespace Components {
     namespace Schemas {
         export interface ActionWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -390,7 +390,14 @@ declare namespace Components {
         /**
          * An entity that describes a billing event such as a future installment or a reimbursement back to the customer.
          */
-        export type BillingEvent = /* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ /* An entity that describes an installment billing event. */ InstallmentEvent | /* An entity that describes a reimbursement billing event. */ ReimbursementEvent;
+        export type BillingEvent = {
+            /**
+             * Amount to be paid in cents in decimal string representation
+             * example:
+             * 100.50
+             */
+            billing_amount_decimal?: string;
+        } & (/* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ /* An entity that describes an installment billing event. */ InstallmentEvent | /* An entity that describes a reimbursement billing event. */ ReimbursementEvent);
         /**
          * The mapped contact of the portal user
          */
@@ -453,7 +460,7 @@ declare namespace Components {
         }
         export interface ContentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -625,19 +632,7 @@ declare namespace Components {
              * example:
              * 2
              */
-            billing_schedule_by_month_day?: number;
-            /**
-             * Defines the start date for the billing schedule
-             * example:
-             * 2020-01-01T00:00:00.000Z
-             */
-            billing_schedule_start_date?: string; // date
-            /**
-             * Defines the end date for the billing schedule
-             * example:
-             * 2020-01-01T00:00:00.000Z
-             */
-            billing_schedule_end_date?: string; // date
+            billing_due_day?: number;
             /**
              * Set amount for installments in cents. (precision 2)
              * example:
@@ -645,23 +640,11 @@ declare namespace Components {
              */
             installment_amount?: number;
             /**
-             * Set amount for installments in decimal string representation.
-             * example:
-             * 100.50
-             */
-            installment_amount_decimal?: string;
-            /**
              * Current balance of the contract in cents. (precision 2)
              * example:
              * 8990
              */
             balance?: number;
-            /**
-             * Current balance of the contract in decimal string representation.
-             * example:
-             * 89.90
-             */
-            balance_amount_decimal?: string;
             balance_currency?: /**
              * Currency code in ISO 4217 format
              * example:
@@ -765,7 +748,7 @@ declare namespace Components {
         }
         export interface DocumentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -960,7 +943,7 @@ declare namespace Components {
         export type EntitySlug = "contact" | "contract" | "file" | "order" | "opportunity" | "product" | "price" | "meter" | "meter_counter";
         export interface EntityWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1487,7 +1470,7 @@ declare namespace Components {
         export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
         export interface PaymentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1713,6 +1696,12 @@ declare namespace Components {
              */
             id?: string;
             /**
+             * ID of the organization
+             * example:
+             * 12345
+             */
+            organization_id?: string;
+            /**
              * Name of the organization
              * example:
              * ABC Company
@@ -1789,7 +1778,7 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "portal_user";
         }
-        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget;
+        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget;
         /**
          * The product entity
          */
@@ -2038,7 +2027,7 @@ declare namespace Components {
         }
         export interface TeaserWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2305,7 +2294,7 @@ declare namespace Components {
         }
         export interface WidgetBase {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2783,24 +2772,28 @@ declare namespace Paths {
     }
     namespace GetBillingEvents {
         namespace Parameters {
-            export type CustomerId = string;
             /**
              * List billing events after this date
              */
-            export type DateAfter = string; // date
+            export type DateAfter = string; // date-time
             /**
              * List billing events before this date
              */
-            export type DateBefore = string; // date
-            export type EntityId = string[];
-            export type EventType = ("installment" | "reimbursement")[];
+            export type DateBefore = string; // date-time
+            /**
+             * Get billing events by entity ID
+             */
+            export type EntityId = string;
+            /**
+             * Type of billing event to filter by
+             */
+            export type EventType = "installment" | "reimbursement";
         }
         export interface QueryParameters {
-            entity_id?: Parameters.EntityId;
-            event_type?: Parameters.EventType;
-            date_after?: /* List billing events after this date */ Parameters.DateAfter /* date */;
-            date_before?: /* List billing events before this date */ Parameters.DateBefore /* date */;
-            customer_id: Parameters.CustomerId;
+            entity_id?: /* Get billing events by entity ID */ Parameters.EntityId;
+            event_type?: /* Type of billing event to filter by */ Parameters.EventType;
+            date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
+            date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;
         }
         namespace Responses {
             export interface $200 {
@@ -2974,20 +2967,6 @@ declare namespace Paths {
         }
     }
     namespace GetCustomerBalance {
-        namespace Parameters {
-            /**
-             * example:
-             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
-             */
-            export type CustomerEntityId = string;
-        }
-        export interface PathParameters {
-            customer_entity_id: /**
-             * example:
-             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
-             */
-            Parameters.CustomerEntityId;
-        }
         namespace Responses {
             export type $200 = Components.Schemas.Balance;
         }
@@ -3548,6 +3527,71 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListPortalsInternal {
+        namespace Parameters {
+            /**
+             * List of fields to return in response
+             * example:
+             * [
+             *   "id",
+             *   "name",
+             *   "origin",
+             *   "enabled",
+             *   "domain"
+             * ]
+             */
+            export type Fields = string[];
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 25
+             */
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 25
+             */
+            Parameters.Size;
+            fields?: /**
+             * List of fields to return in response
+             * example:
+             * [
+             *   "id",
+             *   "name",
+             *   "origin",
+             *   "enabled",
+             *   "domain"
+             * ]
+             */
+            Parameters.Fields;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Total number of portals for pagination
+                 * example:
+                 * 50
+                 */
+                hits?: number;
+                results?: Components.Schemas.PortalConfig[];
+            }
+        }
+    }
     namespace LoginToPortalAsUser {
         export interface RequestBody {
             /**
@@ -3699,7 +3743,7 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace TriggerEntityAccess {
+    namespace TriggerEntityAccessEvent {
         namespace Parameters {
             /**
              * example:
@@ -3707,10 +3751,9 @@ declare namespace Paths {
              */
             export type EntityId = string;
             /**
-             * example:
-             * END_CUSTOMER_PORTAL
+             * Origin of the portal
              */
-            export type Origin = string;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
             /**
              * example:
              * contract
@@ -3728,11 +3771,7 @@ declare namespace Paths {
              * contract
              */
             Parameters.Schema;
-            origin?: /**
-             * example:
-             * END_CUSTOMER_PORTAL
-             */
-            Parameters.Origin;
+            origin?: /* Origin of the portal */ Parameters.Origin;
         }
         namespace Responses {
             export interface $200 {
@@ -4534,7 +4573,7 @@ export interface OperationMethods {
    * Get total balance across all contracts and orders of a customer entity.
    */
   'getCustomerBalance'(
-    parameters?: Parameters<Paths.GetCustomerBalance.PathParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCustomerBalance.Responses.$200>
@@ -4552,15 +4591,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.LoginToPortalAsUser.Responses.$200>
   /**
-   * triggerEntityAccess - triggerEntityAccess
+   * triggerEntityAccessEvent - triggerEntityAccessEvent
    * 
    * Trigger entity access event for a portal user
    */
-  'triggerEntityAccess'(
-    parameters?: Parameters<Paths.TriggerEntityAccess.QueryParameters> | null,
+  'triggerEntityAccessEvent'(
+    parameters?: Parameters<Paths.TriggerEntityAccessEvent.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.TriggerEntityAccess.Responses.$200>
+  ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
   /**
    * searchPortalUserEntities - searchPortalUserEntities
    * 
@@ -4571,6 +4610,16 @@ export interface OperationMethods {
     data?: Paths.SearchPortalUserEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
+  /**
+   * listPortalsInternal - listPortalsInternal
+   * 
+   * List all portals (internal API)
+   */
+  'listPortalsInternal'(
+    parameters?: Parameters<Paths.ListPortalsInternal.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPortalsInternal.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -5229,14 +5278,14 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBillingEvents.Responses.$200>
   }
-  ['/v2/portal/billing/customers/{customer_entity_id}/balance']: {
+  ['/v2/portal/billing/customers/balance']: {
     /**
      * getCustomerBalance - getCustomerBalance
      * 
      * Get total balance across all contracts and orders of a customer entity.
      */
     'get'(
-      parameters?: Parameters<Paths.GetCustomerBalance.PathParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCustomerBalance.Responses.$200>
@@ -5258,15 +5307,15 @@ export interface PathsDictionary {
   }
   ['/v2/portal/entity/access']: {
     /**
-     * triggerEntityAccess - triggerEntityAccess
+     * triggerEntityAccessEvent - triggerEntityAccessEvent
      * 
      * Trigger entity access event for a portal user
      */
     'post'(
-      parameters?: Parameters<Paths.TriggerEntityAccess.QueryParameters> | null,
+      parameters?: Parameters<Paths.TriggerEntityAccessEvent.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.TriggerEntityAccess.Responses.$200>
+    ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
   }
   ['/v2/portal/entity:search']: {
     /**
@@ -5279,6 +5328,18 @@ export interface PathsDictionary {
       data?: Paths.SearchPortalUserEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
+  }
+  ['/v2/portal/internal']: {
+    /**
+     * listPortalsInternal - listPortalsInternal
+     * 
+     * List all portals (internal API)
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListPortalsInternal.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPortalsInternal.Responses.$200>
   }
 }
 

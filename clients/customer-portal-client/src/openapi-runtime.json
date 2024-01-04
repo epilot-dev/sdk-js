@@ -762,25 +762,13 @@
           {
             "name": "date_before",
             "in": "query"
-          },
-          {
-            "name": "customer_id",
-            "in": "query",
-            "required": true
           }
         ]
       }
     },
-    "/v2/portal/billing/customers/{customer_entity_id}/balance": {
+    "/v2/portal/billing/customers/balance": {
       "get": {
-        "operationId": "getCustomerBalance",
-        "parameters": [
-          {
-            "name": "customer_entity_id",
-            "in": "path",
-            "required": true
-          }
-        ]
+        "operationId": "getCustomerBalance"
       }
     },
     "/v2/portal/admin:login-as-user": {
@@ -796,7 +784,7 @@
     },
     "/v2/portal/entity/access": {
       "post": {
-        "operationId": "triggerEntityAccess",
+        "operationId": "triggerEntityAccessEvent",
         "parameters": [
           {
             "name": "entity_id",
@@ -821,6 +809,30 @@
             "application/json": {}
           }
         }
+      }
+    },
+    "/v2/portal/internal": {
+      "get": {
+        "operationId": "listPortalsInternal",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "style": "form",
+            "explode": false
+          }
+        ]
       }
     }
   },

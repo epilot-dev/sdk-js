@@ -3316,26 +3316,20 @@
             "name": "entity_id",
             "in": "query",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "description": "Entity ID to filter by"
-              }
+              "type": "string",
+              "description": "Get billing events by entity ID"
             }
           },
           {
             "name": "event_type",
             "in": "query",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "installment",
-                  "reimbursement"
-                ],
-                "description": "Type of billing event to filter by"
-              }
+              "type": "string",
+              "enum": [
+                "installment",
+                "reimbursement"
+              ],
+              "description": "Type of billing event to filter by"
             }
           },
           {
@@ -3343,7 +3337,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "format": "date",
+              "format": "date-time",
               "description": "List billing events after this date"
             }
           },
@@ -3352,16 +3346,8 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "format": "date",
+              "format": "date-time",
               "description": "List billing events before this date"
-            }
-          },
-          {
-            "name": "customer_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -3392,30 +3378,18 @@
         }
       }
     },
-    "/v2/portal/billing/customers/{customer_entity_id}/balance": {
+    "/v2/portal/billing/customers/balance": {
       "get": {
         "operationId": "getCustomerBalance",
         "summary": "getCustomerBalance",
         "description": "Get total balance across all contracts and orders of a customer entity.",
         "security": [
           {
-            "EpilotAuth": []
+            "PortalAuth": []
           }
         ],
         "tags": [
           "Balance"
-        ],
-        "parameters": [
-          {
-            "name": "customer_entity_id",
-            "in": "path",
-            "description": "Customer entity ID (contact or account)",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
-            }
-          }
         ],
         "responses": {
           "200": {
@@ -3487,8 +3461,8 @@
     },
     "/v2/portal/entity/access": {
       "post": {
-        "operationId": "triggerEntityAccess",
-        "summary": "triggerEntityAccess",
+        "operationId": "triggerEntityAccessEvent",
+        "summary": "triggerEntityAccessEvent",
         "description": "Trigger entity access event for a portal user",
         "tags": [
           "ECP"
@@ -3522,8 +3496,8 @@
             "in": "query",
             "description": "Portal origin",
             "schema": {
-              "type": "string",
-              "example": "END_CUSTOMER_PORTAL"
+              "$ref": "#/components/schemas/Origin",
+              "description": "Origin of the portal"
             }
           }
         ],
@@ -3604,6 +3578,92 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/internal": {
+      "get": {
+        "operationId": "listPortalsInternal",
+        "summary": "listPortalsInternal",
+        "description": "List all portals (internal API)",
+        "x-internal": true,
+        "tags": [
+          "Internal"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Initial offset to set for the search results",
+              "example": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Size of the search results",
+              "example": 25,
+              "default": 25
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "description": "List of fields to return in response",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "id",
+                "name",
+                "origin",
+                "enabled",
+                "domain"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of portals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "type": "number",
+                      "description": "Total number of portals for pagination",
+                      "example": 50
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PortalConfig"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -4237,6 +4297,12 @@
               "id": {
                 "type": "string",
                 "example": 12345,
+                "description": "ID of the organization",
+                "deprecated": true
+              },
+              "organization_id": {
+                "type": "string",
+                "example": 12345,
                 "description": "ID of the organization"
               },
               "org_name": {
@@ -4309,7 +4375,8 @@
               "CONTENT_WIDGET",
               "ENTITY_WIDGET",
               "TEASER_WIDGET",
-              "DOCUMENT_WIDGET"
+              "DOCUMENT_WIDGET",
+              "PAYMENT_WIDGET"
             ]
           },
           "listIndex": {
@@ -4509,6 +4576,9 @@
           },
           {
             "$ref": "#/components/schemas/DocumentWidget"
+          },
+          {
+            "$ref": "#/components/schemas/PaymentWidget"
           }
         ]
       },
@@ -5184,44 +5254,22 @@
                 "description": "The start date of the contract.",
                 "example": "2021-01-01"
               },
-              "billing_schedule_by_month_day": {
+              "billing_due_day": {
                 "type": "integer",
                 "description": "Defines the day of the month in which the installments are due.",
                 "minimum": 1,
                 "maximum": 31,
                 "example": 2
               },
-              "billing_schedule_start_date": {
-                "type": "string",
-                "format": "date",
-                "description": "Defines the start date for the billing schedule",
-                "example": "2020-01-01T00:00:00.000Z"
-              },
-              "billing_schedule_end_date": {
-                "type": "string",
-                "format": "date",
-                "description": "Defines the end date for the billing schedule",
-                "example": "2020-01-01T00:00:00.000Z"
-              },
               "installment_amount": {
                 "type": "integer",
                 "description": "Set amount for installments in cents. (precision 2)",
                 "example": 10050
               },
-              "installment_amount_decimal": {
-                "type": "string",
-                "description": "Set amount for installments in decimal string representation.",
-                "example": "100.50"
-              },
               "balance": {
                 "type": "integer",
                 "description": "Current balance of the contract in cents. (precision 2)",
                 "example": 8990
-              },
-              "balance_amount_decimal": {
-                "type": "string",
-                "description": "Current balance of the contract in decimal string representation.",
-                "example": "89.90"
               },
               "balance_currency": {
                 "$ref": "#/components/schemas/Currency"
