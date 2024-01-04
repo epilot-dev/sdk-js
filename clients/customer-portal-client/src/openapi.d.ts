@@ -19,7 +19,7 @@ declare namespace Components {
     namespace Schemas {
         export interface ActionWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -460,7 +460,7 @@ declare namespace Components {
         }
         export interface ContentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -748,7 +748,7 @@ declare namespace Components {
         }
         export interface DocumentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -943,7 +943,7 @@ declare namespace Components {
         export type EntitySlug = "contact" | "contract" | "file" | "order" | "opportunity" | "product" | "price" | "meter" | "meter_counter";
         export interface EntityWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1470,7 +1470,7 @@ declare namespace Components {
         export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
         export interface PaymentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2027,7 +2027,7 @@ declare namespace Components {
         }
         export interface TeaserWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2294,7 +2294,7 @@ declare namespace Components {
         }
         export interface WidgetBase {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -3613,12 +3613,14 @@ declare namespace Paths {
     }
     namespace ReplaceECPTemplateVariables {
         export interface RequestBody {
-            /**
-             * ID of the contact
-             * example:
-             * 7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51
-             */
-            contactId?: string;
+            [name: string]: {
+                /**
+                 * ID of the contact
+                 * example:
+                 * 7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51
+                 */
+                _id?: string;
+            };
         }
         namespace Responses {
             export interface $200 {
@@ -3628,6 +3630,11 @@ declare namespace Paths {
                      * https://end-customer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com
                      */
                     invitationLink?: string;
+                    /**
+                     * example:
+                     * https://end-customer-portal.ecp.dev.epilot.io/documents
+                     */
+                    newDocumentLink?: string;
                 };
                 installerPortal?: {
                     /**
@@ -3635,6 +3642,11 @@ declare namespace Paths {
                      * https://installer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com
                      */
                     invitationLink?: string;
+                    /**
+                     * example:
+                     * https://installer-portal.ecp.dev.epilot.io/documents
+                     */
+                    newDocumentLink?: string;
                 };
             }
             export type $401 = Components.Responses.Unauthorized;

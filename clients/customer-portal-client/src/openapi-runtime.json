@@ -204,7 +204,6 @@
       "post": {
         "operationId": "replaceECPTemplateVariables",
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {}
           }
