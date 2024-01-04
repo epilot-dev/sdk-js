@@ -591,6 +591,12 @@
           },
           "httpMethod": {
             "$ref": "#/components/schemas/HttpMethod"
+          },
+          "customParameterList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomOAuthParameter"
+            }
           }
         },
         "required": [
@@ -890,6 +896,31 @@
             "type": "boolean"
           }
         }
+      },
+      "CustomOAuthParameter": {
+        "type": "object",
+        "description": "Custom key/value pair of either type body, query or header",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "body",
+              "query",
+              "header"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "key",
+          "value"
+        ]
       }
     },
     "securitySchemes": {

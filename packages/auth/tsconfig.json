@@ -4,18 +4,28 @@
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["esnext"],
+    "lib": [
+      "esnext"
+    ],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
     "strictNullChecks": false,
+    "skipLibCheck": true,
     "baseUrl": ".",
     "rootDir": "src/",
     "outDir": "dist/",
     "sourceMap": true,
     "declaration": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["**/*.test.ts", "src/__tests__", "node_modules", "dist"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "**/*.test.ts",
+    "src/__tests__",
+    "node_modules",
+    "dist"
+  ]
 }

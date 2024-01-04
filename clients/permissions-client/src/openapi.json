@@ -849,6 +849,11 @@
                 "enum": [
                   "org_role"
                 ]
+              },
+              "pricing_tier": {
+                "type": "string",
+                "description": "The pricing tier of the organization this root role is based on",
+                "example": "Professional"
               }
             }
           }

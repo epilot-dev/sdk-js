@@ -30,7 +30,9 @@
         "operationId": "sendMessage",
         "summary": "sendMessage",
         "description": "Send an email message",
-        "tags": null,
+        "tags": [
+          "Messages"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -120,12 +122,13 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "4d74976d-fb64-47fd-85e2-65eea140f5eb"
             }
           }
         ],
         "responses": {
-          "201": {
+          "200": {
             "description": "Success",
             "content": {
               "application/json": {
@@ -138,6 +141,18 @@
                       "$ref": "#/components/schemas/Message"
                     }
                   ]
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to V2 API to fetch the download URL",
+            "headers": {
+              "Location": {
+                "description": "V2 API",
+                "schema": {
+                  "type": "string",
+                  "example": "https://message.sls.epilot.io/v2/messages/4d74976d-fb64-47fd-85e2-65eea140f5eb"
                 }
               }
             }
@@ -587,6 +602,56 @@
         }
       }
     },
+    "/v1/message/threads/{id}/assign:users": {
+      "post": {
+        "operationId": "assignUsers",
+        "summary": "assignUsers",
+        "description": "Assign users to thread for receiving notifications. \nThe operation replaces all existing assigned users in thread.\n",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "User IDs of users assigned to thread",
+                "type": "object",
+                "properties": {
+                  "assigned_to": {
+                    "type": "array",
+                    "description": "IDs of users assigned to thread",
+                    "items": {
+                      "type": "string",
+                      "example": "206801"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/message/drafts": {
       "post": {
         "operationId": "createDraft",
@@ -648,6 +713,47 @@
                     },
                     {
                       "$ref": "#/components/schemas/Message"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v2/message/messages/{id}": {
+      "get": {
+        "operationId": "getMessageV2",
+        "summary": "getMessageV2",
+        "description": "- Fetches message by ID\n- If the message html is omitted on the entity, then it keeps the content on the message as a signed url\n  {\n    ...\n    _id: \"4d74976d-fb64-47fd-85e2-65eea140f5eb\",\n    _schema: \"message\",\n    _org: \"org-123\",\n    html_omitted: true,\n    html_download_url: \"https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html\"\n  }\n",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Message ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "4d74976d-fb64-47fd-85e2-65eea140f5eb"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/MessageV2"
                     }
                   ]
                 }
@@ -893,6 +999,28 @@
               "SENT",
               "RECEIVED"
             ]
+          }
+        }
+      },
+      "MessageV2": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Message"
+          }
+        ],
+        "properties": {
+          "html_omitted": {
+            "type": "boolean",
+            "description": "If true then html is not provided and must be downloaded using the html_download_url",
+            "default": false
+          },
+          "html_download_url": {
+            "type": "string",
+            "description": "HTML body download URL",
+            "example": "https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html"
           }
         }
       },

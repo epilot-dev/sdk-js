@@ -187,6 +187,24 @@
         }
       }
     },
+    "/v1/message/threads/{id}/assign:users": {
+      "post": {
+        "operationId": "assignUsers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v1/message/drafts": {
       "post": {
         "operationId": "createDraft",
@@ -200,6 +218,18 @@
     "/v1/message/drafts:send": {
       "post": {
         "operationId": "sendDraft"
+      }
+    },
+    "/v2/message/messages/{id}": {
+      "get": {
+        "operationId": "getMessageV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
       }
     }
   },

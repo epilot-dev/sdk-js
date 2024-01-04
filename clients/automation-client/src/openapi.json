@@ -694,6 +694,10 @@
           },
           "error_reason": {
             "type": "string"
+          },
+          "error_info": {
+            "type": "object",
+            "additionalProperties": true
           }
         },
         "required": [
@@ -2126,7 +2130,7 @@
                     "properties": {
                       "operation": {
                         "type": "array",
-                        "description": "Filter on operation type. If not specified, all operations will be matched on execution.\nExample:\n  1. Filter all the createEntity/updateEntity operations \n  ```\n    { \n      \"operation\":{\n        \"operation\": [\"createEntity\", \"updateEntity\"]\n      }\n    }\n  ```\n",
+                        "description": "Filter on operation type. If not specified, all operations will be matched on execution.\nExample:\n  1. Filter all the createEntity/updateEntity operations\n  ```\n    {\n      \"operation\":{\n        \"operation\": [\"createEntity\", \"updateEntity\"]\n      }\n    }\n  ```\n",
                         "items": {
                           "$ref": "#/components/schemas/EntityOperation"
                         }
@@ -2182,6 +2186,9 @@
                             },
                             {
                               "$ref": "#/components/schemas/SuffixCondition"
+                            },
+                            {
+                              "$ref": "#/components/schemas/WildcardCondition"
                             }
                           ]
                         },
@@ -2190,7 +2197,7 @@
                           "EntityUpdated",
                           "DocUploadedFromPortal"
                         ],
-                        "description": "Filter on activity type. If not specified, all activities will be matched on execution.\nExample:\n  1. Filter the events when an entity is updated from portal\n    ```\n      { \n        \"activity\":{\n          \"type\": [\"EntityUpdatedFromPortal\"]\n        }\n      }\n    ```\n  2. Filter the events when either a doc is uploaded/removed on an entity from a portal\n    ```\n      { \n        \"activity\":{\n          \"type\": [\"DocUploadedFromPortal\", \"DocRemovedFromPortal\"]\n        }\n      }\n    ```\n"
+                        "description": "Filter on activity type. If not specified, all activities will be matched on execution.\nExample:\n  1. Filter the events when an entity is updated from portal\n    ```\n      {\n        \"activity\":{\n          \"type\": [\"EntityUpdatedFromPortal\"]\n        }\n      }\n    ```\n  2. Filter the events when either a doc is uploaded/removed on an entity from a portal\n    ```\n      {\n        \"activity\":{\n          \"type\": [\"DocUploadedFromPortal\", \"DocRemovedFromPortal\"]\n        }\n      }\n    ```\n"
                       }
                     }
                   }
@@ -2203,7 +2210,7 @@
           "type",
           "configuration"
         ],
-        "description": "- If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.\n- The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`\n  | Comparison             | Example                                             | Rule syntax                                              |\n  |------------------------|-----------------------------------------------------|----------------------------------------------------------|\n  | Null                   | first_name is null                                  | `\"first_name\": [ null ]`                                 |\n  | Empty                  | last_name is empty                                  | `\"last_name\": [\"\"]`                                      |\n  | Equals                 | email is \"j.doe@email.com\"                          | `\"email\": [ \"j.doe@email.com\" ]`                         |\n  | Equals (ignore case)   | first_name is \"John\"                                | `\"first_name\": [ { \"equals-ignore-case\": \"john\" } ]`     |\n  | And                    | fist_name is \"John\" and last_name is \"Doe\"          | `\"first_name\": [ \"John\" ], \"last_name\": [\"Doe\"]`         |\n  | Or                     | PaymentType is \"Invoice\" or \"SEPA\"                  | `\"PaymentType\": [ \"invoice\", \"sepa\"]`                    |\n  | Or (multiple fields)   | first_name is \"John\", or last_name is \"Doe\".        | `\"$or\": [ { \"first_name\": [ \"John\" ] }, { \"last_name\": [ \"Doe\" ] } ]` |\n  | Not                    | status is anything but \"cancelled\"                  | `\"status\": [ { \"anything-but\": [ \"cancelled\" ] } ]`      |\n  | Numeric (equals)       | Price is 100                                        | `\"Price\": [ { \"numeric\": [ \"=\", 100 ] } ]`               |\n  | Numeric (range)        | Price is more than 10, and less than or equal to 20 | `\"Price\": [ { \"numeric\": [ \">\", 10, \"<=\", 20 ] } ]`      |\n  | Exists                 | ProductName exists                                  | `\"ProductName\": [ { \"exists\": true } ]`                  |\n  | Does not exist         | ProductName does not exist                          | `\"ProductName\": [ { \"exists\": false } ]`                 |\n  | Begins with            | OpportunityNumber starts with OPP-                  | `\"opportunity_number\": [ { \"prefix\": \"OPP-\" } ]`         |\n  | Ends with              | FileName ends with a .png extension                 | `\"filename\": [ { \"suffix\": \".png\" } ]`                   |\n  - To run the execution on all update events\n    ```\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"]\n          }\n        }\n      }\n    ```\n  - To run the execution only when the updates are from a portal user\n    ```\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"]\n          },\n          \"activity\": {\n            \"type\": \"EntityUpdatedFromPortal\"\n          }\n        }\n      }\n    ```\n  - To run the execution only when there is an update on a specific attribute\n    ```\n      Only starts the automation when the email on a contact is changed\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"],\n            \"payload\": {\n              \"_schema\": [\"contact\"]\n            },\n            \"diff\": {\n              \"updated\": {\n                \"email\": [{ \"exists\": true }]\n              }\n            }\n          }\n        }\n      }\n    ```\n    - To run the execution only when a specific attribute is altered(created/updated/deleted)\n      ```\n        Only starts the automation when a price is altered on a contract\n        {\n          \"type\": \"filter_entity_event\",\n          \"configuration\": {\n            \"operation\": {\n              \"payload\": {\n                \"_schema\": [\"contract\"]\n              },\n              \"diff\": {\n                // Whether he first_name has been added, updated, or removed\n                $or: [\n                  {\n                    'added.first_name': [{ exists: true }]\n                  },\n                  {\n                    'updated.first_name': [{ exists: true }]\n                  },\n                  {\n                    'deleted.first_name': [{ exists: true }]\n                  }\n                ]\n              }\n            }\n          }\n        }\n      ```\n    - To run the execution if an attribute is changed from one state to another\n      ```\n        Only starts the automation when the order status changes from `open_for_acceptance` to `placed`\n        {\n          \"type\": \"filter_entity_event\",\n          \"configuration\": {\n            \"operation\": {\n              \"operation\": [\"updateEntity\"],\n              \"payload\": {\n                \"_schema\": [\"order\"],\n                \"status\": [\"placed\"]\n              },\n              \"diff\": {\n                \"updated\": {\n                  \"status\": [\"open_for_acceptance\"]\n                }\n              }\n            }\n          }\n        }\n      ```\n"
+        "description": "- If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.\n- The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`\n  | Comparison             | Example                                             | Rule syntax                                              |\n  |------------------------|-----------------------------------------------------|----------------------------------------------------------|\n  | Null                   | first_name is null                                  | `\"first_name\": [ null ]`                                 |\n  | Empty                  | last_name is empty                                  | `\"last_name\": [\"\"]`                                      |\n  | Equals                 | email is \"j.doe@email.com\"                          | `\"email\": [ \"j.doe@email.com\" ]`                         |\n  | Equals (ignore case)   | first_name is \"John\"                                | `\"first_name\": [ { \"equals-ignore-case\": \"john\" } ]`     |\n  | And                    | fist_name is \"John\" and last_name is \"Doe\"          | `\"first_name\": [ \"John\" ], \"last_name\": [\"Doe\"]`         |\n  | Or                     | PaymentType is \"Invoice\" or \"SEPA\"                  | `\"PaymentType\": [ \"invoice\", \"sepa\"]`                    |\n  | Or (multiple fields)   | first_name is \"John\", or last_name is \"Doe\".        | `\"$or\": [ { \"first_name\": [ \"John\" ] }, { \"last_name\": [ \"Doe\" ] } ]` |\n  | Not                    | status is anything but \"cancelled\"                  | `\"status\": [ { \"anything-but\": [ \"cancelled\" ] } ]`      |\n  | Numeric (equals)       | Price is 100                                        | `\"Price\": [ { \"numeric\": [ \"=\", 100 ] } ]`               |\n  | Numeric (range)        | Price is more than 10, and less than or equal to 20 | `\"Price\": [ { \"numeric\": [ \">\", 10, \"<=\", 20 ] } ]`      |\n  | Exists                 | ProductName exists                                  | `\"ProductName\": [ { \"exists\": true } ]`                  |\n  | Does not exist         | ProductName does not exist                          | `\"ProductName\": [ { \"exists\": false } ]`                 |\n  | Begins with            | OpportunityNumber starts with OPP-                  | `\"opportunity_number\": [ { \"prefix\": \"OPP-\" } ]`         |\n  | Ends with              | FileName ends with a .png extension                 | `\"filename\": [ { \"suffix\": \".png\" } ]`                   |\n  | Wildcard               | search a string using a wildcard                    | `\"email\": [ { \"wildcard\": \"*@doe.com\" } ]`               |\n  - To run the execution on all update events\n    ```\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"]\n          }\n        }\n      }\n    ```\n  - To run the execution only when the updates are from a portal user\n    ```\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"]\n          },\n          \"activity\": {\n            \"type\": \"EntityUpdatedFromPortal\"\n          }\n        }\n      }\n    ```\n  - To run the execution only when there is an update on a specific attribute\n    ```\n      Only starts the automation when the email on a contact is changed\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"],\n            \"payload\": {\n              \"_schema\": [\"contact\"]\n            },\n            \"diff\": {\n              \"updated\": {\n                \"email\": [{ \"exists\": true }]\n              }\n            }\n          }\n        }\n      }\n    ```\n    - To run the execution only when a specific attribute is altered(created/updated/deleted)\n      ```\n        Only starts the automation when a price is altered on a contract\n        {\n          \"type\": \"filter_entity_event\",\n          \"configuration\": {\n            \"operation\": {\n              \"payload\": {\n                \"_schema\": [\"contract\"]\n              },\n              \"diff\": {\n                // Whether he first_name has been added, updated, or removed\n                $or: [\n                  {\n                    'added.first_name': [{ exists: true }]\n                  },\n                  {\n                    'updated.first_name': [{ exists: true }]\n                  },\n                  {\n                    'deleted.first_name': [{ exists: true }]\n                  }\n                ]\n              }\n            }\n          }\n        }\n      ```\n    - To run the execution if an attribute is changed from one state to another\n      ```\n        Only starts the automation when the order status changes from `open_for_acceptance` to `placed`\n        {\n          \"type\": \"filter_entity_event\",\n          \"configuration\": {\n            \"operation\": {\n              \"operation\": [\"updateEntity\"],\n              \"payload\": {\n                \"_schema\": [\"order\"],\n                \"status\": [\"placed\"]\n              },\n              \"diff\": {\n                \"updated\": {\n                  \"status\": [\"open_for_acceptance\"]\n                }\n              }\n            }\n          }\n        }\n      ```\n"
       },
       "ActivityTrigger": {
         "type": "object",
@@ -2228,9 +2235,7 @@
                   "enum": [
                     "CreateMeterReading",
                     "UpdateMeterReading",
-                    "DocDownloadedFromPortal",
-                    "MessageActivity",
-                    "SyncActivity"
+                    "DocDownloadedFromPortal"
                   ]
                 }
               }
@@ -2332,7 +2337,7 @@
           },
           {
             "type": "object",
-            "description": "- Filter on entity payload that is modified. If not specified, entire entity be matched on execution.\n  Example:\n    ```\n    {\n      \"operation\": {\n        \"payload\": {\n          \"_schema\": [\"contact\"]\n          \"address\": { \n            \"country\": [\"Germany\"] \n          }\n          age: [ { \"numeric\": [ \">\", 25, \"<=\", 35 ] } ]\n        }\n      }\n    }\n",
+            "description": "- Filter on entity payload that is modified. If not specified, entire entity be matched on execution.\n  Example:\n    ```\n    {\n      \"operation\": {\n        \"payload\": {\n          \"_schema\": [\"contact\"]\n          \"address\": {\n            \"country\": [\"Germany\"]\n          }\n          age: [ { \"numeric\": [ \">\", 25, \"<=\", 35 ] } ]\n        }\n      }\n    }\n",
             "additionalProperties": {
               "type": "array",
               "items": {
@@ -2357,6 +2362,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/SuffixCondition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/WildcardCondition"
                   }
                 ]
               }
@@ -2421,6 +2429,14 @@
         "type": "object",
         "properties": {
           "suffix": {
+            "type": "string"
+          }
+        }
+      },
+      "WildcardCondition": {
+        "type": "object",
+        "properties": {
+          "wildcard": {
             "type": "string"
           }
         }

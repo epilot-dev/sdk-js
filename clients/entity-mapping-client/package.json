@@ -1,12 +1,12 @@
 {
   "name": "@epilot/entity-mapping-client",
-  "version": "0.5.1",
+  "version": "0.8.1",
   "description": "JavaScript client library for the ePilot Entity Mapping API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "ePilot GmbH",
   "license": "MIT",
-  "repsitory": {
+  "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git",
     "directory": "clients/entity-mapping-client"
@@ -47,25 +47,25 @@
     "!*.config.js"
   ],
   "peerDependencies": {
-    "axios": "^0.25.0"
+    "axios": "^1.6.2"
   },
   "dependencies": {
     "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
     "buffer": "^6.0.3",
     "https-browserify": "^1.0.0",
-    "openapi-client-axios": "^6.0.0",
+    "openapi-client-axios": "^7.5.1",
     "stream-http": "^3.1.1",
     "url": "^0.11.0",
     "util": "^0.12.3"
   },
   "devDependencies": {
     "@types/jest": "^28.1.3",
-    "axios": "^0.25.0",
+    "axios": "^1.6.2",
     "copy-webpack-plugin": "^7.0.0",
     "jest": "^28.1.3",
     "json-loader": "^0.5.7",
-    "openapi-client-axios-typegen": "^7.2.0",
-    "openapicmd": "^1.16.2",
+    "openapi-client-axios-typegen": "^7.4.1",
+    "openapicmd": "^2.1.0",
     "ts-jest": "^28.0.6",
     "ts-loader": "^8.0.14",
     "ts-node": "^10.9.1",

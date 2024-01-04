@@ -55,7 +55,8 @@ declare namespace Components {
          *       "s3ref": {
          *         "bucket": "epilot-user-content",
          *         "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-         *       }
+         *       },
+         *       "filename": "document.pdf"
          *     }
          *   ]
          * }
@@ -152,7 +153,8 @@ declare namespace Components {
                  *       "s3ref": {
                  *         "bucket": "epilot-user-content",
                  *         "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                 *       }
+                 *       },
+                 *       "filename": "document.pdf"
                  *     }
                  *   ]
                  * }
@@ -173,7 +175,8 @@ declare namespace Components {
                  *       "s3ref": {
                  *         "bucket": "epilot-user-content",
                  *         "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                 *       }
+                 *       },
+                 *       "filename": "document.pdf"
                  *     }
                  *   ]
                  * }
@@ -194,7 +197,8 @@ declare namespace Components {
                  *       "s3ref": {
                  *         "bucket": "epilot-user-content",
                  *         "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                 *       }
+                 *       },
+                 *       "filename": "document.pdf"
                  *     }
                  *   ]
                  * }
@@ -215,7 +219,8 @@ declare namespace Components {
                  *       "s3ref": {
                  *         "bucket": "epilot-user-content",
                  *         "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                 *       }
+                 *       },
+                 *       "filename": "document.pdf"
                  *     }
                  *   ]
                  * }
@@ -236,7 +241,8 @@ declare namespace Components {
                  *       "s3ref": {
                  *         "bucket": "epilot-user-content",
                  *         "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                 *       }
+                 *       },
+                 *       "filename": "document.pdf"
                  *     }
                  *   ]
                  * }
@@ -257,7 +263,8 @@ declare namespace Components {
                  *       "s3ref": {
                  *         "bucket": "epilot-user-content",
                  *         "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                 *       }
+                 *       },
+                 *       "filename": "document.pdf"
                  *     }
                  *   ]
                  * }
@@ -278,7 +285,8 @@ declare namespace Components {
                  *       "s3ref": {
                  *         "bucket": "epilot-user-content",
                  *         "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                 *       }
+                 *       },
+                 *       "filename": "document.pdf"
                  *     }
                  *   ]
                  * }
@@ -299,7 +307,8 @@ declare namespace Components {
                  *       "s3ref": {
                  *         "bucket": "epilot-user-content",
                  *         "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                 *       }
+                 *       },
+                 *       "filename": "document.pdf"
                  *     }
                  *   ]
                  * }
@@ -320,7 +329,8 @@ declare namespace Components {
                  *       "s3ref": {
                  *         "bucket": "epilot-user-content",
                  *         "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                 *       }
+                 *       },
+                 *       "filename": "document.pdf"
                  *     }
                  *   ]
                  * }
@@ -341,7 +351,8 @@ declare namespace Components {
                  *       "s3ref": {
                  *         "bucket": "epilot-user-content",
                  *         "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
-                 *       }
+                 *       },
+                 *       "filename": "document.pdf"
                  *     }
                  *   ]
                  * }

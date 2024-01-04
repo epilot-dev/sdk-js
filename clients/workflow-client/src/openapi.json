@@ -1153,10 +1153,16 @@
           "name": {
             "type": "string"
           },
+          "description": {
+            "$ref": "#/components/schemas/StepDescription"
+          },
           "type": {
             "$ref": "#/components/schemas/ItemType"
           },
           "ecp": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "installer": {
             "$ref": "#/components/schemas/ECPDetails"
           },
           "enabled": {
@@ -1242,6 +1248,9 @@
               "automationConfig": {
                 "description": "Configuration for automated steps",
                 "$ref": "#/components/schemas/AutomationConfig"
+              },
+              "journey": {
+                "$ref": "#/components/schemas/StepJourney"
               }
             }
           }
@@ -1308,6 +1317,20 @@
           "AUTOMATION"
         ]
       },
+      "StepJourney": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "journeyId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "AutomationConfig": {
         "type": "object",
         "description": "Configuration for automation execution to run",
@@ -1334,6 +1357,24 @@
         "description": "Details regarding ECP for the workflow step",
         "properties": {
           "label": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "journey": {
+            "$ref": "#/components/schemas/StepJourney"
+          }
+        }
+      },
+      "StepDescription": {
+        "type": "object",
+        "description": "Longer information regarding Task",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "value": {
             "type": "string"
           }
         }
@@ -1450,13 +1491,6 @@
         },
         "required": [
           "index"
-        ]
-      },
-      "UpdateStepResp": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Step"
-          }
         ]
       },
       "SearchStepsResp": {
@@ -1615,92 +1649,17 @@
           }
         }
       },
-      "WorkflowInEntity": {
+      "PhaseInEntity": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
-          "definition_id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "$ref": "#/components/schemas/WorkflowStatus"
-          },
-          "assignees": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "duedate": {
-            "type": "string"
-          },
-          "last_update_time": {
-            "type": "string"
-          },
-          "progress": {
-            "type": "number"
-          },
-          "task_id": {
-            "type": "string"
-          },
-          "task_name": {
-            "type": "string"
-          },
-          "task_assignees": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "task_duedate": {
-            "type": "string"
-          },
-          "task_execution_type": {
-            "$ref": "#/components/schemas/StepType"
-          },
-          "task_status": {
-            "$ref": "#/components/schemas/StepStatus"
-          },
           "phase_id": {
             "type": "string"
           },
           "phase_name": {
             "type": "string"
           },
-          "phase_assignees": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
           "phase_progress": {
             "type": "number"
-          },
-          "all_participants": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "future_participants": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "selected_closing_reasons": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ClosingReason"
-            }
-          },
-          "closing_reason_description": {
-            "type": "string"
           }
         }
       },

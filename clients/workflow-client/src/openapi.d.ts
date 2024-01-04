@@ -61,6 +61,8 @@ declare namespace Components {
          */
         export interface ECPDetails {
             label?: string;
+            name?: string;
+            journey?: StepJourney;
         }
         export interface ErrorResp {
             message?: string;
@@ -79,6 +81,11 @@ declare namespace Components {
         export interface LastEvaluatedKey {
             orgId?: string;
             creationTime?: string;
+        }
+        export interface PhaseInEntity {
+            phase_id?: string;
+            phase_name?: string;
+            phase_progress?: number;
         }
         export interface SearchExecutionsReq {
             name?: string;
@@ -153,8 +160,10 @@ declare namespace Components {
                  */
                 entityRefId?: string;
                 name: string;
+                description?: /* Longer information regarding Task */ StepDescription;
                 type: ItemType;
                 ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+                installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
                 /**
                  * enabled flag results from calculating the requirements
                  */
@@ -181,6 +190,7 @@ declare namespace Components {
                 dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
                 manuallyCreated?: boolean;
                 automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
+                journey?: StepJourney;
                 executionName: string;
                 executionStatus: WorkflowStatus;
                 contexts?: {
@@ -237,8 +247,10 @@ declare namespace Components {
              */
             entityRefId?: string;
             name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             /**
              * enabled flag results from calculating the requirements
              */
@@ -265,6 +277,14 @@ declare namespace Components {
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
+            journey?: StepJourney;
+        }
+        /**
+         * Longer information regarding Task
+         */
+        export interface StepDescription {
+            enabled?: boolean;
+            value?: string;
         }
         export interface StepExtended {
             id: string;
@@ -274,8 +294,10 @@ declare namespace Components {
              */
             entityRefId?: string;
             name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             /**
              * enabled flag results from calculating the requirements
              */
@@ -302,6 +324,7 @@ declare namespace Components {
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             manuallyCreated?: boolean;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
+            journey?: StepJourney;
             executionName: string;
             executionStatus: WorkflowStatus;
             contexts?: {
@@ -316,6 +339,11 @@ declare namespace Components {
              * This field is deprecated. It will be soon removed. Please use only id.
              */
             entityRefId?: string;
+        }
+        export interface StepJourney {
+            id?: string;
+            journeyId?: string;
+            name?: string;
         }
         export interface StepPositionAt {
             index: number;
@@ -337,8 +365,10 @@ declare namespace Components {
              */
             entityRefId?: string;
             name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             enabled?: boolean;
             requirements?: /* describe the requirement for step enablement */ StepRequirement[];
             /**
@@ -387,43 +417,6 @@ declare namespace Components {
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
             startedTime?: string;
             completedTime?: string;
-        }
-        export interface UpdateStepResp {
-            id: string;
-            definitionId?: string;
-            /**
-             * This field is deprecated. It will be soon removed. Please use only id.
-             */
-            entityRefId?: string;
-            name: string;
-            type: ItemType;
-            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
-            /**
-             * enabled flag results from calculating the requirements
-             */
-            enabled?: boolean;
-            requirements?: /* describe the requirement for step enablement */ StepRequirement[];
-            executionType?: StepType;
-            sectionId?: string;
-            executionId?: string;
-            /**
-             * This field is deprecated. Please use assignedTo
-             */
-            userIds?: number[];
-            assignedTo?: string[];
-            /**
-             * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
-             */
-            assignedToInProgress?: string;
-            status?: StepStatus;
-            created?: string;
-            lastUpdated?: string;
-            startedTime?: string;
-            completedTime?: string;
-            dueDate?: string;
-            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
-            manuallyCreated?: boolean;
-            automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
         }
         export interface WorkflowContext {
             id: string;
@@ -688,30 +681,6 @@ declare namespace Components {
              * Completed time of the workflow execution
              */
             completedTime?: string;
-        }
-        export interface WorkflowInEntity {
-            id?: string;
-            definition_id?: string;
-            name?: string;
-            status?: WorkflowStatus;
-            assignees?: string[];
-            duedate?: string;
-            last_update_time?: string;
-            progress?: number;
-            task_id?: string;
-            task_name?: string;
-            task_assignees?: string[];
-            task_duedate?: string;
-            task_execution_type?: StepType;
-            task_status?: StepStatus;
-            phase_id?: string;
-            phase_name?: string;
-            phase_assignees?: string[];
-            phase_progress?: number;
-            all_participants?: string[];
-            future_participants?: string[];
-            selected_closing_reasons?: ClosingReason[];
-            closing_reason_description?: string;
         }
         export type WorkflowStatus = "STARTED" | "DONE" | "CLOSED";
     }

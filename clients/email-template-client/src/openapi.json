@@ -978,6 +978,9 @@
   "servers": [
     {
       "url": "https://email-template.sls.epilot.io"
+    },
+    {
+      "url": "https://email-template.sls.epilot.io"
     }
   ]
 }

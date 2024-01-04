@@ -228,7 +228,7 @@ declare namespace Components {
                  * https://account-profile-images.epilot.cloud/1/avatar_32x32.png
                  */
                 thumbnail_32?: string; // uri
-            };
+            } | null;
             properties: {
                 /**
                  * example:
@@ -353,6 +353,19 @@ declare namespace Components {
                 [name: string]: any;
                 original?: string; // uri
                 thumbnail_32?: string; // uri
+            } | null;
+            /**
+             * example:
+             * {
+             *   "entity_views": {
+             *     "opportunity": "891a5409850abf8b92bd2cb7bdd2844d32ce6bec",
+             *     "order": "628aee91-7c2f-4047-ab0d-433582a19c49"
+             *   },
+             *   "dashboard": "751ff121-9ac2-4511-a2e6-851f11287380"
+             * }
+             */
+            favorites?: {
+                [name: string]: any;
             };
             properties?: {
                 /**

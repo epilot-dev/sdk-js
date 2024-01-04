@@ -276,6 +276,140 @@ declare namespace Components {
             bcc?: Address[];
             file?: /* Message attachments */ AttachmentsRelation;
         }
+        export interface MessageV2 {
+            /**
+             * Entity ID
+             * example:
+             * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            _id: string;
+            /**
+             * Entity title
+             */
+            _title: string;
+            /**
+             * Ivy Organization ID the entity belongs to
+             * example:
+             * 206801
+             */
+            _org: string;
+            /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * message
+             */
+            _schema: string;
+            /**
+             * Entity tags
+             * example:
+             * [
+             *   "pricing",
+             *   "INBOX"
+             * ]
+             */
+            _tags?: string[];
+            /**
+             * Created date
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _created_at: string; // date-time
+            /**
+             * Updated date
+             * example:
+             * 2021-02-10T09:14:31.990Z
+             */
+            _updated_at: string; // date-time
+            /**
+             * Message ID which is from email provider. If you provide `message-id`, API overrides by its own value.
+             * example:
+             * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>
+             */
+            message_id?: string;
+            /**
+             * Ivy User ID of user sends the message.
+             * example:
+             * 206801
+             */
+            sender?: string;
+            /**
+             * Subject
+             * example:
+             * Request for solar panel price
+             */
+            subject: string;
+            /**
+             * HTML body
+             * example:
+             * <div>We at ABC GmbH would like to request a price quote for the solar panel.</div>
+             */
+            html?: string;
+            /**
+             * Text body
+             * example:
+             * We at ABC GmbH would like to request a price quote for the solar panel.
+             */
+            text?: string;
+            from: Address;
+            reply_to?: Address;
+            /**
+             * To email addresses
+             */
+            to?: Address[];
+            /**
+             * Cc email addresses
+             */
+            cc?: Address[];
+            /**
+             * Bcc email addresses
+             */
+            bcc?: Address[];
+            file?: /* Message attachments */ AttachmentsRelation;
+            /**
+             * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\
+             * The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\
+             * The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
+             *
+             * example:
+             * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
+             */
+            references?: string;
+            /**
+             * In-Reply-To header. Value is the `message_id` of parent message.
+             *
+             * example:
+             * <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
+             */
+            in_reply_to?: string;
+            /**
+             * Ivy User ID of user read the message.
+             */
+            user_read_message?: string[];
+            /**
+             * Ivy Organization ID of organization read the message.
+             */
+            org_read_message?: string[];
+            /**
+             * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\
+             * Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
+             *
+             */
+            send_status?: ("SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR")[];
+            /**
+             * Message type
+             */
+            type?: "SENT" | "RECEIVED";
+            /**
+             * If true then html is not provided and must be downloaded using the html_download_url
+             */
+            html_omitted?: boolean;
+            /**
+             * HTML body download URL
+             * example:
+             * https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html
+             */
+            html_download_url?: string;
+        }
         export interface SearchParams {
             /**
              * Lucene query syntax supported with ElasticSearch
@@ -346,6 +480,29 @@ declare namespace Paths {
              */
             is_main_entity?: boolean;
         }[];
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace AssignUsers {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        /**
+         * User IDs of users assigned to thread
+         */
+        export interface RequestBody {
+            /**
+             * IDs of users assigned to thread
+             */
+            assigned_to?: string[];
+        }
         namespace Responses {
             export interface $204 {
             }
@@ -514,13 +671,21 @@ declare namespace Paths {
     }
     namespace GetMessage {
         namespace Parameters {
+            /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
             export type Id = string;
         }
         export interface PathParameters {
-            id: Parameters.Id;
+            id: /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
+            Parameters.Id;
         }
         namespace Responses {
-            export interface $201 {
+            export interface $200 {
                 /**
                  * Entity ID
                  * example:
@@ -643,6 +808,162 @@ declare namespace Paths {
                  * Message type
                  */
                 type?: "SENT" | "RECEIVED";
+            }
+            export interface $302 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace GetMessageV2 {
+        namespace Parameters {
+            /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
+            Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Entity ID
+                 * example:
+                 * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                 */
+                _id: string;
+                /**
+                 * Entity title
+                 */
+                _title: string;
+                /**
+                 * Ivy Organization ID the entity belongs to
+                 * example:
+                 * 206801
+                 */
+                _org: string;
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * message
+                 */
+                _schema: string;
+                /**
+                 * Entity tags
+                 * example:
+                 * [
+                 *   "pricing",
+                 *   "INBOX"
+                 * ]
+                 */
+                _tags?: string[];
+                /**
+                 * Created date
+                 * example:
+                 * 2021-02-09T12:41:43.662Z
+                 */
+                _created_at: string; // date-time
+                /**
+                 * Updated date
+                 * example:
+                 * 2021-02-10T09:14:31.990Z
+                 */
+                _updated_at: string; // date-time
+                /**
+                 * Message ID which is from email provider. If you provide `message-id`, API overrides by its own value.
+                 * example:
+                 * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>
+                 */
+                message_id?: string;
+                /**
+                 * Ivy User ID of user sends the message.
+                 * example:
+                 * 206801
+                 */
+                sender?: string;
+                /**
+                 * Subject
+                 * example:
+                 * Request for solar panel price
+                 */
+                subject: string;
+                /**
+                 * HTML body
+                 * example:
+                 * <div>We at ABC GmbH would like to request a price quote for the solar panel.</div>
+                 */
+                html?: string;
+                /**
+                 * Text body
+                 * example:
+                 * We at ABC GmbH would like to request a price quote for the solar panel.
+                 */
+                text?: string;
+                from: Components.Schemas.Address;
+                reply_to?: Components.Schemas.Address;
+                /**
+                 * To email addresses
+                 */
+                to?: Components.Schemas.Address[];
+                /**
+                 * Cc email addresses
+                 */
+                cc?: Components.Schemas.Address[];
+                /**
+                 * Bcc email addresses
+                 */
+                bcc?: Components.Schemas.Address[];
+                file?: /* Message attachments */ Components.Schemas.AttachmentsRelation;
+                /**
+                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\
+                 * The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\
+                 * The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
+                 *
+                 * example:
+                 * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
+                 */
+                references?: string;
+                /**
+                 * In-Reply-To header. Value is the `message_id` of parent message.
+                 *
+                 * example:
+                 * <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
+                 */
+                in_reply_to?: string;
+                /**
+                 * Ivy User ID of user read the message.
+                 */
+                user_read_message?: string[];
+                /**
+                 * Ivy Organization ID of organization read the message.
+                 */
+                org_read_message?: string[];
+                /**
+                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\
+                 * Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
+                 *
+                 */
+                send_status?: ("SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR")[];
+                /**
+                 * Message type
+                 */
+                type?: "SENT" | "RECEIVED";
+                /**
+                 * If true then html is not provided and must be downloaded using the html_download_url
+                 */
+                html_omitted?: boolean;
+                /**
+                 * HTML body download URL
+                 * example:
+                 * https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html
+                 */
+                html_download_url?: string;
             }
             export interface $403 {
             }
@@ -1338,7 +1659,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.GetMessage.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetMessage.Responses.$201>
+  ): OperationResponse<Paths.GetMessage.Responses.$200>
   /**
    * deleteMessage - deleteMessage
    * 
@@ -1475,6 +1796,18 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AssignThread.Responses.$204>
   /**
+   * assignUsers - assignUsers
+   * 
+   * Assign users to thread for receiving notifications. 
+   * The operation replaces all existing assigned users in thread.
+   * 
+   */
+  'assignUsers'(
+    parameters?: Parameters<Paths.AssignUsers.PathParameters> | null,
+    data?: Paths.AssignUsers.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AssignUsers.Responses.$204>
+  /**
    * createDraft - createDraft
    * 
    * Create a new draft
@@ -1494,6 +1827,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SendDraft.Responses.$201>
+  /**
+   * getMessageV2 - getMessageV2
+   * 
+   * - Fetches message by ID
+   * - If the message html is omitted on the entity, then it keeps the content on the message as a signed url
+   *   {
+   *     ...
+   *     _id: "4d74976d-fb64-47fd-85e2-65eea140f5eb",
+   *     _schema: "message",
+   *     _org: "org-123",
+   *     html_omitted: true,
+   *     html_download_url: "https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html"
+   *   }
+   * 
+   */
+  'getMessageV2'(
+    parameters?: Parameters<Paths.GetMessageV2.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMessageV2.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1529,7 +1882,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.GetMessage.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetMessage.Responses.$201>
+    ): OperationResponse<Paths.GetMessage.Responses.$200>
     /**
      * deleteMessage - deleteMessage
      * 
@@ -1690,6 +2043,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AssignThread.Responses.$204>
   }
+  ['/v1/message/threads/{id}/assign:users']: {
+    /**
+     * assignUsers - assignUsers
+     * 
+     * Assign users to thread for receiving notifications. 
+     * The operation replaces all existing assigned users in thread.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.AssignUsers.PathParameters> | null,
+      data?: Paths.AssignUsers.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AssignUsers.Responses.$204>
+  }
   ['/v1/message/drafts']: {
     /**
      * createDraft - createDraft
@@ -1713,6 +2080,28 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SendDraft.Responses.$201>
+  }
+  ['/v2/message/messages/{id}']: {
+    /**
+     * getMessageV2 - getMessageV2
+     * 
+     * - Fetches message by ID
+     * - If the message html is omitted on the entity, then it keeps the content on the message as a signed url
+     *   {
+     *     ...
+     *     _id: "4d74976d-fb64-47fd-85e2-65eea140f5eb",
+     *     _schema: "message",
+     *     _org: "org-123",
+     *     html_omitted: true,
+     *     html_download_url: "https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html"
+     *   }
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMessageV2.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMessageV2.Responses.$200>
   }
 }
 

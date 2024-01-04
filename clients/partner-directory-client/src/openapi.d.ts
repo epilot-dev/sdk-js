@@ -80,7 +80,46 @@ declare namespace Components {
              */
             relevance?: number;
         }
-        export type Assignable = AssignableUser | AssignablePartnerUser | AssignableOrganization;
+        export type Assignable = AssignableUser | AssignablePartnerUser | AssignableOrganization | AssignableEcpPlaceholder;
+        export interface AssignableEcpPlaceholder {
+            /**
+             * example:
+             * ecp
+             */
+            type: "ecp";
+            /**
+             * example:
+             * Example Ecp Placeholder
+             */
+            display_name: string;
+            image_uri?: {
+                /**
+                 * example:
+                 * https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                original: string; // uri
+                /**
+                 * example:
+                 * https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                thumbnail_32?: string; // uri
+            };
+            org_id: /**
+             * example:
+             * 123
+             */
+            OrganizationId;
+            /**
+             * example:
+             * 456
+             */
+            user_id: string;
+            /**
+             * example:
+             * Email of ECP Placeholder
+             */
+            email?: string;
+        }
         export interface AssignableOrganization {
             /**
              * example:
@@ -367,13 +406,13 @@ declare namespace Paths {
     namespace BatchGetAssignable {
         export type RequestBody = {
             /**
-             * search query to filter results
+             * user id of assignable
              */
             user_id: string;
             /**
-             * start results from an offset for pagination
+             * organization id of assignable (optional, defaults to caller org)
              */
-            org_id: string;
+            org_id?: string;
         }[];
         namespace Responses {
             export interface $200 {
@@ -483,7 +522,7 @@ declare namespace Paths {
             /**
              * filter results to specific types of assignables. defaults to all types
              */
-            types?: ("user" | "partner_user" | "partner_organization")[];
+            types?: ("user" | "partner_user" | "partner_organization" | "ecp")[];
         }
         namespace Responses {
             export interface $200 {

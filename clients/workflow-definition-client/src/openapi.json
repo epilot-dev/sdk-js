@@ -981,6 +981,9 @@
           "name": {
             "type": "string"
           },
+          "description": {
+            "$ref": "#/components/schemas/StepDescription"
+          },
           "executionType": {
             "$ref": "#/components/schemas/StepType"
           },
@@ -995,6 +998,9 @@
             "required": [
               "flowId"
             ]
+          },
+          "journey": {
+            "$ref": "#/components/schemas/StepJourney"
           },
           "order": {
             "type": "number"
@@ -1031,6 +1037,9 @@
             "$ref": "#/components/schemas/ItemType"
           },
           "ecp": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "installer": {
             "$ref": "#/components/schemas/ECPDetails"
           }
         },
@@ -1084,11 +1093,49 @@
           "AUTOMATION"
         ]
       },
+      "StepJourney": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "journeyId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "ECPDetails": {
         "type": "object",
         "description": "Details regarding ECP for the workflow step",
         "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
           "label": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "journey": {
+            "$ref": "#/components/schemas/StepJourney"
+          }
+        }
+      },
+      "StepDescription": {
+        "type": "object",
+        "description": "Longer information regarding Task",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "value": {
             "type": "string"
           }
         }

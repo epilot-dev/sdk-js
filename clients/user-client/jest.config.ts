@@ -8,6 +8,9 @@ const config: Config.InitialOptions = {
   coveragePathIgnorePatterns: ['__tests__', 'node_modules'],
   verbose: true,
   silent: true,
+  moduleNameMapper: {
+    '^axios$': require.resolve('axios'),
+  },
 };
 
 export default config;

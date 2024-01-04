@@ -22,7 +22,7 @@ declare namespace Components {
                  * submission
                  */
                 schema?: string;
-                types?: ("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "MessageActivity" | "SyncActivity")[];
+                types?: ("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal")[];
             };
         }
         export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | AutomationAction;
@@ -245,6 +245,7 @@ declare namespace Components {
          *   | Does not exist         | ProductName does not exist                          | `"ProductName": [ { "exists": false } ]`                 |
          *   | Begins with            | OpportunityNumber starts with OPP-                  | `"opportunity_number": [ { "prefix": "OPP-" } ]`         |
          *   | Ends with              | FileName ends with a .png extension                 | `"filename": [ { "suffix": ".png" } ]`                   |
+         *   | Wildcard               | search a string using a wildcard                    | `"email": [ { "wildcard": "*@doe.com" } ]`               |
          *   - To run the execution on all update events
          *     ```
          *       {
@@ -996,6 +997,7 @@ declare namespace Components {
          *   | Does not exist         | ProductName does not exist                          | `"ProductName": [ { "exists": false } ]`                 |
          *   | Begins with            | OpportunityNumber starts with OPP-                  | `"opportunity_number": [ { "prefix": "OPP-" } ]`         |
          *   | Ends with              | FileName ends with a .png extension                 | `"filename": [ { "suffix": ".png" } ]`                   |
+         *   | Wildcard               | search a string using a wildcard                    | `"email": [ { "wildcard": "*@doe.com" } ]`               |
          *   - To run the execution on all update events
          *     ```
          *       {
@@ -1157,7 +1159,7 @@ declare namespace Components {
                          *   "DocUploadedFromPortal"
                          * ]
                          */
-                        type?: (string | EqualsIgnoreCaseCondition | AnythingButCondition | ExistsCondition | PrefixCondition | SuffixCondition)[];
+                        type?: (string | EqualsIgnoreCaseCondition | AnythingButCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
                     };
                 };
             };
@@ -1169,13 +1171,16 @@ declare namespace Components {
         export interface ErrorOutput {
             error_code: ErrorCode;
             error_reason: string;
+            error_info?: {
+                [name: string]: any;
+            };
         }
         export type ExecutionStatus = "pending" | "in_progress" | "success" | "failed" | "cancelled" | "skipped";
         export interface ExistsCondition {
             exists?: boolean;
         }
         export type FilterConditionOnEvent = OrCondition | {
-            [name: string]: (string | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition)[];
+            [name: string]: (string | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
         };
         export interface FrontendSubmitTrigger {
             type: "frontend_submission";
@@ -2112,6 +2117,9 @@ declare namespace Components {
              * ]
              */
             AssignUsersToStep[];
+        }
+        export interface WildcardCondition {
+            wildcard?: string;
         }
     }
 }

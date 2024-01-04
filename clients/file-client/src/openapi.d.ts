@@ -137,6 +137,24 @@ declare namespace Components {
             EntitySlug;
             _tags?: string[];
         }
+        export interface PublicLink {
+            /**
+             * ID of the public link
+             * example:
+             * 3ef5c6d9-818d-45e6-8efb-b1de59079a1c
+             */
+            id?: string;
+            /**
+             * Public link of the file
+             * example:
+             * https://file.sls.epilot.io/v1/files/public/links/3ef5c6d9-818d-45e6-8efb-b1de59079a1c
+             */
+            link?: string;
+            /**
+             * The most recent timestamp when the file was accessed
+             */
+            last_accessed_at?: string;
+        }
         export interface S3Reference {
             /**
              * example:
@@ -170,7 +188,7 @@ declare namespace Components {
             /**
              * Custom external download url used for the file
              */
-            custom_download_url: string; // url
+            custom_download_url: string; // uri
         }
         export type SaveFilePayload = SaveS3FilePayload | SaveCustomFilePayload;
         export interface SaveS3FilePayload {
@@ -206,9 +224,51 @@ declare namespace Components {
              */
             mime_type?: string;
         }
+        export interface VerifyCustomDownloadUrlPayload {
+            /**
+             * Custom external download url with signature and expiration time
+             * example:
+             * https://some-api-url.com?file_id=123&expires_at=1699273500029&signature=abcdefg
+             */
+            custom_download_url: string; // uri
+        }
     }
 }
 declare namespace Paths {
+    namespace AccessPublicLink {
+        namespace Parameters {
+            /**
+             * Name of the file
+             * example:
+             * invoice-2023-12.pdf
+             */
+            export type Filename = string;
+            /**
+             * Id of the publicly generated link
+             * example:
+             * 13d22918-36bd-4227-9ad4-2cb978788c8d
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /**
+             * Id of the publicly generated link
+             * example:
+             * 13d22918-36bd-4227-9ad4-2cb978788c8d
+             */
+            Parameters.Id;
+            filename: /**
+             * Name of the file
+             * example:
+             * invoice-2023-12.pdf
+             */
+            Parameters.Filename;
+        }
+        namespace Responses {
+            export interface $302 {
+            }
+        }
+    }
     namespace DeleteFile {
         export type RequestBody = Components.Schemas.DeleteFilePayload;
         namespace Responses {
@@ -283,6 +343,48 @@ declare namespace Paths {
             }
         }
     }
+    namespace GeneratePublicLink {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            /**
+             * example:
+             * https://file.sls.epilot.io/v1/files/public/links/3ef5c6d9-818d-45e6-8efb-b1de59079a1c/invoice-2023-12.pdf
+             */
+            export type $201 = string;
+        }
+    }
+    namespace GetAllPublicLinksForFile {
+        namespace Parameters {
+            /**
+             * ID of the file entity
+             * example:
+             * 13d22918-36bd-4227-9ad4-2cb978788c8d
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /**
+             * ID of the file entity
+             * example:
+             * 13d22918-36bd-4227-9ad4-2cb978788c8d
+             */
+            Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.PublicLink[];
+            }
+        }
+    }
     namespace GetSession {
         namespace Responses {
             export interface $200 {
@@ -354,6 +456,31 @@ declare namespace Paths {
             bucket: Parameters.Bucket;
             w?: Parameters.W;
             h?: Parameters.H;
+        }
+    }
+    namespace RevokePublicLink {
+        namespace Parameters {
+            /**
+             * Id of the publicly generated link
+             * example:
+             * 13d22918-36bd-4227-9ad4-2cb978788c8d
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /**
+             * Id of the publicly generated link
+             * example:
+             * 13d22918-36bd-4227-9ad4-2cb978788c8d
+             */
+            Parameters.Id;
+        }
+        namespace Responses {
+            /**
+             * example:
+             * https://file.sls.epilot.io/v1/files/public/links/3ef5c6d9-818d-45e6-8efb-b1de59079a1c
+             */
+            export type $204 = string;
         }
     }
     namespace SaveFile {
@@ -440,6 +567,14 @@ declare namespace Paths {
             }
         }
     }
+    namespace VerifyCustomDownloadUrl {
+        export type RequestBody = Components.Schemas.VerifyCustomDownloadUrlPayload;
+        namespace Responses {
+            export interface $200 {
+                valid?: boolean;
+            }
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -494,6 +629,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DownloadFile.Responses.$200>
+  /**
+   * verifyCustomDownloadUrl - verifyCustomDownloadUrl
+   * 
+   * Verify a pre-signed custom download url for a file
+   */
+  'verifyCustomDownloadUrl'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.VerifyCustomDownloadUrl.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.VerifyCustomDownloadUrl.Responses.$200>
   /**
    * downloadFiles - downloadFiles
    * 
@@ -587,6 +732,47 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSession.Responses.$200>
+  /**
+   * getAllPublicLinksForFile - getAllPublicLinksForFile
+   * 
+   * Not yet implemented; This API would fetches all the public links that are previously generated for a file
+   */
+  'getAllPublicLinksForFile'(
+    parameters?: Parameters<Paths.GetAllPublicLinksForFile.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAllPublicLinksForFile.Responses.$200>
+  /**
+   * generatePublicLink - generatePublicLink
+   * 
+   * Generates a public link to access the private files
+   * 
+   */
+  'generatePublicLink'(
+    parameters?: Parameters<Paths.GeneratePublicLink.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GeneratePublicLink.Responses.$201>
+  /**
+   * accessPublicLink - accessPublicLink
+   * 
+   * Redirects to a accessible signed url for the respective file associated to the public link
+   */
+  'accessPublicLink'(
+    parameters?: Parameters<Paths.AccessPublicLink.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
+   * revokePublicLink - revokePublicLink
+   * 
+   * Not yet implemented; This operation would revokes a given public link by ID
+   */
+  'revokePublicLink'(
+    parameters?: Parameters<Paths.RevokePublicLink.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RevokePublicLink.Responses.$204>
 }
 
 export interface PathsDictionary {
@@ -648,6 +834,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DownloadFile.Responses.$200>
+  }
+  ['/v1/files/download:verify']: {
+    /**
+     * verifyCustomDownloadUrl - verifyCustomDownloadUrl
+     * 
+     * Verify a pre-signed custom download url for a file
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.VerifyCustomDownloadUrl.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.VerifyCustomDownloadUrl.Responses.$200>
   }
   ['/v1/files:downloadFiles']: {
     /**
@@ -755,6 +953,51 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSession.Responses.$200>
+  }
+  ['/v1/files/{id}/public/links']: {
+    /**
+     * generatePublicLink - generatePublicLink
+     * 
+     * Generates a public link to access the private files
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.GeneratePublicLink.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GeneratePublicLink.Responses.$201>
+    /**
+     * getAllPublicLinksForFile - getAllPublicLinksForFile
+     * 
+     * Not yet implemented; This API would fetches all the public links that are previously generated for a file
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAllPublicLinksForFile.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAllPublicLinksForFile.Responses.$200>
+  }
+  ['/v1/files/public/links/{id}/{filename}']: {
+    /**
+     * accessPublicLink - accessPublicLink
+     * 
+     * Redirects to a accessible signed url for the respective file associated to the public link
+     */
+    'get'(
+      parameters?: Parameters<Paths.AccessPublicLink.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
+    /**
+     * revokePublicLink - revokePublicLink
+     * 
+     * Not yet implemented; This operation would revokes a given public link by ID
+     */
+    'delete'(
+      parameters?: Parameters<Paths.RevokePublicLink.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RevokePublicLink.Responses.$204>
   }
 }
 

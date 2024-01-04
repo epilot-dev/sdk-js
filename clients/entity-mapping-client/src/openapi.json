@@ -25,6 +25,17 @@
         "tags": [
           "mappings"
         ],
+        "parameters": [
+          {
+            "name": "with_id",
+            "in": "query",
+            "required": false,
+            "description": "Whether ids are part of the body or not",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "description": "Mapping Config to store",
           "content": {
@@ -665,6 +676,12 @@
             "items": {
               "$ref": "#/components/schemas/MappingFailure"
             }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingWarning"
+            }
           }
         },
         "required": [
@@ -691,6 +708,23 @@
           }
         }
       },
+      "MappingWarning": {
+        "type": "object",
+        "properties": {
+          "explanation": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "explanation"
+        ]
+      },
       "Entity": {
         "type": "object",
         "properties": {
@@ -701,7 +735,8 @@
             "type": "string"
           },
           "_title": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "_org": {
             "type": "string"
@@ -710,14 +745,24 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "nullable": true
           },
           "_created_at": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "_updated_at": {
-            "type": "string"
-          }
+            "type": "string",
+            "nullable": true
+          },
+          "required": [
+            "_id",
+            "_schema",
+            "_org",
+            "_created_at",
+            "_updated_at"
+          ]
         },
         "additionalProperties": true
       },
@@ -1326,8 +1371,7 @@
                 "type": "string",
                 "enum": [
                   "each",
-                  "first",
-                  "system_recommendation"
+                  "first"
                 ],
                 "description": "Whether its a read-only ui or not. Can be each target, or only the first. Overwrites uiActions"
               },
@@ -1383,10 +1427,6 @@
           "initial_target_value": {
             "type": "string"
           },
-          "raw": {
-            "type": "boolean",
-            "description": "Whether the raw value should be used, or whether the value is enriched by a path"
-          },
           "possible_target_types": {
             "type": "array",
             "items": {
@@ -1418,5 +1458,10 @@
         ]
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://entity-mapping.sls.epilot.io/"
+    }
+  ]
 }
