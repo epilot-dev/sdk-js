@@ -66,15 +66,15 @@ declare namespace Components {
              */
             direction: Direction;
             /**
+             * The unit of measurement for the reading
+             */
+            unit?: "w" | "wh" | "kw" | "kWh" | "kvarh" | "mw" | "mWh" | "unit" | "cubic-meter" | "hour" | "day" | "month" | "year" | "percentage";
+            /**
              * The reading value of the meter counter
              * example:
              * 240
              */
-            value: string;
-            /**
-             * The unit of measurement for the reading
-             */
-            unit?: Unit;
+            value: number;
         }
         export type Direction = "feed-in" | "feed-out";
         export interface Entity {
@@ -465,7 +465,7 @@ declare namespace Components {
              * - This is only sent when the user is authenticated while submitting a journey
              *
              */
-            readings?: CounterReadingOnSubmission;
+            readings?: CounterReadingOnSubmission[];
             /**
              * The reading value of the meter when the counterId is passed or when the meterType is one-tariff
              * example:
@@ -509,31 +509,31 @@ declare namespace Components {
             /**
              * The type of the meter
              */
-            meterType?: "one-tariff" | "two-tariff" | "three-tariff";
+            meterType?: "one_tariff" | "two_tariff" | "bi_directional";
             /**
              * The feed-in value of the meter when meterType is one-tariff or bi-directional
              * example:
              * 240
              */
-            feedInValue?: string;
+            feedInValue?: number;
             /**
              * The feed-out value of the meter when meterType is bi-directional
              * example:
              * 240
              */
-            feedOutValue?: string;
+            feedOutValue?: number;
             /**
              * The high-peak tariff value of the meter when meterType is two-tariff
              * example:
              * 240
              */
-            htValue?: string;
+            htValue?: number;
             /**
              * The off-peak tariff value of the meter when meterType is two-tariff
              * example:
              * 240
              */
-            ntValue?: string;
+            ntValue?: number;
         }
         export type TariffType = "ht" | "nt";
         export type Unit = "w" | "wh" | "kw" | "kWh" | "kvarh" | "mw" | "mWh" | "unit" | "cubic-meter" | "hour" | "day" | "month" | "year" | "percentage";

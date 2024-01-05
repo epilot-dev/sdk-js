@@ -1512,14 +1512,30 @@
             "$ref": "#/components/schemas/Direction",
             "description": "The direction of the reading (feed-in or feed-out)"
           },
-          "value": {
-            "type": "string",
-            "example": "240",
-            "description": "The reading value of the meter counter"
-          },
           "unit": {
-            "$ref": "#/components/schemas/Unit",
+            "type": "string",
+            "enum": [
+              "w",
+              "wh",
+              "kw",
+              "kWh",
+              "kvarh",
+              "mw",
+              "mWh",
+              "unit",
+              "cubic-meter",
+              "hour",
+              "day",
+              "month",
+              "year",
+              "percentage"
+            ],
             "description": "The unit of measurement for the reading"
+          },
+          "value": {
+            "type": "number",
+            "example": 240,
+            "description": "The reading value of the meter counter"
           }
         }
       },
@@ -1535,7 +1551,10 @@
             "description": "The ID of the associated meter"
           },
           "readings": {
-            "$ref": "#/components/schemas/CounterReadingOnSubmission",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CounterReadingOnSubmission"
+            },
             "description": "- The counter readings of a meter\n- This is only sent when the user is authenticated while submitting a journey\n"
           },
           "readingValue": {
@@ -1575,30 +1594,30 @@
           "meterType": {
             "type": "string",
             "enum": [
-              "one-tariff",
-              "two-tariff",
-              "three-tariff"
+              "one_tariff",
+              "two_tariff",
+              "bi_directional"
             ],
             "description": "The type of the meter"
           },
           "feedInValue": {
-            "type": "string",
-            "example": "240",
+            "type": "number",
+            "example": 240,
             "description": "The feed-in value of the meter when meterType is one-tariff or bi-directional"
           },
           "feedOutValue": {
-            "type": "string",
-            "example": "240",
+            "type": "number",
+            "example": 240,
             "description": "The feed-out value of the meter when meterType is bi-directional"
           },
           "htValue": {
-            "type": "string",
-            "example": "240",
+            "type": "number",
+            "example": 240,
             "description": "The high-peak tariff value of the meter when meterType is two-tariff"
           },
           "ntValue": {
-            "type": "string",
-            "example": "240",
+            "type": "number",
+            "example": 240,
             "description": "The off-peak tariff value of the meter when meterType is two-tariff"
           }
         }
