@@ -56,6 +56,26 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
         }
+        export interface CounterReadingOnSubmission {
+            /**
+             * The ID of the associated meter counter
+             */
+            counterId: Id;
+            /**
+             * The direction of the reading (feed-in or feed-out)
+             */
+            direction: Direction;
+            /**
+             * The reading value of the meter counter
+             * example:
+             * 240
+             */
+            value: string;
+            /**
+             * The unit of measurement for the reading
+             */
+            unit?: Unit;
+        }
         export type Direction = "feed-in" | "feed-out";
         export interface Entity {
             [name: string]: any;
@@ -436,6 +456,84 @@ declare namespace Components {
         export type Source = "ECP" | "ERP" | "360" | "journey-submission";
         export interface SubmissionMeterReading {
             [name: string]: any;
+            /**
+             * The ID of the associated meter
+             */
+            meterId: Id;
+            /**
+             * - The counter readings of a meter
+             * - This is only sent when the user is authenticated while submitting a journey
+             *
+             */
+            readings?: CounterReadingOnSubmission;
+            /**
+             * The reading value of the meter when the counterId is passed or when the meterType is one-tariff
+             * example:
+             * 240
+             */
+            readingValue?: string;
+            /**
+             * If the value is not provided, the system will be set with the time the request is processed.
+             * example:
+             * 2022-10-10T10:10:00.000Z
+             */
+            readingDate?: string;
+            /**
+             * The person who recorded the reading
+             * example:
+             * John Doe
+             */
+            readBy?: string;
+            /**
+             * The reason for recording the reading
+             * example:
+             * Storing the feed-in record
+             */
+            reason?: string;
+            /**
+             * The MA-LO ID of the meter
+             * example:
+             * A09-123
+             */
+            maloId?: string;
+            /**
+             * The OBIS number of the meter counter
+             * example:
+             * A-34
+             */
+            obisNumber?: string;
+            /**
+             * The unit of measurement for the reading
+             */
+            readingUnit?: Unit;
+            /**
+             * The type of the meter
+             */
+            meterType?: "one-tariff" | "two-tariff" | "three-tariff";
+            /**
+             * The feed-in value of the meter when meterType is one-tariff or bi-directional
+             * example:
+             * 240
+             */
+            feedInValue?: string;
+            /**
+             * The feed-out value of the meter when meterType is bi-directional
+             * example:
+             * 240
+             */
+            feedOutValue?: string;
+            /**
+             * The high-peak tariff value of the meter when meterType is two-tariff
+             * example:
+             * 240
+             */
+            htValue?: string;
+            /**
+             * The off-peak tariff value of the meter when meterType is two-tariff
+             * example:
+             * 240
+             */
+            ntValue?: string;
         }
         export type TariffType = "ht" | "nt";
         export type Unit = "w" | "wh" | "kw" | "kWh" | "kvarh" | "mw" | "mWh" | "unit" | "cubic-meter" | "hour" | "day" | "month" | "year" | "percentage";
@@ -455,7 +553,25 @@ declare namespace Paths {
         }
     }
     namespace CreateMeterReadingFromSubmission {
-        export type RequestBody = Components.Schemas.SubmissionMeterReading;
+        export interface RequestBody {
+            [name: string]: any;
+            /**
+             * ID of the organization
+             * example:
+             * 123
+             */
+            org_id?: string;
+            entity: {
+                [name: string]: any;
+                /**
+                 * ID of the organization
+                 * example:
+                 * 123
+                 */
+                _org?: string;
+                meterReadings: Components.Schemas.SubmissionMeterReading[];
+            };
+        }
         namespace Responses {
             export interface $200 {
                 message?: "Successfully Processed";
