@@ -63,6 +63,24 @@ declare namespace Components {
              */
             title?: string | null;
         }
+        export interface Amounts {
+            /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal?: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total?: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal?: string;
+        }
         /**
          * Availability check request payload
          */
@@ -72,6 +90,20 @@ declare namespace Components {
              */
             products: string[];
             filters: /* Availability filters dimensions */ AvailabilityFilters;
+        }
+        export interface AvailabilityDate {
+            /**
+             * The availability interval start date
+             * example:
+             * 2017-07-21
+             */
+            available_start_date?: string; // date
+            /**
+             * The availability interval end date
+             * example:
+             * 2017-07-21
+             */
+            available_end_date?: string; // date
         }
         /**
          * Availability filters dimensions
@@ -152,18 +184,38 @@ declare namespace Components {
          */
         export interface BasePriceItem {
             /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal?: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total?: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal?: string;
+            /**
              * price item id
              */
-            id?: string;
+            _id?: string;
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The unit amount value
              */
             unit_amount?: number;
             /**
-             * Total before any (discounts or) taxes are applied.
+             * The unit gross amount value.
              */
-            amount_subtotal?: number;
+            unit_amount_gross?: number;
+            /**
+             * Total tax amount for this line item.
+             */
+            amount_tax?: number;
             /**
              * Net unit amount without taxes or discounts.
              */
@@ -172,10 +224,6 @@ declare namespace Components {
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
-            /**
-             * Total after (discounts and) taxes.
-             */
-            amount_total?: number;
             currency?: /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
@@ -238,6 +286,26 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
+            /**
+             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
+             */
+            on_request_approved?: boolean;
         }
         /**
          * Represents a valid base price item from a client.
@@ -248,6 +316,25 @@ declare namespace Components {
              * The quantity of products being purchased.
              */
             quantity?: number;
+            /**
+             * Price mapping information required to compute totals
+             */
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -281,6 +368,10 @@ declare namespace Components {
              */
             _product?: {
                 [name: string]: any;
+                /**
+                 * The description for the product
+                 */
+                description?: string;
                 /**
                  * The product code
                  */
@@ -360,7 +451,52 @@ declare namespace Components {
                 _updated_at?: string;
             };
         }
-        export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+        export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
+        /**
+         * Supports shopping for products and services until ready for checkout.
+         */
+        export interface Cart {
+            /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal?: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total?: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal?: string;
+            /**
+             * The cart identifier
+             */
+            id?: string;
+            /**
+             * The user's Organization Id the cart belongs to
+             */
+            org_id?: string;
+            /**
+             * The status of the Cart:
+             * - open - the cart checkout is still in progress. Payment processing has not started
+             * - complete - the cart checkout is complete. Payment processing may still be in progress
+             * - expired - the cart checkout has expired. No further processing will occur
+             *
+             */
+            status?: "open" | "complete" | "expired";
+            customer?: Customer;
+            billing_address?: Address;
+            delivery_address?: Address;
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            line_items?: /* Tracks a set of product prices, quantities, (discounts) and taxes. */ PriceItems;
+            total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+        }
         /**
          * A valid cart payload from a client.
          */
@@ -598,18 +734,38 @@ declare namespace Components {
          */
         export interface CompositePriceItem {
             /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal?: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total?: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal?: string;
+            /**
              * price item id
              */
-            id?: string;
+            _id?: string;
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The unit amount value
              */
             unit_amount?: number;
             /**
-             * Total before any (discounts or) taxes are applied.
+             * The unit gross amount value.
              */
-            amount_subtotal?: number;
+            unit_amount_gross?: number;
+            /**
+             * Total tax amount for this line item.
+             */
+            amount_tax?: number;
             /**
              * Net unit amount without taxes or discounts.
              */
@@ -618,10 +774,6 @@ declare namespace Components {
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
-            /**
-             * Total after (discounts and) taxes.
-             */
-            amount_total?: number;
             currency?: /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
@@ -684,6 +836,26 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
+            /**
+             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
+             */
+            on_request_approved?: boolean;
             /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
@@ -695,6 +867,160 @@ declare namespace Components {
              * }
              */
             PriceItem[];
+            total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
+        }
+        /**
+         * Represents a composite price input to the pricing library.
+         */
+        export interface CompositePriceItemDto {
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            /**
+             * The quantity of products being purchased.
+             */
+            quantity?: number;
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
+            /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            description?: string;
+            /**
+             * The id of the product.
+             */
+            product_id?: string;
+            /**
+             * The id of the price.
+             */
+            price_id?: string;
+            /**
+             * The taxes applied to the price item.
+             */
+            taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
+            /**
+             * The taxes applied to the price item.
+             */
+            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
+             * The snapshot of the product.
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            _product?: {
+                [name: string]: any;
+                /**
+                 * The description for the product
+                 */
+                description?: string;
+                /**
+                 * The product code
+                 */
+                code?: string;
+                /**
+                 * The type of Product:
+                 *
+                 * | type | description |
+                 * |----| ----|
+                 * | `product` | Represents a physical good |
+                 * | `service` | Represents a service or virtual product |
+                 *
+                 */
+                type?: "product" | "service";
+                /**
+                 * The product main name
+                 */
+                name?: string;
+                feature?: {
+                    /**
+                     * An arbitrary set of tags attached to a feature
+                     */
+                    _tags?: string[];
+                    feature?: string;
+                }[];
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to a set of file images of the product
+                 */
+                product_images?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                product_downloads?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to the availability files that define where this product is available.
+                 * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
+                 *
+                 */
+                _availability_files?: File[];
+                /**
+                 * The product id
+                 */
+                _id?: string;
+                /**
+                 * The autogenerated product title
+                 */
+                _title?: string;
+                /**
+                 * The organization id the product belongs to
+                 */
+                _org_id?: string;
+                /**
+                 * The product creation date
+                 */
+                _created_at?: string;
+                /**
+                 * The product last update date
+                 */
+                _updated_at?: string;
+            };
+            /**
+             * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
+             */
+            item_components?: /* Represents a price input to the pricing library. */ PriceItemDto[];
+            _price?: /**
+             * The price entity schema for dynamic pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/composite-price"
+             * }
+             */
+            CompositePrice;
         }
         /**
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
@@ -716,6 +1042,35 @@ declare namespace Components {
             phone?: string;
         }
         export type EntityId = string; // uuid
+        /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         * }
+         */
+        export interface EntityItem {
+            _id: EntityId /* uuid */;
+            /**
+             * Title of entity
+             */
+            _title: string;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org: string;
+            _schema: string;
+            _tags?: string[];
+            _created_at: string; // date-time
+            _updated_at: string; // date-time
+        }
         export interface EntityRelation {
             [name: string]: any;
             entity_id?: string;
@@ -1106,7 +1461,7 @@ declare namespace Components {
              *
              */
             OrderStatus;
-            line_items?: /* Tracks a set of product prices, quantities, (discounts) and taxes. */ PriceItems;
+            line_items?: /* A valid set of product prices, quantities, (discounts) and taxes from a client. */ PriceItemsDto;
             /**
              * type of source, e.g. journey or manual
              * example:
@@ -1213,18 +1568,27 @@ declare namespace Components {
              */
             is_composite_price?: boolean;
             /**
-             * Describes how to compute the price per period. Either `per_unit` or `tiered`.
+             * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
-             * - `tiered` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers and tiers_mode attributes.
-             *
-             * ⚠️ Tiered pricing is **not supported** yet.
+             * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+             * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
              *
              */
-            billing_scheme?: "per_unit";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
+            /**
+             * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
+             *
+             */
+            tiers?: PriceTier[];
             /**
              * A brief description of the price.
              */
             description?: string;
+            /**
+             * A detailed description of the price. This is shown on the order document and order table.
+             */
+            long_description?: string;
             /**
              * The default tax rate applicable to the product.
              * This field is deprecated, use the new `tax` attribute.
@@ -1248,7 +1612,6 @@ declare namespace Components {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "type": "VAT",
              *   "description": "Tax description",
-             *   "behavior": "Exclusive",
              *   "active": "true",
              *   "region": "DE",
              *   "region_label": "Germany",
@@ -1264,15 +1627,9 @@ declare namespace Components {
              */
             Tax[];
             /**
-             * Specifies whether the price is considered `inclusive` of taxes or `exclusive` of taxes.
-             * One of `inclusive`, `exclusive`, or `unspecified`.
-             *
+             * Specifies whether the price is considered `inclusive` of taxes or not.
              */
-            tax_behavior?: "inclusive" | "exclusive";
-            /**
-             * Defines the tiered pricing type of the price.
-             */
-            tiers_mode?: "standard";
+            is_tax_inclusive?: boolean;
             /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
@@ -1343,7 +1700,7 @@ declare namespace Components {
             /**
              * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
              */
-            unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l") | string;
+            unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
             /**
              * The price creation date
              */
@@ -1386,6 +1743,57 @@ declare namespace Components {
             _tags?: string[];
         }
         /**
+         * example:
+         * {
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "value": 1000.245,
+         *   "name": "avg consumption",
+         *   "metadata": {
+         *     "journey_title": "energy journey",
+         *     "step_name": "avg consumption picker"
+         *   }
+         * }
+         */
+        export interface PriceInputMapping {
+            price_id?: string;
+            frequency_unit?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            name?: string;
+            value?: number;
+            metadata?: {
+                [name: string]: string;
+            };
+        }
+        /**
+         * example:
+         * [
+         *   {
+         *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *     "frequency_unit": "weekly",
+         *     "value": 1000.245,
+         *     "name": "avg consumption",
+         *     "metadata": {
+         *       "journey_title": "energy journey",
+         *       "step_name": "avg consumption picker"
+         *     }
+         *   }
+         * ]
+         */
+        export type PriceInputMappings = /**
+         * example:
+         * {
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "value": 1000.245,
+         *   "name": "avg consumption",
+         *   "metadata": {
+         *     "journey_title": "energy journey",
+         *     "step_name": "avg consumption picker"
+         *   }
+         * }
+         */
+        PriceInputMapping[];
+        /**
          * Represents a price item
          * example:
          * {
@@ -1394,18 +1802,38 @@ declare namespace Components {
          */
         export interface PriceItem {
             /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal?: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total?: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal?: string;
+            /**
              * price item id
              */
-            id?: string;
+            _id?: string;
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The unit amount value
              */
             unit_amount?: number;
             /**
-             * Total before any (discounts or) taxes are applied.
+             * The unit gross amount value.
              */
-            amount_subtotal?: number;
+            unit_amount_gross?: number;
+            /**
+             * Total tax amount for this line item.
+             */
+            amount_tax?: number;
             /**
              * Net unit amount without taxes or discounts.
              */
@@ -1414,10 +1842,6 @@ declare namespace Components {
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
-            /**
-             * Total after (discounts and) taxes.
-             */
-            amount_total?: number;
             currency?: /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
@@ -1480,14 +1904,39 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
+            /**
+             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
+             */
+            on_request_approved?: boolean;
             /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
             type?: "one_time" | "recurring";
             /**
-             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
+             * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
+             * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+             * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+             * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+             *
              */
-            on_request_approved?: boolean;
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
         }
         /**
          * Represents a price input to the pricing library.
@@ -1498,6 +1947,22 @@ declare namespace Components {
              * The quantity of products being purchased.
              */
             quantity?: number;
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -1531,6 +1996,10 @@ declare namespace Components {
              */
             _product?: {
                 [name: string]: any;
+                /**
+                 * The description for the product
+                 */
+                description?: string;
                 /**
                  * The product code
                  */
@@ -1618,9 +2087,30 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            unit_amount_currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
+            /**
+             * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
+             * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+             * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+             * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             * - `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             *
+             */
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
             /**
              * The snapshot of the price linked to the price item.
              * example:
@@ -1639,18 +2129,27 @@ declare namespace Components {
                  */
                 is_composite_price?: boolean;
                 /**
-                 * Describes how to compute the price per period. Either `per_unit` or `tiered`.
+                 * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
                  * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
-                 * - `tiered` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers and tiers_mode attributes.
-                 *
-                 * ⚠️ Tiered pricing is **not supported** yet.
+                 * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+                 * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+                 * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
                  *
                  */
-                billing_scheme?: "per_unit";
+                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
+                /**
+                 * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
+                 *
+                 */
+                tiers?: PriceTier[];
                 /**
                  * A brief description of the price.
                  */
                 description?: string;
+                /**
+                 * A detailed description of the price. This is shown on the order document and order table.
+                 */
+                long_description?: string;
                 /**
                  * The default tax rate applicable to the product.
                  * This field is deprecated, use the new `tax` attribute.
@@ -1674,7 +2173,6 @@ declare namespace Components {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                  *   "type": "VAT",
                  *   "description": "Tax description",
-                 *   "behavior": "Exclusive",
                  *   "active": "true",
                  *   "region": "DE",
                  *   "region_label": "Germany",
@@ -1690,15 +2188,9 @@ declare namespace Components {
                  */
                 Tax[];
                 /**
-                 * Specifies whether the price is considered `inclusive` of taxes or `exclusive` of taxes.
-                 * One of `inclusive`, `exclusive`, or `unspecified`.
-                 *
+                 * Specifies whether the price is considered `inclusive` of taxes or not.
                  */
-                tax_behavior?: "inclusive" | "exclusive";
-                /**
-                 * Defines the tiered pricing type of the price.
-                 */
-                tiers_mode?: "standard";
+                is_tax_inclusive?: boolean;
                 /**
                  * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
                  */
@@ -1769,7 +2261,7 @@ declare namespace Components {
                 /**
                  * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
                  */
-                unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l") | string;
+                unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
                 /**
                  * The price creation date
                  */
@@ -1817,7 +2309,61 @@ declare namespace Components {
         /**
          * A valid set of product prices, quantities, (discounts) and taxes from a client.
          */
-        export type PriceItemsDto = (/* Represents a price input to the pricing library. */ PriceItemDto)[];
+        export type PriceItemsDto = (/* Represents a price input to the pricing library. */ PriceItemDto | /* Represents a composite price input to the pricing library. */ CompositePriceItemDto)[];
+        export interface PriceTier {
+            up_to?: number | null;
+            flat_fee_amount?: number;
+            flat_fee_amount_decimal?: string;
+            unit_amount?: number;
+            unit_amount_decimal?: string;
+            display_mode?: PriceTierDisplayMode;
+        }
+        export type PriceTierDisplayMode = "hidden" | "on_request";
+        /**
+         * The result from the calculation of a set of price items.
+         */
+        export interface PricingDetails {
+            items?: (/**
+             * Represents a price item
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-item"
+             * }
+             */
+            PriceItem | /**
+             * Represents a composite price input to the pricing library.
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-item"
+             * }
+             */
+            CompositePriceItem)[];
+            /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total?: number;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            /**
+             * This is the sum of all the price item tax amounts.
+             */
+            amount_tax?: number;
+            total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+        }
         /**
          * The product entity
          * example:
@@ -1827,6 +2373,10 @@ declare namespace Components {
          */
         export interface Product {
             [name: string]: any;
+            /**
+             * The description for the product
+             */
+            description?: string;
             /**
              * The product code
              */
@@ -1910,50 +2460,128 @@ declare namespace Components {
          */
         export interface RecurrenceAmount {
             /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal: string;
+            /**
              * The price type.
              */
             type?: string;
             /**
              * The price billing period.
              */
-            billing_period?: string;
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
             /**
-             * Total of all items, with same recurrence, before (discounts or) taxes are applied.
+             * The unit gross amount value.
              */
-            amount_subtotal: number;
-            /**
-             * Total of all items, with same recurrence, after (discounts and) taxes are applied.
-             */
-            amount_total: number;
+            unit_amount_gross?: number;
             /**
              * Total of all items taxes, with same recurrence.
              */
             amount_tax?: number;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
         }
         /**
          * An amount associated with a specific recurrence.
          */
         export interface RecurrenceAmountDto {
             /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal: string;
+            /**
              * The price type.
              */
             type?: string;
             /**
              * The price billing period.
              */
-            billing_period?: string;
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
             /**
-             * Total of all items, with same recurrence, before (discounts or) taxes are applied.
+             * The unit gross amount value.
              */
-            amount_subtotal: number;
-            /**
-             * Total of all items, with same recurrence, after (discounts and) taxes are applied.
-             */
-            amount_total: number;
+            unit_amount_gross?: number;
             /**
              * Total of all items taxes, with same recurrence.
              */
             amount_tax?: number;
+        }
+        /**
+         * An amount associated with a specific recurrence and tax.
+         */
+        export interface RecurrenceAmountWithTax {
+            /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal: string;
+            /**
+             * The price type.
+             */
+            type?: string;
+            /**
+             * The price billing period.
+             */
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            /**
+             * Total of all items taxes, with same recurrence.
+             */
+            amount_tax?: number;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            tax?: /* A tax amount associated with a specific tax rate. */ TaxAmountBreakdown;
         }
         export type SalesTax = "nontaxable" | "reduced" | "standard";
         /**
@@ -1963,7 +2591,6 @@ declare namespace Components {
          *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
          *   "type": "VAT",
          *   "description": "Tax description",
-         *   "behavior": "Exclusive",
          *   "active": "true",
          *   "region": "DE",
          *   "region_label": "Germany",
@@ -1995,7 +2622,6 @@ declare namespace Components {
             type: "VAT" | "GST" | "Custom";
             description?: string;
             rate: number;
-            behavior: "Exclusive" | "Inclusive" | "exclusive" | "inclusive";
             active?: boolean;
             region?: string;
             region_label?: string;
@@ -2030,7 +2656,6 @@ declare namespace Components {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "type": "VAT",
              *   "description": "Tax description",
-             *   "behavior": "Exclusive",
              *   "active": "true",
              *   "region": "DE",
              *   "region_label": "Germany",
@@ -2081,7 +2706,6 @@ declare namespace Components {
              *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
              *   "type": "VAT",
              *   "description": "Tax description",
-             *   "behavior": "Exclusive",
              *   "active": "true",
              *   "region": "DE",
              *   "region_label": "Germany",
@@ -2123,10 +2747,57 @@ declare namespace Components {
                  */
                 taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmountBreakdown)[];
                 /**
-                 * The aggregated price items tax amount per rate.
+                 * The aggregated price items recurrences.
                  */
                 recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+                /**
+                 * The aggregated price items recurrences by tax rate.
+                 */
+                recurrencesByTax?: (/* An amount associated with a specific recurrence and tax. */ RecurrenceAmountWithTax)[];
             };
+        }
+        /**
+         * The availability rule error
+         */
+        export interface ValidateAvailabilityFileError {
+            /**
+             * The line number where the error was found
+             */
+            line?: number;
+            /**
+             * The error message
+             */
+            msg: string;
+            /**
+             * Data related to the error
+             */
+            data?: string;
+        }
+        /**
+         * The availability map file result payload
+         * example:
+         * {
+         *   "rules_parsed_count": 8,
+         *   "errors": [
+         *     "File must be UTF-8 encoded",
+         *     "Error on line 3 - street_number must be of type number",
+         *     "Error on line 6 - start_date cant be greater than end_date"
+         *   ]
+         * }
+         */
+        export interface ValidateAvailabilityFileResult {
+            /**
+             * The status of the validation
+             */
+            status: "success" | "error";
+            /**
+             * The number of rules successfully parsed
+             */
+            rules_parsed_count: number;
+            /**
+             * The errors found on the file
+             */
+            errors: /* The availability rule error */ ValidateAvailabilityFileError[];
         }
     }
 }
@@ -2252,6 +2923,34 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $ValidateAvailabilityFile {
+        export interface HeaderParameters {
+            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
+        }
+        namespace Parameters {
+            export type Id = string;
+            export type XEpilotOrgID = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * The availability map file result payload
+             * example:
+             * {
+             *   "rules_parsed_count": 8,
+             *   "errors": [
+             *     "File must be UTF-8 encoded",
+             *     "Error on line 3 - street_number must be of type number",
+             *     "Error on line 6 - start_date cant be greater than end_date"
+             *   ]
+             * }
+             */
+            Components.Schemas.ValidateAvailabilityFileResult;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace CreateOrder {
         export type RequestBody = /* Order Entity Payload */ Components.Schemas.OrderPayload;
         namespace Responses {
@@ -2351,6 +3050,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$AvailabilityCheck.Responses.$200>
   /**
+   * $validateAvailabilityFile - validateAvailabilityFile
+   * 
+   * Validates an availability file, it returns an array of errors if the file is invalid
+   */
+  '$validateAvailabilityFile'(
+    parameters?: Parameters<Paths.$ValidateAvailabilityFile.PathParameters & Paths.$ValidateAvailabilityFile.HeaderParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
+  /**
    * $createOpportunity - createOpportunity
    * 
    * This API is Deprecated. Please use the Entity API or Submission API to create opportunities.
@@ -2437,6 +3146,18 @@ export interface PathsDictionary {
       data?: Paths.$AvailabilityCheck.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$AvailabilityCheck.Responses.$200>
+  }
+  ['/v1/validate-availability/{id}']: {
+    /**
+     * $validateAvailabilityFile - validateAvailabilityFile
+     * 
+     * Validates an availability file, it returns an array of errors if the file is invalid
+     */
+    'get'(
+      parameters?: Parameters<Paths.$ValidateAvailabilityFile.PathParameters & Paths.$ValidateAvailabilityFile.HeaderParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
   }
   ['/v1/public/opportunity']: {
     /**
