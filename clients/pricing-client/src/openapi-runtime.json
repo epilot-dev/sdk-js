@@ -93,23 +93,6 @@
         }
       }
     },
-    "/v1/validate-availability/{id}": {
-      "get": {
-        "operationId": "$validateAvailabilityFile",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "in": "header",
-            "name": "X-Epilot-Org-ID",
-            "required": true
-          }
-        ]
-      }
-    },
     "/v1/public/opportunity": {
       "post": {
         "deprecated": true,
