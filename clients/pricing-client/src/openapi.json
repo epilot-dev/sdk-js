@@ -2913,11 +2913,6 @@
         "type": "object",
         "description": "An amount associated with a specific recurrence and tax.",
         "readOnly": true,
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Amounts"
-          }
-        ],
         "properties": {
           "type": {
             "type": "string",
@@ -2934,17 +2929,13 @@
               "yearly"
             ]
           },
-          "unit_amount_gross": {
+          "amount_total": {
             "type": "integer",
-            "description": "The unit gross amount value."
+            "description": "Total of all items after (discounts and) taxes are applied."
           },
           "amount_tax": {
             "type": "integer",
             "description": "Total of all items taxes, with same recurrence."
-          },
-          "currency": {
-            "$ref": "#/components/schemas/Currency",
-            "description": "Currency"
           },
           "tax": {
             "$ref": "#/components/schemas/TaxAmountBreakdown",
@@ -2952,10 +2943,7 @@
           }
         },
         "required": [
-          "amount_subtotal",
-          "amount_total",
-          "amount_subtotal_decimal",
-          "amount_total_decimal"
+          "amount_total"
         ]
       },
       "TotalDetails": {
