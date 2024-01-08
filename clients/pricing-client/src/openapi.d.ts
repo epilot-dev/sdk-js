@@ -2554,6 +2554,10 @@ declare namespace Components {
              */
             amount_total: number;
             /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal: number;
+            /**
              * Total of all items taxes, with same recurrence.
              */
             amount_tax?: number;

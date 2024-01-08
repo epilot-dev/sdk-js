@@ -2933,6 +2933,10 @@
             "type": "integer",
             "description": "Total of all items after (discounts and) taxes are applied."
           },
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total of all items before (discounts or) taxes are applied."
+          },
           "amount_tax": {
             "type": "integer",
             "description": "Total of all items taxes, with same recurrence."
@@ -2943,7 +2947,8 @@
           }
         },
         "required": [
-          "amount_total"
+          "amount_total",
+          "amount_subtotal"
         ]
       },
       "TotalDetails": {
