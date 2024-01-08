@@ -517,7 +517,38 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SubmissionMeterReading"
+                "type": "object",
+                "required": [
+                  "entity"
+                ],
+                "additionalProperties": true,
+                "properties": {
+                  "org_id": {
+                    "type": "string",
+                    "example": "123",
+                    "description": "ID of the organization"
+                  },
+                  "entity": {
+                    "type": "object",
+                    "required": [
+                      "meterReadings"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "_org": {
+                        "type": "string",
+                        "example": "123",
+                        "description": "ID of the organization"
+                      },
+                      "meterReadings": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/SubmissionMeterReading"
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -709,6 +740,20 @@
                 "relative"
               ]
             }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "asc",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "If this value is provided as \"asc\", then the results will be sorted by the timestamp field in ascending order.\nIf this value is provided as \"desc\", then the results will be sorted by the timestamp field in descending order.\n"
           }
         ],
         "responses": {
@@ -997,6 +1042,20 @@
             "schema": {
               "$ref": "#/components/schemas/Direction"
             }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "asc",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "If this value is provided as \"asc\", then the results will be sorted by the timestamp field in ascending order.\nIf this value is provided as \"desc\", then the results will be sorted by the timestamp field in descending order.\n"
           }
         ],
         "responses": {
@@ -1465,10 +1524,131 @@
           }
         ]
       },
+      "CounterReadingOnSubmission": {
+        "type": "object",
+        "required": [
+          "counterId",
+          "direction",
+          "value"
+        ],
+        "properties": {
+          "counterId": {
+            "$ref": "#/components/schemas/Id",
+            "description": "The ID of the associated meter counter"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction",
+            "description": "The direction of the reading (feed-in or feed-out)"
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "w",
+              "wh",
+              "kw",
+              "kWh",
+              "kvarh",
+              "mw",
+              "mWh",
+              "unit",
+              "cubic-meter",
+              "hour",
+              "day",
+              "month",
+              "year",
+              "percentage"
+            ],
+            "description": "The unit of measurement for the reading"
+          },
+          "value": {
+            "type": "number",
+            "example": 240,
+            "description": "The reading value of the meter counter"
+          }
+        }
+      },
       "SubmissionMeterReading": {
         "type": "object",
-        "properties": {},
-        "additionalProperties": true
+        "required": [
+          "meterId"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "meterId": {
+            "$ref": "#/components/schemas/Id",
+            "description": "The ID of the associated meter"
+          },
+          "readings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CounterReadingOnSubmission"
+            },
+            "description": "- The counter readings of a meter\n- This is only sent when the user is authenticated while submitting a journey\n"
+          },
+          "readingValue": {
+            "type": "string",
+            "example": "240",
+            "description": "The reading value of the meter when the counterId is passed or when the meterType is one-tariff"
+          },
+          "readingDate": {
+            "type": "string",
+            "description": "If the value is not provided, the system will be set with the time the request is processed.",
+            "example": "2022-10-10T10:10:00.000Z"
+          },
+          "readBy": {
+            "type": "string",
+            "example": "John Doe",
+            "description": "The person who recorded the reading"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Storing the feed-in record",
+            "description": "The reason for recording the reading"
+          },
+          "maloId": {
+            "type": "string",
+            "example": "A09-123",
+            "description": "The MA-LO ID of the meter"
+          },
+          "obisNumber": {
+            "type": "string",
+            "example": "A-34",
+            "description": "The OBIS number of the meter counter"
+          },
+          "readingUnit": {
+            "$ref": "#/components/schemas/Unit",
+            "description": "The unit of measurement for the reading"
+          },
+          "meterType": {
+            "type": "string",
+            "enum": [
+              "one_tariff",
+              "two_tariff",
+              "bi_directional"
+            ],
+            "description": "The type of the meter"
+          },
+          "feedInValue": {
+            "type": "number",
+            "example": 240,
+            "description": "The feed-in value of the meter when meterType is one-tariff or bi-directional"
+          },
+          "feedOutValue": {
+            "type": "number",
+            "example": 240,
+            "description": "The feed-out value of the meter when meterType is bi-directional"
+          },
+          "htValue": {
+            "type": "number",
+            "example": 240,
+            "description": "The high-peak tariff value of the meter when meterType is two-tariff"
+          },
+          "ntValue": {
+            "type": "number",
+            "example": 240,
+            "description": "The off-peak tariff value of the meter when meterType is two-tariff"
+          }
+        }
       },
       "Unit": {
         "type": "string",
