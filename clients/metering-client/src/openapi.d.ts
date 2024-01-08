@@ -686,6 +686,7 @@ declare namespace Paths {
             export type EndDate = string;
             export type GroupBy = "day" | "week" | "month" | "year";
             export type MeterId = Components.Schemas.Id;
+            export type Sort = "asc" | "desc";
             /**
              * example:
              * 2022-10-01
@@ -709,6 +710,7 @@ declare namespace Paths {
             Parameters.EndDate;
             group_by?: Parameters.GroupBy;
             direction?: Parameters.Direction;
+            sort?: Parameters.Sort;
         }
         namespace Responses {
             export interface $200 {
@@ -802,6 +804,7 @@ declare namespace Paths {
              * 20
              */
             export type Size = number;
+            export type Sort = "asc" | "desc";
             /**
              * example:
              * 2022-10-01
@@ -836,6 +839,7 @@ declare namespace Paths {
              */
             Parameters.From;
             type: Parameters.Type;
+            sort?: Parameters.Sort;
         }
         namespace Responses {
             export interface $200 {

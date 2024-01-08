@@ -160,6 +160,11 @@
             "in": "query",
             "name": "type",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false
           }
         ]
       },
@@ -241,6 +246,11 @@
           {
             "in": "query",
             "name": "direction",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sort",
             "required": false
           }
         ]

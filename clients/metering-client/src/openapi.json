@@ -740,6 +740,20 @@
                 "relative"
               ]
             }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "asc",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "If this value is provided as \"asc\", then the results will be sorted by the timestamp field in ascending order.\nIf this value is provided as \"desc\", then the results will be sorted by the timestamp field in descending order.\n"
           }
         ],
         "responses": {
@@ -1028,6 +1042,20 @@
             "schema": {
               "$ref": "#/components/schemas/Direction"
             }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "asc",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "If this value is provided as \"asc\", then the results will be sorted by the timestamp field in ascending order.\nIf this value is provided as \"desc\", then the results will be sorted by the timestamp field in descending order.\n"
           }
         ],
         "responses": {
