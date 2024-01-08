@@ -234,23 +234,23 @@
                 "description": "Bottom margin in cm",
                 "type": "number",
                 "example": 2.54
-              },
-              "left": {
-                "description": "Left margin in cm",
-                "type": "number",
-                "example": 1.27
-              },
-              "right": {
-                "description": "Right margin in cm",
-                "type": "number",
-                "example": 1.27
               }
             }
           },
           "display_margin_guidelines": {
-            "description": "Display margin guidelines",
+            "description": "Display margin guidelines (applicable to partial generation only)",
             "type": "boolean",
             "example": true
+          },
+          "enable_data_table_margin_autofix": {
+            "description": "Enable data table margin autofix",
+            "type": "boolean",
+            "example": false
+          },
+          "misconfigured_margins": {
+            "description": "An indication that the page margins are misconfigured",
+            "type": "boolean",
+            "example": false
           }
         }
       },

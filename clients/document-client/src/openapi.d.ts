@@ -165,25 +165,25 @@ declare namespace Components {
                  * 2.54
                  */
                 bottom?: number;
-                /**
-                 * Left margin in cm
-                 * example:
-                 * 1.27
-                 */
-                left?: number;
-                /**
-                 * Right margin in cm
-                 * example:
-                 * 1.27
-                 */
-                right?: number;
             };
             /**
-             * Display margin guidelines
+             * Display margin guidelines (applicable to partial generation only)
              * example:
              * true
              */
             display_margin_guidelines?: boolean;
+            /**
+             * Enable data table margin autofix
+             * example:
+             * false
+             */
+            enable_data_table_margin_autofix?: boolean;
+            /**
+             * An indication that the page margins are misconfigured
+             * example:
+             * false
+             */
+            misconfigured_margins?: boolean;
         }
     }
 }
