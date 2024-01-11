@@ -485,6 +485,21 @@ declare namespace Paths {
             Components.Schemas.EventConfigResp;
         }
     }
+    namespace GetEventById {
+        namespace Parameters {
+            export type ConfigId = string;
+            export type EventId = string;
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+            eventId: Parameters.EventId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.WebhookEvent;
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace GetFailures {
         namespace Parameters {
             export type LastLoadedEventId = string;
@@ -921,6 +936,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetWehookEvents.Responses.$200>
+  /**
+   * getEventById - getEventById
+   * 
+   * Get a webhook event by its id
+   */
+  'getEventById'(
+    parameters?: Parameters<Paths.GetEventById.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEventById.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1049,6 +1074,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetWehookEvents.Responses.$200>
+  }
+  ['/v1/webhooks/configs/{configId}/events/{eventId}']: {
+    /**
+     * getEventById - getEventById
+     * 
+     * Get a webhook event by its id
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEventById.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEventById.Responses.$200>
   }
 }
 

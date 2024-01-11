@@ -161,6 +161,23 @@
           }
         ]
       }
+    },
+    "/v1/webhooks/configs/{configId}/events/{eventId}": {
+      "get": {
+        "operationId": "getEventById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "eventId",
+            "required": true
+          }
+        ]
+      }
     }
   },
   "components": {},

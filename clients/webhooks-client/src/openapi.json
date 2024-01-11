@@ -655,6 +655,70 @@
           }
         }
       }
+    },
+    "/v1/webhooks/configs/{configId}/events/{eventId}": {
+      "get": {
+        "operationId": "getEventById",
+        "summary": "getEventById",
+        "description": "Get a webhook event by its id",
+        "tags": [
+          "webhooks",
+          "event"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          },
+          {
+            "in": "path",
+            "name": "eventId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Event id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookEvent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No events found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
