@@ -118,6 +118,49 @@
           }
         }
       }
+    },
+    "/v1/webhooks/config/{configId}/trigger": {
+      "post": {
+        "operationId": "triggerWebhook",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sync"
+          },
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events": {
+      "get": {
+        "operationId": "getWehookEvents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "status"
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          }
+        ]
+      }
     }
   },
   "components": {},

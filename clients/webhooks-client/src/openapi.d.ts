@@ -62,6 +62,12 @@ declare namespace Components {
          */
         export type EventConfigResp = EventConfigEntry[];
         /**
+         * Payload for triggering a webhook
+         */
+        export interface ExecutionPayload {
+            metadata: /* Contains the metadata about the configured event */ Metadata;
+        }
+        /**
          * Failures stored in the database.
          */
         export interface FailureEntry {
@@ -207,6 +213,41 @@ declare namespace Components {
         }
         export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD";
         /**
+         * Contains the metadata about the configured event
+         */
+        export interface Metadata {
+            /**
+             * Action that triggered the event
+             * example:
+             * Manual triggered by user with id 123456
+             */
+            action?: string;
+            /**
+             * Origin of the event
+             */
+            origin?: string;
+            /**
+             * Time of event creation
+             */
+            creation_timestamp?: string;
+            /**
+             * The ID of the webhook configuration
+             */
+            webhook_id?: string;
+            /**
+             * The ID of the given organization
+             */
+            organization_id: string;
+            /**
+             * The ID of the user for manual triggered events
+             */
+            user_id?: string;
+            /**
+             * ID used to track the event
+             */
+            correlation_id?: string;
+        }
+        /**
          * To be sent only if authType is OAUTH_CLIENT_CREDENTIALS
          */
         export interface OAuthConfig {
@@ -268,6 +309,23 @@ declare namespace Components {
             filter?: Filter;
             payloadConfiguration?: /* Configuration for the webhook payload */ PayloadConfiguration;
             enableStaticIP?: boolean;
+        }
+        export interface WebhookEvent {
+            event_id: string;
+            org_id: string;
+            webhook_config_id: string;
+            url?: string;
+            /**
+             * example:
+             * 2021-04-27T12:01:13.000Z
+             */
+            created_at?: string;
+            event_name?: string;
+            status_code?: string;
+            metadata?: /* Contains the metadata about the configured event */ Metadata;
+            status?: "success" | "failure" | "in_progress";
+            http_method?: "GET" | "POST" | "PUT";
+            payload?: /* Payload for triggering a webhook */ ExecutionPayload;
         }
     }
 }
@@ -636,12 +694,56 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace GetWehookEvents {
+        namespace Parameters {
+            export type ConfigId = string;
+            export type Cursor = string;
+            export type Status = "succeeded" | "failed" | "in_progress";
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+        }
+        export interface QueryParameters {
+            status?: Parameters.Status;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.WebhookEvent[];
+                /**
+                 * Cursor to be used for pagination
+                 */
+                cursor?: string;
+            }
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace ResendFailure {
         export type RequestBody = /* Failures stored in the database. */ Components.Schemas.FailureEntry;
         namespace Responses {
             export interface $204 {
             }
             export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
+    namespace TriggerWebhook {
+        namespace Parameters {
+            export type ConfigId = string;
+            export type Sync = boolean;
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+        }
+        export interface QueryParameters {
+            sync?: Parameters.Sync;
+        }
+        export type RequestBody = /* Payload for triggering a webhook */ Components.Schemas.ExecutionPayload;
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $400 = Components.Schemas.ErrorResp;
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -799,6 +901,26 @@ export interface OperationMethods {
     data?: Paths.ResendFailure.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ResendFailure.Responses.$204>
+  /**
+   * triggerWebhook - triggers a webhook event either async or sync
+   * 
+   * Trigger a webhook
+   */
+  'triggerWebhook'(
+    parameters?: Parameters<Paths.TriggerWebhook.PathParameters & Paths.TriggerWebhook.QueryParameters> | null,
+    data?: Paths.TriggerWebhook.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TriggerWebhook.Responses.$204>
+  /**
+   * getWehookEvents - getWehookEvents
+   * 
+   * Get sent events for a given webhook config
+   */
+  'getWehookEvents'(
+    parameters?: Parameters<Paths.GetWehookEvents.PathParameters & Paths.GetWehookEvents.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetWehookEvents.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -903,6 +1025,30 @@ export interface PathsDictionary {
       data?: Paths.ResendFailure.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ResendFailure.Responses.$204>
+  }
+  ['/v1/webhooks/config/{configId}/trigger']: {
+    /**
+     * triggerWebhook - triggers a webhook event either async or sync
+     * 
+     * Trigger a webhook
+     */
+    'post'(
+      parameters?: Parameters<Paths.TriggerWebhook.PathParameters & Paths.TriggerWebhook.QueryParameters> | null,
+      data?: Paths.TriggerWebhook.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TriggerWebhook.Responses.$204>
+  }
+  ['/v1/webhooks/configs/{configId}/events']: {
+    /**
+     * getWehookEvents - getWehookEvents
+     * 
+     * Get sent events for a given webhook config
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetWehookEvents.PathParameters & Paths.GetWehookEvents.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetWehookEvents.Responses.$200>
   }
 }
 
