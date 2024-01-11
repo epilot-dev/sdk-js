@@ -323,7 +323,7 @@ declare namespace Components {
             event_name?: string;
             status_code?: string;
             metadata?: /* Contains the metadata about the configured event */ Metadata;
-            status?: "success" | "failure" | "in_progress";
+            status?: "succeeded" | "failed" | "in_progress";
             http_method?: "GET" | "POST" | "PUT";
             payload?: /* Payload for triggering a webhook */ ExecutionPayload;
         }

@@ -598,7 +598,7 @@
               ]
             },
             "description": "Get all events for a given webhook config id",
-            "example": "success"
+            "example": "succeeded"
           },
           {
             "in": "query",
@@ -1160,8 +1160,8 @@
           "status": {
             "type": "string",
             "enum": [
-              "success",
-              "failure",
+              "succeeded",
+              "failed",
               "in_progress"
             ]
           },
