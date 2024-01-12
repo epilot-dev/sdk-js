@@ -325,7 +325,10 @@ declare namespace Components {
             metadata?: /* Contains the metadata about the configured event */ Metadata;
             status?: "succeeded" | "failed" | "in_progress";
             http_method?: "GET" | "POST" | "PUT";
-            payload?: /* Payload for triggering a webhook */ ExecutionPayload;
+            /**
+             * stringified payload of the webhook request
+             */
+            payload?: string;
         }
     }
 }

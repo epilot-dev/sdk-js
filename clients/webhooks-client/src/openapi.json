@@ -1238,7 +1238,8 @@
             ]
           },
           "payload": {
-            "$ref": "#/components/schemas/ExecutionPayload"
+            "type": "string",
+            "description": "stringified payload of the webhook request"
           }
         },
         "required": [
