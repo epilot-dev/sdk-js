@@ -178,6 +178,23 @@
           }
         ]
       }
+    },
+    "/v1/webhooks/configs/{configId}/events/{eventId}/replay": {
+      "post": {
+        "operationId": "replayEvent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "eventId",
+            "required": true
+          }
+        ]
+      }
     }
   },
   "components": {},

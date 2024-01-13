@@ -737,6 +737,22 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace ReplayEvent {
+        namespace Parameters {
+            export type ConfigId = string;
+            export type EventId = string;
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+            eventId: Parameters.EventId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace ResendFailure {
         export type RequestBody = /* Failures stored in the database. */ Components.Schemas.FailureEntry;
         namespace Responses {
@@ -949,6 +965,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEventById.Responses.$200>
+  /**
+   * replayEvent - replayEvent
+   * 
+   * Replay a webhook event
+   */
+  'replayEvent'(
+    parameters?: Parameters<Paths.ReplayEvent.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReplayEvent.Responses.$204>
 }
 
 export interface PathsDictionary {
@@ -1089,6 +1115,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEventById.Responses.$200>
+  }
+  ['/v1/webhooks/configs/{configId}/events/{eventId}/replay']: {
+    /**
+     * replayEvent - replayEvent
+     * 
+     * Replay a webhook event
+     */
+    'post'(
+      parameters?: Parameters<Paths.ReplayEvent.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReplayEvent.Responses.$204>
   }
 }
 

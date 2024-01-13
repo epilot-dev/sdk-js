@@ -719,6 +719,63 @@
           }
         }
       }
+    },
+    "/v1/webhooks/configs/{configId}/events/{eventId}/replay": {
+      "post": {
+        "operationId": "replayEvent",
+        "summary": "replayEvent",
+        "description": "Replay a webhook event",
+        "tags": [
+          "webhooks",
+          "event"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          },
+          {
+            "in": "path",
+            "name": "eventId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Event id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - replay event"
+          },
+          "404": {
+            "description": "No events found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
