@@ -216,32 +216,6 @@ declare namespace Components {
              */
             phone?: string | null;
         }
-        export interface AuthConfig {
-            /**
-             * AWS Cognito User Pool ID
-             * example:
-             * eu-central-1_CUEQRNbUb
-             */
-            user_pool_id: string;
-            /**
-             * AWS Cognito User Pool Client ID
-             * example:
-             * 6bsd0jkgoie74k2i8mrhc1vest
-             */
-            user_pool_client_id: string;
-            /**
-             * AWS Cognito User Pool Identity Pool ID
-             * example:
-             * eu-central-1:a63af1f7-ab86-4ab5-a0eb-f461cb37c2b1
-             */
-            user_pool_identity_pool_id?: string;
-            /**
-             * Portal ID
-             * example:
-             * 7h2hwdj7hhjsdcjkq03eidna3ep
-             */
-            portal_id: string;
-        }
         export interface Balance {
             /**
              * Current balance of the customer in cents. (precision 2)
@@ -963,23 +937,6 @@ declare namespace Components {
              * Error message
              */
             message?: string;
-        }
-        /**
-         * example:
-         * {
-         *   "exists": true,
-         *   "active": false
-         * }
-         */
-        export interface Exists {
-            /**
-             * Indicate whether the item exists
-             */
-            exists: boolean;
-            /**
-             * Indicate whether the item is active
-             */
-            active?: boolean;
         }
         export type ExtraSchemaAttributes = {
             /**
@@ -2359,6 +2316,35 @@ declare namespace Components {
         export interface WorkflowExecution {
             [name: string]: any;
         }
+        /**
+         * example:
+         * {
+         *   "startedTime": "2024-01-12T13:29:55.942Z",
+         *   "requirements": [],
+         *   "created": "2023-10-20T17:41:10.256Z",
+         *   "executionType": "MANUAL",
+         *   "assignedToInProgress": "-",
+         *   "sectionId": "lzxsw2sblj7",
+         *   "type": "STEP",
+         *   "entityRefId": "q1d6vcbsqvn",
+         *   "assignedTo": [
+         *     "10014532"
+         *   ],
+         *   "lastUpdated": "2024-01-13T05:18:43.838Z",
+         *   "ecp": {},
+         *   "userIds": [],
+         *   "name": "Hinterlege den vereinbarten LIC Termin",
+         *   "id": "q1d6vcbsqvn",
+         *   "definitionId": "9UjHKq",
+         *   "status": "COMPLETED",
+         *   "manuallyCreated": false,
+         *   "enabled": true,
+         *   "completedTime": "2024-01-13T05:18:43.827Z"
+         * }
+         */
+        export interface WorkflowStep {
+            [name: string]: any;
+        }
     }
 }
 declare namespace Paths {
@@ -3527,71 +3513,6 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace ListPortalsInternal {
-        namespace Parameters {
-            /**
-             * List of fields to return in response
-             * example:
-             * [
-             *   "id",
-             *   "name",
-             *   "origin",
-             *   "enabled",
-             *   "domain"
-             * ]
-             */
-            export type Fields = string[];
-            /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            export type From = number;
-            /**
-             * Size of the search results
-             * example:
-             * 25
-             */
-            export type Size = number;
-        }
-        export interface QueryParameters {
-            from?: /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            Parameters.From;
-            size?: /**
-             * Size of the search results
-             * example:
-             * 25
-             */
-            Parameters.Size;
-            fields?: /**
-             * List of fields to return in response
-             * example:
-             * [
-             *   "id",
-             *   "name",
-             *   "origin",
-             *   "enabled",
-             *   "domain"
-             * ]
-             */
-            Parameters.Fields;
-        }
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * Total number of portals for pagination
-                 * example:
-                 * 50
-                 */
-                hits?: number;
-                results?: Components.Schemas.PortalConfig[];
-            }
-        }
-    }
     namespace LoginToPortalAsUser {
         export interface RequestBody {
             /**
@@ -3871,6 +3792,65 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdateWorkflowStepAsDone {
+        namespace Parameters {
+            /**
+             * ID of a step
+             * example:
+             * q1d6vcbsqvn
+             */
+            export type StepId = string;
+            /**
+             * ID of a workflow
+             * example:
+             * 0bjwcxc827t
+             */
+            export type WorkflowId = string;
+        }
+        export interface PathParameters {
+            workflow_id: /**
+             * ID of a workflow
+             * example:
+             * 0bjwcxc827t
+             */
+            Parameters.WorkflowId;
+            step_id: /**
+             * ID of a step
+             * example:
+             * q1d6vcbsqvn
+             */
+            Parameters.StepId;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * {
+             *   "startedTime": "2024-01-12T13:29:55.942Z",
+             *   "requirements": [],
+             *   "created": "2023-10-20T17:41:10.256Z",
+             *   "executionType": "MANUAL",
+             *   "assignedToInProgress": "-",
+             *   "sectionId": "lzxsw2sblj7",
+             *   "type": "STEP",
+             *   "entityRefId": "q1d6vcbsqvn",
+             *   "assignedTo": [
+             *     "10014532"
+             *   ],
+             *   "lastUpdated": "2024-01-13T05:18:43.838Z",
+             *   "ecp": {},
+             *   "userIds": [],
+             *   "name": "Hinterlege den vereinbarten LIC Termin",
+             *   "id": "q1d6vcbsqvn",
+             *   "definitionId": "9UjHKq",
+             *   "status": "COMPLETED",
+             *   "manuallyCreated": false,
+             *   "enabled": true,
+             *   "completedTime": "2024-01-13T05:18:43.827Z"
+             * }
+             */
+            Components.Schemas.WorkflowStep;
         }
     }
     namespace UpsertEmailTemplates {
@@ -4611,15 +4591,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
   /**
-   * listPortalsInternal - listPortalsInternal
+   * updateWorkflowStepAsDone - updateWorkflowStepAsDone
    * 
-   * List all portals (internal API)
+   * Update a workflow step as done
    */
-  'listPortalsInternal'(
-    parameters?: Parameters<Paths.ListPortalsInternal.QueryParameters> | null,
+  'updateWorkflowStepAsDone'(
+    parameters?: Parameters<Paths.UpdateWorkflowStepAsDone.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListPortalsInternal.Responses.$200>
+  ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -5329,17 +5309,17 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
   }
-  ['/v2/portal/internal']: {
+  ['/v2/portal/workflow/{workflow_id}/{step_id}:markDone']: {
     /**
-     * listPortalsInternal - listPortalsInternal
+     * updateWorkflowStepAsDone - updateWorkflowStepAsDone
      * 
-     * List all portals (internal API)
+     * Update a workflow step as done
      */
-    'get'(
-      parameters?: Parameters<Paths.ListPortalsInternal.QueryParameters> | null,
+    'put'(
+      parameters?: Parameters<Paths.UpdateWorkflowStepAsDone.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListPortalsInternal.Responses.$200>
+    ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   }
 }
 

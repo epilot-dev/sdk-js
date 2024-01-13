@@ -3582,85 +3582,48 @@
         }
       }
     },
-    "/v2/portal/internal": {
-      "get": {
-        "operationId": "listPortalsInternal",
-        "summary": "listPortalsInternal",
-        "description": "List all portals (internal API)",
-        "x-internal": true,
+    "/v2/portal/workflow/{workflow_id}/{step_id}:markDone": {
+      "put": {
+        "operationId": "updateWorkflowStepAsDone",
+        "summary": "updateWorkflowStepAsDone",
+        "description": "Update a workflow step as done",
         "tags": [
-          "Internal"
+          "ECP"
         ],
         "security": [
           {
-            "EpilotAuth": []
+            "PortalAuth": []
           }
         ],
         "parameters": [
           {
-            "in": "query",
-            "name": "from",
-            "required": false,
+            "in": "path",
+            "name": "workflow_id",
+            "required": true,
             "schema": {
-              "type": "number",
-              "description": "Initial offset to set for the search results",
-              "example": 0,
-              "default": 0
+              "type": "string",
+              "description": "ID of a workflow",
+              "example": "0bjwcxc827t"
             }
           },
           {
-            "in": "query",
-            "name": "size",
-            "required": false,
+            "in": "path",
+            "name": "step_id",
+            "required": true,
             "schema": {
-              "type": "number",
-              "description": "Size of the search results",
-              "example": 25,
-              "default": 25
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "required": false,
-            "style": "form",
-            "explode": false,
-            "schema": {
-              "type": "array",
-              "description": "List of fields to return in response",
-              "items": {
-                "type": "string"
-              },
-              "example": [
-                "id",
-                "name",
-                "origin",
-                "enabled",
-                "domain"
-              ]
+              "type": "string",
+              "description": "ID of a step",
+              "example": "q1d6vcbsqvn"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "List of portals",
+            "description": "Updated workflow step successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "hits": {
-                      "type": "number",
-                      "description": "Total number of portals for pagination",
-                      "example": 50
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/PortalConfig"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/WorkflowStep"
                 }
               }
             }
@@ -3749,24 +3712,6 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Epilot Bearer Token"
-      },
-      "AsOrganization": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-ivy-org-id",
-        "description": "Set organization id as internal user"
-      },
-      "AsContact": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-contact-id",
-        "description": "Set contact id as internal user"
-      },
-      "AsCustomer": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-portal-user-id",
-        "description": "Set portal id as customer"
       }
     },
     "schemas": {
@@ -4852,56 +4797,6 @@
           }
         }
       },
-      "AuthConfig": {
-        "type": "object",
-        "properties": {
-          "user_pool_id": {
-            "type": "string",
-            "example": "eu-central-1_CUEQRNbUb",
-            "description": "AWS Cognito User Pool ID"
-          },
-          "user_pool_client_id": {
-            "type": "string",
-            "example": "6bsd0jkgoie74k2i8mrhc1vest",
-            "description": "AWS Cognito User Pool Client ID"
-          },
-          "user_pool_identity_pool_id": {
-            "type": "string",
-            "example": "eu-central-1:a63af1f7-ab86-4ab5-a0eb-f461cb37c2b1",
-            "description": "AWS Cognito User Pool Identity Pool ID"
-          },
-          "portal_id": {
-            "type": "string",
-            "example": "7h2hwdj7hhjsdcjkq03eidna3ep",
-            "description": "Portal ID"
-          }
-        },
-        "required": [
-          "user_pool_id",
-          "user_pool_client_id",
-          "portal_id"
-        ]
-      },
-      "Exists": {
-        "type": "object",
-        "required": [
-          "exists"
-        ],
-        "properties": {
-          "exists": {
-            "type": "boolean",
-            "description": "Indicate whether the item exists"
-          },
-          "active": {
-            "type": "boolean",
-            "description": "Indicate whether the item is active"
-          }
-        },
-        "example": {
-          "exists": true,
-          "active": false
-        }
-      },
       "EntitySlug": {
         "description": "URL-friendly identifier for the entity schema",
         "type": "string",
@@ -5736,6 +5631,34 @@
               "dueDate": "2023-01-15T20:00:00"
             }
           ]
+        }
+      },
+      "WorkflowStep": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true,
+        "example": {
+          "startedTime": "2024-01-12T13:29:55.942Z",
+          "requirements": [],
+          "created": "2023-10-20T17:41:10.256Z",
+          "executionType": "MANUAL",
+          "assignedToInProgress": "-",
+          "sectionId": "lzxsw2sblj7",
+          "type": "STEP",
+          "entityRefId": "q1d6vcbsqvn",
+          "assignedTo": [
+            "10014532"
+          ],
+          "lastUpdated": "2024-01-13T05:18:43.838Z",
+          "ecp": {},
+          "userIds": [],
+          "name": "Hinterlege den vereinbarten LIC Termin",
+          "id": "q1d6vcbsqvn",
+          "definitionId": "9UjHKq",
+          "status": "COMPLETED",
+          "manuallyCreated": false,
+          "enabled": true,
+          "completedTime": "2024-01-13T05:18:43.827Z"
         }
       },
       "BaseBillingEvent": {
