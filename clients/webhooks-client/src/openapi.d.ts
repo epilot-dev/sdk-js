@@ -321,7 +321,10 @@ declare namespace Components {
              */
             created_at?: string;
             event_name?: string;
-            status_code?: string;
+            http_response?: {
+                status_code?: number;
+                message?: string;
+            };
             metadata?: /* Contains the metadata about the configured event */ Metadata;
             status?: "succeeded" | "failed" | "in_progress";
             http_method?: "GET" | "POST" | "PUT";

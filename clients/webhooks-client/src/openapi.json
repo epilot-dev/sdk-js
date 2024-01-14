@@ -1272,8 +1272,16 @@
           "event_name": {
             "type": "string"
           },
-          "status_code": {
-            "type": "string"
+          "http_response": {
+            "type": "object",
+            "properties": {
+              "status_code": {
+                "type": "integer"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
           },
           "metadata": {
             "$ref": "#/components/schemas/Metadata"
