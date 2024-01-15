@@ -1083,7 +1083,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ResendFailure.Responses.$204>
   }
-  ['/v1/webhooks/config/{configId}/trigger']: {
+  ['/v1/webhooks/configs/{configId}/trigger']: {
     /**
      * triggerWebhook - triggers a webhook event either async or sync
      * 

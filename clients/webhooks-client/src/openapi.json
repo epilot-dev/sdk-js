@@ -499,7 +499,7 @@
         }
       }
     },
-    "/v1/webhooks/config/{configId}/trigger": {
+    "/v1/webhooks/configs/{configId}/trigger": {
       "post": {
         "operationId": "triggerWebhook",
         "summary": "triggers a webhook event either async or sync",
