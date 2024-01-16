@@ -1,6 +1,6 @@
 {
   "name": "@epilot/webhooks-client",
-  "version": "2.12.0",
+  "version": "2.11.4",
   "description": "Client library for epilot Webhooks API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -45,7 +45,7 @@
     "!*.config.js"
   ],
   "peerDependencies": {
-    "axios": "^1.6.2"
+    "axios": "^0.25.0"
   },
   "dependencies": {
     "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.20",
-    "axios": "^1.6.2",
+    "axios": "^0.25.0",
     "copy-webpack-plugin": "^7.0.0",
     "jest": "^26.6.3",
     "json-loader": "^0.5.7",

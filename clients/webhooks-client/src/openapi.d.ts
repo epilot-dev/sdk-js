@@ -269,6 +269,13 @@ declare namespace Components {
             include_activity?: boolean;
             include_changed_attributes?: boolean;
         }
+        export interface TriggerWebhookResp {
+            status_code?: string;
+            message?: string;
+            status?: "succeeded" | "failed";
+            start_date?: string;
+            end_date?: string;
+        }
         /**
          * example:
          * {
@@ -778,8 +785,7 @@ declare namespace Paths {
         }
         export type RequestBody = /* Payload for triggering a webhook */ Components.Schemas.ExecutionPayload;
         namespace Responses {
-            export interface $204 {
-            }
+            export type $200 = Components.Schemas.TriggerWebhookResp;
             export type $400 = Components.Schemas.ErrorResp;
             export type $500 = Components.Schemas.ErrorResp;
         }
@@ -947,7 +953,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.TriggerWebhook.PathParameters & Paths.TriggerWebhook.QueryParameters> | null,
     data?: Paths.TriggerWebhook.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.TriggerWebhook.Responses.$204>
+  ): OperationResponse<Paths.TriggerWebhook.Responses.$200>
   /**
    * getWehookEvents - getWehookEvents
    * 
@@ -1093,7 +1099,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.TriggerWebhook.PathParameters & Paths.TriggerWebhook.QueryParameters> | null,
       data?: Paths.TriggerWebhook.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.TriggerWebhook.Responses.$204>
+    ): OperationResponse<Paths.TriggerWebhook.Responses.$200>
   }
   ['/v1/webhooks/configs/{configId}/events']: {
     /**
