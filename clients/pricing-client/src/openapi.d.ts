@@ -451,6 +451,23 @@ declare namespace Components {
                 _updated_at?: string;
             };
         }
+        /**
+         * The basic auth credentials
+         */
+        export interface BasicAuthCredentials {
+            /**
+             * The username
+             * example:
+             * username
+             */
+            username: string;
+            /**
+             * The password
+             * example:
+             * 123456
+             */
+            password: string;
+        }
         export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
         /**
          * Supports shopping for products and services until ready for checkout.
@@ -1109,6 +1126,13 @@ declare namespace Components {
             _title?: string;
             $relation?: EntityRelation;
         }
+        /**
+         * The credentials response payload
+         */
+        export interface IntegrationCredentialsResult {
+            schema?: /* The basic auth credentials */ BasicAuthCredentials;
+        }
+        export type IntegrationId = "enet" | "getag";
         /**
          * A set of key-value pairs used to store meta data information about an entity.
          */
@@ -2456,6 +2480,19 @@ declare namespace Components {
             _updated_at?: string;
         }
         /**
+         * The provider entity
+         */
+        export interface Provider {
+            /**
+             * The provider name
+             */
+            name: string;
+            /**
+             * The provider code
+             */
+            code: string;
+        }
+        /**
          * An amount associated with a specific recurrence.
          */
         export interface RecurrenceAmount {
@@ -2567,6 +2604,63 @@ declare namespace Components {
             tax?: /* A tax amount associated with a specific tax rate. */ TaxAmountBreakdown;
         }
         export type SalesTax = "nontaxable" | "reduced" | "standard";
+        /**
+         * The credentials request payload
+         */
+        export interface SaveIntegrationCredentialsParams {
+            schema?: /* The basic auth credentials */ BasicAuthCredentials;
+        }
+        /**
+         * A search providers payload
+         */
+        export interface SearchProvidersParams {
+            /**
+             * The provider type (power or gas)
+             */
+            type: "power" | "gas";
+            /**
+             * The postal code to search for providers
+             */
+            postal_code: string;
+            /**
+             * The city to search for providers
+             */
+            city?: string | null;
+            /**
+             * The street to search for providers
+             */
+            street?: string | null;
+            /**
+             * The street number to search for providers
+             */
+            street_number?: string | null;
+        }
+        /**
+         * The search providers payload
+         */
+        export type SearchProvidersResult = /* The provider entity */ Provider[];
+        /**
+         * A search streets payload
+         */
+        export interface SearchStreetsParams {
+            /**
+             * The postal code to search for providers
+             */
+            postal_code: string;
+            /**
+             * The city to search for providers
+             */
+            city: string | null;
+        }
+        /**
+         * The street entity
+         */
+        export interface Street {
+            /**
+             * The street name
+             */
+            name: string;
+        }
         /**
          * the tax configuration
          * example:
@@ -2730,7 +2824,7 @@ declare namespace Components {
                  */
                 taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmountBreakdown)[];
                 /**
-                 * The aggregated price items recurrences.
+                 * The aggregated price items tax amount per rate.
                  */
                 recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
                 /**
@@ -2855,6 +2949,58 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $DeleteCredentials {
+        export interface HeaderParameters {
+            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
+        }
+        namespace Parameters {
+            export type IntegrationId = Components.Schemas.IntegrationId;
+            export type XEpilotOrgID = string;
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace $GetCredentials {
+        export interface HeaderParameters {
+            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
+        }
+        namespace Parameters {
+            export type IntegrationId = Components.Schemas.IntegrationId;
+            export type XEpilotOrgID = string;
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId;
+        }
+        namespace Responses {
+            export type $200 = /* The credentials response payload */ Components.Schemas.IntegrationCredentialsResult;
+            export type $400 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+        }
+    }
+    namespace $SaveCredentials {
+        export interface HeaderParameters {
+            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
+        }
+        namespace Parameters {
+            export type IntegrationId = Components.Schemas.IntegrationId;
+            export type XEpilotOrgID = string;
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId;
+        }
+        export type RequestBody = /* The credentials request payload */ Components.Schemas.SaveIntegrationCredentialsParams;
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace $SearchCatalog {
         export interface HeaderParameters {
             "X-Ivy-Org-ID": Parameters.XIvyOrgID;
@@ -2904,6 +3050,42 @@ declare namespace Paths {
              */
             Components.Schemas.CatalogSearchResult;
             export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace $SearchProviders {
+        export interface HeaderParameters {
+            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
+        }
+        namespace Parameters {
+            export type IntegrationId = Components.Schemas.IntegrationId;
+            export type XEpilotOrgID = string;
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId;
+        }
+        export type RequestBody = /* A search providers payload */ Components.Schemas.SearchProvidersParams;
+        namespace Responses {
+            export type $200 = /* The search providers payload */ Components.Schemas.SearchProvidersResult;
+            export type $400 = Components.Schemas.Error;
+            export type $403 = Components.Schemas.Error;
+        }
+    }
+    namespace $SearchStreets {
+        export interface HeaderParameters {
+            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
+        }
+        namespace Parameters {
+            export type IntegrationId = Components.Schemas.IntegrationId;
+            export type XEpilotOrgID = string;
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId;
+        }
+        export type RequestBody = /* A search streets payload */ Components.Schemas.SearchStreetsParams;
+        namespace Responses {
+            export type $200 = /* The search providers payload */ Components.Schemas.SearchProvidersResult;
+            export type $400 = Components.Schemas.Error;
+            export type $403 = Components.Schemas.Error;
         }
     }
     namespace $ValidateAvailabilityFile {
@@ -3043,6 +3225,56 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
   /**
+   * $searchProviders - searchProviders
+   * 
+   * Returns the list of providers available based on a given location
+   */
+  '$searchProviders'(
+    parameters?: Parameters<Paths.$SearchProviders.PathParameters & Paths.$SearchProviders.HeaderParameters> | null,
+    data?: Paths.$SearchProviders.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$SearchProviders.Responses.$200>
+  /**
+   * $searchStreets - searchStreets
+   * 
+   * Returns the list of streets available for a given postal_code and city
+   */
+  '$searchStreets'(
+    parameters?: Parameters<Paths.$SearchStreets.PathParameters & Paths.$SearchStreets.HeaderParameters> | null,
+    data?: Paths.$SearchStreets.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$SearchStreets.Responses.$200>
+  /**
+   * $getCredentials - getCredentials
+   * 
+   * Gets the credentials for a given integration / organization
+   */
+  '$getCredentials'(
+    parameters?: Parameters<Paths.$GetCredentials.PathParameters & Paths.$GetCredentials.HeaderParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$GetCredentials.Responses.$200>
+  /**
+   * $saveCredentials - saveCredentials
+   * 
+   * Saves the credentials for a given integration / organization
+   */
+  '$saveCredentials'(
+    parameters?: Parameters<Paths.$SaveCredentials.PathParameters & Paths.$SaveCredentials.HeaderParameters> | null,
+    data?: Paths.$SaveCredentials.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$SaveCredentials.Responses.$204>
+  /**
+   * $deleteCredentials - deleteCredentials
+   * 
+   * Delete the credentials for a given integration / organization
+   */
+  '$deleteCredentials'(
+    parameters?: Parameters<Paths.$DeleteCredentials.PathParameters & Paths.$DeleteCredentials.HeaderParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
+  /**
    * $createOpportunity - createOpportunity
    * 
    * This API is Deprecated. Please use the Entity API or Submission API to create opportunities.
@@ -3141,6 +3373,66 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
+  }
+  ['/v1/public/integration/{integrationId}/providers:search']: {
+    /**
+     * $searchProviders - searchProviders
+     * 
+     * Returns the list of providers available based on a given location
+     */
+    'post'(
+      parameters?: Parameters<Paths.$SearchProviders.PathParameters & Paths.$SearchProviders.HeaderParameters> | null,
+      data?: Paths.$SearchProviders.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$SearchProviders.Responses.$200>
+  }
+  ['/v1/public/integration/{integrationId}/streets:search']: {
+    /**
+     * $searchStreets - searchStreets
+     * 
+     * Returns the list of streets available for a given postal_code and city
+     */
+    'post'(
+      parameters?: Parameters<Paths.$SearchStreets.PathParameters & Paths.$SearchStreets.HeaderParameters> | null,
+      data?: Paths.$SearchStreets.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$SearchStreets.Responses.$200>
+  }
+  ['/v1/integration/{integrationId}/credentials']: {
+    /**
+     * $getCredentials - getCredentials
+     * 
+     * Gets the credentials for a given integration / organization
+     */
+    'get'(
+      parameters?: Parameters<Paths.$GetCredentials.PathParameters & Paths.$GetCredentials.HeaderParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$GetCredentials.Responses.$200>
+  }
+  ['/v1/integration/{integrationId}/credentials:save']: {
+    /**
+     * $saveCredentials - saveCredentials
+     * 
+     * Saves the credentials for a given integration / organization
+     */
+    'put'(
+      parameters?: Parameters<Paths.$SaveCredentials.PathParameters & Paths.$SaveCredentials.HeaderParameters> | null,
+      data?: Paths.$SaveCredentials.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$SaveCredentials.Responses.$204>
+  }
+  ['/v1/integration/{integrationId}/credentials:delete']: {
+    /**
+     * $deleteCredentials - deleteCredentials
+     * 
+     * Delete the credentials for a given integration / organization
+     */
+    'delete'(
+      parameters?: Parameters<Paths.$DeleteCredentials.PathParameters & Paths.$DeleteCredentials.HeaderParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
   }
   ['/v1/public/opportunity']: {
     /**
