@@ -216,32 +216,6 @@ declare namespace Components {
              */
             phone?: string | null;
         }
-        export interface AuthConfig {
-            /**
-             * AWS Cognito User Pool ID
-             * example:
-             * eu-central-1_CUEQRNbUb
-             */
-            user_pool_id: string;
-            /**
-             * AWS Cognito User Pool Client ID
-             * example:
-             * 6bsd0jkgoie74k2i8mrhc1vest
-             */
-            user_pool_client_id: string;
-            /**
-             * AWS Cognito User Pool Identity Pool ID
-             * example:
-             * eu-central-1:a63af1f7-ab86-4ab5-a0eb-f461cb37c2b1
-             */
-            user_pool_identity_pool_id?: string;
-            /**
-             * Portal ID
-             * example:
-             * 7h2hwdj7hhjsdcjkq03eidna3ep
-             */
-            portal_id: string;
-        }
         export interface Balance {
             /**
              * Current balance of the customer in cents. (precision 2)
@@ -964,23 +938,6 @@ declare namespace Components {
              */
             message?: string;
         }
-        /**
-         * example:
-         * {
-         *   "exists": true,
-         *   "active": false
-         * }
-         */
-        export interface Exists {
-            /**
-             * Indicate whether the item exists
-             */
-            exists: boolean;
-            /**
-             * Indicate whether the item is active
-             */
-            active?: boolean;
-        }
         export type ExtraSchemaAttributes = {
             /**
              * Attribute name
@@ -1162,6 +1119,20 @@ declare namespace Components {
              * Effect of the permission
              */
             effect?: "allow" | "deny";
+        }
+        export interface IdentifierAttribute {
+            /**
+             * Label attribute
+             */
+            label?: string;
+            /**
+             * Name of the attribute
+             */
+            name?: string;
+            /**
+             * Type of the secondary attribute
+             */
+            type?: string;
         }
         /**
          * An entity that describes an installment billing event.
@@ -3495,6 +3466,37 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetRegistrationIdentifiers {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * {
+                 *   "contact": [
+                 *     {
+                 *       "label": "First name",
+                 *       "name": "first_name",
+                 *       "type": "string"
+                 *     }
+                 *   ],
+                 *   "contract": [
+                 *     {
+                 *       "label": "Contract number",
+                 *       "name": "contract_number",
+                 *       "type": "string"
+                 *     }
+                 *   ]
+                 * }
+                 */
+                data?: {
+                    [name: string]: Components.Schemas.IdentifierAttribute[];
+                };
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetSchemas {
         namespace Responses {
             export interface $200 {
@@ -3525,71 +3527,6 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace ListPortalsInternal {
-        namespace Parameters {
-            /**
-             * List of fields to return in response
-             * example:
-             * [
-             *   "id",
-             *   "name",
-             *   "origin",
-             *   "enabled",
-             *   "domain"
-             * ]
-             */
-            export type Fields = string[];
-            /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            export type From = number;
-            /**
-             * Size of the search results
-             * example:
-             * 25
-             */
-            export type Size = number;
-        }
-        export interface QueryParameters {
-            from?: /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            Parameters.From;
-            size?: /**
-             * Size of the search results
-             * example:
-             * 25
-             */
-            Parameters.Size;
-            fields?: /**
-             * List of fields to return in response
-             * example:
-             * [
-             *   "id",
-             *   "name",
-             *   "origin",
-             *   "enabled",
-             *   "domain"
-             * ]
-             */
-            Parameters.Fields;
-        }
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * Total number of portals for pagination
-                 * example:
-                 * 50
-                 */
-                hits?: number;
-                results?: Components.Schemas.PortalConfig[];
-            }
         }
     }
     namespace LoginToPortalAsUser {
@@ -4518,6 +4455,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SavePortalFiles.Responses.$201>
   /**
+   * getRegistrationIdentifiers - getRegistrationIdentifiers
+   * 
+   * Get valid attributes from entities that can be used as identifier to map contact to user on registration
+   */
+  'getRegistrationIdentifiers'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRegistrationIdentifiers.Responses.$200>
+  /**
    * getAllFiles - getAllFiles
    * 
    * Fetch all documents under the related entities of a contact
@@ -4610,16 +4557,6 @@ export interface OperationMethods {
     data?: Paths.SearchPortalUserEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
-  /**
-   * listPortalsInternal - listPortalsInternal
-   * 
-   * List all portals (internal API)
-   */
-  'listPortalsInternal'(
-    parameters?: Parameters<Paths.ListPortalsInternal.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListPortalsInternal.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -5218,6 +5155,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SavePortalFiles.Responses.$201>
   }
+  ['/v2/portal/registration/identifiers']: {
+    /**
+     * getRegistrationIdentifiers - getRegistrationIdentifiers
+     * 
+     * Get valid attributes from entities that can be used as identifier to map contact to user on registration
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRegistrationIdentifiers.Responses.$200>
+  }
   ['/v2/portal/user/files']: {
     /**
      * getAllFiles - getAllFiles
@@ -5328,18 +5277,6 @@ export interface PathsDictionary {
       data?: Paths.SearchPortalUserEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
-  }
-  ['/v2/portal/internal']: {
-    /**
-     * listPortalsInternal - listPortalsInternal
-     * 
-     * List all portals (internal API)
-     */
-    'get'(
-      parameters?: Parameters<Paths.ListPortalsInternal.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListPortalsInternal.Responses.$200>
   }
 }
 
