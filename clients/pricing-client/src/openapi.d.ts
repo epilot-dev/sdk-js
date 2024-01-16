@@ -2653,6 +2653,10 @@ declare namespace Components {
             city: string | null;
         }
         /**
+         * The search providers payload
+         */
+        export type SearchStreetsResult = /* The street entity */ Street[];
+        /**
          * The street entity
          */
         export interface Street {
@@ -3083,7 +3087,7 @@ declare namespace Paths {
         }
         export type RequestBody = /* A search streets payload */ Components.Schemas.SearchStreetsParams;
         namespace Responses {
-            export type $200 = /* The search providers payload */ Components.Schemas.SearchProvidersResult;
+            export type $200 = /* The search providers payload */ Components.Schemas.SearchStreetsResult;
             export type $400 = Components.Schemas.Error;
             export type $403 = Components.Schemas.Error;
         }

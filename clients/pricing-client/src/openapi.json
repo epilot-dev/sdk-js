@@ -971,7 +971,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SearchProvidersResult"
+                  "$ref": "#/components/schemas/SearchStreetsResult"
                 },
                 "examples": {
                   "Response with available streets": {
@@ -2550,6 +2550,13 @@
           "username",
           "password"
         ]
+      },
+      "SearchStreetsResult": {
+        "description": "The search providers payload",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Street"
+        }
       },
       "SearchProvidersResult": {
         "description": "The search providers payload",
