@@ -1029,16 +1029,6 @@
             },
             "required": true,
             "example": "getag"
-          },
-          {
-            "in": "header",
-            "name": "X-Epilot-Org-ID",
-            "description": "The target Organization Id represented by the caller",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "example": 739224
           }
         ],
         "responses": {
@@ -1101,16 +1091,6 @@
             },
             "required": true,
             "example": "getag"
-          },
-          {
-            "in": "header",
-            "name": "X-Epilot-Org-ID",
-            "description": "The target Organization Id represented by the caller",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "example": 739224
           }
         ],
         "requestBody": {
@@ -1165,16 +1145,6 @@
             },
             "required": true,
             "example": "getag"
-          },
-          {
-            "in": "header",
-            "name": "X-Epilot-Org-ID",
-            "description": "The target Organization Id represented by the caller",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "example": 739224
           }
         ],
         "responses": {

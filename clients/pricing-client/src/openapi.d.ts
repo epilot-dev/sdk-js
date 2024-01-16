@@ -2944,12 +2944,8 @@ declare namespace Paths {
         }
     }
     namespace $DeleteCredentials {
-        export interface HeaderParameters {
-            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
-        }
         namespace Parameters {
             export type IntegrationId = Components.Schemas.IntegrationId;
-            export type XEpilotOrgID = string;
         }
         export interface PathParameters {
             integrationId: Parameters.IntegrationId;
@@ -2961,12 +2957,8 @@ declare namespace Paths {
         }
     }
     namespace $GetCredentials {
-        export interface HeaderParameters {
-            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
-        }
         namespace Parameters {
             export type IntegrationId = Components.Schemas.IntegrationId;
-            export type XEpilotOrgID = string;
         }
         export interface PathParameters {
             integrationId: Parameters.IntegrationId;
@@ -2978,12 +2970,8 @@ declare namespace Paths {
         }
     }
     namespace $SaveCredentials {
-        export interface HeaderParameters {
-            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
-        }
         namespace Parameters {
             export type IntegrationId = Components.Schemas.IntegrationId;
-            export type XEpilotOrgID = string;
         }
         export interface PathParameters {
             integrationId: Parameters.IntegrationId;
@@ -3244,7 +3232,7 @@ export interface OperationMethods {
    * Gets the credentials for a given integration / organization
    */
   '$getCredentials'(
-    parameters?: Parameters<Paths.$GetCredentials.PathParameters & Paths.$GetCredentials.HeaderParameters> | null,
+    parameters?: Parameters<Paths.$GetCredentials.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$GetCredentials.Responses.$200>
@@ -3254,7 +3242,7 @@ export interface OperationMethods {
    * Saves the credentials for a given integration / organization
    */
   '$saveCredentials'(
-    parameters?: Parameters<Paths.$SaveCredentials.PathParameters & Paths.$SaveCredentials.HeaderParameters> | null,
+    parameters?: Parameters<Paths.$SaveCredentials.PathParameters> | null,
     data?: Paths.$SaveCredentials.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SaveCredentials.Responses.$204>
@@ -3264,7 +3252,7 @@ export interface OperationMethods {
    * Delete the credentials for a given integration / organization
    */
   '$deleteCredentials'(
-    parameters?: Parameters<Paths.$DeleteCredentials.PathParameters & Paths.$DeleteCredentials.HeaderParameters> | null,
+    parameters?: Parameters<Paths.$DeleteCredentials.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
@@ -3399,7 +3387,7 @@ export interface PathsDictionary {
      * Gets the credentials for a given integration / organization
      */
     'get'(
-      parameters?: Parameters<Paths.$GetCredentials.PathParameters & Paths.$GetCredentials.HeaderParameters> | null,
+      parameters?: Parameters<Paths.$GetCredentials.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$GetCredentials.Responses.$200>
@@ -3411,7 +3399,7 @@ export interface PathsDictionary {
      * Saves the credentials for a given integration / organization
      */
     'put'(
-      parameters?: Parameters<Paths.$SaveCredentials.PathParameters & Paths.$SaveCredentials.HeaderParameters> | null,
+      parameters?: Parameters<Paths.$SaveCredentials.PathParameters> | null,
       data?: Paths.$SaveCredentials.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$SaveCredentials.Responses.$204>
@@ -3423,7 +3411,7 @@ export interface PathsDictionary {
      * Delete the credentials for a given integration / organization
      */
     'delete'(
-      parameters?: Parameters<Paths.$DeleteCredentials.PathParameters & Paths.$DeleteCredentials.HeaderParameters> | null,
+      parameters?: Parameters<Paths.$DeleteCredentials.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>

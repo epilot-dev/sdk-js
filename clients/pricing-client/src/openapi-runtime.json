@@ -164,11 +164,6 @@
             "in": "path",
             "name": "integrationId",
             "required": true
-          },
-          {
-            "in": "header",
-            "name": "X-Epilot-Org-ID",
-            "required": true
           }
         ]
       }
@@ -180,11 +175,6 @@
           {
             "in": "path",
             "name": "integrationId",
-            "required": true
-          },
-          {
-            "in": "header",
-            "name": "X-Epilot-Org-ID",
             "required": true
           }
         ],
@@ -202,11 +192,6 @@
           {
             "in": "path",
             "name": "integrationId",
-            "required": true
-          },
-          {
-            "in": "header",
-            "name": "X-Epilot-Org-ID",
             "required": true
           }
         ]
