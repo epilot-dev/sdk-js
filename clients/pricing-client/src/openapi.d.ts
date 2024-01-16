@@ -1126,12 +1126,7 @@ declare namespace Components {
             _title?: string;
             $relation?: EntityRelation;
         }
-        /**
-         * The credentials response payload
-         */
-        export interface IntegrationCredentialsResult {
-            schema?: /* The basic auth credentials */ BasicAuthCredentials;
-        }
+        export type IntegrationCredentialsResult = /* The basic auth credentials */ BasicAuthCredentials;
         export type IntegrationId = "enet" | "getag";
         /**
          * A set of key-value pairs used to store meta data information about an entity.
@@ -2604,12 +2599,7 @@ declare namespace Components {
             tax?: /* A tax amount associated with a specific tax rate. */ TaxAmountBreakdown;
         }
         export type SalesTax = "nontaxable" | "reduced" | "standard";
-        /**
-         * The credentials request payload
-         */
-        export interface SaveIntegrationCredentialsParams {
-            schema?: /* The basic auth credentials */ BasicAuthCredentials;
-        }
+        export type SaveIntegrationCredentialsParams = /* The basic auth credentials */ BasicAuthCredentials;
         /**
          * A search providers payload
          */
@@ -2982,7 +2972,7 @@ declare namespace Paths {
             integrationId: Parameters.IntegrationId;
         }
         namespace Responses {
-            export type $200 = /* The credentials response payload */ Components.Schemas.IntegrationCredentialsResult;
+            export type $200 = /* The basic auth credentials */ Components.Schemas.BasicAuthCredentials;
             export type $400 = Components.Schemas.Error;
             export type $404 = Components.Schemas.Error;
         }
@@ -2998,7 +2988,7 @@ declare namespace Paths {
         export interface PathParameters {
             integrationId: Parameters.IntegrationId;
         }
-        export type RequestBody = /* The credentials request payload */ Components.Schemas.SaveIntegrationCredentialsParams;
+        export type RequestBody = /* The basic auth credentials */ Components.Schemas.BasicAuthCredentials;
         namespace Responses {
             export interface $204 {
             }

@@ -2514,22 +2514,10 @@
         ]
       },
       "IntegrationCredentialsResult": {
-        "description": "The credentials response payload",
-        "type": "object",
-        "properties": {
-          "schema": {
-            "$ref": "#/components/schemas/BasicAuthCredentials"
-          }
-        }
+        "$ref": "#/components/schemas/BasicAuthCredentials"
       },
       "SaveIntegrationCredentialsParams": {
-        "description": "The credentials request payload",
-        "type": "object",
-        "properties": {
-          "schema": {
-            "$ref": "#/components/schemas/BasicAuthCredentials"
-          }
-        }
+        "$ref": "#/components/schemas/BasicAuthCredentials"
       },
       "BasicAuthCredentials": {
         "description": "The basic auth credentials",
