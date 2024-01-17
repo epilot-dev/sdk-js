@@ -1167,7 +1167,7 @@ declare namespace Components {
         export interface EqualsIgnoreCaseCondition {
             "equals-ignore-case"?: string;
         }
-        export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR";
+        export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR";
         export interface ErrorOutput {
             error_code: ErrorCode;
             error_reason: string;
@@ -1947,6 +1947,10 @@ declare namespace Components {
         export interface TriggerWebhookConfig {
             entity_sources?: string[];
             target_webhook_id?: string;
+            /**
+             * Whether to wait for the request to finish before continuing automation execution
+             */
+            sync?: boolean;
         }
         export interface TriggerWorkflowAction {
             id?: /**
