@@ -779,16 +779,18 @@
         ],
         "requestBody": {
           "description": "ECPVariables payload",
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {
-                  "contactId": {
-                    "type": "string",
-                    "example": "7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51",
-                    "description": "ID of the contact"
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "example": "7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51",
+                      "description": "ID of the contact"
+                    }
                   }
                 }
               }
@@ -809,6 +811,10 @@
                         "invitationLink": {
                           "type": "string",
                           "example": "https://end-customer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
+                        },
+                        "newDocumentLink": {
+                          "type": "string",
+                          "example": "https://end-customer-portal.ecp.dev.epilot.io/documents"
                         }
                       }
                     },
@@ -818,6 +824,10 @@
                         "invitationLink": {
                           "type": "string",
                           "example": "https://installer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
+                        },
+                        "newDocumentLink": {
+                          "type": "string",
+                          "example": "https://installer-portal.ecp.dev.epilot.io/documents"
                         }
                       }
                     }
@@ -3449,7 +3459,7 @@
         }
       }
     },
-    "/v2/portal/entity/access": {
+    "/v2/portal/entity/{schema}/access": {
       "post": {
         "operationId": "triggerEntityAccessEvent",
         "summary": "triggerEntityAccessEvent",
@@ -3464,17 +3474,9 @@
         ],
         "parameters": [
           {
-            "name": "entity_id",
-            "in": "query",
-            "description": "Entity ID",
-            "schema": {
-              "type": "string",
-              "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
-            }
-          },
-          {
             "name": "schema",
-            "in": "query",
+            "in": "path",
+            "required": true,
             "description": "Entity schema",
             "schema": {
               "type": "string",
@@ -3482,8 +3484,19 @@
             }
           },
           {
+            "name": "entity_id",
+            "in": "query",
+            "required": false,
+            "description": "Entity ID",
+            "schema": {
+              "type": "string",
+              "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
+            }
+          },
+          {
             "name": "origin",
             "in": "query",
+            "required": true,
             "description": "Portal origin",
             "schema": {
               "$ref": "#/components/schemas/Origin",
@@ -3571,92 +3584,6 @@
           }
         }
       }
-    },
-    "/v2/portal/internal": {
-      "get": {
-        "operationId": "listPortalsInternal",
-        "summary": "listPortalsInternal",
-        "description": "List all portals (internal API)",
-        "x-internal": true,
-        "tags": [
-          "Internal"
-        ],
-        "security": [
-          {
-            "EpilotAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Initial offset to set for the search results",
-              "example": 0,
-              "default": 0
-            }
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false,
-            "schema": {
-              "type": "number",
-              "description": "Size of the search results",
-              "example": 25,
-              "default": 25
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "required": false,
-            "style": "form",
-            "explode": false,
-            "schema": {
-              "type": "array",
-              "description": "List of fields to return in response",
-              "items": {
-                "type": "string"
-              },
-              "example": [
-                "id",
-                "name",
-                "origin",
-                "enabled",
-                "domain"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of portals",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "hits": {
-                      "type": "number",
-                      "description": "Total number of portals for pagination",
-                      "example": 50
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/PortalConfig"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -3739,24 +3666,6 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Epilot Bearer Token"
-      },
-      "AsOrganization": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-ivy-org-id",
-        "description": "Set organization id as internal user"
-      },
-      "AsContact": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-contact-id",
-        "description": "Set contact id as internal user"
-      },
-      "AsCustomer": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-portal-user-id",
-        "description": "Set portal id as customer"
       }
     },
     "schemas": {
@@ -4365,7 +4274,8 @@
               "CONTENT_WIDGET",
               "ENTITY_WIDGET",
               "TEASER_WIDGET",
-              "DOCUMENT_WIDGET"
+              "DOCUMENT_WIDGET",
+              "PAYMENT_WIDGET"
             ]
           },
           "listIndex": {
@@ -4839,56 +4749,6 @@
               }
             }
           }
-        }
-      },
-      "AuthConfig": {
-        "type": "object",
-        "properties": {
-          "user_pool_id": {
-            "type": "string",
-            "example": "eu-central-1_CUEQRNbUb",
-            "description": "AWS Cognito User Pool ID"
-          },
-          "user_pool_client_id": {
-            "type": "string",
-            "example": "6bsd0jkgoie74k2i8mrhc1vest",
-            "description": "AWS Cognito User Pool Client ID"
-          },
-          "user_pool_identity_pool_id": {
-            "type": "string",
-            "example": "eu-central-1:a63af1f7-ab86-4ab5-a0eb-f461cb37c2b1",
-            "description": "AWS Cognito User Pool Identity Pool ID"
-          },
-          "portal_id": {
-            "type": "string",
-            "example": "7h2hwdj7hhjsdcjkq03eidna3ep",
-            "description": "Portal ID"
-          }
-        },
-        "required": [
-          "user_pool_id",
-          "user_pool_client_id",
-          "portal_id"
-        ]
-      },
-      "Exists": {
-        "type": "object",
-        "required": [
-          "exists"
-        ],
-        "properties": {
-          "exists": {
-            "type": "boolean",
-            "description": "Indicate whether the item exists"
-          },
-          "active": {
-            "type": "boolean",
-            "description": "Indicate whether the item is active"
-          }
-        },
-        "example": {
-          "exists": true,
-          "active": false
         }
       },
       "EntitySlug": {

@@ -24,21 +24,24 @@ console.log(`=====>> URL: ${serverURL}`);
 
 // save full openapi.json from source
 console.log(`===> Updating openapi.json from ${sourceFile}...`);
-execSync([
-  OPENAPICMD, 'read',
-  `--json ${sourceFile}`,
-  serverURL ? `--server ${serverURL}` : '',
-  '>', OUTPUT_FILE,
-].join(' '), { stdio: 'inherit' });
+execSync(
+  [
+    OPENAPICMD,
+    'read',
+    '--exclude-ext x-internal',
+    `--json ${sourceFile}`,
+    serverURL ? `--server ${serverURL}` : '',
+    '>',
+    OUTPUT_FILE,
+  ].join(' '),
+  { stdio: 'inherit' },
+);
 
 // store optimized runtime version for client
 console.log('===> Generating openapi-runtime.json');
-execSync([
-  OPENAPICMD, 'read',
-  `--json ${OUTPUT_FILE}`,
-  '--strip openapi_client_axios',
-  '>', RUNTIME_FILE,
-].join(' '), { stdio: 'inherit' });
+execSync([OPENAPICMD, 'read', `--json ${OUTPUT_FILE}`, '--strip openapi_client_axios', '>', RUNTIME_FILE].join(' '), {
+  stdio: 'inherit',
+});
 
 console.log('===> Done!');
 process.exit(0);

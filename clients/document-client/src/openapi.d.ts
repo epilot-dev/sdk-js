@@ -9,6 +9,130 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface DocumentGenerationV2Request {
+            /**
+             * Language to use for variables
+             */
+            language?: string;
+            /**
+             * Input template document
+             */
+            template_document: {
+                /**
+                 * Document original filename
+                 * example:
+                 * my-template-{{order.order_number}}.docx
+                 */
+                filename?: string;
+                s3ref?: S3Reference;
+            };
+            /**
+             * Entity to use for variable context
+             * example:
+             * bcd0aab9-b544-42b0-8bfb-6d449d02eacc
+             */
+            context_entity_id?: string;
+            /**
+             * User Id for variable context
+             * example:
+             * 100321
+             */
+            user_id?: string;
+            /**
+             * Custom values for variables in the template. Takes the higher precedence than others.
+             */
+            variable_payload?: {
+                additionalProperties?: string;
+            };
+            template_settings?: /* Template Settings for document generation */ TemplateSettings;
+        }
+        export interface DocumentGenerationV2Response {
+            job_id?: string; // uuid
+            /**
+             * Status of the job
+             */
+            job_status?: "STARTED" | "PROCESSING" | "SUCCESS" | "FAILED";
+            /**
+             * A message explaining the progress
+             */
+            message?: string;
+            pdf_output?: {
+                /**
+                 * Pre-signed S3 GET URL for PDF preview
+                 * example:
+                 * https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.pdf
+                 */
+                preview_url?: string;
+                /**
+                 * example:
+                 * {
+                 *   "s3ref": {
+                 *     "bucket": "document-api-preview-prod",
+                 *     "key": "preview/my-template.pdf"
+                 *   }
+                 * }
+                 */
+                output_document?: {
+                    /**
+                     * Generated document filename for PDF
+                     * example:
+                     * my-template-OR-001.pdf
+                     */
+                    filename?: string;
+                    s3ref?: S3Reference;
+                };
+            };
+            docx_output?: {
+                /**
+                 * Pre-signed S3 GET URL for DOCX preview
+                 * example:
+                 * https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.docx
+                 */
+                preview_url?: string;
+                /**
+                 * example:
+                 * {
+                 *   "s3ref": {
+                 *     "bucket": "document-api-preview-prod",
+                 *     "key": "preview/my-template.docx"
+                 *   }
+                 * }
+                 */
+                output_document?: {
+                    /**
+                     * Generated document filename for DOCX
+                     * example:
+                     * my-template-OR-001.docx
+                     */
+                    filename?: string;
+                    s3ref?: S3Reference;
+                };
+            };
+            error_output?: ErrorOutput;
+            /**
+             * List of variables and its corresponding replaced values from the document template
+             */
+            variable_payload?: {
+                additionalProperties?: string;
+            };
+            template_settings?: /* Template Settings for document generation */ TemplateSettings;
+        }
+        export interface ErrorOutput {
+            /**
+             * Error message
+             */
+            error_message?: string;
+            /**
+             * Error code
+             */
+            error_code?: "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR";
+            /**
+             * Error details
+             */
+            error_details?: {
+                [name: string]: any;
+            }[];
+        }
         export interface S3Reference {
             /**
              * example:
@@ -20,6 +144,46 @@ declare namespace Components {
              * uploads/my-template.pdf
              */
             key: string;
+        }
+        /**
+         * Template Settings for document generation
+         */
+        export interface TemplateSettings {
+            /**
+             * Custom margins for the document
+             */
+            custom_margins?: {
+                /**
+                 * Top margin in cm
+                 * example:
+                 * 2.54
+                 */
+                top?: number;
+                /**
+                 * Bottom margin in cm
+                 * example:
+                 * 2.54
+                 */
+                bottom?: number;
+            };
+            /**
+             * Display margin guidelines (applicable to partial generation only)
+             * example:
+             * true
+             */
+            display_margin_guidelines?: boolean;
+            /**
+             * Enable data table margin autofix
+             * example:
+             * false
+             */
+            enable_data_table_margin_autofix?: boolean;
+            /**
+             * An indication that the page margins are misconfigured
+             * example:
+             * false
+             */
+            misconfigured_margins?: boolean;
         }
     }
 }
@@ -95,112 +259,9 @@ declare namespace Paths {
             job_id?: Parameters.JobId;
             mode?: Parameters.Mode;
         }
-        export interface RequestBody {
-            /**
-             * Language to use for variables
-             */
-            language?: string;
-            /**
-             * Input template document
-             */
-            template_document: {
-                /**
-                 * Document original filename
-                 * example:
-                 * my-template-{{order.order_number}}.docx
-                 */
-                filename?: string;
-                s3ref?: Components.Schemas.S3Reference;
-            };
-            /**
-             * Entity to use for variable context
-             * example:
-             * bcd0aab9-b544-42b0-8bfb-6d449d02eacc
-             */
-            context_entity_id?: string;
-            /**
-             * User Id for variable context
-             * example:
-             * 100321
-             */
-            user_id?: string;
-            /**
-             * Custom values for variables in the template. Takes the higher precedence than others.
-             */
-            variable_payload?: {
-                additionalProperties?: string;
-            };
-        }
+        export type RequestBody = Components.Schemas.DocumentGenerationV2Request;
         namespace Responses {
-            export interface $200 {
-                job_id?: string; // uuid
-                /**
-                 * Status of the job
-                 */
-                job_status?: "STARTED" | "PROCESSING" | "SUCCESS" | "FAILED";
-                /**
-                 * A message explaining the progress
-                 */
-                message?: string;
-                pdf_output?: {
-                    /**
-                     * Pre-signed S3 GET URL for PDF preview
-                     * example:
-                     * https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.pdf
-                     */
-                    preview_url?: string;
-                    /**
-                     * example:
-                     * {
-                     *   "s3ref": {
-                     *     "bucket": "document-api-preview-prod",
-                     *     "key": "preview/my-template.pdf"
-                     *   }
-                     * }
-                     */
-                    output_document?: {
-                        /**
-                         * Generated document filename for PDF
-                         * example:
-                         * my-template-OR-001.pdf
-                         */
-                        filename?: string;
-                        s3ref?: Components.Schemas.S3Reference;
-                    };
-                };
-                docx_output?: {
-                    /**
-                     * Pre-signed S3 GET URL for DOCX preview
-                     * example:
-                     * https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.docx
-                     */
-                    preview_url?: string;
-                    /**
-                     * example:
-                     * {
-                     *   "s3ref": {
-                     *     "bucket": "document-api-preview-prod",
-                     *     "key": "preview/my-template.docx"
-                     *   }
-                     * }
-                     */
-                    output_document?: {
-                        /**
-                         * Generated document filename for DOCX
-                         * example:
-                         * my-template-OR-001.docx
-                         */
-                        filename?: string;
-                        s3ref?: Components.Schemas.S3Reference;
-                    };
-                };
-                /**
-                 * List of variables and its corresponding replaced values from the document template
-                 */
-                variable_payload?: {
-                    additionalProperties?: string;
-                };
-            }
+            export type $200 = Components.Schemas.DocumentGenerationV2Response;
         }
     }
 }

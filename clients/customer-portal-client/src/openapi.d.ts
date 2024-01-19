@@ -19,7 +19,7 @@ declare namespace Components {
     namespace Schemas {
         export interface ActionWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -215,32 +215,6 @@ declare namespace Components {
              * 12345 67890
              */
             phone?: string | null;
-        }
-        export interface AuthConfig {
-            /**
-             * AWS Cognito User Pool ID
-             * example:
-             * eu-central-1_CUEQRNbUb
-             */
-            user_pool_id: string;
-            /**
-             * AWS Cognito User Pool Client ID
-             * example:
-             * 6bsd0jkgoie74k2i8mrhc1vest
-             */
-            user_pool_client_id: string;
-            /**
-             * AWS Cognito User Pool Identity Pool ID
-             * example:
-             * eu-central-1:a63af1f7-ab86-4ab5-a0eb-f461cb37c2b1
-             */
-            user_pool_identity_pool_id?: string;
-            /**
-             * Portal ID
-             * example:
-             * 7h2hwdj7hhjsdcjkq03eidna3ep
-             */
-            portal_id: string;
         }
         export interface Balance {
             /**
@@ -460,7 +434,7 @@ declare namespace Components {
         }
         export interface ContentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -748,7 +722,7 @@ declare namespace Components {
         }
         export interface DocumentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -943,7 +917,7 @@ declare namespace Components {
         export type EntitySlug = "contact" | "contract" | "file" | "order" | "opportunity" | "product" | "price" | "meter" | "meter_counter";
         export interface EntityWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -963,23 +937,6 @@ declare namespace Components {
              * Error message
              */
             message?: string;
-        }
-        /**
-         * example:
-         * {
-         *   "exists": true,
-         *   "active": false
-         * }
-         */
-        export interface Exists {
-            /**
-             * Indicate whether the item exists
-             */
-            exists: boolean;
-            /**
-             * Indicate whether the item is active
-             */
-            active?: boolean;
         }
         export type ExtraSchemaAttributes = {
             /**
@@ -1470,7 +1427,7 @@ declare namespace Components {
         export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
         export interface PaymentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2027,7 +1984,7 @@ declare namespace Components {
         }
         export interface TeaserWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2294,7 +2251,7 @@ declare namespace Components {
         }
         export interface WidgetBase {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -3527,71 +3484,6 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace ListPortalsInternal {
-        namespace Parameters {
-            /**
-             * List of fields to return in response
-             * example:
-             * [
-             *   "id",
-             *   "name",
-             *   "origin",
-             *   "enabled",
-             *   "domain"
-             * ]
-             */
-            export type Fields = string[];
-            /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            export type From = number;
-            /**
-             * Size of the search results
-             * example:
-             * 25
-             */
-            export type Size = number;
-        }
-        export interface QueryParameters {
-            from?: /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            Parameters.From;
-            size?: /**
-             * Size of the search results
-             * example:
-             * 25
-             */
-            Parameters.Size;
-            fields?: /**
-             * List of fields to return in response
-             * example:
-             * [
-             *   "id",
-             *   "name",
-             *   "origin",
-             *   "enabled",
-             *   "domain"
-             * ]
-             */
-            Parameters.Fields;
-        }
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * Total number of portals for pagination
-                 * example:
-                 * 50
-                 */
-                hits?: number;
-                results?: Components.Schemas.PortalConfig[];
-            }
-        }
-    }
     namespace LoginToPortalAsUser {
         export interface RequestBody {
             /**
@@ -3613,12 +3505,14 @@ declare namespace Paths {
     }
     namespace ReplaceECPTemplateVariables {
         export interface RequestBody {
-            /**
-             * ID of the contact
-             * example:
-             * 7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51
-             */
-            contactId?: string;
+            [name: string]: {
+                /**
+                 * ID of the contact
+                 * example:
+                 * 7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51
+                 */
+                _id?: string;
+            };
         }
         namespace Responses {
             export interface $200 {
@@ -3628,6 +3522,11 @@ declare namespace Paths {
                      * https://end-customer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com
                      */
                     invitationLink?: string;
+                    /**
+                     * example:
+                     * https://end-customer-portal.ecp.dev.epilot.io/documents
+                     */
+                    newDocumentLink?: string;
                 };
                 installerPortal?: {
                     /**
@@ -3635,6 +3534,11 @@ declare namespace Paths {
                      * https://installer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com
                      */
                     invitationLink?: string;
+                    /**
+                     * example:
+                     * https://installer-portal.ecp.dev.epilot.io/documents
+                     */
+                    newDocumentLink?: string;
                 };
             }
             export type $401 = Components.Responses.Unauthorized;
@@ -3748,18 +3652,20 @@ declare namespace Paths {
              */
             export type Schema = string;
         }
+        export interface PathParameters {
+            schema: /**
+             * example:
+             * contract
+             */
+            Parameters.Schema;
+        }
         export interface QueryParameters {
             entity_id?: /**
              * example:
              * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
              */
             Parameters.EntityId;
-            schema?: /**
-             * example:
-             * contract
-             */
-            Parameters.Schema;
-            origin?: /* Origin of the portal */ Parameters.Origin;
+            origin: /* Origin of the portal */ Parameters.Origin;
         }
         namespace Responses {
             export interface $200 {
@@ -4584,7 +4490,7 @@ export interface OperationMethods {
    * Trigger entity access event for a portal user
    */
   'triggerEntityAccessEvent'(
-    parameters?: Parameters<Paths.TriggerEntityAccessEvent.QueryParameters> | null,
+    parameters?: Parameters<Paths.TriggerEntityAccessEvent.PathParameters & Paths.TriggerEntityAccessEvent.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
@@ -4598,16 +4504,6 @@ export interface OperationMethods {
     data?: Paths.SearchPortalUserEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
-  /**
-   * listPortalsInternal - listPortalsInternal
-   * 
-   * List all portals (internal API)
-   */
-  'listPortalsInternal'(
-    parameters?: Parameters<Paths.ListPortalsInternal.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListPortalsInternal.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -5293,14 +5189,14 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.LoginToPortalAsUser.Responses.$200>
   }
-  ['/v2/portal/entity/access']: {
+  ['/v2/portal/entity/{schema}/access']: {
     /**
      * triggerEntityAccessEvent - triggerEntityAccessEvent
      * 
      * Trigger entity access event for a portal user
      */
     'post'(
-      parameters?: Parameters<Paths.TriggerEntityAccessEvent.QueryParameters> | null,
+      parameters?: Parameters<Paths.TriggerEntityAccessEvent.PathParameters & Paths.TriggerEntityAccessEvent.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
@@ -5316,18 +5212,6 @@ export interface PathsDictionary {
       data?: Paths.SearchPortalUserEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
-  }
-  ['/v2/portal/internal']: {
-    /**
-     * listPortalsInternal - listPortalsInternal
-     * 
-     * List all portals (internal API)
-     */
-    'get'(
-      parameters?: Parameters<Paths.ListPortalsInternal.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListPortalsInternal.Responses.$200>
   }
 }
 
