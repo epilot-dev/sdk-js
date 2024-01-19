@@ -3459,7 +3459,7 @@
         }
       }
     },
-    "/v2/portal/entity/access": {
+    "/v2/portal/entity/{schema}/access": {
       "post": {
         "operationId": "triggerEntityAccessEvent",
         "summary": "triggerEntityAccessEvent",
@@ -3474,17 +3474,9 @@
         ],
         "parameters": [
           {
-            "name": "entity_id",
-            "in": "query",
-            "description": "Entity ID",
-            "schema": {
-              "type": "string",
-              "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
-            }
-          },
-          {
             "name": "schema",
-            "in": "query",
+            "in": "path",
+            "required": true,
             "description": "Entity schema",
             "schema": {
               "type": "string",
@@ -3492,8 +3484,19 @@
             }
           },
           {
+            "name": "entity_id",
+            "in": "query",
+            "required": false,
+            "description": "Entity ID",
+            "schema": {
+              "type": "string",
+              "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
+            }
+          },
+          {
             "name": "origin",
             "in": "query",
+            "required": true,
             "description": "Portal origin",
             "schema": {
               "$ref": "#/components/schemas/Origin",
@@ -3578,55 +3581,6 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/workflow/{workflow_id}/{step_id}:markDone": {
-      "put": {
-        "operationId": "updateWorkflowStepAsDone",
-        "summary": "updateWorkflowStepAsDone",
-        "description": "Update a workflow step as done",
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workflow_id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "ID of a workflow",
-              "example": "0bjwcxc827t"
-            }
-          },
-          {
-            "in": "path",
-            "name": "step_id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "ID of a step",
-              "example": "q1d6vcbsqvn"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Updated workflow step successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WorkflowStep"
-                }
-              }
-            }
           }
         }
       }
@@ -5631,34 +5585,6 @@
               "dueDate": "2023-01-15T20:00:00"
             }
           ]
-        }
-      },
-      "WorkflowStep": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": true,
-        "example": {
-          "startedTime": "2024-01-12T13:29:55.942Z",
-          "requirements": [],
-          "created": "2023-10-20T17:41:10.256Z",
-          "executionType": "MANUAL",
-          "assignedToInProgress": "-",
-          "sectionId": "lzxsw2sblj7",
-          "type": "STEP",
-          "entityRefId": "q1d6vcbsqvn",
-          "assignedTo": [
-            "10014532"
-          ],
-          "lastUpdated": "2024-01-13T05:18:43.838Z",
-          "ecp": {},
-          "userIds": [],
-          "name": "Hinterlege den vereinbarten LIC Termin",
-          "id": "q1d6vcbsqvn",
-          "definitionId": "9UjHKq",
-          "status": "COMPLETED",
-          "manuallyCreated": false,
-          "enabled": true,
-          "completedTime": "2024-01-13T05:18:43.827Z"
         }
       },
       "BaseBillingEvent": {

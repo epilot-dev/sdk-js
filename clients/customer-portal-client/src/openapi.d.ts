@@ -2316,35 +2316,6 @@ declare namespace Components {
         export interface WorkflowExecution {
             [name: string]: any;
         }
-        /**
-         * example:
-         * {
-         *   "startedTime": "2024-01-12T13:29:55.942Z",
-         *   "requirements": [],
-         *   "created": "2023-10-20T17:41:10.256Z",
-         *   "executionType": "MANUAL",
-         *   "assignedToInProgress": "-",
-         *   "sectionId": "lzxsw2sblj7",
-         *   "type": "STEP",
-         *   "entityRefId": "q1d6vcbsqvn",
-         *   "assignedTo": [
-         *     "10014532"
-         *   ],
-         *   "lastUpdated": "2024-01-13T05:18:43.838Z",
-         *   "ecp": {},
-         *   "userIds": [],
-         *   "name": "Hinterlege den vereinbarten LIC Termin",
-         *   "id": "q1d6vcbsqvn",
-         *   "definitionId": "9UjHKq",
-         *   "status": "COMPLETED",
-         *   "manuallyCreated": false,
-         *   "enabled": true,
-         *   "completedTime": "2024-01-13T05:18:43.827Z"
-         * }
-         */
-        export interface WorkflowStep {
-            [name: string]: any;
-        }
     }
 }
 declare namespace Paths {
@@ -3681,18 +3652,20 @@ declare namespace Paths {
              */
             export type Schema = string;
         }
+        export interface PathParameters {
+            schema: /**
+             * example:
+             * contract
+             */
+            Parameters.Schema;
+        }
         export interface QueryParameters {
             entity_id?: /**
              * example:
              * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
              */
             Parameters.EntityId;
-            schema?: /**
-             * example:
-             * contract
-             */
-            Parameters.Schema;
-            origin?: /* Origin of the portal */ Parameters.Origin;
+            origin: /* Origin of the portal */ Parameters.Origin;
         }
         namespace Responses {
             export interface $200 {
@@ -3792,65 +3765,6 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace UpdateWorkflowStepAsDone {
-        namespace Parameters {
-            /**
-             * ID of a step
-             * example:
-             * q1d6vcbsqvn
-             */
-            export type StepId = string;
-            /**
-             * ID of a workflow
-             * example:
-             * 0bjwcxc827t
-             */
-            export type WorkflowId = string;
-        }
-        export interface PathParameters {
-            workflow_id: /**
-             * ID of a workflow
-             * example:
-             * 0bjwcxc827t
-             */
-            Parameters.WorkflowId;
-            step_id: /**
-             * ID of a step
-             * example:
-             * q1d6vcbsqvn
-             */
-            Parameters.StepId;
-        }
-        namespace Responses {
-            export type $200 = /**
-             * example:
-             * {
-             *   "startedTime": "2024-01-12T13:29:55.942Z",
-             *   "requirements": [],
-             *   "created": "2023-10-20T17:41:10.256Z",
-             *   "executionType": "MANUAL",
-             *   "assignedToInProgress": "-",
-             *   "sectionId": "lzxsw2sblj7",
-             *   "type": "STEP",
-             *   "entityRefId": "q1d6vcbsqvn",
-             *   "assignedTo": [
-             *     "10014532"
-             *   ],
-             *   "lastUpdated": "2024-01-13T05:18:43.838Z",
-             *   "ecp": {},
-             *   "userIds": [],
-             *   "name": "Hinterlege den vereinbarten LIC Termin",
-             *   "id": "q1d6vcbsqvn",
-             *   "definitionId": "9UjHKq",
-             *   "status": "COMPLETED",
-             *   "manuallyCreated": false,
-             *   "enabled": true,
-             *   "completedTime": "2024-01-13T05:18:43.827Z"
-             * }
-             */
-            Components.Schemas.WorkflowStep;
         }
     }
     namespace UpsertEmailTemplates {
@@ -4576,7 +4490,7 @@ export interface OperationMethods {
    * Trigger entity access event for a portal user
    */
   'triggerEntityAccessEvent'(
-    parameters?: Parameters<Paths.TriggerEntityAccessEvent.QueryParameters> | null,
+    parameters?: Parameters<Paths.TriggerEntityAccessEvent.PathParameters & Paths.TriggerEntityAccessEvent.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
@@ -4590,16 +4504,6 @@ export interface OperationMethods {
     data?: Paths.SearchPortalUserEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
-  /**
-   * updateWorkflowStepAsDone - updateWorkflowStepAsDone
-   * 
-   * Update a workflow step as done
-   */
-  'updateWorkflowStepAsDone'(
-    parameters?: Parameters<Paths.UpdateWorkflowStepAsDone.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -5285,14 +5189,14 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.LoginToPortalAsUser.Responses.$200>
   }
-  ['/v2/portal/entity/access']: {
+  ['/v2/portal/entity/{schema}/access']: {
     /**
      * triggerEntityAccessEvent - triggerEntityAccessEvent
      * 
      * Trigger entity access event for a portal user
      */
     'post'(
-      parameters?: Parameters<Paths.TriggerEntityAccessEvent.QueryParameters> | null,
+      parameters?: Parameters<Paths.TriggerEntityAccessEvent.PathParameters & Paths.TriggerEntityAccessEvent.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
@@ -5308,18 +5212,6 @@ export interface PathsDictionary {
       data?: Paths.SearchPortalUserEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
-  }
-  ['/v2/portal/workflow/{workflow_id}/{step_id}:markDone']: {
-    /**
-     * updateWorkflowStepAsDone - updateWorkflowStepAsDone
-     * 
-     * Update a workflow step as done
-     */
-    'put'(
-      parameters?: Parameters<Paths.UpdateWorkflowStepAsDone.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   }
 }
 
