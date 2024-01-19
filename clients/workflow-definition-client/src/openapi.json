@@ -981,6 +981,9 @@
           "name": {
             "type": "string"
           },
+          "description": {
+            "$ref": "#/components/schemas/StepDescription"
+          },
           "executionType": {
             "$ref": "#/components/schemas/StepType"
           },
@@ -1108,14 +1111,32 @@
         "type": "object",
         "description": "Details regarding ECP for the workflow step",
         "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
           "label": {
             "type": "string"
           },
           "name": {
             "type": "string"
           },
+          "description": {
+            "type": "string"
+          },
           "journey": {
             "$ref": "#/components/schemas/StepJourney"
+          }
+        }
+      },
+      "StepDescription": {
+        "type": "object",
+        "description": "Longer information regarding Task",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": "string"
           }
         }
       },

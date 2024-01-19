@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Pricing API",
-    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n",
+    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### External Integrations API\nProvides endpoints for external integrations (e.g. Enet / GetAG).\n",
     "version": "1.0.0",
     "termsOfService": "https://epilot.cloud/agb",
     "contact": {
@@ -27,6 +27,10 @@
     {
       "name": "Availability API",
       "description": "Provides endpoints for querying products availability by a set of predefined dimensions.\n"
+    },
+    {
+      "name": "External Integrations API",
+      "description": "Provides endpoints for external integrations (e.g. Enet / GetAG).\n"
     },
     {
       "name": "Deprecated Endpoints",
@@ -804,6 +808,362 @@
         }
       }
     },
+    "/v1/public/integration/{integrationId}/providers:search": {
+      "post": {
+        "description": "Returns the list of providers available based on a given location",
+        "operationId": "$searchProviders",
+        "security": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": 739224
+          },
+          {
+            "in": "path",
+            "name": "integrationId",
+            "description": "The integration identifier",
+            "schema": {
+              "$ref": "#/components/schemas/IntegrationId"
+            },
+            "required": true,
+            "example": "getag"
+          }
+        ],
+        "summary": "searchProviders",
+        "tags": [
+          "External Integrations API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchProvidersParams"
+              },
+              "examples": {
+                "Search providers (power)": {
+                  "value": {
+                    "type": "power",
+                    "postal_code": "04109",
+                    "city": "Leipzig",
+                    "street": "Willy-Brandt-Platz"
+                  }
+                },
+                "Search providers (gas)": {
+                  "value": {
+                    "type": "gas",
+                    "postal_code": "57008",
+                    "city": "Cologne",
+                    "street": "Media Park",
+                    "street_number": "8a"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The available providers response payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchProvidersResult"
+                },
+                "examples": {
+                  "Response with available providers": {
+                    "value": [
+                      {
+                        "name": "Provider 1",
+                        "code": "code#1"
+                      },
+                      {
+                        "name": "Provider 2",
+                        "code": "code#2"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, no credentials found for the given integration / organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/integration/{integrationId}/streets:search": {
+      "post": {
+        "description": "Returns the list of streets available for a given postal_code and city",
+        "operationId": "$searchStreets",
+        "security": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": 739224
+          },
+          {
+            "in": "path",
+            "name": "integrationId",
+            "description": "The integration identifier",
+            "schema": {
+              "$ref": "#/components/schemas/IntegrationId"
+            },
+            "required": true,
+            "example": "getag"
+          }
+        ],
+        "summary": "searchStreets",
+        "tags": [
+          "External Integrations API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchStreetsParams"
+              },
+              "examples": {
+                "Search streets": {
+                  "value": {
+                    "postal_code": "04109",
+                    "city": "Leipzig"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The available streets response payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchStreetsResult"
+                },
+                "examples": {
+                  "Response with available streets": {
+                    "value": [
+                      {
+                        "name": "Street 1"
+                      },
+                      {
+                        "name": "Street 2"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, no credentials found for the given integration / organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/integration/{integrationId}/credentials": {
+      "get": {
+        "description": "Gets the credentials for a given integration / organization",
+        "operationId": "$getCredentials",
+        "summary": "getCredentials",
+        "tags": [
+          "External Integrations API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "description": "The integration identifier",
+            "schema": {
+              "$ref": "#/components/schemas/IntegrationId"
+            },
+            "required": true,
+            "example": "getag"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The credentials response payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationCredentialsResult"
+                },
+                "examples": {
+                  "Response when credentials": {
+                    "value": {
+                      "username": "username",
+                      "password": "password"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Credentials not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/integration/{integrationId}/credentials:save": {
+      "put": {
+        "description": "Saves the credentials for a given integration / organization",
+        "operationId": "$saveCredentials",
+        "summary": "saveCredentials",
+        "tags": [
+          "External Integrations API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "description": "The integration identifier",
+            "schema": {
+              "$ref": "#/components/schemas/IntegrationId"
+            },
+            "required": true,
+            "example": "getag"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveIntegrationCredentialsParams"
+              },
+              "examples": {
+                "Save credentials": {
+                  "value": {
+                    "username": "username",
+                    "password": "password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Credentials saved"
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/integration/{integrationId}/credentials:delete": {
+      "delete": {
+        "description": "Delete the credentials for a given integration / organization",
+        "operationId": "$deleteCredentials",
+        "summary": "deleteCredentials",
+        "tags": [
+          "External Integrations API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "description": "The integration identifier",
+            "schema": {
+              "$ref": "#/components/schemas/IntegrationId"
+            },
+            "required": true,
+            "example": "getag"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Credentials deleted"
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/public/opportunity": {
       "post": {
         "deprecated": true,
@@ -905,6 +1265,13 @@
       }
     },
     "schemas": {
+      "IntegrationId": {
+        "type": "string",
+        "enum": [
+          "enet",
+          "getag"
+        ]
+      },
       "Error": {
         "required": [
           "message"
@@ -1965,6 +2332,62 @@
           ]
         }
       },
+      "SearchProvidersParams": {
+        "description": "A search providers payload",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The provider type (power or gas)",
+            "type": "string",
+            "enum": [
+              "power",
+              "gas"
+            ]
+          },
+          "postal_code": {
+            "description": "The postal code to search for providers",
+            "type": "string"
+          },
+          "city": {
+            "description": "The city to search for providers",
+            "type": "string",
+            "nullable": true
+          },
+          "street": {
+            "description": "The street to search for providers",
+            "type": "string",
+            "nullable": true
+          },
+          "street_number": {
+            "description": "The street number to search for providers",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "postal_code"
+        ]
+      },
+      "SearchStreetsParams": {
+        "description": "A search streets payload",
+        "type": "object",
+        "properties": {
+          "postal_code": {
+            "description": "The postal code to search for providers",
+            "type": "string"
+          },
+          "city": {
+            "description": "The city to search for providers",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "city",
+          "postal_code"
+        ]
+      },
       "AvailabilityCheckParams": {
         "description": "Availability check request payload",
         "type": "object",
@@ -2058,6 +2481,77 @@
         },
         "required": [
           "msg"
+        ]
+      },
+      "IntegrationCredentialsResult": {
+        "$ref": "#/components/schemas/BasicAuthCredentials"
+      },
+      "SaveIntegrationCredentialsParams": {
+        "$ref": "#/components/schemas/BasicAuthCredentials"
+      },
+      "BasicAuthCredentials": {
+        "description": "The basic auth credentials",
+        "type": "object",
+        "properties": {
+          "username": {
+            "description": "The username",
+            "type": "string",
+            "example": "username"
+          },
+          "password": {
+            "description": "The password",
+            "type": "string",
+            "example": "123456"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "SearchStreetsResult": {
+        "description": "The search providers payload",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Street"
+        }
+      },
+      "SearchProvidersResult": {
+        "description": "The search providers payload",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Provider"
+        }
+      },
+      "Provider": {
+        "description": "The provider entity",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The provider name",
+            "type": "string"
+          },
+          "code": {
+            "description": "The provider code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "code"
+        ]
+      },
+      "Street": {
+        "description": "The street entity",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The street name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
         ]
       },
       "ValidateAvailabilityFileResult": {
@@ -2909,6 +3403,48 @@
           "amount_total_decimal"
         ]
       },
+      "RecurrenceAmountWithTax": {
+        "type": "object",
+        "description": "An amount associated with a specific recurrence and tax.",
+        "readOnly": true,
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The price type."
+          },
+          "billing_period": {
+            "type": "string",
+            "description": "The price billing period.",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly"
+            ]
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total of all items after (discounts and) taxes are applied."
+          },
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total of all items before (discounts or) taxes are applied."
+          },
+          "amount_tax": {
+            "type": "integer",
+            "description": "Total of all items taxes, with same recurrence."
+          },
+          "tax": {
+            "$ref": "#/components/schemas/TaxAmountBreakdown",
+            "description": "Tax"
+          }
+        },
+        "required": [
+          "amount_total",
+          "amount_subtotal"
+        ]
+      },
       "TotalDetails": {
         "type": "object",
         "description": "The total details with tax (and discount) aggregated totals.",
@@ -2944,6 +3480,17 @@
                   "oneOf": [
                     {
                       "$ref": "#/components/schemas/RecurrenceAmount"
+                    }
+                  ]
+                }
+              },
+              "recurrencesByTax": {
+                "type": "array",
+                "description": "The aggregated price items recurrences by tax rate.",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/RecurrenceAmountWithTax"
                     }
                   ]
                 }

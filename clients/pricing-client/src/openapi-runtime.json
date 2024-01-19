@@ -110,6 +110,93 @@
         ]
       }
     },
+    "/v1/public/integration/{integrationId}/providers:search": {
+      "post": {
+        "operationId": "$searchProviders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/public/integration/{integrationId}/streets:search": {
+      "post": {
+        "operationId": "$searchStreets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/integration/{integrationId}/credentials": {
+      "get": {
+        "operationId": "$getCredentials",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/integration/{integrationId}/credentials:save": {
+      "put": {
+        "operationId": "$saveCredentials",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/integration/{integrationId}/credentials:delete": {
+      "delete": {
+        "operationId": "$deleteCredentials",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ]
+      }
+    },
     "/v1/public/opportunity": {
       "post": {
         "deprecated": true,

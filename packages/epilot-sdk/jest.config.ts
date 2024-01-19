@@ -10,6 +10,9 @@ const config: Config.InitialOptions = {
   verbose: true,
   silent: false,
   forceExit: true,
+  moduleNameMapper: {
+    '^axios$': require.resolve('axios'),
+  },
 };
 
 export default config;

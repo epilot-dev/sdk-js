@@ -204,7 +204,6 @@
       "post": {
         "operationId": "replaceECPTemplateVariables",
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {}
           }
@@ -783,21 +782,24 @@
         }
       }
     },
-    "/v2/portal/entity/access": {
+    "/v2/portal/entity/{schema}/access": {
       "post": {
         "operationId": "triggerEntityAccessEvent",
         "parameters": [
           {
-            "name": "entity_id",
-            "in": "query"
+            "name": "schema",
+            "in": "path",
+            "required": true
           },
           {
-            "name": "schema",
-            "in": "query"
+            "name": "entity_id",
+            "in": "query",
+            "required": false
           },
           {
             "name": "origin",
-            "in": "query"
+            "in": "query",
+            "required": true
           }
         ]
       }
@@ -810,30 +812,6 @@
             "application/json": {}
           }
         }
-      }
-    },
-    "/v2/portal/internal": {
-      "get": {
-        "operationId": "listPortalsInternal",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "required": false,
-            "style": "form",
-            "explode": false
-          }
-        ]
       }
     }
   },

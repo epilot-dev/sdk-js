@@ -10,6 +10,18 @@
         "operationId": "getCustomerMeters"
       }
     },
+    "/v1/metering/contract/meters/{contract_id}": {
+      "get": {
+        "operationId": "getMetersByContractId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true
+          }
+        ]
+      }
+    },
     "/v1/metering/meter/{id}": {
       "patch": {
         "operationId": "updateMeter",
@@ -148,6 +160,11 @@
             "in": "query",
             "name": "type",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false
           }
         ]
       },
@@ -230,6 +247,11 @@
             "in": "query",
             "name": "direction",
             "required": false
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false
           }
         ]
       }
@@ -248,11 +270,6 @@
         }
       },
       "Forbidden": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "NotFound": {
         "content": {
           "application/json": {}
         }

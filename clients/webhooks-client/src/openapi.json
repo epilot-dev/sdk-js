@@ -498,6 +498,291 @@
           }
         }
       }
+    },
+    "/v1/webhooks/configs/{configId}/trigger": {
+      "post": {
+        "operationId": "triggerWebhook",
+        "summary": "triggers a webhook event either async or sync",
+        "description": "Trigger a webhook",
+        "tags": [
+          "webhooks",
+          "trigger"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sync",
+            "description": "If set to true, the webhook will be triggered synchronously. Otherwise, it will be triggered asynchronously.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          }
+        ],
+        "requestBody": {
+          "description": "Webhook payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecutionPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - if the webhook is triggered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TriggerWebhookResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events": {
+      "get": {
+        "operationId": "getWehookEvents",
+        "summary": "getWehookEvents",
+        "description": "Get sent events for a given webhook config",
+        "tags": [
+          "webhooks",
+          "events"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "succeeded",
+                "failed",
+                "in_progress"
+              ]
+            },
+            "description": "Get all events for a given webhook config id",
+            "example": "succeeded"
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Base64 encoded cursor to be used for pagination"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - list events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WebhookEvent"
+                      }
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "description": "Cursor to be used for pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No events found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events/{eventId}": {
+      "get": {
+        "operationId": "getEventById",
+        "summary": "getEventById",
+        "description": "Get a webhook event by its id",
+        "tags": [
+          "webhooks",
+          "event"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          },
+          {
+            "in": "path",
+            "name": "eventId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Event id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookEvent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No events found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events/{eventId}/replay": {
+      "post": {
+        "operationId": "replayEvent",
+        "summary": "replayEvent",
+        "description": "Replay a webhook event",
+        "tags": [
+          "webhooks",
+          "event"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          },
+          {
+            "in": "path",
+            "name": "eventId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Event id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - replay event"
+          },
+          "404": {
+            "description": "No events found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -879,6 +1164,30 @@
           }
         }
       },
+      "TriggerWebhookResp": {
+        "type": "object",
+        "properties": {
+          "status_code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed"
+            ]
+          },
+          "start_date": {
+            "type": "string"
+          },
+          "end_date": {
+            "type": "string"
+          }
+        }
+      },
       "PayloadConfiguration": {
         "type": "object",
         "description": "Configuration for the webhook payload",
@@ -920,6 +1229,119 @@
           "type",
           "key",
           "value"
+        ]
+      },
+      "Metadata": {
+        "type": "object",
+        "description": "Contains the metadata about the configured event",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Action that triggered the event",
+            "example": "Manual triggered by user with id 123456"
+          },
+          "origin": {
+            "type": "string",
+            "description": "Origin of the event"
+          },
+          "creation_timestamp": {
+            "type": "string",
+            "description": "Time of event creation"
+          },
+          "webhook_id": {
+            "type": "string",
+            "description": "The ID of the webhook configuration"
+          },
+          "organization_id": {
+            "type": "string",
+            "description": "The ID of the given organization"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "The ID of the user for manual triggered events"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "ID used to track the event"
+          }
+        },
+        "required": [
+          "organization_id"
+        ]
+      },
+      "ExecutionPayload": {
+        "type": "object",
+        "description": "Payload for triggering a webhook",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "required": [
+          "metadata"
+        ]
+      },
+      "WebhookEvent": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "string"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "webhook_config_id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2021-04-27T12:01:13.000Z"
+          },
+          "event_name": {
+            "type": "string"
+          },
+          "http_response": {
+            "type": "object",
+            "properties": {
+              "status_code": {
+                "type": "integer"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed",
+              "in_progress"
+            ]
+          },
+          "http_method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT"
+            ]
+          },
+          "payload": {
+            "type": "string",
+            "description": "stringified payload of the webhook request"
+          }
+        },
+        "required": [
+          "event_id",
+          "webhook_config_id",
+          "org_id"
         ]
       }
     },
