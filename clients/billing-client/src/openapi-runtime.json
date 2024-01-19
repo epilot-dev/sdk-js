@@ -6,6 +6,27 @@
   },
   "paths": {
     "/v1/billing/events": {
+      "post": {
+        "operationId": "createBillingEvent",
+        "parameters": [
+          {
+            "name": "contract_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "event_type",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
       "get": {
         "operationId": "getBillingEvents",
         "parameters": [
@@ -58,24 +79,6 @@
             "required": true
           }
         ]
-      }
-    },
-    "/v1/billing/events/{event_type}": {
-      "post": {
-        "operationId": "createBillingEvent",
-        "parameters": [
-          {
-            "name": "event_type",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
       }
     },
     "/v1/billing/contracts": {

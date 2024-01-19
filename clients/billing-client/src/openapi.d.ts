@@ -598,10 +598,18 @@ declare namespace Components {
 declare namespace Paths {
     namespace CreateBillingEvent {
         namespace Parameters {
+            /**
+             * The contract ID to create the billing event for
+             */
+            export type ContractId = string;
+            /**
+             * The billing event type
+             */
             export type EventType = "installment" | "reimbursement";
         }
-        export interface PathParameters {
-            event_type: Parameters.EventType;
+        export interface QueryParameters {
+            contract_id: /* The contract ID to create the billing event for */ Parameters.ContractId;
+            event_type: /* The billing event type */ Parameters.EventType;
         }
         /**
          * An entity that describes a billing event such as a future installment or a reimbursement back to the customer.
@@ -737,6 +745,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBillingEvents.Responses.$200>
   /**
+   * createBillingEvent - createBillingEvent
+   * 
+   * Create a new billing event.
+   */
+  'createBillingEvent'(
+    parameters?: Parameters<Paths.CreateBillingEvent.QueryParameters> | null,
+    data?: Paths.CreateBillingEvent.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateBillingEvent.Responses.$201>
+  /**
    * updateBillingEvent - updateBillingEvent
    * 
    * Update an existing billing event.
@@ -756,16 +774,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBillingEvent.Responses.$204>
-  /**
-   * createBillingEvent - createBillingEvent
-   * 
-   * Create a new billing event.
-   */
-  'createBillingEvent'(
-    parameters?: Parameters<Paths.CreateBillingEvent.PathParameters> | null,
-    data?: Paths.CreateBillingEvent.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateBillingEvent.Responses.$201>
   /**
    * createContractEntity - createContractEntity
    * 
@@ -811,6 +819,16 @@ export interface OperationMethods {
 export interface PathsDictionary {
   ['/v1/billing/events']: {
     /**
+     * createBillingEvent - createBillingEvent
+     * 
+     * Create a new billing event.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateBillingEvent.QueryParameters> | null,
+      data?: Paths.CreateBillingEvent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateBillingEvent.Responses.$201>
+    /**
      * getBillingEvents - getBillingEvents
      * 
      * Get and filter billing events such as installments and reimbursements.
@@ -842,18 +860,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBillingEvent.Responses.$204>
-  }
-  ['/v1/billing/events/{event_type}']: {
-    /**
-     * createBillingEvent - createBillingEvent
-     * 
-     * Create a new billing event.
-     */
-    'post'(
-      parameters?: Parameters<Paths.CreateBillingEvent.PathParameters> | null,
-      data?: Paths.CreateBillingEvent.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateBillingEvent.Responses.$201>
   }
   ['/v1/billing/contracts']: {
     /**
