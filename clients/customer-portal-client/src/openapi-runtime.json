@@ -782,21 +782,24 @@
         }
       }
     },
-    "/v2/portal/entity/access": {
+    "/v2/portal/entity/{schema}/access": {
       "post": {
         "operationId": "triggerEntityAccessEvent",
         "parameters": [
           {
-            "name": "entity_id",
-            "in": "query"
+            "name": "schema",
+            "in": "path",
+            "required": true
           },
           {
-            "name": "schema",
-            "in": "query"
+            "name": "entity_id",
+            "in": "query",
+            "required": false
           },
           {
             "name": "origin",
-            "in": "query"
+            "in": "query",
+            "required": true
           }
         ]
       }
@@ -809,23 +812,6 @@
             "application/json": {}
           }
         }
-      }
-    },
-    "/v2/portal/workflow/{workflow_id}/{step_id}:markDone": {
-      "put": {
-        "operationId": "updateWorkflowStepAsDone",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workflow_id",
-            "required": true
-          },
-          {
-            "in": "path",
-            "name": "step_id",
-            "required": true
-          }
-        ]
       }
     }
   },
