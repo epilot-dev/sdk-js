@@ -26,68 +26,6 @@
   ],
   "paths": {
     "/v1/billing/events": {
-      "post": {
-        "operationId": "createBillingEvent",
-        "summary": "createBillingEvent",
-        "description": "Create a new billing event.",
-        "parameters": [
-          {
-            "name": "contract_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The contract ID to create the billing event for"
-            }
-          },
-          {
-            "name": "event_type",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The billing event type",
-              "enum": [
-                "installment",
-                "reimbursement"
-              ]
-            }
-          }
-        ],
-        "tags": [
-          "Billing Events"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/BillingEvent"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Billing event created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/BillingEvent"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
       "get": {
         "operationId": "getBillingEvents",
         "summary": "getBillingEvents",
@@ -166,9 +104,78 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createBillingEvent",
+        "summary": "createBillingEvent",
+        "description": "Create a new billing event.",
+        "tags": [
+          "Billing Events"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BillingEvent"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Billing event created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BillingEvent"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/billing/events/{id}": {
+      "get": {
+        "operationId": "getBillingEvent",
+        "summary": "getBillingEvent",
+        "description": "Get a single billing event by ID.",
+        "tags": [
+          "Billing Events"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the billing event to get",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Billing Event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingEvent"
+                }
+              }
+            }
+          }
+        }
+      },
       "patch": {
         "operationId": "updateBillingEvent",
         "summary": "updateBillingEvent",
