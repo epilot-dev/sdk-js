@@ -61,7 +61,6 @@ declare namespace Components {
          */
         export interface ECPDetails {
             label?: string;
-            name?: string;
             journey?: StepJourney;
         }
         export interface ErrorResp {
@@ -565,10 +564,6 @@ declare namespace Components {
          * {
          *   "workflowId": "j3f23fh23uif98",
          *   "trigger": "AUTOMATIC",
-         *   "assignedTo": [
-         *     192582,
-         *     10521
-         *   ],
          *   "dueDate": "2021-04-27T12:01:13.000Z",
          *   "contexts": [
          *     {
@@ -692,10 +687,6 @@ declare namespace Paths {
          * {
          *   "workflowId": "j3f23fh23uif98",
          *   "trigger": "AUTOMATIC",
-         *   "assignedTo": [
-         *     192582,
-         *     10521
-         *   ],
          *   "dueDate": "2021-04-27T12:01:13.000Z",
          *   "contexts": [
          *     {

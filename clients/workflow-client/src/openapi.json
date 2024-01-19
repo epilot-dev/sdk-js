@@ -690,6 +690,7 @@
             "$ref": "#/components/schemas/TriggerType"
           },
           "assignedTo": {
+            "deprecated": true,
             "type": "array",
             "items": {
               "type": "string"
@@ -708,10 +709,6 @@
         "example": {
           "workflowId": "j3f23fh23uif98",
           "trigger": "AUTOMATIC",
-          "assignedTo": [
-            192582,
-            10521
-          ],
           "dueDate": "2021-04-27T12:01:13.000Z",
           "contexts": [
             {
@@ -1357,9 +1354,6 @@
         "description": "Details regarding ECP for the workflow step",
         "properties": {
           "label": {
-            "type": "string"
-          },
-          "name": {
             "type": "string"
           },
           "journey": {
