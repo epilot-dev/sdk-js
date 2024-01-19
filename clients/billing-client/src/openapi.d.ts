@@ -597,20 +597,6 @@ declare namespace Components {
 }
 declare namespace Paths {
     namespace CreateBillingEvent {
-        namespace Parameters {
-            /**
-             * The contract ID to create the billing event for
-             */
-            export type ContractId = string;
-            /**
-             * The billing event type
-             */
-            export type EventType = "installment" | "reimbursement";
-        }
-        export interface QueryParameters {
-            contract_id: /* The contract ID to create the billing event for */ Parameters.ContractId;
-            event_type: /* The billing event type */ Parameters.EventType;
-        }
         /**
          * An entity that describes a billing event such as a future installment or a reimbursement back to the customer.
          */
@@ -649,6 +635,17 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $204 = Components.Schemas.ContractItem;
+        }
+    }
+    namespace GetBillingEvent {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ Components.Schemas.BillingEvent;
         }
     }
     namespace GetBillingEvents {
@@ -750,10 +747,20 @@ export interface OperationMethods {
    * Create a new billing event.
    */
   'createBillingEvent'(
-    parameters?: Parameters<Paths.CreateBillingEvent.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateBillingEvent.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBillingEvent.Responses.$201>
+  /**
+   * getBillingEvent - getBillingEvent
+   * 
+   * Get a single billing event by ID.
+   */
+  'getBillingEvent'(
+    parameters?: Parameters<Paths.GetBillingEvent.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBillingEvent.Responses.$200>
   /**
    * updateBillingEvent - updateBillingEvent
    * 
@@ -819,16 +826,6 @@ export interface OperationMethods {
 export interface PathsDictionary {
   ['/v1/billing/events']: {
     /**
-     * createBillingEvent - createBillingEvent
-     * 
-     * Create a new billing event.
-     */
-    'post'(
-      parameters?: Parameters<Paths.CreateBillingEvent.QueryParameters> | null,
-      data?: Paths.CreateBillingEvent.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateBillingEvent.Responses.$201>
-    /**
      * getBillingEvents - getBillingEvents
      * 
      * Get and filter billing events such as installments and reimbursements.
@@ -838,8 +835,28 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBillingEvents.Responses.$200>
+    /**
+     * createBillingEvent - createBillingEvent
+     * 
+     * Create a new billing event.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateBillingEvent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateBillingEvent.Responses.$201>
   }
   ['/v1/billing/events/{id}']: {
+    /**
+     * getBillingEvent - getBillingEvent
+     * 
+     * Get a single billing event by ID.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBillingEvent.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBillingEvent.Responses.$200>
     /**
      * updateBillingEvent - updateBillingEvent
      * 
