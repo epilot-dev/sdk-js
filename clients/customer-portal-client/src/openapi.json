@@ -3315,9 +3315,13 @@
           {
             "name": "entity_id",
             "in": "query",
+            "description": "Comma-separated list of entity IDs to filter by",
+            "required": true,
             "schema": {
-              "type": "string",
-              "description": "Get billing events by entity ID"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           {
@@ -3581,6 +3585,55 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/workflow/{workflow_id}/{step_id}:markDone": {
+      "put": {
+        "operationId": "updateWorkflowStepAsDone",
+        "summary": "updateWorkflowStepAsDone",
+        "description": "Update a workflow step as done",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workflow_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of a workflow",
+              "example": "0bjwcxc827t"
+            }
+          },
+          {
+            "in": "path",
+            "name": "step_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of a step",
+              "example": "q1d6vcbsqvn"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated workflow step successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowStep"
+                }
+              }
+            }
           }
         }
       }
@@ -3976,7 +4029,7 @@
           },
           "self_registration": {
             "type": "boolean",
-            "description": "Allow portal user self-registration without a mapped contact",
+            "description": "Deprecated. Use self_registration_setting instead.",
             "example": false,
             "deprecated": true
           },
@@ -4029,7 +4082,7 @@
           },
           "contact_secondary_identifier": {
             "type": "string",
-            "description": "Secondary identifier to identify a contact other than the email",
+            "description": "Deprecated. Use contact_identifiers instead.",
             "example": "full_name",
             "deprecated": true
           },
@@ -4547,7 +4600,8 @@
               "secondaryIdentifier": {
                 "type": "string",
                 "example": 123456,
-                "description": "Secondary identifier to identify a contact"
+                "description": "Deprecated. Use contactIdentifiers instead.",
+                "deprecated": true
               },
               "contactIdentifiers": {
                 "type": "object",
@@ -5585,6 +5639,34 @@
               "dueDate": "2023-01-15T20:00:00"
             }
           ]
+        }
+      },
+      "WorkflowStep": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true,
+        "example": {
+          "startedTime": "2024-01-12T13:29:55.942Z",
+          "requirements": [],
+          "created": "2023-10-20T17:41:10.256Z",
+          "executionType": "MANUAL",
+          "assignedToInProgress": "-",
+          "sectionId": "lzxsw2sblj7",
+          "type": "STEP",
+          "entityRefId": "q1d6vcbsqvn",
+          "assignedTo": [
+            "10014532"
+          ],
+          "lastUpdated": "2024-01-13T05:18:43.838Z",
+          "ecp": {},
+          "userIds": [],
+          "name": "Hinterlege den vereinbarten LIC Termin",
+          "id": "q1d6vcbsqvn",
+          "definitionId": "9UjHKq",
+          "status": "COMPLETED",
+          "manuallyCreated": false,
+          "enabled": true,
+          "completedTime": "2024-01-13T05:18:43.827Z"
         }
       },
       "BaseBillingEvent": {
