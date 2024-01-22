@@ -749,7 +749,8 @@
         "parameters": [
           {
             "name": "entity_id",
-            "in": "query"
+            "in": "query",
+            "required": true
           },
           {
             "name": "event_type",
@@ -812,6 +813,23 @@
             "application/json": {}
           }
         }
+      }
+    },
+    "/v2/portal/workflow/{workflow_id}/{step_id}:markDone": {
+      "put": {
+        "operationId": "updateWorkflowStepAsDone",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workflow_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "step_id",
+            "required": true
+          }
+        ]
       }
     }
   },

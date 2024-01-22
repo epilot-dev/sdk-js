@@ -678,7 +678,7 @@ declare namespace Components {
              */
             password: string;
             /**
-             * Secondary identifier to identify a contact
+             * Deprecated. Use contactIdentifiers instead.
              * example:
              * 123456
              */
@@ -1478,7 +1478,7 @@ declare namespace Components {
                 onPendingUser?: AdminUser[];
             };
             /**
-             * Allow portal user self-registration without a mapped contact
+             * Deprecated. Use self_registration_setting instead.
              * example:
              * false
              */
@@ -1525,7 +1525,7 @@ declare namespace Components {
              */
             config?: string;
             /**
-             * Secondary identifier to identify a contact other than the email
+             * Deprecated. Use contact_identifiers instead.
              * example:
              * full_name
              */
@@ -2043,7 +2043,7 @@ declare namespace Components {
                 onPendingUser?: AdminUser[];
             };
             /**
-             * Allow portal user self-registration without a mapped contact
+             * Deprecated. Use self_registration_setting instead.
              * example:
              * false
              */
@@ -2090,7 +2090,7 @@ declare namespace Components {
              */
             config?: string;
             /**
-             * Secondary identifier to identify a contact other than the email
+             * Deprecated. Use contact_identifiers instead.
              * example:
              * full_name
              */
@@ -2314,6 +2314,35 @@ declare namespace Components {
          * }
          */
         export interface WorkflowExecution {
+            [name: string]: any;
+        }
+        /**
+         * example:
+         * {
+         *   "startedTime": "2024-01-12T13:29:55.942Z",
+         *   "requirements": [],
+         *   "created": "2023-10-20T17:41:10.256Z",
+         *   "executionType": "MANUAL",
+         *   "assignedToInProgress": "-",
+         *   "sectionId": "lzxsw2sblj7",
+         *   "type": "STEP",
+         *   "entityRefId": "q1d6vcbsqvn",
+         *   "assignedTo": [
+         *     "10014532"
+         *   ],
+         *   "lastUpdated": "2024-01-13T05:18:43.838Z",
+         *   "ecp": {},
+         *   "userIds": [],
+         *   "name": "Hinterlege den vereinbarten LIC Termin",
+         *   "id": "q1d6vcbsqvn",
+         *   "definitionId": "9UjHKq",
+         *   "status": "COMPLETED",
+         *   "manuallyCreated": false,
+         *   "enabled": true,
+         *   "completedTime": "2024-01-13T05:18:43.827Z"
+         * }
+         */
+        export interface WorkflowStep {
             [name: string]: any;
         }
     }
@@ -2737,17 +2766,14 @@ declare namespace Paths {
              * List billing events before this date
              */
             export type DateBefore = string; // date-time
-            /**
-             * Get billing events by entity ID
-             */
-            export type EntityId = string;
+            export type EntityId = string[];
             /**
              * Type of billing event to filter by
              */
             export type EventType = "installment" | "reimbursement";
         }
         export interface QueryParameters {
-            entity_id?: /* Get billing events by entity ID */ Parameters.EntityId;
+            entity_id: Parameters.EntityId;
             event_type?: /* Type of billing event to filter by */ Parameters.EventType;
             date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
             date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;
@@ -3767,6 +3793,65 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpdateWorkflowStepAsDone {
+        namespace Parameters {
+            /**
+             * ID of a step
+             * example:
+             * q1d6vcbsqvn
+             */
+            export type StepId = string;
+            /**
+             * ID of a workflow
+             * example:
+             * 0bjwcxc827t
+             */
+            export type WorkflowId = string;
+        }
+        export interface PathParameters {
+            workflow_id: /**
+             * ID of a workflow
+             * example:
+             * 0bjwcxc827t
+             */
+            Parameters.WorkflowId;
+            step_id: /**
+             * ID of a step
+             * example:
+             * q1d6vcbsqvn
+             */
+            Parameters.StepId;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * {
+             *   "startedTime": "2024-01-12T13:29:55.942Z",
+             *   "requirements": [],
+             *   "created": "2023-10-20T17:41:10.256Z",
+             *   "executionType": "MANUAL",
+             *   "assignedToInProgress": "-",
+             *   "sectionId": "lzxsw2sblj7",
+             *   "type": "STEP",
+             *   "entityRefId": "q1d6vcbsqvn",
+             *   "assignedTo": [
+             *     "10014532"
+             *   ],
+             *   "lastUpdated": "2024-01-13T05:18:43.838Z",
+             *   "ecp": {},
+             *   "userIds": [],
+             *   "name": "Hinterlege den vereinbarten LIC Termin",
+             *   "id": "q1d6vcbsqvn",
+             *   "definitionId": "9UjHKq",
+             *   "status": "COMPLETED",
+             *   "manuallyCreated": false,
+             *   "enabled": true,
+             *   "completedTime": "2024-01-13T05:18:43.827Z"
+             * }
+             */
+            Components.Schemas.WorkflowStep;
+        }
+    }
     namespace UpsertEmailTemplates {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -4504,6 +4589,16 @@ export interface OperationMethods {
     data?: Paths.SearchPortalUserEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
+  /**
+   * updateWorkflowStepAsDone - updateWorkflowStepAsDone
+   * 
+   * Update a workflow step as done
+   */
+  'updateWorkflowStepAsDone'(
+    parameters?: Parameters<Paths.UpdateWorkflowStepAsDone.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -5212,6 +5307,18 @@ export interface PathsDictionary {
       data?: Paths.SearchPortalUserEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
+  }
+  ['/v2/portal/workflow/{workflow_id}/{step_id}:markDone']: {
+    /**
+     * updateWorkflowStepAsDone - updateWorkflowStepAsDone
+     * 
+     * Update a workflow step as done
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateWorkflowStepAsDone.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   }
 }
 
