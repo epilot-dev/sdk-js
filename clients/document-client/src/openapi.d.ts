@@ -31,7 +31,7 @@ declare namespace Components {
              * example:
              * bcd0aab9-b544-42b0-8bfb-6d449d02eacc
              */
-            context_entity_id?: string;
+            context_entity_id?: string; // uuid
             /**
              * User Id for variable context
              * example:
@@ -117,22 +117,121 @@ declare namespace Components {
             };
             template_settings?: /* Template Settings for document generation */ TemplateSettings;
         }
+        /**
+         * DocxTemplater error detail
+         */
+        export interface DocxTemplaterErrorDetail {
+            /**
+             * Id of the error
+             */
+            id?: string;
+            /**
+             * Context of the error
+             */
+            context?: string;
+            /**
+             * Explanation of the error
+             */
+            explanation?: string;
+        }
+        /**
+         * Error details for DocxTemplater error. This error will appear under 'PARSE_ERROR' error code.
+         * See https://docxtemplater.com/docs/errors/#error-schema for more details.
+         *
+         */
+        export type DocxTemplaterErrorDetails = [
+            /* DocxTemplater error detail */ DocxTemplaterErrorDetail?,
+            ...any[]
+        ];
+        /**
+         * Error codes for document generation:
+         * - PARSE_ERROR - Error while parsing the document. Normally related with a bad template using the wrong DocxTemplater syntax.
+         * - DOC_TO_PDF_CONVERT_ERROR - Error while converting the document to PDF. Normally related with a ConvertAPI failure.
+         * - INTERNAL_ERROR - Internal error. Please contact support.
+         * - INVALID_TEMPLATE_FORMAT - Invalid template format (only .docx is supported). This can happen due to a bad word file or an unsupported file extension.
+         *
+         */
+        export type ErrorCode = "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR" | "INVALID_TEMPLATE_FORMAT";
         export interface ErrorOutput {
             /**
              * Error message
              */
             error_message?: string;
-            /**
-             * Error code
+            error_code?: /**
+             * Error codes for document generation:
+             * - PARSE_ERROR - Error while parsing the document. Normally related with a bad template using the wrong DocxTemplater syntax.
+             * - DOC_TO_PDF_CONVERT_ERROR - Error while converting the document to PDF. Normally related with a ConvertAPI failure.
+             * - INTERNAL_ERROR - Internal error. Please contact support.
+             * - INVALID_TEMPLATE_FORMAT - Invalid template format (only .docx is supported). This can happen due to a bad word file or an unsupported file extension.
+             *
              */
-            error_code?: "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR";
-            /**
-             * Error details
+            ErrorCode;
+            error_details?: /* Error details for invalid custom variables. This error will appear under 'PARSE_ERROR' error code. */ InvalidCustomVariableErrorDetails | /* Error details for internal error. This error will appear under 'INTERNAL_ERROR' error code. */ InternalErrorDetails | /**
+             * Error details for DocxTemplater error. This error will appear under 'PARSE_ERROR' error code.
+             * See https://docxtemplater.com/docs/errors/#error-schema for more details.
+             *
              */
-            error_details?: {
-                [name: string]: any;
-            }[];
+            DocxTemplaterErrorDetails;
         }
+        /**
+         * Internal error detail
+         */
+        export interface InternalErrorDetail {
+            /**
+             * Name of the error
+             */
+            name?: string;
+            /**
+             * Error message
+             */
+            message?: string;
+            /**
+             * Stack trace
+             */
+            stack?: string;
+            /**
+             * Cause of the error
+             */
+            cause?: string;
+        }
+        /**
+         * Error details for internal error. This error will appear under 'INTERNAL_ERROR' error code.
+         */
+        export type InternalErrorDetails = {
+            items?: any;
+        }[];
+        export interface InvalidCustomVariableErrorDetail {
+            [name: string]: any;
+            /**
+             * Explanation for the error
+             */
+            explanation?: string;
+            /**
+             * Context for the error
+             */
+            context?: {
+                /**
+                 * List of invalid variables
+                 */
+                invalid_variables?: {
+                    /**
+                     * Variable name
+                     */
+                    variable?: string;
+                    /**
+                     * Explanation for the error
+                     */
+                    error?: string;
+                }[];
+            };
+        }
+        /**
+         * Error details for invalid custom variables. This error will appear under 'PARSE_ERROR' error code.
+         */
+        export type InvalidCustomVariableErrorDetails = [
+            InvalidCustomVariableErrorDetail?,
+            ...any[]
+        ];
         export interface S3Reference {
             /**
              * example:
@@ -178,6 +277,12 @@ declare namespace Components {
              * false
              */
             enable_data_table_margin_autofix?: boolean;
+            /**
+             * Enables the persistance of template settings
+             * example:
+             * false
+             */
+            enabled_template_settings_persistence?: boolean;
             /**
              * An indication that the page margins are misconfigured
              * example:
