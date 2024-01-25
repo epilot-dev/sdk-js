@@ -693,6 +693,11 @@
         }
       }
     },
+    "/v2/portal/registration/identifiers": {
+      "get": {
+        "operationId": "getRegistrationIdentifiers"
+      }
+    },
     "/v2/portal/user/files": {
       "get": {
         "operationId": "getAllFiles",

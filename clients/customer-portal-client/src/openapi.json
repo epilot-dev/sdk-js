@@ -3057,6 +3057,69 @@
         }
       }
     },
+    "/v2/portal/registration/identifiers": {
+      "get": {
+        "operationId": "getRegistrationIdentifiers",
+        "summary": "getRegistrationIdentifiers",
+        "description": "Get valid attributes from entities that can be used as identifier to map contact to user on registration",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A dictionary of identifier attributes per entity schema are returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/IdentifierAttribute"
+                        }
+                      },
+                      "example": {
+                        "contact": [
+                          {
+                            "label": "First name",
+                            "name": "first_name",
+                            "type": "string"
+                          }
+                        ],
+                        "contract": [
+                          {
+                            "label": "Contract number",
+                            "name": "contract_number",
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/user/files": {
       "get": {
         "operationId": "getAllFiles",
@@ -4027,12 +4090,6 @@
               }
             }
           },
-          "self_registration": {
-            "type": "boolean",
-            "description": "Deprecated. Use self_registration_setting instead.",
-            "example": false,
-            "deprecated": true
-          },
           "self_registration_setting": {
             "type": "string",
             "enum": [
@@ -4080,15 +4137,10 @@
             "type": "string",
             "description": "Stringified object with configuration details"
           },
-          "contact_secondary_identifier": {
-            "type": "string",
-            "description": "Deprecated. Use contact_identifiers instead.",
-            "example": "full_name",
-            "deprecated": true
-          },
           "contact_identifiers": {
             "type": "array",
-            "description": "Identifiers to identify a contact.",
+            "description": "Deprecated. Use registration_identifiers instead.",
+            "deprecated": true,
             "items": {
               "type": "string"
             },
@@ -4152,6 +4204,25 @@
                   }
                 }
               }
+            }
+          },
+          "registration_identifiers": {
+            "type": "object",
+            "description": "Identifiers per schema to identify a contact of a portal user during the resgistration",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "contact": [
+                "email",
+                "last_name"
+              ],
+              "contract": [
+                "contract_number"
+              ]
             }
           },
           "entity_actions": {
@@ -4597,15 +4668,10 @@
                 "example": "124n$aAJs*d41h4",
                 "description": "User's password"
               },
-              "secondaryIdentifier": {
-                "type": "string",
-                "example": 123456,
-                "description": "Deprecated. Use contactIdentifiers instead.",
-                "deprecated": true
-              },
               "contactIdentifiers": {
                 "type": "object",
-                "description": "Identifiers to identify a contact",
+                "description": "Deprecated. Use registration_identifiers instead.",
+                "deprecated": true,
                 "additionalProperties": {
                   "type": "string"
                 }
@@ -4614,6 +4680,24 @@
                 "type": "string",
                 "example": 123456,
                 "description": "ID of the contact"
+              },
+              "registration_identifiers": {
+                "type": "object",
+                "description": "Identifier-value pairs per schema to identify a contact of a portal user during the resgistration",
+                "additionalProperties": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "contact": {
+                    "email": "john.doe@example.com"
+                  },
+                  "contract": {
+                    "contract_number": "123456"
+                  }
+                }
               }
             }
           }
@@ -5879,6 +5963,23 @@
         "required": [
           "slug"
         ]
+      },
+      "IdentifierAttribute": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Label attribute"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the attribute"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the secondary attribute"
+          }
+        }
       }
     }
   },

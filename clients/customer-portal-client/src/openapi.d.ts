@@ -678,13 +678,7 @@ declare namespace Components {
              */
             password: string;
             /**
-             * Deprecated. Use contactIdentifiers instead.
-             * example:
-             * 123456
-             */
-            secondaryIdentifier?: string;
-            /**
-             * Identifiers to identify a contact
+             * Deprecated. Use registration_identifiers instead.
              */
             contactIdentifiers?: {
                 [name: string]: string;
@@ -695,6 +689,23 @@ declare namespace Components {
              * 123456
              */
             contactId?: string;
+            /**
+             * Identifier-value pairs per schema to identify a contact of a portal user during the resgistration
+             * example:
+             * {
+             *   "contact": {
+             *     "email": "john.doe@example.com"
+             *   },
+             *   "contract": {
+             *     "contract_number": "123456"
+             *   }
+             * }
+             */
+            registration_identifiers?: {
+                [name: string]: {
+                    [name: string]: string;
+                };
+            };
         }
         /**
          * Currency code in ISO 4217 format
@@ -1120,6 +1131,20 @@ declare namespace Components {
              */
             effect?: "allow" | "deny";
         }
+        export interface IdentifierAttribute {
+            /**
+             * Label attribute
+             */
+            label?: string;
+            /**
+             * Name of the attribute
+             */
+            name?: string;
+            /**
+             * Type of the secondary attribute
+             */
+            type?: string;
+        }
         /**
          * An entity that describes an installment billing event.
          */
@@ -1477,12 +1502,6 @@ declare namespace Components {
                  */
                 onPendingUser?: AdminUser[];
             };
-            /**
-             * Deprecated. Use self_registration_setting instead.
-             * example:
-             * false
-             */
-            self_registration?: boolean;
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
             /**
              * Feature settings for the portal
@@ -1525,13 +1544,7 @@ declare namespace Components {
              */
             config?: string;
             /**
-             * Deprecated. Use contact_identifiers instead.
-             * example:
-             * full_name
-             */
-            contact_secondary_identifier?: string;
-            /**
-             * Identifiers to identify a contact.
+             * Deprecated. Use registration_identifiers instead.
              * example:
              * [
              *   "email",
@@ -1581,6 +1594,22 @@ declare namespace Components {
                      */
                     attributes?: string[];
                 };
+            };
+            /**
+             * Identifiers per schema to identify a contact of a portal user during the resgistration
+             * example:
+             * {
+             *   "contact": [
+             *     "email",
+             *     "last_name"
+             *   ],
+             *   "contract": [
+             *     "contract_number"
+             *   ]
+             * }
+             */
+            registration_identifiers?: {
+                [name: string]: string[];
             };
             /**
              * Journey actions allowed on an entity by a portal user
@@ -2042,12 +2071,6 @@ declare namespace Components {
                  */
                 onPendingUser?: AdminUser[];
             };
-            /**
-             * Deprecated. Use self_registration_setting instead.
-             * example:
-             * false
-             */
-            self_registration?: boolean;
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
             /**
              * Feature settings for the portal
@@ -2090,13 +2113,7 @@ declare namespace Components {
              */
             config?: string;
             /**
-             * Deprecated. Use contact_identifiers instead.
-             * example:
-             * full_name
-             */
-            contact_secondary_identifier?: string;
-            /**
-             * Identifiers to identify a contact.
+             * Deprecated. Use registration_identifiers instead.
              * example:
              * [
              *   "email",
@@ -2146,6 +2163,22 @@ declare namespace Components {
                      */
                     attributes?: string[];
                 };
+            };
+            /**
+             * Identifiers per schema to identify a contact of a portal user during the resgistration
+             * example:
+             * {
+             *   "contact": [
+             *     "email",
+             *     "last_name"
+             *   ],
+             *   "contract": [
+             *     "contract_number"
+             *   ]
+             * }
+             */
+            registration_identifiers?: {
+                [name: string]: string[];
             };
             /**
              * Journey actions allowed on an entity by a portal user
@@ -3478,6 +3511,37 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetRegistrationIdentifiers {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * {
+                 *   "contact": [
+                 *     {
+                 *       "label": "First name",
+                 *       "name": "first_name",
+                 *       "type": "string"
+                 *     }
+                 *   ],
+                 *   "contract": [
+                 *     {
+                 *       "label": "Contract number",
+                 *       "name": "contract_number",
+                 *       "type": "string"
+                 *     }
+                 *   ]
+                 * }
+                 */
+                data?: {
+                    [name: string]: Components.Schemas.IdentifierAttribute[];
+                };
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetSchemas {
         namespace Responses {
             export interface $200 {
@@ -4497,6 +4561,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SavePortalFiles.Responses.$201>
   /**
+   * getRegistrationIdentifiers - getRegistrationIdentifiers
+   * 
+   * Get valid attributes from entities that can be used as identifier to map contact to user on registration
+   */
+  'getRegistrationIdentifiers'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRegistrationIdentifiers.Responses.$200>
+  /**
    * getAllFiles - getAllFiles
    * 
    * Fetch all documents under the related entities of a contact
@@ -5196,6 +5270,18 @@ export interface PathsDictionary {
       data?: Paths.SavePortalFiles.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SavePortalFiles.Responses.$201>
+  }
+  ['/v2/portal/registration/identifiers']: {
+    /**
+     * getRegistrationIdentifiers - getRegistrationIdentifiers
+     * 
+     * Get valid attributes from entities that can be used as identifier to map contact to user on registration
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRegistrationIdentifiers.Responses.$200>
   }
   ['/v2/portal/user/files']: {
     /**
