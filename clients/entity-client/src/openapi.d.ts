@@ -31,6 +31,12 @@ declare namespace Components {
          * contact
          */
         Schemas.EntitySlug;
+        /**
+         * URL-friendly identifier for the entity schema
+         * example:
+         * price
+         */
+        export type EntitySlugPathPriceParam = string;
         export type ExcludeSchemasQueryParam = /**
          * URL-friendly identifier for the entity schema
          * example:
@@ -54,6 +60,12 @@ declare namespace Components {
     export interface PathParameters {
         EntityIdPathParam?: Parameters.EntityIdPathParam;
         EntitySlugPathParam?: Parameters.EntitySlugPathParam;
+        EntitySlugPathPriceParam?: /**
+         * URL-friendly identifier for the entity schema
+         * example:
+         * price
+         */
+        Parameters.EntitySlugPathPriceParam;
         TaxonomySlugPathParam?: Parameters.TaxonomySlugPathParam;
         SavedViewIdPathParam?: Parameters.SavedViewIdPathParam;
         ActivityIdPathParam?: Parameters.ActivityIdPathParam;
@@ -281,11 +293,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -407,11 +417,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -528,11 +536,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -716,11 +722,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -846,11 +850,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -970,11 +972,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -1096,11 +1096,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -1220,11 +1218,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -1354,11 +1350,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -1603,15 +1597,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This capability should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This capability should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
-            /**
-             * Only show capability for legacy tenants (ivy)
-             */
-            legacy?: boolean;
+            settings_flag?: SettingFlag[];
         }
         export interface EntityDefaultCreate {
             view_type?: "default";
@@ -1645,10 +1633,6 @@ declare namespace Components {
                  * FF_MY_FEATURE_FLAG
                  */
                 feature_flag?: string;
-                /**
-                 * Only show item for legacy tenants (ivy)
-                 */
-                legacy?: boolean;
             } | {
                 type?: "link";
                 /**
@@ -1663,10 +1647,6 @@ declare namespace Components {
                  * FF_MY_FEATURE_FLAG
                  */
                 feature_flag?: string;
-                /**
-                 * Only show item for legacy tenants (ivy)
-                 */
-                legacy?: boolean;
             })[];
             row_actions?: (string | /* An entity action configured from the entity schema */ EntityAction)[];
             navbar_actions?: {
@@ -2152,11 +2132,9 @@ declare namespace Components {
                  */
                 feature_flag?: string;
                 /**
-                 * This group should only be active when the setting is enabled
-                 * example:
-                 * MY_SETTING
+                 * This group should only be active when all the settings have the correct value
                  */
-                setting_flag?: string;
+                settings_flag?: SettingFlag[];
                 info_tooltip_title?: {
                     key?: string;
                     default?: string;
@@ -2409,11 +2387,9 @@ declare namespace Components {
                  */
                 feature_flag?: string;
                 /**
-                 * This group should only be active when the setting is enabled
-                 * example:
-                 * MY_SETTING
+                 * This group should only be active when all the settings have the correct value
                  */
-                setting_flag?: string;
+                settings_flag?: SettingFlag[];
                 info_tooltip_title?: {
                     key?: string;
                     default?: string;
@@ -2637,6 +2613,60 @@ declare namespace Components {
          * contact
          */
         export type EntitySlug = string;
+        /**
+         * Validation error for an entity attribute
+         */
+        export interface EntityValidationError {
+            /**
+             * Error code identifier
+             * example:
+             * custom
+             */
+            code: string;
+            /**
+             * Additional parameters for the error
+             */
+            params: {
+                /**
+                 * The type of the error
+                 * example:
+                 * missing_field
+                 */
+                type?: string;
+            };
+            /**
+             * The path to the attribute that failed validation
+             * example:
+             * [
+             *   "first_name"
+             * ]
+             */
+            path: string[];
+            /**
+             * A human-readable message describing the error
+             * example:
+             * Invalid input
+             */
+            message: string;
+        }
+        /**
+         * Validation result for a failed validation
+         */
+        export interface EntityValidationResultError {
+            status: "error";
+            errors: [
+                /* Validation error for an entity attribute */ EntityValidationError,
+                .../* Validation error for an entity attribute */ EntityValidationError[]
+            ];
+        }
+        /**
+         * Validation result for a successful validation
+         */
+        export interface EntityValidationResultSuccess {
+            status: "success";
+            errors: [
+            ];
+        }
         export interface EntityViewDisabled {
             view_type?: "disabled";
         }
@@ -2739,11 +2769,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -3114,11 +3142,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -3238,11 +3264,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -3362,11 +3386,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -3494,11 +3516,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -3618,11 +3638,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -3758,11 +3776,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -3883,11 +3899,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -4007,11 +4021,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -4131,11 +4143,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -4255,11 +4265,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -4384,11 +4392,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -4527,11 +4533,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -4645,9 +4649,9 @@ declare namespace Components {
                  */
                 feature_flag?: string;
                 /**
-                 * Name of the setting flag that enables this action
+                 * This action should only be active when all the settings have the correct value
                  */
-                setting_flag?: string;
+                settings_flag?: SettingFlag[];
                 /**
                  * example:
                  * {
@@ -4888,11 +4892,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -5185,11 +5187,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -5317,11 +5317,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -5372,6 +5370,16 @@ declare namespace Components {
              */
             prefix?: string;
             start_number?: number;
+        }
+        export interface SettingFlag {
+            /**
+             * The name of the organization setting to check
+             */
+            name?: string;
+            /**
+             * Whether the setting should be enabled or not
+             */
+            enabled?: boolean;
         }
         /**
          * Status select
@@ -5448,11 +5456,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -5550,9 +5556,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * Binds summary field visibility to the setting flag state.
+             * This summary attribute should only be visible when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
         }
         /**
          * Summary Fields are displayed inside list view as a resume of the relation entity.
@@ -5642,11 +5648,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -5807,11 +5811,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -5932,11 +5934,9 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when the setting is enabled
-             * example:
-             * MY_SETTING
+             * This attribute should only be active when all the settings have the correct value
              */
-            setting_flag?: string;
+            settings_flag?: SettingFlag[];
             value_formatter?: string;
             preview_value_formatter?: string;
             /**
@@ -6773,6 +6773,15 @@ declare namespace Paths {
         namespace Parameters {
             export type DraftsFrom = number;
             export type DraftsSize = number;
+            /**
+             * example:
+             * [
+             *   "id",
+             *   "attributes",
+             *   "capabilites"
+             * ]
+             */
+            export type Fields = string[];
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -6790,6 +6799,15 @@ declare namespace Paths {
             versions_size?: Parameters.VersionsSize;
             drafts_from?: Parameters.DraftsFrom;
             drafts_size?: Parameters.DraftsSize;
+            fields?: /**
+             * example:
+             * [
+             *   "id",
+             *   "attributes",
+             *   "capabilites"
+             * ]
+             */
+            Parameters.Fields;
         }
         namespace Responses {
             export interface $200 {
@@ -7403,6 +7421,61 @@ declare namespace Paths {
             }
         }
     }
+    namespace ValidateEntity {
+        namespace Parameters {
+            /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * price
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * price
+             */
+            Parameters.Slug;
+        }
+        export type RequestBody = /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   }
+         * }
+         */
+        Components.Schemas.Entity;
+        namespace Responses {
+            export type $200 = /* Validation result for a successful validation */ Components.Schemas.EntityValidationResultSuccess;
+            export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationResultError;
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -7586,6 +7659,16 @@ export interface OperationMethods {
     data?: Paths.CreateEntity.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateEntity.Responses.$201>
+  /**
+   * validateEntity - validateEntity
+   * 
+   * Validates an entity against the schema.
+   */
+  'validateEntity'(
+    parameters?: Parameters<Paths.ValidateEntity.PathParameters> | null,
+    data?: Paths.ValidateEntity.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateEntity.Responses.$200>
   /**
    * upsertEntity - upsertEntity
    * 
@@ -8249,6 +8332,18 @@ export interface PathsDictionary {
       data?: Paths.CreateEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateEntity.Responses.$201>
+  }
+  ['/v1/entity/{slug}:validate']: {
+    /**
+     * validateEntity - validateEntity
+     * 
+     * Validates an entity against the schema.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ValidateEntity.PathParameters> | null,
+      data?: Paths.ValidateEntity.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateEntity.Responses.$200>
   }
   ['/v1/entity/{slug}:upsert']: {
     /**

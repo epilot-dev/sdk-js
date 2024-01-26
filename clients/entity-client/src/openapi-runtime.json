@@ -77,6 +77,13 @@
           {
             "in": "query",
             "name": "drafts_size"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "style": "form",
+            "explode": false
           }
         ]
       }
@@ -129,6 +136,21 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/entity/{slug}:validate": {
+      "post": {
+        "operationId": "validateEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathPriceParam"
           }
         ],
         "requestBody": {
@@ -746,6 +768,11 @@
         "required": true
       },
       "EntitySlugPathParam": {
+        "name": "slug",
+        "in": "path",
+        "required": true
+      },
+      "EntitySlugPathPriceParam": {
         "name": "slug",
         "in": "path",
         "required": true
