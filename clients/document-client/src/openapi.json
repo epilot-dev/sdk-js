@@ -371,6 +371,12 @@
             "description": "An indication that the page margins are misconfigured",
             "type": "boolean",
             "example": false
+          },
+          "file_entity_id": {
+            "description": "The file entity id, used when persisting a new template version with updated settings",
+            "type": "string",
+            "format": "uuid",
+            "example": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
           }
         }
       },
