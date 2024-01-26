@@ -1040,6 +1040,76 @@ declare namespace Components {
             CompositePrice;
         }
         /**
+         * The compute price payload
+         */
+        export interface ComputePriceParams {
+            /**
+             * The postal code to search for providers
+             */
+            postal_code: string;
+            /**
+             * The monthly consumption to compute the price in kWh
+             */
+            consumption: number;
+            /**
+             * The association id
+             */
+            association_id?: string;
+            /**
+             * The product type
+             */
+            type: "power" | "gas";
+            /**
+             * The billing period (defaults to monthly)
+             */
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+        }
+        export interface ComputePriceResult {
+            /**
+             * The computed total price
+             */
+            amount_total: number;
+            /**
+             * The computed total price as decimal
+             */
+            amount_total_decimal: string;
+            /**
+             * The currency of the computed price (three-letter ISO currency code)
+             */
+            currency: /* The currency of the computed price (three-letter ISO currency code) */ /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * The billing period
+             */
+            billing_period: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            breakdown: /* Price breakdown */ ComputedPriceBreakdown;
+        }
+        /**
+         * The computed price
+         */
+        export interface ComputedBasePrice {
+            /**
+             * The computed price
+             */
+            amount: number;
+            /**
+             * The computed price as decimal
+             */
+            amount_decimal: string;
+        }
+        /**
+         * Price breakdown
+         */
+        export interface ComputedPriceBreakdown {
+            [name: string]: /* The computed price */ ComputedBasePrice;
+        }
+        /**
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
          * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
          *
@@ -2916,6 +2986,24 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $ComputePrice {
+        export interface HeaderParameters {
+            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
+        }
+        namespace Parameters {
+            export type IntegrationId = Components.Schemas.IntegrationId;
+            export type XEpilotOrgID = string;
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId;
+        }
+        export type RequestBody = /* The compute price payload */ Components.Schemas.ComputePriceParams;
+        namespace Responses {
+            export type $200 = Components.Schemas.ComputePriceResult;
+            export type $400 = Components.Schemas.Error;
+            export type $403 = Components.Schemas.Error;
+        }
+    }
     namespace $CreateOpportunity {
         export interface HeaderParameters {
             "X-Ivy-Org-ID": Parameters.XIvyOrgID;
@@ -3219,13 +3307,23 @@ export interface OperationMethods {
   /**
    * $searchStreets - searchStreets
    * 
-   * Returns the list of streets available for a given postal_code and city
+   * Returns the list of streets available for a given postal code and city
    */
   '$searchStreets'(
     parameters?: Parameters<Paths.$SearchStreets.PathParameters & Paths.$SearchStreets.HeaderParameters> | null,
     data?: Paths.$SearchStreets.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchStreets.Responses.$200>
+  /**
+   * $computePrice - computePrice
+   * 
+   * Returns the price for a given product type based on location and consumption
+   */
+  '$computePrice'(
+    parameters?: Parameters<Paths.$ComputePrice.PathParameters & Paths.$ComputePrice.HeaderParameters> | null,
+    data?: Paths.$ComputePrice.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ComputePrice.Responses.$200>
   /**
    * $getCredentials - getCredentials
    * 
@@ -3372,13 +3470,25 @@ export interface PathsDictionary {
     /**
      * $searchStreets - searchStreets
      * 
-     * Returns the list of streets available for a given postal_code and city
+     * Returns the list of streets available for a given postal code and city
      */
     'post'(
       parameters?: Parameters<Paths.$SearchStreets.PathParameters & Paths.$SearchStreets.HeaderParameters> | null,
       data?: Paths.$SearchStreets.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$SearchStreets.Responses.$200>
+  }
+  ['/v1/public/integration/{integrationId}/compute-price']: {
+    /**
+     * $computePrice - computePrice
+     * 
+     * Returns the price for a given product type based on location and consumption
+     */
+    'post'(
+      parameters?: Parameters<Paths.$ComputePrice.PathParameters & Paths.$ComputePrice.HeaderParameters> | null,
+      data?: Paths.$ComputePrice.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ComputePrice.Responses.$200>
   }
   ['/v1/integration/{integrationId}/credentials']: {
     /**

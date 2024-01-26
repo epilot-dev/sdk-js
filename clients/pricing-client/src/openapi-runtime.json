@@ -156,6 +156,28 @@
         }
       }
     },
+    "/v1/public/integration/{integrationId}/compute-price": {
+      "post": {
+        "operationId": "$computePrice",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v1/integration/{integrationId}/credentials": {
       "get": {
         "operationId": "$getCredentials",

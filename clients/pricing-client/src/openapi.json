@@ -918,7 +918,7 @@
     },
     "/v1/public/integration/{integrationId}/streets:search": {
       "post": {
-        "description": "Returns the list of streets available for a given postal_code and city",
+        "description": "Returns the list of streets available for a given postal code and city",
         "operationId": "$searchStreets",
         "security": [],
         "parameters": [
@@ -983,6 +983,107 @@
                         "name": "Street 2"
                       }
                     ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, no credentials found for the given integration / organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/integration/{integrationId}/compute-price": {
+      "post": {
+        "description": "Returns the price for a given product type based on location and consumption",
+        "operationId": "$computePrice",
+        "security": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": 739224
+          },
+          {
+            "in": "path",
+            "name": "integrationId",
+            "description": "The integration identifier",
+            "schema": {
+              "$ref": "#/components/schemas/IntegrationId"
+            },
+            "required": true,
+            "example": "getag"
+          }
+        ],
+        "summary": "computePrice",
+        "tags": [
+          "External Integrations API"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComputePriceParams"
+              },
+              "examples": {
+                "Compute price": {
+                  "value": {
+                    "type": "power",
+                    "billing_period": "monthly",
+                    "postal_code": "04109",
+                    "consumption": 3500,
+                    "association_id": "123456789"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The compute price response payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComputePriceResult"
+                },
+                "examples": {
+                  "Response of computed price": {
+                    "value": {
+                      "amount_total": 100,
+                      "amount_total_decimal": "100.00",
+                      "currency": "EUR",
+                      "billing_period": "monthly",
+                      "breakdown": {
+                        "maintenance_fee": {
+                          "amount": 10,
+                          "amount_decimal": "10.00"
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -2488,6 +2589,118 @@
       },
       "SaveIntegrationCredentialsParams": {
         "$ref": "#/components/schemas/BasicAuthCredentials"
+      },
+      "ComputePriceParams": {
+        "description": "The compute price payload",
+        "type": "object",
+        "properties": {
+          "postal_code": {
+            "description": "The postal code to search for providers",
+            "type": "string"
+          },
+          "consumption": {
+            "description": "The monthly consumption to compute the price in kWh",
+            "type": "number"
+          },
+          "association_id": {
+            "description": "The association id",
+            "type": "string"
+          },
+          "type": {
+            "description": "The product type",
+            "type": "string",
+            "enum": [
+              "power",
+              "gas"
+            ]
+          },
+          "billing_period": {
+            "description": "The billing period (defaults to monthly)",
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly",
+              "one_time"
+            ],
+            "default": "monthly"
+          }
+        },
+        "required": [
+          "type",
+          "postal_code",
+          "consumption"
+        ]
+      },
+      "ComputedBasePrice": {
+        "type": "object",
+        "description": "The computed price",
+        "properties": {
+          "amount": {
+            "description": "The computed price",
+            "type": "number"
+          },
+          "amount_decimal": {
+            "description": "The computed price as decimal",
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount",
+          "amount_decimal"
+        ]
+      },
+      "ComputedPriceBreakdown": {
+        "type": "object",
+        "description": "Price breakdown",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ComputedBasePrice"
+        }
+      },
+      "ComputePriceResult": {
+        "type": "object",
+        "properties": {
+          "amount_total": {
+            "description": "The computed total price",
+            "type": "number"
+          },
+          "amount_total_decimal": {
+            "description": "The computed total price as decimal",
+            "type": "string"
+          },
+          "currency": {
+            "description": "The currency of the computed price (three-letter ISO currency code)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Currency"
+              }
+            ]
+          },
+          "billing_period": {
+            "description": "The billing period",
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly",
+              "one_time"
+            ]
+          },
+          "breakdown": {
+            "$ref": "#/components/schemas/ComputedPriceBreakdown"
+          }
+        },
+        "required": [
+          "amount_total",
+          "amount_total_decimal",
+          "currency",
+          "billing_period",
+          "breakdown"
+        ]
       },
       "BasicAuthCredentials": {
         "description": "The basic auth credentials",
