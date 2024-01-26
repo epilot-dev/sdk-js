@@ -33,6 +33,10 @@
     {
       "name": "Taxonomy",
       "description": "Entity classification with Taxonomies"
+    },
+    {
+      "name": "Elastic Cluster Assignment",
+      "description": "Elastic Cluster assignment for organizations"
     }
   ],
   "security": [
@@ -217,6 +221,24 @@
             "name": "drafts_size",
             "schema": {
               "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "id",
+                "attributes",
+                "capabilites"
+              ]
             }
           }
         ],
@@ -436,6 +458,60 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EntityItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/{slug}:validate": {
+      "post": {
+        "operationId": "validateEntity",
+        "summary": "validateEntity",
+        "description": "Validates an entity against the schema.",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathPriceParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              },
+              "examples": {
+                "Valid Price": {
+                  "$ref": "#/components/examples/PriceEntity"
+                },
+                "Invalid Price": {
+                  "$ref": "#/components/examples/EmptyGenericEntity"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityValidationResultSuccess"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityValidationResultError"
                 }
               }
             }
@@ -2176,10 +2252,12 @@
                   "example": "FF_MY_FEATURE_FLAG",
                   "description": "This group should only be active when the feature flag is enabled"
                 },
-                "setting_flag": {
-                  "type": "string",
-                  "example": "MY_SETTING",
-                  "description": "This group should only be active when the setting is enabled"
+                "settings_flag": {
+                  "type": "array",
+                  "description": "This group should only be active when all the settings have the correct value",
+                  "items": {
+                    "$ref": "#/components/schemas/SettingFlag"
+                  }
                 },
                 "info_tooltip_title": {
                   "type": "object",
@@ -2509,10 +2587,12 @@
             "example": "FF_MY_FEATURE_FLAG",
             "description": "This attribute should only be active when the feature flag is enabled"
           },
-          "setting_flag": {
-            "type": "string",
-            "example": "MY_SETTING",
-            "description": "This attribute should only be active when the setting is enabled"
+          "settings_flag": {
+            "type": "array",
+            "description": "This attribute should only be active when all the settings have the correct value",
+            "items": {
+              "$ref": "#/components/schemas/SettingFlag"
+            }
           },
           "value_formatter": {
             "type": "string"
@@ -3098,9 +3178,12 @@
                       "type": "string",
                       "description": "Name of the feature flag that enables this action"
                     },
-                    "setting_flag": {
-                      "type": "string",
-                      "description": "Name of the setting flag that enables this action"
+                    "settings_flag": {
+                      "type": "array",
+                      "description": "This action should only be active when all the settings have the correct value",
+                      "items": {
+                        "$ref": "#/components/schemas/SettingFlag"
+                      }
                     },
                     "new_entity_item": {
                       "type": "object",
@@ -3561,9 +3644,12 @@
             "type": "string",
             "description": "Binds summary field visibility to the feature flag state."
           },
-          "setting_flag": {
-            "type": "string",
-            "description": "Binds summary field visibility to the setting flag state."
+          "settings_flag": {
+            "type": "array",
+            "description": "This summary attribute should only be visible when all the settings have the correct value",
+            "items": {
+              "$ref": "#/components/schemas/SettingFlag"
+            }
           }
         },
         "required": [
@@ -3686,14 +3772,12 @@
             "example": "FF_MY_FEATURE_FLAG",
             "description": "This capability should only be active when the feature flag is enabled"
           },
-          "setting_flag": {
-            "type": "string",
-            "example": "MY_SETTING",
-            "description": "This capability should only be active when the setting is enabled"
-          },
-          "legacy": {
-            "type": "boolean",
-            "description": "Only show capability for legacy tenants (ivy)"
+          "settings_flag": {
+            "type": "array",
+            "description": "This capability should only be active when all the settings have the correct value",
+            "items": {
+              "$ref": "#/components/schemas/SettingFlag"
+            }
           }
         },
         "required": [
@@ -3731,10 +3815,6 @@
                       "type": "string",
                       "example": "FF_MY_FEATURE_FLAG",
                       "description": "This dropdown item should only be active when the feature flag is enabled"
-                    },
-                    "legacy": {
-                      "type": "boolean",
-                      "description": "Only show item for legacy tenants (ivy)"
                     }
                   }
                 },
@@ -4031,6 +4111,105 @@
           }
         },
         "additionalProperties": true
+      },
+      "EntityItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ]
+      },
+      "EntityValidationError": {
+        "type": "object",
+        "description": "Validation error for an entity attribute",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Error code identifier",
+            "example": "custom"
+          },
+          "params": {
+            "type": "object",
+            "description": "Additional parameters for the error",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of the error",
+                "example": "missing_field"
+              }
+            }
+          },
+          "path": {
+            "type": "array",
+            "description": "The path to the attribute that failed validation",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "first_name"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable message describing the error",
+            "example": "Invalid input"
+          }
+        },
+        "required": [
+          "code",
+          "params",
+          "path",
+          "message"
+        ]
+      },
+      "EntityValidationResultSuccess": {
+        "type": "object",
+        "description": "Validation result for a successful validation",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          },
+          "errors": {
+            "type": "array",
+            "maxItems": 0,
+            "items": {
+              "$ref": "#/components/schemas/EntityValidationError"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "errors"
+        ]
+      },
+      "EntityValidationResultError": {
+        "type": "object",
+        "description": "Validation result for a failed validation",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "error"
+            ]
+          },
+          "errors": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/EntityValidationError"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "errors"
+        ]
       },
       "HydratedEntity": {
         "type": "object",
@@ -4632,7 +4811,9 @@
           "name": {
             "description": "User-friendly identifier for the saved view",
             "type": "string",
-            "example": "View listing German"
+            "example": "View listing German",
+            "minLength": 1,
+            "maxLength": 100
           },
           "org": {
             "description": "Organisation ID a view belongs to",
@@ -4796,6 +4977,19 @@
             }
           }
         }
+      },
+      "SettingFlag": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the organization setting to check"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the setting should be enabled or not"
+          }
+        }
       }
     },
     "parameters": {
@@ -4815,6 +5009,20 @@
         "required": true,
         "schema": {
           "$ref": "#/components/schemas/EntitySlug"
+        }
+      },
+      "EntitySlugPathPriceParam": {
+        "name": "slug",
+        "description": "Entity Type",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          ],
+          "example": "price"
         }
       },
       "TaxonomySlugQueryParam": {
@@ -4893,7 +5101,7 @@
       },
       "IncludeReverseDeprecatedQueryParam": {
         "name": "include_reverse",
-        "description": "When true, includes reverse relations in response (other entities pointing to this entity)  \n*It gets overriden by mode query parameter.*\n",
+        "description": "When true, includes reverse relations in response (other entities pointing to this entity)\n*It gets overriden by mode query parameter.*\n",
         "in": "query",
         "deprecated": true,
         "schema": {
@@ -4942,7 +5150,7 @@
       },
       "EntityRelationsModeQueryParam": {
         "name": "mode",
-        "description": "Options to determine how relations will be included in the result.  \n*It overrides the include_reverse query param.*  \nExplanation of possible options:    \n- direct: include relations to which the searched entity refers  \n- reverse: include relations that refer to the entity you are looking for  \n- both: both direct and reverse relations\n",
+        "description": "Options to determine how relations will be included in the result.\n*It overrides the include_reverse query param.*\nExplanation of possible options:\n- direct: include relations to which the searched entity refers\n- reverse: include relations that refer to the entity you are looking for\n- both: both direct and reverse relations\n",
         "in": "query",
         "required": false,
         "schema": {
@@ -4966,6 +5174,10 @@
       }
     },
     "examples": {
+      "EmptyGenericEntity": {
+        "description": "Example of an empty, generic entity",
+        "value": {}
+      },
       "TaxEntity": {
         "description": "Example of a Tax Rate entity",
         "value": {
@@ -5188,6 +5400,7 @@
           "code": "MODEL_375KW_PREMIUM",
           "type": "One Time",
           "description": "Solar Panel 375 kWp Premium",
+          "internal_description": "Solar Panel 375 kWp Premium",
           "billing_scheme": "per_unit",
           "unit_amount": "€ 28500",
           "tiers_mode": "Standard"
@@ -5577,6 +5790,37 @@
               }
             ]
           }
+        }
+      },
+      "EntityValidationError": {
+        "description": "Example of an entity validation error",
+        "value": {
+          "code": "string",
+          "params": {
+            "type": "string"
+          },
+          "path": [
+            "string"
+          ],
+          "message": "string"
+        }
+      },
+      "EntityValidationResultSuccess": {
+        "description": "Example of a successful entity validation result",
+        "value": {
+          "status": "success",
+          "errors": []
+        }
+      },
+      "EntityValidationResultError": {
+        "description": "Example of a failed entity validation result",
+        "value": {
+          "status": "error",
+          "errors": [
+            {
+              "$ref": "#/components/examples/EntityValidationError"
+            }
+          ]
         }
       }
     }
