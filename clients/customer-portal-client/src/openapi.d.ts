@@ -432,6 +432,31 @@ declare namespace Components {
                 [name: string]: string;
             };
         }
+        export interface ContactExistsRequest {
+            /**
+             * ID of the organization
+             * example:
+             * 728
+             */
+            org_id: string;
+            /**
+             * Identifier-value pairs per schema to identify a contact of a portal user during the resgistration
+             * example:
+             * {
+             *   "contact": {
+             *     "email": "john.doe@example.com"
+             *   },
+             *   "contract": {
+             *     "contract_number": "123456"
+             *   }
+             * }
+             */
+            registration_identifiers: {
+                [name: string]: {
+                    [name: string]: string;
+                };
+            };
+        }
         export interface ContentWidget {
             id: string;
             type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
@@ -2410,6 +2435,28 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace CheckContactExists {
+        namespace Parameters {
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            origin: Parameters.Origin;
+        }
+        export type RequestBody = Components.Schemas.ContactExistsRequest;
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether the contact exists with the given identifier values
+                 * example:
+                 * true
+                 */
+                exists?: boolean;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ConfigureDistribution {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -4270,13 +4317,23 @@ export interface OperationMethods {
   /**
    * getContactCount - getContactCount
    * 
-   * Check existence of contacts.
+   * Return number of contacts matching identifier values.
    */
   'getContactCount'(
     parameters?: Parameters<Paths.GetContactCount.QueryParameters> | null,
     data?: Paths.GetContactCount.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetContactCount.Responses.$200>
+  /**
+   * checkContactExists - checkContactExists
+   * 
+   * True if contact with given identifiers exists.
+   */
+  'checkContactExists'(
+    parameters?: Parameters<Paths.CheckContactExists.QueryParameters> | null,
+    data?: Paths.CheckContactExists.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CheckContactExists.Responses.$200>
   /**
    * getValidSecondaryAttributes - getValidSecondaryAttributes
    * 
@@ -4936,13 +4993,25 @@ export interface PathsDictionary {
     /**
      * getContactCount - getContactCount
      * 
-     * Check existence of contacts.
+     * Return number of contacts matching identifier values.
      */
     'post'(
       parameters?: Parameters<Paths.GetContactCount.QueryParameters> | null,
       data?: Paths.GetContactCount.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetContactCount.Responses.$200>
+  }
+  ['/v2/portal/public/contact/exists']: {
+    /**
+     * checkContactExists - checkContactExists
+     * 
+     * True if contact with given identifiers exists.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CheckContactExists.QueryParameters> | null,
+      data?: Paths.CheckContactExists.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CheckContactExists.Responses.$200>
   }
   ['/v2/portal/contact/valid/secondary/attributes']: {
     /**

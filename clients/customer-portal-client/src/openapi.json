@@ -1199,9 +1199,10 @@
     },
     "/v2/portal/public/contact/count": {
       "post": {
+        "deprecated": true,
         "operationId": "getContactCount",
         "summary": "getContactCount",
-        "description": "Check existence of contacts.",
+        "description": "Return number of contacts matching identifier values.",
         "security": [],
         "tags": [
           "Public"
@@ -1240,6 +1241,67 @@
                       "type": "number",
                       "description": "Count of Contact",
                       "example": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/contact/exists": {
+      "post": {
+        "operationId": "checkContactExists",
+        "summary": "checkContactExists",
+        "description": "True if contact with given identifiers exists.",
+        "security": [],
+        "tags": [
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "requestBody": {
+          "description": "Request payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactExistsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return result true|false if the contact with given identifiers exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exists": {
+                      "type": "boolean",
+                      "description": "Whether the contact exists with the given identifier values",
+                      "example": true
                     }
                   }
                 }
@@ -4622,6 +4684,38 @@
             "description": "Identifiers to identify a contact",
             "additionalProperties": {
               "type": "string"
+            }
+          }
+        }
+      },
+      "ContactExistsRequest": {
+        "type": "object",
+        "required": [
+          "registration_identifiers",
+          "org_id"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": 728,
+            "description": "ID of the organization"
+          },
+          "registration_identifiers": {
+            "type": "object",
+            "description": "Identifier-value pairs per schema to identify a contact of a portal user during the resgistration",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "contact": {
+                "email": "john.doe@example.com"
+              },
+              "contract": {
+                "contract_number": "123456"
+              }
             }
           }
         }

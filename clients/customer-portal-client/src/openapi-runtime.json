@@ -269,7 +269,26 @@
     },
     "/v2/portal/public/contact/count": {
       "post": {
+        "deprecated": true,
         "operationId": "getContactCount",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v2/portal/public/contact/exists": {
+      "post": {
+        "operationId": "checkContactExists",
         "parameters": [
           {
             "in": "query",
