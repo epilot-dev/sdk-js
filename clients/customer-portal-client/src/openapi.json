@@ -4269,23 +4269,25 @@
             }
           },
           "registration_identifiers": {
-            "type": "object",
-            "description": "Identifiers per schema to identify a contact of a portal user during the resgistration",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+            "type": "array",
+            "description": "Identifiers to identify a contact of a portal user during the registration.",
+            "items": {
+              "$ref": "#/components/schemas/RegistrationIdentifier"
             },
-            "example": {
-              "contact": [
-                "email",
-                "last_name"
-              ],
-              "contract": [
-                "contract_number"
-              ]
-            }
+            "example": [
+              {
+                "name": "email",
+                "schema": "contact"
+              },
+              {
+                "name": "last_name",
+                "schema": "contact"
+              },
+              {
+                "name": "contract_number",
+                "schema": "contract"
+              }
+            ]
           },
           "entity_actions": {
             "type": "array",
@@ -6072,6 +6074,18 @@
           "type": {
             "type": "string",
             "description": "Type of the secondary attribute"
+          }
+        }
+      },
+      "RegistrationIdentifier": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the identifier/attribute"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/EntitySlug"
           }
         }
       }

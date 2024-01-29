@@ -1621,21 +1621,24 @@ declare namespace Components {
                 };
             };
             /**
-             * Identifiers per schema to identify a contact of a portal user during the resgistration
+             * Identifiers to identify a contact of a portal user during the registration.
              * example:
-             * {
-             *   "contact": [
-             *     "email",
-             *     "last_name"
-             *   ],
-             *   "contract": [
-             *     "contract_number"
-             *   ]
-             * }
+             * [
+             *   {
+             *     "name": "email",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
              */
-            registration_identifiers?: {
-                [name: string]: string[];
-            };
+            registration_identifiers?: RegistrationIdentifier[];
             /**
              * Journey actions allowed on an entity by a portal user
              */
@@ -1835,6 +1838,18 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
             _schema: "product";
+        }
+        export interface RegistrationIdentifier {
+            /**
+             * Name of the identifier/attribute
+             */
+            name?: string;
+            schema?: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
         }
         /**
          * An entity that describes a reimbursement billing event.
@@ -2190,21 +2205,24 @@ declare namespace Components {
                 };
             };
             /**
-             * Identifiers per schema to identify a contact of a portal user during the resgistration
+             * Identifiers to identify a contact of a portal user during the registration.
              * example:
-             * {
-             *   "contact": [
-             *     "email",
-             *     "last_name"
-             *   ],
-             *   "contract": [
-             *     "contract_number"
-             *   ]
-             * }
+             * [
+             *   {
+             *     "name": "email",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
              */
-            registration_identifiers?: {
-                [name: string]: string[];
-            };
+            registration_identifiers?: RegistrationIdentifier[];
             /**
              * Journey actions allowed on an entity by a portal user
              */
