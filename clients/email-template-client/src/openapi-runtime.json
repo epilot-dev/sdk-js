@@ -53,9 +53,9 @@
         }
       }
     },
-    "/v1/email-template/templates:revert": {
+    "/v1/email-template/templates:bulkSendMessage": {
       "post": {
-        "operationId": "revertToOriginalTemplate",
+        "operationId": "bulkSendMessage",
         "requestBody": {
           "content": {
             "application/json": {}
@@ -63,14 +63,9 @@
         }
       }
     },
-    "/v1/email-template/templates/system": {
+    "/v1/email-template/templates:revert": {
       "post": {
-        "operationId": "createSystemTemplates"
-      }
-    },
-    "/v1/email-template/templates/system/feature": {
-      "post": {
-        "operationId": "createFeatureSystemTemplates",
+        "operationId": "revertToOriginalTemplate",
         "requestBody": {
           "content": {
             "application/json": {}

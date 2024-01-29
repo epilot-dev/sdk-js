@@ -42,119 +42,7 @@ declare namespace Components {
              * Result of the email template that is replaced along with generated docs
              */
             result?: {
-                entity?: {
-                    /**
-                     * name
-                     * example:
-                     * Order confirmation
-                     */
-                    name: string;
-                    /**
-                     * Brand ID. Equal 0 if available for All brands
-                     * example:
-                     * 0
-                     */
-                    brand_id?: number | null;
-                    from?: From;
-                    /**
-                     * To
-                     */
-                    to?: To[];
-                    /**
-                     * Cc
-                     */
-                    cc?: To[];
-                    /**
-                     * Bcc
-                     */
-                    bcc?: To[];
-                    /**
-                     * Subject
-                     * example:
-                     * We have received your order!
-                     */
-                    subject?: string;
-                    /**
-                     * Body
-                     * example:
-                     * Hi Ms Ny Huynh, </br> Thank you for your order. We will contact you shortly
-                     */
-                    body?: string;
-                    /**
-                     * Email template attachments
-                     */
-                    attachments?: Attachment[] | null;
-                    file?: {
-                        /**
-                         * Entity tags
-                         */
-                        $relation?: {
-                            [key: string]: any;
-                        }[];
-                    };
-                    /**
-                     * Created by
-                     * example:
-                     * 1234
-                     */
-                    created_by?: number;
-                    /**
-                     * Updated by
-                     * example:
-                     * 1234
-                     */
-                    updated_by?: number;
-                    /**
-                     * If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...
-                     * Remember to add default content of template to system_template enum for revert to original feature
-                     *
-                     * example:
-                     * false
-                     */
-                    system_template?: boolean;
-                    /**
-                     * Entity ID
-                     * example:
-                     * 3fa85f64-5717-4562-b3fc-2c963f66afa6
-                     */
-                    _id: string;
-                    /**
-                     * Entity title
-                     */
-                    _title: string;
-                    /**
-                     * Ivy Organization ID the entity belongs to
-                     * example:
-                     * 206801
-                     */
-                    _org: string;
-                    /**
-                     * URL-friendly identifier for the entity schema
-                     * example:
-                     * message
-                     */
-                    _schema: string;
-                    /**
-                     * Entity tags
-                     * example:
-                     * [
-                     *   "automatic email template"
-                     * ]
-                     */
-                    _tags?: string[];
-                    /**
-                     * Created date
-                     * example:
-                     * 2021-02-09T12:41:43.662Z
-                     */
-                    _created_at: string; // date-time
-                    /**
-                     * Updated date
-                     * example:
-                     * 2021-02-10T09:14:31.990Z
-                     */
-                    _updated_at: string; // date-time
-                };
+                entity?: EmailTemplateEntity;
                 relations?: {
                     [key: string]: any;
                 }[];
@@ -224,52 +112,6 @@ declare namespace Components {
              */
             copy_to_message?: boolean;
         } | null;
-        export interface AttachmentResponse {
-            /**
-             * Total attachments
-             * example:
-             * 10
-             */
-            total?: number;
-            /**
-             * List attachments
-             */
-            attachments?: {
-                /**
-                 * File name
-                 * example:
-                 * order.docx
-                 */
-                filename?: string;
-                /**
-                 * Bucket name
-                 * example:
-                 * epilot-playground-upload-document
-                 */
-                bucket?: string;
-                /**
-                 * Object key
-                 * example:
-                 * 9f561bea-f0d9-4e96-b7a9-879fc1643ac0.docx
-                 */
-                object_key?: string;
-                /**
-                 * URL
-                 * example:
-                 * https://epilot-playground-upload-document.s3.eu-central-1.amazonaws.com/9f561bea-f0d9-4e96-b7a9-879fc1643ac0.docx
-                 */
-                url?: string;
-                /**
-                 * Document type:
-                 * * 0: Static docs
-                 * * 1: Templates
-                 *
-                 * example:
-                 * 0
-                 */
-                document_type?: number;
-            }[];
-        }
         export interface BaseEntity {
             /**
              * Entity ID
@@ -314,7 +156,124 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
         }
+        export interface BulkSendMessageJob {
+            /**
+             * Job ID for tracking the status of bulk message action
+             * example:
+             * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+             */
+            job_id: string;
+            /**
+             * Status of the bulk message action
+             * * QUEUEING: Bulk message action is generating emails to send in a queue
+             * * SENDING: Bulk message action is sending emails from the queue
+             * * SUCCESS: Bulk message action is completed successfully
+             * * FAILED: Bulk message action is failed
+             * * CANCELLED: Bulk message action was cancelled
+             *
+             */
+            status: "QUEUEING" | "SENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
+            request: BulkSendMessageRequest;
+            /**
+             * Total number of emails generated and queued for sending
+             * example:
+             * 100
+             */
+            total_queued?: number;
+            /**
+             * List of entity ids and message ids that were sent successfully
+             */
+            sent?: {
+                /**
+                 * Recipient Entity ID
+                 * example:
+                 * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                 */
+                entity_id: string;
+                /**
+                 * Message ID
+                 * example:
+                 * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                 */
+                message_id: string;
+            }[];
+            /**
+             * List of entity ids that were skipped or failed
+             */
+            failed?: {
+                /**
+                 * Recipient Entity ID
+                 * example:
+                 * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                 */
+                entity_id: string;
+                /**
+                 * Error message
+                 */
+                error: string;
+            }[];
+        }
+        export interface BulkSendMessageRequest {
+            /**
+             * ID of email template to use for sending bulk emails
+             * example:
+             * 511ceb90-f738-47aa-8b1e-915ace0ae13c
+             */
+            email_template_id: string;
+            /**
+             * List of entity ids to use as recipients
+             * example:
+             * [
+             *   "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "3fa85f64-5717-4562-b3fc-2c963f66afa7",
+             *   "3fa85f64-5717-4562-b3fc-2c963f66afa8"
+             * ]
+             */
+            recipient_ids: string[];
+        }
         export interface EmailTemplateEntity {
+            /**
+             * Entity ID
+             * example:
+             * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            _id: string;
+            /**
+             * Entity title
+             */
+            _title: string;
+            /**
+             * Ivy Organization ID the entity belongs to
+             * example:
+             * 206801
+             */
+            _org: string;
+            /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * message
+             */
+            _schema: string;
+            /**
+             * Entity tags
+             * example:
+             * [
+             *   "automatic email template"
+             * ]
+             */
+            _tags?: string[];
+            /**
+             * Created date
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _created_at: string; // date-time
+            /**
+             * Updated date
+             * example:
+             * 2021-02-10T09:14:31.990Z
+             */
+            _updated_at: string; // date-time
             /**
              * name
              * example:
@@ -327,9 +286,6 @@ declare namespace Components {
              * 0
              */
             brand_id?: number | null;
-            /**
-             * From
-             */
             from?: From;
             /**
              * To
@@ -476,119 +432,7 @@ declare namespace Components {
             updated_by?: number;
         }
         export interface EmailTemplateResponse {
-            entity?: {
-                /**
-                 * name
-                 * example:
-                 * Order confirmation
-                 */
-                name: string;
-                /**
-                 * Brand ID. Equal 0 if available for All brands
-                 * example:
-                 * 0
-                 */
-                brand_id?: number | null;
-                from?: From;
-                /**
-                 * To
-                 */
-                to?: To[];
-                /**
-                 * Cc
-                 */
-                cc?: To[];
-                /**
-                 * Bcc
-                 */
-                bcc?: To[];
-                /**
-                 * Subject
-                 * example:
-                 * We have received your order!
-                 */
-                subject?: string;
-                /**
-                 * Body
-                 * example:
-                 * Hi Ms Ny Huynh, </br> Thank you for your order. We will contact you shortly
-                 */
-                body?: string;
-                /**
-                 * Email template attachments
-                 */
-                attachments?: Attachment[] | null;
-                file?: {
-                    /**
-                     * Entity tags
-                     */
-                    $relation?: {
-                        [key: string]: any;
-                    }[];
-                };
-                /**
-                 * Created by
-                 * example:
-                 * 1234
-                 */
-                created_by?: number;
-                /**
-                 * Updated by
-                 * example:
-                 * 1234
-                 */
-                updated_by?: number;
-                /**
-                 * If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...
-                 * Remember to add default content of template to system_template enum for revert to original feature
-                 *
-                 * example:
-                 * false
-                 */
-                system_template?: boolean;
-                /**
-                 * Entity ID
-                 * example:
-                 * 3fa85f64-5717-4562-b3fc-2c963f66afa6
-                 */
-                _id: string;
-                /**
-                 * Entity title
-                 */
-                _title: string;
-                /**
-                 * Ivy Organization ID the entity belongs to
-                 * example:
-                 * 206801
-                 */
-                _org: string;
-                /**
-                 * URL-friendly identifier for the entity schema
-                 * example:
-                 * message
-                 */
-                _schema: string;
-                /**
-                 * Entity tags
-                 * example:
-                 * [
-                 *   "automatic email template"
-                 * ]
-                 */
-                _tags?: string[];
-                /**
-                 * Created date
-                 * example:
-                 * 2021-02-09T12:41:43.662Z
-                 */
-                _created_at: string; // date-time
-                /**
-                 * Updated date
-                 * example:
-                 * 2021-02-10T09:14:31.990Z
-                 */
-                _updated_at: string; // date-time
-            };
+            entity?: EmailTemplateEntity;
             relations?: {
                 [key: string]: any;
             }[];
@@ -605,53 +449,6 @@ declare namespace Components {
              */
             email: string;
         }
-        export interface PresignedRequest {
-            /**
-             * UUID
-             * example:
-             * 8c086140-f33e-4bb7-a993-50c0f2402c7b
-             */
-            id: string;
-            /**
-             * File name
-             * example:
-             * order.pdf
-             */
-            filename: string;
-            /**
-             * Content type
-             * example:
-             * application/pdf
-             */
-            content_type: string;
-        }
-        export interface PresignedResponse {
-            /**
-             * URL to download the attachment. This URL is not accessible until attachment is uploaded successfully.
-             * example:
-             * https://go.epilot.cloud/attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf
-             */
-            download_url: string;
-            /**
-             * Post presigned URL to upload file
-             */
-            upload_url: {
-                /**
-                 * URL to upload the attachment
-                 * example:
-                 * https://s3.eu-central-1.amazonaws.com/893487340562-message-attachment
-                 */
-                url: number;
-                /**
-                 * Fields are provided by AWS to authenticate and validate the request. All fields should be included in form-data when performing upload request.
-                 * example:
-                 * {}
-                 */
-                fields: {
-                    [key: string]: any;
-                };
-            };
-        }
         export type TemplateType = "email" | "document";
         export interface To {
             /**
@@ -664,51 +461,6 @@ declare namespace Components {
              * ny.huynh@axonactive.com
              */
             email: string;
-        }
-        export interface UserResponse {
-            id?: string;
-            organization_id?: string;
-            /**
-             * User's display name (default: email address)
-             * example:
-             * Example User
-             */
-            display_name?: string;
-            email?: string; // email
-            /**
-             * example:
-             * 1234567890
-             */
-            phone?: string | null;
-            /**
-             * example:
-             * de
-             */
-            preferred_language?: string;
-            /**
-             * example:
-             * {
-             *   "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
-             *   "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
-             * }
-             */
-            image_uri?: {
-                [name: string]: any;
-                original?: string; // uri
-                thumbnail_32?: string; // uri
-            };
-            properties?: {
-                /**
-                 * example:
-                 * profileImageName
-                 */
-                name: string;
-                /**
-                 * example:
-                 * avatar.png
-                 */
-                value: string;
-            }[];
         }
         export interface VariableParameters {
             template_type: TemplateType;
@@ -743,25 +495,34 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
-    namespace CreateFeatureSystemTemplates {
-        export interface RequestBody {
+    namespace BulkSendMessage {
+        export type RequestBody = {
             /**
+             * ID of email template to use for sending bulk emails
              * example:
-             * end_customer_portal
+             * 511ceb90-f738-47aa-8b1e-915ace0ae13c
              */
-            featureKey?: string;
-        }
+            email_template_id: string;
+            /**
+             * Entity search query to select recipients
+             * example:
+             * _schema:contact AND consent_email_marketing:active
+             */
+            recipient_query: string;
+        } | Components.Schemas.BulkSendMessageRequest | {
+            /**
+             * Job ID for tracking the status of a bulk message request
+             * example:
+             * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+             */
+            job_id: string;
+            /**
+             * Provide CANCEL to stop the bulk message request
+             */
+            action?: "CANCEL";
+        };
         namespace Responses {
-            export interface $200 {
-            }
-            export interface $403 {
-            }
-        }
-    }
-    namespace CreateSystemTemplates {
-        namespace Responses {
-            export interface $200 {
-            }
+            export type $200 = Components.Schemas.BulkSendMessageJob;
             export interface $403 {
             }
         }
@@ -789,6 +550,11 @@ declare namespace Paths {
              */
             email_template_id: string;
             variable_parameters?: Components.Schemas.VariableParameters;
+            /**
+             * If true then skip document generation. This is useful when you want to replace html variables only. Speeds up the process.
+             *
+             */
+            skip_document_generation?: boolean;
         }
         namespace Responses {
             export type $200 = Components.Schemas.EmailTemplateResponse;
@@ -810,6 +576,11 @@ declare namespace Paths {
              */
             email_template_id?: string;
             variable_parameters?: Components.Schemas.VariableParameters;
+            /**
+             * If true then skip document generation. This is useful when you want to replace html variables only. Speeds up the process.
+             *
+             */
+            skip_document_generation?: boolean;
         }
         namespace Responses {
             export type $200 = Components.Schemas.AsyncEmailTemplateResponse;
@@ -835,119 +606,7 @@ declare namespace Paths {
     namespace SaveTemplate {
         export type RequestBody = Components.Schemas.EmailTemplateRequest;
         namespace Responses {
-            export interface $200 {
-                /**
-                 * name
-                 * example:
-                 * Order confirmation
-                 */
-                name: string;
-                /**
-                 * Brand ID. Equal 0 if available for All brands
-                 * example:
-                 * 0
-                 */
-                brand_id?: number | null;
-                from?: Components.Schemas.From;
-                /**
-                 * To
-                 */
-                to?: Components.Schemas.To[];
-                /**
-                 * Cc
-                 */
-                cc?: Components.Schemas.To[];
-                /**
-                 * Bcc
-                 */
-                bcc?: Components.Schemas.To[];
-                /**
-                 * Subject
-                 * example:
-                 * We have received your order!
-                 */
-                subject?: string;
-                /**
-                 * Body
-                 * example:
-                 * Hi Ms Ny Huynh, </br> Thank you for your order. We will contact you shortly
-                 */
-                body?: string;
-                /**
-                 * Email template attachments
-                 */
-                attachments?: Components.Schemas.Attachment[] | null;
-                file?: {
-                    /**
-                     * Entity tags
-                     */
-                    $relation?: {
-                        [key: string]: any;
-                    }[];
-                };
-                /**
-                 * Created by
-                 * example:
-                 * 1234
-                 */
-                created_by?: number;
-                /**
-                 * Updated by
-                 * example:
-                 * 1234
-                 */
-                updated_by?: number;
-                /**
-                 * If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...
-                 * Remember to add default content of template to system_template enum for revert to original feature
-                 *
-                 * example:
-                 * false
-                 */
-                system_template?: boolean;
-                /**
-                 * Entity ID
-                 * example:
-                 * 3fa85f64-5717-4562-b3fc-2c963f66afa6
-                 */
-                _id: string;
-                /**
-                 * Entity title
-                 */
-                _title: string;
-                /**
-                 * Ivy Organization ID the entity belongs to
-                 * example:
-                 * 206801
-                 */
-                _org: string;
-                /**
-                 * URL-friendly identifier for the entity schema
-                 * example:
-                 * message
-                 */
-                _schema: string;
-                /**
-                 * Entity tags
-                 * example:
-                 * [
-                 *   "automatic email template"
-                 * ]
-                 */
-                _tags?: string[];
-                /**
-                 * Created date
-                 * example:
-                 * 2021-02-09T12:41:43.662Z
-                 */
-                _created_at: string; // date-time
-                /**
-                 * Updated date
-                 * example:
-                 * 2021-02-10T09:14:31.990Z
-                 */
-                _updated_at: string; // date-time
-            }
+            export type $200 = Components.Schemas.EmailTemplateEntity;
             export interface $403 {
             }
         }
@@ -988,8 +647,8 @@ export interface OperationMethods {
   /**
    * replaceVariablesAsync - replaceVariablesAsync
    * 
-   * This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents. 
-   * On initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template. 
+   * This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents.
+   * On initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template.
    * If still processing, it returns the jobId and IN-PROGRESS status. Upon completion or failure, it returns the final template or a failure status with reason.
    * 
    */
@@ -998,6 +657,16 @@ export interface OperationMethods {
     data?: Paths.ReplaceVariablesAsync.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplaceVariablesAsync.Responses.$200>
+  /**
+   * bulkSendMessage - bulkSendMessage
+   * 
+   * Send emails to multiple recipients using a template
+   */
+  'bulkSendMessage'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.BulkSendMessage.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkSendMessage.Responses.$200>
   /**
    * revertToOriginalTemplate - revertToOriginalTemplate
    * 
@@ -1008,26 +677,6 @@ export interface OperationMethods {
     data?: Paths.RevertToOriginalTemplate.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RevertToOriginalTemplate.Responses.$200>
-  /**
-   * createSystemTemplates - createSystemTemplates
-   * 
-   * create system email templates for an organization
-   */
-  'createSystemTemplates'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateSystemTemplates.Responses.$200>
-  /**
-   * createFeatureSystemTemplates - createFeatureSystemTemplates
-   * 
-   * create system email templates for an organization based on feature
-   */
-  'createFeatureSystemTemplates'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.CreateFeatureSystemTemplates.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateFeatureSystemTemplates.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1071,8 +720,8 @@ export interface PathsDictionary {
     /**
      * replaceVariablesAsync - replaceVariablesAsync
      * 
-     * This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents. 
-     * On initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template. 
+     * This endpoint allows to initiate an asynchronous process in replacing the template details & generating the documents.
+     * On initial request, a jobId and STARTED status are returned. Subsequent requests can use this jobId to poll for the resolved template.
      * If still processing, it returns the jobId and IN-PROGRESS status. Upon completion or failure, it returns the final template or a failure status with reason.
      * 
      */
@@ -1081,6 +730,18 @@ export interface PathsDictionary {
       data?: Paths.ReplaceVariablesAsync.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ReplaceVariablesAsync.Responses.$200>
+  }
+  ['/v1/email-template/templates:bulkSendMessage']: {
+    /**
+     * bulkSendMessage - bulkSendMessage
+     * 
+     * Send emails to multiple recipients using a template
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.BulkSendMessage.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkSendMessage.Responses.$200>
   }
   ['/v1/email-template/templates:revert']: {
     /**
@@ -1093,30 +754,6 @@ export interface PathsDictionary {
       data?: Paths.RevertToOriginalTemplate.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RevertToOriginalTemplate.Responses.$200>
-  }
-  ['/v1/email-template/templates/system']: {
-    /**
-     * createSystemTemplates - createSystemTemplates
-     * 
-     * create system email templates for an organization
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateSystemTemplates.Responses.$200>
-  }
-  ['/v1/email-template/templates/system/feature']: {
-    /**
-     * createFeatureSystemTemplates - createFeatureSystemTemplates
-     * 
-     * create system email templates for an organization based on feature
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.CreateFeatureSystemTemplates.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateFeatureSystemTemplates.Responses.$200>
   }
 }
 
