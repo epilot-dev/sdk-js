@@ -2871,7 +2871,7 @@ declare namespace Paths {
             export type EventType = "installment" | "reimbursement";
         }
         export interface QueryParameters {
-            entity_id: Parameters.EntityId;
+            entity_id?: Parameters.EntityId;
             event_type?: /* Type of billing event to filter by */ Parameters.EventType;
             date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
             date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;

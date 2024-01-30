@@ -3440,8 +3440,8 @@
           {
             "name": "entity_id",
             "in": "query",
-            "description": "Comma-separated list of entity IDs to filter by",
-            "required": true,
+            "description": "Entity ID to filter billing events by",
+            "required": false,
             "schema": {
               "type": "array",
               "items": {
