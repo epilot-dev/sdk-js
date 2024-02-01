@@ -697,7 +697,15 @@
           },
           "error_info": {
             "type": "object",
-            "additionalProperties": true
+            "additionalProperties": true,
+            "properties": {
+              "details": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
           }
         },
         "required": [
@@ -715,7 +723,25 @@
           "TIMEOUT_ERROR",
           "BAD_CONFIG",
           "INTERNAL_ERROR",
-          "TRIGGER_WEBHOOK_ERROR"
+          "TRIGGER_WEBHOOK_ERROR",
+          "TEMPLATE_ERROR"
+        ]
+      },
+      "ErrorDetail": {
+        "type": "object",
+        "properties": {
+          "explanation": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "explanation"
         ]
       },
       "CartCheckoutActionConfig": {
@@ -2237,11 +2263,20 @@
               "types": {
                 "type": "array",
                 "items": {
-                  "type": "string",
-                  "enum": [
-                    "CreateMeterReading",
-                    "UpdateMeterReading",
-                    "DocDownloadedFromPortal"
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "CreateMeterReading",
+                        "UpdateMeterReading",
+                        "DocDownloadedFromPortal",
+                        "PortalUserResetPassword",
+                        "PortalUserResetForgotPassword"
+                      ]
+                    },
+                    {
+                      "type": "string"
+                    }
                   ]
                 }
               }
@@ -2539,9 +2574,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://automation.sls.epilot.io"
-    },
     {
       "url": "https://automation.sls.epilot.io"
     }
