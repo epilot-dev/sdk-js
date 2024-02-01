@@ -1323,6 +1323,12 @@
               },
               "message": {
                 "type": "string"
+              },
+              "body": {
+                "type": "object"
+              },
+              "code": {
+                "type": "string"
               }
             }
           },

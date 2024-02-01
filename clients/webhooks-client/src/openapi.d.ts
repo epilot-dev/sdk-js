@@ -336,6 +336,10 @@ declare namespace Components {
             http_response?: {
                 status_code?: number;
                 message?: string;
+                body?: {
+                    [key: string]: any;
+                };
+                code?: string;
             };
             metadata?: /* Contains the metadata about the configured event */ Metadata;
             status?: "succeeded" | "failed" | "in_progress";
