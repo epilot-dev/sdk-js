@@ -310,6 +310,7 @@
     "/v1/webhooks/configs/{configId}/failures": {
       "get": {
         "operationId": "getFailuresForConfig",
+        "deprecated": true,
         "summary": "getFailuresForConfig",
         "description": "Get failed deliveries for a given config id",
         "tags": [
@@ -381,6 +382,7 @@
     },
     "/v1/webhooks/failures": {
       "get": {
+        "deprecated": true,
         "operationId": "getFailures",
         "summary": "getFailures",
         "description": "Get saved failures from the webhooks DB, in a paginated way",
@@ -455,6 +457,7 @@
     },
     "/v1/webhooks/failures/resend": {
       "post": {
+        "deprecated": true,
         "operationId": "resendFailure",
         "summary": "resendFailure",
         "description": "Resend payload for one failure",
@@ -1173,6 +1176,12 @@
           "message": {
             "type": "string"
           },
+          "body": {
+            "type": "object"
+          },
+          "code": {
+            "type": "string"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -1184,6 +1193,9 @@
             "type": "string"
           },
           "end_date": {
+            "type": "string"
+          },
+          "event_id": {
             "type": "string"
           }
         }

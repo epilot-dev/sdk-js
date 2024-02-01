@@ -272,9 +272,14 @@ declare namespace Components {
         export interface TriggerWebhookResp {
             status_code?: string;
             message?: string;
+            body?: {
+                [key: string]: any;
+            };
+            code?: string;
             status?: "succeeded" | "failed";
             start_date?: string;
             end_date?: string;
+            event_id?: string;
         }
         /**
          * example:
