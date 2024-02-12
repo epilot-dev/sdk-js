@@ -1075,12 +1075,24 @@
                     "value": {
                       "amount_total": 100,
                       "amount_total_decimal": "100.00",
+                      "amount_static": 500,
+                      "amount_static_decimal": "50.00",
+                      "amount_variable": 500,
+                      "amount_variable_decimal": "50.00",
                       "currency": "EUR",
                       "billing_period": "monthly",
                       "breakdown": {
-                        "maintenance_fee": {
-                          "amount": 10,
-                          "amount_decimal": "10.00"
+                        "static": {
+                          "maintenance_fee": {
+                            "amount": 50,
+                            "amount_decimal": "50.00"
+                          }
+                        },
+                        "variable": {
+                          "offshore_liability_fee": {
+                            "amount": 50,
+                            "amount_decimal": "50.00"
+                          }
                         }
                       }
                     }
@@ -2655,6 +2667,20 @@
       "ComputedPriceBreakdown": {
         "type": "object",
         "description": "Price breakdown",
+        "properties": {
+          "static": {
+            "description": "The static price breakdown",
+            "$ref": "#/components/schemas/ComputedPriceComponents"
+          },
+          "variable": {
+            "description": "The variable price breakdown",
+            "$ref": "#/components/schemas/ComputedPriceComponents"
+          }
+        }
+      },
+      "ComputedPriceComponents": {
+        "type": "object",
+        "description": "The computed price components",
         "additionalProperties": {
           "$ref": "#/components/schemas/ComputedBasePrice"
         }
@@ -2668,6 +2694,21 @@
           },
           "amount_total_decimal": {
             "description": "The computed total price as decimal",
+            "type": "string"
+          },
+          "amount_static": {
+            "description": "The computed static price",
+            "type": "number"
+          },
+          "amount_static_decimal": {
+            "description": "The computed static price as decimal"
+          },
+          "amount_variable": {
+            "description": "The computed variable price",
+            "type": "number"
+          },
+          "amount_variable_decimal": {
+            "description": "The computed variable price as decimal",
             "type": "string"
           },
           "currency": {
@@ -2758,13 +2799,13 @@
         "description": "The street entity",
         "type": "object",
         "properties": {
-          "name": {
+          "street": {
             "description": "The street name",
             "type": "string"
           }
         },
         "required": [
-          "name"
+          "street"
         ]
       },
       "ValidateAvailabilityFileResult": {
@@ -3165,63 +3206,6 @@
           "amount_total_decimal"
         ]
       },
-      "Cart": {
-        "description": "Supports shopping for products and services until ready for checkout.",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Amounts"
-          }
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "The cart identifier"
-          },
-          "org_id": {
-            "type": "string",
-            "description": "The user's Organization Id the cart belongs to",
-            "readOnly": true
-          },
-          "status": {
-            "enum": [
-              "open",
-              "complete",
-              "expired"
-            ],
-            "type": "string",
-            "readOnly": true,
-            "description": "The status of the Cart:\n- open - the cart checkout is still in progress. Payment processing has not started\n- complete - the cart checkout is complete. Payment processing may still be in progress\n- expired - the cart checkout has expired. No further processing will occur\n"
-          },
-          "customer": {
-            "$ref": "#/components/schemas/Customer"
-          },
-          "billing_address": {
-            "$ref": "#/components/schemas/Address"
-          },
-          "delivery_address": {
-            "$ref": "#/components/schemas/Address"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/MetaData"
-          },
-          "line_items": {
-            "$ref": "#/components/schemas/PriceItems"
-          },
-          "total_details": {
-            "$ref": "#/components/schemas/TotalDetails"
-          },
-          "created_at": {
-            "readOnly": true,
-            "type": "string",
-            "format": "date-time"
-          },
-          "updated_at": {
-            "readOnly": true,
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
       "Currency": {
         "type": "string",
         "description": "Three-letter ISO currency code, in lowercase. Must be a supported currency.\nISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html\n",
@@ -3616,48 +3600,6 @@
           "amount_total_decimal"
         ]
       },
-      "RecurrenceAmountWithTax": {
-        "type": "object",
-        "description": "An amount associated with a specific recurrence and tax.",
-        "readOnly": true,
-        "properties": {
-          "type": {
-            "type": "string",
-            "description": "The price type."
-          },
-          "billing_period": {
-            "type": "string",
-            "description": "The price billing period.",
-            "enum": [
-              "weekly",
-              "monthly",
-              "every_quarter",
-              "every_6_months",
-              "yearly"
-            ]
-          },
-          "amount_total": {
-            "type": "integer",
-            "description": "Total of all items after (discounts and) taxes are applied."
-          },
-          "amount_subtotal": {
-            "type": "integer",
-            "description": "Total of all items before (discounts or) taxes are applied."
-          },
-          "amount_tax": {
-            "type": "integer",
-            "description": "Total of all items taxes, with same recurrence."
-          },
-          "tax": {
-            "$ref": "#/components/schemas/TaxAmountBreakdown",
-            "description": "Tax"
-          }
-        },
-        "required": [
-          "amount_total",
-          "amount_subtotal"
-        ]
-      },
       "TotalDetails": {
         "type": "object",
         "description": "The total details with tax (and discount) aggregated totals.",
@@ -3696,60 +3638,8 @@
                     }
                   ]
                 }
-              },
-              "recurrencesByTax": {
-                "type": "array",
-                "description": "The aggregated price items recurrences by tax rate.",
-                "items": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/RecurrenceAmountWithTax"
-                    }
-                  ]
-                }
               }
             }
-          }
-        }
-      },
-      "PricingDetails": {
-        "type": "object",
-        "description": "The result from the calculation of a set of price items.",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/PriceItem"
-                },
-                {
-                  "$ref": "#/components/schemas/CompositePriceItem"
-                }
-              ]
-            }
-          },
-          "amount_subtotal": {
-            "type": "integer",
-            "description": "Total of all items before (discounts or) taxes are applied."
-          },
-          "amount_total": {
-            "type": "integer",
-            "description": "Total of all items after (discounts and) taxes are applied."
-          },
-          "unit_amount_gross": {
-            "type": "integer",
-            "description": "The unit gross amount value."
-          },
-          "amount_tax": {
-            "type": "integer",
-            "description": "This is the sum of all the price item tax amounts."
-          },
-          "total_details": {
-            "$ref": "#/components/schemas/TotalDetails"
-          },
-          "currency": {
-            "$ref": "#/components/schemas/Currency"
           }
         }
       },
@@ -3793,23 +3683,6 @@
           "country": {
             "type": "string",
             "description": "The name of the country."
-          }
-        }
-      },
-      "AvailabilityDate": {
-        "type": "object",
-        "properties": {
-          "available_start_date": {
-            "type": "string",
-            "format": "date",
-            "description": "The availability interval start date",
-            "example": "2017-07-21"
-          },
-          "available_end_date": {
-            "type": "string",
-            "format": "date",
-            "description": "The availability interval end date",
-            "example": "2017-07-21"
           }
         }
       },
@@ -4016,58 +3889,6 @@
         "type": "string",
         "format": "uuid"
       },
-      "EntityItem": {
-        "type": "object",
-        "properties": {
-          "_id": {
-            "$ref": "#/components/schemas/EntityId"
-          },
-          "_title": {
-            "type": "string",
-            "description": "Title of entity"
-          },
-          "_org": {
-            "type": "string",
-            "description": "Organization Id the entity belongs to"
-          },
-          "_schema": {
-            "type": "string"
-          },
-          "_tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "_created_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "_updated_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "_id",
-          "_title",
-          "_org",
-          "_schema",
-          "_created_at",
-          "_updated_at"
-        ],
-        "example": {
-          "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "_org": "123",
-          "_schema": "contact",
-          "_tags": [
-            "example",
-            "mock"
-          ],
-          "_created_at": "2021-02-09T12:41:43.662Z",
-          "_updated_at": "2021-02-09T12:41:43.662Z"
-        }
-      },
       "EntityRelation": {
         "type": "object",
         "additionalProperties": true,
@@ -4219,12 +4040,6 @@
       }
     },
     "examples": {
-      "checkout-with-cart-id": {
-        "value": {
-          "mode": "create_order",
-          "cart": "pZ324jnndf"
-        }
-      },
       "checkout-with-transient-cart": {
         "value": {
           "mode": "create_order",
@@ -4916,448 +4731,6 @@
           "_org": "728",
           "_created_at": "2022-06-03T16:29:46.303Z",
           "_updated_at": "2022-06-03T16:29:46.303Z"
-        }
-      },
-      "order-with-simple-prices-request": {
-        "value": {
-          "order_number": "OR 2022/742701",
-          "status": "quote",
-          "source": {
-            "title": "manual",
-            "href": null
-          },
-          "source_type": "manual",
-          "_schema": "order",
-          "_title": "OR 2022/742701",
-          "expires_at": "2022-06-30T16:17:00.000Z",
-          "line_items": [
-            {
-              "price_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
-              "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
-              "quantity": 16
-            },
-            {
-              "price_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
-              "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
-              "quantity": 4
-            },
-            {
-              "price_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
-              "product_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
-              "quantity": 1
-            },
-            {
-              "price_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
-              "product_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
-              "quantity": 1
-            }
-          ],
-          "currency": "EUR",
-          "payment_method": [
-            {
-              "type": "IBAN",
-              "details": {}
-            }
-          ],
-          "billing_contact": {
-            "$relation": [
-              {
-                "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
-                "_tags": []
-              }
-            ]
-          },
-          "billing_first_name": "Joao",
-          "billing_last_name": "Pinho",
-          "billing_email": "j.pinho@epilot.cloud",
-          "billing_company_name": "epilot cloud",
-          "billing_address": [
-            {
-              "_tags": [],
-              "street": "Im Media Park",
-              "street_number": "8a",
-              "postal_code": "52000",
-              "city": "Cologne",
-              "country": "DE",
-              "additional_info": ""
-            }
-          ],
-          "delivery_address": [],
-          "dates": [
-            {
-              "_tags": [
-                "Instalation Date"
-              ],
-              "dates": "",
-              "value": "2022-06-30T16:29:00.000Z"
-            }
-          ],
-          "_id": "4c7c9562-f8f0-4af0-a3a6-6aebc5571a6e",
-          "_org": "728",
-          "_created_at": "2022-06-03T16:29:46.303Z",
-          "_updated_at": "2022-06-03T16:29:46.303Z"
-        }
-      },
-      "order-with-composite-prices": {
-        "value": {
-          "metadata": [
-            {
-              "key": "_origin",
-              "value": "journey checkout"
-            }
-          ],
-          "_tags": [
-            "journey",
-            "automation"
-          ],
-          "status": "quote",
-          "order_number": "OREabZxnO",
-          "billing_first_name": "Paulo",
-          "billing_last_name": "Henriques",
-          "billing_email": "ph@ph1.pt",
-          "billing_address": [
-            {
-              "street": "Bernauer Str.",
-              "street_number": "1",
-              "city": "Berlin",
-              "postal_code": "10115",
-              "country": "DE",
-              "additional_info": "1"
-            }
-          ],
-          "delivery_address": [
-            {
-              "street": "Bernauer Str.",
-              "street_number": "1",
-              "city": "Berlin",
-              "postal_code": "10115",
-              "country": "DE",
-              "additional_info": "1"
-            }
-          ],
-          "payment_method": [
-            {
-              "type": "BankTransfer",
-              "details": {
-                "label": "Überweisung"
-              }
-            }
-          ],
-          "currency": "EUR",
-          "line_items": [
-            {
-              "product_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
-              "price_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
-              "quantity": 3,
-              "currency": "EUR",
-              "item_components": [
-                {
-                  "price_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
-                  "product_id": "target-price-product-id",
-                  "quantity": 3,
-                  "unit_amount": 15000,
-                  "unit_amount_currency": "EUR",
-                  "unit_amount_decimal": "150.00",
-                  "amount_subtotal": 45000,
-                  "amount_total": 47700,
-                  "taxes": [
-                    {
-                      "tax": {
-                        "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
-                        "type": "VAT",
-                        "active": true,
-                        "region": "DE",
-                        "_schema": "tax",
-                        "_title": "Tax Without Behaviour",
-                        "description": "Without Behaviour",
-                        "rate": "6",
-                        "_org": "739224",
-                        "_created_at": "2022-02-07T14:49:08.831Z",
-                        "_updated_at": "2022-02-07T14:49:08.831Z"
-                      },
-                      "amount": 2700
-                    }
-                  ]
-                },
-                {
-                  "price_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
-                  "product_id": "target-price-product-id",
-                  "quantity": 3,
-                  "unit_amount": 15000,
-                  "unit_amount_currency": "EUR",
-                  "unit_amount_decimal": "150.00",
-                  "amount_subtotal": 45000,
-                  "amount_total": 47700,
-                  "taxes": [
-                    {
-                      "tax": {
-                        "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
-                        "type": "VAT",
-                        "active": true,
-                        "region": "DE",
-                        "_schema": "tax",
-                        "_title": "Tax Without Behaviour",
-                        "description": "Without Behaviour",
-                        "rate": 6,
-                        "_org": "739224",
-                        "_created_at": "2022-02-07T14:49:08.831Z",
-                        "_updated_at": "2022-02-07T14:49:08.831Z"
-                      },
-                      "amount": 2700
-                    }
-                  ]
-                }
-              ],
-              "_price": {
-                "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
-                "_schema": "price",
-                "_title": "Test 1",
-                "description": "Test 1",
-                "_org": "739224",
-                "_created_at": "2022-02-18T10:10:26.439Z",
-                "_updated_at": "2022-02-18T11:53:04.191Z",
-                "active": true,
-                "price_components": {
-                  "$relation": [
-                    {
-                      "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
-                      "_schema": "price",
-                      "_product_id": "target-price-product-id",
-                      "quantity": 1,
-                      "item": {
-                        "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
-                        "unit_amount": 10000,
-                        "unit_amount_currency": "EUR",
-                        "unit_amount_decimal": "100.00",
-                        "sales_tax": "standard",
-                        "price_display_in_journeys": "show_price",
-                        "type": "one_time",
-                        "_schema": "price",
-                        "_title": "Test 1",
-                        "description": "Test 1",
-                        "tax": {
-                          "$relation": [
-                            {
-                              "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
-                            }
-                          ]
-                        },
-                        "_org": "739224",
-                        "_created_at": "2022-02-18T10:10:26.439Z",
-                        "_updated_at": "2022-02-18T11:53:04.191Z",
-                        "active": true,
-                        "billing_period": "weekly",
-                        "billing_duration_unit": "months",
-                        "notice_time_unit": "months",
-                        "termination_time_unit": "months",
-                        "renewal_duration_unit": "months"
-                      }
-                    },
-                    {
-                      "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
-                      "_schema": "price",
-                      "_product_id": "target-price-product-id",
-                      "quantity": 2,
-                      "item": {
-                        "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
-                        "unit_amount": 10000,
-                        "unit_amount_currency": "EUR",
-                        "unit_amount_decimal": "100.00",
-                        "sales_tax": "standard",
-                        "is_tax_inclusive": false,
-                        "price_display_in_journeys": "show_price",
-                        "type": "one_time",
-                        "_schema": "price",
-                        "_title": "Test 1",
-                        "description": "Test 1",
-                        "tax": {
-                          "$relation": [
-                            {
-                              "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
-                            }
-                          ]
-                        },
-                        "_org": "739224",
-                        "_created_at": "2022-02-18T10:10:26.439Z",
-                        "_updated_at": "2022-02-18T11:53:04.191Z",
-                        "active": true,
-                        "billing_period": "weekly",
-                        "billing_duration_unit": "months",
-                        "notice_time_unit": "months",
-                        "termination_time_unit": "months",
-                        "renewal_duration_unit": "months"
-                      }
-                    }
-                  ]
-                }
-              },
-              "_product": {
-                "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
-                "type": "product",
-                "name": "Cool box",
-                "_title": "Cool box"
-              },
-              "description": "Price Component",
-              "unit_amount": 90000,
-              "amount_subtotal": 270000,
-              "amount_total": 286200
-            },
-            {
-              "price_id": "adbd8cee-0db2-41dd-b93b-2d0ed57c77da",
-              "product_id": "11bd46e5-4c02-425c-bcce-5f5e022a2b45",
-              "taxes": [
-                {
-                  "tax": null,
-                  "amount": 0
-                }
-              ],
-              "_price": {
-                "_id": "adbd8cee-0db2-41dd-b93b-2d0ed57c77da",
-                "unit_amount": 55566677,
-                "unit_amount_currency": "EUR",
-                "unit_amount_decimal": "555666.77",
-                "sales_tax": "standard",
-                "is_tax_inclusive": true,
-                "price_display_in_journeys": "show_as_starting_price",
-                "type": "one_time",
-                "_schema": "price",
-                "_title": "As Starting Price One Time No Tax",
-                "description": "As Starting Price One Time No Tax",
-                "tax": null,
-                "active": true,
-                "_org": "739224",
-                "_created_at": "2022-04-14T16:12:34.456Z",
-                "_updated_at": "2022-04-14T16:13:47.261Z",
-                "billing_period": "weekly",
-                "billing_duration_unit": "months",
-                "notice_time_unit": "months",
-                "termination_time_unit": "months",
-                "renewal_duration_unit": "months"
-              },
-              "_product": {
-                "_id": "11bd46e5-4c02-425c-bcce-5f5e022a2b45",
-                "type": "product",
-                "_schema": "product",
-                "_title": "Product With A Lot Of Prices - Do Not Change 🙏",
-                "name": "Product With A Lot Of Prices - Do Not Change 🙏",
-                "_org": "739224",
-                "_created_at": "2022-04-14T16:08:08.595Z",
-                "_updated_at": "2022-04-18T16:26:33.089Z",
-                "price_options": {
-                  "$relation": [
-                    {
-                      "entity_id": "f850ebff-082e-4924-8631-965cc9c0ab2b",
-                      "_tags": []
-                    },
-                    {
-                      "entity_id": "d6ecc576-b5d6-44b4-8c95-496ab2ac14d3",
-                      "_tags": []
-                    },
-                    {
-                      "entity_id": "3c0e47ad-6ca3-4cd8-b6b4-b2a48dab7f16",
-                      "_tags": []
-                    },
-                    {
-                      "entity_id": "adbd8cee-0db2-41dd-b93b-2d0ed57c77da",
-                      "_tags": []
-                    },
-                    {
-                      "entity_id": "3e97f809-1d4b-47e1-9faf-46386b2b0d21",
-                      "_tags": []
-                    },
-                    {
-                      "entity_id": "d4061656-71dc-45ec-bf6c-1d90d2419d87",
-                      "_tags": []
-                    },
-                    {
-                      "entity_id": "4ae4221b-4fd0-4bcc-98a2-f20cda954903",
-                      "_tags": []
-                    },
-                    {
-                      "entity_id": "b326df19-9d0f-433a-a4d2-a0a65034b5f7",
-                      "_tags": []
-                    },
-                    {
-                      "entity_id": "0d071551-47be-4a5b-90d7-d425a59607e6",
-                      "_tags": []
-                    }
-                  ]
-                },
-                "_files": {
-                  "$relation": [
-                    {
-                      "entity_id": "27cc0710-651d-48dc-9624-9d1d3057d025",
-                      "_tags": []
-                    },
-                    {
-                      "entity_id": "8530678c-d4cb-4e27-b314-16a79d6c0abc",
-                      "_tags": []
-                    },
-                    {
-                      "entity_id": "714d6253-213f-4e30-8caf-00b0d11032e4",
-                      "_tags": []
-                    },
-                    {
-                      "entity_id": "2218a8f8-c6e2-4a98-a2fe-030ed78ebfa7",
-                      "_tags": []
-                    }
-                  ]
-                }
-              },
-              "quantity": 7,
-              "currency": "EUR",
-              "description": "As Starting Price One Time No Tax",
-              "unit_amount": 55566677,
-              "amount_subtotal": 388966739,
-              "amount_total": 388966739
-            }
-          ],
-          "amount_subtotal": 389236739,
-          "amount_total": 389252939,
-          "total_details": {
-            "amount_tax": 5400,
-            "breakdown": {
-              "taxes": [
-                {
-                  "tax": {
-                    "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
-                    "type": "VAT",
-                    "active": true,
-                    "region": "DE",
-                    "_schema": "tax",
-                    "_title": "Tax Without Behaviour",
-                    "description": "Without Behaviour",
-                    "rate": 6,
-                    "_org": "739224",
-                    "_created_at": "2022-02-07T14:49:08.831Z",
-                    "_updated_at": "2022-02-07T14:49:08.831Z"
-                  },
-                  "amount": 5400
-                }
-              ],
-              "recurrences": [
-                {
-                  "type": "one_time",
-                  "amount_subtotal": 389236739,
-                  "amount_total": 389252939,
-                  "amount_tax": 5400
-                }
-              ]
-            }
-          },
-          "_schema": "order",
-          "_id": "78ac88ae-d7df-4a1e-a26b-acaf089abfb2",
-          "_org": "739224",
-          "_created_at": "2022-04-19T08:19:29.816Z",
-          "_updated_at": "2022-04-20T16:15:48.759Z",
-          "_title": "OREabZxnO",
-          "customer": {
-            "$relation": [
-              {
-                "entity_id": "bb986d50-f403-477c-9d9c-726f8fd6d155"
-              }
-            ]
-          }
         }
       },
       "opportunity": {
