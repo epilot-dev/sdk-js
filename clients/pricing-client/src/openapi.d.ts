@@ -91,6 +91,20 @@ declare namespace Components {
             products: string[];
             filters: /* Availability filters dimensions */ AvailabilityFilters;
         }
+        export interface AvailabilityDate {
+            /**
+             * The availability interval start date
+             * example:
+             * 2017-07-21
+             */
+            available_start_date?: string; // date
+            /**
+             * The availability interval end date
+             * example:
+             * 2017-07-21
+             */
+            available_end_date?: string; // date
+        }
         /**
          * Availability filters dimensions
          */
@@ -455,6 +469,51 @@ declare namespace Components {
             password: string;
         }
         export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
+        /**
+         * Supports shopping for products and services until ready for checkout.
+         */
+        export interface Cart {
+            /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal?: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total?: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal?: string;
+            /**
+             * The cart identifier
+             */
+            id?: string;
+            /**
+             * The user's Organization Id the cart belongs to
+             */
+            org_id?: string;
+            /**
+             * The status of the Cart:
+             * - open - the cart checkout is still in progress. Payment processing has not started
+             * - complete - the cart checkout is complete. Payment processing may still be in progress
+             * - expired - the cart checkout has expired. No further processing will occur
+             *
+             */
+            status?: "open" | "complete" | "expired";
+            customer?: Customer;
+            billing_address?: Address;
+            delivery_address?: Address;
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            line_items?: /* Tracks a set of product prices, quantities, (discounts) and taxes. */ PriceItems;
+            total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+        }
         /**
          * A valid cart payload from a client.
          */
@@ -1099,6 +1158,35 @@ declare namespace Components {
             phone?: string;
         }
         export type EntityId = string; // uuid
+        /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         * }
+         */
+        export interface EntityItem {
+            _id: EntityId /* uuid */;
+            /**
+             * Title of entity
+             */
+            _title: string;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org: string;
+            _schema: string;
+            _tags?: string[];
+            _created_at: string; // date-time
+            _updated_at: string; // date-time
+        }
         export interface EntityRelation {
             [name: string]: any;
             entity_id?: string;
@@ -2349,6 +2437,51 @@ declare namespace Components {
             display_mode?: PriceTierDisplayMode;
         }
         export type PriceTierDisplayMode = "hidden" | "on_request";
+        /**
+         * The result from the calculation of a set of price items.
+         */
+        export interface PricingDetails {
+            items?: (/**
+             * Represents a price item
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-item"
+             * }
+             */
+            PriceItem | /**
+             * Represents a composite price input to the pricing library.
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-item"
+             * }
+             */
+            CompositePriceItem)[];
+            /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total?: number;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            /**
+             * This is the sum of all the price item tax amounts.
+             */
+            amount_tax?: number;
+            total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+        }
         /**
          * The product entity
          * example:
