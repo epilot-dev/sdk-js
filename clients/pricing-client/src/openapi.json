@@ -3654,6 +3654,51 @@
           "amount_total_decimal"
         ]
       },
+      "RecurrenceAmountWithTax": {
+        "type": "object",
+        "description": "An amount associated with a specific recurrence.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The price type."
+          },
+          "billing_period": {
+            "type": "string",
+            "description": "The price billing period.",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly"
+            ]
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total amount of items with same recurrence."
+          },
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total amount of items with same recurrence, excluding taxes."
+          },
+          "amount_tax": {
+            "type": "integer",
+            "description": "Total tax amount of items with same recurrence."
+          },
+          "tax": {
+            "type": "array",
+            "description": "The taxes applied to the price item.",
+            "readOnly": true,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TaxAmount"
+                }
+              ]
+            }
+          }
+        }
+      },
       "TotalDetails": {
         "type": "object",
         "description": "The total details with tax (and discount) aggregated totals.",
@@ -3693,6 +3738,17 @@
                   ]
                 }
               }
+            }
+          },
+          "recurrencesByTax": {
+            "type": "array",
+            "description": "The aggregated price items recurrences by tax rate",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/RecurrenceAmountWithTax"
+                }
+              ]
             }
           }
         }

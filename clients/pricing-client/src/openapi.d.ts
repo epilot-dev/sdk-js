@@ -2668,6 +2668,35 @@ declare namespace Components {
              */
             amount_tax?: number;
         }
+        /**
+         * An amount associated with a specific recurrence.
+         */
+        export interface RecurrenceAmountWithTax {
+            /**
+             * The price type.
+             */
+            type?: string;
+            /**
+             * The price billing period.
+             */
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
+            /**
+             * Total amount of items with same recurrence.
+             */
+            amount_total?: number;
+            /**
+             * Total amount of items with same recurrence, excluding taxes.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total tax amount of items with same recurrence.
+             */
+            amount_tax?: number;
+            /**
+             * The taxes applied to the price item.
+             */
+            tax?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
+        }
         export type SalesTax = "nontaxable" | "reduced" | "standard";
         export type SaveIntegrationCredentialsParams = /* The basic auth credentials */ BasicAuthCredentials;
         /**
@@ -2892,6 +2921,10 @@ declare namespace Components {
                  */
                 recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
             };
+            /**
+             * The aggregated price items recurrences by tax rate
+             */
+            recurrencesByTax?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountWithTax)[];
         }
         /**
          * The availability rule error
