@@ -1,6 +1,6 @@
 {
   "name": "@epilot/entity-client",
-  "version": "4.20.4",
+  "version": "4.21.0-rc.3",
   "description": "JavaScript client library for the epilot Core Entity API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -29,7 +29,8 @@
     "build": "tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",
     "release-alpha": "npm version prerelease --preid alpha",
-    "lint": "../../node_modules/eslint/bin/eslint.js src"
+    "lint": "../../node_modules/eslint/bin/eslint.js src",
+    "prepublishOnly": "npm run typegen && npm run build"
   },
   "files": [
     "*.js",

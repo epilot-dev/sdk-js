@@ -3804,61 +3804,20 @@
               "default"
             ]
           },
-          "dropdown_items": {
+          "row_actions": {
             "type": "array",
             "items": {
-              "allOf": [
+              "oneOf": [
                 {
-                  "type": "object",
-                  "properties": {
-                    "feature_flag": {
-                      "type": "string",
-                      "example": "FF_MY_FEATURE_FLAG",
-                      "description": "This dropdown item should only be active when the feature flag is enabled"
-                    }
-                  }
+                  "type": "string"
                 },
                 {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "entity"
-                          ]
-                        },
-                        "entity": {
-                          "$ref": "#/components/schemas/EntitySlug"
-                        }
-                      }
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "link"
-                          ]
-                        },
-                        "title": {
-                          "type": "string",
-                          "example": "Opportunities"
-                        },
-                        "uri": {
-                          "type": "string",
-                          "format": "uri-reference"
-                        }
-                      }
-                    }
-                  ]
+                  "$ref": "#/components/schemas/EntityAction"
                 }
               ]
             }
           },
-          "row_actions": {
+          "bulk_actions": {
             "type": "array",
             "items": {
               "oneOf": [
@@ -4112,6 +4071,87 @@
         },
         "additionalProperties": true
       },
+      "HydratedEntity": {
+        "type": "object",
+        "description": "Entity with relation data resolved into the attribute values",
+        "properties": {
+          "_relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/EntityId"
+                }
+              },
+              "required": [
+                "entity_id"
+              ]
+            }
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "_relations"
+        ],
+        "example": {
+          "_relations": [
+            {
+              "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            }
+          ],
+          "status": "active",
+          "customer_number": "abc123",
+          "email": [
+            {
+              "label": "work",
+              "email": "user@example.com"
+            }
+          ],
+          "phone": [
+            {
+              "label": "work",
+              "phone": "+49123456789"
+            }
+          ],
+          "first_name": "First Name",
+          "middle_name": "Middle Name",
+          "last_name": "Last Name",
+          "date_of_birth": "2019-08-24",
+          "title": "Mr.",
+          "account": [
+            {
+              "status": "active",
+              "name": "Company name",
+              "company_email": [
+                {
+                  "label": "Company email",
+                  "email": "company@example.com"
+                }
+              ],
+              "company_phone": [
+                {
+                  "label": "Support phone",
+                  "phone": "+49123456789"
+                }
+              ],
+              "company_website": "https://example.com",
+              "tax_id": "DE123456789",
+              "tax_exemption": "2019-08-24",
+              "contacts": {
+                "$relation": [
+                  {
+                    "_tags": [
+                      "CEO"
+                    ],
+                    "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
       "EntityItem": {
         "allOf": [
           {
@@ -4209,107 +4249,6 @@
         "required": [
           "status",
           "errors"
-        ]
-      },
-      "HydratedEntity": {
-        "type": "object",
-        "description": "Entity with relation data resolved into the attribute values",
-        "properties": {
-          "_relations": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "entity_id": {
-                  "$ref": "#/components/schemas/EntityId"
-                }
-              },
-              "required": [
-                "entity_id"
-              ]
-            }
-          }
-        },
-        "additionalProperties": true,
-        "required": [
-          "_relations"
-        ],
-        "example": {
-          "_relations": [
-            {
-              "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-            }
-          ],
-          "status": "active",
-          "customer_number": "abc123",
-          "email": [
-            {
-              "label": "work",
-              "email": "user@example.com"
-            }
-          ],
-          "phone": [
-            {
-              "label": "work",
-              "phone": "+49123456789"
-            }
-          ],
-          "first_name": "First Name",
-          "middle_name": "Middle Name",
-          "last_name": "Last Name",
-          "date_of_birth": "2019-08-24",
-          "title": "Mr.",
-          "account": [
-            {
-              "status": "active",
-              "name": "Company name",
-              "company_email": [
-                {
-                  "label": "Company email",
-                  "email": "company@example.com"
-                }
-              ],
-              "company_phone": [
-                {
-                  "label": "Support phone",
-                  "phone": "+49123456789"
-                }
-              ],
-              "company_website": "https://example.com",
-              "tax_id": "DE123456789",
-              "tax_exemption": "2019-08-24",
-              "contacts": {
-                "$relation": [
-                  {
-                    "_tags": [
-                      "CEO"
-                    ],
-                    "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      "EntityItem": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseEntity"
-          },
-          {
-            "$ref": "#/components/schemas/Entity"
-          }
-        ]
-      },
-      "HydratedEntityItem": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseEntity"
-          },
-          {
-            "$ref": "#/components/schemas/HydratedEntity"
-          }
         ]
       },
       "GetRelationsResp": {
