@@ -3686,18 +3686,21 @@
             "description": "Total tax amount of items with same recurrence."
           },
           "tax": {
-            "type": "array",
+            "type": "object",
             "description": "The taxes applied to the price item.",
-            "readOnly": true,
             "items": {
               "oneOf": [
                 {
-                  "$ref": "#/components/schemas/TaxAmount"
+                  "$ref": "#/components/schemas/TaxAmountBreakdown"
                 }
               ]
             }
           }
-        }
+        },
+        "required": [
+          "amount_subtotal",
+          "amount_total"
+        ]
       },
       "TotalDetails": {
         "type": "object",
@@ -3737,18 +3740,18 @@
                     }
                   ]
                 }
-              }
-            }
-          },
-          "recurrencesByTax": {
-            "type": "array",
-            "description": "The aggregated price items recurrences by tax rate",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/RecurrenceAmountWithTax"
+              },
+              "recurrencesByTax": {
+                "type": "array",
+                "description": "The aggregated price items recurrences by tax rate",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/RecurrenceAmountWithTax"
+                    }
+                  ]
                 }
-              ]
+              }
             }
           }
         }

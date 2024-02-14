@@ -2683,11 +2683,11 @@ declare namespace Components {
             /**
              * Total amount of items with same recurrence.
              */
-            amount_total?: number;
+            amount_total: number;
             /**
              * Total amount of items with same recurrence, excluding taxes.
              */
-            amount_subtotal?: number;
+            amount_subtotal: number;
             /**
              * Total tax amount of items with same recurrence.
              */
@@ -2695,7 +2695,9 @@ declare namespace Components {
             /**
              * The taxes applied to the price item.
              */
-            tax?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
+            tax?: {
+                [key: string]: any;
+            };
         }
         export type SalesTax = "nontaxable" | "reduced" | "standard";
         export type SaveIntegrationCredentialsParams = /* The basic auth credentials */ BasicAuthCredentials;
@@ -2920,11 +2922,11 @@ declare namespace Components {
                  * The aggregated price items tax amount per rate.
                  */
                 recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+                /**
+                 * The aggregated price items recurrences by tax rate
+                 */
+                recurrencesByTax?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountWithTax)[];
             };
-            /**
-             * The aggregated price items recurrences by tax rate
-             */
-            recurrencesByTax?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountWithTax)[];
         }
         /**
          * The availability rule error
