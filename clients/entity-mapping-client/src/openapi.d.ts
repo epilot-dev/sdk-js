@@ -401,6 +401,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             mode: "append" | "prepend" | "set";
+            origin?: /* Origin of an attribute. */ AttributeOrigin;
         }
         export interface RelationItem {
             entity_id: string;

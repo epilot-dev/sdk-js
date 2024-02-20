@@ -1001,6 +1001,9 @@
               "prepend",
               "set"
             ]
+          },
+          "origin": {
+            "$ref": "#/components/schemas/AttributeOrigin"
           }
         },
         "required": [
