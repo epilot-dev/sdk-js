@@ -154,7 +154,7 @@
   "components": {},
   "servers": [
     {
-      "url": "https://entity-mapping.sls.epilot.io"
+      "url": "https://entity-mapping.sls.epilot.io/"
     }
   ]
 }
