@@ -469,6 +469,46 @@
         ]
       }
     },
+    "/v2/portal/opportunities/searchable-attributes": {
+      "get": {
+        "operationId": "getSearchableAttributesForOpportunities",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          }
+        ]
+      }
+    },
+    "/v2/portal/opportunities/search": {
+      "post": {
+        "operationId": "getSearchResultsForOpportunities",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v2/portal/opportunities/{id}": {
       "get": {
         "operationId": "getOpportunity",
@@ -771,6 +811,16 @@
       "get": {
         "operationId": "getBillingEvents",
         "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
           {
             "name": "entity_id",
             "in": "query",

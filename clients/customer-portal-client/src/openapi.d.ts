@@ -2342,6 +2342,13 @@ declare namespace Components {
             };
         }
         /**
+         * Workflow identifier object
+         */
+        export interface WorfklowIdentifier {
+            defition_id?: string;
+            name?: string;
+        }
+        /**
          * example:
          * {
          *   "id": "8gja72h6kas6h",
@@ -2869,8 +2876,32 @@ declare namespace Paths {
              * Type of billing event to filter by
              */
             export type EventType = "installment" | "reimbursement";
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            export type Size = number;
         }
         export interface QueryParameters {
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            Parameters.Size;
             entity_id?: Parameters.EntityId;
             event_type?: /* Type of billing event to filter by */ Parameters.EventType;
             date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
@@ -3616,6 +3647,90 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetSearchResultsForOpportunities {
+        namespace Parameters {
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 1000
+             */
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 1000
+             */
+            Parameters.Size;
+        }
+        export interface RequestBody {
+            addresses?: string[];
+            customers?: string[];
+            purposes?: string[];
+            workflows?: any[];
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* The opportunity entity */ Components.Schemas.Opportunity[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetSearchableAttributesForOpportunities {
+        namespace Parameters {
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 1000
+             */
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 1000
+             */
+            Parameters.Size;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* The opportunity entity */ Components.Schemas.Opportunity[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetValidSecondaryAttributes {
         namespace Responses {
             export interface $200 {
@@ -3667,6 +3782,7 @@ declare namespace Paths {
                  * 7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51
                  */
                 _id?: string;
+                is_main_entity?: boolean;
             };
         }
         namespace Responses {
@@ -4483,6 +4599,26 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllOpportunities.Responses.$200>
   /**
+   * getSearchableAttributesForOpportunities - getSearchableAttributesForOpportunities
+   * 
+   * Get all opportunity searchable attributes for a portal user
+   */
+  'getSearchableAttributesForOpportunities'(
+    parameters?: Parameters<Paths.GetSearchableAttributesForOpportunities.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSearchableAttributesForOpportunities.Responses.$200>
+  /**
+   * getSearchResultsForOpportunities - getSearchResultsForOpportunities
+   * 
+   * Get all opportunity with the given serached attributes
+   */
+  'getSearchResultsForOpportunities'(
+    parameters?: Parameters<Paths.GetSearchResultsForOpportunities.QueryParameters> | null,
+    data?: Paths.GetSearchResultsForOpportunities.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSearchResultsForOpportunities.Responses.$200>
+  /**
    * getOpportunity - getOpportunity
    * 
    * Get an opportunity by id
@@ -5180,6 +5316,30 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllOpportunities.Responses.$200>
+  }
+  ['/v2/portal/opportunities/searchable-attributes']: {
+    /**
+     * getSearchableAttributesForOpportunities - getSearchableAttributesForOpportunities
+     * 
+     * Get all opportunity searchable attributes for a portal user
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSearchableAttributesForOpportunities.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSearchableAttributesForOpportunities.Responses.$200>
+  }
+  ['/v2/portal/opportunities/search']: {
+    /**
+     * getSearchResultsForOpportunities - getSearchResultsForOpportunities
+     * 
+     * Get all opportunity with the given serached attributes
+     */
+    'post'(
+      parameters?: Parameters<Paths.GetSearchResultsForOpportunities.QueryParameters> | null,
+      data?: Paths.GetSearchResultsForOpportunities.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSearchResultsForOpportunities.Responses.$200>
   }
   ['/v2/portal/opportunities/{id}']: {
     /**
