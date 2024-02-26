@@ -10,8 +10,19 @@
         "operationId": "getBillingEvents",
         "parameters": [
           {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
             "name": "entity_id",
-            "in": "query"
+            "in": "query",
+            "required": false
           },
           {
             "name": "event_type",
@@ -23,10 +34,6 @@
           },
           {
             "name": "date_before",
-            "in": "query"
-          },
-          {
-            "name": "customer_id",
             "in": "query"
           }
         ]
@@ -73,6 +80,18 @@
         "parameters": [
           {
             "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/billing/external/{external_id}": {
+      "get": {
+        "operationId": "getBillingEventByExternalId",
+        "parameters": [
+          {
+            "name": "external_id",
             "in": "path",
             "required": true
           }
