@@ -108,9 +108,6 @@
   "servers": [
     {
       "url": "https://pricing-api.sls.epilot.io"
-    },
-    {
-      "url": "https://pricing-api.sls.epilot.io"
     }
   ],
   "paths": {
@@ -1075,12 +1072,24 @@
                     "value": {
                       "amount_total": 100,
                       "amount_total_decimal": "100.00",
+                      "amount_static": 500,
+                      "amount_static_decimal": "50.00",
+                      "amount_variable": 500,
+                      "amount_variable_decimal": "50.00",
                       "currency": "EUR",
                       "billing_period": "monthly",
                       "breakdown": {
-                        "maintenance_fee": {
-                          "amount": 10,
-                          "amount_decimal": "10.00"
+                        "static": {
+                          "maintenance_fee": {
+                            "amount": 50,
+                            "amount_decimal": "50.00"
+                          }
+                        },
+                        "variable": {
+                          "offshore_liability_fee": {
+                            "amount": 50,
+                            "amount_decimal": "50.00"
+                          }
                         }
                       }
                     }
@@ -2655,6 +2664,20 @@
       "ComputedPriceBreakdown": {
         "type": "object",
         "description": "Price breakdown",
+        "properties": {
+          "static": {
+            "description": "The static price breakdown",
+            "$ref": "#/components/schemas/ComputedPriceComponents"
+          },
+          "variable": {
+            "description": "The variable price breakdown",
+            "$ref": "#/components/schemas/ComputedPriceComponents"
+          }
+        }
+      },
+      "ComputedPriceComponents": {
+        "type": "object",
+        "description": "The computed price components",
         "additionalProperties": {
           "$ref": "#/components/schemas/ComputedBasePrice"
         }
@@ -2668,6 +2691,21 @@
           },
           "amount_total_decimal": {
             "description": "The computed total price as decimal",
+            "type": "string"
+          },
+          "amount_static": {
+            "description": "The computed static price",
+            "type": "number"
+          },
+          "amount_static_decimal": {
+            "description": "The computed static price as decimal"
+          },
+          "amount_variable": {
+            "description": "The computed variable price",
+            "type": "number"
+          },
+          "amount_variable_decimal": {
+            "description": "The computed variable price as decimal",
             "type": "string"
           },
           "currency": {
@@ -2758,13 +2796,13 @@
         "description": "The street entity",
         "type": "object",
         "properties": {
-          "name": {
+          "street": {
             "description": "The street name",
             "type": "string"
           }
         },
         "required": [
-          "name"
+          "street"
         ]
       },
       "ValidateAvailabilityFileResult": {
@@ -3618,8 +3656,7 @@
       },
       "RecurrenceAmountWithTax": {
         "type": "object",
-        "description": "An amount associated with a specific recurrence and tax.",
-        "readOnly": true,
+        "description": "An amount associated with a specific recurrence.",
         "properties": {
           "type": {
             "type": "string",
@@ -3638,24 +3675,31 @@
           },
           "amount_total": {
             "type": "integer",
-            "description": "Total of all items after (discounts and) taxes are applied."
+            "description": "Total amount of items with same recurrence."
           },
           "amount_subtotal": {
             "type": "integer",
-            "description": "Total of all items before (discounts or) taxes are applied."
+            "description": "Total amount of items with same recurrence, excluding taxes."
           },
           "amount_tax": {
             "type": "integer",
-            "description": "Total of all items taxes, with same recurrence."
+            "description": "Total tax amount of items with same recurrence."
           },
           "tax": {
-            "$ref": "#/components/schemas/TaxAmountBreakdown",
-            "description": "Tax"
+            "type": "object",
+            "description": "The taxes applied to the price item.",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TaxAmountBreakdown"
+                }
+              ]
+            }
           }
         },
         "required": [
-          "amount_total",
-          "amount_subtotal"
+          "amount_subtotal",
+          "amount_total"
         ]
       },
       "TotalDetails": {
@@ -3699,7 +3743,7 @@
               },
               "recurrencesByTax": {
                 "type": "array",
-                "description": "The aggregated price items recurrences by tax rate.",
+                "description": "The aggregated price items recurrences by tax rate",
                 "items": {
                   "oneOf": [
                     {

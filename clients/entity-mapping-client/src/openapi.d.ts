@@ -267,7 +267,7 @@ declare namespace Components {
                 /**
                  * Whether its a read-only ui or not. Can be each target, or only the first. Overwrites uiActions
                  */
-                locked?: "each" | "first";
+                locked?: "each" | "first" | "system_recommendation";
                 /**
                  * Whether all source mappings flow into a single attribute (e.g. address)
                  */
@@ -292,6 +292,10 @@ declare namespace Components {
              * Data Structure Type of the underlaying output value
              */
             possible_target_types?: MappingSourceTargetType[];
+            /**
+             * Whether the raw value should be used, or whether the value is enriched by a path
+             */
+            raw?: boolean;
         }
         export type MappingSourceTargetType = "string" | "date" | "datetime" | "boolean" | "number" | "image" | "file" | "address" | "email" | "phone" | "select" | "multiselect";
         export interface MappingWarning {
@@ -401,6 +405,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             mode: "append" | "prepend" | "set";
+            origin?: /* Origin of an attribute. */ AttributeOrigin;
         }
         export interface RelationItem {
             entity_id: string;

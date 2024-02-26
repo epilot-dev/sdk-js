@@ -1074,6 +1074,22 @@ declare namespace Components {
              */
             amount_total_decimal: string;
             /**
+             * The computed static price
+             */
+            amount_static?: number;
+            /**
+             * The computed static price as decimal
+             */
+            amount_static_decimal?: any;
+            /**
+             * The computed variable price
+             */
+            amount_variable?: number;
+            /**
+             * The computed variable price as decimal
+             */
+            amount_variable_decimal?: string;
+            /**
              * The currency of the computed price (three-letter ISO currency code)
              */
             currency: /* The currency of the computed price (three-letter ISO currency code) */ /**
@@ -1107,6 +1123,19 @@ declare namespace Components {
          * Price breakdown
          */
         export interface ComputedPriceBreakdown {
+            /**
+             * The static price breakdown
+             */
+            static?: /* The computed price components */ ComputedPriceComponents;
+            /**
+             * The variable price breakdown
+             */
+            variable?: /* The computed price components */ ComputedPriceComponents;
+        }
+        /**
+         * The computed price components
+         */
+        export interface ComputedPriceComponents {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
         /**
@@ -2640,7 +2669,7 @@ declare namespace Components {
             amount_tax?: number;
         }
         /**
-         * An amount associated with a specific recurrence and tax.
+         * An amount associated with a specific recurrence.
          */
         export interface RecurrenceAmountWithTax {
             /**
@@ -2652,21 +2681,23 @@ declare namespace Components {
              */
             billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
             /**
-             * Total of all items after (discounts and) taxes are applied.
+             * Total amount of items with same recurrence.
              */
             amount_total: number;
             /**
-             * Total of all items before (discounts or) taxes are applied.
+             * Total amount of items with same recurrence, excluding taxes.
              */
             amount_subtotal: number;
             /**
-             * Total of all items taxes, with same recurrence.
+             * Total tax amount of items with same recurrence.
              */
             amount_tax?: number;
             /**
-             * Tax
+             * The taxes applied to the price item.
              */
-            tax?: /* A tax amount associated with a specific tax rate. */ TaxAmountBreakdown;
+            tax?: {
+                [key: string]: any;
+            };
         }
         export type SalesTax = "nontaxable" | "reduced" | "standard";
         export type SaveIntegrationCredentialsParams = /* The basic auth credentials */ BasicAuthCredentials;
@@ -2723,7 +2754,7 @@ declare namespace Components {
             /**
              * The street name
              */
-            name: string;
+            street: string;
         }
         /**
          * the tax configuration
@@ -2892,9 +2923,9 @@ declare namespace Components {
                  */
                 recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
                 /**
-                 * The aggregated price items recurrences by tax rate.
+                 * The aggregated price items recurrences by tax rate
                  */
-                recurrencesByTax?: (/* An amount associated with a specific recurrence and tax. */ RecurrenceAmountWithTax)[];
+                recurrencesByTax?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountWithTax)[];
             };
         }
         /**

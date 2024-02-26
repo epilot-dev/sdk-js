@@ -278,6 +278,12 @@ declare namespace Components {
              */
             enable_data_table_margin_autofix?: boolean;
             /**
+             * A flag that indicates whether the template has 1 or more data tables in it
+             * example:
+             * false
+             */
+            template_with_datatable?: boolean;
+            /**
              * Enables the persistance of template settings
              * example:
              * false

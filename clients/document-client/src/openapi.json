@@ -362,6 +362,11 @@
             "type": "boolean",
             "example": false
           },
+          "template_with_datatable": {
+            "description": "A flag that indicates whether the template has 1 or more data tables in it",
+            "type": "boolean",
+            "example": false
+          },
           "enabled_template_settings_persistence": {
             "description": "Enables the persistance of template settings",
             "type": "boolean",

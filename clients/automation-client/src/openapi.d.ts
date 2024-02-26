@@ -22,7 +22,7 @@ declare namespace Components {
                  * submission
                  */
                 schema?: string;
-                types?: ("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal")[];
+                types?: (("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword") | string)[];
             };
         }
         export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | AutomationAction;
@@ -1167,12 +1167,18 @@ declare namespace Components {
         export interface EqualsIgnoreCaseCondition {
             "equals-ignore-case"?: string;
         }
-        export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR";
+        export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR" | "TEMPLATE_ERROR";
+        export interface ErrorDetail {
+            explanation: string;
+            context?: string;
+            id?: string;
+        }
         export interface ErrorOutput {
             error_code: ErrorCode;
             error_reason: string;
             error_info?: {
                 [name: string]: any;
+                details?: ErrorDetail[];
             };
         }
         export type ExecutionStatus = "pending" | "in_progress" | "success" | "failed" | "cancelled" | "skipped";
