@@ -772,6 +772,16 @@
         "operationId": "getBillingEvents",
         "parameters": [
           {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
             "name": "entity_id",
             "in": "query",
             "required": false

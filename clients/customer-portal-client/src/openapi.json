@@ -3438,6 +3438,28 @@
         ],
         "parameters": [
           {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Initial offset to set for the search results",
+              "example": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Size of the search results",
+              "example": 100,
+              "default": 100
+            }
+          },
+          {
             "name": "entity_id",
             "in": "query",
             "description": "Entity ID to filter billing events by",
