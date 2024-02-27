@@ -535,7 +535,7 @@
             "description": "Amount to be paid in cents in decimal string representation",
             "example": "100.50"
           },
-          "billing_amount_currency": {
+          "billing_currency": {
             "$ref": "#/components/schemas/Currency"
           },
           "external_id": {
