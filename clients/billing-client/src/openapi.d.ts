@@ -62,14 +62,14 @@ declare namespace Components {
              * example:
              * 10050
              */
-            billing_amount?: number;
+            billing_amount: number;
             /**
              * Amount to be paid in cents in decimal string representation
              * example:
              * 100.50
              */
-            billing_amount_decimal?: string;
-            billing_currency?: /**
+            billing_amount_decimal: string;
+            billing_currency: /**
              * Currency code in ISO 4217 format
              * example:
              * EUR
@@ -490,14 +490,14 @@ declare namespace Components {
              * example:
              * 10050
              */
-            billing_amount?: number;
+            billing_amount: number;
             /**
              * Amount to be paid in cents in decimal string representation
              * example:
              * 100.50
              */
-            billing_amount_decimal?: string;
-            billing_currency?: /**
+            billing_amount_decimal: string;
+            billing_currency: /**
              * Currency code in ISO 4217 format
              * example:
              * EUR
@@ -560,14 +560,14 @@ declare namespace Components {
              * example:
              * 10050
              */
-            billing_amount?: number;
+            billing_amount: number;
             /**
              * Amount to be paid in cents in decimal string representation
              * example:
              * 100.50
              */
-            billing_amount_decimal?: string;
-            billing_currency?: /**
+            billing_amount_decimal: string;
+            billing_currency: /**
              * Currency code in ISO 4217 format
              * example:
              * EUR
@@ -648,12 +648,19 @@ declare namespace Paths {
             export type $200 = /* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ Components.Schemas.BillingEvent;
         }
     }
+    namespace GetBillingEventByExternalId {
+        namespace Parameters {
+            export type ExternalId = string;
+        }
+        export interface PathParameters {
+            external_id: Parameters.ExternalId;
+        }
+        namespace Responses {
+            export type $200 = /* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ Components.Schemas.BillingEvent;
+        }
+    }
     namespace GetBillingEvents {
         namespace Parameters {
-            /**
-             * List billing events for all contracts/orders of specific customer
-             */
-            export type CustomerId = string;
             /**
              * List billing events after this date
              */
@@ -662,21 +669,41 @@ declare namespace Paths {
              * List billing events before this date
              */
             export type DateBefore = string; // date-time
-            /**
-             * Get billing events by entity ID
-             */
-            export type EntityId = string;
+            export type EntityId = string[];
             /**
              * Type of billing event to filter by
              */
             export type EventType = "installment" | "reimbursement";
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            export type Size = number;
         }
         export interface QueryParameters {
-            entity_id?: /* Get billing events by entity ID */ Parameters.EntityId;
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            Parameters.Size;
+            entity_id?: Parameters.EntityId;
             event_type?: /* Type of billing event to filter by */ Parameters.EventType;
             date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
             date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;
-            customer_id?: /* List billing events for all contracts/orders of specific customer */ Parameters.CustomerId;
         }
         namespace Responses {
             export interface $200 {
@@ -782,6 +809,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBillingEvent.Responses.$204>
   /**
+   * getBillingEventByExternalId - getBillingEventByExternalId
+   * 
+   * Get a single billing event by External ID.
+   */
+  'getBillingEventByExternalId'(
+    parameters?: Parameters<Paths.GetBillingEventByExternalId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBillingEventByExternalId.Responses.$200>
+  /**
    * createContractEntity - createContractEntity
    * 
    * Create a new contract entity.
@@ -877,6 +914,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBillingEvent.Responses.$204>
+  }
+  ['/v1/billing/external/{external_id}']: {
+    /**
+     * getBillingEventByExternalId - getBillingEventByExternalId
+     * 
+     * Get a single billing event by External ID.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBillingEventByExternalId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBillingEventByExternalId.Responses.$200>
   }
   ['/v1/billing/contracts']: {
     /**

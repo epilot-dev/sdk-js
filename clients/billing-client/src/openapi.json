@@ -35,11 +35,37 @@
         ],
         "parameters": [
           {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Initial offset to set for the search results",
+              "example": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Size of the search results",
+              "example": 100,
+              "default": 100
+            }
+          },
+          {
             "name": "entity_id",
             "in": "query",
+            "description": "Entity ID to filter billing events by",
+            "required": false,
             "schema": {
-              "type": "string",
-              "description": "Get billing events by entity ID"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           {
@@ -70,14 +96,6 @@
               "type": "string",
               "format": "date-time",
               "description": "List billing events before this date"
-            }
-          },
-          {
-            "name": "customer_id",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "description": "List billing events for all contracts/orders of specific customer"
             }
           }
         ],
@@ -238,6 +256,39 @@
         "responses": {
           "204": {
             "description": "Billing Event deleted successfully"
+          }
+        }
+      }
+    },
+    "/v1/billing/external/{external_id}": {
+      "get": {
+        "operationId": "getBillingEventByExternalId",
+        "summary": "getBillingEventByExternalId",
+        "description": "Get a single billing event by External ID.",
+        "tags": [
+          "Billing Events"
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the billing event to get",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Billing Event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingEvent"
+                }
+              }
+            }
           }
         }
       }
@@ -467,7 +518,10 @@
         "type": "object",
         "required": [
           "type",
-          "contract"
+          "contract",
+          "billing_amount",
+          "billing_amount_decimal",
+          "billing_currency"
         ],
         "additionalProperties": true,
         "properties": {
