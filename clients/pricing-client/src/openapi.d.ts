@@ -3088,6 +3088,51 @@ declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace $PrivateSearchCatalog {
+        export type RequestBody = /**
+         * A catalog search payload
+         * example:
+         * {
+         *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
+         *   "sort": "description ASC",
+         *   "from": 0,
+         *   "size": 200,
+         *   "availability": {
+         *     "location": {
+         *       "postal_code": "57008,",
+         *       "city": "Cologne,",
+         *       "street": "Media Park,",
+         *       "street_number": "8a"
+         *     },
+         *     "available_date": {
+         *       "value": "2022-05-01"
+         *     }
+         *   }
+         * }
+         */
+        Components.Schemas.CatalogSearch;
+        namespace Responses {
+            export type $200 = /**
+             * The query result payload
+             * example:
+             * {
+             *   "hits": 2,
+             *   "results": [
+             *     {
+             *       "schema": "product",
+             *       "description": "product a"
+             *     },
+             *     {
+             *       "schema": "price",
+             *       "unit_amount_decimal": "124.342343434"
+             *     }
+             *   ]
+             * }
+             */
+            Components.Schemas.CatalogSearchResult;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace $SaveCredentials {
         namespace Parameters {
             export type IntegrationId = Components.Schemas.IntegrationId;
@@ -3306,6 +3351,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchCatalog.Responses.$200>
   /**
+   * $privateSearchCatalog - privateSearchCatalog
+   * 
+   * Provides a querying functionalities over products and prices of the Catalog for a given organization.
+   */
+  '$privateSearchCatalog'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$PrivateSearchCatalog.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$PrivateSearchCatalog.Responses.$200>
+  /**
    * $availabilityCheck - availabilityCheck
    * 
    * The availability check endpoint
@@ -3460,6 +3515,18 @@ export interface PathsDictionary {
       data?: Paths.$SearchCatalog.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$SearchCatalog.Responses.$200>
+  }
+  ['/v1/catalog']: {
+    /**
+     * $privateSearchCatalog - privateSearchCatalog
+     * 
+     * Provides a querying functionalities over products and prices of the Catalog for a given organization.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$PrivateSearchCatalog.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$PrivateSearchCatalog.Responses.$200>
   }
   ['/v1/public/availability:check']: {
     /**
