@@ -69,7 +69,7 @@ declare namespace Components {
              * 100.50
              */
             billing_amount_decimal: string;
-            billing_amount_currency?: /**
+            billing_currency?: /**
              * Currency code in ISO 4217 format
              * example:
              * EUR
@@ -497,7 +497,7 @@ declare namespace Components {
              * 100.50
              */
             billing_amount_decimal: string;
-            billing_amount_currency?: /**
+            billing_currency?: /**
              * Currency code in ISO 4217 format
              * example:
              * EUR
@@ -567,7 +567,7 @@ declare namespace Components {
              * 100.50
              */
             billing_amount_decimal: string;
-            billing_amount_currency?: /**
+            billing_currency?: /**
              * Currency code in ISO 4217 format
              * example:
              * EUR
