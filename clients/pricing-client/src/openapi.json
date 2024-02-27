@@ -608,6 +608,48 @@
         }
       }
     },
+    "/v1/catalog": {
+      "post": {
+        "description": "Provides a querying functionalities over products and prices of the Catalog for a given organization.",
+        "operationId": "$privateSearchCatalog",
+        "summary": "privateSearchCatalog",
+        "tags": [
+          "Catalog API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The search result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/public/availability:check": {
       "post": {
         "description": "The availability check endpoint",

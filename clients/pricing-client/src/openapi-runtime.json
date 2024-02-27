@@ -75,6 +75,17 @@
         }
       }
     },
+    "/v1/catalog": {
+      "post": {
+        "operationId": "$privateSearchCatalog",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v1/public/availability:check": {
       "post": {
         "operationId": "$availabilityCheck",
