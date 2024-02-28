@@ -67,6 +67,7 @@
     "@epilot/user-client": "^3.5.0",
     "@epilot/workflow-client": "^1.5.0",
     "@epilot/workflow-definition-client": "^1.4.0",
+    "@epilot/tf-blueprints-client": "^1.0.0",
     "axios": "1.4.0",
     "openapi-client-axios": "^7.5.1"
   },

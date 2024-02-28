@@ -54,6 +54,12 @@ describe('EpilotClient', () => {
       expect(eclient.discussion).not.toBeNull();
       expect(eclient.notification).not.toBeNull();
       expect(eclient.message).not.toBeNull();
+      expect(eclient.permissions).not.toBeNull();
+      expect(eclient.workflow).not.toBeNull();
+      expect(eclient.automation).not.toBeNull();
+      expect(eclient.partner).not.toBeNull();
+      expect(eclient.addressSuggestions).not.toBeNull();
+      expect(eclient.terraformBlueprints).not.toBeNull();
     });
   });
 
