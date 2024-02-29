@@ -3101,6 +3101,17 @@
               "recurring"
             ]
           },
+          "billing_period": {
+            "type": "string",
+            "description": "The price billing period.",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly"
+            ]
+          },
           "unit_amount": {
             "type": "integer",
             "description": "The unit amount value"
@@ -3582,6 +3593,17 @@
             "enum": [
               "one_time",
               "recurring"
+            ]
+          },
+          "billing_period": {
+            "type": "string",
+            "description": "The price billing period.",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly"
             ]
           },
           "pricing_model": {
