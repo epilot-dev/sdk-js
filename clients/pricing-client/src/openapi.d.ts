@@ -2048,6 +2048,10 @@ declare namespace Components {
              */
             type?: "one_time" | "recurring";
             /**
+             * The price billing period.
+             */
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
+            /**
              * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
@@ -2202,6 +2206,10 @@ declare namespace Components {
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
             type?: "one_time" | "recurring";
+            /**
+             * The price billing period.
+             */
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
             /**
              * The unit amount value
              */
