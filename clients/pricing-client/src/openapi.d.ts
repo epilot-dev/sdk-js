@@ -1691,9 +1691,10 @@ declare namespace Components {
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+             * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
             /**
              * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
              *
@@ -2052,9 +2053,10 @@ declare namespace Components {
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+             * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
         }
         /**
          * Represents a price input to the pricing library.
@@ -2226,9 +2228,10 @@ declare namespace Components {
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              * - `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
             /**
              * The snapshot of the price linked to the price item.
              * example:
@@ -2252,9 +2255,10 @@ declare namespace Components {
                  * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
                  * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
                  * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+                 * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
                  *
                  */
-                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
+                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
                 /**
                  * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
                  *
