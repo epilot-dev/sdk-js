@@ -24,7 +24,7 @@
     "test": "jest",
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/pricing-api.yaml",
-    "openapi:local": "node ../../scripts/update-openapi.js ../../../pricing-api/lambda/ApiHandlerFunction/openapi.yml",
+    "openapi:local": "npx openapicmd read --json ../../../pricing-api/lambda/ApiHandlerFunction/openapi.yml > ./src/openapi.json",
     "typegen": "echo '/* eslint-disable */' > src/openapi.d.ts && typegen ./src/openapi.json >> src/openapi.d.ts",
     "build": "tsc && npm run bundle-definition",
     "build:watch": "npm run build && tsc -w",

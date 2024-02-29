@@ -2002,12 +2002,13 @@
           },
           "pricing_model": {
             "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n",
+            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
             "enum": [
               "per_unit",
               "tiered_graduated",
               "tiered_volume",
-              "tiered_flatfee"
+              "tiered_flatfee",
+              "external_getag"
             ]
           },
           "tiers": {
@@ -3117,12 +3118,13 @@
           },
           "pricing_model": {
             "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n",
+            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
             "enum": [
               "per_unit",
               "tiered_graduated",
               "tiered_volume",
-              "tiered_flatfee"
+              "tiered_flatfee",
+              "external_getag"
             ]
           },
           "_price": {
@@ -3584,12 +3586,13 @@
           },
           "pricing_model": {
             "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n",
+            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
             "enum": [
               "per_unit",
               "tiered_graduated",
               "tiered_volume",
-              "tiered_flatfee"
+              "tiered_flatfee",
+              "external_getag"
             ]
           }
         },
