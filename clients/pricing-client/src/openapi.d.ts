@@ -336,6 +336,21 @@ declare namespace Components {
              */
             PriceInputMappings;
             /**
+             * External fees mapping information required to compute totals, for some pricing models
+             */
+            external_fees_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
+             */
+            ExternalFeeMappings;
+            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -911,6 +926,18 @@ declare namespace Components {
              * ]
              */
             PriceInputMappings;
+            external_fees_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
+             */
+            ExternalFeeMappings;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -1206,6 +1233,42 @@ declare namespace Components {
              */
             cause?: string;
         }
+        /**
+         * example:
+         * {
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "amount_total": 1000,
+         *   "amount_total_decimal": "10.00"
+         * }
+         */
+        export interface ExternalFeeMapping {
+            price_id?: string;
+            frequency_unit?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            amount_total?: number;
+            amount_total_decimal?: string;
+        }
+        /**
+         * example:
+         * [
+         *   {
+         *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *     "frequency_unit": "weekly",
+         *     "amount_total": 1000,
+         *     "amount_total_decimal": "10.00"
+         *   }
+         * ]
+         */
+        export type ExternalFeeMappings = /**
+         * example:
+         * {
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "amount_total": 1000,
+         *   "amount_total_decimal": "10.00"
+         * }
+         */
+        ExternalFeeMapping[];
         export interface File {
             [name: string]: any;
             _id: string;
@@ -2087,6 +2150,18 @@ declare namespace Components {
              * ]
              */
             PriceInputMappings;
+            external_fees_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
+             */
+            ExternalFeeMappings;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
