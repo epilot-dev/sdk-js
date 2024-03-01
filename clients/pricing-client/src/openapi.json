@@ -2399,6 +2399,51 @@
           }
         }
       },
+      "ExternalFeeMappings": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExternalFeeMapping"
+        },
+        "example": [
+          {
+            "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+            "frequency_unit": "weekly",
+            "amount_total": 1000,
+            "amount_total_decimal": "10.00"
+          }
+        ]
+      },
+      "ExternalFeeMapping": {
+        "type": "object",
+        "properties": {
+          "price_id": {
+            "type": "string"
+          },
+          "frequency_unit": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly",
+              "one_time"
+            ]
+          },
+          "amount_total": {
+            "type": "number"
+          },
+          "amount_total_decimal": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+          "frequency_unit": "weekly",
+          "amount_total": 1000,
+          "amount_total_decimal": "10.00"
+        }
+      },
       "CatalogSearch": {
         "description": "A catalog search payload",
         "type": "object",
@@ -3033,6 +3078,10 @@
           "price_mappings": {
             "description": "Price mapping information required to compute totals",
             "$ref": "#/components/schemas/PriceInputMappings"
+          },
+          "external_fees_mappings": {
+            "description": "External fees mapping information required to compute totals, for some pricing models",
+            "$ref": "#/components/schemas/ExternalFeeMappings"
           },
           "description": {
             "type": "string",
