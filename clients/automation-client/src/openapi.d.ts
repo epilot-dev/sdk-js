@@ -225,7 +225,7 @@ declare namespace Components {
          *   }
          * }
          */
-        SendEmailActionConfig | /* Creates an order entity with prices from journey */ CartCheckoutActionConfig | AutomationActionConfig;
+        SendEmailActionConfig | /* Creates an order entity with prices from journey */ CartCheckoutActionConfig | AutomationActionConfig | ConditionActionConfig;
         export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | /**
          * - If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.
          * - The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`
@@ -655,7 +655,23 @@ declare namespace Components {
              * submission
              */
             entity_schema?: string;
+            /**
+             * The actions (nodes) of the automation flow
+             */
             actions: AnyActionConfig[];
+            /**
+             * The edges between actions which define the flow order
+             */
+            edges?: /**
+             * example:
+             * {
+             *   "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
+             *   "start": "3567cabc-587f-4ba2-8752-1f3da0100d1f",
+             *   "end": "4e29af6c-9824-461c-bcfb-505840a949ba",
+             *   "condition_output": true
+             * }
+             */
+            Edge[];
             /**
              * Number of automation executions that ran
              * example:
@@ -686,6 +702,12 @@ declare namespace Components {
              * Determines if the flow is a system generated flow
              */
             system_flow?: boolean;
+            /**
+             * Version of the flow
+             * example:
+             * 2
+             */
+            version?: number;
         }
         /**
          * example:
@@ -820,6 +842,52 @@ declare namespace Components {
             target_unique?: string[];
         }
         export type Comparison = "equals" | "any_of" | "not_empty" | "is_empty";
+        export interface ConditionActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "condition";
+            config?: ConditionConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+        }
+        export interface ConditionConfig {
+            source?: {
+                id?: string;
+                type?: string;
+                attributes?: string;
+            };
+            operation?: "equals" | "not_equals" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+            values?: string[];
+        }
         export interface CopyValueMapper {
             mode: /**
              * - copy_if_exists - it replaces the target attribute with the source value - append_if_exists - it currently replaces target attribute with array like values. Useful when you have multiple values to be added into one attribute. - set_value - it sets a value to a predefined value. Must be used together with value property.
@@ -947,6 +1015,30 @@ declare namespace Components {
         export type DiffAdded = FilterConditionOnEvent;
         export type DiffDeleted = FilterConditionOnEvent;
         export type DiffUpdated = FilterConditionOnEvent;
+        /**
+         * example:
+         * {
+         *   "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
+         *   "start": "3567cabc-587f-4ba2-8752-1f3da0100d1f",
+         *   "end": "4e29af6c-9824-461c-bcfb-505840a949ba",
+         *   "condition_output": true
+         * }
+         */
+        export interface Edge {
+            id: string;
+            /**
+             * The action id from which the edge starts
+             */
+            start?: string;
+            /**
+             * The action id to which the edge ends
+             */
+            end?: string;
+            /**
+             * The condition output of the edge (binary)
+             */
+            condition_output?: boolean;
+        }
         /**
          * example:
          * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
