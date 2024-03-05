@@ -1098,6 +1098,12 @@ declare namespace Components {
             filename?: string;
             access_control?: "private" | "public-read";
             /**
+             * The date used for sorting the file
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            sorting_date?: string; // date-time
+            /**
              * Direct URL for file (public only if file access control is public-read)
              * example:
              * https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf
@@ -2340,6 +2346,13 @@ declare namespace Components {
                 en?: string;
                 de?: string;
             };
+        }
+        /**
+         * Workflow identifier object
+         */
+        export interface WorfklowIdentifier {
+            defition_id?: string;
+            name?: string;
         }
         /**
          * example:
@@ -3640,6 +3653,90 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetSearchResultsForOpportunities {
+        namespace Parameters {
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 1000
+             */
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 1000
+             */
+            Parameters.Size;
+        }
+        export interface RequestBody {
+            addresses?: string[];
+            customers?: string[];
+            purposes?: string[];
+            workflows?: any[];
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* The opportunity entity */ Components.Schemas.Opportunity[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetSearchableAttributesForOpportunities {
+        namespace Parameters {
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 1000
+             */
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 1000
+             */
+            Parameters.Size;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* The opportunity entity */ Components.Schemas.Opportunity[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetValidSecondaryAttributes {
         namespace Responses {
             export interface $200 {
@@ -4507,6 +4604,26 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllOpportunities.Responses.$200>
   /**
+   * getSearchableAttributesForOpportunities - getSearchableAttributesForOpportunities
+   * 
+   * Get all opportunity searchable attributes for a portal user
+   */
+  'getSearchableAttributesForOpportunities'(
+    parameters?: Parameters<Paths.GetSearchableAttributesForOpportunities.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSearchableAttributesForOpportunities.Responses.$200>
+  /**
+   * getSearchResultsForOpportunities - getSearchResultsForOpportunities
+   * 
+   * Get all opportunity with the given serached attributes
+   */
+  'getSearchResultsForOpportunities'(
+    parameters?: Parameters<Paths.GetSearchResultsForOpportunities.QueryParameters> | null,
+    data?: Paths.GetSearchResultsForOpportunities.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSearchResultsForOpportunities.Responses.$200>
+  /**
    * getOpportunity - getOpportunity
    * 
    * Get an opportunity by id
@@ -5204,6 +5321,30 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllOpportunities.Responses.$200>
+  }
+  ['/v2/portal/opportunities/searchable-attributes']: {
+    /**
+     * getSearchableAttributesForOpportunities - getSearchableAttributesForOpportunities
+     * 
+     * Get all opportunity searchable attributes for a portal user
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSearchableAttributesForOpportunities.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSearchableAttributesForOpportunities.Responses.$200>
+  }
+  ['/v2/portal/opportunities/search']: {
+    /**
+     * getSearchResultsForOpportunities - getSearchResultsForOpportunities
+     * 
+     * Get all opportunity with the given serached attributes
+     */
+    'post'(
+      parameters?: Parameters<Paths.GetSearchResultsForOpportunities.QueryParameters> | null,
+      data?: Paths.GetSearchResultsForOpportunities.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSearchResultsForOpportunities.Responses.$200>
   }
   ['/v2/portal/opportunities/{id}']: {
     /**
