@@ -1098,6 +1098,12 @@ declare namespace Components {
             filename?: string;
             access_control?: "private" | "public-read";
             /**
+             * The date used for sorting the file
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            file_date?: string; // date-time
+            /**
              * Direct URL for file (public only if file access control is public-read)
              * example:
              * https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf
@@ -3782,7 +3788,6 @@ declare namespace Paths {
                  * 7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51
                  */
                 _id?: string;
-                is_main_entity?: boolean;
             };
         }
         namespace Responses {

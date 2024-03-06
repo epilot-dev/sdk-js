@@ -790,9 +790,6 @@
                       "type": "string",
                       "example": "7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51",
                       "description": "ID of the contact"
-                    },
-                    "is_main_entity": {
-                      "type": "boolean"
                     }
                   }
                 }
@@ -5818,6 +5815,12 @@
                   "private",
                   "public-read"
                 ]
+              },
+              "file_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The date used for sorting the file",
+                "example": "2021-02-09T12:41:43.662Z"
               },
               "public_url": {
                 "description": "Direct URL for file (public only if file access control is public-read)",
