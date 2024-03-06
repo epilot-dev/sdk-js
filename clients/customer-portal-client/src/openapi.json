@@ -790,6 +790,9 @@
                       "type": "string",
                       "example": "7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51",
                       "description": "ID of the contact"
+                    },
+                    "is_main_entity": {
+                      "type": "boolean"
                     }
                   }
                 }
@@ -2057,6 +2060,186 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "The opportunities is retrieved successfully for the portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Opportunity"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/opportunities/searchable-attributes": {
+      "get": {
+        "operationId": "getSearchableAttributesForOpportunities",
+        "summary": "getSearchableAttributesForOpportunities",
+        "description": "Get all opportunity searchable attributes for a portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Initial offset to set for the search results",
+              "example": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Size of the search results",
+              "example": 1000,
+              "default": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The opportunities is retrieved successfully for the portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Opportunity"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/opportunities/search": {
+      "post": {
+        "operationId": "getSearchResultsForOpportunities",
+        "summary": "getSearchResultsForOpportunities",
+        "description": "Get all opportunity with the given serached attributes",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Initial offset to set for the search results",
+              "example": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Size of the search results",
+              "example": 1000,
+              "default": 1000
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "addresses": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "customers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "purposes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "workflows": {
+                    "type": "array",
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/WorfklowIdentifier"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "The opportunities is retrieved successfully for the portal user.",
@@ -5161,6 +5344,22 @@
                 "enum": [
                   "contact"
                 ]
+              }
+            }
+          }
+        ]
+      },
+      "WorfklowIdentifier": {
+        "description": "Workflow identifier object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "defition_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
               }
             }
           }
