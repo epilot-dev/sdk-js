@@ -336,6 +336,21 @@ declare namespace Components {
              */
             PriceInputMappings;
             /**
+             * External fees mapping information required to compute totals, for some pricing models
+             */
+            external_fees_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
+             */
+            ExternalFeeMappings;
+            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -911,6 +926,18 @@ declare namespace Components {
              * ]
              */
             PriceInputMappings;
+            external_fees_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
+             */
+            ExternalFeeMappings;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -1206,6 +1233,42 @@ declare namespace Components {
              */
             cause?: string;
         }
+        /**
+         * example:
+         * {
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "amount_total": 1000,
+         *   "amount_total_decimal": "10.00"
+         * }
+         */
+        export interface ExternalFeeMapping {
+            price_id?: string;
+            frequency_unit?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            amount_total?: number;
+            amount_total_decimal?: string;
+        }
+        /**
+         * example:
+         * [
+         *   {
+         *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *     "frequency_unit": "weekly",
+         *     "amount_total": 1000,
+         *     "amount_total_decimal": "10.00"
+         *   }
+         * ]
+         */
+        export type ExternalFeeMappings = /**
+         * example:
+         * {
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "amount_total": 1000,
+         *   "amount_total_decimal": "10.00"
+         * }
+         */
+        ExternalFeeMapping[];
         export interface File {
             [name: string]: any;
             _id: string;
@@ -1691,9 +1754,10 @@ declare namespace Components {
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+             * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
             /**
              * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
              *
@@ -2047,14 +2111,19 @@ declare namespace Components {
              */
             type?: "one_time" | "recurring";
             /**
+             * The price billing period.
+             */
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
+            /**
              * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+             * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
         }
         /**
          * Represents a price input to the pricing library.
@@ -2081,6 +2150,18 @@ declare namespace Components {
              * ]
              */
             PriceInputMappings;
+            external_fees_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
+             */
+            ExternalFeeMappings;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -2201,6 +2282,10 @@ declare namespace Components {
              */
             type?: "one_time" | "recurring";
             /**
+             * The price billing period.
+             */
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
+            /**
              * The unit amount value
              */
             unit_amount?: number;
@@ -2226,9 +2311,10 @@ declare namespace Components {
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              * - `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
             /**
              * The snapshot of the price linked to the price item.
              * example:
@@ -2252,9 +2338,10 @@ declare namespace Components {
                  * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
                  * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
                  * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+                 * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
                  *
                  */
-                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee";
+                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
                 /**
                  * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
                  *
@@ -3088,6 +3175,51 @@ declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace $PrivateSearchCatalog {
+        export type RequestBody = /**
+         * A catalog search payload
+         * example:
+         * {
+         *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
+         *   "sort": "description ASC",
+         *   "from": 0,
+         *   "size": 200,
+         *   "availability": {
+         *     "location": {
+         *       "postal_code": "57008,",
+         *       "city": "Cologne,",
+         *       "street": "Media Park,",
+         *       "street_number": "8a"
+         *     },
+         *     "available_date": {
+         *       "value": "2022-05-01"
+         *     }
+         *   }
+         * }
+         */
+        Components.Schemas.CatalogSearch;
+        namespace Responses {
+            export type $200 = /**
+             * The query result payload
+             * example:
+             * {
+             *   "hits": 2,
+             *   "results": [
+             *     {
+             *       "schema": "product",
+             *       "description": "product a"
+             *     },
+             *     {
+             *       "schema": "price",
+             *       "unit_amount_decimal": "124.342343434"
+             *     }
+             *   ]
+             * }
+             */
+            Components.Schemas.CatalogSearchResult;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace $SaveCredentials {
         namespace Parameters {
             export type IntegrationId = Components.Schemas.IntegrationId;
@@ -3306,6 +3438,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchCatalog.Responses.$200>
   /**
+   * $privateSearchCatalog - privateSearchCatalog
+   * 
+   * Provides a querying functionalities over products and prices of the Catalog for a given organization.
+   */
+  '$privateSearchCatalog'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$PrivateSearchCatalog.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$PrivateSearchCatalog.Responses.$200>
+  /**
    * $availabilityCheck - availabilityCheck
    * 
    * The availability check endpoint
@@ -3460,6 +3602,18 @@ export interface PathsDictionary {
       data?: Paths.$SearchCatalog.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$SearchCatalog.Responses.$200>
+  }
+  ['/v1/catalog']: {
+    /**
+     * $privateSearchCatalog - privateSearchCatalog
+     * 
+     * Provides a querying functionalities over products and prices of the Catalog for a given organization.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$PrivateSearchCatalog.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$PrivateSearchCatalog.Responses.$200>
   }
   ['/v1/public/availability:check']: {
     /**

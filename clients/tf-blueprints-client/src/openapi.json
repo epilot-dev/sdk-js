@@ -1,0 +1,228 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Blueprint API",
+    "version": "0.1.0",
+    "description": "API for managing blueprint installations in epilot"
+  },
+  "tags": [
+    {
+      "name": "Blueprints",
+      "description": "Import and Export your Blueprints"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v2/exportBlueprint": {
+      "post": {
+        "operationId": "exportBlueprint",
+        "summary": "exportBlueprint",
+        "description": "Export a blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resourceType": {
+                    "type": "string",
+                    "enum": [
+                      "journey",
+                      "product",
+                      "price",
+                      "tax",
+                      "automation_flow",
+                      "designbuilder",
+                      "file",
+                      "emailtemplate",
+                      "entity"
+                    ]
+                  },
+                  "resourceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "maxItems": 25
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "templateFilePath": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/createBlueprint": {
+      "post": {
+        "operationId": "createBlueprint",
+        "summary": "createBlueprint",
+        "description": "Create a blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "templateFilePath": {
+                    "type": "string",
+                    "example": "example.tf"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/updateBlueprint": {
+      "post": {
+        "operationId": "updateBlueprint",
+        "summary": "updateBlueprint",
+        "description": "Update a blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "blueprintId": {
+                    "type": "string",
+                    "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+                  },
+                  "templateFilePath": {
+                    "type": "string",
+                    "example": "example.tf"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/applyBlueprint": {
+      "post": {
+        "operationId": "applyBlueprint",
+        "summary": "applyBlueprint",
+        "description": "Apply blueprint from generated plan",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "blueprintId": {
+                    "type": "string",
+                    "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+                  },
+                  "templateFilePath": {
+                    "type": "string",
+                    "example": "example.tf"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {},
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "None"
+    },
+    {
+      "url": "None"
+    }
+  ]
+}

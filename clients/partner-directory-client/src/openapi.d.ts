@@ -338,6 +338,10 @@ declare namespace Components {
              */
             invitation_email?: string; // email
             /**
+             * Email using to receive invitation
+             */
+            email?: string; // email
+            /**
              * Email using to sign up
              */
             signed_up_email?: string; // email

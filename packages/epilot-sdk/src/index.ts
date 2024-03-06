@@ -21,6 +21,10 @@ import {
   default as templateVariablesClient,
   getClient as getTemplateVariablesClient,
 } from './template-variables-client';
+import {
+  default as terraformBlueprintsClient,
+  getClient as getTerraformBlueprintsClient,
+} from './tf-blueprints-client';
 import { default as userClient, getClient as getUserClient } from './user-client';
 import { default as workflowClient, getClient as getWorkflowClient } from './workflow-client';
 
@@ -78,6 +82,10 @@ export class EpilotClient {
     return getAddressSuggestionsClient();
   }
 
+  get terraformBlueprints() {
+    return getTerraformBlueprintsClient();
+  }
+
   public authorize(token: string) {
     authorizeWithToken(this.entity, token);
     authorizeWithToken(this.pricing, token);
@@ -96,6 +104,7 @@ export class EpilotClient {
     authorizeWithToken(this.templateVariables, token);
     authorizeWithToken(this.partner, token);
     authorizeWithToken(this.addressSuggestions, token);
+    authorizeWithToken(this.terraformBlueprints, token);
 
     return this;
   }
@@ -120,6 +129,7 @@ export class EpilotClient {
     authorizer.configureClient(this.templateVariables);
     authorizer.configureClient(this.partner);
     authorizer.configureClient(this.addressSuggestions);
+    authorizer.configureClient(this.terraformBlueprints);
 
     return this;
   }
@@ -144,3 +154,4 @@ export { emailTemplateClient };
 export { templateVariablesClient };
 export { partnerClient };
 export { addressSuggestionsClient };
+export { terraformBlueprintsClient };

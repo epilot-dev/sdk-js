@@ -608,6 +608,48 @@
         }
       }
     },
+    "/v1/catalog": {
+      "post": {
+        "description": "Provides a querying functionalities over products and prices of the Catalog for a given organization.",
+        "operationId": "$privateSearchCatalog",
+        "summary": "privateSearchCatalog",
+        "tags": [
+          "Catalog API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogSearch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The search result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSearchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/public/availability:check": {
       "post": {
         "description": "The availability check endpoint",
@@ -1960,12 +2002,13 @@
           },
           "pricing_model": {
             "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n",
+            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
             "enum": [
               "per_unit",
               "tiered_graduated",
               "tiered_volume",
-              "tiered_flatfee"
+              "tiered_flatfee",
+              "external_getag"
             ]
           },
           "tiers": {
@@ -2354,6 +2397,51 @@
             "journey_title": "energy journey",
             "step_name": "avg consumption picker"
           }
+        }
+      },
+      "ExternalFeeMappings": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExternalFeeMapping"
+        },
+        "example": [
+          {
+            "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+            "frequency_unit": "weekly",
+            "amount_total": 1000,
+            "amount_total_decimal": "10.00"
+          }
+        ]
+      },
+      "ExternalFeeMapping": {
+        "type": "object",
+        "properties": {
+          "price_id": {
+            "type": "string"
+          },
+          "frequency_unit": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly",
+              "one_time"
+            ]
+          },
+          "amount_total": {
+            "type": "number"
+          },
+          "amount_total_decimal": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+          "frequency_unit": "weekly",
+          "amount_total": 1000,
+          "amount_total_decimal": "10.00"
         }
       },
       "CatalogSearch": {
@@ -2991,6 +3079,10 @@
             "description": "Price mapping information required to compute totals",
             "$ref": "#/components/schemas/PriceInputMappings"
           },
+          "external_fees_mappings": {
+            "description": "External fees mapping information required to compute totals, for some pricing models",
+            "$ref": "#/components/schemas/ExternalFeeMappings"
+          },
           "description": {
             "type": "string",
             "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
@@ -3058,6 +3150,17 @@
               "recurring"
             ]
           },
+          "billing_period": {
+            "type": "string",
+            "description": "The price billing period.",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly"
+            ]
+          },
           "unit_amount": {
             "type": "integer",
             "description": "The unit amount value"
@@ -3075,12 +3178,13 @@
           },
           "pricing_model": {
             "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n",
+            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
             "enum": [
               "per_unit",
               "tiered_graduated",
               "tiered_volume",
-              "tiered_flatfee"
+              "tiered_flatfee",
+              "external_getag"
             ]
           },
           "_price": {
@@ -3540,14 +3644,26 @@
               "recurring"
             ]
           },
+          "billing_period": {
+            "type": "string",
+            "description": "The price billing period.",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly"
+            ]
+          },
           "pricing_model": {
             "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n",
+            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
             "enum": [
               "per_unit",
               "tiered_graduated",
               "tiered_volume",
-              "tiered_flatfee"
+              "tiered_flatfee",
+              "external_getag"
             ]
           }
         },

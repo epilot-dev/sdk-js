@@ -457,10 +457,18 @@
           },
           "actions": {
             "type": "array",
+            "description": "The actions (nodes) of the automation flow",
             "items": {
               "$ref": "#/components/schemas/AnyActionConfig"
             },
             "readOnly": true
+          },
+          "edges": {
+            "type": "array",
+            "description": "The edges between actions which define the flow order",
+            "items": {
+              "$ref": "#/components/schemas/Edge"
+            }
           },
           "runs": {
             "type": "number",
@@ -498,6 +506,11 @@
           "system_flow": {
             "type": "boolean",
             "description": "Determines if the flow is a system generated flow"
+          },
+          "version": {
+            "type": "number",
+            "description": "Version of the flow",
+            "example": 2
           }
         },
         "required": [
@@ -505,6 +518,37 @@
           "triggers",
           "actions"
         ]
+      },
+      "Edge": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "description": "The action id from which the edge starts"
+          },
+          "end": {
+            "type": "string",
+            "description": "The action id to which the edge ends"
+          },
+          "condition_output": {
+            "type": "boolean",
+            "description": "The condition output of the edge (binary)"
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "target"
+        ],
+        "example": {
+          "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
+          "start": "3567cabc-587f-4ba2-8752-1f3da0100d1f",
+          "end": "4e29af6c-9824-461c-bcfb-505840a949ba",
+          "condition_output": true
+        }
       },
       "SearchAutomationsResp": {
         "type": "object",
@@ -596,6 +640,9 @@
           },
           {
             "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/ConditionActionConfig"
           }
         ]
       },
@@ -1743,6 +1790,68 @@
           }
         }
       },
+      "ConditionConfig": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "string"
+              }
+            }
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "equals",
+              "not_equals",
+              "contains",
+              "not_contains",
+              "starts_with",
+              "ends_with",
+              "greater_than",
+              "less_than",
+              "greater_than_or_equals",
+              "less_than_or_equals",
+              "is_empty",
+              "is_not_empty"
+            ]
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ConditionActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "condition"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/ConditionConfig"
+              }
+            }
+          }
+        ]
+      },
       "AutomationExecutionId": {
         "type": "string",
         "example": "9baf184f-bc81-4128-bca3-d974c90a12c4"
@@ -2574,6 +2683,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://automation.sls.epilot.io"
+    },
     {
       "url": "https://automation.sls.epilot.io"
     }
