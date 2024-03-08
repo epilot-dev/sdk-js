@@ -344,7 +344,7 @@ declare namespace Components {
          */
         EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
         export interface AnythingButCondition {
-            "anything-but"?: string[];
+            "anything-but"?: (string | number)[];
         }
         export interface ApiCallerContext {
             [name: string]: any;
@@ -1029,11 +1029,11 @@ declare namespace Components {
             /**
              * The action id from which the edge starts
              */
-            start?: string;
+            start: string;
             /**
              * The action id to which the edge ends
              */
-            end?: string;
+            end: string;
             /**
              * The condition output of the edge (binary)
              */
@@ -1254,6 +1254,20 @@ declare namespace Components {
                         type?: (string | EqualsIgnoreCaseCondition | AnythingButCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
                     };
                 };
+                ecp_config?: {
+                    /**
+                     * example:
+                     * END_CUSTOMER_PORTAL
+                     */
+                    origin?: string;
+                    file_config?: {
+                        /**
+                         * example:
+                         * true
+                         */
+                        shared_with_end_customer?: boolean;
+                    };
+                };
             };
         }
         export interface EqualsIgnoreCaseCondition {
@@ -1278,7 +1292,7 @@ declare namespace Components {
             exists?: boolean;
         }
         export type FilterConditionOnEvent = OrCondition | {
-            [name: string]: (string | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
+            [name: string]: (string | number | boolean | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
         };
         export interface FrontendSubmitTrigger {
             type: "frontend_submission";
