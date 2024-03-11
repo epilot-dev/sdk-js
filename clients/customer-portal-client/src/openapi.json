@@ -814,7 +814,21 @@
                         },
                         "newDocumentLink": {
                           "type": "string",
-                          "example": "https://end-customer-portal.ecp.dev.epilot.io/documents"
+                          "example": "https://end-customer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b"
+                        },
+                        "entityLink": {
+                          "type": "string",
+                          "example": "https://end-customer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b"
+                        },
+                        "userEmailsOnEntity": {
+                          "type": "array",
+                          "example": [
+                            "john@doe.com",
+                            "mary@doe.com"
+                          ],
+                          "items": {
+                            "type": "string"
+                          }
                         }
                       }
                     },
@@ -827,7 +841,21 @@
                         },
                         "newDocumentLink": {
                           "type": "string",
-                          "example": "https://installer-portal.ecp.dev.epilot.io/documents"
+                          "example": "https://installer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b"
+                        },
+                        "entityLink": {
+                          "type": "string",
+                          "example": "https://installer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b"
+                        },
+                        "userEmailsOnEntity": {
+                          "type": "array",
+                          "example": [
+                            "peter@doe.com",
+                            "jane@doe.com"
+                          ],
+                          "items": {
+                            "type": "string"
+                          }
                         }
                       }
                     }
@@ -3916,6 +3944,62 @@
         }
       }
     },
+    "/v2/portal/can-trigger-portal-flow": {
+      "post": {
+        "operationId": "canTriggerPortalFlow",
+        "summary": "canTriggerPortalFlow",
+        "description": "Returns whether the user can trigger a portal flow",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "requestBody": {
+          "description": "Request of trigger portal flow",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriggerPortalFlow"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Can Trigger Portal Flow",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "can_trigger": {
+                      "type": "boolean",
+                      "description": "Whether the flow can be triggered",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/portal/workflow/{workflow_id}/{step_id}:markDone": {
       "put": {
         "operationId": "updateWorkflowStepAsDone",
@@ -6310,6 +6394,43 @@
           },
           "schema": {
             "$ref": "#/components/schemas/EntitySlug"
+          }
+        }
+      },
+      "TriggerPortalFlow": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "$ref": "#/components/schemas/Entity"
+          },
+          "diff": {
+            "type": "object",
+            "description": "The diff of the entity",
+            "properties": {
+              "added": {
+                "$ref": "#/components/schemas/Entity"
+              },
+              "updated": {
+                "$ref": "#/components/schemas/Entity"
+              },
+              "deleted": {
+                "$ref": "#/components/schemas/Entity"
+              }
+            }
+          },
+          "ecp_config": {
+            "type": "object",
+            "properties": {
+              "file_config": {
+                "type": "object",
+                "properties": {
+                  "shared_with_end_customer": {
+                    "type": "boolean",
+                    "description": "Indicate whether the file is shared with the end customer"
+                  }
+                }
+              }
+            }
           }
         }
       }

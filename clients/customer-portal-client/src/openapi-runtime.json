@@ -889,6 +889,24 @@
         }
       }
     },
+    "/v2/portal/can-trigger-portal-flow": {
+      "post": {
+        "operationId": "canTriggerPortalFlow",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v2/portal/workflow/{workflow_id}/{step_id}:markDone": {
       "put": {
         "operationId": "updateWorkflowStepAsDone",

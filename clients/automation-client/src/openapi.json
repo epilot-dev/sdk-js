@@ -540,8 +540,8 @@
         },
         "required": [
           "id",
-          "source",
-          "target"
+          "start",
+          "end"
         ],
         "example": {
           "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -2343,6 +2343,24 @@
                     }
                   }
                 }
+              },
+              "ecp_config": {
+                "type": "object",
+                "properties": {
+                  "origin": {
+                    "type": "string",
+                    "example": "END_CUSTOMER_PORTAL"
+                  },
+                  "file_config": {
+                    "type": "object",
+                    "properties": {
+                      "shared_with_end_customer": {
+                        "type": "boolean",
+                        "example": true
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -2496,6 +2514,12 @@
                     "type": "string"
                   },
                   {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
                     "$ref": "#/components/schemas/EqualsIgnoreCaseCondition"
                   },
                   {
@@ -2536,7 +2560,14 @@
           "anything-but": {
             "type": "array",
             "items": {
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
             }
           }
         }
@@ -2683,9 +2714,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://automation.sls.epilot.io"
-    },
     {
       "url": "https://automation.sls.epilot.io"
     }

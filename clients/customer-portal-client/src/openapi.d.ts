@@ -2081,6 +2081,25 @@ declare namespace Components {
                 url?: string;
             };
         }
+        export interface TriggerPortalFlow {
+            entity?: Entity;
+            /**
+             * The diff of the entity
+             */
+            diff?: {
+                added?: Entity;
+                updated?: Entity;
+                deleted?: Entity;
+            };
+            ecp_config?: {
+                file_config?: {
+                    /**
+                     * Indicate whether the file is shared with the end customer
+                     */
+                    shared_with_end_customer?: boolean;
+                };
+            };
+        }
         export interface UpsertPortalConfig {
             /**
              * Enable/Disable the portal access
@@ -2464,6 +2483,25 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CanTriggerPortalFlow {
+        namespace Parameters {
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            origin: Parameters.Origin;
+        }
+        export type RequestBody = Components.Schemas.TriggerPortalFlow;
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether the flow can be triggered
+                 * example:
+                 * true
+                 */
+                can_trigger?: boolean;
+            }
         }
     }
     namespace CheckContactExists {
@@ -3800,9 +3838,22 @@ declare namespace Paths {
                     invitationLink?: string;
                     /**
                      * example:
-                     * https://end-customer-portal.ecp.dev.epilot.io/documents
+                     * https://end-customer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b
                      */
                     newDocumentLink?: string;
+                    /**
+                     * example:
+                     * https://end-customer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b
+                     */
+                    entityLink?: string;
+                    /**
+                     * example:
+                     * [
+                     *   "john@doe.com",
+                     *   "mary@doe.com"
+                     * ]
+                     */
+                    userEmailsOnEntity?: string[];
                 };
                 installerPortal?: {
                     /**
@@ -3812,9 +3863,22 @@ declare namespace Paths {
                     invitationLink?: string;
                     /**
                      * example:
-                     * https://installer-portal.ecp.dev.epilot.io/documents
+                     * https://installer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b
                      */
                     newDocumentLink?: string;
+                    /**
+                     * example:
+                     * https://installer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b
+                     */
+                    entityLink?: string;
+                    /**
+                     * example:
+                     * [
+                     *   "peter@doe.com",
+                     *   "jane@doe.com"
+                     * ]
+                     */
+                    userEmailsOnEntity?: string[];
                 };
             }
             export type $401 = Components.Responses.Unauthorized;
@@ -4880,6 +4944,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
   /**
+   * canTriggerPortalFlow - canTriggerPortalFlow
+   * 
+   * Returns whether the user can trigger a portal flow
+   */
+  'canTriggerPortalFlow'(
+    parameters?: Parameters<Paths.CanTriggerPortalFlow.QueryParameters> | null,
+    data?: Paths.CanTriggerPortalFlow.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CanTriggerPortalFlow.Responses.$200>
+  /**
    * updateWorkflowStepAsDone - updateWorkflowStepAsDone
    * 
    * Update a workflow step as done
@@ -5645,6 +5719,18 @@ export interface PathsDictionary {
       data?: Paths.SearchPortalUserEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
+  }
+  ['/v2/portal/can-trigger-portal-flow']: {
+    /**
+     * canTriggerPortalFlow - canTriggerPortalFlow
+     * 
+     * Returns whether the user can trigger a portal flow
+     */
+    'post'(
+      parameters?: Parameters<Paths.CanTriggerPortalFlow.QueryParameters> | null,
+      data?: Paths.CanTriggerPortalFlow.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CanTriggerPortalFlow.Responses.$200>
   }
   ['/v2/portal/workflow/{workflow_id}/{step_id}:markDone']: {
     /**
