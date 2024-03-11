@@ -951,10 +951,6 @@
             "type": "string",
             "example": "eu-central-1"
           },
-          "cognito_identity_pool_id": {
-            "type": "string",
-            "example": "eu-central-1:d24af723-7b40-4c3d-be57-d0a732a59a5d"
-          },
           "cognito_user_pool_id": {
             "type": "string",
             "example": "eu-central-sample"
@@ -1050,6 +1046,27 @@
           "pricing_tier",
           "email"
         ]
+      },
+      "CognitoDetails": {
+        "type": "object",
+        "properties": {
+          "cognito_region": {
+            "type": "string",
+            "example": "eu-central-1"
+          },
+          "cognito_user_pool_id": {
+            "type": "string",
+            "example": "eu-central-sample"
+          },
+          "cognito_user_pool_client_id": {
+            "type": "string",
+            "example": "asbkh213ehkquwhdi"
+          },
+          "cognito_user_pool_arn": {
+            "type": "string",
+            "example": "arn:aws:cognito-idp:eu-central-1:123456789012:userpool/eu-central-sample"
+          }
+        }
       },
       "UserDetail": {
         "type": "object",
@@ -1162,13 +1179,10 @@
             "type": "boolean",
             "example": false,
             "nullable": true
+          },
+          "cognito_details": {
+            "$ref": "#/components/schemas/CognitoDetails"
           }
-        }
-      },
-      "DataPointsResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/DataPoint"
         }
       },
       "DataPoint": {
@@ -1199,9 +1213,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://user.sls.epilot.io"
-    },
     {
       "url": "https://user.sls.epilot.io"
     }

@@ -3295,6 +3295,10 @@
             "type": "integer",
             "description": "The unit gross amount value."
           },
+          "unit_amount_net": {
+            "type": "integer",
+            "description": "The unit net amount value."
+          },
           "amount_tax": {
             "type": "integer",
             "description": "Total of all items taxes, with same recurrence."
@@ -3754,6 +3758,10 @@
             "type": "integer",
             "description": "The unit gross amount value."
           },
+          "unit_amount_net": {
+            "type": "integer",
+            "description": "The unit net amount value."
+          },
           "amount_tax": {
             "type": "integer",
             "description": "Total of all items taxes, with same recurrence."
@@ -3900,6 +3908,10 @@
           "unit_amount_gross": {
             "type": "integer",
             "description": "The unit gross amount value."
+          },
+          "unit_amount_net": {
+            "type": "integer",
+            "description": "The unit net amount value."
           },
           "amount_tax": {
             "type": "integer",

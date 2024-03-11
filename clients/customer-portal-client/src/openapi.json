@@ -790,9 +790,6 @@
                       "type": "string",
                       "example": "7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51",
                       "description": "ID of the contact"
-                    },
-                    "is_main_entity": {
-                      "type": "boolean"
                     }
                   }
                 }

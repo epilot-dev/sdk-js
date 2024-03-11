@@ -2556,6 +2556,10 @@ declare namespace Components {
              */
             unit_amount_gross?: number;
             /**
+             * The unit net amount value.
+             */
+            unit_amount_net?: number;
+            /**
              * This is the sum of all the price item tax amounts.
              */
             amount_tax?: number;
@@ -2706,6 +2710,10 @@ declare namespace Components {
              */
             unit_amount_gross?: number;
             /**
+             * The unit net amount value.
+             */
+            unit_amount_net?: number;
+            /**
              * Total of all items taxes, with same recurrence.
              */
             amount_tax?: number;
@@ -2750,6 +2758,10 @@ declare namespace Components {
              * The unit gross amount value.
              */
             unit_amount_gross?: number;
+            /**
+             * The unit net amount value.
+             */
+            unit_amount_net?: number;
             /**
              * Total of all items taxes, with same recurrence.
              */

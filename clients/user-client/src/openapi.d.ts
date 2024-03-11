@@ -9,6 +9,28 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface CognitoDetails {
+            /**
+             * example:
+             * eu-central-1
+             */
+            cognito_region?: string;
+            /**
+             * example:
+             * eu-central-sample
+             */
+            cognito_user_pool_id?: string;
+            /**
+             * example:
+             * asbkh213ehkquwhdi
+             */
+            cognito_user_pool_client_id?: string;
+            /**
+             * example:
+             * arn:aws:cognito-idp:eu-central-1:123456789012:userpool/eu-central-sample
+             */
+            cognito_user_pool_arn?: string;
+        }
         export interface DataPoint {
             /**
              * Organization id
@@ -35,7 +57,6 @@ declare namespace Components {
              */
             non_billable_users_last_month?: number;
         }
-        export type DataPointsResponse = DataPoint[];
         export type InviteToken = string;
         export type Limit = number;
         export interface LoginParameters {
@@ -59,11 +80,6 @@ declare namespace Components {
              * eu-central-1
              */
             cognito_region?: string;
-            /**
-             * example:
-             * eu-central-1:d24af723-7b40-4c3d-be57-d0a732a59a5d
-             */
-            cognito_identity_pool_id?: string;
             /**
              * example:
              * eu-central-sample
@@ -149,6 +165,7 @@ declare namespace Components {
              * false
              */
             is_unlicensed_org?: boolean | null;
+            cognito_details?: CognitoDetails;
         }
         export interface OrganizationDetail {
             [name: string]: any;
