@@ -2084,13 +2084,11 @@ declare namespace Components {
         export interface TriggerPortalFlow {
             entity?: Entity;
             /**
-             * The diff of the entity
+             * Id of the activity
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            diff?: {
-                added?: Entity;
-                updated?: Entity;
-                deleted?: Entity;
-            };
+            activity_id?: string;
             ecp_config?: {
                 file_config?: {
                     /**
@@ -3826,6 +3824,7 @@ declare namespace Paths {
                  * 7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51
                  */
                 _id?: string;
+                is_main_entity?: boolean;
             };
         }
         namespace Responses {
