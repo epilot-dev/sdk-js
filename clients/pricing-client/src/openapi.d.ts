@@ -1924,6 +1924,15 @@ declare namespace Components {
              */
             _tags?: string[];
         }
+        export interface PriceGetAg {
+            category: string;
+            markup_amount: number;
+            markup_amount_decimal: string;
+            unit_amount_gross: number;
+            unit_amount_gross_decimal?: string;
+            unit_amount_net: number;
+            unit_amount_net_decimal?: string;
+        }
         /**
          * example:
          * {
@@ -2125,6 +2134,7 @@ declare namespace Components {
              */
             pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
             tiers_details?: TierDetails[];
+            get_ag?: PriceGetAg;
         }
         /**
          * Represents a price input to the pricing library.

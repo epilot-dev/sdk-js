@@ -3675,6 +3675,9 @@
             "items": {
               "$ref": "#/components/schemas/TierDetails"
             }
+          },
+          "get_ag": {
+            "$ref": "#/components/schemas/PriceGetAg"
           }
         },
         "required": [
@@ -4393,6 +4396,39 @@
         "enum": [
           "hidden",
           "on_request"
+        ]
+      },
+      "PriceGetAg": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "markup_amount": {
+            "type": "number"
+          },
+          "markup_amount_decimal": {
+            "type": "string"
+          },
+          "unit_amount_gross": {
+            "type": "number"
+          },
+          "unit_amount_gross_decimal": {
+            "type": "string"
+          },
+          "unit_amount_net": {
+            "type": "number"
+          },
+          "unit_amount_net_decimal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "markup_amount",
+          "markup_amount_decimal",
+          "unit_amount_gross",
+          "unit_amount_net"
         ]
       },
       "TierDetails": {
