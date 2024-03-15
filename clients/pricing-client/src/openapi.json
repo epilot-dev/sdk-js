@@ -3669,6 +3669,12 @@
               "tiered_flatfee",
               "external_getag"
             ]
+          },
+          "tiers_details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TierDetails"
+            }
           }
         },
         "required": [
@@ -4388,6 +4394,32 @@
           "hidden",
           "on_request"
         ]
+      },
+      "TierDetails": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number"
+          },
+          "unit_amount": {
+            "type": "number"
+          },
+          "unit_amount_gross": {
+            "type": "number"
+          },
+          "unit_amount_net": {
+            "type": "number"
+          },
+          "amount_total": {
+            "type": "number"
+          },
+          "amount_subtotal": {
+            "type": "number"
+          },
+          "amount_tax": {
+            "type": "number"
+          }
+        }
       }
     },
     "examples": {
