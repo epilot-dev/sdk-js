@@ -4419,7 +4419,16 @@
           "amount_tax": {
             "type": "number"
           }
-        }
+        },
+        "required": [
+          "quantity",
+          "unit_amount",
+          "unit_amount_gross",
+          "unit_amount_net",
+          "amount_total",
+          "amount_subtotal",
+          "amount_tax"
+        ]
       }
     },
     "examples": {

@@ -2999,13 +2999,13 @@ declare namespace Components {
             _id?: string;
         }
         export interface TierDetails {
-            quantity?: number;
-            unit_amount?: number;
-            unit_amount_gross?: number;
-            unit_amount_net?: number;
-            amount_total?: number;
-            amount_subtotal?: number;
-            amount_tax?: number;
+            quantity: number;
+            unit_amount: number;
+            unit_amount_gross: number;
+            unit_amount_net: number;
+            amount_total: number;
+            amount_subtotal: number;
+            amount_tax: number;
         }
         /**
          * The total details with tax (and discount) aggregated totals.
