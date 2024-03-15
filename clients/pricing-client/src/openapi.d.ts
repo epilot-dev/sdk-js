@@ -2124,6 +2124,7 @@ declare namespace Components {
              *
              */
             pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
+            tiers_details?: TierDetails[];
         }
         /**
          * Represents a price input to the pricing library.
@@ -2996,6 +2997,15 @@ declare namespace Components {
             rate?: number;
             type?: "VAT" | "GST" | "Custom";
             _id?: string;
+        }
+        export interface TierDetails {
+            quantity?: number;
+            unit_amount?: number;
+            unit_amount_gross?: number;
+            unit_amount_net?: number;
+            amount_total?: number;
+            amount_subtotal?: number;
+            amount_tax?: number;
         }
         /**
          * The total details with tax (and discount) aggregated totals.
