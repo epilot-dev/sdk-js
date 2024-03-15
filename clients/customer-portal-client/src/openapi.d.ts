@@ -2082,7 +2082,6 @@ declare namespace Components {
             };
         }
         export interface TriggerPortalFlow {
-            entity?: Entity;
             /**
              * Id of the activity
              * example:
