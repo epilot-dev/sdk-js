@@ -6403,9 +6403,6 @@
       "TriggerPortalFlow": {
         "type": "object",
         "properties": {
-          "entity": {
-            "$ref": "#/components/schemas/Entity"
-          },
           "activity_id": {
             "type": "string",
             "description": "Id of the activity",
