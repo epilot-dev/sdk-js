@@ -7,6 +7,35 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios'; 
 
+declare namespace Components {
+    namespace Schemas {
+        export interface S3Reference {
+            /**
+             * example:
+             * epilot-dev-blueprints
+             */
+            bucket?: string;
+            /**
+             * example:
+             * templates/main.tf
+             */
+            key?: string;
+        }
+        export interface UploadFilePayload {
+            /**
+             * example:
+             * main.tf
+             */
+            filename: string;
+            /**
+             * MIME type of file
+             * example:
+             * application/pdf
+             */
+            mime_type?: string;
+        }
+    }
+}
 declare namespace Paths {
     namespace ApplyBlueprint {
         export interface RequestBody {
@@ -93,6 +122,19 @@ declare namespace Paths {
             export type $200 = string;
         }
     }
+    namespace UploadBlueprintTemplate {
+        export type RequestBody = Components.Schemas.UploadFilePayload;
+        namespace Responses {
+            export interface $201 {
+                s3ref?: Components.Schemas.S3Reference;
+                /**
+                 * example:
+                 * https://epilot-dev-blueprints.s3.eu-central-1.amazonaws.com/templates/document.pdf
+                 */
+                upload_url?: string; // url
+            }
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -106,6 +148,17 @@ export interface OperationMethods {
     data?: Paths.ExportBlueprint.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExportBlueprint.Responses.$200>
+  /**
+   * uploadBlueprintTemplate - uploadBlueprintTemplate
+   * 
+   * Create pre-signed S3 URL to upload a file.
+   * 
+   */
+  'uploadBlueprintTemplate'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.UploadBlueprintTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UploadBlueprintTemplate.Responses.$201>
   /**
    * createBlueprint - createBlueprint
    * 
@@ -150,6 +203,19 @@ export interface PathsDictionary {
       data?: Paths.ExportBlueprint.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExportBlueprint.Responses.$200>
+  }
+  ['/v2/uploadBlueprintTemplate']: {
+    /**
+     * uploadBlueprintTemplate - uploadBlueprintTemplate
+     * 
+     * Create pre-signed S3 URL to upload a file.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.UploadBlueprintTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UploadBlueprintTemplate.Responses.$201>
   }
   ['/v2/createBlueprint']: {
     /**

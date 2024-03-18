@@ -16,6 +16,23 @@
       "EpilotAuth": []
     }
   ],
+  "servers": [
+    {
+      "url": "https://tf-blueprint.dev.sls.epilot.io"
+    },
+    {
+      "url": "https://tf-blueprint.dev.sls.epilot.io",
+      "description": "Development server"
+    },
+    {
+      "url": "https://tf-blueprint.staging.sls.epilot.io",
+      "description": "Staging server"
+    },
+    {
+      "url": "https://tf-blueprint.sls.epilot.io",
+      "description": "Production server"
+    }
+  ],
   "paths": {
     "/v2/exportBlueprint": {
       "post": {
@@ -77,6 +94,48 @@
                     },
                     "templateFilePath": {
                       "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/uploadBlueprintTemplate": {
+      "post": {
+        "operationId": "uploadBlueprintTemplate",
+        "summary": "uploadBlueprintTemplate",
+        "security": [],
+        "description": "Create pre-signed S3 URL to upload a file.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFilePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pre-signed URL for POST / PUT upload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "s3ref": {
+                      "$ref": "#/components/schemas/S3Reference"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "url",
+                      "example": "https://epilot-dev-blueprints.s3.eu-central-1.amazonaws.com/templates/document.pdf"
                     }
                   }
                 }
@@ -207,7 +266,39 @@
     }
   },
   "components": {
-    "schemas": {},
+    "schemas": {
+      "UploadFilePayload": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "example": "main.tf"
+          },
+          "mime_type": {
+            "description": "MIME type of file",
+            "type": "string",
+            "example": "application/pdf",
+            "default": "application/octet-stream"
+          }
+        },
+        "required": [
+          "filename"
+        ]
+      },
+      "S3Reference": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "example": "epilot-dev-blueprints"
+          },
+          "key": {
+            "type": "string",
+            "example": "templates/main.tf"
+          }
+        }
+      }
+    },
     "securitySchemes": {
       "EpilotAuth": {
         "type": "http",
@@ -216,13 +307,5 @@
         "bearerFormat": "JWT"
       }
     }
-  },
-  "servers": [
-    {
-      "url": "None"
-    },
-    {
-      "url": "None"
-    }
-  ]
+  }
 }
