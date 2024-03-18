@@ -116,17 +116,9 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "resources": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "templateFilePath": {
-                      "type": "string"
+                    "blueprintId": {
+                      "type": "string",
+                      "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
                     }
                   }
                 }
@@ -207,7 +199,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "blueprintId": {
+                      "type": "string",
+                      "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+                    }
+                  }
                 }
               }
             }
@@ -301,7 +299,7 @@
   "components": {
     "schemas": {
       "ProgressStatus": {
-        "type": "enum",
+        "type": "string",
         "enum": [
           "STARTED",
           "WAITING_USER_ACTION",

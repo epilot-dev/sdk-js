@@ -81,7 +81,13 @@ declare namespace Paths {
             templateFilePath?: string;
         }
         namespace Responses {
-            export type $200 = string;
+            export interface $200 {
+                /**
+                 * example:
+                 * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+                 */
+                blueprintId?: string;
+            }
         }
     }
     namespace ExportBlueprint {
@@ -117,9 +123,11 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                message?: string;
-                resources?: string[];
-                templateFilePath?: string;
+                /**
+                 * example:
+                 * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+                 */
+                blueprintId?: string;
             }
         }
     }
