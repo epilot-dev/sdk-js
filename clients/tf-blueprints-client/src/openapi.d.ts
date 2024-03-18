@@ -9,6 +9,13 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface Progress {
+            job_status?: ProgressStatus;
+            job_id?: string;
+            message?: string;
+            time_stamp?: string; // date-time
+        }
+        export type ProgressStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
         export interface S3Reference {
             /**
              * example:
@@ -52,6 +59,17 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = string;
+        }
+    }
+    namespace BlueprintStatus {
+        namespace Parameters {
+            export type BlueprintId = string;
+        }
+        export interface PathParameters {
+            blueprintId: Parameters.BlueprintId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Progress;
         }
     }
     namespace CreateBlueprint {
@@ -139,6 +157,16 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
+   * blueprintStatus - blueprintStatus
+   * 
+   * Get the current status of a blueprint (export or import)
+   */
+  'blueprintStatus'(
+    parameters?: Parameters<Paths.BlueprintStatus.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BlueprintStatus.Responses.$200>
+  /**
    * exportBlueprint - exportBlueprint
    * 
    * Export a blueprint
@@ -192,6 +220,18 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
+  ['/v2/blueprintStatus/{blueprintId}']: {
+    /**
+     * blueprintStatus - blueprintStatus
+     * 
+     * Get the current status of a blueprint (export or import)
+     */
+    'get'(
+      parameters?: Parameters<Paths.BlueprintStatus.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BlueprintStatus.Responses.$200>
+  }
   ['/v2/exportBlueprint']: {
     /**
      * exportBlueprint - exportBlueprint

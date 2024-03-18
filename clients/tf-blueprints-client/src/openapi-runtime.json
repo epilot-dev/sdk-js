@@ -10,6 +10,18 @@
     }
   ],
   "paths": {
+    "/v2/blueprintStatus/{blueprintId}": {
+      "get": {
+        "operationId": "blueprintStatus",
+        "parameters": [
+          {
+            "name": "blueprintId",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
     "/v2/exportBlueprint": {
       "post": {
         "operationId": "exportBlueprint",

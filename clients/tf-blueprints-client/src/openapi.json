@@ -34,6 +34,39 @@
     }
   ],
   "paths": {
+    "/v2/blueprintStatus/{blueprintId}": {
+      "get": {
+        "operationId": "blueprintStatus",
+        "summary": "blueprintStatus",
+        "description": "Get the current status of a blueprint (export or import)",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "name": "blueprintId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the blueprint",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current status of the blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Progress"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/exportBlueprint": {
       "post": {
         "operationId": "exportBlueprint",
@@ -267,6 +300,35 @@
   },
   "components": {
     "schemas": {
+      "ProgressStatus": {
+        "type": "enum",
+        "enum": [
+          "STARTED",
+          "WAITING_USER_ACTION",
+          "CANCELED",
+          "IN_PROGRESS",
+          "SUCCESS",
+          "FAILED"
+        ]
+      },
+      "Progress": {
+        "type": "object",
+        "properties": {
+          "job_status": {
+            "$ref": "#/components/schemas/ProgressStatus"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "time_stamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "UploadFilePayload": {
         "type": "object",
         "properties": {
