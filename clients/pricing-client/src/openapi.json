@@ -3675,6 +3675,9 @@
             "items": {
               "$ref": "#/components/schemas/TierDetails"
             }
+          },
+          "get_ag": {
+            "$ref": "#/components/schemas/PriceGetAg"
           }
         },
         "required": [
@@ -4395,6 +4398,40 @@
           "on_request"
         ]
       },
+      "PriceGetAg": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "markup_amount": {
+            "type": "number"
+          },
+          "markup_amount_decimal": {
+            "type": "string"
+          },
+          "unit_amount_gross": {
+            "type": "number"
+          },
+          "unit_amount_gross_decimal": {
+            "type": "string"
+          },
+          "unit_amount_net": {
+            "type": "number"
+          },
+          "unit_amount_decimal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "markup_amount",
+          "markup_amount_decimal",
+          "unit_amount_gross",
+          "unit_amount_net",
+          "unit_amount_decimal"
+        ]
+      },
       "TierDetails": {
         "type": "object",
         "properties": {
@@ -4418,6 +4455,9 @@
           },
           "amount_tax": {
             "type": "number"
+          },
+          "unit_amount_decimal": {
+            "type": "string"
           }
         },
         "required": [
@@ -4427,7 +4467,8 @@
           "unit_amount_net",
           "amount_total",
           "amount_subtotal",
-          "amount_tax"
+          "amount_tax",
+          "unit_amount_decimal"
         ]
       }
     },
