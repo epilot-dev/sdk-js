@@ -1931,7 +1931,7 @@ declare namespace Components {
             unit_amount_gross: number;
             unit_amount_gross_decimal?: string;
             unit_amount_net: number;
-            unit_amount_decimal: string;
+            unit_amount_net_decimal?: string;
         }
         /**
          * example:

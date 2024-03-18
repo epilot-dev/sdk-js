@@ -4419,7 +4419,7 @@
           "unit_amount_net": {
             "type": "number"
           },
-          "unit_amount_decimal": {
+          "unit_amount_net_decimal": {
             "type": "string"
           }
         },
@@ -4428,8 +4428,7 @@
           "markup_amount",
           "markup_amount_decimal",
           "unit_amount_gross",
-          "unit_amount_net",
-          "unit_amount_decimal"
+          "unit_amount_net"
         ]
       },
       "TierDetails": {
