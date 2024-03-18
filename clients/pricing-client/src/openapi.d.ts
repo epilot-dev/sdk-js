@@ -3016,6 +3016,7 @@ declare namespace Components {
             amount_total: number;
             amount_subtotal: number;
             amount_tax: number;
+            unit_amount_decimal: string;
         }
         /**
          * The total details with tax (and discount) aggregated totals.
