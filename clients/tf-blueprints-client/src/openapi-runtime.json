@@ -15,7 +15,7 @@
         "operationId": "getBlueprintStatus",
         "parameters": [
           {
-            "name": "blueprintId",
+            "name": "id",
             "in": "path",
             "required": true
           }

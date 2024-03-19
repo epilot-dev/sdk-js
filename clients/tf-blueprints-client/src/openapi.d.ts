@@ -122,10 +122,10 @@ declare namespace Paths {
     }
     namespace GetBlueprintStatus {
         namespace Parameters {
-            export type BlueprintId = string;
+            export type Id = string;
         }
         export interface PathParameters {
-            blueprintId: Parameters.BlueprintId;
+            id: Parameters.Id;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Progress;
