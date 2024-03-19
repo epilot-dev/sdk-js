@@ -10,9 +10,9 @@
     }
   ],
   "paths": {
-    "/v2/blueprintStatus/{blueprintId}": {
+    "/v2/blueprint/{id}/status": {
       "get": {
-        "operationId": "blueprintStatus",
+        "operationId": "getBlueprintStatus",
         "parameters": [
           {
             "name": "blueprintId",

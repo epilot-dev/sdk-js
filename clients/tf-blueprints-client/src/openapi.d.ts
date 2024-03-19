@@ -61,17 +61,6 @@ declare namespace Paths {
             export type $200 = string;
         }
     }
-    namespace BlueprintStatus {
-        namespace Parameters {
-            export type BlueprintId = string;
-        }
-        export interface PathParameters {
-            blueprintId: Parameters.BlueprintId;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.Progress;
-        }
-    }
     namespace CreateBlueprint {
         export interface RequestBody {
             /**
@@ -131,6 +120,17 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetBlueprintStatus {
+        namespace Parameters {
+            export type BlueprintId = string;
+        }
+        export interface PathParameters {
+            blueprintId: Parameters.BlueprintId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Progress;
+        }
+    }
     namespace UpdateBlueprint {
         export interface RequestBody {
             /**
@@ -165,15 +165,15 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * blueprintStatus - blueprintStatus
+   * getBlueprintStatus - getBlueprintStatus
    * 
    * Get the current status of a blueprint (export or import)
    */
-  'blueprintStatus'(
-    parameters?: Parameters<Paths.BlueprintStatus.PathParameters> | null,
+  'getBlueprintStatus'(
+    parameters?: Parameters<Paths.GetBlueprintStatus.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.BlueprintStatus.Responses.$200>
+  ): OperationResponse<Paths.GetBlueprintStatus.Responses.$200>
   /**
    * exportBlueprint - exportBlueprint
    * 
@@ -228,17 +228,17 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
-  ['/v2/blueprintStatus/{blueprintId}']: {
+  ['/v2/blueprint/{id}/status']: {
     /**
-     * blueprintStatus - blueprintStatus
+     * getBlueprintStatus - getBlueprintStatus
      * 
      * Get the current status of a blueprint (export or import)
      */
     'get'(
-      parameters?: Parameters<Paths.BlueprintStatus.PathParameters> | null,
+      parameters?: Parameters<Paths.GetBlueprintStatus.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.BlueprintStatus.Responses.$200>
+    ): OperationResponse<Paths.GetBlueprintStatus.Responses.$200>
   }
   ['/v2/exportBlueprint']: {
     /**

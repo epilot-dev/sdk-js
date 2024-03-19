@@ -34,10 +34,10 @@
     }
   ],
   "paths": {
-    "/v2/blueprintStatus/{blueprintId}": {
+    "/v2/blueprint/{id}/status": {
       "get": {
-        "operationId": "blueprintStatus",
-        "summary": "blueprintStatus",
+        "operationId": "getBlueprintStatus",
+        "summary": "getBlueprintStatus",
         "description": "Get the current status of a blueprint (export or import)",
         "tags": [
           "Blueprints"
