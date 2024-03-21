@@ -766,6 +766,11 @@
             "nullable": true,
             "example": 1234567890
           },
+          "secondary_phone": {
+            "type": "string",
+            "nullable": true,
+            "example": 1234567890
+          },
           "preferred_language": {
             "type": "string",
             "example": "de"
