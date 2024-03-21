@@ -673,6 +673,10 @@
             "description": "Flag indicating whether the action was created automatically or manually",
             "type": "boolean"
           },
+          "is_bulk_action": {
+            "description": "Flag indicating whether the same action can be run multiple times in a single execution",
+            "type": "boolean"
+          },
           "reason": {
             "type": "object",
             "properties": {
