@@ -331,6 +331,11 @@ declare namespace Components {
             phone?: string | null;
             /**
              * example:
+             * 1234567890
+             */
+            secondary_phone?: string | null;
+            /**
+             * example:
              * de
              */
             preferred_language?: string;
