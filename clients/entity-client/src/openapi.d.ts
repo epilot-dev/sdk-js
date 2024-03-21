@@ -54,6 +54,7 @@ declare namespace Components {
          */
         Schemas.EntitySlug[];
         export type SavedViewIdPathParam = /* Generated uuid for a saved view */ Schemas.SavedViewId /* uuid */;
+        export type TaxonomyClassificationSlugPathParam = string;
         export type TaxonomySlugPathParam = string;
         export type TaxonomySlugQueryParam = string;
     }
@@ -67,6 +68,7 @@ declare namespace Components {
          */
         Parameters.EntitySlugPathPriceParam;
         TaxonomySlugPathParam?: Parameters.TaxonomySlugPathParam;
+        TaxonomyClassificationSlugPathParam?: Parameters.TaxonomyClassificationSlugPathParam;
         SavedViewIdPathParam?: Parameters.SavedViewIdPathParam;
         ActivityIdPathParam?: Parameters.ActivityIdPathParam;
     }
@@ -1619,36 +1621,8 @@ declare namespace Components {
         }
         export interface EntityDefaultTable {
             view_type?: "default";
-            dropdown_items?: ({
-                type?: "entity";
-                entity?: /**
-                 * URL-friendly identifier for the entity schema
-                 * example:
-                 * contact
-                 */
-                EntitySlug;
-                /**
-                 * This dropdown item should only be active when the feature flag is enabled
-                 * example:
-                 * FF_MY_FEATURE_FLAG
-                 */
-                feature_flag?: string;
-            } | {
-                type?: "link";
-                /**
-                 * example:
-                 * Opportunities
-                 */
-                title?: string;
-                uri?: string; // uri-reference
-                /**
-                 * This dropdown item should only be active when the feature flag is enabled
-                 * example:
-                 * FF_MY_FEATURE_FLAG
-                 */
-                feature_flag?: string;
-            })[];
             row_actions?: (string | /* An entity action configured from the entity schema */ EntityAction)[];
+            bulk_actions?: (string | /* An entity action configured from the entity schema */ EntityAction)[];
             navbar_actions?: {
                 type: string;
                 options?: {
@@ -2943,126 +2917,6 @@ declare namespace Components {
          */
         export interface HydratedEntity {
             [name: string]: any;
-            _relations: {
-                entity_id: EntityId /* uuid */;
-            }[];
-        }
-        /**
-         * Entity with relation data resolved into the attribute values
-         * example:
-         * {
-         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-         *   "_org": "123",
-         *   "_owners": [
-         *     {
-         *       "org_id": "123",
-         *       "user_id": "123"
-         *     }
-         *   ],
-         *   "_schema": "contact",
-         *   "_tags": [
-         *     "example",
-         *     "mock"
-         *   ],
-         *   "_created_at": "2021-02-09T12:41:43.662Z",
-         *   "_updated_at": "2021-02-09T12:41:43.662Z",
-         *   "_acl": {
-         *     "view": [
-         *       "org:456",
-         *       "org:789"
-         *     ],
-         *     "edit": [
-         *       "org:456"
-         *     ],
-         *     "delete": [
-         *       "org:456"
-         *     ]
-         *   },
-         *   "_relations": [
-         *     {
-         *       "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-         *     }
-         *   ],
-         *   "status": "active",
-         *   "customer_number": "abc123",
-         *   "email": [
-         *     {
-         *       "label": "work",
-         *       "email": "user@example.com"
-         *     }
-         *   ],
-         *   "phone": [
-         *     {
-         *       "label": "work",
-         *       "phone": "+49123456789"
-         *     }
-         *   ],
-         *   "first_name": "First Name",
-         *   "middle_name": "Middle Name",
-         *   "last_name": "Last Name",
-         *   "date_of_birth": "2019-08-24",
-         *   "title": "Mr.",
-         *   "account": [
-         *     {
-         *       "status": "active",
-         *       "name": "Company name",
-         *       "company_email": [
-         *         {
-         *           "label": "Company email",
-         *           "email": "company@example.com"
-         *         }
-         *       ],
-         *       "company_phone": [
-         *         {
-         *           "label": "Support phone",
-         *           "phone": "+49123456789"
-         *         }
-         *       ],
-         *       "company_website": "https://example.com",
-         *       "tax_id": "DE123456789",
-         *       "tax_exemption": "2019-08-24",
-         *       "contacts": {
-         *         "$relation": [
-         *           {
-         *             "_tags": [
-         *               "CEO"
-         *             ],
-         *             "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-         *           }
-         *         ]
-         *       }
-         *     }
-         *   ]
-         * }
-         */
-        export interface HydratedEntityItem {
-            [name: string]: any;
-            _id: EntityId /* uuid */;
-            /**
-             * Organization Id the entity belongs to
-             */
-            _org: string;
-            _owners?: /**
-             * The user / organization owning this entity.
-             *
-             * Note: Owner implicitly has access to the entity regardless of ACLs.
-             *
-             */
-            EntityOwner[];
-            _schema: /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            EntitySlug;
-            /**
-             * Title of entity
-             */
-            _title: string | null;
-            _tags?: string[] | null;
-            _created_at: string | null; // date-time
-            _updated_at: string | null; // date-time
-            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             _relations: {
                 entity_id: EntityId /* uuid */;
             }[];
@@ -4438,6 +4292,12 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             id?: ClassificationId /* uuid */;
+            /**
+             * URL-friendly identifier for the classification
+             * example:
+             * wallbox-pv
+             */
+            slug?: string;
             parents?: ClassificationId /* uuid */[];
             created_at?: string; // date-time
             updated_at?: string; // date-time
@@ -5698,7 +5558,7 @@ declare namespace Components {
             suggestions?: string[];
         }
         export interface Taxonomy {
-            slug: /**
+            slug?: /**
              * URL-friendly name for taxonomy
              * example:
              * purpose
@@ -5709,18 +5569,58 @@ declare namespace Components {
              * example:
              * Purpose
              */
-            name: string;
+            name?: string;
             /**
-             * Plural name of a Taxonomy e.g. Purposes, Product Categories, Folders, Tags
+             * Plural name of a Taxonomy e.g. Purposes, Product Categories, Folders, Tags. Defaults to name is not provided.
              * example:
              * Purposes
              */
             plural?: string;
+            /**
+             * Kind of taxonomy e.g. system or user_defined. By default, it's empty, which means 'user_defined'
+             * example:
+             * system
+             */
+            kind?: "system" | "user_defined";
+            /**
+             * Icon name for the taxonomy (from epilot360/icons icon set)
+             * example:
+             * purpose
+             */
+            icon?: string;
+            /**
+             * HEX Color code for the taxonomy
+             * example:
+             * #FF5733
+             */
+            color?: string;
             created_at?: string; // date-time
             updated_at?: string; // date-time
+            /**
+             * Date when the taxonomy was soft-deleted (enabled: false)
+             */
+            deleted_at?: string; // date-time
+            /**
+             * User ID of the creator
+             * example:
+             * 10598
+             */
+            created_by?: string;
+            /**
+             * Whether the taxonomy is enabled or not
+             * example:
+             * true
+             */
+            enabled?: boolean;
         }
         export interface TaxonomyClassification {
             id?: ClassificationId /* uuid */;
+            /**
+             * URL-friendly identifier for the classification
+             * example:
+             * wallbox-pv
+             */
+            slug?: string;
             /**
              * example:
              * Wallbox PV
@@ -6200,6 +6100,64 @@ declare namespace Paths {
             export type $201 = /* A saved entity view */ Components.Schemas.SavedViewItem;
         }
     }
+    namespace CreateTaxonomy {
+        /**
+         * example:
+         * {
+         *   "slug": "product-category",
+         *   "name": "Product Category",
+         *   "plural": "Product Categories",
+         *   "icon": "product-hub",
+         *   "color": "#FF5733"
+         * }
+         */
+        export interface RequestBody {
+            slug: /**
+             * URL-friendly name for taxonomy
+             * example:
+             * purpose
+             */
+            Components.Schemas.TaxonomySlug;
+            /**
+             * A human friendly name of a Taxonomy e.g. Purpose, Product Category, Folder, Tag
+             * example:
+             * Purpose
+             */
+            name: string;
+            /**
+             * Plural name of a Taxonomy e.g. Purposes, Product Categories, Folders, Tags. Defaults to name is not provided.
+             * example:
+             * Purposes
+             */
+            plural?: string;
+            /**
+             * Icon name for the taxonomy (from epilot360/icons icon set)
+             * example:
+             * purpose
+             */
+            icon?: string;
+            /**
+             * HEX Color code for the taxonomy
+             * example:
+             * #FF5733
+             */
+            color?: string;
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.Taxonomy;
+            export interface $409 {
+            }
+        }
+    }
+    namespace CreateTaxonomyClassification {
+        namespace Parameters {
+            export type TaxonomySlug = string;
+        }
+        export interface PathParameters {
+            taxonomySlug: Parameters.TaxonomySlug;
+        }
+        export type RequestBody = Components.Schemas.TaxonomyClassification;
+    }
     namespace DeleteEntity {
         namespace Parameters {
             export type ActivityId = /**
@@ -6289,6 +6247,36 @@ declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
+        }
+    }
+    namespace DeleteTaxonomy {
+        namespace Parameters {
+            export type Permanent = boolean;
+            export type TaxonomySlug = string;
+        }
+        export interface PathParameters {
+            taxonomySlug: Parameters.TaxonomySlug;
+        }
+        export interface QueryParameters {
+            permanent?: Parameters.Permanent;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+        }
+    }
+    namespace DeleteTaxonomyClassification {
+        namespace Parameters {
+            export type ClassificationId = Components.Schemas.ClassificationId /* uuid */;
+            export type Permanent = boolean;
+            export type TaxonomySlug = string;
+        }
+        export interface PathParameters {
+            taxonomySlug: Parameters.TaxonomySlug;
+            classificationId: Parameters.ClassificationId;
+        }
+        export interface QueryParameters {
+            permanent?: Parameters.Permanent;
         }
     }
     namespace ExportEntities {
@@ -6827,6 +6815,21 @@ declare namespace Paths {
             export type $200 = Components.Schemas.Taxonomy;
         }
     }
+    namespace GetTaxonomyClassification {
+        namespace Parameters {
+            export type TaxonomyClassificationSlug = string;
+            export type TaxonomySlug = string;
+        }
+        export interface PathParameters {
+            taxonomySlug: Parameters.TaxonomySlug;
+            taxonomyClassificationSlug: Parameters.TaxonomyClassificationSlug;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.TaxonomyClassification;
+            export interface $404 {
+            }
+        }
+    }
     namespace ImportEntities {
         namespace Parameters {
             export type JobId = /**
@@ -6891,6 +6894,12 @@ declare namespace Paths {
         }
     }
     namespace ListTaxonomies {
+        namespace Parameters {
+            export type IncludeDisabled = boolean;
+        }
+        export interface QueryParameters {
+            include_disabled?: Parameters.IncludeDisabled;
+        }
         namespace Responses {
             export interface $200 {
                 results?: Components.Schemas.Taxonomy[];
@@ -7262,6 +7271,68 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = /* A saved entity view */ Components.Schemas.SavedViewItem;
         }
+    }
+    namespace UpdateTaxonomy {
+        namespace Parameters {
+            export type TaxonomySlug = string;
+        }
+        export interface PathParameters {
+            taxonomySlug: Parameters.TaxonomySlug;
+        }
+        /**
+         * example:
+         * {
+         *   "name": "Product Category",
+         *   "plural": "Product Categories",
+         *   "icon": "product-hub",
+         *   "color": "#FF5733",
+         *   "enabled": true
+         * }
+         */
+        export interface RequestBody {
+            /**
+             * A human friendly name of a Taxonomy e.g. Purpose, Product Category, Folder, Tag
+             * example:
+             * Purpose
+             */
+            name?: string;
+            /**
+             * Plural name of a Taxonomy e.g. Purposes, Product Categories, Folders, Tags. Defaults to name is not provided.
+             * example:
+             * Purposes
+             */
+            plural?: string;
+            /**
+             * Icon name for the taxonomy (from epilot360/icons icon set)
+             * example:
+             * purpose
+             */
+            icon?: string;
+            /**
+             * HEX Color code for the taxonomy
+             * example:
+             * #FF5733
+             */
+            color?: string;
+            /**
+             * Whether the taxonomy is enabled or not
+             * example:
+             * true
+             */
+            enabled?: boolean;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Taxonomy;
+        }
+    }
+    namespace UpdateTaxonomyClassification {
+        namespace Parameters {
+            export type TaxonomySlug = string;
+        }
+        export interface PathParameters {
+            taxonomySlug: Parameters.TaxonomySlug;
+        }
+        export type RequestBody = Components.Schemas.TaxonomyClassification;
     }
     namespace UpsertEntity {
         namespace Parameters {
@@ -8092,10 +8163,30 @@ export interface OperationMethods {
    * List taxonomies in an organisation
    */
   'listTaxonomies'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.ListTaxonomies.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListTaxonomies.Responses.$200>
+  /**
+   * listTaxonomies - listTaxonomies
+   * 
+   * List taxonomies in an organization
+   */
+  'listTaxonomies'(
+    parameters?: Parameters<Paths.ListTaxonomies.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListTaxonomies.Responses.$200>
+  /**
+   * createTaxonomy - createTaxonomy
+   * 
+   * Create a new taxonomy
+   */
+  'createTaxonomy'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateTaxonomy.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateTaxonomy.Responses.$201>
   /**
    * getTaxonomy - getTaxonomy
    * 
@@ -8106,6 +8197,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetTaxonomy.Responses.$200>
+  /**
+   * updateTaxonomy - updateTaxonomy
+   * 
+   * Update a taxonomy
+   */
+  'updateTaxonomy'(
+    parameters?: Parameters<Paths.UpdateTaxonomy.PathParameters> | null,
+    data?: Paths.UpdateTaxonomy.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateTaxonomy.Responses.$200>
+  /**
+   * deleteTaxonomy - deleteTaxonomy
+   * 
+   * Delete a taxonomy
+   */
+  'deleteTaxonomy'(
+    parameters?: Parameters<Paths.DeleteTaxonomy.PathParameters & Paths.DeleteTaxonomy.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteTaxonomy.Responses.$204>
   /**
    * taxonomyAutocomplete - taxonomyAutocomplete
    * 
@@ -8119,7 +8230,7 @@ export interface OperationMethods {
   /**
    * taxonomiesClassificationsSearch - taxonomiesClassificationsSearch
    * 
-   * List taxonomy classifications in an organisation based on taxonomy slug
+   * List taxonomy classifications in an organization based on taxonomy slug
    */
   'taxonomiesClassificationsSearch'(
     parameters?: Parameters<Paths.TaxonomiesClassificationsSearch.QueryParameters> | null,
@@ -8129,13 +8240,53 @@ export interface OperationMethods {
   /**
    * updateClassificationsForTaxonomy - updateClassificationsForTaxonomy
    * 
-   * Update taxonomies in an organisation based in taxonomy slug
+   * Update the classifications for a taxonomy
    */
   'updateClassificationsForTaxonomy'(
     parameters?: Parameters<Paths.UpdateClassificationsForTaxonomy.PathParameters> | null,
     data?: Paths.UpdateClassificationsForTaxonomy.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
+  /**
+   * getTaxonomyClassification - getTaxonomyClassification
+   * 
+   * Gets the classification of a taxonomy
+   */
+  'getTaxonomyClassification'(
+    parameters?: Parameters<Paths.GetTaxonomyClassification.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetTaxonomyClassification.Responses.$200>
+  /**
+   * updateTaxonomyClassification - updateTaxonomyClassification
+   * 
+   * Update a classification for a taxonomy
+   */
+  'updateTaxonomyClassification'(
+    parameters?: Parameters<Paths.UpdateTaxonomyClassification.PathParameters> | null,
+    data?: Paths.UpdateTaxonomyClassification.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
+   * createTaxonomyClassification - createTaxonomyClassification
+   * 
+   * Create a new classification for a taxonomy
+   */
+  'createTaxonomyClassification'(
+    parameters?: Parameters<Paths.CreateTaxonomyClassification.PathParameters> | null,
+    data?: Paths.CreateTaxonomyClassification.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
+   * deleteTaxonomyClassification - deleteTaxonomyClassification
+   * 
+   * Delete a classification for a taxonomy
+   */
+  'deleteTaxonomyClassification'(
+    parameters?: Parameters<Paths.DeleteTaxonomyClassification.PathParameters & Paths.DeleteTaxonomyClassification.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
 }
 
 export interface PathsDictionary {
@@ -8807,10 +8958,32 @@ export interface PathsDictionary {
      * List taxonomies in an organisation
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.ListTaxonomies.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListTaxonomies.Responses.$200>
+  }
+  ['/v1/entity/taxonomies']: {
+    /**
+     * listTaxonomies - listTaxonomies
+     * 
+     * List taxonomies in an organization
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListTaxonomies.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListTaxonomies.Responses.$200>
+    /**
+     * createTaxonomy - createTaxonomy
+     * 
+     * Create a new taxonomy
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateTaxonomy.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateTaxonomy.Responses.$201>
   }
   ['/v1/entity/taxonomies/{taxonomySlug}']: {
     /**
@@ -8823,6 +8996,26 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetTaxonomy.Responses.$200>
+    /**
+     * updateTaxonomy - updateTaxonomy
+     * 
+     * Update a taxonomy
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateTaxonomy.PathParameters> | null,
+      data?: Paths.UpdateTaxonomy.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateTaxonomy.Responses.$200>
+    /**
+     * deleteTaxonomy - deleteTaxonomy
+     * 
+     * Delete a taxonomy
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteTaxonomy.PathParameters & Paths.DeleteTaxonomy.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteTaxonomy.Responses.$204>
   }
   ['/v1/entity/taxonomies/{taxonomySlug}:autocomplete']: {
     /**
@@ -8840,7 +9033,7 @@ export interface PathsDictionary {
     /**
      * taxonomiesClassificationsSearch - taxonomiesClassificationsSearch
      * 
-     * List taxonomy classifications in an organisation based on taxonomy slug
+     * List taxonomy classifications in an organization based on taxonomy slug
      */
     'post'(
       parameters?: Parameters<Paths.TaxonomiesClassificationsSearch.QueryParameters> | null,
@@ -8852,13 +9045,55 @@ export interface PathsDictionary {
     /**
      * updateClassificationsForTaxonomy - updateClassificationsForTaxonomy
      * 
-     * Update taxonomies in an organisation based in taxonomy slug
+     * Update the classifications for a taxonomy
      */
     'post'(
       parameters?: Parameters<Paths.UpdateClassificationsForTaxonomy.PathParameters> | null,
       data?: Paths.UpdateClassificationsForTaxonomy.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
+  }
+  ['/v2/entity/taxonomies/{taxonomySlug}/classifications/{classificationSlug}']: {
+    /**
+     * getTaxonomyClassification - getTaxonomyClassification
+     * 
+     * Gets the classification of a taxonomy
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetTaxonomyClassification.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetTaxonomyClassification.Responses.$200>
+    /**
+     * createTaxonomyClassification - createTaxonomyClassification
+     * 
+     * Create a new classification for a taxonomy
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateTaxonomyClassification.PathParameters> | null,
+      data?: Paths.CreateTaxonomyClassification.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
+    /**
+     * updateTaxonomyClassification - updateTaxonomyClassification
+     * 
+     * Update a classification for a taxonomy
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateTaxonomyClassification.PathParameters> | null,
+      data?: Paths.UpdateTaxonomyClassification.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
+    /**
+     * deleteTaxonomyClassification - deleteTaxonomyClassification
+     * 
+     * Delete a classification for a taxonomy
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteTaxonomyClassification.PathParameters & Paths.DeleteTaxonomyClassification.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
   }
 }
 

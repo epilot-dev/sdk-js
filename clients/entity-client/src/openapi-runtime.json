@@ -698,7 +698,33 @@
     },
     "/v1/entity/listTaxonomies": {
       "get": {
-        "operationId": "listTaxonomies"
+        "deprecated": true,
+        "operationId": "listTaxonomies",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_disabled"
+          }
+        ]
+      }
+    },
+    "/v1/entity/taxonomies": {
+      "get": {
+        "operationId": "listTaxonomies",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_disabled"
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createTaxonomy",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
       }
     },
     "/v1/entity/taxonomies/{taxonomySlug}": {
@@ -707,6 +733,31 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ]
+      },
+      "put": {
+        "operationId": "updateTaxonomy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTaxonomy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "permanent"
           }
         ]
       }
@@ -758,6 +809,89 @@
           }
         }
       }
+    },
+    "/v2/entity/taxonomies/{taxonomySlug}/classifications/{classificationSlug}": {
+      "get": {
+        "operationId": "getTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "response": {
+          "201": {
+            "description": "Taxonomy classification created",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "409": {
+            "description": "Taxonomy classification already exists\""
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "response": {
+          "200": {
+            "description": "Taxonomy classification updated",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Taxonomy classification not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "in": "path",
+            "name": "classificationId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "permanent"
+          }
+        ],
+        "response": {
+          "204": {
+            "description": "Taxonomy classification deleted"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -784,6 +918,11 @@
       },
       "TaxonomySlugPathParam": {
         "name": "taxonomySlug",
+        "in": "path",
+        "required": true
+      },
+      "TaxonomyClassificationSlugPathParam": {
+        "name": "taxonomyClassificationSlug",
         "in": "path",
         "required": true
       },
