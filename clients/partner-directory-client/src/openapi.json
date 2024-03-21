@@ -459,6 +459,51 @@
           }
         }
       }
+    },
+    "/v2/partners/{id}/invite": {
+      "post": {
+        "operationId": "invitePartnerV2",
+        "summary": "invitePartnerV2",
+        "tags": [
+          "partners"
+        ],
+        "description": "Invite a partner into collaboration. It will send an email to partner and ask to join into collaboration",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/PartnerId"
+            },
+            "required": true,
+            "description": "The Id of partner"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerInvitationPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partner"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to invite"
+          }
+        }
+      }
     }
   },
   "components": {

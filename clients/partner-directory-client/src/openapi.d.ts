@@ -461,6 +461,24 @@ declare namespace Paths {
             }
         }
     }
+    namespace InvitePartnerV2 {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
+             */
+            Components.Schemas.PartnerId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.PartnerInvitationPayload;
+        namespace Responses {
+            export type $200 = Components.Schemas.Partner;
+            export interface $400 {
+            }
+        }
+    }
     namespace RejectPartner {
         namespace Parameters {
             export type Id = /**
@@ -650,6 +668,16 @@ export interface OperationMethods {
     data?: Paths.SearchGeolocationForText.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchGeolocationForText.Responses.$200>
+  /**
+   * invitePartnerV2 - invitePartnerV2
+   * 
+   * Invite a partner into collaboration. It will send an email to partner and ask to join into collaboration
+   */
+  'invitePartnerV2'(
+    parameters?: Parameters<Paths.InvitePartnerV2.PathParameters> | null,
+    data?: Paths.InvitePartnerV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.InvitePartnerV2.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -767,6 +795,18 @@ export interface PathsDictionary {
       data?: Paths.SearchGeolocationForText.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchGeolocationForText.Responses.$200>
+  }
+  ['/v2/partners/{id}/invite']: {
+    /**
+     * invitePartnerV2 - invitePartnerV2
+     * 
+     * Invite a partner into collaboration. It will send an email to partner and ask to join into collaboration
+     */
+    'post'(
+      parameters?: Parameters<Paths.InvitePartnerV2.PathParameters> | null,
+      data?: Paths.InvitePartnerV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.InvitePartnerV2.Responses.$200>
   }
 }
 

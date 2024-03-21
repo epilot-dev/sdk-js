@@ -121,6 +121,23 @@
           }
         }
       }
+    },
+    "/v2/partners/{id}/invite": {
+      "post": {
+        "operationId": "invitePartnerV2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
     }
   },
   "components": {},
