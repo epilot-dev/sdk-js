@@ -4454,6 +4454,9 @@
           },
           "amount_tax": {
             "type": "number"
+          },
+          "unit_amount_decimal": {
+            "type": "string"
           }
         },
         "required": [
@@ -4463,7 +4466,8 @@
           "unit_amount_net",
           "amount_total",
           "amount_subtotal",
-          "amount_tax"
+          "amount_tax",
+          "unit_amount_decimal"
         ]
       }
     },

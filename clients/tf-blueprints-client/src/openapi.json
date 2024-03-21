@@ -16,7 +16,57 @@
       "EpilotAuth": []
     }
   ],
+  "servers": [
+    {
+      "url": "https://tf-blueprint.dev.sls.epilot.io"
+    },
+    {
+      "url": "https://tf-blueprint.dev.sls.epilot.io",
+      "description": "Development server"
+    },
+    {
+      "url": "https://tf-blueprint.staging.sls.epilot.io",
+      "description": "Staging server"
+    },
+    {
+      "url": "https://tf-blueprint.sls.epilot.io",
+      "description": "Production server"
+    }
+  ],
   "paths": {
+    "/v2/blueprint/{id}/status": {
+      "get": {
+        "operationId": "getBlueprintStatus",
+        "summary": "getBlueprintStatus",
+        "description": "Get the current status of a blueprint (export or import)",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the blueprint",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current status of the blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Progress"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/exportBlueprint": {
       "post": {
         "operationId": "exportBlueprint",
@@ -66,17 +116,51 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": {
-                      "type": "string"
+                    "blueprintId": {
+                      "type": "string",
+                      "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/uploadBlueprintTemplate": {
+      "post": {
+        "operationId": "uploadBlueprintTemplate",
+        "summary": "uploadBlueprintTemplate",
+        "security": [],
+        "description": "Create pre-signed S3 URL to upload a file.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFilePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pre-signed URL for POST / PUT upload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "s3ref": {
+                      "$ref": "#/components/schemas/S3Reference"
                     },
-                    "resources": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "templateFilePath": {
-                      "type": "string"
+                    "upload_url": {
+                      "type": "string",
+                      "format": "url",
+                      "example": "https://epilot-dev-blueprints.s3.eu-central-1.amazonaws.com/templates/document.pdf"
                     }
                   }
                 }
@@ -115,7 +199,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "blueprintId": {
+                      "type": "string",
+                      "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+                    }
+                  }
                 }
               }
             }
@@ -207,7 +297,68 @@
     }
   },
   "components": {
-    "schemas": {},
+    "schemas": {
+      "ProgressStatus": {
+        "type": "string",
+        "enum": [
+          "STARTED",
+          "WAITING_USER_ACTION",
+          "CANCELED",
+          "IN_PROGRESS",
+          "SUCCESS",
+          "FAILED"
+        ]
+      },
+      "Progress": {
+        "type": "object",
+        "properties": {
+          "job_status": {
+            "$ref": "#/components/schemas/ProgressStatus"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "time_stamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UploadFilePayload": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "example": "main.tf"
+          },
+          "mime_type": {
+            "description": "MIME type of file",
+            "type": "string",
+            "example": "application/pdf",
+            "default": "application/octet-stream"
+          }
+        },
+        "required": [
+          "filename"
+        ]
+      },
+      "S3Reference": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "example": "epilot-dev-blueprints"
+          },
+          "key": {
+            "type": "string",
+            "example": "templates/main.tf"
+          }
+        }
+      }
+    },
     "securitySchemes": {
       "EpilotAuth": {
         "type": "http",
@@ -216,13 +367,5 @@
         "bearerFormat": "JWT"
       }
     }
-  },
-  "servers": [
-    {
-      "url": "None"
-    },
-    {
-      "url": "None"
-    }
-  ]
+  }
 }

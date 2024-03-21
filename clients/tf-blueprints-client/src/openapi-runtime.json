@@ -4,10 +4,37 @@
     "title": "",
     "version": ""
   },
+  "servers": [
+    {
+      "url": "https://tf-blueprint.dev.sls.epilot.io"
+    }
+  ],
   "paths": {
+    "/v2/blueprint/{id}/status": {
+      "get": {
+        "operationId": "getBlueprintStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
     "/v2/exportBlueprint": {
       "post": {
         "operationId": "exportBlueprint",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v2/uploadBlueprintTemplate": {
+      "post": {
+        "operationId": "uploadBlueprintTemplate",
         "requestBody": {
           "content": {
             "application/json": {}
@@ -46,10 +73,5 @@
       }
     }
   },
-  "components": {},
-  "servers": [
-    {
-      "url": "None"
-    }
-  ]
+  "components": {}
 }

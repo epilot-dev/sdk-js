@@ -7,6 +7,42 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios'; 
 
+declare namespace Components {
+    namespace Schemas {
+        export interface Progress {
+            job_status?: ProgressStatus;
+            job_id?: string;
+            message?: string;
+            time_stamp?: string; // date-time
+        }
+        export type ProgressStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
+        export interface S3Reference {
+            /**
+             * example:
+             * epilot-dev-blueprints
+             */
+            bucket?: string;
+            /**
+             * example:
+             * templates/main.tf
+             */
+            key?: string;
+        }
+        export interface UploadFilePayload {
+            /**
+             * example:
+             * main.tf
+             */
+            filename: string;
+            /**
+             * MIME type of file
+             * example:
+             * application/pdf
+             */
+            mime_type?: string;
+        }
+    }
+}
 declare namespace Paths {
     namespace ApplyBlueprint {
         export interface RequestBody {
@@ -34,7 +70,13 @@ declare namespace Paths {
             templateFilePath?: string;
         }
         namespace Responses {
-            export type $200 = string;
+            export interface $200 {
+                /**
+                 * example:
+                 * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+                 */
+                blueprintId?: string;
+            }
         }
     }
     namespace ExportBlueprint {
@@ -70,10 +112,23 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                message?: string;
-                resources?: string[];
-                templateFilePath?: string;
+                /**
+                 * example:
+                 * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+                 */
+                blueprintId?: string;
             }
+        }
+    }
+    namespace GetBlueprintStatus {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Progress;
         }
     }
     namespace UpdateBlueprint {
@@ -93,9 +148,32 @@ declare namespace Paths {
             export type $200 = string;
         }
     }
+    namespace UploadBlueprintTemplate {
+        export type RequestBody = Components.Schemas.UploadFilePayload;
+        namespace Responses {
+            export interface $201 {
+                s3ref?: Components.Schemas.S3Reference;
+                /**
+                 * example:
+                 * https://epilot-dev-blueprints.s3.eu-central-1.amazonaws.com/templates/document.pdf
+                 */
+                upload_url?: string; // url
+            }
+        }
+    }
 }
 
 export interface OperationMethods {
+  /**
+   * getBlueprintStatus - getBlueprintStatus
+   * 
+   * Get the current status of a blueprint (export or import)
+   */
+  'getBlueprintStatus'(
+    parameters?: Parameters<Paths.GetBlueprintStatus.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintStatus.Responses.$200>
   /**
    * exportBlueprint - exportBlueprint
    * 
@@ -106,6 +184,17 @@ export interface OperationMethods {
     data?: Paths.ExportBlueprint.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExportBlueprint.Responses.$200>
+  /**
+   * uploadBlueprintTemplate - uploadBlueprintTemplate
+   * 
+   * Create pre-signed S3 URL to upload a file.
+   * 
+   */
+  'uploadBlueprintTemplate'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.UploadBlueprintTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UploadBlueprintTemplate.Responses.$201>
   /**
    * createBlueprint - createBlueprint
    * 
@@ -139,6 +228,18 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
+  ['/v2/blueprint/{id}/status']: {
+    /**
+     * getBlueprintStatus - getBlueprintStatus
+     * 
+     * Get the current status of a blueprint (export or import)
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintStatus.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintStatus.Responses.$200>
+  }
   ['/v2/exportBlueprint']: {
     /**
      * exportBlueprint - exportBlueprint
@@ -150,6 +251,19 @@ export interface PathsDictionary {
       data?: Paths.ExportBlueprint.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExportBlueprint.Responses.$200>
+  }
+  ['/v2/uploadBlueprintTemplate']: {
+    /**
+     * uploadBlueprintTemplate - uploadBlueprintTemplate
+     * 
+     * Create pre-signed S3 URL to upload a file.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.UploadBlueprintTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UploadBlueprintTemplate.Responses.$201>
   }
   ['/v2/createBlueprint']: {
     /**

@@ -1,6 +1,6 @@
 {
   "name": "@epilot/pricing-client",
-  "version": "3.22.2",
+  "version": "3.22.3",
   "description": "Client for epilot Pricing APIs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
