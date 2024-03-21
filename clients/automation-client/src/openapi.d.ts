@@ -491,6 +491,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -542,6 +546,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -739,6 +747,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -791,6 +803,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -864,6 +880,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -926,6 +946,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -993,6 +1017,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -1336,6 +1364,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -1505,6 +1537,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -1727,6 +1763,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -1788,6 +1828,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -1977,6 +2021,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -2041,6 +2089,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -2086,6 +2138,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
@@ -2169,6 +2225,10 @@ declare namespace Components {
              * Flag indicating whether the action was created automatically or manually
              */
             created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be run multiple times in a single execution
+             */
+            is_bulk_action?: boolean;
             reason?: {
                 /**
                  * Why the action has to be skipped/failed
