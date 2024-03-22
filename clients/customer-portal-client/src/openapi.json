@@ -1712,11 +1712,11 @@
         }
       }
     },
-    "/v2/portal/registered/users": {
+    "/v2/portal/users-to-notify": {
       "post": {
-        "operationId": "getRegisteredUsers",
-        "summary": "getRegisteredUsers",
-        "description": "Returns the registered emails on any portal from the given emails",
+        "operationId": "filterUsersToNotifyOnAutomation",
+        "summary": "filterUsersToNotifyOnAutomation",
+        "description": "Filters the portal user emails to notify on automation",
         "tags": [
           "ECP Admin"
         ],
@@ -1736,10 +1736,15 @@
                     "example": [
                       "john@doe.com"
                     ],
-                    "description": "Emails array to check if they're registered on a portal",
+                    "description": "Emails array that are part of the automation",
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "template_id": {
+                    "type": "string",
+                    "example": "d11eb11a-c4cf-4365-8a92-e7c05f61cde4",
+                    "description": "Email template ID that used on the automation"
                   }
                 }
               }
@@ -1762,10 +1767,14 @@
                       "example": [
                         "john@doe.com"
                       ],
-                      "description": "Registered emails on a portal",
+                      "description": "Filtered emails on a portal",
                       "items": {
                         "type": "string"
                       }
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Reason to not notify the user"
                     }
                   }
                 }
