@@ -386,9 +386,9 @@
         ]
       }
     },
-    "/v2/portal/registered/users": {
+    "/v2/portal/users-to-notify": {
       "post": {
-        "operationId": "getRegisteredUsers",
+        "operationId": "filterUsersToNotifyOnAutomation",
         "requestBody": {
           "content": {
             "application/json": {}

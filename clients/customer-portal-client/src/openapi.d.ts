@@ -2716,6 +2716,41 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace FilterUsersToNotifyOnAutomation {
+        export interface RequestBody {
+            /**
+             * Emails array that are part of the automation
+             * example:
+             * [
+             *   "john@doe.com"
+             * ]
+             */
+            emails?: string[];
+            /**
+             * Email template ID that used on the automation
+             * example:
+             * d11eb11a-c4cf-4365-8a92-e7c05f61cde4
+             */
+            template_id?: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Filtered emails on a portal
+                 * example:
+                 * [
+                 *   "john@doe.com"
+                 * ]
+                 */
+                emails: string[];
+                /**
+                 * Reason to not notify the user
+                 */
+                message?: string;
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetAllContracts {
         namespace Parameters {
             /**
@@ -3620,31 +3655,6 @@ declare namespace Paths {
             export type $200 = Components.Schemas.UpsertPortalWidget;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetRegisteredUsers {
-        export interface RequestBody {
-            /**
-             * Emails array to check if they're registered on a portal
-             * example:
-             * [
-             *   "john@doe.com"
-             * ]
-             */
-            emails?: string[];
-        }
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * Registered emails on a portal
-                 * example:
-                 * [
-                 *   "john@doe.com"
-                 * ]
-                 */
-                emails: string[];
-            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -4606,15 +4616,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UserExists.Responses.$200>
   /**
-   * getRegisteredUsers - getRegisteredUsers
+   * filterUsersToNotifyOnAutomation - filterUsersToNotifyOnAutomation
    * 
-   * Returns the registered emails on any portal from the given emails
+   * Filters the portal user emails to notify on automation
    */
-  'getRegisteredUsers'(
+  'filterUsersToNotifyOnAutomation'(
     parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.GetRegisteredUsers.RequestBody,
+    data?: Paths.FilterUsersToNotifyOnAutomation.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetRegisteredUsers.Responses.$200>
+  ): OperationResponse<Paths.FilterUsersToNotifyOnAutomation.Responses.$200>
   /**
    * configureDistribution - configureDistribution
    * 
@@ -5324,17 +5334,17 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UserExists.Responses.$200>
   }
-  ['/v2/portal/registered/users']: {
+  ['/v2/portal/users-to-notify']: {
     /**
-     * getRegisteredUsers - getRegisteredUsers
+     * filterUsersToNotifyOnAutomation - filterUsersToNotifyOnAutomation
      * 
-     * Returns the registered emails on any portal from the given emails
+     * Filters the portal user emails to notify on automation
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.GetRegisteredUsers.RequestBody,
+      data?: Paths.FilterUsersToNotifyOnAutomation.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetRegisteredUsers.Responses.$200>
+    ): OperationResponse<Paths.FilterUsersToNotifyOnAutomation.Responses.$200>
   }
   ['/v2/portal/configure-distribution']: {
     /**
