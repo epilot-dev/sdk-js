@@ -674,7 +674,7 @@
             "type": "boolean"
           },
           "is_bulk_action": {
-            "description": "Flag indicating whether the same action can be run multiple times in a single execution",
+            "description": "Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity",
             "type": "boolean"
           },
           "reason": {
@@ -1433,9 +1433,14 @@
             "description": "Send an email exclusively to the portal user if they are registered on the portal.",
             "default": false
           },
+          "skip_creating_entities": {
+            "type": "boolean",
+            "description": "When true, it lets to send only the email by skip creating the thread & message entities.",
+            "default": false
+          },
           "attachments": {
             "type": "array",
-            "description": "Include extra file attachments in sent email.\n\nAttachments in email template will be sent regardless of this configuration.\n",
+            "description": "Include extra file attachments in sent email.\nAttachments in email template will be sent regardless of this configuration.\n",
             "items": {
               "type": "object",
               "properties": {

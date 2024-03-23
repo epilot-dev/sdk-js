@@ -12,7 +12,7 @@
     },
     {
       "name": "Variables",
-      "description": null
+      "description": "Variable service"
     }
   ],
   "security": [
@@ -223,23 +223,7 @@
               "schema": {
                 "oneOf": [
                   {
-                    "type": "object",
-                    "required": [
-                      "email_template_id",
-                      "recipient_query"
-                    ],
-                    "properties": {
-                      "email_template_id": {
-                        "type": "string",
-                        "description": "ID of email template to use for sending bulk emails",
-                        "example": "511ceb90-f738-47aa-8b1e-915ace0ae13c"
-                      },
-                      "recipient_query": {
-                        "type": "string",
-                        "description": "Entity search query to select recipients",
-                        "example": "_schema:contact AND consent_email_marketing:active"
-                      }
-                    }
+                    "$ref": "#/components/schemas/BulkSendMessageRequestWithQuery"
                   },
                   {
                     "$ref": "#/components/schemas/BulkSendMessageRequest"
@@ -257,8 +241,9 @@
                       },
                       "action": {
                         "type": "string",
-                        "description": "Provide CANCEL to stop the bulk message request",
+                        "description": "Trigger an APPROVE OR CANCEL action for the bulk message request",
                         "enum": [
+                          "APPROVE",
                           "CANCEL"
                         ]
                       }
@@ -328,13 +313,8 @@
       "EpilotAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Epilot Bearer Custom Authorization Token\n\n```\nbtoa(JSON.stringify(\n    {\n        idtoken: $idToken,\n        accesstoken: $accessToken\n    }\n))\n```\n"
-      },
-      "AsOrganization": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-ivy-org-id",
-        "description": "Set organization id when using internal auth"
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
       },
       "EpilotOrg": {
         "description": "Overrides the target organization to allow shared tenant access",
@@ -829,6 +809,10 @@
           }
         }
       },
+      "SkipCreatingEntities": {
+        "type": "boolean",
+        "description": "When true, it lets to send only the email by skip creating the thread & message entities."
+      },
       "BulkSendMessageRequest": {
         "type": "object",
         "required": [
@@ -836,6 +820,9 @@
           "recipient_ids"
         ],
         "properties": {
+          "skip_creating_entities": {
+            "$ref": "#/components/schemas/SkipCreatingEntities"
+          },
           "email_template_id": {
             "type": "string",
             "description": "ID of email template to use for sending bulk emails",
@@ -855,6 +842,28 @@
           }
         }
       },
+      "BulkSendMessageRequestWithQuery": {
+        "type": "object",
+        "required": [
+          "email_template_id",
+          "recipient_query"
+        ],
+        "properties": {
+          "skip_creating_entities": {
+            "$ref": "#/components/schemas/SkipCreatingEntities"
+          },
+          "email_template_id": {
+            "type": "string",
+            "description": "ID of email template to use for sending bulk emails",
+            "example": "511ceb90-f738-47aa-8b1e-915ace0ae13c"
+          },
+          "recipient_query": {
+            "type": "string",
+            "description": "Entity search query to select recipients",
+            "example": "_schema:contact AND consent_email_marketing:active"
+          }
+        }
+      },
       "BulkSendMessageJob": {
         "type": "object",
         "required": [
@@ -863,16 +872,27 @@
           "request"
         ],
         "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID",
+            "example": "206801",
+            "readonly": true
+          },
           "job_id": {
             "type": "string",
             "description": "Job ID for tracking the status of bulk message action",
             "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b"
           },
+          "skip_creating_entities": {
+            "$ref": "#/components/schemas/SkipCreatingEntities"
+          },
           "status": {
             "type": "string",
-            "description": "Status of the bulk message action\n* QUEUEING: Bulk message action is generating emails to send in a queue\n* SENDING: Bulk message action is sending emails from the queue\n* SUCCESS: Bulk message action is completed successfully\n* FAILED: Bulk message action is failed\n* CANCELLED: Bulk message action was cancelled\n",
+            "description": "Status of the bulk message action\n* PROCESSING: Bulk message action is processing the request\n* QUEUEING: Bulk message action is generating emails to send in a queue\n* SENDING: Bulk message action is sending emails from the queue\n* SUCCESS: Bulk message action is completed successfully\n* FAILED: Bulk message action is failed\n* CANCELLED: Bulk message action was cancelled\n",
             "enum": [
+              "PROCESSING",
               "QUEUEING",
+              "APPROVAL",
               "SENDING",
               "SUCCESS",
               "FAILED",
@@ -880,12 +900,75 @@
             ]
           },
           "request": {
-            "$ref": "#/components/schemas/BulkSendMessageRequest"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BulkSendMessageRequest"
+              },
+              {
+                "$ref": "#/components/schemas/BulkSendMessageRequestWithQuery"
+              }
+            ]
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User ID who created the bulk message action",
+            "example": "1234",
+            "readonly": true
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Time when the bulk message action was created",
+            "format": "date-time",
+            "readonly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Time when the bulk message action was last updated",
+            "format": "date-time",
+            "readonly": true
+          },
+          "approved_at": {
+            "type": "string",
+            "description": "Time when the bulk message action was last updated",
+            "format": "date-time",
+            "readonly": true
+          },
+          "task_token": {
+            "type": "string",
+            "description": "Task token to approve or cancel the bulk message action",
+            "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b",
+            "readonly": true
           },
           "total_queued": {
             "type": "integer",
             "description": "Total number of emails generated and queued for sending",
-            "example": 100
+            "example": 100,
+            "deprecated": true
+          },
+          "queued": {
+            "type": "array",
+            "description": "List of entity ids that are queued for sending",
+            "items": {
+              "type": "object",
+              "required": [
+                "entity_id"
+              ],
+              "properties": {
+                "entity_id": {
+                  "type": "string",
+                  "description": "Recipient Entity ID",
+                  "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                },
+                "email_to": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Recipient email address",
+                    "example": "recipient@example.com"
+                  }
+                }
+              }
+            }
           },
           "sent": {
             "type": "array",
@@ -906,6 +989,14 @@
                   "type": "string",
                   "description": "Message ID",
                   "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                },
+                "email_to": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Recipient email address",
+                    "example": "recipient@example.com"
+                  }
                 }
               }
             }
@@ -928,6 +1019,14 @@
                 "error": {
                   "type": "string",
                   "description": "Error message"
+                },
+                "email_to": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Recipient email address",
+                    "example": "recipient@example.com"
+                  }
                 }
               }
             }
