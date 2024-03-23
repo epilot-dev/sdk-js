@@ -158,13 +158,21 @@ declare namespace Components {
         }
         export interface BulkSendMessageJob {
             /**
+             * Organization ID
+             * example:
+             * 206801
+             */
+            org_id?: string;
+            /**
              * Job ID for tracking the status of bulk message action
              * example:
              * 8c086140-f33e-4bb7-a993-50c0f2402c7b
              */
             job_id: string;
+            skip_creating_entities?: /* When true, it lets to send only the email by skip creating the thread & message entities. */ SkipCreatingEntities;
             /**
              * Status of the bulk message action
+             * * PROCESSING: Bulk message action is processing the request
              * * QUEUEING: Bulk message action is generating emails to send in a queue
              * * SENDING: Bulk message action is sending emails from the queue
              * * SUCCESS: Bulk message action is completed successfully
@@ -172,14 +180,50 @@ declare namespace Components {
              * * CANCELLED: Bulk message action was cancelled
              *
              */
-            status: "QUEUEING" | "SENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
-            request: BulkSendMessageRequest;
+            status: "PROCESSING" | "QUEUEING" | "APPROVAL" | "SENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
+            request: BulkSendMessageRequest | BulkSendMessageRequestWithQuery;
+            /**
+             * User ID who created the bulk message action
+             * example:
+             * 1234
+             */
+            created_by?: string;
+            /**
+             * Time when the bulk message action was created
+             */
+            created_at?: string; // date-time
+            /**
+             * Time when the bulk message action was last updated
+             */
+            updated_at?: string; // date-time
+            /**
+             * Time when the bulk message action was last updated
+             */
+            approved_at?: string; // date-time
+            /**
+             * Task token to approve or cancel the bulk message action
+             * example:
+             * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+             */
+            task_token?: string;
             /**
              * Total number of emails generated and queued for sending
              * example:
              * 100
              */
             total_queued?: number;
+            /**
+             * List of entity ids that are queued for sending
+             */
+            queued?: {
+                /**
+                 * Recipient Entity ID
+                 * example:
+                 * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                 */
+                entity_id: string;
+                email_to?: string[];
+            }[];
             /**
              * List of entity ids and message ids that were sent successfully
              */
@@ -196,6 +240,7 @@ declare namespace Components {
                  * 3fa85f64-5717-4562-b3fc-2c963f66afa6
                  */
                 message_id: string;
+                email_to?: string[];
             }[];
             /**
              * List of entity ids that were skipped or failed
@@ -211,9 +256,11 @@ declare namespace Components {
                  * Error message
                  */
                 error: string;
+                email_to?: string[];
             }[];
         }
         export interface BulkSendMessageRequest {
+            skip_creating_entities?: /* When true, it lets to send only the email by skip creating the thread & message entities. */ SkipCreatingEntities;
             /**
              * ID of email template to use for sending bulk emails
              * example:
@@ -230,6 +277,21 @@ declare namespace Components {
              * ]
              */
             recipient_ids: string[];
+        }
+        export interface BulkSendMessageRequestWithQuery {
+            skip_creating_entities?: /* When true, it lets to send only the email by skip creating the thread & message entities. */ SkipCreatingEntities;
+            /**
+             * ID of email template to use for sending bulk emails
+             * example:
+             * 511ceb90-f738-47aa-8b1e-915ace0ae13c
+             */
+            email_template_id: string;
+            /**
+             * Entity search query to select recipients
+             * example:
+             * _schema:contact AND consent_email_marketing:active
+             */
+            recipient_query: string;
         }
         export interface EmailTemplateEntity {
             /**
@@ -449,6 +511,10 @@ declare namespace Components {
              */
             email: string;
         }
+        /**
+         * When true, it lets to send only the email by skip creating the thread & message entities.
+         */
+        export type SkipCreatingEntities = boolean;
         export type TemplateType = "email" | "document";
         export interface To {
             /**
@@ -496,20 +562,7 @@ declare namespace Components {
 }
 declare namespace Paths {
     namespace BulkSendMessage {
-        export type RequestBody = {
-            /**
-             * ID of email template to use for sending bulk emails
-             * example:
-             * 511ceb90-f738-47aa-8b1e-915ace0ae13c
-             */
-            email_template_id: string;
-            /**
-             * Entity search query to select recipients
-             * example:
-             * _schema:contact AND consent_email_marketing:active
-             */
-            recipient_query: string;
-        } | Components.Schemas.BulkSendMessageRequest | {
+        export type RequestBody = Components.Schemas.BulkSendMessageRequestWithQuery | Components.Schemas.BulkSendMessageRequest | {
             /**
              * Job ID for tracking the status of a bulk message request
              * example:
@@ -517,9 +570,9 @@ declare namespace Paths {
              */
             job_id: string;
             /**
-             * Provide CANCEL to stop the bulk message request
+             * Trigger an APPROVE OR CANCEL action for the bulk message request
              */
-            action?: "CANCEL";
+            action?: "APPROVE" | "CANCEL";
         };
         namespace Responses {
             export type $200 = Components.Schemas.BulkSendMessageJob;
