@@ -492,7 +492,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -547,7 +547,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -748,7 +748,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -804,7 +804,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -881,7 +881,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -947,7 +947,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -1018,7 +1018,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -1365,7 +1365,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -1538,7 +1538,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -1764,7 +1764,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -1829,7 +1829,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -1855,8 +1855,11 @@ declare namespace Components {
              */
             notify_portal_user_only?: boolean;
             /**
+             * When true, it lets to send only the email by skip creating the thread & message entities.
+             */
+            skip_creating_entities?: boolean;
+            /**
              * Include extra file attachments in sent email.
-             *
              * Attachments in email template will be sent regardless of this configuration.
              *
              */
@@ -2022,7 +2025,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -2090,7 +2093,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -2139,7 +2142,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
@@ -2226,7 +2229,7 @@ declare namespace Components {
              */
             created_automatically?: boolean;
             /**
-             * Flag indicating whether the same action can be run multiple times in a single execution
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
              */
             is_bulk_action?: boolean;
             reason?: {
