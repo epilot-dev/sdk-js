@@ -351,6 +351,10 @@ declare namespace Components {
              */
             ExternalFeeMappings;
             /**
+             * External fees metadata information required to compute totals, for some pricing models
+             */
+            external_fees_metadata?: ExternalFeeMetadata;
+            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -938,6 +942,7 @@ declare namespace Components {
              * ]
              */
             ExternalFeeMappings;
+            external_fees_metadata?: ExternalFeeMetadata;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -1132,6 +1137,7 @@ declare namespace Components {
              */
             billing_period: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
             breakdown: /* Price breakdown */ ComputedPriceBreakdown;
+            _meta?: /* Signature meta data payload */ SignatureMeta;
         }
         /**
          * The computed price
@@ -1269,6 +1275,52 @@ declare namespace Components {
          * }
          */
         ExternalFeeMapping[];
+        export interface ExternalFeeMetadata {
+            /**
+             * The computed total price
+             */
+            amount_total: number;
+            /**
+             * The computed total price as decimal
+             */
+            amount_total_decimal: string;
+            /**
+             * The computed static price
+             */
+            amount_static?: number;
+            /**
+             * The computed static price as decimal
+             */
+            amount_static_decimal?: any;
+            /**
+             * The computed variable price
+             */
+            amount_variable?: number;
+            /**
+             * The computed variable price as decimal
+             */
+            amount_variable_decimal?: string;
+            /**
+             * The currency of the computed price (three-letter ISO currency code)
+             */
+            currency: /* The currency of the computed price (three-letter ISO currency code) */ /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * The billing period
+             */
+            billing_period: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            breakdown: /* Price breakdown */ ComputedPriceBreakdown;
+            _meta?: /* Signature meta data payload */ SignatureMeta;
+            inputs?: {
+                [name: string]: any;
+            };
+        }
         export interface File {
             [name: string]: any;
             _id: string;
@@ -2173,6 +2225,7 @@ declare namespace Components {
              * ]
              */
             ExternalFeeMappings;
+            external_fees_metadata?: ExternalFeeMetadata;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -2857,6 +2910,19 @@ declare namespace Components {
          * The search providers payload
          */
         export type SearchStreetsResult = /* The street entity */ Street[];
+        /**
+         * Signature meta data payload
+         */
+        export interface SignatureMeta {
+            /**
+             * The signature hash of the payload
+             */
+            signature: string;
+            /**
+             * Timestamp of the signature
+             */
+            timestamp: number;
+        }
         /**
          * The street entity
          */

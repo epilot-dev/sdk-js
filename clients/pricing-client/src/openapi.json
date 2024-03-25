@@ -2399,6 +2399,20 @@
           }
         }
       },
+      "ExternalFeeMetadata": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ComputePriceResult"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "inputs": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
       "ExternalFeeMappings": {
         "type": "array",
         "items": {
@@ -2731,6 +2745,24 @@
           "consumption"
         ]
       },
+      "SignatureMeta": {
+        "type": "object",
+        "description": "Signature meta data payload",
+        "properties": {
+          "signature": {
+            "description": "The signature hash of the payload",
+            "type": "string"
+          },
+          "timestamp": {
+            "description": "Timestamp of the signature",
+            "type": "number"
+          }
+        },
+        "required": [
+          "timestamp",
+          "signature"
+        ]
+      },
       "ComputedBasePrice": {
         "type": "object",
         "description": "The computed price",
@@ -2818,6 +2850,9 @@
           },
           "breakdown": {
             "$ref": "#/components/schemas/ComputedPriceBreakdown"
+          },
+          "_meta": {
+            "$ref": "#/components/schemas/SignatureMeta"
           }
         },
         "required": [
@@ -3082,6 +3117,10 @@
           "external_fees_mappings": {
             "description": "External fees mapping information required to compute totals, for some pricing models",
             "$ref": "#/components/schemas/ExternalFeeMappings"
+          },
+          "external_fees_metadata": {
+            "description": "External fees metadata information required to compute totals, for some pricing models",
+            "$ref": "#/components/schemas/ExternalFeeMetadata"
           },
           "description": {
             "type": "string",
