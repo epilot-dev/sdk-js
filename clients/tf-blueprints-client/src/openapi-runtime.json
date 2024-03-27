@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://tf-blueprint.dev.sls.epilot.io"
+      "url": "None"
     }
   ],
   "paths": {
@@ -20,6 +20,11 @@
             "required": true
           }
         ]
+      }
+    },
+    "/v2/blueprint/listInstalledPatches": {
+      "get": {
+        "operationId": "listInstalledPatches"
       }
     },
     "/v2/exportBlueprint": {

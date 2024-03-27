@@ -18,7 +18,10 @@
   ],
   "servers": [
     {
-      "url": "https://tf-blueprint.dev.sls.epilot.io"
+      "url": "None"
+    },
+    {
+      "url": "None"
     },
     {
       "url": "https://tf-blueprint.dev.sls.epilot.io",
@@ -60,6 +63,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Progress"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint/listInstalledPatches": {
+      "get": {
+        "operationId": "listInstalledPatches",
+        "summary": "listInstalledPatches",
+        "description": "Get the list of installed patches for org",
+        "tags": [
+          "Blueprints"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of installed blueprint patches for org",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/InstalledPatchItem"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -355,6 +388,17 @@
           "key": {
             "type": "string",
             "example": "templates/main.tf"
+          }
+        }
+      },
+      "InstalledPatchItem": {
+        "type": "object",
+        "properties": {
+          "blueprint_id": {
+            "type": "string"
+          },
+          "stateFileRef": {
+            "type": "string"
           }
         }
       }

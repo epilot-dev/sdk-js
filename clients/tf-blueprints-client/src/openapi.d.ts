@@ -9,6 +9,10 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface InstalledPatchItem {
+            blueprint_id?: string;
+            stateFileRef?: string;
+        }
         export interface Progress {
             job_status?: ProgressStatus;
             job_id?: string;
@@ -131,6 +135,13 @@ declare namespace Paths {
             export type $200 = Components.Schemas.Progress;
         }
     }
+    namespace ListInstalledPatches {
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.InstalledPatchItem[];
+            }
+        }
+    }
     namespace UpdateBlueprint {
         export interface RequestBody {
             /**
@@ -174,6 +185,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintStatus.Responses.$200>
+  /**
+   * listInstalledPatches - listInstalledPatches
+   * 
+   * Get the list of installed patches for org
+   */
+  'listInstalledPatches'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListInstalledPatches.Responses.$200>
   /**
    * exportBlueprint - exportBlueprint
    * 
@@ -239,6 +260,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintStatus.Responses.$200>
+  }
+  ['/v2/blueprint/listInstalledPatches']: {
+    /**
+     * listInstalledPatches - listInstalledPatches
+     * 
+     * Get the list of installed patches for org
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListInstalledPatches.Responses.$200>
   }
   ['/v2/exportBlueprint']: {
     /**
