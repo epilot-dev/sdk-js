@@ -386,9 +386,9 @@
         ]
       }
     },
-    "/v2/portal/users-to-notify": {
+    "/v2/portal/recipients-to-notify": {
       "post": {
-        "operationId": "filterUsersToNotifyOnAutomation",
+        "operationId": "getRecipientsToNotifyOnAutomation",
         "requestBody": {
           "content": {
             "application/json": {}
