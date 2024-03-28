@@ -1712,11 +1712,11 @@
         }
       }
     },
-    "/v2/portal/users-to-notify": {
+    "/v2/portal/recipients-to-notify": {
       "post": {
-        "operationId": "filterUsersToNotifyOnAutomation",
-        "summary": "filterUsersToNotifyOnAutomation",
-        "description": "Filters the portal user emails to notify on automation",
+        "operationId": "getRecipientsToNotifyOnAutomation",
+        "summary": "getRecipientsToNotifyOnAutomation",
+        "description": "Get recipients to notify on automation",
         "tags": [
           "ECP Admin"
         ],
@@ -1730,6 +1730,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "emails",
+                  "template_id"
+                ],
                 "properties": {
                   "emails": {
                     "type": "array",
@@ -1753,7 +1757,7 @@
         },
         "responses": {
           "200": {
-            "description": "Returned whether the user exists in the portal or not successfully.",
+            "description": "Returns the valid recipients to notify successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1762,14 +1766,27 @@
                     "emails"
                   ],
                   "properties": {
-                    "emails": {
+                    "recipients": {
                       "type": "array",
-                      "example": [
-                        "john@doe.com"
-                      ],
-                      "description": "Filtered emails on a portal",
+                      "description": "Filtered recipients to notify",
                       "items": {
-                        "type": "string"
+                        "type": "object",
+                        "required": [
+                          "email",
+                          "recipient_id"
+                        ],
+                        "properties": {
+                          "email": {
+                            "type": "string",
+                            "description": "Email of the recipient",
+                            "example": "john@doe.com"
+                          },
+                          "recipient_id": {
+                            "type": "string",
+                            "description": "ID of the recipient",
+                            "example": "d11eb11a-c4cf-4365-8a92-e7c05f61cde4"
+                          }
+                        }
                       }
                     },
                     "message": {
