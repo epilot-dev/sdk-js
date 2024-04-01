@@ -3902,6 +3902,23 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace RevokeToken {
+        export interface RequestBody {
+            /**
+             * Refresh Token to be revoked
+             * example:
+             * eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+             */
+            refresh_token: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                message?: "Token revoked successfully";
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace SaveEntityFile {
         export type RequestBody = Components.Schemas.SaveEntityFile;
         namespace Responses {
@@ -4334,6 +4351,16 @@ export interface OperationMethods {
     data?: Paths.CreateUser.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateUser.Responses.$201>
+  /**
+   * revokeToken - revokeToken
+   * 
+   * Revokes all of the access tokens for the given Refresh Token.
+   */
+  'revokeToken'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.RevokeToken.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RevokeToken.Responses.$200>
   /**
    * createSSOUser - createSSOUser
    * 
@@ -5006,6 +5033,18 @@ export interface PathsDictionary {
       data?: Paths.CreateUser.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateUser.Responses.$201>
+  }
+  ['/v2/portal/token/revoke']: {
+    /**
+     * revokeToken - revokeToken
+     * 
+     * Revokes all of the access tokens for the given Refresh Token.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.RevokeToken.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RevokeToken.Responses.$200>
   }
   ['/v2/portal/sso/user']: {
     /**
