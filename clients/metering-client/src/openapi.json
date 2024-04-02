@@ -518,9 +518,6 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "entity"
-                ],
                 "additionalProperties": true,
                 "properties": {
                   "org_id": {
@@ -530,9 +527,6 @@
                   },
                   "entity": {
                     "type": "object",
-                    "required": [
-                      "meterReadings"
-                    ],
                     "additionalProperties": true,
                     "properties": {
                       "_org": {
@@ -566,6 +560,91 @@
                       "enum": [
                         "Successfully Processed"
                       ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/allowed/reading/{meter_id}": {
+      "get": {
+        "operationId": "getAllowedReadingForMeter",
+        "summary": "getAllowedReadingForMeter",
+        "description": "Get allowed reading for the given meter",
+        "tags": [
+          "ECP Admin",
+          "ECP"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          },
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "schema": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "required": true,
+            "description": "The ID of the meter."
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": false,
+            "description": "If not provided, the system will default to now.",
+            "schema": {
+              "type": "string",
+              "example": "2022-10-01T10:10:00.000Z"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recent reading for the meter fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "counter_id": {
+                            "$ref": "#/components/schemas/Id"
+                          },
+                          "min_value": {
+                            "type": "number",
+                            "description": "Minimum allowed reading value for the meter"
+                          },
+                          "max_value": {
+                            "type": "number",
+                            "description": "Maximum allowed reading value for the meter"
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -1572,7 +1651,7 @@
         "required": [
           "meterId"
         ],
-        "additionalProperties": true,
+        "nullable": true,
         "properties": {
           "meterId": {
             "$ref": "#/components/schemas/Id",
@@ -1586,8 +1665,8 @@
             "description": "- The counter readings of a meter\n- This is only sent when the user is authenticated while submitting a journey\n"
           },
           "readingValue": {
-            "type": "string",
-            "example": "240",
+            "type": "number",
+            "example": 240,
             "description": "The reading value of the meter when the counterId is passed or when the meterType is one-tariff"
           },
           "readingDate": {
