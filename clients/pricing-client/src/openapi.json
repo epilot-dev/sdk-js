@@ -4449,6 +4449,12 @@
           "markup_amount_decimal": {
             "type": "string"
           },
+          "markup_amount_net": {
+            "type": "number"
+          },
+          "markup_amount_net_decimal": {
+            "type": "string"
+          },
           "unit_amount_gross": {
             "type": "number"
           },
