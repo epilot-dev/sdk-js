@@ -59,14 +59,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/BaseEntity"
-                    },
-                    {
-                      "$ref": "#/components/schemas/Message"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/MessageRequestParams"
                 }
               }
             }
@@ -880,6 +873,11 @@
             "type": "object",
             "description": "Latest trash message of thread",
             "$ref": "#/components/schemas/Message"
+          },
+          "latest_message_at": {
+            "type": "string",
+            "description": "The date of the latest message time in the thread",
+            "example": "2024-02-10T09:14:31.990Z"
           }
         }
       },
@@ -1113,6 +1111,7 @@
           "subject",
           "from"
         ],
+        "additionalProperties": true,
         "properties": {
           "thread": {
             "type": "object",

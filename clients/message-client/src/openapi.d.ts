@@ -209,6 +209,7 @@ declare namespace Components {
             type?: "SENT" | "RECEIVED";
         }
         export interface MessageRequestParams {
+            [name: string]: any;
             /**
              * Open new thread when sending the very first message in conversation. Thread should contains context related to all messages in it (eg. topic, brand_id, opportunity_id, assigned_to,...).\
              * Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.\
@@ -446,6 +447,12 @@ declare namespace Components {
              * Latest trash message of thread
              */
             latest_trash_message?: Message;
+            /**
+             * The date of the latest message time in the thread
+             * example:
+             * 2024-02-10T09:14:31.990Z
+             */
+            latest_message_at?: string;
         }
     }
 }
@@ -1098,6 +1105,12 @@ declare namespace Paths {
                     org_read_message?: string[];
                     latest_message?: Components.Schemas.Message;
                     latest_trash_message?: Components.Schemas.Message;
+                    /**
+                     * The date of the latest message time in the thread
+                     * example:
+                     * 2024-02-10T09:14:31.990Z
+                     */
+                    latest_message_at?: string;
                 }[];
             }
             export interface $403 {
@@ -1243,130 +1256,7 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.MessageRequestParams;
         namespace Responses {
-            export interface $201 {
-                /**
-                 * Entity ID
-                 * example:
-                 * 3fa85f64-5717-4562-b3fc-2c963f66afa6
-                 */
-                _id: string;
-                /**
-                 * Entity title
-                 */
-                _title: string;
-                /**
-                 * Ivy Organization ID the entity belongs to
-                 * example:
-                 * 206801
-                 */
-                _org: string;
-                /**
-                 * URL-friendly identifier for the entity schema
-                 * example:
-                 * message
-                 */
-                _schema: string;
-                /**
-                 * Entity tags
-                 * example:
-                 * [
-                 *   "pricing",
-                 *   "INBOX"
-                 * ]
-                 */
-                _tags?: string[];
-                /**
-                 * Created date
-                 * example:
-                 * 2021-02-09T12:41:43.662Z
-                 */
-                _created_at: string; // date-time
-                /**
-                 * Updated date
-                 * example:
-                 * 2021-02-10T09:14:31.990Z
-                 */
-                _updated_at: string; // date-time
-                /**
-                 * Message ID which is from email provider. If you provide `message-id`, API overrides by its own value.
-                 * example:
-                 * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>
-                 */
-                message_id?: string;
-                /**
-                 * Ivy User ID of user sends the message.
-                 * example:
-                 * 206801
-                 */
-                sender?: string;
-                /**
-                 * Subject
-                 * example:
-                 * Request for solar panel price
-                 */
-                subject: string;
-                /**
-                 * HTML body
-                 * example:
-                 * <div>We at ABC GmbH would like to request a price quote for the solar panel.</div>
-                 */
-                html?: string;
-                /**
-                 * Text body
-                 * example:
-                 * We at ABC GmbH would like to request a price quote for the solar panel.
-                 */
-                text?: string;
-                from: Components.Schemas.Address;
-                reply_to?: Components.Schemas.Address;
-                /**
-                 * To email addresses
-                 */
-                to?: Components.Schemas.Address[];
-                /**
-                 * Cc email addresses
-                 */
-                cc?: Components.Schemas.Address[];
-                /**
-                 * Bcc email addresses
-                 */
-                bcc?: Components.Schemas.Address[];
-                file?: /* Message attachments */ Components.Schemas.AttachmentsRelation;
-                /**
-                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\
-                 * The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\
-                 * The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
-                 *
-                 * example:
-                 * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
-                 */
-                references?: string;
-                /**
-                 * In-Reply-To header. Value is the `message_id` of parent message.
-                 *
-                 * example:
-                 * <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
-                 */
-                in_reply_to?: string;
-                /**
-                 * Ivy User ID of user read the message.
-                 */
-                user_read_message?: string[];
-                /**
-                 * Ivy Organization ID of organization read the message.
-                 */
-                org_read_message?: string[];
-                /**
-                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\
-                 * Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
-                 *
-                 */
-                send_status?: ("SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR")[];
-                /**
-                 * Message type
-                 */
-                type?: "SENT" | "RECEIVED";
-            }
+            export type $201 = Components.Schemas.MessageRequestParams;
             export interface $403 {
             }
         }
@@ -1622,6 +1512,12 @@ declare namespace Paths {
                 org_read_message?: string[];
                 latest_message?: Components.Schemas.Message;
                 latest_trash_message?: Components.Schemas.Message;
+                /**
+                 * The date of the latest message time in the thread
+                 * example:
+                 * 2024-02-10T09:14:31.990Z
+                 */
+                latest_message_at?: string;
             }
             export interface $403 {
             }
