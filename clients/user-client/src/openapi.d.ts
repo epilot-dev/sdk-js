@@ -57,6 +57,9 @@ declare namespace Components {
              */
             non_billable_users_last_month?: number;
         }
+        /**
+         * Token used to invite a user to epilot
+         */
         export type InviteToken = string;
         export type Limit = number;
         export interface LoginParameters {
@@ -195,6 +198,9 @@ declare namespace Components {
             is_terms_and_conditions_checked?: boolean | null;
         }
         export type OrganizationId = string;
+        /**
+         * Token used to invite a partner user to epilot
+         */
         export type PartnerInvitationToken = string;
         export type Query = string;
         export interface SignupUserPayload {
@@ -206,7 +212,7 @@ declare namespace Components {
             language?: "en" | "de";
         }
         export interface User {
-            id: UserId;
+            id: /* User's unique identifier */ UserId;
             organization_id: OrganizationId;
             email: string; // email
             /**
@@ -287,6 +293,9 @@ declare namespace Components {
              */
             password: string;
         }
+        /**
+         * User's unique identifier
+         */
         export type UserId = string;
         export interface UserInvitationPayload {
             /**
@@ -302,7 +311,7 @@ declare namespace Components {
             roles?: string[];
         }
         export interface UserV2 {
-            id?: UserId;
+            id?: /* User's unique identifier */ UserId;
             organization_id?: OrganizationId;
             /**
              * example:
@@ -316,7 +325,13 @@ declare namespace Components {
              */
             display_name?: string;
             status?: "Active" | "Pending" | "Deactivated" | "Deleted";
+            /**
+             * User's email address
+             */
             email?: string; // email
+            /**
+             * User's pending email address
+             */
             draft_email?: string | null; // email
             /**
              * User's department
@@ -325,46 +340,54 @@ declare namespace Components {
              */
             department?: string | null;
             /**
+             * User's phone number
              * example:
              * 1234567890
              */
             phone?: string | null;
             /**
+             * User's secondary phone number, preferred for communication
              * example:
              * 1234567890
              */
             secondary_phone?: string | null;
             /**
-             * example:
-             * de
-             */
-            preferred_language?: string;
-            /**
-             * example:
-             * 65dc527f-cb2d-4158-8f2e-8978dbceb599
-             */
-            token?: string;
-            /**
+             * User's multi-factor authentication status
              * example:
              * false
              */
             mfa_enabled?: boolean;
             /**
+             * User's phone number verification status
              * example:
              * true
              */
             phone_verified?: boolean;
+            token?: /* Token used to invite a user to epilot */ InviteToken;
             /**
+             * User's email signature
              * example:
              * <p>Thanks</p>
              */
             signature?: string | null;
             /**
+             * Whether the user's signature is enabled
              * example:
              * true
              */
             is_signature_enabled?: boolean | null;
             /**
+             * User's preferred language
+             * example:
+             * de
+             */
+            preferred_language?: string;
+            /**
+             * This field is used to override the release channel for the user.
+             */
+            override_release_channel?: "canary" | "rc" | "stable";
+            /**
+             * User's custom profile image
              * example:
              * {
              *   "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
@@ -417,7 +440,7 @@ declare namespace Components {
 declare namespace Paths {
     namespace ActivateUser {
         namespace Parameters {
-            export type Token = Components.Schemas.InviteToken;
+            export type Token = /* Token used to invite a user to epilot */ Components.Schemas.InviteToken;
         }
         export interface QueryParameters {
             token: Parameters.Token;
@@ -432,7 +455,7 @@ declare namespace Paths {
     }
     namespace DeleteUserV2 {
         namespace Parameters {
-            export type Id = Components.Schemas.UserId;
+            export type Id = /* User's unique identifier */ Components.Schemas.UserId;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -453,7 +476,7 @@ declare namespace Paths {
     }
     namespace GetUser {
         namespace Parameters {
-            export type Id = Components.Schemas.UserId;
+            export type Id = /* User's unique identifier */ Components.Schemas.UserId;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -490,7 +513,7 @@ declare namespace Paths {
     }
     namespace GetUserV2 {
         namespace Parameters {
-            export type Id = Components.Schemas.UserId;
+            export type Id = /* User's unique identifier */ Components.Schemas.UserId;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -564,7 +587,7 @@ declare namespace Paths {
     }
     namespace SignUpUser {
         namespace Parameters {
-            export type Token = Components.Schemas.PartnerInvitationToken;
+            export type Token = /* Token used to invite a partner user to epilot */ Components.Schemas.PartnerInvitationToken;
         }
         export interface QueryParameters {
             token?: Parameters.Token;
@@ -579,7 +602,7 @@ declare namespace Paths {
     }
     namespace UpdateUserV2 {
         namespace Parameters {
-            export type Id = Components.Schemas.UserId;
+            export type Id = /* User's unique identifier */ Components.Schemas.UserId;
         }
         export interface PathParameters {
             id: Parameters.Id;

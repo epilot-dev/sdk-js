@@ -119,7 +119,7 @@
           {
             "name": "offset",
             "in": "query",
-            "description": "Specify the page",
+            "description": "Specify the offset",
             "required": false,
             "schema": {
               "$ref": "#/components/schemas/Offset"
@@ -522,7 +522,7 @@
           {
             "name": "offset",
             "in": "query",
-            "description": "Specify the page",
+            "description": "Specify the offset",
             "required": false,
             "schema": {
               "$ref": "#/components/schemas/Offset"
@@ -640,17 +640,21 @@
       }
     },
     "schemas": {
-      "PartnerInvitationToken": {
+      "InviteToken": {
+        "description": "Token used to invite a user to epilot",
         "type": "string"
       },
-      "InviteToken": {
+      "PartnerInvitationToken": {
+        "description": "Token used to invite a partner user to epilot",
         "type": "string"
       },
       "VerificationToken": {
         "type": "string"
       },
       "UserId": {
-        "type": "string"
+        "description": "User's unique identifier",
+        "type": "string",
+        "readOnly": true
       },
       "Query": {
         "type": "string"
@@ -747,10 +751,12 @@
             ]
           },
           "email": {
+            "description": "User's email address",
             "type": "string",
             "format": "email"
           },
           "draft_email": {
+            "description": "User's pending email address",
             "type": "string",
             "nullable": true,
             "format": "email"
@@ -762,43 +768,60 @@
             "example": "Sales"
           },
           "phone": {
+            "description": "User's phone number",
             "type": "string",
             "nullable": true,
             "example": 1234567890
           },
           "secondary_phone": {
+            "description": "User's secondary phone number, preferred for communication",
             "type": "string",
             "nullable": true,
             "example": 1234567890
           },
-          "preferred_language": {
-            "type": "string",
-            "example": "de"
-          },
-          "token": {
-            "type": "string",
-            "example": "65dc527f-cb2d-4158-8f2e-8978dbceb599"
-          },
           "mfa_enabled": {
+            "description": "User's multi-factor authentication status",
             "type": "boolean",
             "example": false
           },
           "phone_verified": {
+            "description": "User's phone number verification status",
             "type": "boolean",
             "example": true
           },
+          "token": {
+            "$ref": "#/components/schemas/InviteToken"
+          },
           "signature": {
+            "description": "User's email signature",
             "type": "string",
             "example": "<p>Thanks</p>",
             "nullable": true
           },
           "is_signature_enabled": {
+            "description": "Whether the user's signature is enabled",
             "type": "boolean",
             "example": true,
             "nullable": true
           },
+          "preferred_language": {
+            "description": "User's preferred language",
+            "type": "string",
+            "example": "de"
+          },
+          "override_release_channel": {
+            "description": "This field is used to override the release channel for the user.",
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "canary",
+              "rc",
+              "stable"
+            ]
+          },
           "image_uri": {
             "type": "object",
+            "description": "User's custom profile image",
             "additionalProperties": true,
             "properties": {
               "original": {
