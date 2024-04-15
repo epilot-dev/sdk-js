@@ -306,6 +306,10 @@ declare namespace Components {
              * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
             on_request_approved?: boolean;
+            /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
         }
         /**
          * Represents a valid base price item from a client.
@@ -469,6 +473,10 @@ declare namespace Components {
                  */
                 _updated_at?: string;
             };
+            /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
         }
         /**
          * The basic auth credentials
@@ -893,6 +901,10 @@ declare namespace Components {
              */
             on_request_approved?: boolean;
             /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
+            /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
             item_components?: /**
@@ -1059,6 +1071,10 @@ declare namespace Components {
                 _updated_at?: string;
             };
             /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
+            /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
             item_components?: /* Represents a price input to the pricing library. */ PriceItemDto[];
@@ -1080,9 +1096,21 @@ declare namespace Components {
              */
             postal_code: string;
             /**
-             * The monthly consumption to compute the price in kWh
+             * The consumption type
+             */
+            consumption_type?: "household" | "heating_pump" | "night_storage_heating";
+            /**
+             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
              */
             consumption: number;
+            /**
+             * The monthly HT consumption to compute the price in kWh
+             */
+            consumption_HT?: number;
+            /**
+             * The monthly NT consumption to compute the price in kWh
+             */
+            consumption_NT?: number;
             /**
              * The association id
              */
@@ -2170,6 +2198,10 @@ declare namespace Components {
              */
             on_request_approved?: boolean;
             /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
+            /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
             type?: "one_time" | "recurring";
@@ -2343,6 +2375,10 @@ declare namespace Components {
                  */
                 _updated_at?: string;
             };
+            /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
             /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
