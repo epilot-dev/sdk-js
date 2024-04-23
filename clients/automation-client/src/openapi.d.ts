@@ -344,7 +344,7 @@ declare namespace Components {
          */
         EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
         export interface AnythingButCondition {
-            "anything-but"?: (string | number)[];
+            "anything-but"?: string[];
         }
         export interface ApiCallerContext {
             [name: string]: any;
@@ -625,6 +625,25 @@ declare namespace Components {
              */
             AutomationActionId;
             actions: AnyAction[];
+            /**
+             * The edges between actions which define the flow order
+             */
+            edges?: /**
+             * example:
+             * {
+             *   "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
+             *   "start": "3567cabc-587f-4ba2-8752-1f3da0100d1f",
+             *   "end": "4e29af6c-9824-461c-bcfb-505840a949ba",
+             *   "condition_output": true
+             * }
+             */
+            Edge[];
+            /**
+             * Version of the flow
+             * example:
+             * 2
+             */
+            version?: number;
             trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation;
         }
         /**
@@ -903,7 +922,7 @@ declare namespace Components {
             source?: {
                 id?: string;
                 type?: string;
-                attributes?: string;
+                attribute?: string;
             };
             operation?: "equals" | "not_equals" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
             values?: string[];
@@ -1320,7 +1339,7 @@ declare namespace Components {
             exists?: boolean;
         }
         export type FilterConditionOnEvent = OrCondition | {
-            [name: string]: (string | number | boolean | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
+            [name: string]: (string | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
         };
         export interface FrontendSubmitTrigger {
             type: "frontend_submission";

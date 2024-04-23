@@ -1811,7 +1811,7 @@
               "type": {
                 "type": "string"
               },
-              "attributes": {
+              "attribute": {
                 "type": "string"
               }
             }
@@ -1909,6 +1909,18 @@
             "items": {
               "$ref": "#/components/schemas/AnyAction"
             }
+          },
+          "edges": {
+            "type": "array",
+            "description": "The edges between actions which define the flow order",
+            "items": {
+              "$ref": "#/components/schemas/Edge"
+            }
+          },
+          "version": {
+            "type": "number",
+            "description": "Version of the flow",
+            "example": 2
           },
           "trigger_event": {
             "oneOf": [
@@ -2523,12 +2535,6 @@
                     "type": "string"
                   },
                   {
-                    "type": "number"
-                  },
-                  {
-                    "type": "boolean"
-                  },
-                  {
                     "$ref": "#/components/schemas/EqualsIgnoreCaseCondition"
                   },
                   {
@@ -2569,14 +2575,7 @@
           "anything-but": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
+              "type": "string"
             }
           }
         }
