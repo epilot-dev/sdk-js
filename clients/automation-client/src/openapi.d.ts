@@ -25,7 +25,7 @@ declare namespace Components {
                 types?: (("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword") | string)[];
             };
         }
-        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | AutomationAction;
+        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | AutomationAction | ConditionAction;
         export type AnyActionConfig = /**
          * example:
          * {
@@ -877,6 +877,60 @@ declare namespace Components {
             target_unique?: string[];
         }
         export type Comparison = "equals" | "any_of" | "not_empty" | "is_empty";
+        export interface ConditionAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "condition";
+            config?: ConditionConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            actions?: AnyAction[];
+        }
         export interface ConditionActionConfig {
             id?: /**
              * example:
@@ -917,6 +971,7 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            actions?: AnyActionConfig[];
         }
         export interface ConditionConfig {
             source?: {

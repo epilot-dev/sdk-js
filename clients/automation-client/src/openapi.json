@@ -615,6 +615,9 @@
           },
           {
             "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "$ref": "#/components/schemas/ConditionAction"
           }
         ]
       },
@@ -1841,6 +1844,32 @@
           }
         }
       },
+      "ConditionAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "condition"
+                ]
+              },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AnyAction"
+                }
+              },
+              "config": {
+                "$ref": "#/components/schemas/ConditionConfig"
+              }
+            }
+          }
+        ]
+      },
       "ConditionActionConfig": {
         "allOf": [
           {
@@ -1853,6 +1882,12 @@
                 "enum": [
                   "condition"
                 ]
+              },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AnyActionConfig"
+                }
               },
               "config": {
                 "$ref": "#/components/schemas/ConditionConfig"
