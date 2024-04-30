@@ -455,6 +455,12 @@
             "type": "string",
             "example": "submission"
           },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionCondition"
+            }
+          },
           "actions": {
             "type": "array",
             "description": "The actions (nodes) of the automation flow",
@@ -462,13 +468,6 @@
               "$ref": "#/components/schemas/AnyActionConfig"
             },
             "readOnly": true
-          },
-          "edges": {
-            "type": "array",
-            "description": "The edges between actions which define the flow order",
-            "items": {
-              "$ref": "#/components/schemas/Edge"
-            }
           },
           "runs": {
             "type": "number",
@@ -518,37 +517,6 @@
           "triggers",
           "actions"
         ]
-      },
-      "Edge": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "start": {
-            "type": "string",
-            "description": "The action id from which the edge starts"
-          },
-          "end": {
-            "type": "string",
-            "description": "The action id to which the edge ends"
-          },
-          "condition_output": {
-            "type": "boolean",
-            "description": "The condition output of the edge (binary)"
-          }
-        },
-        "required": [
-          "id",
-          "start",
-          "end"
-        ],
-        "example": {
-          "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-          "start": "3567cabc-587f-4ba2-8752-1f3da0100d1f",
-          "end": "4e29af6c-9824-461c-bcfb-505840a949ba",
-          "condition_output": true
-        }
       },
       "SearchAutomationsResp": {
         "type": "object",
@@ -615,9 +583,6 @@
           },
           {
             "$ref": "#/components/schemas/AutomationAction"
-          },
-          {
-            "$ref": "#/components/schemas/ConditionAction"
           }
         ]
       },
@@ -643,9 +608,6 @@
           },
           {
             "$ref": "#/components/schemas/AutomationActionConfig"
-          },
-          {
-            "$ref": "#/components/schemas/ConditionActionConfig"
           }
         ]
       },
@@ -694,6 +656,10 @@
                 "description": "Extra metadata about the skipping reason - such as a certain condition not met, etc."
               }
             }
+          },
+          "condition_id": {
+            "type": "string",
+            "description": "Condition Id to be checked before executing the action"
           }
         }
       },
@@ -1802,16 +1768,19 @@
           }
         }
       },
-      "ConditionConfig": {
+      "Condition": {
         "type": "object",
         "properties": {
           "source": {
             "type": "object",
             "properties": {
+              "type": {
+                "type": "string"
+              },
               "id": {
                 "type": "string"
               },
-              "type": {
+              "schema": {
                 "type": "string"
               },
               "attribute": {
@@ -1844,57 +1813,23 @@
           }
         }
       },
-      "ConditionAction": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AutomationAction"
+      "ActionCondition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
           },
-          {
-            "type": "object",
-            "properties": {
-              "type": {
-                "enum": [
-                  "condition"
-                ]
-              },
-              "actions": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/AnyAction"
-                }
-              },
-              "config": {
-                "$ref": "#/components/schemas/ConditionConfig"
-              }
+          "evaluationResult": {
+            "type": "boolean",
+            "description": "Result of the condition evaluation"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Condition"
             }
           }
-        ]
-      },
-      "ConditionActionConfig": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AutomationActionConfig"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "type": {
-                "enum": [
-                  "condition"
-                ]
-              },
-              "actions": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/AnyActionConfig"
-                }
-              },
-              "config": {
-                "$ref": "#/components/schemas/ConditionConfig"
-              }
-            }
-          }
-        ]
+        }
       },
       "AutomationExecutionId": {
         "type": "string",
@@ -1939,17 +1874,16 @@
           "current_action_id": {
             "$ref": "#/components/schemas/AutomationActionId"
           },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionCondition"
+            }
+          },
           "actions": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AnyAction"
-            }
-          },
-          "edges": {
-            "type": "array",
-            "description": "The edges between actions which define the flow order",
-            "items": {
-              "$ref": "#/components/schemas/Edge"
             }
           },
           "version": {
