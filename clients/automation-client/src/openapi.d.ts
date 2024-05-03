@@ -913,16 +913,8 @@ declare namespace Components {
          */
         export interface Condition {
             source?: {
-                /**
-                 * example:
-                 * action | trigger
-                 */
-                origin?: string;
-                /**
-                 * example:
-                 * entity | workflow | journey block
-                 */
-                originType?: string;
+                origin?: "trigger" | "action";
+                originType?: "entity" | "workflow" | "journey_block";
                 id?: string;
                 schema?: string;
                 attribute?: string;

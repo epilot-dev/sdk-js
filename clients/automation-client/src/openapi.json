@@ -1776,11 +1776,18 @@
             "properties": {
               "origin": {
                 "type": "string",
-                "example": "action | trigger"
+                "enum": [
+                  "trigger",
+                  "action"
+                ]
               },
               "originType": {
                 "type": "string",
-                "example": "entity | workflow | journey block"
+                "enum": [
+                  "entity",
+                  "workflow",
+                  "journey_block"
+                ]
               },
               "id": {
                 "type": "string"
