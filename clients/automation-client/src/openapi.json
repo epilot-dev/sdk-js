@@ -1774,8 +1774,13 @@
           "source": {
             "type": "object",
             "properties": {
-              "type": {
-                "type": "string"
+              "origin": {
+                "type": "string",
+                "example": "action | trigger"
+              },
+              "originType": {
+                "type": "string",
+                "example": "entity | workflow | journey block"
               },
               "id": {
                 "type": "string"
@@ -1785,6 +1790,10 @@
               },
               "attribute": {
                 "type": "string"
+              },
+              "attributeType": {
+                "type": "string",
+                "example": "text | boolean | date | number"
               }
             }
           },
@@ -1811,6 +1820,20 @@
               "type": "string"
             }
           }
+        },
+        "example": {
+          "source": {
+            "origin": "trigger",
+            "originType": "entity",
+            "id": "trigger-id",
+            "schema": "contact",
+            "attribute": "email",
+            "attributeType": "text"
+          },
+          "operation": "equals",
+          "values": [
+            "hello@epilot.cloud"
+          ]
         }
       },
       "ActionCondition": {

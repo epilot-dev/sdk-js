@@ -15,7 +15,24 @@ declare namespace Components {
              * Result of the condition evaluation
              */
             evaluationResult?: boolean;
-            conditions?: Condition[];
+            conditions?: /**
+             * example:
+             * {
+             *   "source": {
+             *     "origin": "trigger",
+             *     "originType": "entity",
+             *     "id": "trigger-id",
+             *     "schema": "contact",
+             *     "attribute": "email",
+             *     "attributeType": "text"
+             *   },
+             *   "operation": "equals",
+             *   "values": [
+             *     "hello@epilot.cloud"
+             *   ]
+             * }
+             */
+            Condition[];
         }
         /**
          * example:
@@ -877,12 +894,43 @@ declare namespace Components {
             target_unique?: string[];
         }
         export type Comparison = "equals" | "any_of" | "not_empty" | "is_empty";
+        /**
+         * example:
+         * {
+         *   "source": {
+         *     "origin": "trigger",
+         *     "originType": "entity",
+         *     "id": "trigger-id",
+         *     "schema": "contact",
+         *     "attribute": "email",
+         *     "attributeType": "text"
+         *   },
+         *   "operation": "equals",
+         *   "values": [
+         *     "hello@epilot.cloud"
+         *   ]
+         * }
+         */
         export interface Condition {
             source?: {
-                type?: string;
+                /**
+                 * example:
+                 * action | trigger
+                 */
+                origin?: string;
+                /**
+                 * example:
+                 * entity | workflow | journey block
+                 */
+                originType?: string;
                 id?: string;
                 schema?: string;
                 attribute?: string;
+                /**
+                 * example:
+                 * text | boolean | date | number
+                 */
+                attributeType?: string;
             };
             operation?: "equals" | "not_equals" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
             values?: string[];
