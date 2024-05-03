@@ -1800,7 +1800,18 @@
               },
               "attributeType": {
                 "type": "string",
-                "example": "text | boolean | date | number"
+                "enum": [
+                  "text",
+                  "number",
+                  "boolean",
+                  "date",
+                  "tag",
+                  "country",
+                  "email",
+                  "phone",
+                  "product",
+                  "price"
+                ]
               }
             }
           },

@@ -918,11 +918,7 @@ declare namespace Components {
                 id?: string;
                 schema?: string;
                 attribute?: string;
-                /**
-                 * example:
-                 * text | boolean | date | number
-                 */
-                attributeType?: string;
+                attributeType?: "text" | "number" | "boolean" | "date" | "tag" | "country" | "email" | "phone" | "product" | "price";
             };
             operation?: "equals" | "not_equals" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
             values?: string[];
