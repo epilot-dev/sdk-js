@@ -558,9 +558,6 @@
           },
           {
             "$ref": "#/components/schemas/ReceivedEmailTrigger"
-          },
-          {
-            "$ref": "#/components/schemas/AutomationTrigger"
           }
         ]
       },

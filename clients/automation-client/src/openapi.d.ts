@@ -372,7 +372,7 @@ declare namespace Components {
          *       ```
          *
          */
-        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | AutomationTrigger;
+        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
         export interface AnythingButCondition {
             "anything-but"?: string[];
         }
