@@ -558,6 +558,9 @@
           },
           {
             "$ref": "#/components/schemas/ReceivedEmailTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
           }
         ]
       },
@@ -1771,6 +1774,11 @@
       "Condition": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "1c8d3d9c-6d4c-4a83-aa22-aa0d630cbc2d"
+          },
           "source": {
             "type": "object",
             "properties": {
@@ -2153,297 +2161,349 @@
         "type": "string",
         "example": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74"
       },
-      "JourneySubmitTrigger": {
+      "AutomationTrigger": {
         "type": "object",
         "properties": {
-          "type": {
+          "id": {
             "type": "string",
-            "enum": [
-              "journey_submission"
-            ]
+            "format": "uuid",
+            "example": "12d4f45a-1883-4841-a94c-5928cb338a94"
+          }
+        }
+      },
+      "JourneySubmitTrigger": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
           },
-          "configuration": {
+          {
             "type": "object",
             "properties": {
-              "source_id": {
+              "type": {
                 "type": "string",
-                "format": "uuid"
+                "enum": [
+                  "journey_submission"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "source_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "source_id"
+                ]
               }
             },
             "required": [
-              "source_id"
+              "type",
+              "configuration"
             ]
           }
-        },
-        "required": [
-          "type",
-          "configuration"
         ]
       },
       "FrontendSubmitTrigger": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "frontend_submission"
-            ]
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
           },
-          "configuration": {
+          {
             "type": "object",
             "properties": {
-              "source_id": {
+              "type": {
                 "type": "string",
-                "example": "99"
+                "enum": [
+                  "frontend_submission"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "source_id": {
+                    "type": "string",
+                    "example": "99"
+                  }
+                }
               }
-            }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
           }
-        },
-        "required": [
-          "type",
-          "configuration"
         ]
       },
       "ApiSubmissionTrigger": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "api_submission"
-            ]
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
           },
-          "configuration": {
+          {
             "type": "object",
             "properties": {
-              "source_id": {
-                "type": "string"
+              "type": {
+                "type": "string",
+                "enum": [
+                  "api_submission"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "source_id": {
+                    "type": "string"
+                  }
+                }
               }
-            }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
           }
-        },
-        "required": [
-          "type",
-          "configuration"
         ]
       },
       "ReceivedEmailTrigger": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "received_email"
-            ]
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
           },
-          "configuration": {
+          {
             "type": "object",
             "properties": {
-              "message_type": {
+              "type": {
                 "type": "string",
                 "enum": [
-                  "RECEIVED"
+                  "received_email"
                 ]
+              },
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "message_type": {
+                    "type": "string",
+                    "enum": [
+                      "RECEIVED"
+                    ]
+                  }
+                }
               }
-            }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
           }
-        },
-        "required": [
-          "type",
-          "configuration"
         ]
       },
       "EntityOperationTrigger": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "entity_operation"
-            ]
+        "description": "- If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.\n- The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`\n  | Comparison             | Example                                             | Rule syntax                                              |\n  |------------------------|-----------------------------------------------------|----------------------------------------------------------|\n  | Null                   | first_name is null                                  | `\"first_name\": [ null ]`                                 |\n  | Empty                  | last_name is empty                                  | `\"last_name\": [\"\"]`                                      |\n  | Equals                 | email is \"j.doe@email.com\"                          | `\"email\": [ \"j.doe@email.com\" ]`                         |\n  | Equals (ignore case)   | first_name is \"John\"                                | `\"first_name\": [ { \"equals-ignore-case\": \"john\" } ]`     |\n  | And                    | fist_name is \"John\" and last_name is \"Doe\"          | `\"first_name\": [ \"John\" ], \"last_name\": [\"Doe\"]`         |\n  | Or                     | PaymentType is \"Invoice\" or \"SEPA\"                  | `\"PaymentType\": [ \"invoice\", \"sepa\"]`                    |\n  | Or (multiple fields)   | first_name is \"John\", or last_name is \"Doe\".        | `\"$or\": [ { \"first_name\": [ \"John\" ] }, { \"last_name\": [ \"Doe\" ] } ]` |\n  | Not                    | status is anything but \"cancelled\"                  | `\"status\": [ { \"anything-but\": [ \"cancelled\" ] } ]`      |\n  | Numeric (equals)       | Price is 100                                        | `\"Price\": [ { \"numeric\": [ \"=\", 100 ] } ]`               |\n  | Numeric (range)        | Price is more than 10, and less than or equal to 20 | `\"Price\": [ { \"numeric\": [ \">\", 10, \"<=\", 20 ] } ]`      |\n  | Exists                 | ProductName exists                                  | `\"ProductName\": [ { \"exists\": true } ]`                  |\n  | Does not exist         | ProductName does not exist                          | `\"ProductName\": [ { \"exists\": false } ]`                 |\n  | Begins with            | OpportunityNumber starts with OPP-                  | `\"opportunity_number\": [ { \"prefix\": \"OPP-\" } ]`         |\n  | Ends with              | FileName ends with a .png extension                 | `\"filename\": [ { \"suffix\": \".png\" } ]`                   |\n  | Wildcard               | search a string using a wildcard                    | `\"email\": [ { \"wildcard\": \"*@doe.com\" } ]`               |\n  - To run the execution on all update events\n    ```\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"]\n          }\n        }\n      }\n    ```\n  - To run the execution only when the updates are from a portal user\n    ```\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"]\n          },\n          \"activity\": {\n            \"type\": \"EntityUpdatedFromPortal\"\n          }\n        }\n      }\n    ```\n  - To run the execution only when there is an update on a specific attribute\n    ```\n      Only starts the automation when the email on a contact is changed\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"],\n            \"payload\": {\n              \"_schema\": [\"contact\"]\n            },\n            \"diff\": {\n              \"updated\": {\n                \"email\": [{ \"exists\": true }]\n              }\n            }\n          }\n        }\n      }\n    ```\n    - To run the execution only when a specific attribute is altered(created/updated/deleted)\n      ```\n        Only starts the automation when a price is altered on a contract\n        {\n          \"type\": \"filter_entity_event\",\n          \"configuration\": {\n            \"operation\": {\n              \"payload\": {\n                \"_schema\": [\"contract\"]\n              },\n              \"diff\": {\n                // Whether he first_name has been added, updated, or removed\n                $or: [\n                  {\n                    'added.first_name': [{ exists: true }]\n                  },\n                  {\n                    'updated.first_name': [{ exists: true }]\n                  },\n                  {\n                    'deleted.first_name': [{ exists: true }]\n                  }\n                ]\n              }\n            }\n          }\n        }\n      ```\n    - To run the execution if an attribute is changed from one state to another\n      ```\n        Only starts the automation when the order status changes from `open_for_acceptance` to `placed`\n        {\n          \"type\": \"filter_entity_event\",\n          \"configuration\": {\n            \"operation\": {\n              \"operation\": [\"updateEntity\"],\n              \"payload\": {\n                \"_schema\": [\"order\"],\n                \"status\": [\"placed\"]\n              },\n              \"diff\": {\n                \"updated\": {\n                  \"status\": [\"open_for_acceptance\"]\n                }\n              }\n            }\n          }\n        }\n      ```\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
           },
-          "configuration": {
+          {
             "type": "object",
             "properties": {
-              "schema": {
+              "type": {
                 "type": "string",
-                "example": "submission"
+                "enum": [
+                  "entity_operation"
+                ]
               },
-              "operations": {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "$ref": "#/components/schemas/EntityOperation"
-                }
-              },
-              "include_activities": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "example": [
-                    "CreateEntity"
-                  ]
-                }
-              },
-              "exclude_activities": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "example": [
-                    "SyncEntity"
-                  ]
-                }
-              },
-              "filter_config": {
+              "configuration": {
                 "type": "object",
                 "properties": {
-                  "operation": {
+                  "schema": {
+                    "type": "string",
+                    "example": "submission"
+                  },
+                  "operations": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "$ref": "#/components/schemas/EntityOperation"
+                    }
+                  },
+                  "include_activities": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": [
+                        "CreateEntity"
+                      ]
+                    }
+                  },
+                  "exclude_activities": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": [
+                        "SyncEntity"
+                      ]
+                    }
+                  },
+                  "filter_config": {
                     "type": "object",
                     "properties": {
                       "operation": {
-                        "type": "array",
-                        "description": "Filter on operation type. If not specified, all operations will be matched on execution.\nExample:\n  1. Filter all the createEntity/updateEntity operations\n  ```\n    {\n      \"operation\":{\n        \"operation\": [\"createEntity\", \"updateEntity\"]\n      }\n    }\n  ```\n",
-                        "items": {
-                          "$ref": "#/components/schemas/EntityOperation"
+                        "type": "object",
+                        "properties": {
+                          "operation": {
+                            "type": "array",
+                            "description": "Filter on operation type. If not specified, all operations will be matched on execution.\nExample:\n  1. Filter all the createEntity/updateEntity operations\n  ```\n    {\n      \"operation\":{\n        \"operation\": [\"createEntity\", \"updateEntity\"]\n      }\n    }\n  ```\n",
+                            "items": {
+                              "$ref": "#/components/schemas/EntityOperation"
+                            }
+                          },
+                          "payload": {
+                            "$ref": "#/components/schemas/FilterConditionOnEvent"
+                          },
+                          "diff": {
+                            "anyOf": [
+                              {
+                                "$ref": "#/components/schemas/OrConditionForDiff"
+                              },
+                              {
+                                "type": "object",
+                                "description": "Diff to it's prior state when an entity is updated",
+                                "properties": {
+                                  "added": {
+                                    "$ref": "#/components/schemas/DiffAdded"
+                                  },
+                                  "updated": {
+                                    "$ref": "#/components/schemas/DiffUpdated"
+                                  },
+                                  "deleted": {
+                                    "$ref": "#/components/schemas/DiffDeleted"
+                                  }
+                                }
+                              }
+                            ]
+                          }
                         }
                       },
-                      "payload": {
-                        "$ref": "#/components/schemas/FilterConditionOnEvent"
-                      },
-                      "diff": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/OrConditionForDiff"
-                          },
-                          {
-                            "type": "object",
-                            "description": "Diff to it's prior state when an entity is updated",
-                            "properties": {
-                              "added": {
-                                "$ref": "#/components/schemas/DiffAdded"
-                              },
-                              "updated": {
-                                "$ref": "#/components/schemas/DiffUpdated"
-                              },
-                              "deleted": {
-                                "$ref": "#/components/schemas/DiffDeleted"
-                              }
-                            }
+                      "activity": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "$ref": "#/components/schemas/EqualsIgnoreCaseCondition"
+                                },
+                                {
+                                  "$ref": "#/components/schemas/AnythingButCondition"
+                                },
+                                {
+                                  "$ref": "#/components/schemas/ExistsCondition"
+                                },
+                                {
+                                  "$ref": "#/components/schemas/PrefixCondition"
+                                },
+                                {
+                                  "$ref": "#/components/schemas/SuffixCondition"
+                                },
+                                {
+                                  "$ref": "#/components/schemas/WildcardCondition"
+                                }
+                              ]
+                            },
+                            "example": [
+                              "EntityUpdatedFromPortal",
+                              "EntityUpdated",
+                              "DocUploadedFromPortal"
+                            ],
+                            "description": "Filter on activity type. If not specified, all activities will be matched on execution.\nExample:\n  1. Filter the events when an entity is updated from portal\n    ```\n      {\n        \"activity\":{\n          \"type\": [\"EntityUpdatedFromPortal\"]\n        }\n      }\n    ```\n  2. Filter the events when either a doc is uploaded/removed on an entity from a portal\n    ```\n      {\n        \"activity\":{\n          \"type\": [\"DocUploadedFromPortal\", \"DocRemovedFromPortal\"]\n        }\n      }\n    ```\n"
                           }
-                        ]
+                        }
                       }
                     }
                   },
-                  "activity": {
+                  "ecp_config": {
                     "type": "object",
                     "properties": {
-                      "type": {
-                        "type": "array",
-                        "items": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "$ref": "#/components/schemas/EqualsIgnoreCaseCondition"
-                            },
-                            {
-                              "$ref": "#/components/schemas/AnythingButCondition"
-                            },
-                            {
-                              "$ref": "#/components/schemas/ExistsCondition"
-                            },
-                            {
-                              "$ref": "#/components/schemas/PrefixCondition"
-                            },
-                            {
-                              "$ref": "#/components/schemas/SuffixCondition"
-                            },
-                            {
-                              "$ref": "#/components/schemas/WildcardCondition"
-                            }
-                          ]
-                        },
-                        "example": [
-                          "EntityUpdatedFromPortal",
-                          "EntityUpdated",
-                          "DocUploadedFromPortal"
-                        ],
-                        "description": "Filter on activity type. If not specified, all activities will be matched on execution.\nExample:\n  1. Filter the events when an entity is updated from portal\n    ```\n      {\n        \"activity\":{\n          \"type\": [\"EntityUpdatedFromPortal\"]\n        }\n      }\n    ```\n  2. Filter the events when either a doc is uploaded/removed on an entity from a portal\n    ```\n      {\n        \"activity\":{\n          \"type\": [\"DocUploadedFromPortal\", \"DocRemovedFromPortal\"]\n        }\n      }\n    ```\n"
-                      }
-                    }
-                  }
-                }
-              },
-              "ecp_config": {
-                "type": "object",
-                "properties": {
-                  "origin": {
-                    "type": "string",
-                    "example": "END_CUSTOMER_PORTAL"
-                  },
-                  "file_config": {
-                    "type": "object",
-                    "properties": {
-                      "shared_with_end_customer": {
-                        "type": "boolean",
-                        "example": true
+                      "origin": {
+                        "type": "string",
+                        "example": "END_CUSTOMER_PORTAL"
+                      },
+                      "file_config": {
+                        "type": "object",
+                        "properties": {
+                          "shared_with_end_customer": {
+                            "type": "boolean",
+                            "example": true
+                          }
+                        }
                       }
                     }
                   }
                 }
               }
-            }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
           }
-        },
-        "required": [
-          "type",
-          "configuration"
-        ],
-        "description": "- If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.\n- The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`\n  | Comparison             | Example                                             | Rule syntax                                              |\n  |------------------------|-----------------------------------------------------|----------------------------------------------------------|\n  | Null                   | first_name is null                                  | `\"first_name\": [ null ]`                                 |\n  | Empty                  | last_name is empty                                  | `\"last_name\": [\"\"]`                                      |\n  | Equals                 | email is \"j.doe@email.com\"                          | `\"email\": [ \"j.doe@email.com\" ]`                         |\n  | Equals (ignore case)   | first_name is \"John\"                                | `\"first_name\": [ { \"equals-ignore-case\": \"john\" } ]`     |\n  | And                    | fist_name is \"John\" and last_name is \"Doe\"          | `\"first_name\": [ \"John\" ], \"last_name\": [\"Doe\"]`         |\n  | Or                     | PaymentType is \"Invoice\" or \"SEPA\"                  | `\"PaymentType\": [ \"invoice\", \"sepa\"]`                    |\n  | Or (multiple fields)   | first_name is \"John\", or last_name is \"Doe\".        | `\"$or\": [ { \"first_name\": [ \"John\" ] }, { \"last_name\": [ \"Doe\" ] } ]` |\n  | Not                    | status is anything but \"cancelled\"                  | `\"status\": [ { \"anything-but\": [ \"cancelled\" ] } ]`      |\n  | Numeric (equals)       | Price is 100                                        | `\"Price\": [ { \"numeric\": [ \"=\", 100 ] } ]`               |\n  | Numeric (range)        | Price is more than 10, and less than or equal to 20 | `\"Price\": [ { \"numeric\": [ \">\", 10, \"<=\", 20 ] } ]`      |\n  | Exists                 | ProductName exists                                  | `\"ProductName\": [ { \"exists\": true } ]`                  |\n  | Does not exist         | ProductName does not exist                          | `\"ProductName\": [ { \"exists\": false } ]`                 |\n  | Begins with            | OpportunityNumber starts with OPP-                  | `\"opportunity_number\": [ { \"prefix\": \"OPP-\" } ]`         |\n  | Ends with              | FileName ends with a .png extension                 | `\"filename\": [ { \"suffix\": \".png\" } ]`                   |\n  | Wildcard               | search a string using a wildcard                    | `\"email\": [ { \"wildcard\": \"*@doe.com\" } ]`               |\n  - To run the execution on all update events\n    ```\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"]\n          }\n        }\n      }\n    ```\n  - To run the execution only when the updates are from a portal user\n    ```\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"]\n          },\n          \"activity\": {\n            \"type\": \"EntityUpdatedFromPortal\"\n          }\n        }\n      }\n    ```\n  - To run the execution only when there is an update on a specific attribute\n    ```\n      Only starts the automation when the email on a contact is changed\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"],\n            \"payload\": {\n              \"_schema\": [\"contact\"]\n            },\n            \"diff\": {\n              \"updated\": {\n                \"email\": [{ \"exists\": true }]\n              }\n            }\n          }\n        }\n      }\n    ```\n    - To run the execution only when a specific attribute is altered(created/updated/deleted)\n      ```\n        Only starts the automation when a price is altered on a contract\n        {\n          \"type\": \"filter_entity_event\",\n          \"configuration\": {\n            \"operation\": {\n              \"payload\": {\n                \"_schema\": [\"contract\"]\n              },\n              \"diff\": {\n                // Whether he first_name has been added, updated, or removed\n                $or: [\n                  {\n                    'added.first_name': [{ exists: true }]\n                  },\n                  {\n                    'updated.first_name': [{ exists: true }]\n                  },\n                  {\n                    'deleted.first_name': [{ exists: true }]\n                  }\n                ]\n              }\n            }\n          }\n        }\n      ```\n    - To run the execution if an attribute is changed from one state to another\n      ```\n        Only starts the automation when the order status changes from `open_for_acceptance` to `placed`\n        {\n          \"type\": \"filter_entity_event\",\n          \"configuration\": {\n            \"operation\": {\n              \"operation\": [\"updateEntity\"],\n              \"payload\": {\n                \"_schema\": [\"order\"],\n                \"status\": [\"placed\"]\n              },\n              \"diff\": {\n                \"updated\": {\n                  \"status\": [\"open_for_acceptance\"]\n                }\n              }\n            }\n          }\n        }\n      ```\n"
+        ]
       },
       "ActivityTrigger": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "activity"
-            ]
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
           },
-          "configuration": {
+          {
             "type": "object",
             "properties": {
-              "schema": {
+              "type": {
                 "type": "string",
-                "example": "submission"
+                "enum": [
+                  "activity"
+                ]
               },
-              "types": {
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "enum": [
-                        "CreateMeterReading",
-                        "UpdateMeterReading",
-                        "DocDownloadedFromPortal",
-                        "PortalUserResetPassword",
-                        "PortalUserResetForgotPassword"
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "type": "string",
+                    "example": "submission"
+                  },
+                  "types": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "CreateMeterReading",
+                            "UpdateMeterReading",
+                            "DocDownloadedFromPortal",
+                            "PortalUserResetPassword",
+                            "PortalUserResetForgotPassword"
+                          ]
+                        },
+                        {
+                          "type": "string"
+                        }
                       ]
-                    },
-                    {
-                      "type": "string"
                     }
-                  ]
+                  }
                 }
               }
-            }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
           }
-        },
-        "required": [
-          "type",
-          "configuration"
         ]
       },
       "EntityOperation": {
@@ -2455,28 +2515,35 @@
         ]
       },
       "EntityManualTrigger": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "entity_manual"
-            ]
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
           },
-          "configuration": {
+          {
             "type": "object",
             "properties": {
-              "schema": {
-                "description": "Which entity type can this automation be triggered from",
+              "type": {
                 "type": "string",
-                "example": "submission"
+                "enum": [
+                  "entity_manual"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "description": "Which entity type can this automation be triggered from",
+                    "type": "string",
+                    "example": "submission"
+                  }
+                }
               }
-            }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
           }
-        },
-        "required": [
-          "type",
-          "configuration"
         ]
       },
       "TriggerCondition": {

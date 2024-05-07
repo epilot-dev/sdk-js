@@ -40,6 +40,11 @@ declare namespace Components {
          */
         export type ActivityId = string;
         export interface ActivityTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "activity";
             configuration: {
                 /**
@@ -367,7 +372,7 @@ declare namespace Components {
          *       ```
          *
          */
-        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
+        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | AutomationTrigger;
         export interface AnythingButCondition {
             "anything-but"?: string[];
         }
@@ -436,6 +441,11 @@ declare namespace Components {
             };
         }
         export interface ApiSubmissionTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "api_submission";
             configuration: {
                 source_id?: string;
@@ -750,6 +760,13 @@ declare namespace Components {
          * 7791b04a-16d2-44a2-9af9-2d59c25c512f
          */
         export type AutomationFlowId = string;
+        export interface AutomationTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
+        }
         /**
          * Creates an order entity with prices from journey
          */
@@ -912,6 +929,11 @@ declare namespace Components {
          * }
          */
         export interface Condition {
+            /**
+             * example:
+             * 1c8d3d9c-6d4c-4a83-aa22-aa0d630cbc2d
+             */
+            id?: string; // uuid
             source?: {
                 origin?: "trigger" | "action";
                 originType?: "entity" | "workflow" | "journey_block";
@@ -1086,6 +1108,11 @@ declare namespace Components {
             _updated_at: string; // date-time
         }
         export interface EntityManualTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "entity_manual";
             configuration: {
                 /**
@@ -1214,6 +1241,11 @@ declare namespace Components {
          *
          */
         export interface EntityOperationTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "entity_operation";
             configuration: {
                 /**
@@ -1322,6 +1354,11 @@ declare namespace Components {
             [name: string]: (string | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
         };
         export interface FrontendSubmitTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "frontend_submission";
             configuration: {
                 /**
@@ -1336,6 +1373,11 @@ declare namespace Components {
             results: AutomationExecution[];
         }
         export interface JourneySubmitTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "journey_submission";
             configuration: {
                 source_id: string; // uuid
@@ -1685,6 +1727,11 @@ declare namespace Components {
         }
         export type PrimitiveJSONValue = any;
         export interface ReceivedEmailTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "received_email";
             configuration: {
                 message_type?: "RECEIVED";
