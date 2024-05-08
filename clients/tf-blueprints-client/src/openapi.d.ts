@@ -10,7 +10,7 @@ import type {
 declare namespace Components {
     namespace Schemas {
         export interface InstalledPatchItem {
-            blueprint_id?: string;
+            blueprintId?: string;
             stateFileRef?: string;
         }
         export interface Progress {
@@ -85,7 +85,7 @@ declare namespace Paths {
     }
     namespace ExportBlueprint {
         export interface RequestBody {
-            resourceType?: "journey" | "product" | "price" | "tax" | "automation_flow" | "designbuilder" | "file" | "emailtemplate" | "entity";
+            resourceType?: "journey" | "product" | "price" | "tax" | "automation_flow" | "designbuilder" | "file" | "emailtemplate" | "entity" | "schema";
             resourceIds?: [
                 string,
                 string?,

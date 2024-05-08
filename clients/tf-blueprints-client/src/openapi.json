@@ -125,7 +125,8 @@
                       "designbuilder",
                       "file",
                       "emailtemplate",
-                      "entity"
+                      "entity",
+                      "schema"
                     ]
                   },
                   "resourceIds": {
@@ -394,7 +395,7 @@
       "InstalledPatchItem": {
         "type": "object",
         "properties": {
-          "blueprint_id": {
+          "blueprintId": {
             "type": "string"
           },
           "stateFileRef": {
