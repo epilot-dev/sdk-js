@@ -10,7 +10,7 @@ const { execSync } = require('child_process');
 
 const defaultSrc = process.argv[2];
 const overrideSrc = process.argv[3];
-const includeEXT = process.argv.includes('--include-ext')
+const includeEXT = process.argv.includes('--include-ext');
 const sourceFile = overrideSrc || defaultSrc;
 
 const OPENAPICMD = 'npx openapicmd';
