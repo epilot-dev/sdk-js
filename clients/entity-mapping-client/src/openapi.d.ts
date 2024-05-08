@@ -179,8 +179,25 @@ declare namespace Components {
         }
         export interface MappingConfig {
             id: string;
+            source: SourceConfig;
+            targets: TargetConfig[];
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            created_by?: Owner;
+            last_updated_by?: Owner;
+            /**
+             * example:
+             * 66
+             */
             org_id: string;
+            /**
+             * example:
+             * 2
+             */
             version: number;
+        }
+        export interface MappingConfigCommonFields {
+            id: string;
             source: SourceConfig;
             targets: TargetConfig[];
             created_at?: string; // date-time
@@ -204,6 +221,25 @@ declare namespace Components {
              */
             last_updated_by?: Owner;
         }
+        export interface MappingConfigV2 {
+            id: string;
+            source: SourceConfig;
+            targets: TargetConfig[];
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            created_by?: Owner;
+            last_updated_by?: Owner;
+            /**
+             * example:
+             * 66
+             */
+            org_id?: string;
+            /**
+             * example:
+             * 2
+             */
+            version?: number;
+        }
         export type MappingConfigs = MappingConfig[];
         export interface MappingConfigsResp {
             configs: MappingConfigs;
@@ -219,7 +255,7 @@ declare namespace Components {
         export interface MappingHistoryEntry {
             /**
              * example:
-             * uuidv4
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
              */
             id: string;
             timestamp: string; // ISO datetime
@@ -229,60 +265,6 @@ declare namespace Components {
         }
         export interface MappingHistoryResp {
             results: MappingHistoryEntry[];
-        }
-        export interface MappingSource {
-            /**
-             * Key aiming to identify source
-             */
-            key: string;
-            /**
-             * Each item describes a property under the main source and a possibly, a default value for its target attribute
-             */
-            sub_properties?: MappingSourceProperty[];
-            /**
-             * Data Structure type of source
-             */
-            source_type: string;
-            /**
-             * Data Structure Type of the underlaying output value
-             */
-            possible_target_types?: MappingSourceTargetType[];
-            /**
-             * Initial value of a relation to be added
-             */
-            initial_relation?: RelationAttribute;
-            /**
-             * Human readable name of the Source
-             */
-            title: string;
-            /**
-             * Human readable type of the source
-             */
-            sub_title?: string;
-            target_settings?: {
-                /**
-                 * Describes which actions the user can perform on each target, if specified. If not specified, all actions are allowed
-                 */
-                allowed_ui_actions?: ("schema-select" | "attribute-select" | "target-delete" | "target-add" | "target")[];
-                /**
-                 * Whether its a read-only ui or not. Can be each target, or only the first. Overwrites uiActions
-                 */
-                locked?: "each" | "first" | "system_recommendation";
-                /**
-                 * Whether all source mappings flow into a single attribute (e.g. address)
-                 */
-                isSingleTarget?: boolean;
-                /**
-                 * Determines whether a mapping target should be shown or not. Use if there are targets which cannot be manipulated by the UI. E.g journey_data
-                 */
-                visibility?: {
-                    mode: "hide" | "show" | "message";
-                    if: {
-                        [name: string]: string;
-                    };
-                    message?: string;
-                };
-            };
         }
         export interface MappingSourceProperty {
             value: string;
@@ -456,6 +438,19 @@ declare namespace Components {
              */
             target_unique?: string[];
             /**
+             * contains config in case of running in loop mode
+             */
+            loop_config?: {
+                /**
+                 * path to the array from the entity payload
+                 */
+                source_path?: string;
+                /**
+                 * a hard limit of how many times the loop is allowed to run.
+                 */
+                length?: number;
+            };
+            /**
              * Mode of how conditions are considered valid
              */
             conditionMode?: "oneOf" | "anyOf" | "allOf";
@@ -501,14 +496,14 @@ declare namespace Paths {
         namespace Parameters {
             /**
              * example:
-             * uuidv4
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
              */
             export type Id = string;
         }
         export interface PathParameters {
             id: /**
              * example:
-             * uuidv4
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
              */
             Parameters.Id;
         }
@@ -546,14 +541,14 @@ declare namespace Paths {
         namespace Parameters {
             /**
              * example:
-             * uuidv4
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
              */
             export type Id = string;
         }
         export interface PathParameters {
             id: /**
              * example:
-             * uuidv4
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
              */
             Parameters.Id;
         }
@@ -565,14 +560,14 @@ declare namespace Paths {
         namespace Parameters {
             /**
              * example:
-             * uuidv4
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
              */
             export type Id = string;
         }
         export interface PathParameters {
             id: /**
              * example:
-             * uuidv4
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
              */
             Parameters.Id;
         }
@@ -584,7 +579,7 @@ declare namespace Paths {
         namespace Parameters {
             /**
              * example:
-             * uuidv4
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
              */
             export type Id = string;
             /**
@@ -596,7 +591,7 @@ declare namespace Paths {
         export interface PathParameters {
             id: /**
              * example:
-             * uuidv4
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
              */
             Parameters.Id;
             version: /**
@@ -607,6 +602,45 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.MappingConfig;
+        }
+    }
+    namespace GetMappingConfig {
+        namespace Parameters {
+            /**
+             * example:
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
+             */
+            Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MappingConfigV2;
+        }
+    }
+    namespace PutMappingConfig {
+        namespace Parameters {
+            /**
+             * example:
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
+             */
+            Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.MappingConfigV2;
+        namespace Responses {
+            export type $200 = Components.Schemas.MappingConfigV2;
         }
     }
     namespace QueryMappingHistory {
@@ -650,14 +684,14 @@ declare namespace Paths {
         namespace Parameters {
             /**
              * example:
-             * uuidv4
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
              */
             export type Id = string;
         }
         export interface PathParameters {
             id: /**
              * example:
-             * uuidv4
+             * 70542580-2b38-4bfc-af8d-bb90102f9f47
              */
             Parameters.Id;
         }
@@ -769,6 +803,26 @@ export interface OperationMethods {
     data?: Paths.ExecuteRelations.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExecuteRelations.Responses.$200>
+  /**
+   * getMappingConfig - getMappingConfig
+   * 
+   * Get latest version of a mapping config by id V2
+   */
+  'getMappingConfig'(
+    parameters?: Parameters<Paths.GetMappingConfig.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMappingConfig.Responses.$200>
+  /**
+   * putMappingConfig - putMappingConfig
+   * 
+   * Stores new version of entity mapping config
+   */
+  'putMappingConfig'(
+    parameters?: Parameters<Paths.PutMappingConfig.PathParameters> | null,
+    data?: Paths.PutMappingConfig.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutMappingConfig.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -887,6 +941,28 @@ export interface PathsDictionary {
       data?: Paths.ExecuteRelations.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExecuteRelations.Responses.$200>
+  }
+  ['/v2/mappings/{id}']: {
+    /**
+     * getMappingConfig - getMappingConfig
+     * 
+     * Get latest version of a mapping config by id V2
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMappingConfig.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMappingConfig.Responses.$200>
+    /**
+     * putMappingConfig - putMappingConfig
+     * 
+     * Stores new version of entity mapping config
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutMappingConfig.PathParameters> | null,
+      data?: Paths.PutMappingConfig.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutMappingConfig.Responses.$200>
   }
 }
 
