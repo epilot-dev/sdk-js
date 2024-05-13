@@ -1142,13 +1142,21 @@ declare namespace Components {
              */
             amount_static_decimal?: any;
             /**
-             * The computed variable price
+             * The computed variable price, for the day period
              */
-            amount_variable?: number;
+            amount_variable_ht?: number;
             /**
-             * The computed variable price as decimal
+             * The computed variable price, for the day period, as decimal
              */
-            amount_variable_decimal?: string;
+            amount_variable_decimal_ht?: string;
+            /**
+             * The computed variable price, for the night period
+             */
+            amount_variable_nt?: number;
+            /**
+             * The computed variable price, for the night period, as decimal
+             */
+            amount_variable_decimal_nt?: string;
             /**
              * The currency of the computed price (three-letter ISO currency code)
              */
@@ -1321,13 +1329,21 @@ declare namespace Components {
              */
             amount_static_decimal?: any;
             /**
-             * The computed variable price
+             * The computed variable price, for the day period
              */
-            amount_variable?: number;
+            amount_variable_ht?: number;
             /**
-             * The computed variable price as decimal
+             * The computed variable price, for the day period, as decimal
              */
-            amount_variable_decimal?: string;
+            amount_variable_decimal_ht?: string;
+            /**
+             * The computed variable price, for the night period
+             */
+            amount_variable_nt?: number;
+            /**
+             * The computed variable price, for the night period, as decimal
+             */
+            amount_variable_decimal_nt?: string;
             /**
              * The currency of the computed price (three-letter ISO currency code)
              */

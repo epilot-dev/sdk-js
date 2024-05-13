@@ -2838,12 +2838,20 @@
           "amount_static_decimal": {
             "description": "The computed static price as decimal"
           },
-          "amount_variable": {
-            "description": "The computed variable price",
+          "amount_variable_ht": {
+            "description": "The computed variable price, for the day period",
             "type": "number"
           },
-          "amount_variable_decimal": {
-            "description": "The computed variable price as decimal",
+          "amount_variable_decimal_ht": {
+            "description": "The computed variable price, for the day period, as decimal",
+            "type": "string"
+          },
+          "amount_variable_nt": {
+            "description": "The computed variable price, for the night period",
+            "type": "number"
+          },
+          "amount_variable_decimal_nt": {
+            "description": "The computed variable price, for the night period, as decimal",
             "type": "string"
           },
           "currency": {
