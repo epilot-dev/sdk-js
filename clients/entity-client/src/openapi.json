@@ -927,7 +927,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ActivityItem"
+                  "$ref": "#/components/schemas/BaseActivityItem"
                 }
               }
             }
@@ -1015,7 +1015,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ActivityItem"
+                  "$ref": "#/components/schemas/BaseActivityItem"
                 }
               }
             }
@@ -1651,6 +1651,46 @@
             "schema": {
               "$ref": "#/components/schemas/EntitySlug"
             }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "description": "The sort key to use if present",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "name:asc"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "Number of saved views to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 150,
+              "minimum": 1,
+              "maximum": 250
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/FieldsParam"
+            }
           }
         ],
         "responses": {
@@ -1659,15 +1699,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/SavedViewItem"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/ListSavedViewsResults"
                 }
               }
             }
@@ -1725,12 +1757,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "view": {
-                      "$ref": "#/components/schemas/SavedViewItem"
-                    }
-                  }
+                  "$ref": "#/components/schemas/SavedViewItem"
                 }
               }
             }
@@ -2153,7 +2180,16 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomySlugQueryParam"
+            "$ref": "#/components/parameters/TaxonomySlugQueryParamOptional"
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "description": "Input to search",
+            "schema": {
+              "type": "string",
+              "example": "sales"
+            }
           }
         ],
         "requestBody": {
@@ -2251,38 +2287,7 @@
         }
       }
     },
-    "/v2/entity/taxonomies/{taxonomySlug}/classifications/{classificationSlug}": {
-      "get": {
-        "operationId": "getTaxonomyClassification",
-        "summary": "getTaxonomyClassification",
-        "description": "Gets the classification of a taxonomy",
-        "tags": [
-          "Taxonomy"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/TaxonomySlugPathParam"
-          },
-          {
-            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Taxonomy classification",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TaxonomyClassification"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Taxonomy classification not found"
-          }
-        }
-      },
+    "/v2/entity/taxonomies/{taxonomySlug}/classifications": {
       "post": {
         "operationId": "createTaxonomyClassification",
         "summary": "createTaxonomyClassification",
@@ -2304,7 +2309,7 @@
             }
           }
         },
-        "response": {
+        "responses": {
           "201": {
             "description": "Taxonomy classification created",
             "content": {
@@ -2319,7 +2324,9 @@
             "description": "Taxonomy classification already exists\""
           }
         }
-      },
+      }
+    },
+    "/v2/entity/taxonomies/{taxonomySlug}/classifications/{classificationSlug}": {
       "put": {
         "operationId": "updateTaxonomyClassification",
         "summary": "updateTaxonomyClassification",
@@ -2330,6 +2337,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
           }
         ],
         "requestBody": {
@@ -2341,7 +2351,7 @@
             }
           }
         },
-        "response": {
+        "responses": {
           "200": {
             "description": "Taxonomy classification updated",
             "content": {
@@ -2369,13 +2379,7 @@
             "$ref": "#/components/parameters/TaxonomySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "classificationId",
-            "description": "The classification id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ClassificationId"
-            }
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
           },
           {
             "in": "query",
@@ -2386,9 +2390,229 @@
             }
           }
         ],
-        "response": {
+        "responses": {
           "204": {
             "description": "Taxonomy classification deleted"
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/attributes/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaAttribute",
+        "summary": "getSchemaAttribute",
+        "description": "Get a schema attribute from given attribute ID",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "composite_id",
+            "description": "Schema Slug and the Attribute ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putSchemaAttribute",
+        "summary": "putSchemaAttribute",
+        "description": "Adds or updates an attribute in the schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "composite_id",
+            "description": "Schema Slug and the Attribute ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttributeWithCompositeID"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSchemaAttribute",
+        "summary": "deleteSchemaAttribute",
+        "description": "Deletes an attribute from a schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "composite_id",
+            "description": "Schema Slug and the Attribute ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/capabilities/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaCapability",
+        "summary": "getSchemaCapability",
+        "description": "Get a schema capability from given capability ID",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "composite_id",
+            "description": "Schema Slug and the Attribute ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityCapabilityWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putSchemaCapability",
+        "summary": "putSchemaCapability",
+        "description": "Adds or updates an capability in the schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "composite_id",
+            "description": "Schema Slug and the Attribute ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityCapabilityWithCompositeID"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityCapabilityWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSchemaCapability",
+        "summary": "deleteSchemaCapability",
+        "description": "Deletes a Capability from a schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "composite_id",
+            "description": "Schema Slug and the Attribute ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityCapabilityWithCompositeID"
+                }
+              }
+            }
           }
         }
       }
@@ -2859,6 +3083,24 @@
           },
           {
             "$ref": "#/components/schemas/PartnerOrganisationAttribute"
+          }
+        ]
+      },
+      "AttributeWithCompositeID": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Attribute"
+          },
+          {
+            "type": "object",
+            "description": "a readonly computed ID for the attribute including schema slug and the attribute ID",
+            "properties": {
+              "composite_id": {
+                "type": "string",
+                "readOnly": true,
+                "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+              }
+            }
           }
         ]
       },
@@ -3879,6 +4121,11 @@
               },
               "format": {
                 "type": "string"
+              },
+              "show_separator": {
+                "description": "Whether or not to show a thousands separator",
+                "type": "boolean",
+                "default": true
               }
             }
           }
@@ -4139,6 +4386,24 @@
         },
         "required": [
           "name"
+        ]
+      },
+      "EntityCapabilityWithCompositeID": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EntityCapability"
+          },
+          {
+            "type": "object",
+            "description": "a readonly computed ID for the entity capability including schema slug and the capability ID",
+            "properties": {
+              "composite_id": {
+                "type": "string",
+                "readOnly": true,
+                "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+              }
+            }
+          }
         ]
       },
       "EntityViewDisabled": {
@@ -4427,87 +4692,6 @@
           }
         },
         "additionalProperties": true
-      },
-      "HydratedEntity": {
-        "type": "object",
-        "description": "Entity with relation data resolved into the attribute values",
-        "properties": {
-          "_relations": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "entity_id": {
-                  "$ref": "#/components/schemas/EntityId"
-                }
-              },
-              "required": [
-                "entity_id"
-              ]
-            }
-          }
-        },
-        "additionalProperties": true,
-        "required": [
-          "_relations"
-        ],
-        "example": {
-          "_relations": [
-            {
-              "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-            }
-          ],
-          "status": "active",
-          "customer_number": "abc123",
-          "email": [
-            {
-              "label": "work",
-              "email": "user@example.com"
-            }
-          ],
-          "phone": [
-            {
-              "label": "work",
-              "phone": "+49123456789"
-            }
-          ],
-          "first_name": "First Name",
-          "middle_name": "Middle Name",
-          "last_name": "Last Name",
-          "date_of_birth": "2019-08-24",
-          "title": "Mr.",
-          "account": [
-            {
-              "status": "active",
-              "name": "Company name",
-              "company_email": [
-                {
-                  "label": "Company email",
-                  "email": "company@example.com"
-                }
-              ],
-              "company_phone": [
-                {
-                  "label": "Support phone",
-                  "phone": "+49123456789"
-                }
-              ],
-              "company_website": "https://example.com",
-              "tax_id": "DE123456789",
-              "tax_exemption": "2019-08-24",
-              "contacts": {
-                "$relation": [
-                  {
-                    "_tags": [
-                      "CEO"
-                    ],
-                    "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                  }
-                ]
-              }
-            }
-          ]
-        }
       },
       "EntityItem": {
         "allOf": [
@@ -5019,7 +5203,7 @@
           "operation"
         ]
       },
-      "ActivityItem": {
+      "BaseActivityItem": {
         "allOf": [
           {
             "type": "object",
@@ -5043,6 +5227,13 @@
                 "$ref": "#/components/schemas/ActivityCallerContext"
               }
             }
+          }
+        ]
+      },
+      "ActivityItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseActivityItem"
           },
           {
             "type": "object",
@@ -5066,6 +5257,21 @@
         "description": "Reference to blueprint",
         "type": "string",
         "format": "uuid"
+      },
+      "ListSavedViewsResults": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "number",
+            "example": 1
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SavedViewItem"
+            }
+          }
+        }
       },
       "SavedViewId": {
         "description": "Generated uuid for a saved view",
@@ -5284,7 +5490,7 @@
       },
       "ClassificationId": {
         "type": "string",
-        "format": "uuid"
+        "example": "taxonomy-slug:classification-slug"
       },
       "TaxonomySlug": {
         "type": "string",
@@ -5309,7 +5515,15 @@
           "delete": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ClassificationId"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ClassificationId"
+                },
+                {
+                  "type": "string",
+                  "example": "taxonomy-slug:classification-slug"
+                }
+              ]
             }
           }
         }
@@ -5361,15 +5575,6 @@
           "example": "price"
         }
       },
-      "TaxonomySlugQueryParam": {
-        "name": "taxonomySlug",
-        "description": "Taxonomy slug",
-        "in": "query",
-        "schema": {
-          "type": "string"
-        },
-        "required": true
-      },
       "TaxonomySlugPathParam": {
         "name": "taxonomySlug",
         "description": "Taxonomy slug",
@@ -5379,8 +5584,16 @@
           "type": "string"
         }
       },
+      "TaxonomySlugQueryParamOptional": {
+        "name": "taxonomySlug",
+        "description": "Taxonomy slug",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        }
+      },
       "TaxonomyClassificationSlugPathParam": {
-        "name": "taxonomyClassificationSlug",
+        "name": "classificationSlug",
         "description": "Taxonomy Classification slug",
         "in": "path",
         "required": true,
@@ -6171,6 +6384,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    },
     {
       "url": "https://entity.sls.epilot.io"
     }
