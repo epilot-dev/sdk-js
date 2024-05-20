@@ -4464,6 +4464,35 @@
           }
         }
       },
+      "PriceTierEnhanced": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PriceTier"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "up_to": {
+            "type": "number",
+            "nullable": true
+          },
+          "flat_fee_amount": {
+            "type": "number"
+          },
+          "flat_fee_amount_decimal": {
+            "type": "string"
+          },
+          "unit_amount": {
+            "type": "number"
+          },
+          "unit_amount_decimal": {
+            "type": "string"
+          },
+          "display_mode": {
+            "$ref": "#/components/schemas/PriceTierDisplayMode"
+          }
+        }
+      },
       "PriceTierDisplayMode": {
         "type": "string",
         "enum": [

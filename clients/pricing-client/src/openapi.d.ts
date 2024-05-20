@@ -2642,6 +2642,14 @@ declare namespace Components {
             display_mode?: PriceTierDisplayMode;
         }
         export type PriceTierDisplayMode = "hidden" | "on_request";
+        export interface PriceTierEnhanced {
+            up_to?: number | null;
+            flat_fee_amount?: number;
+            flat_fee_amount_decimal?: string;
+            unit_amount?: number;
+            unit_amount_decimal?: string;
+            display_mode?: PriceTierDisplayMode;
+        }
         /**
          * The result from the calculation of a set of price items.
          */
