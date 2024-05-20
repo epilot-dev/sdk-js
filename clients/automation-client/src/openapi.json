@@ -1806,6 +1806,7 @@
               "attributeType": {
                 "type": "string",
                 "enum": [
+                  "string",
                   "text",
                   "number",
                   "boolean",
@@ -1815,7 +1816,9 @@
                   "email",
                   "phone",
                   "product",
-                  "price"
+                  "price",
+                  "status",
+                  "relation"
                 ]
               }
             }
@@ -1825,6 +1828,8 @@
             "enum": [
               "equals",
               "not_equals",
+              "any_of",
+              "none_of",
               "contains",
               "not_contains",
               "starts_with",
