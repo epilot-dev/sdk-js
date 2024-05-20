@@ -1098,7 +1098,7 @@ declare namespace Components {
             /**
              * The consumption type
              */
-            consumption_type?: "household" | "heating_pump" | "night_storage_heating";
+            consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
             /**
              * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
              */
@@ -2649,6 +2649,10 @@ declare namespace Components {
             unit_amount?: number;
             unit_amount_decimal?: string;
             display_mode?: PriceTierDisplayMode;
+            unit_amount_gross?: number;
+            unit_amount_gross_decimal?: string;
+            flat_fee_amount_gross?: number;
+            flat_fee_amount_gross_decimal?: string;
         }
         /**
          * The result from the calculation of a set of price items.

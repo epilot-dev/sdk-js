@@ -2716,7 +2716,8 @@
             "enum": [
               "household",
               "heating_pump",
-              "night_storage_heating"
+              "night_storage_heating",
+              "night_storage_heating_common_meter"
             ]
           },
           "consumption": {
@@ -4472,24 +4473,17 @@
         ],
         "type": "object",
         "properties": {
-          "up_to": {
-            "type": "number",
-            "nullable": true
-          },
-          "flat_fee_amount": {
+          "unit_amount_gross": {
             "type": "number"
           },
-          "flat_fee_amount_decimal": {
+          "unit_amount_gross_decimal": {
             "type": "string"
           },
-          "unit_amount": {
+          "flat_fee_amount_gross": {
             "type": "number"
           },
-          "unit_amount_decimal": {
+          "flat_fee_amount_gross_decimal": {
             "type": "string"
-          },
-          "display_mode": {
-            "$ref": "#/components/schemas/PriceTierDisplayMode"
           }
         }
       },
