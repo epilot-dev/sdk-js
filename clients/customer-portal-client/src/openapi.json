@@ -849,9 +849,8 @@
                   "type": "object",
                   "properties": {
                     "_id": {
-                      "type": "string",
-                      "example": "7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51",
-                      "description": "ID of the contact"
+                      "$ref": "#/components/schemas/EntityId",
+                      "description": "ID of the entity"
                     },
                     "is_main_entity": {
                       "type": "boolean"
@@ -1198,9 +1197,7 @@
             "name": "id",
             "required": true,
             "schema": {
-              "description": "ID of the mapped contact",
-              "type": "string",
-              "example": 1234
+              "$ref": "#/components/schemas/EntityId"
             }
           }
         ],
@@ -1239,7 +1236,8 @@
       "get": {
         "operationId": "getCountByEmail",
         "summary": "getCountByEmail",
-        "description": "Check Contact by email",
+        "deprecated": true,
+        "description": "Check Contact by email. Deprecated in favor of /contact/exists.",
         "tags": [
           "Public"
         ],
@@ -1295,7 +1293,7 @@
         "deprecated": true,
         "operationId": "getContactCount",
         "summary": "getContactCount",
-        "description": "Return number of contacts matching identifier values.",
+        "description": "Return number of contacts matching identifier values. Deprecated in favor of /contact/exists.",
         "security": [],
         "tags": [
           "Public"
@@ -1759,9 +1757,6 @@
                       "type": "boolean",
                       "description": "Whether the user exists in the portal",
                       "example": true
-                    },
-                    "user": {
-                      "$ref": "#/components/schemas/PortalUser"
                     }
                   }
                 }
@@ -1808,8 +1803,7 @@
                     }
                   },
                   "template_id": {
-                    "type": "string",
-                    "example": "d11eb11a-c4cf-4365-8a92-e7c05f61cde4",
+                    "$ref": "#/components/schemas/EntityId",
                     "description": "Email template ID that used on the automation"
                   }
                 }
@@ -1844,9 +1838,8 @@
                             "example": "john@doe.com"
                           },
                           "recipient_id": {
-                            "type": "string",
-                            "description": "ID of the recipient",
-                            "example": "d11eb11a-c4cf-4365-8a92-e7c05f61cde4"
+                            "$ref": "#/components/schemas/EntityId",
+                            "description": "ID of the recipient"
                           }
                         }
                       }
@@ -2751,6 +2744,69 @@
         }
       }
     },
+    "/v2/portal/contract/by-identifiers": {
+      "post": {
+        "operationId": "getContractByIdentifiers",
+        "summary": "getContractByIdentifiers",
+        "description": "Get contract by pre-configured identifiers.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Identifiers to search by. Have to be pre-configured in Portal Configuration Permissions.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity",
+                "example": "```json\n  {\n    \"name\": \"My Contract\",\n    \"contract_number\": \"123\"\n  }\n```\n"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The found contract.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/EntityItem"
+                    },
+                    "hits": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "hits"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/entity/identifiers/{slug}": {
       "get": {
         "operationId": "getEntityIdentifiers",
@@ -2822,7 +2878,8 @@
       "post": {
         "operationId": "getEntitiesByIdentifiers",
         "summary": "getEntitiesByIdentifiers",
-        "description": "Get entities by identifiers by portal user",
+        "deprecated": true,
+        "description": "Get entities (contract) by identifiers. Deprecated in favor of /contract/by-identifiers.",
         "tags": [
           "ECP"
         ],
@@ -2839,7 +2896,7 @@
               "$ref": "#/components/schemas/EntitySlug"
             },
             "required": true,
-            "description": "The slug of an entity"
+            "description": "The slug of the entity to search by. Currently the only supported value is 'contract'."
           }
         ],
         "requestBody": {
@@ -3097,8 +3154,7 @@
             "name": "attribute",
             "description": "Get activities after this timestamp",
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "type": "string"
             }
           }
         ],
@@ -3329,9 +3385,8 @@
                     "deletedFiles": {
                       "type": "array",
                       "items": {
-                        "type": "string",
-                        "description": "File ID",
-                        "example": "00250c75-afd4-4c94-ba7a-ba0df638eba5"
+                        "$ref": "#/components/schemas/EntityId",
+                        "description": "File ID"
                       }
                     }
                   }
@@ -3522,7 +3577,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "string"
+                "$ref": "#/components/schemas/EntityId"
               },
               "example": [
                 "4910096f-000a-4504-bf5a-d3774ec3032a",
@@ -3766,7 +3821,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "string"
+                "$ref": "#/components/schemas/EntityId"
               }
             }
           },
@@ -3939,8 +3994,7 @@
             "required": false,
             "description": "Entity ID",
             "schema": {
-              "type": "string",
-              "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
+              "$ref": "#/components/schemas/EntityId"
             }
           },
           {
@@ -4251,34 +4305,28 @@
         "description": "Email templates used for authentication and internal processes",
         "properties": {
           "confirmAccount": {
-            "type": "string",
-            "description": "ID of the confirmation email template upon registration",
-            "example": "701f089d-6953-48b5-ac35-442de7c59cd3"
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the confirmation email template upon registration"
           },
           "forgotPassword": {
-            "type": "string",
-            "description": "ID of the email template for forgot password",
-            "example": "6538fddb-f0e9-4f0f-af51-6e57891ff20a"
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the email template for forgot password"
           },
           "invitation": {
-            "type": "string",
-            "description": "ID of the email template for invitation",
-            "example": "14ae65fb-0dc1-4863-8743-6bc01da469f6"
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the email template for invitation"
           },
           "onNewQuote": {
-            "type": "string",
-            "description": "ID of the email template for new quote",
-            "example": "b03e2b88-8f3f-4a93-8118-1fb07e9198a1"
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the email template for new quote"
           },
           "onMapAPendingUser": {
-            "type": "string",
-            "description": "ID of the email template for mapping a pending portal user with a contact",
-            "example": "940134fa-50f2-4204-a08a-fd3afddbf39a"
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the email template for mapping a pending portal user with a contact"
           },
           "onDocUpload": {
-            "type": "string",
-            "description": "ID of the email template for document upload",
-            "example": "c8ee93c0-8158-4da7-82f3-114f0c7b20ff"
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the email template for document upload"
           }
         }
       },
@@ -4291,9 +4339,7 @@
         ],
         "properties": {
           "entity_id": {
-            "type": "string",
-            "example": 123456,
-            "description": "Entity ID"
+            "$ref": "#/components/schemas/EntityId"
           },
           "entity_type": {
             "type": "string",
@@ -4303,8 +4349,7 @@
           "file_entity_ids": {
             "type": "array",
             "items": {
-              "type": "string",
-              "example": 12345
+              "$ref": "#/components/schemas/EntityId"
             },
             "description": "Array of file entity IDs"
           }
@@ -4319,9 +4364,7 @@
         ],
         "properties": {
           "entity_id": {
-            "type": "string",
-            "example": 123456,
-            "description": "Entity ID"
+            "$ref": "#/components/schemas/EntityId"
           },
           "entity_type": {
             "type": "string",
@@ -4343,9 +4386,7 @@
                   "description": "File name"
                 },
                 "file_entity_id": {
-                  "type": "string",
-                  "example": 12345,
-                  "description": "File entity ID"
+                  "$ref": "#/components/schemas/EntityId"
                 },
                 "document_type": {
                   "type": "string",
@@ -4512,9 +4553,8 @@
             "description": "Mark true if the domain is an Epilot domain"
           },
           "design_id": {
-            "type": "string",
-            "description": "ID of the design used to build the portal",
-            "example": "9ba94f20-b872-4217-a259-2a90a8ee1a29"
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the design used to build the portal"
           },
           "default_user_to_notify": {
             "type": "object",
@@ -4673,7 +4713,7 @@
               "type": "object",
               "properties": {
                 "journey_id": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/EntityId"
                 },
                 "slug": {
                   "$ref": "#/components/schemas/EntitySlug"
@@ -5150,8 +5190,7 @@
                 }
               },
               "contactId": {
-                "type": "string",
-                "example": 123456,
+                "$ref": "#/components/schemas/EntityId",
                 "description": "ID of the contact"
               },
               "registration_identifiers": {
@@ -5380,6 +5419,7 @@
       },
       "EntityId": {
         "type": "string",
+        "format": "uuid",
         "description": "Entity ID",
         "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
       },
@@ -5833,12 +5873,10 @@
                     "example": "john@doe.com"
                   },
                   "custom:portal_user_id": {
-                    "type": "string",
-                    "example": "06c78f9d-af75-4483-893d-a3fad524400f"
+                    "$ref": "#/components/schemas/EntityId"
                   },
                   "custom:contact_entity_id": {
-                    "type": "string",
-                    "example": "7579d22f-9400-41d1-b460-04730239ee91"
+                    "$ref": "#/components/schemas/EntityId"
                   }
                 },
                 "example": {
@@ -5955,7 +5993,7 @@
                     "type": "object",
                     "properties": {
                       "id": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/EntityId"
                       },
                       "schema": {
                         "type": "string"
@@ -6032,9 +6070,8 @@
                   "type": "object",
                   "properties": {
                     "entity_id": {
-                      "type": "string",
-                      "description": "The ID of the parent entity",
-                      "example": "d8dffa9a-6c90-4c4e-b8d1-032194b25526"
+                      "$ref": "#/components/schemas/EntityId",
+                      "description": "The ID of the parent entity"
                     },
                     "_schema": {
                       "$ref": "#/components/schemas/EntitySlug"
@@ -6064,9 +6101,8 @@
         ],
         "properties": {
           "entity_id": {
-            "type": "string",
-            "description": "The ID of the parent entity",
-            "example": "d8dffa9a-6c90-4c4e-b8d1-032194b25526"
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the parent entity"
           },
           "_schema": {
             "$ref": "#/components/schemas/EntitySlug"
