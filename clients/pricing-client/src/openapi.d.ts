@@ -306,6 +306,10 @@ declare namespace Components {
              * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
             on_request_approved?: boolean;
+            /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
         }
         /**
          * Represents a valid base price item from a client.
@@ -469,6 +473,10 @@ declare namespace Components {
                  */
                 _updated_at?: string;
             };
+            /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
         }
         /**
          * The basic auth credentials
@@ -893,6 +901,10 @@ declare namespace Components {
              */
             on_request_approved?: boolean;
             /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
+            /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
             item_components?: /**
@@ -1059,6 +1071,10 @@ declare namespace Components {
                 _updated_at?: string;
             };
             /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
+            /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
             item_components?: /* Represents a price input to the pricing library. */ PriceItemDto[];
@@ -1080,9 +1096,21 @@ declare namespace Components {
              */
             postal_code: string;
             /**
-             * The monthly consumption to compute the price in kWh
+             * The consumption type
+             */
+            consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
+            /**
+             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
              */
             consumption: number;
+            /**
+             * The monthly HT consumption to compute the price in kWh
+             */
+            consumption_HT?: number;
+            /**
+             * The monthly NT consumption to compute the price in kWh
+             */
+            consumption_NT?: number;
             /**
              * The association id
              */
@@ -1114,13 +1142,21 @@ declare namespace Components {
              */
             amount_static_decimal?: any;
             /**
-             * The computed variable price
+             * The computed variable price, for the day period
              */
-            amount_variable?: number;
+            amount_variable_ht?: number;
             /**
-             * The computed variable price as decimal
+             * The computed variable price, for the day period, as decimal
              */
-            amount_variable_decimal?: string;
+            amount_variable_decimal_ht?: string;
+            /**
+             * The computed variable price, for the night period
+             */
+            amount_variable_nt?: number;
+            /**
+             * The computed variable price, for the night period, as decimal
+             */
+            amount_variable_decimal_nt?: string;
             /**
              * The currency of the computed price (three-letter ISO currency code)
              */
@@ -1293,13 +1329,21 @@ declare namespace Components {
              */
             amount_static_decimal?: any;
             /**
-             * The computed variable price
+             * The computed variable price, for the day period
              */
-            amount_variable?: number;
+            amount_variable_ht?: number;
             /**
-             * The computed variable price as decimal
+             * The computed variable price, for the day period, as decimal
              */
-            amount_variable_decimal?: string;
+            amount_variable_decimal_ht?: string;
+            /**
+             * The computed variable price, for the night period
+             */
+            amount_variable_nt?: number;
+            /**
+             * The computed variable price, for the night period, as decimal
+             */
+            amount_variable_decimal_nt?: string;
             /**
              * The currency of the computed price (three-letter ISO currency code)
              */
@@ -1980,6 +2024,8 @@ declare namespace Components {
             category: string;
             markup_amount: number;
             markup_amount_decimal: string;
+            markup_amount_net?: number;
+            markup_amount_net_decimal?: string;
             unit_amount_gross: number;
             unit_amount_gross_decimal?: string;
             unit_amount_net: number;
@@ -2168,6 +2214,10 @@ declare namespace Components {
              */
             on_request_approved?: boolean;
             /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
+            /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
             type?: "one_time" | "recurring";
@@ -2341,6 +2391,10 @@ declare namespace Components {
                  */
                 _updated_at?: string;
             };
+            /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
             /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
@@ -2588,6 +2642,18 @@ declare namespace Components {
             display_mode?: PriceTierDisplayMode;
         }
         export type PriceTierDisplayMode = "hidden" | "on_request";
+        export interface PriceTierEnhanced {
+            up_to?: number | null;
+            flat_fee_amount?: number;
+            flat_fee_amount_decimal?: string;
+            unit_amount?: number;
+            unit_amount_decimal?: string;
+            display_mode?: PriceTierDisplayMode;
+            unit_amount_gross?: number;
+            unit_amount_gross_decimal?: string;
+            flat_fee_amount_gross?: number;
+            flat_fee_amount_gross_decimal?: string;
+        }
         /**
          * The result from the calculation of a set of price items.
          */

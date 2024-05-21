@@ -76,7 +76,7 @@
             "description": "Mapping Config Id",
             "schema": {
               "type": "string",
-              "example": "uuidv4"
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
             }
           }
         ],
@@ -108,7 +108,7 @@
             "description": "Mapping Config Id",
             "schema": {
               "type": "string",
-              "example": "uuidv4"
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
             }
           }
         ],
@@ -142,7 +142,7 @@
             "description": "Mapping Config Id",
             "schema": {
               "type": "string",
-              "example": "uuidv4"
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
             }
           }
         ],
@@ -174,7 +174,7 @@
             "description": "Mapping Config Id",
             "schema": {
               "type": "string",
-              "example": "uuidv4"
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
             }
           }
         ],
@@ -218,7 +218,7 @@
             "description": "Mapping Config Id",
             "schema": {
               "type": "string",
-              "example": "uuidv4"
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
             }
           },
           {
@@ -418,6 +418,82 @@
           }
         }
       }
+    },
+    "/v2/mappings/{id}": {
+      "get": {
+        "operationId": "getMappingConfig",
+        "summary": "getMappingConfig",
+        "description": "Get latest version of a mapping config by id V2",
+        "tags": [
+          "mappings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Mapping Config Id",
+            "schema": {
+              "type": "string",
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity Mapping Config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfigV2"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putMappingConfig",
+        "summary": "putMappingConfig",
+        "description": "Stores new version of entity mapping config",
+        "tags": [
+          "mappings"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Mapping Config Id",
+            "schema": {
+              "type": "string",
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Mapping Config to store",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingConfigV2"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated entity mapping config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfigV2"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -455,16 +531,56 @@
         }
       },
       "MappingConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MappingConfigCommonFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "org_id": {
+                "type": "string",
+                "example": "66"
+              },
+              "version": {
+                "type": "integer",
+                "example": 2
+              }
+            }
+          }
+        ],
+        "required": [
+          "org_id",
+          "version"
+        ]
+      },
+      "MappingConfigV2": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MappingConfigCommonFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "org_id": {
+                "type": "string",
+                "example": "66",
+                "readOnly": true
+              },
+              "version": {
+                "type": "integer",
+                "example": 2,
+                "readOnly": true
+              }
+            }
+          }
+        ]
+      },
+      "MappingConfigCommonFields": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string"
-          },
-          "org_id": {
-            "type": "string"
-          },
-          "version": {
-            "type": "number"
           },
           "source": {
             "$ref": "#/components/schemas/SourceConfig"
@@ -502,8 +618,6 @@
         },
         "required": [
           "id",
-          "org_id",
-          "version",
           "source",
           "targets"
         ]
@@ -813,6 +927,13 @@
           }
         }
       },
+      "Loop_Index_String": {
+        "type": "string",
+        "description": "This string value will be replaced with the value of the loop index, when mapping in loop mode",
+        "enum": [
+          "##LOOP_INDEX##"
+        ]
+      },
       "TargetConfig": {
         "type": "object",
         "properties": {
@@ -837,6 +958,21 @@
             "description": "Unique key for target entity (see upsertEntity of Entity API)",
             "items": {
               "type": "string"
+            }
+          },
+          "loop_config": {
+            "type": "object",
+            "description": "contains config in case of running in loop mode",
+            "properties": {
+              "source_path": {
+                "type": "string",
+                "description": "path to the array from the entity payload"
+              },
+              "length": {
+                "type": "number",
+                "description": "a hard limit of how many times the loop is allowed to run.",
+                "default": "the length of the array"
+              }
             }
           },
           "conditionMode": {
@@ -1286,7 +1422,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "example": "uuidv4"
+            "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
           },
           "timestamp": {
             "type": "string",
@@ -1469,7 +1605,10 @@
   },
   "servers": [
     {
-      "url": "https://entity-mapping.sls.epilot.io/"
+      "url": "https://entity-mapping.sls.epilot.io"
+    },
+    {
+      "url": "https://entity-mapping.sls.epilot.io"
     }
   ]
 }

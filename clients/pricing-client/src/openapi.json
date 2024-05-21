@@ -2709,8 +2709,27 @@
             "description": "The postal code to search for providers",
             "type": "string"
           },
+          "consumption_type": {
+            "description": "The consumption type",
+            "type": "string",
+            "default": "household",
+            "enum": [
+              "household",
+              "heating_pump",
+              "night_storage_heating",
+              "night_storage_heating_common_meter"
+            ]
+          },
           "consumption": {
-            "description": "The monthly consumption to compute the price in kWh",
+            "description": "The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)",
+            "type": "number"
+          },
+          "consumption_HT": {
+            "description": "The monthly HT consumption to compute the price in kWh",
+            "type": "number"
+          },
+          "consumption_NT": {
+            "description": "The monthly NT consumption to compute the price in kWh",
             "type": "number"
           },
           "association_id": {
@@ -2820,12 +2839,20 @@
           "amount_static_decimal": {
             "description": "The computed static price as decimal"
           },
-          "amount_variable": {
-            "description": "The computed variable price",
+          "amount_variable_ht": {
+            "description": "The computed variable price, for the day period",
             "type": "number"
           },
-          "amount_variable_decimal": {
-            "description": "The computed variable price as decimal",
+          "amount_variable_decimal_ht": {
+            "description": "The computed variable price, for the day period, as decimal",
+            "type": "string"
+          },
+          "amount_variable_nt": {
+            "description": "The computed variable price, for the night period",
+            "type": "number"
+          },
+          "amount_variable_decimal_nt": {
+            "description": "The computed variable price, for the night period, as decimal",
             "type": "string"
           },
           "currency": {
@@ -3169,6 +3196,10 @@
                 "$ref": "#/components/schemas/Product"
               }
             ]
+          },
+          "is_tax_inclusive": {
+            "type": "boolean",
+            "description": "Specifies whether the price is considered `inclusive` of taxes or not."
           }
         }
       },
@@ -3643,6 +3674,10 @@
           "on_request_approved": {
             "type": "boolean",
             "description": "When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'."
+          },
+          "is_tax_inclusive": {
+            "type": "boolean",
+            "description": "Specifies whether the price is considered `inclusive` of taxes or not."
           }
         }
       },
@@ -4430,6 +4465,28 @@
           }
         }
       },
+      "PriceTierEnhanced": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PriceTier"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "unit_amount_gross": {
+            "type": "number"
+          },
+          "unit_amount_gross_decimal": {
+            "type": "string"
+          },
+          "flat_fee_amount_gross": {
+            "type": "number"
+          },
+          "flat_fee_amount_gross_decimal": {
+            "type": "string"
+          }
+        }
+      },
       "PriceTierDisplayMode": {
         "type": "string",
         "enum": [
@@ -4447,6 +4504,12 @@
             "type": "number"
           },
           "markup_amount_decimal": {
+            "type": "string"
+          },
+          "markup_amount_net": {
+            "type": "number"
+          },
+          "markup_amount_net_decimal": {
             "type": "string"
           },
           "unit_amount_gross": {

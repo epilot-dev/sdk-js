@@ -149,12 +149,39 @@
           }
         }
       }
+    },
+    "/v2/mappings/{id}": {
+      "get": {
+        "operationId": "getMappingConfig",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "operationId": "putMappingConfig",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
     }
   },
   "components": {},
   "servers": [
     {
-      "url": "https://entity-mapping.sls.epilot.io/"
+      "url": "https://entity-mapping.sls.epilot.io"
     }
   ]
 }

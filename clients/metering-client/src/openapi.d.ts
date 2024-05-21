@@ -454,8 +454,7 @@ declare namespace Components {
             source?: Source;
         }
         export type Source = "ECP" | "ERP" | "360" | "journey-submission";
-        export interface SubmissionMeterReading {
-            [name: string]: any;
+        export type SubmissionMeterReading = {
             /**
              * The ID of the associated meter
              */
@@ -471,7 +470,7 @@ declare namespace Components {
              * example:
              * 240
              */
-            readingValue?: string;
+            readingValue?: number;
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
@@ -534,7 +533,7 @@ declare namespace Components {
              * 240
              */
             ntValue?: number;
-        }
+        } | null;
         export type TariffType = "ht" | "nt";
         export type Unit = "w" | "wh" | "kw" | "kWh" | "kvarh" | "mw" | "mWh" | "unit" | "cubic-meter" | "hour" | "day" | "month" | "year" | "percentage";
     }
@@ -561,7 +560,7 @@ declare namespace Paths {
              * 123
              */
             org_id?: string;
-            entity: {
+            entity?: {
                 [name: string]: any;
                 /**
                  * ID of the organization
@@ -569,7 +568,7 @@ declare namespace Paths {
                  * 123
                  */
                 _org?: string;
-                meterReadings: Components.Schemas.SubmissionMeterReading[];
+                meterReadings?: Components.Schemas.SubmissionMeterReading[];
             };
         }
         namespace Responses {
@@ -640,6 +639,45 @@ declare namespace Paths {
                      */
                     timestamp?: string;
                 };
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetAllowedReadingForMeter {
+        namespace Parameters {
+            export type MeterId = Components.Schemas.Id;
+            /**
+             * example:
+             * 2022-10-01T10:10:00.000Z
+             */
+            export type Timestamp = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+        }
+        export interface QueryParameters {
+            timestamp?: /**
+             * example:
+             * 2022-10-01T10:10:00.000Z
+             */
+            Parameters.Timestamp;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: {
+                    counter_id?: Components.Schemas.Id;
+                    /**
+                     * Minimum allowed reading value for the meter
+                     */
+                    min_value?: number;
+                    /**
+                     * Maximum allowed reading value for the meter
+                     */
+                    max_value?: number;
+                }[];
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
@@ -1005,6 +1043,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReadingFromSubmission.Responses.$200>
   /**
+   * getAllowedReadingForMeter - getAllowedReadingForMeter
+   * 
+   * Get allowed reading for the given meter
+   */
+  'getAllowedReadingForMeter'(
+    parameters?: Parameters<Paths.GetAllowedReadingForMeter.PathParameters & Paths.GetAllowedReadingForMeter.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAllowedReadingForMeter.Responses.$200>
+  /**
    * createReadingWithMeter - Create Reading with Meter
    * 
    * Creates a reading along with a meter.
@@ -1168,6 +1216,18 @@ export interface PathsDictionary {
       data?: Paths.CreateMeterReadingFromSubmission.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMeterReadingFromSubmission.Responses.$200>
+  }
+  ['/v1/metering/allowed/reading/{meter_id}']: {
+    /**
+     * getAllowedReadingForMeter - getAllowedReadingForMeter
+     * 
+     * Get allowed reading for the given meter
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAllowedReadingForMeter.PathParameters & Paths.GetAllowedReadingForMeter.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAllowedReadingForMeter.Responses.$200>
   }
   ['/v1/metering/reading/with-meter']: {
     /**

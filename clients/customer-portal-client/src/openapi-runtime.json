@@ -41,6 +41,17 @@
         }
       }
     },
+    "/v2/portal/token/revoke": {
+      "post": {
+        "operationId": "revokeToken",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v2/portal/sso/user": {
       "post": {
         "operationId": "createSSOUser",
@@ -253,6 +264,7 @@
     "/v2/portal/contact/email/count": {
       "get": {
         "operationId": "getCountByEmail",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -386,9 +398,9 @@
         ]
       }
     },
-    "/v2/portal/users-to-notify": {
+    "/v2/portal/recipients-to-notify": {
       "post": {
-        "operationId": "filterUsersToNotifyOnAutomation",
+        "operationId": "getRecipientsToNotifyOnAutomation",
         "requestBody": {
           "content": {
             "application/json": {}
@@ -582,6 +594,17 @@
         }
       }
     },
+    "/v2/portal/contract/by-identifiers": {
+      "post": {
+        "operationId": "getContractByIdentifiers",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v2/portal/entity/identifiers/{slug}": {
       "get": {
         "operationId": "getEntityIdentifiers",
@@ -597,6 +620,7 @@
     "/v2/portal/entity/by-identifiers/{slug}": {
       "post": {
         "operationId": "getEntitiesByIdentifiers",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",

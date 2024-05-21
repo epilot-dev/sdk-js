@@ -56,7 +56,7 @@ declare namespace Components {
         export type SavedViewIdPathParam = /* Generated uuid for a saved view */ Schemas.SavedViewId /* uuid */;
         export type TaxonomyClassificationSlugPathParam = string;
         export type TaxonomySlugPathParam = string;
-        export type TaxonomySlugQueryParam = string;
+        export type TaxonomySlugQueryParamOptional = string;
     }
     export interface PathParameters {
         EntityIdPathParam?: Parameters.EntityIdPathParam;
@@ -73,7 +73,7 @@ declare namespace Components {
         ActivityIdPathParam?: Parameters.ActivityIdPathParam;
     }
     export interface QueryParameters {
-        TaxonomySlugQueryParam?: Parameters.TaxonomySlugQueryParam;
+        TaxonomySlugQueryParamOptional?: Parameters.TaxonomySlugQueryParamOptional;
         AsyncOperationQueryParam?: Parameters.AsyncOperationQueryParam;
         HydrateEntitiesQueryParam?: Parameters.HydrateEntitiesQueryParam;
         ActivityIdQueryParam?: Parameters.ActivityIdQueryParam;
@@ -275,7 +275,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -345,6 +349,16 @@ declare namespace Components {
         }
         export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute;
         /**
+         * a readonly computed ID for the attribute including schema slug and the attribute ID
+         */
+        export type AttributeWithCompositeID = {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            composite_id?: string;
+        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute);
+        /**
          * Automation entity
          */
         export interface AutomationAttribute {
@@ -399,7 +413,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -466,6 +484,45 @@ declare namespace Components {
             };
             type?: "automation";
         }
+        export interface BaseActivityItem {
+            _id?: /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            ActivityId /* ulid */;
+            timestamp?: string; // date-time
+            /**
+             * example:
+             * MyCustomActivity
+             */
+            type: string;
+            /**
+             * Title for activity. Supports handlebars syntax.
+             * example:
+             * My custom activity
+             */
+            title: string;
+            /**
+             * Message for activity. Supports handlebars syntax.
+             * example:
+             * {{caller}} did something with {{entity payload.entity.id}}.
+             */
+            message: string;
+            /**
+             * example:
+             * {
+             *   "entity": {
+             *     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *     "schema": "contact"
+             *   }
+             * }
+             */
+            payload?: {
+                [name: string]: any;
+            };
+            caller?: ActivityCallerContext;
+        }
         export interface BaseAttribute {
             name: string;
             label: string;
@@ -518,7 +575,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -704,7 +765,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -771,11 +836,19 @@ declare namespace Components {
             };
             type?: "boolean";
         }
-        export type ClassificationId = string; // uuid
+        /**
+         * example:
+         * taxonomy-slug:classification-slug
+         */
+        export type ClassificationId = string;
         export interface ClassificationsUpdate {
             create?: TaxonomyClassification[];
             update?: TaxonomyClassification[];
-            delete?: ClassificationId /* uuid */[];
+            delete?: (/**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId | string)[];
         }
         /**
          * An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes)
@@ -832,7 +905,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -954,7 +1031,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -1078,7 +1159,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -1200,7 +1285,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -1332,7 +1421,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -1515,7 +1608,11 @@ declare namespace Components {
              */
             title?: string;
             attributes?: Attribute[];
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             ui_hooks?: {
                 [name: string]: any;
                 /**
@@ -1602,6 +1699,120 @@ declare namespace Components {
              * This capability should only be active when all the settings have the correct value
              */
             settings_flag?: SettingFlag[];
+        }
+        /**
+         * a readonly computed ID for the entity capability including schema slug and the capability ID
+         */
+        export interface EntityCapabilityWithCompositeID {
+            /**
+             * Unique name for the capability
+             * example:
+             * customer_messaging
+             */
+            name: string;
+            /**
+             * Human readable title of the capability
+             * example:
+             * Messaging
+             */
+            title?: string;
+            attributes?: Attribute[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            ui_hooks?: {
+                [name: string]: any;
+                /**
+                 * name of the hook to use
+                 * example:
+                 * EntityDetailsV2:Tab
+                 */
+                hook: string;
+                /**
+                 * example:
+                 * _is_composite_price = "false"
+                 */
+                render_condition?: string;
+                /**
+                 * render order (ascending)
+                 * example:
+                 * 10
+                 */
+                order?: number;
+                /**
+                 * example:
+                 * Notes
+                 */
+                title?: string;
+                /**
+                 * Sets the group expand/collapse default state
+                 */
+                group_expanded?: boolean;
+                /**
+                 * package to be imported
+                 * example:
+                 * @epilot360/notes
+                 */
+                import?: string;
+                /**
+                 * the component to be dynamically loaded
+                 * example:
+                 * PricingItems
+                 */
+                component?: string;
+                /**
+                 * route for specified capability
+                 * example:
+                 * notes
+                 */
+                route?: string;
+                /**
+                 * Preview icon name(As in Base elements) for the capability
+                 * example:
+                 * email
+                 */
+                icon?: string;
+                /**
+                 * Whether capability should be disabled
+                 */
+                disabled?: boolean;
+                /**
+                 * Specific to Activity pilot
+                 */
+                header?: boolean;
+                /**
+                 * Require a permission to display UI hook
+                 */
+                requiredPermission?: {
+                    /**
+                     * example:
+                     * note:view
+                     */
+                    action: string;
+                    /**
+                     * example:
+                     * 123
+                     */
+                    resource?: string;
+                };
+            }[];
+            /**
+             * This capability should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This capability should only be active when all the settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            composite_id?: string;
         }
         export interface EntityDefaultCreate {
             view_type?: "default";
@@ -2113,7 +2324,11 @@ declare namespace Components {
                     key?: string;
                     default?: string;
                 };
-                _purpose?: ClassificationId /* uuid */[];
+                _purpose?: /**
+                 * example:
+                 * taxonomy-slug:classification-slug
+                 */
+                ClassificationId[];
             }[];
             /**
              * Custom grid definitions for the layout. These settings are composed by managed and un-managed properties:
@@ -2368,7 +2583,11 @@ declare namespace Components {
                     key?: string;
                     default?: string;
                 };
-                _purpose?: ClassificationId /* uuid */[];
+                _purpose?: /**
+                 * example:
+                 * taxonomy-slug:classification-slug
+                 */
+                ClassificationId[];
             }[];
             /**
              * Custom grid definitions for the layout. These settings are composed by managed and un-managed properties:
@@ -2723,7 +2942,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -2855,73 +3078,6 @@ declare namespace Components {
             relations?: GetRelationsResp;
         }
         /**
-         * Entity with relation data resolved into the attribute values
-         * example:
-         * {
-         *   "_relations": [
-         *     {
-         *       "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-         *     }
-         *   ],
-         *   "status": "active",
-         *   "customer_number": "abc123",
-         *   "email": [
-         *     {
-         *       "label": "work",
-         *       "email": "user@example.com"
-         *     }
-         *   ],
-         *   "phone": [
-         *     {
-         *       "label": "work",
-         *       "phone": "+49123456789"
-         *     }
-         *   ],
-         *   "first_name": "First Name",
-         *   "middle_name": "Middle Name",
-         *   "last_name": "Last Name",
-         *   "date_of_birth": "2019-08-24",
-         *   "title": "Mr.",
-         *   "account": [
-         *     {
-         *       "status": "active",
-         *       "name": "Company name",
-         *       "company_email": [
-         *         {
-         *           "label": "Company email",
-         *           "email": "company@example.com"
-         *         }
-         *       ],
-         *       "company_phone": [
-         *         {
-         *           "label": "Support phone",
-         *           "phone": "+49123456789"
-         *         }
-         *       ],
-         *       "company_website": "https://example.com",
-         *       "tax_id": "DE123456789",
-         *       "tax_exemption": "2019-08-24",
-         *       "contacts": {
-         *         "$relation": [
-         *           {
-         *             "_tags": [
-         *               "CEO"
-         *             ],
-         *             "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-         *           }
-         *         ]
-         *       }
-         *     }
-         *   ]
-         * }
-         */
-        export interface HydratedEntity {
-            [name: string]: any;
-            _relations: {
-                entity_id: EntityId /* uuid */;
-            }[];
-        }
-        /**
          * No UI representation
          */
         export interface InternalAttribute {
@@ -2976,7 +3132,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3098,7 +3258,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3220,7 +3384,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3350,7 +3518,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3417,6 +3589,14 @@ declare namespace Components {
             };
             type?: "link";
         }
+        export interface ListSavedViewsResults {
+            /**
+             * example:
+             * 1
+             */
+            hits?: number;
+            results?: /* A saved entity view */ SavedViewItem[];
+        }
         /**
          * Multi Choice Selection
          */
@@ -3472,7 +3652,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3610,7 +3794,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3677,6 +3865,10 @@ declare namespace Components {
             };
             type?: "number";
             format?: string;
+            /**
+             * Whether or not to show a thousands separator
+             */
+            show_separator?: boolean;
         }
         /**
          * Type of attribute to render N number of ordered fields
@@ -3733,7 +3925,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3855,7 +4051,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -3977,7 +4177,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -4099,7 +4303,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -4226,7 +4434,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -4291,14 +4503,22 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            id?: ClassificationId /* uuid */;
+            id?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId;
             /**
              * URL-friendly identifier for the classification
              * example:
              * wallbox-pv
              */
             slug?: string;
-            parents?: ClassificationId /* uuid */[];
+            parents?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             created_at?: string; // date-time
             updated_at?: string; // date-time
             type?: "purpose";
@@ -4373,7 +4593,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -4732,7 +4956,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -5027,7 +5255,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -5157,7 +5389,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -5296,7 +5532,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -5488,7 +5728,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -5614,7 +5858,11 @@ declare namespace Components {
             enabled?: boolean;
         }
         export interface TaxonomyClassification {
-            id?: ClassificationId /* uuid */;
+            id?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId;
             /**
              * URL-friendly identifier for the classification
              * example:
@@ -5626,7 +5874,11 @@ declare namespace Components {
              * Wallbox PV
              */
             name: string;
-            parents?: ClassificationId /* uuid */[];
+            parents?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             created_at?: string; // date-time
             updated_at?: string; // date-time
         }
@@ -5691,7 +5943,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -5814,7 +6070,11 @@ declare namespace Components {
              *
              */
             render_condition?: string;
-            _purpose?: ClassificationId /* uuid */[];
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -5932,7 +6192,7 @@ declare namespace Paths {
             entities?: Parameters.Entities;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.ActivityItem;
+            export type $200 = Components.Schemas.BaseActivityItem;
         }
     }
     namespace Autocomplete {
@@ -5989,7 +6249,7 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.Activity;
         namespace Responses {
-            export type $200 = Components.Schemas.ActivityItem;
+            export type $200 = Components.Schemas.BaseActivityItem;
         }
     }
     namespace CreateEntity {
@@ -6157,6 +6417,11 @@ declare namespace Paths {
             taxonomySlug: Parameters.TaxonomySlug;
         }
         export type RequestBody = Components.Schemas.TaxonomyClassification;
+        namespace Responses {
+            export type $201 = Components.Schemas.TaxonomyClassification;
+            export interface $409 {
+            }
+        }
     }
     namespace DeleteEntity {
         namespace Parameters {
@@ -6249,6 +6514,44 @@ declare namespace Paths {
             }
         }
     }
+    namespace DeleteSchemaAttribute {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
+        }
+    }
+    namespace DeleteSchemaCapability {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+        }
+    }
     namespace DeleteTaxonomy {
         namespace Parameters {
             export type Permanent = boolean;
@@ -6267,16 +6570,20 @@ declare namespace Paths {
     }
     namespace DeleteTaxonomyClassification {
         namespace Parameters {
-            export type ClassificationId = Components.Schemas.ClassificationId /* uuid */;
+            export type ClassificationSlug = string;
             export type Permanent = boolean;
             export type TaxonomySlug = string;
         }
         export interface PathParameters {
             taxonomySlug: Parameters.TaxonomySlug;
-            classificationId: Parameters.ClassificationId;
+            classificationSlug: Parameters.ClassificationSlug;
         }
         export interface QueryParameters {
             permanent?: Parameters.Permanent;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
         }
     }
     namespace ExportEntities {
@@ -6732,9 +7039,7 @@ declare namespace Paths {
             id: Parameters.Id;
         }
         namespace Responses {
-            export interface $200 {
-                view?: /* A saved entity view */ Components.Schemas.SavedViewItem;
-            }
+            export type $200 = /* A saved entity view */ Components.Schemas.SavedViewItem;
         }
     }
     namespace GetSchema {
@@ -6755,6 +7060,44 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+        }
+    }
+    namespace GetSchemaAttribute {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
+        }
+    }
+    namespace GetSchemaCapability {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
         }
     }
     namespace GetSchemaVersions {
@@ -6815,21 +7158,6 @@ declare namespace Paths {
             export type $200 = Components.Schemas.Taxonomy;
         }
     }
-    namespace GetTaxonomyClassification {
-        namespace Parameters {
-            export type TaxonomyClassificationSlug = string;
-            export type TaxonomySlug = string;
-        }
-        export interface PathParameters {
-            taxonomySlug: Parameters.TaxonomySlug;
-            taxonomyClassificationSlug: Parameters.TaxonomyClassificationSlug;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.TaxonomyClassification;
-            export interface $404 {
-            }
-        }
-    }
     namespace ImportEntities {
         namespace Parameters {
             export type JobId = /**
@@ -6857,20 +7185,43 @@ declare namespace Paths {
     }
     namespace ListSavedViews {
         namespace Parameters {
+            export type Fields = /**
+             * List of entity fields to include or exclude in the response
+             *
+             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+             *
+             * Globbing and globstart (**) is supported for nested fields.
+             *
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
+             * ]
+             */
+            Components.Schemas.FieldsParam;
+            export type From = number;
+            export type Size = number;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
              * contact
              */
             Components.Schemas.EntitySlug;
+            export type Sort = string;
         }
         export interface QueryParameters {
             slug?: Parameters.Slug;
+            sort?: Parameters.Sort;
+            from?: Parameters.From;
+            size?: Parameters.Size;
+            fields?: Parameters.Fields;
         }
         namespace Responses {
-            export interface $200 {
-                results?: /* A saved entity view */ Components.Schemas.SavedViewItem[];
-            }
+            export type $200 = Components.Schemas.ListSavedViewsResults;
         }
     }
     namespace ListSchemaBlueprints {
@@ -7061,6 +7412,46 @@ declare namespace Paths {
             export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
         }
     }
+    namespace PutSchemaAttribute {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        export type RequestBody = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
+        }
+    }
+    namespace PutSchemaCapability {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        export type RequestBody = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+        }
+    }
     namespace SearchEntities {
         export type RequestBody = Components.Schemas.EntitySearchParams;
         namespace Responses {
@@ -7069,13 +7460,27 @@ declare namespace Paths {
     }
     namespace TaxonomiesClassificationsSearch {
         namespace Parameters {
+            /**
+             * example:
+             * sales
+             */
+            export type Query = string;
             export type TaxonomySlug = string;
         }
         export interface QueryParameters {
-            taxonomySlug: Parameters.TaxonomySlug;
+            taxonomySlug?: Parameters.TaxonomySlug;
+            query?: /**
+             * example:
+             * sales
+             */
+            Parameters.Query;
         }
         export interface RequestBody {
-            classificationIds?: Components.Schemas.ClassificationId /* uuid */[];
+            classificationIds?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            Components.Schemas.ClassificationId[];
         }
         namespace Responses {
             export interface $200 {
@@ -7327,12 +7732,19 @@ declare namespace Paths {
     }
     namespace UpdateTaxonomyClassification {
         namespace Parameters {
+            export type ClassificationSlug = string;
             export type TaxonomySlug = string;
         }
         export interface PathParameters {
             taxonomySlug: Parameters.TaxonomySlug;
+            classificationSlug: Parameters.ClassificationSlug;
         }
         export type RequestBody = Components.Schemas.TaxonomyClassification;
+        namespace Responses {
+            export type $200 = Components.Schemas.TaxonomyClassification;
+            export interface $404 {
+            }
+        }
     }
     namespace UpsertEntity {
         namespace Parameters {
@@ -8248,15 +8660,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
   /**
-   * getTaxonomyClassification - getTaxonomyClassification
+   * createTaxonomyClassification - createTaxonomyClassification
    * 
-   * Gets the classification of a taxonomy
+   * Create a new classification for a taxonomy
    */
-  'getTaxonomyClassification'(
-    parameters?: Parameters<Paths.GetTaxonomyClassification.PathParameters> | null,
-    data?: any,
+  'createTaxonomyClassification'(
+    parameters?: Parameters<Paths.CreateTaxonomyClassification.PathParameters> | null,
+    data?: Paths.CreateTaxonomyClassification.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetTaxonomyClassification.Responses.$200>
+  ): OperationResponse<Paths.CreateTaxonomyClassification.Responses.$201>
   /**
    * updateTaxonomyClassification - updateTaxonomyClassification
    * 
@@ -8266,17 +8678,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.UpdateTaxonomyClassification.PathParameters> | null,
     data?: Paths.UpdateTaxonomyClassification.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
-  /**
-   * createTaxonomyClassification - createTaxonomyClassification
-   * 
-   * Create a new classification for a taxonomy
-   */
-  'createTaxonomyClassification'(
-    parameters?: Parameters<Paths.CreateTaxonomyClassification.PathParameters> | null,
-    data?: Paths.CreateTaxonomyClassification.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.UpdateTaxonomyClassification.Responses.$200>
   /**
    * deleteTaxonomyClassification - deleteTaxonomyClassification
    * 
@@ -8286,7 +8688,67 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.DeleteTaxonomyClassification.PathParameters & Paths.DeleteTaxonomyClassification.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.DeleteTaxonomyClassification.Responses.$204>
+  /**
+   * getSchemaAttribute - getSchemaAttribute
+   * 
+   * Get a schema attribute from given attribute ID
+   */
+  'getSchemaAttribute'(
+    parameters?: Parameters<Paths.GetSchemaAttribute.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSchemaAttribute.Responses.$200>
+  /**
+   * putSchemaAttribute - putSchemaAttribute
+   * 
+   * Adds or updates an attribute in the schema
+   */
+  'putSchemaAttribute'(
+    parameters?: Parameters<Paths.PutSchemaAttribute.PathParameters> | null,
+    data?: Paths.PutSchemaAttribute.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutSchemaAttribute.Responses.$200>
+  /**
+   * deleteSchemaAttribute - deleteSchemaAttribute
+   * 
+   * Deletes an attribute from a schema
+   */
+  'deleteSchemaAttribute'(
+    parameters?: Parameters<Paths.DeleteSchemaAttribute.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteSchemaAttribute.Responses.$200>
+  /**
+   * getSchemaCapability - getSchemaCapability
+   * 
+   * Get a schema capability from given capability ID
+   */
+  'getSchemaCapability'(
+    parameters?: Parameters<Paths.GetSchemaCapability.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSchemaCapability.Responses.$200>
+  /**
+   * putSchemaCapability - putSchemaCapability
+   * 
+   * Adds or updates an capability in the schema
+   */
+  'putSchemaCapability'(
+    parameters?: Parameters<Paths.PutSchemaCapability.PathParameters> | null,
+    data?: Paths.PutSchemaCapability.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutSchemaCapability.Responses.$200>
+  /**
+   * deleteSchemaCapability - deleteSchemaCapability
+   * 
+   * Deletes a Capability from a schema
+   */
+  'deleteSchemaCapability'(
+    parameters?: Parameters<Paths.DeleteSchemaCapability.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteSchemaCapability.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -9053,17 +9515,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
   }
-  ['/v2/entity/taxonomies/{taxonomySlug}/classifications/{classificationSlug}']: {
-    /**
-     * getTaxonomyClassification - getTaxonomyClassification
-     * 
-     * Gets the classification of a taxonomy
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetTaxonomyClassification.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetTaxonomyClassification.Responses.$200>
+  ['/v2/entity/taxonomies/{taxonomySlug}/classifications']: {
     /**
      * createTaxonomyClassification - createTaxonomyClassification
      * 
@@ -9073,7 +9525,9 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.CreateTaxonomyClassification.PathParameters> | null,
       data?: Paths.CreateTaxonomyClassification.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.CreateTaxonomyClassification.Responses.$201>
+  }
+  ['/v2/entity/taxonomies/{taxonomySlug}/classifications/{classificationSlug}']: {
     /**
      * updateTaxonomyClassification - updateTaxonomyClassification
      * 
@@ -9083,7 +9537,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.UpdateTaxonomyClassification.PathParameters> | null,
       data?: Paths.UpdateTaxonomyClassification.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.UpdateTaxonomyClassification.Responses.$200>
     /**
      * deleteTaxonomyClassification - deleteTaxonomyClassification
      * 
@@ -9093,7 +9547,71 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.DeleteTaxonomyClassification.PathParameters & Paths.DeleteTaxonomyClassification.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.DeleteTaxonomyClassification.Responses.$204>
+  }
+  ['/v1/entity/schemas/attributes/{composite_id}']: {
+    /**
+     * getSchemaAttribute - getSchemaAttribute
+     * 
+     * Get a schema attribute from given attribute ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSchemaAttribute.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSchemaAttribute.Responses.$200>
+    /**
+     * putSchemaAttribute - putSchemaAttribute
+     * 
+     * Adds or updates an attribute in the schema
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutSchemaAttribute.PathParameters> | null,
+      data?: Paths.PutSchemaAttribute.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutSchemaAttribute.Responses.$200>
+    /**
+     * deleteSchemaAttribute - deleteSchemaAttribute
+     * 
+     * Deletes an attribute from a schema
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteSchemaAttribute.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteSchemaAttribute.Responses.$200>
+  }
+  ['/v1/entity/schemas/capabilities/{composite_id}']: {
+    /**
+     * getSchemaCapability - getSchemaCapability
+     * 
+     * Get a schema capability from given capability ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSchemaCapability.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSchemaCapability.Responses.$200>
+    /**
+     * putSchemaCapability - putSchemaCapability
+     * 
+     * Adds or updates an capability in the schema
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutSchemaCapability.PathParameters> | null,
+      data?: Paths.PutSchemaCapability.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutSchemaCapability.Responses.$200>
+    /**
+     * deleteSchemaCapability - deleteSchemaCapability
+     * 
+     * Deletes a Capability from a schema
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteSchemaCapability.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteSchemaCapability.Responses.$200>
   }
 }
 

@@ -99,16 +99,18 @@ declare namespace Components {
                      * john@doe.com
                      */
                     "cognito:username"?: string;
-                    /**
+                    "custom:portal_user_id"?: /**
+                     * Entity ID
                      * example:
-                     * 06c78f9d-af75-4483-893d-a3fad524400f
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
                      */
-                    "custom:portal_user_id"?: string;
-                    /**
+                    EntityId /* uuid */;
+                    "custom:contact_entity_id"?: /**
+                     * Entity ID
                      * example:
-                     * 7579d22f-9400-41d1-b460-04730239ee91
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
                      */
-                    "custom:contact_entity_id"?: string;
+                    EntityId /* uuid */;
                 };
             };
         }
@@ -155,7 +157,12 @@ declare namespace Components {
             payload?: {
                 [name: string]: any;
                 entity?: {
-                    id?: string;
+                    id?: /**
+                     * Entity ID
+                     * example:
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
+                     */
+                    EntityId /* uuid */;
                     schema?: string;
                 };
                 caller?: ActivityCallerContext;
@@ -246,7 +253,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -326,7 +333,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -382,7 +389,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -484,7 +491,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -708,12 +715,12 @@ declare namespace Components {
             contactIdentifiers?: {
                 [name: string]: string;
             };
-            /**
-             * ID of the contact
+            contactId?: /**
+             * Entity ID
              * example:
-             * 123456
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            contactId?: string;
+            EntityId /* uuid */;
             /**
              * Identifier-value pairs per schema to identify a contact of a portal user during the resgistration
              * example:
@@ -739,12 +746,12 @@ declare namespace Components {
          */
         export type Currency = string;
         export interface DeleteEntityFile {
-            /**
+            entity_id: /**
              * Entity ID
              * example:
-             * 123456
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            entity_id: string;
+            EntityId /* uuid */;
             /**
              * Entity type
              * example:
@@ -754,7 +761,12 @@ declare namespace Components {
             /**
              * Array of file entity IDs
              */
-            file_entity_ids: string[];
+            file_entity_ids: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */[];
         }
         export interface DocumentWidget {
             id: string;
@@ -778,40 +790,58 @@ declare namespace Components {
         export interface EmailTemplates {
             /**
              * ID of the confirmation email template upon registration
-             * example:
-             * 701f089d-6953-48b5-ac35-442de7c59cd3
              */
-            confirmAccount?: string;
+            confirmAccount?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
             /**
              * ID of the email template for forgot password
-             * example:
-             * 6538fddb-f0e9-4f0f-af51-6e57891ff20a
              */
-            forgotPassword?: string;
+            forgotPassword?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
             /**
              * ID of the email template for invitation
-             * example:
-             * 14ae65fb-0dc1-4863-8743-6bc01da469f6
              */
-            invitation?: string;
+            invitation?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
             /**
              * ID of the email template for new quote
-             * example:
-             * b03e2b88-8f3f-4a93-8118-1fb07e9198a1
              */
-            onNewQuote?: string;
+            onNewQuote?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
             /**
              * ID of the email template for mapping a pending portal user with a contact
-             * example:
-             * 940134fa-50f2-4204-a08a-fd3afddbf39a
              */
-            onMapAPendingUser?: string;
+            onMapAPendingUser?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
             /**
              * ID of the email template for document upload
-             * example:
-             * c8ee93c0-8158-4da7-82f3-114f0c7b20ff
              */
-            onDocUpload?: string;
+            onDocUpload?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
         }
         export interface Entity {
             [name: string]: any;
@@ -836,10 +866,13 @@ declare namespace Components {
         export interface EntityFileCount {
             /**
              * The ID of the parent entity
-             * example:
-             * d8dffa9a-6c90-4c4e-b8d1-032194b25526
              */
-            entity_id: string;
+            entity_id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
             _schema: /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -864,7 +897,7 @@ declare namespace Components {
          * example:
          * 5da0a718-c822-403d-9f5d-20d4584e0528
          */
-        export type EntityId = string;
+        export type EntityId = string; // uuid
         export interface EntityItem {
             [name: string]: any;
             _id: /**
@@ -872,7 +905,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -1010,7 +1043,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -1056,7 +1089,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -1120,12 +1153,12 @@ declare namespace Components {
              */
             mime_type?: string;
             _relations?: {
-                /**
-                 * The ID of the parent entity
+                entity_id?: /**
+                 * Entity ID
                  * example:
-                 * d8dffa9a-6c90-4c4e-b8d1-032194b25526
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
-                entity_id?: string;
+                EntityId /* uuid */;
                 _schema?: /**
                  * URL-friendly identifier for the entity schema
                  * example:
@@ -1186,7 +1219,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -1279,7 +1312,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -1325,7 +1358,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -1518,12 +1551,12 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
-            /**
-             * ID of the design used to build the portal
+            design_id: /**
+             * Entity ID
              * example:
-             * 9ba94f20-b872-4217-a259-2a90a8ee1a29
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            design_id: string;
+            EntityId /* uuid */;
             /**
              * Default 360 user to notify upon an internal notification
              */
@@ -1649,7 +1682,12 @@ declare namespace Components {
              * Journey actions allowed on an entity by a portal user
              */
             entity_actions?: {
-                journey_id?: string;
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
                 slug?: /**
                  * URL-friendly identifier for the entity schema
                  * example:
@@ -1762,7 +1800,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -1809,7 +1847,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -1867,7 +1905,7 @@ declare namespace Components {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            EntityId;
+            EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -1951,12 +1989,12 @@ declare namespace Components {
             paid_date?: string; // date
         }
         export interface SaveEntityFile {
-            /**
+            entity_id: /**
              * Entity ID
              * example:
-             * 123456
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            entity_id: string;
+            EntityId /* uuid */;
             /**
              * Entity type
              * example:
@@ -1970,12 +2008,12 @@ declare namespace Components {
                  * 12345
                  */
                 filename: string;
-                /**
-                 * File entity ID
+                file_entity_id?: /**
+                 * Entity ID
                  * example:
-                 * 12345
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
-                file_entity_id?: string;
+                EntityId /* uuid */;
                 /**
                  * Document type
                  * example:
@@ -2120,10 +2158,13 @@ declare namespace Components {
             is_epilot_domain?: boolean;
             /**
              * ID of the design used to build the portal
-             * example:
-             * 9ba94f20-b872-4217-a259-2a90a8ee1a29
              */
-            design_id: string;
+            design_id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
             /**
              * Default 360 user to notify upon an internal notification
              */
@@ -2249,7 +2290,12 @@ declare namespace Components {
              * Journey actions allowed on an entity by a portal user
              */
             entity_actions?: {
-                journey_id?: string;
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
                 slug?: /**
                  * URL-friendly identifier for the entity schema
                  * example:
@@ -2460,7 +2506,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -2551,7 +2597,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
             /**
              * example:
              * 123
@@ -2583,7 +2629,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId[];
+            Components.Schemas.EntityId /* uuid */[];
         }
         export interface QueryParameters {
             entities?: Parameters.Entities;
@@ -2634,7 +2680,12 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.DeleteEntityFile;
         namespace Responses {
             export interface $202 {
-                deletedFiles?: string[];
+                deletedFiles?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */[];
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
@@ -2667,7 +2718,7 @@ declare namespace Paths {
                  * example:
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
-                Components.Schemas.EntityId;
+                Components.Schemas.EntityId /* uuid */;
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
@@ -2695,7 +2746,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -2713,41 +2764,6 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace FilterUsersToNotifyOnAutomation {
-        export interface RequestBody {
-            /**
-             * Emails array that are part of the automation
-             * example:
-             * [
-             *   "john@doe.com"
-             * ]
-             */
-            emails?: string[];
-            /**
-             * Email template ID that used on the automation
-             * example:
-             * d11eb11a-c4cf-4365-8a92-e7c05f61cde4
-             */
-            template_id?: string;
-        }
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * Filtered emails on a portal
-                 * example:
-                 * [
-                 *   "john@doe.com"
-                 * ]
-                 */
-                emails: string[];
-                /**
-                 * Reason to not notify the user
-                 */
-                message?: string;
-            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -2798,7 +2814,12 @@ declare namespace Paths {
              *   "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
              * ]
              */
-            export type EntityIds = string[];
+            export type EntityIds = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */[];
             /**
              * Initial offset to set for the search results
              * example:
@@ -2947,7 +2968,12 @@ declare namespace Paths {
              * List billing events before this date
              */
             export type DateBefore = string; // date-time
-            export type EntityId = string[];
+            export type EntityId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */[];
             /**
              * Type of billing event to filter by
              */
@@ -3037,7 +3063,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -3113,6 +3139,29 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetContractByIdentifiers {
+        /**
+         * example:
+         * ```json
+         *   {
+         *     "name": "My Contract",
+         *     "contract_number": "123"
+         *   }
+         * ```
+         *
+         */
+        export type RequestBody = Components.Schemas.Entity;
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.EntityItem;
+                hits: number;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetCountByEmail {
         namespace Parameters {
             /**
@@ -3161,20 +3210,15 @@ declare namespace Paths {
     }
     namespace GetECPContact {
         namespace Parameters {
-            /**
-             * ID of the mapped contact
+            export type Id = /**
+             * Entity ID
              * example:
-             * 1234
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            export type Id = string;
+            Components.Schemas.EntityId /* uuid */;
         }
         export interface QueryParameters {
-            id: /**
-             * ID of the mapped contact
-             * example:
-             * 1234
-             */
-            Parameters.Id;
+            id: Parameters.Id;
         }
         namespace Responses {
             export interface $200 {
@@ -3243,7 +3287,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
             export type IncludeRelations = boolean;
             export type Size = number;
             export type Slug = /**
@@ -3326,7 +3370,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -3357,7 +3401,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -3443,7 +3487,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -3658,6 +3702,56 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetRecipientsToNotifyOnAutomation {
+        export interface RequestBody {
+            /**
+             * Emails array that are part of the automation
+             * example:
+             * [
+             *   "john@doe.com"
+             * ]
+             */
+            emails: string[];
+            /**
+             * Email template ID that used on the automation
+             */
+            template_id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Filtered recipients to notify
+                 */
+                recipients?: {
+                    /**
+                     * Email of the recipient
+                     * example:
+                     * john@doe.com
+                     */
+                    email: string;
+                    /**
+                     * ID of the recipient
+                     */
+                    recipient_id: /**
+                     * Entity ID
+                     * example:
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
+                     */
+                    Components.Schemas.EntityId /* uuid */;
+                }[];
+                /**
+                 * Reason to not notify the user
+                 */
+                message?: string;
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetRegistrationIdentifiers {
         namespace Responses {
             export interface $200 {
@@ -3828,11 +3922,14 @@ declare namespace Paths {
         export interface RequestBody {
             [name: string]: {
                 /**
-                 * ID of the contact
-                 * example:
-                 * 7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51
+                 * ID of the entity
                  */
-                _id?: string;
+                _id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
                 is_main_entity?: boolean;
             };
         }
@@ -3893,6 +3990,23 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace RevokeToken {
+        export interface RequestBody {
+            /**
+             * Refresh Token to be revoked
+             * example:
+             * eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+             */
+            refresh_token: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                message?: "Token revoked successfully";
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace SaveEntityFile {
         export type RequestBody = Components.Schemas.SaveEntityFile;
         namespace Responses {
@@ -3926,7 +4040,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -3968,7 +4082,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -3985,11 +4099,12 @@ declare namespace Paths {
     }
     namespace TriggerEntityAccessEvent {
         namespace Parameters {
-            /**
+            export type EntityId = /**
+             * Entity ID
              * example:
-             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            export type EntityId = string;
+            Components.Schemas.EntityId /* uuid */;
             /**
              * Origin of the portal
              */
@@ -4008,11 +4123,7 @@ declare namespace Paths {
             Parameters.Schema;
         }
         export interface QueryParameters {
-            entity_id?: /**
-             * example:
-             * 1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e
-             */
-            Parameters.EntityId;
+            entity_id?: Parameters.EntityId;
             origin: /* Origin of the portal */ Parameters.Origin;
         }
         namespace Responses {
@@ -4043,7 +4154,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -4066,7 +4177,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -4089,7 +4200,7 @@ declare namespace Paths {
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -4263,20 +4374,19 @@ declare namespace Paths {
                  * true
                  */
                 exists: boolean;
-                user?: /* The portal user entity */ Components.Schemas.PortalUser;
             }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace ValidateCadenceEntityEditRules {
         namespace Parameters {
-            export type Attribute = string; // date-time
+            export type Attribute = string;
             export type Id = /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
-            Components.Schemas.EntityId;
+            Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -4289,7 +4399,7 @@ declare namespace Paths {
             id: Parameters.Id;
         }
         export interface QueryParameters {
-            attribute?: Parameters.Attribute /* date-time */;
+            attribute?: Parameters.Attribute;
         }
         namespace Responses {
             export interface $200 {
@@ -4325,6 +4435,16 @@ export interface OperationMethods {
     data?: Paths.CreateUser.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateUser.Responses.$201>
+  /**
+   * revokeToken - revokeToken
+   * 
+   * Revokes all of the access tokens for the given Refresh Token.
+   */
+  'revokeToken'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.RevokeToken.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RevokeToken.Responses.$200>
   /**
    * createSSOUser - createSSOUser
    * 
@@ -4518,7 +4638,7 @@ export interface OperationMethods {
   /**
    * getCountByEmail - getCountByEmail
    * 
-   * Check Contact by email
+   * Check Contact by email. Deprecated in favor of /contact/exists.
    */
   'getCountByEmail'(
     parameters?: Parameters<Paths.GetCountByEmail.QueryParameters> | null,
@@ -4528,7 +4648,7 @@ export interface OperationMethods {
   /**
    * getContactCount - getContactCount
    * 
-   * Return number of contacts matching identifier values.
+   * Return number of contacts matching identifier values. Deprecated in favor of /contact/exists.
    */
   'getContactCount'(
     parameters?: Parameters<Paths.GetContactCount.QueryParameters> | null,
@@ -4616,15 +4736,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UserExists.Responses.$200>
   /**
-   * filterUsersToNotifyOnAutomation - filterUsersToNotifyOnAutomation
+   * getRecipientsToNotifyOnAutomation - getRecipientsToNotifyOnAutomation
    * 
-   * Filters the portal user emails to notify on automation
+   * Get recipients to notify on automation
    */
-  'filterUsersToNotifyOnAutomation'(
+  'getRecipientsToNotifyOnAutomation'(
     parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.FilterUsersToNotifyOnAutomation.RequestBody,
+    data?: Paths.GetRecipientsToNotifyOnAutomation.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.FilterUsersToNotifyOnAutomation.Responses.$200>
+  ): OperationResponse<Paths.GetRecipientsToNotifyOnAutomation.Responses.$200>
   /**
    * configureDistribution - configureDistribution
    * 
@@ -4746,6 +4866,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateContract.Responses.$200>
   /**
+   * getContractByIdentifiers - getContractByIdentifiers
+   * 
+   * Get contract by pre-configured identifiers.
+   */
+  'getContractByIdentifiers'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetContractByIdentifiers.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetContractByIdentifiers.Responses.$200>
+  /**
    * getEntityIdentifiers - getEntityIdentifiers
    * 
    * Retrieve a list of entity identifiers used for entity search by portal users.
@@ -4758,7 +4888,7 @@ export interface OperationMethods {
   /**
    * getEntitiesByIdentifiers - getEntitiesByIdentifiers
    * 
-   * Get entities by identifiers by portal user
+   * Get entities (contract) by identifiers. Deprecated in favor of /contract/by-identifiers.
    */
   'getEntitiesByIdentifiers'(
     parameters?: Parameters<Paths.GetEntitiesByIdentifiers.PathParameters> | null,
@@ -4998,6 +5128,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateUser.Responses.$201>
   }
+  ['/v2/portal/token/revoke']: {
+    /**
+     * revokeToken - revokeToken
+     * 
+     * Revokes all of the access tokens for the given Refresh Token.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.RevokeToken.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RevokeToken.Responses.$200>
+  }
   ['/v2/portal/sso/user']: {
     /**
      * createSSOUser - createSSOUser
@@ -5222,7 +5364,7 @@ export interface PathsDictionary {
     /**
      * getCountByEmail - getCountByEmail
      * 
-     * Check Contact by email
+     * Check Contact by email. Deprecated in favor of /contact/exists.
      */
     'get'(
       parameters?: Parameters<Paths.GetCountByEmail.QueryParameters> | null,
@@ -5234,7 +5376,7 @@ export interface PathsDictionary {
     /**
      * getContactCount - getContactCount
      * 
-     * Return number of contacts matching identifier values.
+     * Return number of contacts matching identifier values. Deprecated in favor of /contact/exists.
      */
     'post'(
       parameters?: Parameters<Paths.GetContactCount.QueryParameters> | null,
@@ -5334,17 +5476,17 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UserExists.Responses.$200>
   }
-  ['/v2/portal/users-to-notify']: {
+  ['/v2/portal/recipients-to-notify']: {
     /**
-     * filterUsersToNotifyOnAutomation - filterUsersToNotifyOnAutomation
+     * getRecipientsToNotifyOnAutomation - getRecipientsToNotifyOnAutomation
      * 
-     * Filters the portal user emails to notify on automation
+     * Get recipients to notify on automation
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.FilterUsersToNotifyOnAutomation.RequestBody,
+      data?: Paths.GetRecipientsToNotifyOnAutomation.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.FilterUsersToNotifyOnAutomation.Responses.$200>
+    ): OperationResponse<Paths.GetRecipientsToNotifyOnAutomation.Responses.$200>
   }
   ['/v2/portal/configure-distribution']: {
     /**
@@ -5484,6 +5626,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateContract.Responses.$200>
   }
+  ['/v2/portal/contract/by-identifiers']: {
+    /**
+     * getContractByIdentifiers - getContractByIdentifiers
+     * 
+     * Get contract by pre-configured identifiers.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetContractByIdentifiers.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetContractByIdentifiers.Responses.$200>
+  }
   ['/v2/portal/entity/identifiers/{slug}']: {
     /**
      * getEntityIdentifiers - getEntityIdentifiers
@@ -5500,7 +5654,7 @@ export interface PathsDictionary {
     /**
      * getEntitiesByIdentifiers - getEntitiesByIdentifiers
      * 
-     * Get entities by identifiers by portal user
+     * Get entities (contract) by identifiers. Deprecated in favor of /contract/by-identifiers.
      */
     'post'(
       parameters?: Parameters<Paths.GetEntitiesByIdentifiers.PathParameters> | null,

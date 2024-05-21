@@ -646,6 +646,26 @@
             "in": "query",
             "name": "slug",
             "required": false
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false
           }
         ]
       }
@@ -785,7 +805,11 @@
         "operationId": "taxonomiesClassificationsSearch",
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomySlugQueryParam"
+            "$ref": "#/components/parameters/TaxonomySlugQueryParamOptional"
+          },
+          {
+            "in": "query",
+            "name": "query"
           }
         ],
         "requestBody": {
@@ -810,18 +834,7 @@
         }
       }
     },
-    "/v2/entity/taxonomies/{taxonomySlug}/classifications/{classificationSlug}": {
-      "get": {
-        "operationId": "getTaxonomyClassification",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/TaxonomySlugPathParam"
-          },
-          {
-            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
-          }
-        ]
-      },
+    "/v2/entity/taxonomies/{taxonomySlug}/classifications": {
       "post": {
         "operationId": "createTaxonomyClassification",
         "parameters": [
@@ -833,40 +846,23 @@
           "content": {
             "application/json": {}
           }
-        },
-        "response": {
-          "201": {
-            "description": "Taxonomy classification created",
-            "content": {
-              "application/json": {}
-            }
-          },
-          "409": {
-            "description": "Taxonomy classification already exists\""
-          }
         }
-      },
+      }
+    },
+    "/v2/entity/taxonomies/{taxonomySlug}/classifications/{classificationSlug}": {
       "put": {
         "operationId": "updateTaxonomyClassification",
         "parameters": [
           {
             "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {}
-          }
-        },
-        "response": {
-          "200": {
-            "description": "Taxonomy classification updated",
-            "content": {
-              "application/json": {}
-            }
-          },
-          "404": {
-            "description": "Taxonomy classification not found"
           }
         }
       },
@@ -877,20 +873,87 @@
             "$ref": "#/components/parameters/TaxonomySlugPathParam"
           },
           {
-            "in": "path",
-            "name": "classificationId",
-            "required": true
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
           },
           {
             "in": "query",
             "name": "permanent"
           }
+        ]
+      }
+    },
+    "/v1/entity/schemas/attributes/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaAttribute",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "operationId": "putSchemaAttribute",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
         ],
-        "response": {
-          "204": {
-            "description": "Taxonomy classification deleted"
+        "requestBody": {
+          "content": {
+            "application/json": {}
           }
         }
+      },
+      "delete": {
+        "operationId": "deleteSchemaAttribute",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/entity/schemas/capabilities/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaCapability",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "operationId": "putSchemaCapability",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSchemaCapability",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ]
       }
     }
   },
@@ -911,18 +974,17 @@
         "in": "path",
         "required": true
       },
-      "TaxonomySlugQueryParam": {
-        "name": "taxonomySlug",
-        "in": "query",
-        "required": true
-      },
       "TaxonomySlugPathParam": {
         "name": "taxonomySlug",
         "in": "path",
         "required": true
       },
+      "TaxonomySlugQueryParamOptional": {
+        "name": "taxonomySlug",
+        "in": "query"
+      },
       "TaxonomyClassificationSlugPathParam": {
-        "name": "taxonomyClassificationSlug",
+        "name": "classificationSlug",
         "in": "path",
         "required": true
       },

@@ -9,12 +9,42 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface ActionCondition {
+            id?: string;
+            /**
+             * Result of the condition evaluation
+             */
+            evaluationResult?: boolean;
+            conditions?: /**
+             * example:
+             * {
+             *   "source": {
+             *     "origin": "trigger",
+             *     "originType": "entity",
+             *     "id": "trigger-id",
+             *     "schema": "contact",
+             *     "attribute": "email",
+             *     "attributeType": "text"
+             *   },
+             *   "operation": "equals",
+             *   "values": [
+             *     "hello@epilot.cloud"
+             *   ]
+             * }
+             */
+            Condition[];
+        }
         /**
          * example:
          * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
          */
         export type ActivityId = string;
         export interface ActivityTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "activity";
             configuration: {
                 /**
@@ -225,7 +255,7 @@ declare namespace Components {
          *   }
          * }
          */
-        SendEmailActionConfig | /* Creates an order entity with prices from journey */ CartCheckoutActionConfig | AutomationActionConfig | ConditionActionConfig;
+        SendEmailActionConfig | /* Creates an order entity with prices from journey */ CartCheckoutActionConfig | AutomationActionConfig;
         export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | /**
          * - If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.
          * - The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`
@@ -344,7 +374,7 @@ declare namespace Components {
          */
         EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
         export interface AnythingButCondition {
-            "anything-but"?: (string | number)[];
+            "anything-but"?: string[];
         }
         export interface ApiCallerContext {
             [name: string]: any;
@@ -411,6 +441,11 @@ declare namespace Components {
             };
         }
         export interface ApiSubmissionTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "api_submission";
             configuration: {
                 source_id?: string;
@@ -509,6 +544,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -564,6 +603,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
         }
         export interface AutomationActionExecutionState {
             execution_status?: ExecutionStatus;
@@ -624,7 +667,14 @@ declare namespace Components {
              * 9ec3711b-db63-449c-b894-54d5bb622a8f
              */
             AutomationActionId;
+            conditions?: ActionCondition[];
             actions: AnyAction[];
+            /**
+             * Version of the flow
+             * example:
+             * 2
+             */
+            version?: number;
             trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation;
         }
         /**
@@ -663,23 +713,11 @@ declare namespace Components {
              * submission
              */
             entity_schema?: string;
+            conditions?: ActionCondition[];
             /**
              * The actions (nodes) of the automation flow
              */
             actions: AnyActionConfig[];
-            /**
-             * The edges between actions which define the flow order
-             */
-            edges?: /**
-             * example:
-             * {
-             *   "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-             *   "start": "3567cabc-587f-4ba2-8752-1f3da0100d1f",
-             *   "end": "4e29af6c-9824-461c-bcfb-505840a949ba",
-             *   "condition_output": true
-             * }
-             */
-            Edge[];
             /**
              * Number of automation executions that ran
              * example:
@@ -722,6 +760,13 @@ declare namespace Components {
          * 7791b04a-16d2-44a2-9af9-2d59c25c512f
          */
         export type AutomationFlowId = string;
+        export interface AutomationTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
+        }
         /**
          * Creates an order entity with prices from journey
          */
@@ -765,6 +810,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -821,6 +870,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
         }
         export interface CartCheckoutConfig {
             /**
@@ -858,54 +911,38 @@ declare namespace Components {
             target_unique?: string[];
         }
         export type Comparison = "equals" | "any_of" | "not_empty" | "is_empty";
-        export interface ConditionActionConfig {
-            id?: /**
+        /**
+         * example:
+         * {
+         *   "source": {
+         *     "origin": "trigger",
+         *     "originType": "entity",
+         *     "id": "trigger-id",
+         *     "schema": "contact",
+         *     "attribute": "email",
+         *     "attributeType": "text"
+         *   },
+         *   "operation": "equals",
+         *   "values": [
+         *     "hello@epilot.cloud"
+         *   ]
+         * }
+         */
+        export interface Condition {
+            /**
              * example:
-             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             * 1c8d3d9c-6d4c-4a83-aa22-aa0d630cbc2d
              */
-            AutomationActionId;
-            flow_action_id?: /**
-             * example:
-             * 9ec3711b-db63-449c-b894-54d5bb622a8f
-             */
-            AutomationActionId;
-            name?: string;
-            type?: "condition";
-            config?: ConditionConfig;
-            /**
-             * Whether to stop execution in a failed state if this action fails
-             */
-            allow_failure?: boolean;
-            /**
-             * Flag indicating whether the action was created automatically or manually
-             */
-            created_automatically?: boolean;
-            /**
-             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
-             */
-            is_bulk_action?: boolean;
-            reason?: {
-                /**
-                 * Why the action has to be skipped/failed
-                 * example:
-                 * There are no registered portal users for the given emails, hence skipping the action
-                 */
-                message?: string;
-                /**
-                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
-                 */
-                payload?: {
-                    [name: string]: any;
-                };
-            };
-        }
-        export interface ConditionConfig {
+            id?: string; // uuid
             source?: {
+                origin?: "trigger" | "action";
+                originType?: "entity" | "workflow" | "journey_block";
                 id?: string;
-                type?: string;
-                attributes?: string;
+                schema?: string;
+                attribute?: string;
+                attributeType?: "string" | "text" | "number" | "boolean" | "date" | "tag" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation";
             };
-            operation?: "equals" | "not_equals" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+            operation?: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
             values?: string[];
         }
         export interface CopyValueMapper {
@@ -964,6 +1001,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1035,6 +1076,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
         }
         export interface CreateDocumentConfig {
             template_id?: string;
@@ -1043,30 +1088,6 @@ declare namespace Components {
         export type DiffAdded = FilterConditionOnEvent;
         export type DiffDeleted = FilterConditionOnEvent;
         export type DiffUpdated = FilterConditionOnEvent;
-        /**
-         * example:
-         * {
-         *   "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-         *   "start": "3567cabc-587f-4ba2-8752-1f3da0100d1f",
-         *   "end": "4e29af6c-9824-461c-bcfb-505840a949ba",
-         *   "condition_output": true
-         * }
-         */
-        export interface Edge {
-            id: string;
-            /**
-             * The action id from which the edge starts
-             */
-            start: string;
-            /**
-             * The action id to which the edge ends
-             */
-            end: string;
-            /**
-             * The condition output of the edge (binary)
-             */
-            condition_output?: boolean;
-        }
         /**
          * example:
          * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
@@ -1087,6 +1108,11 @@ declare namespace Components {
             _updated_at: string; // date-time
         }
         export interface EntityManualTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "entity_manual";
             configuration: {
                 /**
@@ -1215,6 +1241,11 @@ declare namespace Components {
          *
          */
         export interface EntityOperationTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "entity_operation";
             configuration: {
                 /**
@@ -1320,9 +1351,14 @@ declare namespace Components {
             exists?: boolean;
         }
         export type FilterConditionOnEvent = OrCondition | {
-            [name: string]: (string | number | boolean | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
+            [name: string]: (string | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
         };
         export interface FrontendSubmitTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "frontend_submission";
             configuration: {
                 /**
@@ -1337,6 +1373,11 @@ declare namespace Components {
             results: AutomationExecution[];
         }
         export interface JourneySubmitTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "journey_submission";
             configuration: {
                 source_id: string; // uuid
@@ -1382,6 +1423,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1555,6 +1600,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
         }
         export interface MapEntityConfig {
             mapping_config?: MappingConfigRef;
@@ -1678,6 +1727,11 @@ declare namespace Components {
         }
         export type PrimitiveJSONValue = any;
         export interface ReceivedEmailTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
             type: "received_email";
             configuration: {
                 message_type?: "RECEIVED";
@@ -1781,6 +1835,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1846,6 +1904,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
         }
         export interface SendEmailConfig {
             email_template_id?: string;
@@ -2042,6 +2104,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -2110,6 +2176,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
         }
         export interface TriggerWebhookConfig {
             entity_sources?: string[];
@@ -2159,6 +2229,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -2246,6 +2320,10 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
         }
         /**
          * example:
