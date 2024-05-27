@@ -572,6 +572,14 @@
               "type": "string"
             },
             "required": true
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "The token identifying the client making the request",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {

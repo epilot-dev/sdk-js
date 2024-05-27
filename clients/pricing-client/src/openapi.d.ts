@@ -3402,8 +3402,10 @@ declare namespace Paths {
     namespace $SearchCatalog {
         export interface HeaderParameters {
             "X-Ivy-Org-ID": Parameters.XIvyOrgID;
+            Authorization?: Parameters.Authorization;
         }
         namespace Parameters {
+            export type Authorization = string;
             export type XIvyOrgID = string;
         }
         export type RequestBody = /**
