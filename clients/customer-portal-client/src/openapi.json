@@ -25,6 +25,9 @@
     },
     {
       "PortalAuth": []
+    },
+    {
+      "EitherAuth": []
     }
   ],
   "paths": {
@@ -148,6 +151,32 @@
           },
           "400": {
             "$ref": "#/components/responses/InvalidRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/token/validate": {
+      "post": {
+        "operationId": "validateToken",
+        "summary": "validateToken",
+        "description": "Validates Portal Token is valid. Pass the token via Authorization Header.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tokens is valid for the given organization."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -340,10 +369,7 @@
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
-          {
-            "PortalAuth": []
+            "EitherAuth": []
           }
         ],
         "responses": {
@@ -786,10 +812,7 @@
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
-          {
-            "PortalAuth": []
+            "EitherAuth": []
           }
         ],
         "parameters": [
@@ -2333,7 +2356,7 @@
                   "purposes": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/EntityId"
                     }
                   },
                   "workflows": {
@@ -2746,9 +2769,9 @@
     },
     "/v2/portal/contract/by-identifiers": {
       "post": {
-        "operationId": "getContractByIdentifiers",
-        "summary": "getContractByIdentifiers",
-        "description": "Get contract by pre-configured identifiers.",
+        "operationId": "addContractByIdentifiers",
+        "summary": "addContractByIdentifiers",
+        "description": "Self-assign contract by pre-configured identifiers.",
         "tags": [
           "ECP"
         ],
@@ -2771,7 +2794,7 @@
         },
         "responses": {
           "200": {
-            "description": "The found contract.",
+            "description": "Contract was assigned successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2800,6 +2823,9 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/ContractAssignmentConflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -4244,6 +4270,34 @@
           }
         }
       },
+      "ContractAssignmentConflict": {
+        "description": "Contract was found but is not assignable in its current state.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "MULTIPLE",
+                        "DRAFT"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "reason"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
       "NotFound": {
         "description": "The specified resource was not found",
         "content": {
@@ -4275,6 +4329,11 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Epilot Bearer Token"
+      },
+      "EitherAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Portal or Epilot Bearer Token"
       }
     },
     "schemas": {

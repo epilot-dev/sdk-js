@@ -9,6 +9,13 @@ import type {
 
 declare namespace Components {
     namespace Responses {
+        export interface ContractAssignmentConflict {
+            /**
+             * Error message
+             */
+            message?: string;
+            reason: "MULTIPLE" | "DRAFT";
+        }
         export type Forbidden = Schemas.ErrorResp;
         export type ForbiddenByRule = Schemas.ErrorResp | Schemas.FailedRuleErrorResp;
         export type InternalServerError = Schemas.ErrorResp;
@@ -2499,6 +2506,30 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace AddContractByIdentifiers {
+        /**
+         * example:
+         * ```json
+         *   {
+         *     "name": "My Contract",
+         *     "contract_number": "123"
+         *   }
+         * ```
+         *
+         */
+        export type RequestBody = Components.Schemas.Entity;
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.EntityItem;
+                hits: number;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Responses.ContractAssignmentConflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace AddEndCustomerRelationToEntity {
         namespace Parameters {
             export type Id = /**
@@ -3136,29 +3167,6 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetContractByIdentifiers {
-        /**
-         * example:
-         * ```json
-         *   {
-         *     "name": "My Contract",
-         *     "contract_number": "123"
-         *   }
-         * ```
-         *
-         */
-        export type RequestBody = Components.Schemas.Entity;
-        namespace Responses {
-            export interface $200 {
-                data?: Components.Schemas.EntityItem;
-                hits: number;
-            }
-            export type $400 = Components.Responses.InvalidRequest;
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -3824,7 +3832,12 @@ declare namespace Paths {
         export interface RequestBody {
             addresses?: string[];
             customers?: string[];
-            purposes?: string[];
+            purposes?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */[];
             workflows?: any[];
         }
         namespace Responses {
@@ -4412,6 +4425,14 @@ declare namespace Paths {
             }
         }
     }
+    namespace ValidateToken {
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -4435,6 +4456,16 @@ export interface OperationMethods {
     data?: Paths.CreateUser.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateUser.Responses.$201>
+  /**
+   * validateToken - validateToken
+   * 
+   * Validates Portal Token is valid. Pass the token via Authorization Header.
+   */
+  'validateToken'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateToken.Responses.$204>
   /**
    * revokeToken - revokeToken
    * 
@@ -4866,15 +4897,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateContract.Responses.$200>
   /**
-   * getContractByIdentifiers - getContractByIdentifiers
+   * addContractByIdentifiers - addContractByIdentifiers
    * 
-   * Get contract by pre-configured identifiers.
+   * Self-assign contract by pre-configured identifiers.
    */
-  'getContractByIdentifiers'(
+  'addContractByIdentifiers'(
     parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.GetContractByIdentifiers.RequestBody,
+    data?: Paths.AddContractByIdentifiers.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetContractByIdentifiers.Responses.$200>
+  ): OperationResponse<Paths.AddContractByIdentifiers.Responses.$200>
   /**
    * getEntityIdentifiers - getEntityIdentifiers
    * 
@@ -5127,6 +5158,18 @@ export interface PathsDictionary {
       data?: Paths.CreateUser.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateUser.Responses.$201>
+  }
+  ['/v2/portal/token/validate']: {
+    /**
+     * validateToken - validateToken
+     * 
+     * Validates Portal Token is valid. Pass the token via Authorization Header.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateToken.Responses.$204>
   }
   ['/v2/portal/token/revoke']: {
     /**
@@ -5628,15 +5671,15 @@ export interface PathsDictionary {
   }
   ['/v2/portal/contract/by-identifiers']: {
     /**
-     * getContractByIdentifiers - getContractByIdentifiers
+     * addContractByIdentifiers - addContractByIdentifiers
      * 
-     * Get contract by pre-configured identifiers.
+     * Self-assign contract by pre-configured identifiers.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.GetContractByIdentifiers.RequestBody,
+      data?: Paths.AddContractByIdentifiers.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetContractByIdentifiers.Responses.$200>
+    ): OperationResponse<Paths.AddContractByIdentifiers.Responses.$200>
   }
   ['/v2/portal/entity/identifiers/{slug}']: {
     /**
