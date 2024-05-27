@@ -41,6 +41,11 @@
         }
       }
     },
+    "/v2/portal/token/validate": {
+      "post": {
+        "operationId": "validateToken"
+      }
+    },
     "/v2/portal/token/revoke": {
       "post": {
         "operationId": "revokeToken",
@@ -596,7 +601,7 @@
     },
     "/v2/portal/contract/by-identifiers": {
       "post": {
-        "operationId": "getContractByIdentifiers",
+        "operationId": "addContractByIdentifiers",
         "requestBody": {
           "required": true,
           "content": {
@@ -967,6 +972,11 @@
         }
       },
       "ForbiddenByRule": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ContractAssignmentConflict": {
         "content": {
           "application/json": {}
         }
