@@ -356,7 +356,7 @@
       "post": {
         "operationId": "searchEntities",
         "summary": "searchEntities",
-        "description": "Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.\n\nPassing comma-separated `x-epilot-org-id` is supported for cross-org entity search.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  },\n  \"addresses\": {\n    \"$relation_ref\": [\n      { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ],\n  \"addresses\": [\n    {\n      \"$relation_ref\": { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      \"_id\": \"123\",\n      \"address\": \"address 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation_ref\": { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n      \"_id\": \"234\",\n      \"address\": \"address 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
+        "description": "Search for entities. Supports ordering and pagination. [Lucene query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) supported for complex querying.\n\nPassing comma-separated `x-epilot-org-id` is supported for cross-org entity search.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  },\n  \"addresses\": {\n    \"$relation_ref\": [\n      { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ],\n  \"addresses\": [\n    {\n      \"$relation_ref\": { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      \"_id\": \"123\",\n      \"address\": \"address 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation_ref\": { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n      \"_id\": \"234\",\n      \"address\": \"address 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
         "tags": [
           "Entities"
         ],
@@ -365,6 +365,42 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/EntitySearchParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySearchResults"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity:list": {
+      "post": {
+        "operationId": "listEntities",
+        "summary": "listEntities",
+        "description": "List entities that meet the specified conditions.\n\nSupports the same options as entity search but utilizes filtering using a subset of [Elastic Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html) and does not perform scoring.\n",
+        "tags": [
+          "Entities"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityListParams"
               }
             }
           }
@@ -4693,6 +4729,87 @@
         },
         "additionalProperties": true
       },
+      "HydratedEntity": {
+        "type": "object",
+        "description": "Entity with relation data resolved into the attribute values",
+        "properties": {
+          "_relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/EntityId"
+                }
+              },
+              "required": [
+                "entity_id"
+              ]
+            }
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "_relations"
+        ],
+        "example": {
+          "_relations": [
+            {
+              "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            }
+          ],
+          "status": "active",
+          "customer_number": "abc123",
+          "email": [
+            {
+              "label": "work",
+              "email": "user@example.com"
+            }
+          ],
+          "phone": [
+            {
+              "label": "work",
+              "phone": "+49123456789"
+            }
+          ],
+          "first_name": "First Name",
+          "middle_name": "Middle Name",
+          "last_name": "Last Name",
+          "date_of_birth": "2019-08-24",
+          "title": "Mr.",
+          "account": [
+            {
+              "status": "active",
+              "name": "Company name",
+              "company_email": [
+                {
+                  "label": "Company email",
+                  "email": "company@example.com"
+                }
+              ],
+              "company_phone": [
+                {
+                  "label": "Support phone",
+                  "phone": "+49123456789"
+                }
+              ],
+              "company_website": "https://example.com",
+              "tax_id": "DE123456789",
+              "tax_exemption": "2019-08-24",
+              "contacts": {
+                "$relation": [
+                  {
+                    "_tags": [
+                      "CEO"
+                    ],
+                    "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
       "EntityItem": {
         "allOf": [
           {
@@ -4867,13 +4984,227 @@
         ]
       },
       "EntitySearchParams": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "q": {
+                "description": "Lucene [queries supported with ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax)",
+                "type": "string",
+                "example": "_schema:contact AND status:active"
+              },
+              "include_scores": {
+                "type": "boolean",
+                "default": false,
+                "description": "Adds a `_score` number field to results that can be used to rank by match score"
+              }
+            },
+            "required": [
+              "q"
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/EntitySearchOptions"
+          }
+        ]
+      },
+      "EntityListParams": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "filter": {
+                "$ref": "#/components/schemas/SearchFilter"
+              },
+              "allow_targeting_all_schemas": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow running the listing without any schema filter. This is disabled by default to prevent security and performance issues if done by an accident."
+              }
+            },
+            "required": [
+              "filter"
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/EntitySearchOptions"
+          }
+        ]
+      },
+      "SearchFilter": {
+        "type": "array",
+        "description": "A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.",
+        "items": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 1,
+          "properties": {
+            "term": {
+              "description": "Returns documents that contain an exact term in a provided field.\n\nTo return a document, the query term must exactly match the queried field's value, including whitespace and capitalization.\n\nYou likely DO NOT want to use this filter on text fields and want to target its .keyword instead.\n",
+              "externalDocs": {
+                "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-term-query.html"
+              },
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 1,
+              "additionalProperties": {
+                "$ref": "#/components/schemas/SearchFilterValue"
+              },
+              "example": {
+                "_schema": "contact"
+              }
+            },
+            "terms": {
+              "description": "Returns documents that contain one of the exact terms in a provided field. See term filter for more info.",
+              "externalDocs": {
+                "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html"
+              },
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 1,
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SearchFilterValue"
+                }
+              },
+              "example": {
+                "status": [
+                  "active"
+                ]
+              }
+            },
+            "ids": {
+              "description": "Returns documents based on their IDs.",
+              "externalDocs": {
+                "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-ids-query.html"
+              },
+              "type": "object",
+              "properties": {
+                "values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "values": [
+                  "550e8400-e29b-41d4-a716-446655440000"
+                ]
+              }
+            },
+            "range": {
+              "description": "Returns documents with fields that have terms within a certain range.",
+              "externalDocs": {
+                "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-range-query.html"
+              },
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 1,
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "gt": {
+                    "$ref": "#/components/schemas/SearchFilterValue"
+                  },
+                  "gte": {
+                    "$ref": "#/components/schemas/SearchFilterValue"
+                  },
+                  "lt": {
+                    "$ref": "#/components/schemas/SearchFilterValue"
+                  },
+                  "lte": {
+                    "$ref": "#/components/schemas/SearchFilterValue"
+                  },
+                  "format": {
+                    "type": "string",
+                    "description": "The date format used to parse date values."
+                  },
+                  "relation": {
+                    "type": "string",
+                    "enum": [
+                      "INTERSECTS",
+                      "CONTAINS",
+                      "WITHIN"
+                    ],
+                    "description": "Indicates how the range query matches values for range fields."
+                  },
+                  "time_zone": {
+                    "type": "string",
+                    "description": "Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query to UTC."
+                  }
+                }
+              },
+              "example": {
+                "_created_at": {
+                  "gte": "2021-01-01T00:00:00.000Z",
+                  "lte": "2021-01-31T23:59:59.999Z"
+                }
+              }
+            },
+            "exists": {
+              "description": "Returns documents that have a value in the specified field.",
+              "externalDocs": {
+                "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html"
+              },
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "field"
+              ],
+              "example": {
+                "field": "_tags"
+              }
+            },
+            "$and": {
+              "$ref": "#/components/schemas/SearchFilter"
+            },
+            "$or": {
+              "$ref": "#/components/schemas/SearchFilter"
+            },
+            "$not": {
+              "$ref": "#/components/schemas/SearchFilter"
+            }
+          }
+        },
+        "example": [
+          {
+            "term": {
+              "_schema": "contact"
+            }
+          },
+          {
+            "terms": {
+              "status": [
+                "active"
+              ]
+            }
+          }
+        ]
+      },
+      "SearchFilterValue": {
+        "description": "A filter field value.",
+        "oneOf": [
+          {
+            "type": "string",
+            "nullable": true
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "EntitySearchOptions": {
         "type": "object",
         "properties": {
-          "q": {
-            "description": "Lucene queries supported with ElasticSearch",
-            "type": "string",
-            "example": "_schema:contact AND status:active"
-          },
           "sort": {
             "type": "string",
             "example": "_created_at:desc"
@@ -4897,11 +5228,6 @@
           "fields": {
             "$ref": "#/components/schemas/FieldsParam"
           },
-          "include_scores": {
-            "type": "boolean",
-            "default": false,
-            "description": "Adds a `_score` number field to results that can be used to rank by match score"
-          },
           "aggs": {
             "type": "object",
             "description": "Aggregation supported by ElasticSearch allows summarizing data as metrics, statistics, or other analytics.",
@@ -4913,10 +5239,7 @@
               }
             }
           }
-        },
-        "required": [
-          "q"
-        ]
+        }
       },
       "FieldsParam": {
         "type": "array",
@@ -6384,9 +6707,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }
