@@ -2663,6 +2663,13 @@
                         "$ref": "#/components/schemas/Order"
                       }
                     },
+                    "meters": {
+                      "type": "array",
+                      "description": "The related meters of the requested contract",
+                      "items": {
+                        "$ref": "#/components/schemas/Meter"
+                      }
+                    },
                     "files": {
                       "type": "array",
                       "description": "The related files of the requested contract",
@@ -5631,6 +5638,31 @@
               },
               "name": {
                 "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "Meter": {
+        "description": "The meter entity",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema"
+            ],
+            "properties": {
+              "_schema": {
+                "type": "string",
+                "enum": [
+                  "meter"
+                ]
               }
             }
           }
