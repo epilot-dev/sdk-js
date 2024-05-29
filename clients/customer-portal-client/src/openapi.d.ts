@@ -1310,6 +1310,52 @@ declare namespace Components {
             paid_date?: string; // date
         }
         /**
+         * The meter entity
+         */
+        export interface Meter {
+            [name: string]: any;
+            _id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * Title of the entity
+             * example:
+             * Example Entity
+             */
+            _title: string;
+            /**
+             * Organization ID the entity belongs to
+             * example:
+             * 123
+             */
+            _org: string;
+            /**
+             * Array of entity tags
+             * example:
+             * [
+             *   "example",
+             *   "mock"
+             * ]
+             */
+            _tags?: string[];
+            /**
+             * Creation timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _created_at: string; // date-time
+            /**
+             * Last update timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _updated_at: string; // date-time
+            _schema: "meter";
+        }
+        /**
          * The opportunity entity
          */
         export interface Opportunity {
@@ -3106,6 +3152,10 @@ declare namespace Paths {
                  * The related orders of the requested contract
                  */
                 orders?: /* The order entity */ Components.Schemas.Order[];
+                /**
+                 * The related meters of the requested contract
+                 */
+                meters?: /* The meter entity */ Components.Schemas.Meter[];
                 /**
                  * The related files of the requested contract
                  */
