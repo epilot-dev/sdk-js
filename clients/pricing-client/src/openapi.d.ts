@@ -215,7 +215,7 @@ declare namespace Components {
             /**
              * The unit gross amount value.
              */
-            unit_amount_gross_decimal?: number;
+            unit_amount_gross_decimal?: string;
             /**
              * Total tax amount for this line item.
              */
@@ -817,7 +817,7 @@ declare namespace Components {
             /**
              * The unit gross amount value.
              */
-            unit_amount_gross_decimal?: number;
+            unit_amount_gross_decimal?: string;
             /**
              * Total tax amount for this line item.
              */
@@ -2138,7 +2138,7 @@ declare namespace Components {
             /**
              * The unit gross amount value.
              */
-            unit_amount_gross_decimal?: number;
+            unit_amount_gross_decimal?: string;
             /**
              * Total tax amount for this line item.
              */

@@ -3602,7 +3602,7 @@
             "readOnly": true
           },
           "unit_amount_gross_decimal": {
-            "type": "integer",
+            "type": "string",
             "description": "The unit gross amount value.",
             "readOnly": true
           },
