@@ -1948,6 +1948,77 @@ declare namespace Components {
             _updated_at: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
         }
+        export interface EntityListParams {
+            filter: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            SearchFilter;
+            /**
+             * Allow running the listing without any schema filter. This is disabled by default to prevent security and performance issues if done by an accident.
+             */
+            allow_targeting_all_schemas?: boolean;
+            /**
+             * example:
+             * _created_at:desc
+             */
+            sort?: string;
+            from?: number;
+            /**
+             * Max search size is 1000 with higher values defaulting to 1000
+             */
+            size?: number;
+            /**
+             * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
+             */
+            hydrate?: boolean;
+            fields?: /**
+             * List of entity fields to include or exclude in the response
+             *
+             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+             *
+             * Globbing and globstart (**) is supported for nested fields.
+             *
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
+             * ]
+             */
+            FieldsParam;
+            /**
+             * Aggregation supported by ElasticSearch allows summarizing data as metrics, statistics, or other analytics.
+             * example:
+             * {
+             *   "contact-count-per-tag": {
+             *     "terms": {
+             *       "field": "_tags.keyword"
+             *     }
+             *   }
+             * }
+             */
+            aggs?: {
+                [key: string]: any;
+            };
+        }
         export interface EntityOperation {
             entity: EntityId /* uuid */;
             /**
@@ -2670,13 +2741,7 @@ declare namespace Components {
              */
             SearchMappings;
         }
-        export interface EntitySearchParams {
-            /**
-             * Lucene queries supported with ElasticSearch
-             * example:
-             * _schema:contact AND status:active
-             */
-            q: string;
+        export interface EntitySearchOptions {
             /**
              * example:
              * _created_at:desc
@@ -2710,9 +2775,63 @@ declare namespace Components {
              */
             FieldsParam;
             /**
+             * Aggregation supported by ElasticSearch allows summarizing data as metrics, statistics, or other analytics.
+             * example:
+             * {
+             *   "contact-count-per-tag": {
+             *     "terms": {
+             *       "field": "_tags.keyword"
+             *     }
+             *   }
+             * }
+             */
+            aggs?: {
+                [key: string]: any;
+            };
+        }
+        export interface EntitySearchParams {
+            /**
+             * Lucene [queries supported with ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax)
+             * example:
+             * _schema:contact AND status:active
+             */
+            q: string;
+            /**
              * Adds a `_score` number field to results that can be used to rank by match score
              */
             include_scores?: boolean;
+            /**
+             * example:
+             * _created_at:desc
+             */
+            sort?: string;
+            from?: number;
+            /**
+             * Max search size is 1000 with higher values defaulting to 1000
+             */
+            size?: number;
+            /**
+             * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
+             */
+            hydrate?: boolean;
+            fields?: /**
+             * List of entity fields to include or exclude in the response
+             *
+             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+             *
+             * Globbing and globstart (**) is supported for nested fields.
+             *
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
+             * ]
+             */
+            FieldsParam;
             /**
              * Aggregation supported by ElasticSearch allows summarizing data as metrics, statistics, or other analytics.
              * example:
@@ -3076,6 +3195,73 @@ declare namespace Components {
              */
             hits?: number;
             relations?: GetRelationsResp;
+        }
+        /**
+         * Entity with relation data resolved into the attribute values
+         * example:
+         * {
+         *   "_relations": [
+         *     {
+         *       "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+         *     }
+         *   ],
+         *   "status": "active",
+         *   "customer_number": "abc123",
+         *   "email": [
+         *     {
+         *       "label": "work",
+         *       "email": "user@example.com"
+         *     }
+         *   ],
+         *   "phone": [
+         *     {
+         *       "label": "work",
+         *       "phone": "+49123456789"
+         *     }
+         *   ],
+         *   "first_name": "First Name",
+         *   "middle_name": "Middle Name",
+         *   "last_name": "Last Name",
+         *   "date_of_birth": "2019-08-24",
+         *   "title": "Mr.",
+         *   "account": [
+         *     {
+         *       "status": "active",
+         *       "name": "Company name",
+         *       "company_email": [
+         *         {
+         *           "label": "Company email",
+         *           "email": "company@example.com"
+         *         }
+         *       ],
+         *       "company_phone": [
+         *         {
+         *           "label": "Support phone",
+         *           "phone": "+49123456789"
+         *         }
+         *       ],
+         *       "company_website": "https://example.com",
+         *       "tax_id": "DE123456789",
+         *       "tax_exemption": "2019-08-24",
+         *       "contacts": {
+         *         "$relation": [
+         *           {
+         *             "_tags": [
+         *               "CEO"
+         *             ],
+         *             "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+         *           }
+         *         ]
+         *       }
+         *     }
+         *   ]
+         * }
+         */
+        export interface HydratedEntity {
+            [name: string]: any;
+            _relations: {
+                entity_id: EntityId /* uuid */;
+            }[];
         }
         /**
          * No UI representation
@@ -5181,6 +5367,166 @@ declare namespace Components {
          */
         export type SchemaId = string; // uuid
         /**
+         * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+         * example:
+         * [
+         *   {
+         *     "term": {
+         *       "_schema": "contact"
+         *     }
+         *   },
+         *   {
+         *     "terms": {
+         *       "status": [
+         *         "active"
+         *       ]
+         *     }
+         *   }
+         * ]
+         */
+        export type SearchFilter = {
+            /**
+             * Returns documents that contain an exact term in a provided field.
+             *
+             * To return a document, the query term must exactly match the queried field's value, including whitespace and capitalization.
+             *
+             * You likely DO NOT want to use this filter on text fields and want to target its .keyword instead.
+             *
+             * example:
+             * {
+             *   "_schema": "contact"
+             * }
+             */
+            term?: {
+                [name: string]: /* A filter field value. */ SearchFilterValue;
+            };
+            /**
+             * Returns documents that contain one of the exact terms in a provided field. See term filter for more info.
+             * example:
+             * {
+             *   "status": [
+             *     "active"
+             *   ]
+             * }
+             */
+            terms?: {
+                [name: string]: /* A filter field value. */ SearchFilterValue[];
+            };
+            /**
+             * Returns documents based on their IDs.
+             * example:
+             * {
+             *   "values": [
+             *     "550e8400-e29b-41d4-a716-446655440000"
+             *   ]
+             * }
+             */
+            ids?: {
+                values?: string[];
+            };
+            /**
+             * Returns documents with fields that have terms within a certain range.
+             * example:
+             * {
+             *   "_created_at": {
+             *     "gte": "2021-01-01T00:00:00.000Z",
+             *     "lte": "2021-01-31T23:59:59.999Z"
+             *   }
+             * }
+             */
+            range?: {
+                [name: string]: {
+                    gt?: /* A filter field value. */ SearchFilterValue;
+                    gte?: /* A filter field value. */ SearchFilterValue;
+                    lt?: /* A filter field value. */ SearchFilterValue;
+                    lte?: /* A filter field value. */ SearchFilterValue;
+                    /**
+                     * The date format used to parse date values.
+                     */
+                    format?: string;
+                    /**
+                     * Indicates how the range query matches values for range fields.
+                     */
+                    relation?: "INTERSECTS" | "CONTAINS" | "WITHIN";
+                    /**
+                     * Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query to UTC.
+                     */
+                    time_zone?: string;
+                };
+            };
+            /**
+             * Returns documents that have a value in the specified field.
+             * example:
+             * {
+             *   "field": "_tags"
+             * }
+             */
+            exists?: {
+                field: string;
+            };
+            $and?: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            SearchFilter;
+            $or?: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            SearchFilter;
+            $not?: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            SearchFilter;
+        }[];
+        /**
+         * A filter field value.
+         */
+        export type SearchFilterValue = /* A filter field value. */ (string | null) | number | boolean;
+        /**
          * Advanced: explicit Elasticsearch index mapping definitions for entity data
          *
          * example:
@@ -7176,6 +7522,12 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListEntities {
+        export type RequestBody = Components.Schemas.EntityListParams;
+        namespace Responses {
+            export type $200 = Components.Schemas.EntitySearchResults;
+        }
+    }
     namespace ListFavoriteViewsForUser {
         namespace Responses {
             export interface $200 {
@@ -7672,7 +8024,7 @@ declare namespace Paths {
         export interface PathParameters {
             id: Parameters.Id;
         }
-        export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
+        export type RequestBody = /* A saved entity view */ Components.Schemas.SavedViewItem;
         namespace Responses {
             export type $200 = /* A saved entity view */ Components.Schemas.SavedViewItem;
         }
@@ -8035,7 +8387,7 @@ export interface OperationMethods {
   /**
    * searchEntities - searchEntities
    * 
-   * Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.
+   * Search for entities. Supports ordering and pagination. [Lucene query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) supported for complex querying.
    * 
    * Passing comma-separated `x-epilot-org-id` is supported for cross-org entity search.
    * 
@@ -8107,6 +8459,19 @@ export interface OperationMethods {
     data?: Paths.SearchEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchEntities.Responses.$200>
+  /**
+   * listEntities - listEntities
+   * 
+   * List entities that meet the specified conditions.
+   * 
+   * Supports the same options as entity search but utilizes filtering using a subset of [Elastic Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html) and does not perform scoring.
+   * 
+   */
+  'listEntities'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ListEntities.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListEntities.Responses.$200>
   /**
    * createEntity - createEntity
    * 
@@ -8836,7 +9201,7 @@ export interface PathsDictionary {
     /**
      * searchEntities - searchEntities
      * 
-     * Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.
+     * Search for entities. Supports ordering and pagination. [Lucene query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) supported for complex querying.
      * 
      * Passing comma-separated `x-epilot-org-id` is supported for cross-org entity search.
      * 
@@ -8908,6 +9273,21 @@ export interface PathsDictionary {
       data?: Paths.SearchEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchEntities.Responses.$200>
+  }
+  ['/v1/entity:list']: {
+    /**
+     * listEntities - listEntities
+     * 
+     * List entities that meet the specified conditions.
+     * 
+     * Supports the same options as entity search but utilizes filtering using a subset of [Elastic Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html) and does not perform scoring.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ListEntities.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListEntities.Responses.$200>
   }
   ['/v1/entity/{slug}']: {
     /**

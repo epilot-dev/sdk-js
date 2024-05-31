@@ -124,6 +124,16 @@
         }
       }
     },
+    "/v1/entity:list": {
+      "post": {
+        "operationId": "listEntities",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v1/entity/{slug}": {
       "post": {
         "operationId": "createEntity",
