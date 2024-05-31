@@ -22,6 +22,9 @@
     },
     {
       "name": "Drafts"
+    },
+    {
+      "name": "GenAI"
     }
   ],
   "paths": {
@@ -599,7 +602,7 @@
       "post": {
         "operationId": "assignUsers",
         "summary": "assignUsers",
-        "description": "Assign users to thread for receiving notifications. \nThe operation replaces all existing assigned users in thread.\n",
+        "description": "Assign users to thread for receiving notifications.\nThe operation replaces all existing assigned users in thread.\n",
         "tags": [
           "Threads"
         ],
@@ -755,6 +758,187 @@
           },
           "403": {
             "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/messages/{messageId}/genai:reply": {
+      "post": {
+        "operationId": "generateSuggestedReply",
+        "summary": "generateSuggestedReply",
+        "description": "Generate suggested reply of the message in the thread",
+        "tags": [
+          "GenAI"
+        ],
+        "parameters": [
+          {
+            "name": "messageId",
+            "description": "Message ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "UUID"
+            }
+          },
+          {
+            "name": "threadId",
+            "description": "Thread ID",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "UUID"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/{threadId}/genai:info": {
+      "get": {
+        "operationId": "getInfo",
+        "summary": "getInfo",
+        "description": "Get generated information of the thread",
+        "tags": [
+          "GenAI"
+        ],
+        "parameters": [
+          {
+            "name": "threadId",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "UUID"
+            }
+          },
+          {
+            "name": "messageId",
+            "description": "Message ID, If not passed defaults to latest message ID in the thread",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "UUID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/GenAIJobOutput"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "payload": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/GenAIInfoJobOutputPayload"
+                            },
+                            {
+                              "$ref": "#/components/schemas/GenAIJobOutputPayload"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/{threadId}/messages/{messageId}/genai:info": {
+      "patch": {
+        "operationId": "patchInfo",
+        "summary": "patchInfo",
+        "description": "patch generated information of the thread",
+        "tags": [
+          "GenAI"
+        ],
+        "parameters": [
+          {
+            "name": "threadId",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "UUID"
+            }
+          },
+          {
+            "name": "messageId",
+            "description": "Message ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "UUID"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Request body for genai info update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rating": {
+                    "type": "string",
+                    "example": "positive"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successfully updated, no content to return"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Internal server error"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -945,7 +1129,7 @@
           },
           "references": {
             "type": "string",
-            "description": "References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\\\nThe last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\\\nThe basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.\n",
+            "description": "References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.            The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.            The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.\n",
             "example": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>"
           },
           "in_reply_to": {
@@ -977,7 +1161,7 @@
           },
           "send_status": {
             "type": "array",
-            "description": "Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\\\nReference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>\n",
+            "description": "Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>\n",
             "items": {
               "type": "string",
               "enum": [
@@ -1040,7 +1224,7 @@
           },
           "send_status": {
             "type": "string",
-            "description": "Sent message status regarding to this recipient.\\\nReference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>\n",
+            "description": "Sent message status regarding to this recipient.            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>\n",
             "enum": [
               "SEND",
               "DELIVERY",
@@ -1052,7 +1236,7 @@
           },
           "send_error": {
             "type": "object",
-            "description": "Information about reject, complaint or bounce event. Only available if `send_status` is REJECT, COMPLAINT, BOUNCE or ERROR.\\\nJSON object is defined by AWS SES. Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/notification-contents.html>\n"
+            "description": "Information about reject, complaint or bounce event. Only available if `send_status` is REJECT, COMPLAINT, BOUNCE or ERROR.            JSON object is defined by AWS SES. Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/notification-contents.html>\n"
           }
         }
       },
@@ -1096,12 +1280,12 @@
           },
           "inline": {
             "type": "boolean",
-            "description": "If true then this attachment should not be offered for download (at least not in the main attachments list).\\\nThe usecase is CID embedded image (aka inline image).\n",
+            "description": "If true then this attachment should not be offered for download (at least not in the main attachments list).            The usecase is CID embedded image (aka inline image).\n",
             "default": false
           },
           "send_as_link": {
             "type": "boolean",
-            "description": "If true then this attachment is sent via link. The link have to be inserted to email body by API caller.\\\nIn this case, service doesn't process this attachment.\n",
+            "description": "If true then this attachment is sent via link. The link have to be inserted to email body by API caller.            In this case, service doesn't process this attachment.\n",
             "default": false
           }
         }
@@ -1118,7 +1302,7 @@
             "required": [
               "topic"
             ],
-            "description": "Open new thread when sending the very first message in conversation. Thread should contains context related to all messages in it (eg. topic, brand_id, opportunity_id, assigned_to,...).\\\nThread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.\\\n`thread` or `parent_id` must be provided either.\n",
+            "description": "Open new thread when sending the very first message in conversation. Thread should contains context related to all messages in it (eg. topic, brand_id, opportunity_id, assigned_to,...).            Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.            `thread` or `parent_id` must be provided either.\n",
             "properties": {
               "topic": {
                 "type": "string",
@@ -1143,7 +1327,7 @@
           },
           "parent_id": {
             "type": "string",
-            "description": "Entity ID of parent message which this message replies to or forwards from.\\\nIf both `parent_id` and `thread` are provided, `thread` is discarded.\n",
+            "description": "Entity ID of parent message which this message replies to or forwards from.            If both `parent_id` and `thread` are provided, `thread` is discarded.\n",
             "example": "44d7a3eb-0cce-4bd3-a7cd-0b3e652de0c2"
           },
           "subject": {
@@ -1215,12 +1399,100 @@
             "default": 10
           }
         }
+      },
+      "GenAIJobOutput": {
+        "type": "object",
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID",
+            "example": "739224"
+          },
+          "thread_id": {
+            "type": "string",
+            "description": "Thread ID",
+            "example": "07b8b522-a993-4021-8fae-fd19f330ee60"
+          },
+          "message_id": {
+            "type": "string",
+            "description": "Message ID",
+            "example": "c03eb411-9f75-4ff0-9404-5a61c5b8798d"
+          },
+          "type": {
+            "type": "string",
+            "description": "Job type",
+            "enum": [
+              "INFO",
+              "REPLY"
+            ]
+          }
+        }
+      },
+      "GenAIJobOutputPayload": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_PROGRESS",
+              "COMPLETED",
+              "FAILED"
+            ],
+            "description": "Status of the GenAI job",
+            "example": "COMPLETED"
+          },
+          "progress": {
+            "type": "number",
+            "description": "Progress of the GenAI job in percentage",
+            "example": 100
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if the job failed",
+            "example": "Failed to generate summary",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "number",
+            "description": "Job created date",
+            "example": 1612900000000
+          },
+          "updated_at": {
+            "type": "number",
+            "description": "Job last updated date",
+            "example": 1612900000000
+          }
+        }
+      },
+      "GenAIInfoJobOutputPayload": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string",
+            "description": "Generated summary",
+            "example": "Customer is interested in solar panels",
+            "nullable": true
+          },
+          "next_steps": {
+            "type": "string",
+            "description": "Next steps",
+            "example": "Send a quote",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "description": "Tags",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "solar",
+              "quote"
+            ],
+            "nullable": true
+          }
+        }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://message.sls.epilot.io"
-    }
-  ]
+  }
 }
