@@ -572,6 +572,14 @@
               "type": "string"
             },
             "required": true
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "The token identifying the client making the request",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -3593,12 +3601,22 @@
             "description": "The unit gross amount value.",
             "readOnly": true
           },
+          "unit_amount_gross_decimal": {
+            "type": "string",
+            "description": "The unit gross amount value.",
+            "readOnly": true
+          },
           "amount_tax": {
             "type": "integer",
             "description": "Total tax amount for this line item."
           },
           "unit_amount_net": {
             "type": "integer",
+            "description": "Net unit amount without taxes or discounts.",
+            "readOnly": true
+          },
+          "unit_amount_net_decimal": {
+            "type": "string",
             "description": "Net unit amount without taxes or discounts.",
             "readOnly": true
           },

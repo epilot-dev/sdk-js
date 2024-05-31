@@ -213,6 +213,10 @@ declare namespace Components {
              */
             unit_amount_gross?: number;
             /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross_decimal?: string;
+            /**
              * Total tax amount for this line item.
              */
             amount_tax?: number;
@@ -220,6 +224,10 @@ declare namespace Components {
              * Net unit amount without taxes or discounts.
              */
             unit_amount_net?: number;
+            /**
+             * Net unit amount without taxes or discounts.
+             */
+            unit_amount_net_decimal?: string;
             /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
@@ -807,6 +815,10 @@ declare namespace Components {
              */
             unit_amount_gross?: number;
             /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross_decimal?: string;
+            /**
              * Total tax amount for this line item.
              */
             amount_tax?: number;
@@ -814,6 +826,10 @@ declare namespace Components {
              * Net unit amount without taxes or discounts.
              */
             unit_amount_net?: number;
+            /**
+             * Net unit amount without taxes or discounts.
+             */
+            unit_amount_net_decimal?: string;
             /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
@@ -2120,6 +2136,10 @@ declare namespace Components {
              */
             unit_amount_gross?: number;
             /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross_decimal?: string;
+            /**
              * Total tax amount for this line item.
              */
             amount_tax?: number;
@@ -2127,6 +2147,10 @@ declare namespace Components {
              * Net unit amount without taxes or discounts.
              */
             unit_amount_net?: number;
+            /**
+             * Net unit amount without taxes or discounts.
+             */
+            unit_amount_net_decimal?: string;
             /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
@@ -3402,8 +3426,10 @@ declare namespace Paths {
     namespace $SearchCatalog {
         export interface HeaderParameters {
             "X-Ivy-Org-ID": Parameters.XIvyOrgID;
+            Authorization?: Parameters.Authorization;
         }
         namespace Parameters {
+            export type Authorization = string;
             export type XIvyOrgID = string;
         }
         export type RequestBody = /**
