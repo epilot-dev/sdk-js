@@ -582,6 +582,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "additionalProperties": false,
                 "properties": {
                   "unique_key": {
                     "type": "array",
@@ -1509,6 +1510,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "additionalProperties": false,
                 "properties": {
                   "_tags": {
                     "type": "array",
@@ -1715,7 +1717,7 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 150,
+              "default": 80,
               "minimum": 1,
               "maximum": 250
             }
@@ -1816,7 +1818,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SavedView"
+                "$ref": "#/components/schemas/SavedViewItem"
               }
             }
           }
@@ -4997,8 +4999,15 @@
                 "type": "boolean",
                 "default": false,
                 "description": "Adds a `_score` number field to results that can be used to rank by match score"
-              }
+              },
+              "sort": {},
+              "from": {},
+              "size": {},
+              "hydrate": {},
+              "fields": {},
+              "aggs": {}
             },
+            "additionalProperties": false,
             "required": [
               "q"
             ]
@@ -5020,8 +5029,15 @@
                 "type": "boolean",
                 "default": false,
                 "description": "Allow running the listing without any schema filter. This is disabled by default to prevent security and performance issues if done by an accident."
-              }
+              },
+              "sort": {},
+              "from": {},
+              "size": {},
+              "hydrate": {},
+              "fields": {},
+              "aggs": {}
             },
+            "additionalProperties": false,
             "required": [
               "filter"
             ]
@@ -5258,6 +5274,7 @@
       },
       "EntityImportParams": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "S3Reference": {
             "type": "object",
@@ -5422,6 +5439,7 @@
       },
       "Activity": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "type": {
             "type": "string",

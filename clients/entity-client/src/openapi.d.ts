@@ -8024,7 +8024,7 @@ declare namespace Paths {
         export interface PathParameters {
             id: Parameters.Id;
         }
-        export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
+        export type RequestBody = /* A saved entity view */ Components.Schemas.SavedViewItem;
         namespace Responses {
             export type $200 = /* A saved entity view */ Components.Schemas.SavedViewItem;
         }
