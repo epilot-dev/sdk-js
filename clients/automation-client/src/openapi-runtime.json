@@ -144,6 +144,16 @@
           }
         }
       }
+    },
+    "/v1/automation/public/executions:resume": {
+      "post": {
+        "operationId": "resumeExecutionWithToken",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
     }
   },
   "components": {},

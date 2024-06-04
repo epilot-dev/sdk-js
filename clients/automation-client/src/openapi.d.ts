@@ -669,6 +669,12 @@ declare namespace Components {
             AutomationActionId;
             conditions?: ActionCondition[];
             actions: AnyAction[];
+            resume_token?: /**
+             * A unique token to resume a paused automation execution
+             * example:
+             * eyJraWQiOiJrZXkifQ==
+             */
+            ResumeToken;
             /**
              * Version of the flow
              * example:
@@ -940,7 +946,7 @@ declare namespace Components {
                 id?: string;
                 schema?: string;
                 attribute?: string;
-                attributeType?: "string" | "text" | "number" | "boolean" | "date" | "tag" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation";
+                attributeType?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tag" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user";
             };
             operation?: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
             values?: string[];
@@ -1346,7 +1352,7 @@ declare namespace Components {
                 details?: ErrorDetail[];
             };
         }
-        export type ExecutionStatus = "pending" | "in_progress" | "success" | "failed" | "cancelled" | "skipped";
+        export type ExecutionStatus = "pending" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped";
         export interface ExistsCondition {
             exists?: boolean;
         }
@@ -1784,6 +1790,20 @@ declare namespace Components {
             };
             mode: "append" | "prepend" | "set";
         }
+        export interface ResumeReq {
+            resume_token: /**
+             * A unique token to resume a paused automation execution
+             * example:
+             * eyJraWQiOiJrZXkifQ==
+             */
+            ResumeToken;
+        }
+        /**
+         * A unique token to resume a paused automation execution
+         * example:
+         * eyJraWQiOiJrZXkifQ==
+         */
+        export type ResumeToken = string;
         export interface RetryReq {
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
         }
@@ -1920,6 +1940,13 @@ declare namespace Components {
              * When true, it lets to send only the email by skip creating the thread & message entities.
              */
             skip_creating_entities?: boolean;
+            /**
+             * Pause automation execution after sending email to wait for a confirmation link to be clicked.
+             *
+             * The email template should contain a confirmation link using the variable `{{confirmation_url}}`
+             *
+             */
+            wait_for_confirmation?: boolean;
             /**
              * Include extra file attachments in sent email.
              * Attachments in email template will be sent regardless of this configuration.
@@ -2482,6 +2509,15 @@ declare namespace Paths {
             export type $200 = Components.Schemas.AutomationFlow;
         }
     }
+    namespace ResumeExecutionWithToken {
+        export type RequestBody = Components.Schemas.ResumeReq;
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $400 {
+            }
+        }
+    }
     namespace RetriggerAction {
         namespace Parameters {
             export type ActionId = /**
@@ -2647,6 +2683,21 @@ export interface OperationMethods {
     data?: Paths.RetriggerAction.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetriggerAction.Responses.$200>
+  /**
+   * resumeExecutionWithToken - resumeExecutionWithToken
+   * 
+   * Resume a paused automation execution using a unique resume token.
+   * 
+   * This public API is normally called when a user lands on a confirmation page via email link.
+   * 
+   * Example link: https://automation.epilot.io/confirm-email?token=eyJraWQiOiJrZXkifQ...
+   * 
+   */
+  'resumeExecutionWithToken'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ResumeExecutionWithToken.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ResumeExecutionWithToken.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -2759,6 +2810,23 @@ export interface PathsDictionary {
       data?: Paths.RetriggerAction.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RetriggerAction.Responses.$200>
+  }
+  ['/v1/automation/public/executions:resume']: {
+    /**
+     * resumeExecutionWithToken - resumeExecutionWithToken
+     * 
+     * Resume a paused automation execution using a unique resume token.
+     * 
+     * This public API is normally called when a user lands on a confirmation page via email link.
+     * 
+     * Example link: https://automation.epilot.io/confirm-email?token=eyJraWQiOiJrZXkifQ...
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ResumeExecutionWithToken.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ResumeExecutionWithToken.Responses.$200>
   }
 }
 
