@@ -266,43 +266,6 @@
         ]
       }
     },
-    "/v2/portal/contact/email/count": {
-      "get": {
-        "operationId": "getCountByEmail",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "query",
-            "name": "email",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "org_id",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v2/portal/public/contact/count": {
-      "post": {
-        "deprecated": true,
-        "operationId": "getContactCount",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
     "/v2/portal/public/contact/exists": {
       "post": {
         "operationId": "checkContactExists",
@@ -620,25 +583,6 @@
             "required": true
           }
         ]
-      }
-    },
-    "/v2/portal/entity/by-identifiers/{slug}": {
-      "post": {
-        "operationId": "getEntitiesByIdentifiers",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
       }
     },
     "/v2/portal/entity/add-end-customer/{slug}/{id}": {

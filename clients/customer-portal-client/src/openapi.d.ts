@@ -230,6 +230,21 @@ declare namespace Components {
              */
             phone?: string | null;
         }
+        /**
+         * Allowed file extensions for upload
+         */
+        export interface AllowedFileExtensions {
+            document?: string[];
+            image?: string[];
+            spreadsheet?: string[];
+            presentation?: string[];
+            audioVideo?: string[];
+            email?: string[];
+            archive?: string[];
+            cad?: string[];
+            calendar?: string[];
+            other?: string[];
+        }
         export interface Balance {
             /**
              * Current balance of the customer in cents. (precision 2)
@@ -431,20 +446,6 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
             _schema: "contact";
-        }
-        export interface ContactCountRequest {
-            /**
-             * ID of the organization
-             * example:
-             * 728
-             */
-            orgId: string;
-            /**
-             * Identifiers to identify a contact
-             */
-            contactIdentifiers: {
-                [name: string]: string;
-            };
         }
         export interface ContactExistsRequest {
             /**
@@ -1819,6 +1820,7 @@ declare namespace Components {
              */
             org_name?: string;
             origin?: /* Origin of the portal */ Origin;
+            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
              * Organization settings
              */
@@ -1833,11 +1835,11 @@ declare namespace Components {
                     enabled?: boolean;
                 };
                 /**
-                 * Release candidate settings
+                 * Disable Advanced Usage Metrics
                  */
-                release_candidate?: {
+                notracking?: {
                     /**
-                     * Enable/Disable the release candidate feature
+                     * Disable browser-side scripts that track advanced usage metrics
                      */
                     enabled?: boolean;
                 };
@@ -2058,31 +2060,13 @@ declare namespace Components {
                 /**
                  * File name
                  * example:
-                 * 12345
+                 * document.pdf
                  */
                 filename: string;
-                file_entity_id?: /**
-                 * Entity ID
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                EntityId /* uuid */;
                 /**
-                 * Document type
-                 * example:
-                 * 12345
-                 */
-                document_type?: string;
-                /**
-                 * Access control level for the file
+                 * Access control level for the file. Deprecated - all files are private.
                  */
                 access_control?: "private" | "public-read";
-                /**
-                 * Array of file tags
-                 * example:
-                 * 12345
-                 */
-                _tags?: string[];
                 s3ref: {
                     /**
                      * S3 bucket name
@@ -3111,28 +3095,6 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace GetContactCount {
-        namespace Parameters {
-            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
-        }
-        export interface QueryParameters {
-            origin: Parameters.Origin;
-        }
-        export type RequestBody = Components.Schemas.ContactCountRequest;
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * Count of Contact
-                 * example:
-                 * 2
-                 */
-                count?: number;
-            }
-            export type $400 = Components.Responses.InvalidRequest;
-            export type $404 = Components.Responses.NotFound;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
     namespace GetContract {
         namespace Parameters {
             export type Id = /**
@@ -3220,47 +3182,6 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace GetCountByEmail {
-        namespace Parameters {
-            /**
-             * Portal user Email Address
-             * example:
-             * test@test.com
-             */
-            export type Email = string;
-            /**
-             * Organization ID
-             * example:
-             * 123
-             */
-            export type OrgId = string;
-        }
-        export interface QueryParameters {
-            email: /**
-             * Portal user Email Address
-             * example:
-             * test@test.com
-             */
-            Parameters.Email;
-            org_id: /**
-             * Organization ID
-             * example:
-             * 123
-             */
-            Parameters.OrgId;
-        }
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * Count of Contact
-                 * example:
-                 * 2
-                 */
-                count?: number;
-            }
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
     namespace GetCustomerBalance {
         namespace Responses {
             export type $200 = Components.Schemas.Balance;
@@ -3297,39 +3218,6 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetEntitiesByIdentifiers {
-        namespace Parameters {
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-        }
-        /**
-         * example:
-         * ```json
-         *   {
-         *     "name": "My Contract",
-         *     "contract_number": "123"
-         *   }
-         * ```
-         *
-         */
-        export type RequestBody = Components.Schemas.Entity;
-        namespace Responses {
-            export interface $200 {
-                data?: Components.Schemas.EntityItem[];
-            }
-            export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -4717,26 +4605,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetECPContact.Responses.$200>
   /**
-   * getCountByEmail - getCountByEmail
-   * 
-   * Check Contact by email. Deprecated in favor of /contact/exists.
-   */
-  'getCountByEmail'(
-    parameters?: Parameters<Paths.GetCountByEmail.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetCountByEmail.Responses.$200>
-  /**
-   * getContactCount - getContactCount
-   * 
-   * Return number of contacts matching identifier values. Deprecated in favor of /contact/exists.
-   */
-  'getContactCount'(
-    parameters?: Parameters<Paths.GetContactCount.QueryParameters> | null,
-    data?: Paths.GetContactCount.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetContactCount.Responses.$200>
-  /**
    * checkContactExists - checkContactExists
    * 
    * True if contact with given identifiers exists.
@@ -4966,16 +4834,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityIdentifiers.Responses.$200>
-  /**
-   * getEntitiesByIdentifiers - getEntitiesByIdentifiers
-   * 
-   * Get entities (contract) by identifiers. Deprecated in favor of /contract/by-identifiers.
-   */
-  'getEntitiesByIdentifiers'(
-    parameters?: Parameters<Paths.GetEntitiesByIdentifiers.PathParameters> | null,
-    data?: Paths.GetEntitiesByIdentifiers.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetEntitiesByIdentifiers.Responses.$200>
   /**
    * addEndCustomerRelationToEntity - addEndCustomerRelationToEntity
    * 
@@ -5453,30 +5311,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetECPContact.Responses.$200>
   }
-  ['/v2/portal/contact/email/count']: {
-    /**
-     * getCountByEmail - getCountByEmail
-     * 
-     * Check Contact by email. Deprecated in favor of /contact/exists.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetCountByEmail.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetCountByEmail.Responses.$200>
-  }
-  ['/v2/portal/public/contact/count']: {
-    /**
-     * getContactCount - getContactCount
-     * 
-     * Return number of contacts matching identifier values. Deprecated in favor of /contact/exists.
-     */
-    'post'(
-      parameters?: Parameters<Paths.GetContactCount.QueryParameters> | null,
-      data?: Paths.GetContactCount.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetContactCount.Responses.$200>
-  }
   ['/v2/portal/public/contact/exists']: {
     /**
      * checkContactExists - checkContactExists
@@ -5742,18 +5576,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityIdentifiers.Responses.$200>
-  }
-  ['/v2/portal/entity/by-identifiers/{slug}']: {
-    /**
-     * getEntitiesByIdentifiers - getEntitiesByIdentifiers
-     * 
-     * Get entities (contract) by identifiers. Deprecated in favor of /contract/by-identifiers.
-     */
-    'post'(
-      parameters?: Parameters<Paths.GetEntitiesByIdentifiers.PathParameters> | null,
-      data?: Paths.GetEntitiesByIdentifiers.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetEntitiesByIdentifiers.Responses.$200>
   }
   ['/v2/portal/entity/add-end-customer/{slug}/{id}']: {
     /**
