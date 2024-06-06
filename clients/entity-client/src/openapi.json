@@ -2472,7 +2472,7 @@
       "put": {
         "operationId": "putSchemaAttribute",
         "summary": "putSchemaAttribute",
-        "description": "Adds or updates an attribute in the schema",
+        "description": "Updates an attribute in the schema",
         "tags": [
           "Schemas"
         ],
@@ -2531,6 +2531,49 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/attribute/{slug}": {
+      "post": {
+        "operationId": "createSchemaAttribute",
+        "summary": "createSchemaAttribute",
+        "description": "Adds an attribute to the schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "description": "Schema Slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "contact"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Attribute"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Success",
@@ -2641,6 +2684,49 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityCapabilityWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/capability/{slug}": {
+      "post": {
+        "operationId": "createSchemaCapability",
+        "summary": "createSchemaCapability",
+        "description": "Adds a capability to the schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "description": "Schema Slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "contact"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityCapability"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Success",
@@ -3145,6 +3231,11 @@
       "BaseAttribute": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID for the entity attribute",
+            "example": "d5839b94-ba20-4225-a78e-76951d352bd6"
+          },
           "name": {
             "type": "string"
           },
@@ -3272,6 +3363,7 @@
           }
         },
         "required": [
+          "id",
           "name",
           "label"
         ]
@@ -4308,6 +4400,11 @@
         "description": "Capabilities the Entity has. Turn features on/off for entities.",
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID for the entity capability",
+            "example": "d5839b94-ba20-4225-a78e-76951d352bd6"
+          },
           "name": {
             "type": "string",
             "description": "Unique name for the capability",
@@ -4423,6 +4520,7 @@
           }
         },
         "required": [
+          "id",
           "name"
         ]
       },

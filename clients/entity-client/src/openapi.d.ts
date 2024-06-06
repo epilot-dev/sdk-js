@@ -224,6 +224,12 @@ declare namespace Components {
          * Reference to an address attribute of another entity
          */
         export interface AddressRelationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -362,6 +368,12 @@ declare namespace Components {
          * Automation entity
          */
         export interface AutomationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -524,6 +536,12 @@ declare namespace Components {
             caller?: ActivityCallerContext;
         }
         export interface BaseAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -714,6 +732,12 @@ declare namespace Components {
          * Yes / No Toggle
          */
         export interface BooleanAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -854,6 +878,12 @@ declare namespace Components {
          * An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes)
          */
         export interface ComputedAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -980,6 +1010,12 @@ declare namespace Components {
          * Consent Management
          */
         export interface ConsentAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1108,6 +1144,12 @@ declare namespace Components {
          * Country picker
          */
         export interface CountryAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1234,6 +1276,12 @@ declare namespace Components {
          * Currency input
          */
         export interface CurrencyAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1370,6 +1418,12 @@ declare namespace Components {
          * Date or Datetime picker
          */
         export interface DateAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1596,6 +1650,12 @@ declare namespace Components {
          */
         export interface EntityCapability {
             /**
+             * ID for the entity capability
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
+            /**
              * Unique name for the capability
              * example:
              * customer_messaging
@@ -1704,6 +1764,12 @@ declare namespace Components {
          * a readonly computed ID for the entity capability including schema slug and the capability ID
          */
         export interface EntityCapabilityWithCompositeID {
+            /**
+             * ID for the entity capability
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             /**
              * Unique name for the capability
              * example:
@@ -3010,6 +3076,12 @@ declare namespace Components {
          * File or Image Attachment
          */
         export interface FileAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3267,6 +3339,12 @@ declare namespace Components {
          * No UI representation
          */
         export interface InternalAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3393,6 +3471,12 @@ declare namespace Components {
          * Epilot internal user info
          */
         export interface InternalUserAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3519,6 +3603,12 @@ declare namespace Components {
          * Email address for send invitation
          */
         export interface InvitationEmailAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3653,6 +3743,12 @@ declare namespace Components {
          * Link with title and href
          */
         export interface LinkAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3787,6 +3883,12 @@ declare namespace Components {
          * Multi Choice Selection
          */
         export interface MultiSelectAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3929,6 +4031,12 @@ declare namespace Components {
          * Numeric input
          */
         export interface NumberAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4060,6 +4168,12 @@ declare namespace Components {
          * Type of attribute to render N number of ordered fields
          */
         export interface OrderedListAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4186,6 +4300,12 @@ declare namespace Components {
          * Shared Partner Organisations
          */
         export interface PartnerOrganisationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4312,6 +4432,12 @@ declare namespace Components {
          * Partner Status
          */
         export interface PartnerStatusAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4438,6 +4564,12 @@ declare namespace Components {
          * Reference to a payment method attribute of another entity
          */
         export interface PaymentMethodRelationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4566,6 +4698,16 @@ declare namespace Components {
          */
         export interface PurposeAttribute {
             /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId;
+            /**
              * example:
              * Wallbox PV
              */
@@ -4689,11 +4831,6 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            id?: /**
-             * example:
-             * taxonomy-slug:classification-slug
-             */
-            ClassificationId;
             /**
              * URL-friendly identifier for the classification
              * example:
@@ -4728,6 +4865,12 @@ declare namespace Components {
          * Entity Relationship
          */
         export interface RelationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5091,6 +5234,12 @@ declare namespace Components {
          * Repeatable (add N number of fields)
          */
         export interface RepeatableAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5550,6 +5699,12 @@ declare namespace Components {
          * Dropdown select
          */
         export interface SelectAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5684,6 +5839,12 @@ declare namespace Components {
          * Sequence of unique identifiers
          */
         export interface SequenceAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5827,6 +5988,12 @@ declare namespace Components {
          * Status select
          */
         export interface StatusAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -6023,6 +6190,12 @@ declare namespace Components {
          * Tags
          */
         export interface TagsAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -6238,6 +6411,12 @@ declare namespace Components {
          * Textarea or text input
          */
         export interface TextAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -6365,6 +6544,12 @@ declare namespace Components {
          * User Relationship
          */
         export interface UserRelationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -6704,6 +6889,46 @@ declare namespace Paths {
         export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
         namespace Responses {
             export type $201 = /* A saved entity view */ Components.Schemas.SavedViewItem;
+        }
+    }
+    namespace CreateSchemaAttribute {
+        namespace Parameters {
+            /**
+             * example:
+             * contact
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * example:
+             * contact
+             */
+            Parameters.Slug;
+        }
+        export type RequestBody = Components.Schemas.Attribute;
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
+        }
+    }
+    namespace CreateSchemaCapability {
+        namespace Parameters {
+            /**
+             * example:
+             * contact
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * example:
+             * contact
+             */
+            Parameters.Slug;
+        }
+        export type RequestBody = /* Capabilities the Entity has. Turn features on/off for entities. */ Components.Schemas.EntityCapability;
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
         }
     }
     namespace CreateTaxonomy {
@@ -9067,7 +9292,7 @@ export interface OperationMethods {
   /**
    * putSchemaAttribute - putSchemaAttribute
    * 
-   * Adds or updates an attribute in the schema
+   * Updates an attribute in the schema
    */
   'putSchemaAttribute'(
     parameters?: Parameters<Paths.PutSchemaAttribute.PathParameters> | null,
@@ -9084,6 +9309,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaAttribute.Responses.$200>
+  /**
+   * createSchemaAttribute - createSchemaAttribute
+   * 
+   * Adds an attribute to the schema
+   */
+  'createSchemaAttribute'(
+    parameters?: Parameters<Paths.CreateSchemaAttribute.PathParameters> | null,
+    data?: Paths.CreateSchemaAttribute.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSchemaAttribute.Responses.$200>
   /**
    * getSchemaCapability - getSchemaCapability
    * 
@@ -9114,6 +9349,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaCapability.Responses.$200>
+  /**
+   * createSchemaCapability - createSchemaCapability
+   * 
+   * Adds a capability to the schema
+   */
+  'createSchemaCapability'(
+    parameters?: Parameters<Paths.CreateSchemaCapability.PathParameters> | null,
+    data?: Paths.CreateSchemaCapability.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSchemaCapability.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -9943,7 +10188,7 @@ export interface PathsDictionary {
     /**
      * putSchemaAttribute - putSchemaAttribute
      * 
-     * Adds or updates an attribute in the schema
+     * Updates an attribute in the schema
      */
     'put'(
       parameters?: Parameters<Paths.PutSchemaAttribute.PathParameters> | null,
@@ -9960,6 +10205,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaAttribute.Responses.$200>
+  }
+  ['/v1/entity/schemas/attribute/{slug}']: {
+    /**
+     * createSchemaAttribute - createSchemaAttribute
+     * 
+     * Adds an attribute to the schema
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateSchemaAttribute.PathParameters> | null,
+      data?: Paths.CreateSchemaAttribute.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSchemaAttribute.Responses.$200>
   }
   ['/v1/entity/schemas/capabilities/{composite_id}']: {
     /**
@@ -9992,6 +10249,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaCapability.Responses.$200>
+  }
+  ['/v1/entity/schemas/capability/{slug}']: {
+    /**
+     * createSchemaCapability - createSchemaCapability
+     * 
+     * Adds a capability to the schema
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateSchemaCapability.PathParameters> | null,
+      data?: Paths.CreateSchemaCapability.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSchemaCapability.Responses.$200>
   }
 }
 

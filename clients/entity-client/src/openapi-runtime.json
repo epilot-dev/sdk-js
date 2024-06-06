@@ -929,6 +929,23 @@
         ]
       }
     },
+    "/v1/entity/schemas/attribute/{slug}": {
+      "post": {
+        "operationId": "createSchemaAttribute",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v1/entity/schemas/capabilities/{composite_id}": {
       "get": {
         "operationId": "getSchemaCapability",
@@ -964,6 +981,23 @@
             "required": true
           }
         ]
+      }
+    },
+    "/v1/entity/schemas/capability/{slug}": {
+      "post": {
+        "operationId": "createSchemaCapability",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
       }
     }
   },
