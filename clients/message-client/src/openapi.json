@@ -907,16 +907,44 @@
                 "properties": {
                   "rating": {
                     "type": "string",
+                    "nullable": true,
                     "example": "positive"
                   }
-                }
+                },
+                "additionalProperties": true
               }
             }
           }
         },
         "responses": {
-          "204": {
-            "description": "Successfully updated, no content to return"
+          "200": {
+            "description": "Successfully updated, returns the updated info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/GenAIJobOutput"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "payload": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/GenAIInfoJobOutputPayload"
+                            },
+                            {
+                              "$ref": "#/components/schemas/GenAIJobOutputPayload"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid input"
@@ -1468,9 +1496,20 @@
         "type": "object",
         "properties": {
           "summary": {
-            "type": "string",
+            "type": "array",
             "description": "Generated summary",
-            "example": "Customer is interested in solar panels",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Customer is interested in solar panels"
+            ],
+            "nullable": true
+          },
+          "topic": {
+            "type": "string",
+            "description": "Topic of the GenAI Summary",
+            "example": "Product enquiry",
             "nullable": true
           },
           "next_steps": {
@@ -1494,5 +1533,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://message.sls.epilot.io"
+    }
+  ]
 }

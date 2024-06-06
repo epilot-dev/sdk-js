@@ -127,9 +127,17 @@ declare namespace Components {
             /**
              * Generated summary
              * example:
-             * Customer is interested in solar panels
+             * [
+             *   "Customer is interested in solar panels"
+             * ]
              */
-            summary?: string | null;
+            summary?: string[] | null;
+            /**
+             * Topic of the GenAI Summary
+             * example:
+             * Product enquiry
+             */
+            topic?: string | null;
             /**
              * Next steps
              * example:
@@ -796,9 +804,17 @@ declare namespace Paths {
                     /**
                      * Generated summary
                      * example:
-                     * Customer is interested in solar panels
+                     * [
+                     *   "Customer is interested in solar panels"
+                     * ]
                      */
-                    summary?: string | null;
+                    summary?: string[] | null;
+                    /**
+                     * Topic of the GenAI Summary
+                     * example:
+                     * Product enquiry
+                     */
+                    topic?: string | null;
                     /**
                      * Next steps
                      * example:
@@ -1210,14 +1226,98 @@ declare namespace Paths {
             messageId: Parameters.MessageId /* UUID */;
         }
         export interface RequestBody {
+            [name: string]: any;
             /**
              * example:
              * positive
              */
-            rating?: string;
+            rating?: string | null;
         }
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
+                /**
+                 * Organization ID
+                 * example:
+                 * 739224
+                 */
+                org_id?: string;
+                /**
+                 * Thread ID
+                 * example:
+                 * 07b8b522-a993-4021-8fae-fd19f330ee60
+                 */
+                thread_id?: string;
+                /**
+                 * Message ID
+                 * example:
+                 * c03eb411-9f75-4ff0-9404-5a61c5b8798d
+                 */
+                message_id?: string;
+                /**
+                 * Job type
+                 */
+                type?: "INFO" | "REPLY";
+                payload?: {
+                    /**
+                     * Generated summary
+                     * example:
+                     * [
+                     *   "Customer is interested in solar panels"
+                     * ]
+                     */
+                    summary?: string[] | null;
+                    /**
+                     * Topic of the GenAI Summary
+                     * example:
+                     * Product enquiry
+                     */
+                    topic?: string | null;
+                    /**
+                     * Next steps
+                     * example:
+                     * Send a quote
+                     */
+                    next_steps?: string | null;
+                    /**
+                     * Tags
+                     * example:
+                     * [
+                     *   "solar",
+                     *   "quote"
+                     * ]
+                     */
+                    tags?: string[] | null;
+                    /**
+                     * Status of the GenAI job
+                     * example:
+                     * COMPLETED
+                     */
+                    status?: "IN_PROGRESS" | "COMPLETED" | "FAILED";
+                    /**
+                     * Progress of the GenAI job in percentage
+                     * example:
+                     * 100
+                     */
+                    progress?: number;
+                    /**
+                     * Error message if the job failed
+                     * example:
+                     * Failed to generate summary
+                     */
+                    error?: string | null;
+                    /**
+                     * Job created date
+                     * example:
+                     * 1612900000000
+                     */
+                    created_at?: number;
+                    /**
+                     * Job last updated date
+                     * example:
+                     * 1612900000000
+                     */
+                    updated_at?: number;
+                };
             }
             export interface $400 {
             }
@@ -1966,7 +2066,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.PatchInfo.PathParameters> | null,
     data?: Paths.PatchInfo.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.PatchInfo.Responses.$204>
+  ): OperationResponse<Paths.PatchInfo.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -2257,7 +2357,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.PatchInfo.PathParameters> | null,
       data?: Paths.PatchInfo.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.PatchInfo.Responses.$204>
+    ): OperationResponse<Paths.PatchInfo.Responses.$200>
   }
 }
 
