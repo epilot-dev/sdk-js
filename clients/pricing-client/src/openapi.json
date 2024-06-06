@@ -3790,15 +3790,7 @@
             ]
           },
           "pricing_model": {
-            "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
-            "enum": [
-              "per_unit",
-              "tiered_graduated",
-              "tiered_volume",
-              "tiered_flatfee",
-              "external_getag"
-            ]
+            "$ref": "#/components/schemas/PricingModel"
           },
           "tiers_details": {
             "type": "array",
@@ -4550,6 +4542,33 @@
           "on_request"
         ]
       },
+      "PricingModel": {
+        "type": "string",
+        "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
+        "enum": [
+          "per_unit",
+          "tiered_graduated",
+          "tiered_volume",
+          "tiered_flatfee",
+          "external_getag"
+        ]
+      },
+      "MarkupPricingModel": {
+        "type": "string",
+        "description": "Describes how to compute the markup per period. Either `per_unit`, `tiered_volume` or `tiered_flatfee`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unitary price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n",
+        "enum": [
+          "per_unit",
+          "tiered_volume",
+          "tiered_flatfee"
+        ]
+      },
+      "TypeGetAg": {
+        "type": "string",
+        "enum": [
+          "base_price",
+          "work_price"
+        ]
+      },
       "PriceGetAg": {
         "type": "object",
         "properties": {
@@ -4557,19 +4576,10 @@
             "type": "string"
           },
           "markup_pricing_model": {
-            "type": "string",
-            "enum": [
-              "per_unit",
-              "tiered_volume",
-              "tiered_flatfee"
-            ]
+            "$ref": "#/components/schemas/MarkupPricingModel"
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "base_price",
-              "work_price"
-            ]
+            "$ref": "#/components/schemas/TypeGetAg"
           },
           "markup_tiers": {
             "description": "Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.\n",

@@ -1396,6 +1396,14 @@ declare namespace Components {
         export type IntegrationCredentialsResult = /* The basic auth credentials */ BasicAuthCredentials;
         export type IntegrationId = "enet" | "getag";
         /**
+         * Describes how to compute the markup per period. Either `per_unit`, `tiered_volume` or `tiered_flatfee`.
+         * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+         * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unitary price for all purchased units.
+         * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+         *
+         */
+        export type MarkupPricingModel = "per_unit" | "tiered_volume" | "tiered_flatfee";
+        /**
          * A set of key-value pairs used to store meta data information about an entity.
          */
         export type MetaData = ({
@@ -2031,8 +2039,15 @@ declare namespace Components {
         }
         export interface PriceGetAg {
             category: string;
-            markup_pricing_model?: "per_unit" | "tiered_volume" | "tiered_flatfee";
-            type?: "base_price" | "work_price";
+            markup_pricing_model?: /**
+             * Describes how to compute the markup per period. Either `per_unit`, `tiered_volume` or `tiered_flatfee`.
+             * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+             * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unitary price for all purchased units.
+             * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+             *
+             */
+            MarkupPricingModel;
+            type?: TypeGetAg;
             /**
              * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
              *
@@ -2249,7 +2264,7 @@ declare namespace Components {
              * The price billing period.
              */
             billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
-            /**
+            pricing_model: /**
              * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
@@ -2258,7 +2273,7 @@ declare namespace Components {
              * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
+            PricingModel;
             tiers_details?: TierDetails[];
             get_ag?: PriceGetAg;
         }
@@ -2727,6 +2742,16 @@ declare namespace Components {
              */
             Currency;
         }
+        /**
+         * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
+         * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+         * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+         * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+         * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+         * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
+         *
+         */
+        export type PricingModel = "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
         /**
          * The product entity
          * example:
@@ -3204,6 +3229,7 @@ declare namespace Components {
                 recurrencesByTax?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountWithTax)[];
             };
         }
+        export type TypeGetAg = "base_price" | "work_price";
         /**
          * The availability rule error
          */
