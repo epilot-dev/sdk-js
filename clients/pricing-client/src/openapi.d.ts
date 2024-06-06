@@ -1216,6 +1216,7 @@ declare namespace Components {
         export interface ComputedPriceComponents {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
+        export type ConsumptionTypeGetAg = "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
         /**
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
          * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
@@ -2049,6 +2050,8 @@ declare namespace Components {
              */
             MarkupPricingModel;
             type?: TypeGetAg;
+            tariff_type?: TariffTypeGetAg;
+            consumption_type?: ConsumptionTypeGetAg;
             /**
              * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
              *
@@ -3049,6 +3052,7 @@ declare namespace Components {
              */
             street: string;
         }
+        export type TariffTypeGetAg = "HT" | "NT";
         /**
          * the tax configuration
          * example:

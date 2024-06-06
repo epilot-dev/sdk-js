@@ -4572,6 +4572,22 @@
           "work_price"
         ]
       },
+      "TariffTypeGetAg": {
+        "type": "string",
+        "enum": [
+          "HT",
+          "NT"
+        ]
+      },
+      "ConsumptionTypeGetAg": {
+        "type": "string",
+        "enum": [
+          "household",
+          "heating_pump",
+          "night_storage_heating",
+          "night_storage_heating_common_meter"
+        ]
+      },
       "PriceGetAg": {
         "type": "object",
         "properties": {
@@ -4583,6 +4599,12 @@
           },
           "type": {
             "$ref": "#/components/schemas/TypeGetAg"
+          },
+          "tariff_type": {
+            "$ref": "#/components/schemas/TariffTypeGetAg"
+          },
+          "consumption_type": {
+            "$ref": "#/components/schemas/ConsumptionTypeGetAg"
           },
           "markup_tiers": {
             "description": "Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.\n",
