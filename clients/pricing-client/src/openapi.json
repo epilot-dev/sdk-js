@@ -2235,6 +2235,9 @@
               }
             ]
           },
+          "get_ag": {
+            "$ref": "#/components/schemas/PriceGetAg"
+          },
           "_created_at": {
             "description": "The price creation date",
             "type": "string"
