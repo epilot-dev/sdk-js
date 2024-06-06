@@ -495,7 +495,12 @@
         "description": "Checkouts a cart and executes the specified checkout `mode` process.\n\nA Checkout implicitly finalizes the provided cart (if not transient from a fast-checkout) and behaves in one of the following modes:\n- `create_order` (**default**): the payment happens at a later date or managed by 3rd-party CRM (SAP)\n- `create_invoice`: the payment happens on the online checkout (paypal, stripe, adyen)\n- `create_quote`: the checkout represents a price quote request\n\nFast checkout is also supported, by passing the Cart contents directly.\nWhen a fast checkout is performed the cart is considered transient and there is no cart persistance.\n\nIf the checkout `mode` is omitted, the `mode` will default to `create_order`.\n",
         "operationId": "$checkoutCart",
         "summary": "checkoutCart",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "tags": [
           "Cart API"
         ],
@@ -559,7 +564,12 @@
         "description": "Provides a querying functionalities over products and prices of the Catalog for a given organization.",
         "operationId": "$searchCatalog",
         "summary": "searchCatalog",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "tags": [
           "Catalog API"
         ],
@@ -568,10 +578,10 @@
             "in": "header",
             "name": "X-Ivy-Org-ID",
             "description": "The target Organization Id represented by the caller",
+            "example": 739224,
             "schema": {
               "type": "string"
-            },
-            "required": true
+            }
           },
           {
             "in": "header",
@@ -663,7 +673,12 @@
         "description": "The availability check endpoint",
         "operationId": "$availabilityCheck",
         "summary": "availabilityCheck",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "tags": [
           "Availability API"
         ],
@@ -859,7 +874,12 @@
       "post": {
         "description": "Returns the list of providers available based on a given location",
         "operationId": "$searchProviders",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "parameters": [
           {
             "in": "header",
@@ -967,7 +987,12 @@
       "post": {
         "description": "Returns the list of streets available for a given postal code and city",
         "operationId": "$searchStreets",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "parameters": [
           {
             "in": "header",
@@ -1062,7 +1087,12 @@
       "post": {
         "description": "Returns the price for a given product type based on location and consumption",
         "operationId": "$computePrice",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "parameters": [
           {
             "in": "header",
@@ -1330,7 +1360,12 @@
         "description": "This API is Deprecated. Please use the Entity API or Submission API to create opportunities.\n\nEnables the creation of a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.\nThe `opportunity_number` can be used to universally identify an opportunity within epilot platform.\n",
         "operationId": "$createOpportunity",
         "summary": "createOpportunity",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "tags": [
           "Deprecated"
         ],
@@ -1422,6 +1457,12 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Epilot Bearer Token"
+      },
+      "EpilotPublicAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Public Access Bearer Token",
+        "bearerFormat": "JWT"
       }
     },
     "schemas": {
@@ -2499,18 +2540,7 @@
           "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
           "sort": "description ASC",
           "from": 0,
-          "size": 200,
-          "availability": {
-            "location": {
-              "postal_code": "57008,",
-              "city": "Cologne,",
-              "street": "Media Park,",
-              "street_number": "8a"
-            },
-            "available_date": {
-              "value": "2022-05-01"
-            }
-          }
+          "size": 200
         },
         "required": [
           "q"
@@ -3292,6 +3322,14 @@
             "description": "Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).",
             "items": {
               "$ref": "#/components/schemas/PriceItemDto"
+            }
+          },
+          "selected_price_component_ids": {
+            "type": "array",
+            "description": "The ids of the price components that should be selected for the price calculation.",
+            "items": {
+              "type": "string",
+              "description": "The id of the price component"
             }
           },
           "_price": {
@@ -4517,6 +4555,28 @@
         "properties": {
           "category": {
             "type": "string"
+          },
+          "markup_pricing_model": {
+            "type": "string",
+            "enum": [
+              "per_unit",
+              "tiered_volume",
+              "tiered_flatfee"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "base_price",
+              "work_price"
+            ]
+          },
+          "markup_tiers": {
+            "description": "Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceTier"
+            }
           },
           "markup_amount": {
             "type": "number"

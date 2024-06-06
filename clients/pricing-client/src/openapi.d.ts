@@ -608,18 +608,7 @@ declare namespace Components {
          *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
          *   "sort": "description ASC",
          *   "from": 0,
-         *   "size": 200,
-         *   "availability": {
-         *     "location": {
-         *       "postal_code": "57008,",
-         *       "city": "Cologne,",
-         *       "street": "Media Park,",
-         *       "street_number": "8a"
-         *     },
-         *     "available_date": {
-         *       "value": "2022-05-01"
-         *     }
-         *   }
+         *   "size": 200
          * }
          */
         export interface CatalogSearch {
@@ -1094,6 +1083,10 @@ declare namespace Components {
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
             item_components?: /* Represents a price input to the pricing library. */ PriceItemDto[];
+            /**
+             * The ids of the price components that should be selected for the price calculation.
+             */
+            selected_price_component_ids?: string[];
             _price?: /**
              * The price entity schema for dynamic pricing
              * example:
@@ -2038,6 +2031,13 @@ declare namespace Components {
         }
         export interface PriceGetAg {
             category: string;
+            markup_pricing_model?: "per_unit" | "tiered_volume" | "tiered_flatfee";
+            type?: "base_price" | "work_price";
+            /**
+             * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
+             *
+             */
+            markup_tiers?: PriceTier[];
             markup_amount: number;
             markup_amount_decimal: string;
             markup_amount_net?: number;
@@ -3372,18 +3372,7 @@ declare namespace Paths {
          *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
          *   "sort": "description ASC",
          *   "from": 0,
-         *   "size": 200,
-         *   "availability": {
-         *     "location": {
-         *       "postal_code": "57008,",
-         *       "city": "Cologne,",
-         *       "street": "Media Park,",
-         *       "street_number": "8a"
-         *     },
-         *     "available_date": {
-         *       "value": "2022-05-01"
-         *     }
-         *   }
+         *   "size": 200
          * }
          */
         Components.Schemas.CatalogSearch;
@@ -3425,7 +3414,7 @@ declare namespace Paths {
     }
     namespace $SearchCatalog {
         export interface HeaderParameters {
-            "X-Ivy-Org-ID": Parameters.XIvyOrgID;
+            "X-Ivy-Org-ID"?: Parameters.XIvyOrgID;
             Authorization?: Parameters.Authorization;
         }
         namespace Parameters {
@@ -3439,18 +3428,7 @@ declare namespace Paths {
          *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
          *   "sort": "description ASC",
          *   "from": 0,
-         *   "size": 200,
-         *   "availability": {
-         *     "location": {
-         *       "postal_code": "57008,",
-         *       "city": "Cologne,",
-         *       "street": "Media Park,",
-         *       "street_number": "8a"
-         *     },
-         *     "available_date": {
-         *       "value": "2022-05-01"
-         *     }
-         *   }
+         *   "size": 200
          * }
          */
         Components.Schemas.CatalogSearch;
