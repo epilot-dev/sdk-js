@@ -1996,6 +1996,7 @@ declare namespace Components {
              * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
              */
             unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
+            get_ag?: PriceGetAg;
             /**
              * The price creation date
              */
@@ -2624,6 +2625,7 @@ declare namespace Components {
                  * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
                  */
                 unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
+                get_ag?: PriceGetAg;
                 /**
                  * The price creation date
                  */
