@@ -4588,11 +4588,18 @@
           "night_storage_heating_common_meter"
         ]
       },
+      "ProductCategory": {
+        "type": "string",
+        "enum": [
+          "power",
+          "gas"
+        ]
+      },
       "PriceGetAg": {
         "type": "object",
         "properties": {
           "category": {
-            "type": "string"
+            "$ref": "#/components/schemas/ProductCategory"
           },
           "markup_pricing_model": {
             "$ref": "#/components/schemas/MarkupPricingModel"

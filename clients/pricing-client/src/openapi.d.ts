@@ -2040,7 +2040,7 @@ declare namespace Components {
             _tags?: string[];
         }
         export interface PriceGetAg {
-            category: string;
+            category: ProductCategory;
             markup_pricing_model?: /**
              * Describes how to compute the markup per period. Either `per_unit`, `tiered_volume` or `tiered_flatfee`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
@@ -2848,6 +2848,7 @@ declare namespace Components {
              */
             _updated_at?: string;
         }
+        export type ProductCategory = "power" | "gas";
         /**
          * The provider entity
          */
