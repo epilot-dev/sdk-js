@@ -140,9 +140,6 @@
                       "enum": [
                         "User created successfully"
                       ]
-                    },
-                    "response": {
-                      "$ref": "#/components/schemas/PortalUser"
                     }
                   }
                 }
@@ -1129,6 +1126,12 @@
                       "items": {
                         "$ref": "#/components/schemas/EntityItem"
                       }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
+                      }
                     }
                   }
                 }
@@ -1245,124 +1248,6 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/contact/email/count": {
-      "get": {
-        "operationId": "getCountByEmail",
-        "summary": "getCountByEmail",
-        "deprecated": true,
-        "description": "Check Contact by email. Deprecated in favor of /contact/exists.",
-        "tags": [
-          "Public"
-        ],
-        "security": [],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "email",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Portal user Email Address",
-              "example": "test@test.com"
-            }
-          },
-          {
-            "in": "query",
-            "name": "org_id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Organization ID",
-              "example": 123
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Contact count for the requested email successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "number",
-                      "description": "Count of Contact",
-                      "example": 2
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/public/contact/count": {
-      "post": {
-        "deprecated": true,
-        "operationId": "getContactCount",
-        "summary": "getContactCount",
-        "description": "Return number of contacts matching identifier values. Deprecated in favor of /contact/exists.",
-        "security": [],
-        "tags": [
-          "Public"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Origin"
-            },
-            "description": "Origin of the portal"
-          }
-        ],
-        "requestBody": {
-          "description": "Request payload",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ContactCountRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Contact count for the request successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "number",
-                      "description": "Count of Contact",
-                      "example": 2
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/InvalidRequest"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -2072,6 +1957,12 @@
                       "items": {
                         "$ref": "#/components/schemas/WorkflowExecution"
                       }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
+                      }
                     }
                   }
                 }
@@ -2468,6 +2359,12 @@
                       "items": {
                         "$ref": "#/components/schemas/WorkflowExecution"
                       }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
+                      }
                     }
                   }
                 }
@@ -2689,6 +2586,12 @@
                       "items": {
                         "$ref": "#/components/schemas/WorkflowExecution"
                       }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
+                      }
                     }
                   }
                 }
@@ -2894,77 +2797,6 @@
                 }
               }
             }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/entity/by-identifiers/{slug}": {
-      "post": {
-        "operationId": "getEntitiesByIdentifiers",
-        "summary": "getEntitiesByIdentifiers",
-        "deprecated": true,
-        "description": "Get entities (contract) by identifiers. Deprecated in favor of /contract/by-identifiers.",
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            },
-            "required": true,
-            "description": "The slug of the entity to search by. Currently the only supported value is 'contract'."
-          }
-        ],
-        "requestBody": {
-          "description": "The entities are retrieved successfully.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Entity",
-                "example": "```json\n  {\n    \"name\": \"My Contract\",\n    \"contract_number\": \"123\"\n  }\n```\n"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The returned Entities",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/EntityItem"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/InvalidRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -4448,16 +4280,8 @@
               "properties": {
                 "filename": {
                   "type": "string",
-                  "example": 12345,
+                  "example": "document.pdf",
                   "description": "File name"
-                },
-                "file_entity_id": {
-                  "$ref": "#/components/schemas/EntityId"
-                },
-                "document_type": {
-                  "type": "string",
-                  "example": 12345,
-                  "description": "Document type"
                 },
                 "access_control": {
                   "type": "string",
@@ -4466,15 +4290,8 @@
                     "private",
                     "public-read"
                   ],
-                  "description": "Access control level for the file"
-                },
-                "_tags": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "example": 12345,
-                  "description": "Array of file tags"
+                  "description": "Access control level for the file. Deprecated - all files are private.",
+                  "deprecated": true
                 },
                 "s3ref": {
                   "type": "object",
@@ -4594,6 +4411,83 @@
           "INSTALLER_PORTAL"
         ]
       },
+      "AllowedFileExtensions": {
+        "type": "object",
+        "description": "Allowed file extensions for upload",
+        "properties": {
+          "document": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "pdf"
+            }
+          },
+          "image": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "jpg"
+            }
+          },
+          "spreadsheet": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "xls"
+            }
+          },
+          "presentation": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "ppt"
+            }
+          },
+          "audioVideo": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "mp4"
+            }
+          },
+          "email": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "eml"
+            }
+          },
+          "archive": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "zip"
+            }
+          },
+          "cad": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "cad"
+            }
+          },
+          "calendar": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "ics"
+            }
+          },
+          "other": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "txt"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
       "UpsertPortalConfig": {
         "type": "object",
         "required": [
@@ -4675,6 +4569,37 @@
                 "type": "string",
                 "example": "eu-central-1_CUEQRNbUb",
                 "description": "Cognito user pool ID"
+              },
+              "password_policy": {
+                "type": "object",
+                "description": "Password policy for the portal",
+                "properties": {
+                  "minimum_length": {
+                    "type": "integer",
+                    "example": 8,
+                    "description": "Minimum password length"
+                  },
+                  "require_lowercase": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require lowercase characters"
+                  },
+                  "require_uppercase": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require uppercase characters"
+                  },
+                  "require_numbers": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require numbers"
+                  },
+                  "require_symbols": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require symbols"
+                  }
+                }
               }
             }
           },
@@ -4883,6 +4808,9 @@
               "origin": {
                 "$ref": "#/components/schemas/Origin"
               },
+              "allowed_file_extensions": {
+                "$ref": "#/components/schemas/AllowedFileExtensions"
+              },
               "org_settings": {
                 "type": "object",
                 "description": "Organization settings",
@@ -4897,13 +4825,13 @@
                       }
                     }
                   },
-                  "release_candidate": {
+                  "notracking": {
                     "type": "object",
-                    "description": "Release candidate settings",
+                    "description": "Disable Advanced Usage Metrics",
                     "properties": {
                       "enabled": {
                         "type": "boolean",
-                        "description": "Enable/Disable the release candidate feature"
+                        "description": "Disable browser-side scripts that track advanced usage metrics"
                       }
                     }
                   }
@@ -5151,27 +5079,6 @@
             "$ref": "#/components/schemas/PaymentWidget"
           }
         ]
-      },
-      "ContactCountRequest": {
-        "type": "object",
-        "required": [
-          "contactIdentifiers",
-          "orgId"
-        ],
-        "properties": {
-          "orgId": {
-            "type": "string",
-            "example": 728,
-            "description": "ID of the organization"
-          },
-          "contactIdentifiers": {
-            "type": "object",
-            "description": "Identifiers to identify a contact",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
       },
       "ContactExistsRequest": {
         "type": "object",
@@ -6296,6 +6203,61 @@
         "required": [
           "action"
         ]
+      },
+      "ActionLabel": {
+        "type": "object",
+        "properties": {
+          "en": {
+            "type": "string",
+            "nullable": true
+          },
+          "de": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Rule": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute_value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "JourneyActions": {
+        "type": "object",
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "action_label": {
+            "type": "object",
+            "$ref": "#/components/schemas/ActionLabel",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rule"
+            },
+            "nullable": true
+          }
+        }
       },
       "WorkflowExecution": {
         "type": "object",
