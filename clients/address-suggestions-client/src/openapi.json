@@ -13,6 +13,9 @@
   "security": [
     {
       "EpilotAuth": []
+    },
+    {
+      "EpilotPublicAuth": []
     }
   ],
   "servers": [
@@ -86,7 +89,12 @@
         "tags": [
           "Addresses API"
         ],
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Suggestions list",
@@ -128,12 +136,20 @@
           {
             "in": "query",
             "name": "s3FileUrl",
-            "required": true,
             "schema": {
               "type": "string"
             },
             "description": "file s3 reference",
             "example": "https://epilot-dev-user-content.s3.eu-central-1.amazonaws.com/739224/4e7b7d95-ced6-4f5f-9326-0c61f30dcadb/availability-file-template%2520(19).csv"
+          },
+          {
+            "in": "query",
+            "name": "fileId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "file id to validate",
+            "example": "4e7b7d95-ced6-4f5f-9326-0c61f30dcadb"
           }
         ],
         "responses": {
@@ -176,6 +192,115 @@
           }
         }
       }
+    },
+    "/v1/public/availability:check": {
+      "get": {
+        "description": "Check the availability of a given address within multiple files",
+        "operationId": "checkAvailability",
+        "summary": "Check address availability",
+        "tags": [
+          "Addresses API"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": 739224
+          },
+          {
+            "in": "query",
+            "name": "files",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "file ids to check, comma separated"
+          },
+          {
+            "in": "query",
+            "name": "countryCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "country code",
+            "example": "de"
+          },
+          {
+            "in": "query",
+            "name": "postalCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "postal code",
+            "example": 50667
+          },
+          {
+            "in": "query",
+            "name": "street",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "street",
+            "example": "Breite Str."
+          },
+          {
+            "in": "query",
+            "name": "streetNumber",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "street number",
+            "example": 1
+          }
+        ],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Availability result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Address not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -183,7 +308,14 @@
       "EpilotAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Epilot Bearer Token"
+        "description": "Epilot Bearer Token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotPublicAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Public Access Bearer Token",
+        "bearerFormat": "JWT"
       }
     },
     "examples": {
@@ -198,6 +330,16 @@
       }
     },
     "schemas": {
+      "AvailabilityResult": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "string",
+            "description": "The id of the file where the address was found",
+            "example": "4e7b7d95-ced6-4f5f-9326-0c61f30dcadb"
+          }
+        }
+      },
       "Error": {
         "required": [
           "message"

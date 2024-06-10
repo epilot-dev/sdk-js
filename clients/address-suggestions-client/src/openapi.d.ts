@@ -55,6 +55,14 @@ declare namespace Components {
          * The address suggestions entity array
          */
         export type AddressSuggestions = /* The address suggestions entity */ AddressSuggestion[];
+        export interface AvailabilityResult {
+            /**
+             * The id of the file where the address was found
+             * example:
+             * 4e7b7d95-ced6-4f5f-9326-0c61f30dcadb
+             */
+            fileId?: string;
+        }
         export interface Error {
             /**
              * Error message
@@ -89,6 +97,31 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace CheckAvailability {
+        export interface HeaderParameters {
+            "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
+        }
+        namespace Parameters {
+            export type CountryCode = string;
+            export type Files = string;
+            export type PostalCode = string;
+            export type Street = string;
+            export type StreetNumber = string;
+            export type XEpilotOrgID = string;
+        }
+        export interface QueryParameters {
+            files: Parameters.Files;
+            countryCode: Parameters.CountryCode;
+            postalCode: Parameters.PostalCode;
+            street?: Parameters.Street;
+            streetNumber?: Parameters.StreetNumber;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.AvailabilityResult;
+            export type $400 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+        }
+    }
     namespace GetAddresses {
         export interface HeaderParameters {
             "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
@@ -113,10 +146,12 @@ declare namespace Paths {
     }
     namespace ValidateAddresses {
         namespace Parameters {
+            export type FileId = string;
             export type S3FileUrl = string;
         }
         export interface QueryParameters {
-            s3FileUrl: Parameters.S3FileUrl;
+            s3FileUrl?: Parameters.S3FileUrl;
+            fileId?: Parameters.FileId;
         }
         namespace Responses {
             export type $200 = /* The availability map file result payload */ Components.Schemas.ValidateAddressSuggestionsFileResult;
@@ -146,6 +181,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ValidateAddresses.Responses.$200>
+  /**
+   * checkAvailability - Check address availability
+   * 
+   * Check the availability of a given address within multiple files
+   */
+  'checkAvailability'(
+    parameters?: Parameters<Paths.CheckAvailability.QueryParameters & Paths.CheckAvailability.HeaderParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CheckAvailability.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -172,6 +217,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ValidateAddresses.Responses.$200>
+  }
+  ['/v1/public/availability:check']: {
+    /**
+     * checkAvailability - Check address availability
+     * 
+     * Check the availability of a given address within multiple files
+     */
+    'get'(
+      parameters?: Parameters<Paths.CheckAvailability.QueryParameters & Paths.CheckAvailability.HeaderParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CheckAvailability.Responses.$200>
   }
 }
 
