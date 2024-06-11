@@ -123,6 +123,20 @@ declare namespace Components {
              */
             send_as_link?: boolean;
         }
+        export interface GenAIFeedbackPayload {
+            /**
+             * Rating of the suggested reply
+             * example:
+             * positive
+             */
+            rating?: string | null;
+            /**
+             * Feedback of the suggested reply
+             * example:
+             * Good summary
+             */
+            feedback?: string | null;
+        }
         export interface GenAIInfoJobOutputPayload {
             /**
              * Generated summary
@@ -182,6 +196,18 @@ declare namespace Components {
         }
         export interface GenAIJobOutputPayload {
             /**
+             * Rating of the suggested reply
+             * example:
+             * positive
+             */
+            rating?: string | null;
+            /**
+             * Feedback of the suggested reply
+             * example:
+             * Good summary
+             */
+            feedback?: string | null;
+            /**
              * Status of the GenAI job
              * example:
              * COMPLETED
@@ -211,6 +237,14 @@ declare namespace Components {
              * 1612900000000
              */
             updated_at?: number;
+        }
+        export interface GenAIReplyJobOutputPayload {
+            /**
+             * Suggested reply
+             * example:
+             * Thank you for your inquiry. We will get back to you shortly.
+             */
+            suggested_reply?: string | null;
         }
         export interface Message {
             /**
@@ -761,6 +795,80 @@ declare namespace Paths {
             threadId: Parameters.ThreadId /* UUID */;
         }
         namespace Responses {
+            export interface $200 {
+                /**
+                 * Organization ID
+                 * example:
+                 * 739224
+                 */
+                org_id?: string;
+                /**
+                 * Thread ID
+                 * example:
+                 * 07b8b522-a993-4021-8fae-fd19f330ee60
+                 */
+                thread_id?: string;
+                /**
+                 * Message ID
+                 * example:
+                 * c03eb411-9f75-4ff0-9404-5a61c5b8798d
+                 */
+                message_id?: string;
+                /**
+                 * Job type
+                 */
+                type?: "INFO" | "REPLY";
+                payload?: {
+                    /**
+                     * Suggested reply
+                     * example:
+                     * Thank you for your inquiry. We will get back to you shortly.
+                     */
+                    suggested_reply?: string | null;
+                    /**
+                     * Rating of the suggested reply
+                     * example:
+                     * positive
+                     */
+                    rating?: string | null;
+                    /**
+                     * Feedback of the suggested reply
+                     * example:
+                     * Good summary
+                     */
+                    feedback?: string | null;
+                    /**
+                     * Status of the GenAI job
+                     * example:
+                     * COMPLETED
+                     */
+                    status?: "IN_PROGRESS" | "COMPLETED" | "FAILED";
+                    /**
+                     * Progress of the GenAI job in percentage
+                     * example:
+                     * 100
+                     */
+                    progress?: number;
+                    /**
+                     * Error message if the job failed
+                     * example:
+                     * Failed to generate summary
+                     */
+                    error?: string | null;
+                    /**
+                     * Job created date
+                     * example:
+                     * 1612900000000
+                     */
+                    created_at?: number;
+                    /**
+                     * Job last updated date
+                     * example:
+                     * 1612900000000
+                     */
+                    updated_at?: number;
+                };
+            }
             export interface $202 {
             }
             export interface $403 {
@@ -834,6 +942,18 @@ declare namespace Paths {
                      * ]
                      */
                     tags?: string[] | null;
+                    /**
+                     * Rating of the suggested reply
+                     * example:
+                     * positive
+                     */
+                    rating?: string | null;
+                    /**
+                     * Feedback of the suggested reply
+                     * example:
+                     * Good summary
+                     */
+                    feedback?: string | null;
                     /**
                      * Status of the GenAI job
                      * example:
@@ -1230,17 +1350,79 @@ declare namespace Paths {
             messageId: Parameters.MessageId /* UUID */;
         }
         export interface RequestBody {
-            [name: string]: any;
             /**
+             * Generated summary
+             * example:
+             * [
+             *   "Customer is interested in solar panels"
+             * ]
+             */
+            summary?: string[] | null;
+            /**
+             * Topic of the GenAI Summary
+             * example:
+             * Product enquiry
+             */
+            topic?: string | null;
+            /**
+             * Recommended next steps
+             * example:
+             * [
+             *   "The agent should approve the refund"
+             * ]
+             */
+            next_steps?: string[] | null;
+            /**
+             * Tags
+             * example:
+             * [
+             *   "solar",
+             *   "quote"
+             * ]
+             */
+            tags?: string[] | null;
+            /**
+             * Rating of the suggested reply
              * example:
              * positive
              */
             rating?: string | null;
             /**
+             * Feedback of the suggested reply
              * example:
              * Good summary
              */
             feedback?: string | null;
+            /**
+             * Status of the GenAI job
+             * example:
+             * COMPLETED
+             */
+            status?: "IN_PROGRESS" | "COMPLETED" | "FAILED";
+            /**
+             * Progress of the GenAI job in percentage
+             * example:
+             * 100
+             */
+            progress?: number;
+            /**
+             * Error message if the job failed
+             * example:
+             * Failed to generate summary
+             */
+            error?: string | null;
+            /**
+             * Job created date
+             * example:
+             * 1612900000000
+             */
+            created_at?: number;
+            /**
+             * Job last updated date
+             * example:
+             * 1612900000000
+             */
+            updated_at?: number;
         }
         namespace Responses {
             export interface $200 {
@@ -1298,6 +1480,18 @@ declare namespace Paths {
                      * ]
                      */
                     tags?: string[] | null;
+                    /**
+                     * Rating of the suggested reply
+                     * example:
+                     * positive
+                     */
+                    rating?: string | null;
+                    /**
+                     * Feedback of the suggested reply
+                     * example:
+                     * Good summary
+                     */
+                    feedback?: string | null;
                     /**
                      * Status of the GenAI job
                      * example:
@@ -2057,7 +2251,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.GenerateSuggestedReply.PathParameters & Paths.GenerateSuggestedReply.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GenerateSuggestedReply.Responses.$202>
+  ): OperationResponse<Paths.GenerateSuggestedReply.Responses.$200 | Paths.GenerateSuggestedReply.Responses.$202>
   /**
    * getInfo - getInfo
    * 
@@ -2344,7 +2538,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.GenerateSuggestedReply.PathParameters & Paths.GenerateSuggestedReply.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GenerateSuggestedReply.Responses.$202>
+    ): OperationResponse<Paths.GenerateSuggestedReply.Responses.$200 | Paths.GenerateSuggestedReply.Responses.$202>
   }
   ['/v1/message/threads/{threadId}/genai:info']: {
     /**

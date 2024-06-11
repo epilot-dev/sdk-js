@@ -793,8 +793,37 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/GenAIJobOutput"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "payload": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/GenAIReplyJobOutputPayload"
+                            },
+                            {
+                              "$ref": "#/components/schemas/GenAIJobOutputPayload"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
           "202": {
-            "description": "Success"
+            "description": "Accepted"
           },
           "403": {
             "description": "Forbidden"
@@ -903,20 +932,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "rating": {
-                    "type": "string",
-                    "nullable": true,
-                    "example": "positive"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/GenAIInfoJobOutputPayload"
                   },
-                  "feedback": {
-                    "type": "string",
-                    "nullable": true,
-                    "example": "Good summary"
+                  {
+                    "$ref": "#/components/schemas/GenAIJobOutputPayload"
                   }
-                },
-                "additionalProperties": true
+                ]
               }
             }
           }
@@ -1434,7 +1457,6 @@
         }
       },
       "GenAIJobOutput": {
-        "type": "object",
         "properties": {
           "org_id": {
             "type": "string",
@@ -1462,7 +1484,11 @@
         }
       },
       "GenAIJobOutputPayload": {
-        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GenAIFeedbackPayload"
+          }
+        ],
         "properties": {
           "status": {
             "type": "string",
@@ -1498,7 +1524,6 @@
         }
       },
       "GenAIInfoJobOutputPayload": {
-        "type": "object",
         "properties": {
           "summary": {
             "type": "array",
@@ -1538,6 +1563,34 @@
               "solar",
               "quote"
             ],
+            "nullable": true
+          }
+        }
+      },
+      "GenAIReplyJobOutputPayload": {
+        "type": "object",
+        "properties": {
+          "suggested_reply": {
+            "type": "string",
+            "description": "Suggested reply",
+            "example": "Thank you for your inquiry. We will get back to you shortly.",
+            "nullable": true
+          }
+        }
+      },
+      "GenAIFeedbackPayload": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "string",
+            "description": "Rating of the suggested reply",
+            "example": "positive",
+            "nullable": true
+          },
+          "feedback": {
+            "type": "string",
+            "description": "Feedback of the suggested reply",
+            "example": "Good summary",
             "nullable": true
           }
         }
