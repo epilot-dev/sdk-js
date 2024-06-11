@@ -18,10 +18,7 @@
   ],
   "servers": [
     {
-      "url": "None"
-    },
-    {
-      "url": "None"
+      "url": "https://tf-blueprint.dev.sls.epilot.io"
     },
     {
       "url": "https://tf-blueprint.dev.sls.epilot.io",
@@ -126,7 +123,10 @@
                       "file",
                       "emailtemplate",
                       "entity",
-                      "schema"
+                      "schema",
+                      "schema_attribute",
+                      "schema_capability",
+                      "workflow_definition"
                     ]
                   },
                   "resourceIds": {
@@ -136,6 +136,11 @@
                     },
                     "minItems": 1,
                     "maxItems": 25
+                  },
+                  "serverUrl": {
+                    "type": "string",
+                    "description": "The environment to run terraform providers against. Used for local development",
+                    "example": "https://journey-config.dev.sls.epilot.io"
                   }
                 }
               }
@@ -221,6 +226,11 @@
                   "templateFilePath": {
                     "type": "string",
                     "example": "example.tf"
+                  },
+                  "serverUrl": {
+                    "type": "string",
+                    "description": "The environment to run terraform providers against. Used for local development",
+                    "example": "https://journey-config.dev.sls.epilot.io"
                   }
                 }
               }
@@ -268,6 +278,11 @@
                   "templateFilePath": {
                     "type": "string",
                     "example": "example.tf"
+                  },
+                  "serverUrl": {
+                    "type": "string",
+                    "description": "The environment to run terraform providers against. Used for local development",
+                    "example": "https://journey-config.dev.sls.epilot.io"
                   }
                 }
               }
@@ -309,6 +324,11 @@
                   "templateFilePath": {
                     "type": "string",
                     "example": "example.tf"
+                  },
+                  "serverUrl": {
+                    "type": "string",
+                    "description": "The environment to run terraform providers against. Used for local development",
+                    "example": "https://journey-config.dev.sls.epilot.io"
                   }
                 }
               }

@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "None"
+      "url": "https://tf-blueprint.dev.sls.epilot.io"
     }
   ],
   "paths": {

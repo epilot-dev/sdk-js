@@ -60,6 +60,12 @@ declare namespace Paths {
              * example.tf
              */
             templateFilePath?: string;
+            /**
+             * The environment to run terraform providers against. Used for local development
+             * example:
+             * https://journey-config.dev.sls.epilot.io
+             */
+            serverUrl?: string;
         }
         namespace Responses {
             export type $200 = string;
@@ -72,6 +78,12 @@ declare namespace Paths {
              * example.tf
              */
             templateFilePath?: string;
+            /**
+             * The environment to run terraform providers against. Used for local development
+             * example:
+             * https://journey-config.dev.sls.epilot.io
+             */
+            serverUrl?: string;
         }
         namespace Responses {
             export interface $200 {
@@ -85,7 +97,7 @@ declare namespace Paths {
     }
     namespace ExportBlueprint {
         export interface RequestBody {
-            resourceType?: "journey" | "product" | "price" | "tax" | "automation_flow" | "designbuilder" | "file" | "emailtemplate" | "entity" | "schema";
+            resourceType?: "journey" | "product" | "price" | "tax" | "automation_flow" | "designbuilder" | "file" | "emailtemplate" | "entity" | "schema" | "schema_attribute" | "schema_capability" | "workflow_definition";
             resourceIds?: [
                 string,
                 string?,
@@ -113,6 +125,12 @@ declare namespace Paths {
                 string?,
                 string?
             ];
+            /**
+             * The environment to run terraform providers against. Used for local development
+             * example:
+             * https://journey-config.dev.sls.epilot.io
+             */
+            serverUrl?: string;
         }
         namespace Responses {
             export interface $200 {
@@ -154,6 +172,12 @@ declare namespace Paths {
              * example.tf
              */
             templateFilePath?: string;
+            /**
+             * The environment to run terraform providers against. Used for local development
+             * example:
+             * https://journey-config.dev.sls.epilot.io
+             */
+            serverUrl?: string;
         }
         namespace Responses {
             export type $200 = string;
