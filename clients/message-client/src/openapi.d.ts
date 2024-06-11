@@ -139,11 +139,13 @@ declare namespace Components {
              */
             topic?: string | null;
             /**
-             * Next steps
+             * Recommended next steps
              * example:
-             * Send a quote
+             * [
+             *   "The agent should approve the refund"
+             * ]
              */
-            next_steps?: string | null;
+            next_steps?: string[] | null;
             /**
              * Tags
              * example:
@@ -816,11 +818,13 @@ declare namespace Paths {
                      */
                     topic?: string | null;
                     /**
-                     * Next steps
+                     * Recommended next steps
                      * example:
-                     * Send a quote
+                     * [
+                     *   "The agent should approve the refund"
+                     * ]
                      */
-                    next_steps?: string | null;
+                    next_steps?: string[] | null;
                     /**
                      * Tags
                      * example:
@@ -1232,6 +1236,11 @@ declare namespace Paths {
              * positive
              */
             rating?: string | null;
+            /**
+             * example:
+             * Good summary
+             */
+            feedback?: string | null;
         }
         namespace Responses {
             export interface $200 {
@@ -1273,11 +1282,13 @@ declare namespace Paths {
                      */
                     topic?: string | null;
                     /**
-                     * Next steps
+                     * Recommended next steps
                      * example:
-                     * Send a quote
+                     * [
+                     *   "The agent should approve the refund"
+                     * ]
                      */
-                    next_steps?: string | null;
+                    next_steps?: string[] | null;
                     /**
                      * Tags
                      * example:

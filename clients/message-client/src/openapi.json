@@ -909,6 +909,11 @@
                     "type": "string",
                     "nullable": true,
                     "example": "positive"
+                  },
+                  "feedback": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": "Good summary"
                   }
                 },
                 "additionalProperties": true
@@ -1513,9 +1518,14 @@
             "nullable": true
           },
           "next_steps": {
-            "type": "string",
-            "description": "Next steps",
-            "example": "Send a quote",
+            "type": "array",
+            "description": "Recommended next steps",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "The agent should approve the refund"
+            ],
             "nullable": true
           },
           "tags": {
