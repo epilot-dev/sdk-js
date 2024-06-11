@@ -140,9 +140,6 @@
                       "enum": [
                         "User created successfully"
                       ]
-                    },
-                    "response": {
-                      "$ref": "#/components/schemas/PortalUser"
                     }
                   }
                 }
@@ -1129,6 +1126,12 @@
                       "items": {
                         "$ref": "#/components/schemas/EntityItem"
                       }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
+                      }
                     }
                   }
                 }
@@ -1954,6 +1957,12 @@
                       "items": {
                         "$ref": "#/components/schemas/WorkflowExecution"
                       }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
+                      }
                     }
                   }
                 }
@@ -2350,6 +2359,12 @@
                       "items": {
                         "$ref": "#/components/schemas/WorkflowExecution"
                       }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
+                      }
                     }
                   }
                 }
@@ -2570,6 +2585,12 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/WorkflowExecution"
+                      }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
                       }
                     }
                   }
@@ -4548,6 +4569,37 @@
                 "type": "string",
                 "example": "eu-central-1_CUEQRNbUb",
                 "description": "Cognito user pool ID"
+              },
+              "password_policy": {
+                "type": "object",
+                "description": "Password policy for the portal",
+                "properties": {
+                  "minimum_length": {
+                    "type": "integer",
+                    "example": 8,
+                    "description": "Minimum password length"
+                  },
+                  "require_lowercase": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require lowercase characters"
+                  },
+                  "require_uppercase": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require uppercase characters"
+                  },
+                  "require_numbers": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require numbers"
+                  },
+                  "require_symbols": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require symbols"
+                  }
+                }
               }
             }
           },
@@ -6151,6 +6203,61 @@
         "required": [
           "action"
         ]
+      },
+      "ActionLabel": {
+        "type": "object",
+        "properties": {
+          "en": {
+            "type": "string",
+            "nullable": true
+          },
+          "de": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Rule": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute_value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "JourneyActions": {
+        "type": "object",
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "action_label": {
+            "type": "object",
+            "$ref": "#/components/schemas/ActionLabel",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rule"
+            },
+            "nullable": true
+          }
+        }
       },
       "WorkflowExecution": {
         "type": "object",

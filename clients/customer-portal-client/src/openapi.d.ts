@@ -24,6 +24,10 @@ declare namespace Components {
         export type Unauthorized = Schemas.ErrorResp;
     }
     namespace Schemas {
+        export interface ActionLabel {
+            en?: string | null;
+            de?: string | null;
+        }
         export interface ActionWidget {
             id: string;
             type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
@@ -1310,6 +1314,12 @@ declare namespace Components {
              */
             paid_date?: string; // date
         }
+        export interface JourneyActions {
+            journey_id?: string | null;
+            action_label?: ActionLabel;
+            slug?: string | null;
+            rules?: Rule[] | null;
+        }
         /**
          * The meter entity
          */
@@ -1656,6 +1666,41 @@ declare namespace Components {
                  * eu-central-1_CUEQRNbUb
                  */
                 cognito_user_pool_id?: string;
+                /**
+                 * Password policy for the portal
+                 */
+                password_policy?: {
+                    /**
+                     * Minimum password length
+                     * example:
+                     * 8
+                     */
+                    minimum_length?: number;
+                    /**
+                     * Require lowercase characters
+                     * example:
+                     * true
+                     */
+                    require_lowercase?: boolean;
+                    /**
+                     * Require uppercase characters
+                     * example:
+                     * true
+                     */
+                    require_uppercase?: boolean;
+                    /**
+                     * Require numbers
+                     * example:
+                     * true
+                     */
+                    require_numbers?: boolean;
+                    /**
+                     * Require symbols
+                     * example:
+                     * true
+                     */
+                    require_symbols?: boolean;
+                };
             };
             /**
              * Stringified object with configuration details
@@ -2043,6 +2088,11 @@ declare namespace Components {
              */
             paid_date?: string; // date
         }
+        export interface Rule {
+            entity?: string | null;
+            attribute?: string | null;
+            attribute_value?: string | null;
+        }
         export interface SaveEntityFile {
             entity_id: /**
              * Entity ID
@@ -2247,6 +2297,41 @@ declare namespace Components {
                  * eu-central-1_CUEQRNbUb
                  */
                 cognito_user_pool_id?: string;
+                /**
+                 * Password policy for the portal
+                 */
+                password_policy?: {
+                    /**
+                     * Minimum password length
+                     * example:
+                     * 8
+                     */
+                    minimum_length?: number;
+                    /**
+                     * Require lowercase characters
+                     * example:
+                     * true
+                     */
+                    require_lowercase?: boolean;
+                    /**
+                     * Require uppercase characters
+                     * example:
+                     * true
+                     */
+                    require_uppercase?: boolean;
+                    /**
+                     * Require numbers
+                     * example:
+                     * true
+                     */
+                    require_numbers?: boolean;
+                    /**
+                     * Require symbols
+                     * example:
+                     * true
+                     */
+                    require_symbols?: boolean;
+                };
             };
             /**
              * Stringified object with configuration details
@@ -2731,7 +2816,6 @@ declare namespace Paths {
         namespace Responses {
             export interface $201 {
                 message: "User created successfully";
-                response: /* The portal user entity */ Components.Schemas.PortalUser;
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $500 = Components.Responses.InternalServerError;
@@ -3088,6 +3172,7 @@ declare namespace Paths {
                 entity?: /* The mapped contact of the portal user */ Components.Schemas.Contact;
                 files?: /* The file entity */ Components.Schemas.File[];
                 relations?: Components.Schemas.EntityItem[];
+                journey_actions?: Components.Schemas.JourneyActions[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -3175,6 +3260,7 @@ declare namespace Paths {
                  * }
                  */
                 Components.Schemas.WorkflowExecution[];
+                journey_actions?: Components.Schemas.JourneyActions[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -3419,6 +3505,7 @@ declare namespace Paths {
                  * }
                  */
                 Components.Schemas.WorkflowExecution[];
+                journey_actions?: Components.Schemas.JourneyActions[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -3509,6 +3596,7 @@ declare namespace Paths {
                  * }
                  */
                 Components.Schemas.WorkflowExecution[];
+                journey_actions?: Components.Schemas.JourneyActions[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
