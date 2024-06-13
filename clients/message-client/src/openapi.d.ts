@@ -212,7 +212,7 @@ declare namespace Components {
              * example:
              * COMPLETED
              */
-            status?: "IN_PROGRESS" | "COMPLETED" | "FAILED";
+            status?: "INITIATED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
             /**
              * Progress of the GenAI job in percentage
              * example:
@@ -842,7 +842,7 @@ declare namespace Paths {
                      * example:
                      * COMPLETED
                      */
-                    status?: "IN_PROGRESS" | "COMPLETED" | "FAILED";
+                    status?: "INITIATED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
                     /**
                      * Progress of the GenAI job in percentage
                      * example:
@@ -959,7 +959,7 @@ declare namespace Paths {
                      * example:
                      * COMPLETED
                      */
-                    status?: "IN_PROGRESS" | "COMPLETED" | "FAILED";
+                    status?: "INITIATED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
                     /**
                      * Progress of the GenAI job in percentage
                      * example:
@@ -1398,7 +1398,7 @@ declare namespace Paths {
              * example:
              * COMPLETED
              */
-            status?: "IN_PROGRESS" | "COMPLETED" | "FAILED";
+            status?: "INITIATED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
             /**
              * Progress of the GenAI job in percentage
              * example:
@@ -1497,7 +1497,7 @@ declare namespace Paths {
                      * example:
                      * COMPLETED
                      */
-                    status?: "IN_PROGRESS" | "COMPLETED" | "FAILED";
+                    status?: "INITIATED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
                     /**
                      * Progress of the GenAI job in percentage
                      * example:

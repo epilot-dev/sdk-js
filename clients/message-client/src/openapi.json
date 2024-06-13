@@ -1493,6 +1493,7 @@
           "status": {
             "type": "string",
             "enum": [
+              "INITIATED",
               "IN_PROGRESS",
               "COMPLETED",
               "FAILED"
