@@ -15,7 +15,7 @@ declare namespace Components {
              * Result of the condition evaluation
              */
             evaluationResult?: boolean;
-            conditions?: /**
+            statements?: /**
              * example:
              * {
              *   "source": {
@@ -32,7 +32,7 @@ declare namespace Components {
              *   ]
              * }
              */
-            Condition[];
+            ConditionStatement[];
         }
         /**
          * example:
@@ -934,7 +934,7 @@ declare namespace Components {
          *   ]
          * }
          */
-        export interface Condition {
+        export interface ConditionStatement {
             /**
              * example:
              * 1c8d3d9c-6d4c-4a83-aa22-aa0d630cbc2d

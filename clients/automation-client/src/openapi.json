@@ -1802,7 +1802,7 @@
           }
         }
       },
-      "Condition": {
+      "ConditionStatement": {
         "type": "object",
         "properties": {
           "id": {
@@ -1913,10 +1913,10 @@
             "type": "boolean",
             "description": "Result of the condition evaluation"
           },
-          "conditions": {
+          "statements": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Condition"
+              "$ref": "#/components/schemas/ConditionStatement"
             }
           }
         }
