@@ -383,9 +383,23 @@ declare namespace Components {
              */
             preferred_language?: string;
             /**
+             * User's start page after login
+             */
+            custom_start_page?: string | null; // ^/app/*
+            /**
              * This field is used to override the release channel for the user.
              */
-            override_release_channel?: "canary" | "rc" | "stable";
+            override_release_channel?: "canary" | "rc" | "stable" | null;
+            /**
+             * User's feature preferences
+             * example:
+             * {
+             *   "feature_name": true
+             * }
+             */
+            feature_preferences?: {
+                [name: string]: any;
+            } | null;
             /**
              * User's custom profile image
              * example:
