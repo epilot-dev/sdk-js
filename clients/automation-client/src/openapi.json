@@ -1859,6 +1859,9 @@
                   "radio",
                   "relation_user"
                 ]
+              },
+              "attributeRepeatable": {
+                "type": "boolean"
               }
             }
           },

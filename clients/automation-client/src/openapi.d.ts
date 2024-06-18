@@ -947,6 +947,7 @@ declare namespace Components {
                 schema?: string;
                 attribute?: string;
                 attributeType?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tag" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user";
+                attributeRepeatable?: boolean;
             };
             operation?: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
             values?: string[];
