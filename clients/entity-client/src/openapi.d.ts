@@ -6375,6 +6375,16 @@ declare namespace Components {
              * true
              */
             enabled?: boolean;
+            /**
+             * Position of the taxonomy
+             * example:
+             * 10
+             */
+            order?: number;
+            /**
+             * List of locations where the taxonomy is enabled to be used. If empty, it's enabled for all locations.
+             */
+            enabled_locations?: ("email-templates" | "emails" | "contacts" | "orders" | "contracts" | "meters" | "accounts" | "products" | "prices" | "opportunities" | "all_entities")[];
         }
         export interface TaxonomyClassification {
             id?: /**
