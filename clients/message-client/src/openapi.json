@@ -1537,10 +1537,15 @@
             ],
             "nullable": true
           },
-          "topic": {
-            "type": "string",
-            "description": "Topic of the GenAI Summary",
-            "example": "Product enquiry",
+          "topics": {
+            "type": "array",
+            "description": "Topics of the email thread",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Product enquiry"
+            ],
             "nullable": true
           },
           "next_steps": {

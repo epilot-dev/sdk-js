@@ -147,11 +147,13 @@ declare namespace Components {
              */
             summary?: string[] | null;
             /**
-             * Topic of the GenAI Summary
+             * Topics of the email thread
              * example:
-             * Product enquiry
+             * [
+             *   "Product enquiry"
+             * ]
              */
-            topic?: string | null;
+            topics?: string[] | null;
             /**
              * Recommended next steps
              * example:
@@ -920,11 +922,13 @@ declare namespace Paths {
                      */
                     summary?: string[] | null;
                     /**
-                     * Topic of the GenAI Summary
+                     * Topics of the email thread
                      * example:
-                     * Product enquiry
+                     * [
+                     *   "Product enquiry"
+                     * ]
                      */
-                    topic?: string | null;
+                    topics?: string[] | null;
                     /**
                      * Recommended next steps
                      * example:
@@ -1359,11 +1363,13 @@ declare namespace Paths {
              */
             summary?: string[] | null;
             /**
-             * Topic of the GenAI Summary
+             * Topics of the email thread
              * example:
-             * Product enquiry
+             * [
+             *   "Product enquiry"
+             * ]
              */
-            topic?: string | null;
+            topics?: string[] | null;
             /**
              * Recommended next steps
              * example:
@@ -1458,11 +1464,13 @@ declare namespace Paths {
                      */
                     summary?: string[] | null;
                     /**
-                     * Topic of the GenAI Summary
+                     * Topics of the email thread
                      * example:
-                     * Product enquiry
+                     * [
+                     *   "Product enquiry"
+                     * ]
                      */
-                    topic?: string | null;
+                    topics?: string[] | null;
                     /**
                      * Recommended next steps
                      * example:
