@@ -430,6 +430,66 @@
         }
       }
     },
+    "/v2/portal/external-links": {
+      "get": {
+        "operationId": "getExternalLinks",
+        "summary": "getExternalLinks",
+        "description": "Retrieves the portal configuration external links.",
+        "tags": [
+          "ECP Admin",
+          "ECP"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          },
+          {
+            "in": "query",
+            "name": "contactId",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "description": "Contact ID of the user"
+          }
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal config links retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JourneyActions"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/public/portal/config": {
       "get": {
         "operationId": "getPublicPortalConfig",
@@ -1881,6 +1941,73 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/order/{id}/acceptance": {
+      "post": {
+        "operationId": "postOrderAcceptance",
+        "summary": "postOrderAcceptance",
+        "description": "Accept/decline an offer by id",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of order"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptanceDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order was accepted/declined successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -4109,6 +4236,16 @@
           }
         }
       },
+      "Conflict": {
+        "description": "The request conflicts with the current state of the target resource.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
       "ContractAssignmentConflict": {
         "description": "Contract was found but is not assignable in its current state.",
         "content": {
@@ -4779,6 +4916,9 @@
                 }
               }
             }
+          },
+          "allowed_file_extensions": {
+            "$ref": "#/components/schemas/AllowedFileExtensions"
           }
         }
       },
@@ -4807,9 +4947,6 @@
               },
               "origin": {
                 "$ref": "#/components/schemas/Origin"
-              },
-              "allowed_file_extensions": {
-                "$ref": "#/components/schemas/AllowedFileExtensions"
               },
               "org_settings": {
                 "type": "object",
@@ -6576,6 +6713,23 @@
             "$ref": "#/components/schemas/EntitySlug"
           }
         }
+      },
+      "AcceptanceDecision": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "accept",
+              "decline"
+            ],
+            "description": "Acceptance decision"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "additionalProperties": false
       },
       "TriggerPortalFlow": {
         "type": "object",

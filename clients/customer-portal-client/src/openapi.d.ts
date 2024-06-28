@@ -9,6 +9,7 @@ import type {
 
 declare namespace Components {
     namespace Responses {
+        export type Conflict = Schemas.ErrorResp;
         export interface ContractAssignmentConflict {
             /**
              * Error message
@@ -24,6 +25,12 @@ declare namespace Components {
         export type Unauthorized = Schemas.ErrorResp;
     }
     namespace Schemas {
+        export interface AcceptanceDecision {
+            /**
+             * Acceptance decision
+             */
+            decision: "accept" | "decline";
+        }
         export interface ActionLabel {
             en?: string | null;
             de?: string | null;
@@ -1846,6 +1853,7 @@ declare namespace Components {
                  */
                 number_of_days_before_restriction?: number;
             }[];
+            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
              * ID of the organization
              * example:
@@ -1865,7 +1873,6 @@ declare namespace Components {
              */
             org_name?: string;
             origin?: /* Origin of the portal */ Origin;
-            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
              * Organization settings
              */
@@ -2477,6 +2484,7 @@ declare namespace Components {
                  */
                 number_of_days_before_restriction?: number;
             }[];
+            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -3395,6 +3403,27 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetExternalLinks {
+        namespace Parameters {
+            export type ContactId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            origin?: Parameters.Origin;
+            contactId?: Parameters.ContactId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyActions[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetFileById {
         namespace Parameters {
             export type Id = /**
@@ -3955,6 +3984,30 @@ declare namespace Paths {
                  */
                 login_as_token?: string;
             }
+        }
+    }
+    namespace PostOrderAcceptance {
+        namespace Parameters {
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.AcceptanceDecision;
+        namespace Responses {
+            export interface $200 {
+                data?: /* The order entity */ Components.Schemas.Order;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace ReplaceECPTemplateVariables {
@@ -4543,6 +4596,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortal.Responses.$204>
   /**
+   * getExternalLinks - getExternalLinks
+   * 
+   * Retrieves the portal configuration external links.
+   */
+  'getExternalLinks'(
+    parameters?: Parameters<Paths.GetExternalLinks.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
+  /**
    * getPublicPortalConfig - getPublicPortalConfig
    * 
    * Retrieves the public portal configuration.
@@ -4802,6 +4865,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllOrders.Responses.$200>
+  /**
+   * postOrderAcceptance - postOrderAcceptance
+   * 
+   * Accept/decline an offer by id
+   */
+  'postOrderAcceptance'(
+    parameters?: Parameters<Paths.PostOrderAcceptance.PathParameters> | null,
+    data?: Paths.PostOrderAcceptance.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PostOrderAcceptance.Responses.$200>
   /**
    * getOrder - getOrder
    * 
@@ -5225,6 +5298,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortal.Responses.$204>
   }
+  ['/v2/portal/external-links']: {
+    /**
+     * getExternalLinks - getExternalLinks
+     * 
+     * Retrieves the portal configuration external links.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetExternalLinks.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
+  }
   ['/v2/portal/public/portal/config']: {
     /**
      * getPublicPortalConfig - getPublicPortalConfig
@@ -5526,6 +5611,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllOrders.Responses.$200>
+  }
+  ['/v2/portal/order/{id}/acceptance']: {
+    /**
+     * postOrderAcceptance - postOrderAcceptance
+     * 
+     * Accept/decline an offer by id
+     */
+    'post'(
+      parameters?: Parameters<Paths.PostOrderAcceptance.PathParameters> | null,
+      data?: Paths.PostOrderAcceptance.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PostOrderAcceptance.Responses.$200>
   }
   ['/v2/portal/order/{id}']: {
     /**
