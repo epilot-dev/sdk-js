@@ -1169,7 +1169,7 @@ declare namespace Components {
             /**
              * The concession type for gas
              */
-            concession_type?: "tarif_ka" | "sonder_ka";
+            concession_type?: "standard" | "special";
         }
         /**
          * The compute price payload for power

@@ -2834,8 +2834,8 @@
                 "description": "The concession type for gas",
                 "type": "string",
                 "enum": [
-                  "tarif_ka",
-                  "sonder_ka"
+                  "standard",
+                  "special"
                 ]
               }
             },
