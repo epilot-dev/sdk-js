@@ -1166,10 +1166,7 @@ declare namespace Components {
              * The type of energy to compute the price
              */
             type: "gas";
-            /**
-             * The concession type for gas
-             */
-            concession_type?: "standard" | "special";
+            concession_type?: /* The concession type for gas */ GasConcessionType;
         }
         /**
          * The compute price payload for power
@@ -1469,6 +1466,10 @@ declare namespace Components {
             _title?: string;
             $relation?: EntityRelation;
         }
+        /**
+         * The concession type for gas
+         */
+        export type GasConcessionType = "standard" | "special";
         export type IntegrationCredentialsResult = /* The basic auth credentials */ BasicAuthCredentials;
         export type IntegrationId = "enet" | "getag";
         /**
@@ -2127,6 +2128,7 @@ declare namespace Components {
             type?: TypeGetAg;
             tariff_type?: TariffTypeGetAg;
             consumption_type?: ConsumptionTypeGetAg;
+            concession_type?: /* The concession type for gas */ GasConcessionType;
             /**
              * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
              *

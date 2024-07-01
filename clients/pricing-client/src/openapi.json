@@ -2831,12 +2831,7 @@
                 ]
               },
               "concession_type": {
-                "description": "The concession type for gas",
-                "type": "string",
-                "enum": [
-                  "standard",
-                  "special"
-                ]
+                "$ref": "#/components/schemas/GasConcessionType"
               }
             },
             "description": "The compute price payload for gas"
@@ -2888,6 +2883,14 @@
           {
             "$ref": "#/components/schemas/ComputePriceParamsGas"
           }
+        ]
+      },
+      "GasConcessionType": {
+        "description": "The concession type for gas",
+        "type": "string",
+        "enum": [
+          "standard",
+          "special"
         ]
       },
       "ComputedPriceBreakdown": {
@@ -4661,6 +4664,13 @@
           },
           "consumption_type": {
             "$ref": "#/components/schemas/ConsumptionTypeGetAg"
+          },
+          "concession_type": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GasConcessionType"
+              }
+            ]
           },
           "markup_tiers": {
             "description": "Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.\n",
