@@ -2742,8 +2742,7 @@
       "SaveIntegrationCredentialsParams": {
         "$ref": "#/components/schemas/BasicAuthCredentials"
       },
-      "ComputePriceParams": {
-        "description": "The compute price payload",
+      "ComputePriceParamsBase": {
         "type": "object",
         "properties": {
           "postal_code": {
@@ -2777,14 +2776,6 @@
             "description": "The association id",
             "type": "string"
           },
-          "type": {
-            "description": "The product type",
-            "type": "string",
-            "enum": [
-              "power",
-              "gas"
-            ]
-          },
           "billing_period": {
             "description": "The billing period (defaults to monthly)",
             "type": "string",
@@ -2798,11 +2789,64 @@
             ],
             "default": "monthly"
           }
-        },
-        "required": [
-          "type",
-          "postal_code",
-          "consumption"
+        }
+      },
+      "ComputePriceParamsPower": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of energy to compute the price",
+                "enum": [
+                  "power"
+                ]
+              }
+            },
+            "description": "The compute price payload for power",
+            "required": [
+              "type",
+              "postal_code",
+              "consumption"
+            ]
+          }
+        ]
+      },
+      "ComputePriceParamsGas": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of energy to compute the price",
+                "enum": [
+                  "gas"
+                ]
+              },
+              "concession_type": {
+                "description": "The concession type for gas",
+                "type": "string",
+                "enum": [
+                  "tarif_ka",
+                  "sonder_ka"
+                ]
+              }
+            },
+            "description": "The compute price payload for gas",
+            "required": [
+              "type",
+              "postal_code",
+              "consumption"
+            ]
+          }
         ]
       },
       "SignatureMeta": {
@@ -2839,6 +2883,17 @@
         "required": [
           "amount",
           "amount_decimal"
+        ]
+      },
+      "ComputePriceParams": {
+        "description": "The compute price payload",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsPower"
+          },
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsGas"
+          }
         ]
       },
       "ComputedPriceBreakdown": {
