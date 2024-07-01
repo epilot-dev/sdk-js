@@ -2789,7 +2789,11 @@
             ],
             "default": "monthly"
           }
-        }
+        },
+        "required": [
+          "type",
+          "postal_code"
+        ]
       },
       "ComputePriceParamsPower": {
         "allOf": [
@@ -2807,12 +2811,7 @@
                 ]
               }
             },
-            "description": "The compute price payload for power",
-            "required": [
-              "type",
-              "postal_code",
-              "consumption"
-            ]
+            "description": "The compute price payload for power"
           }
         ]
       },
@@ -2840,12 +2839,7 @@
                 ]
               }
             },
-            "description": "The compute price payload for gas",
-            "required": [
-              "type",
-              "postal_code",
-              "consumption"
-            ]
+            "description": "The compute price payload for gas"
           }
         ]
       },

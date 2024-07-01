@@ -1104,7 +1104,7 @@ declare namespace Components {
             /**
              * The postal code to search for providers
              */
-            postal_code?: string;
+            postal_code: string;
             /**
              * The consumption type
              */
@@ -1145,7 +1145,7 @@ declare namespace Components {
             /**
              * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
              */
-            consumption: number;
+            consumption?: number;
             /**
              * The monthly HT consumption to compute the price in kWh
              */
@@ -1186,7 +1186,7 @@ declare namespace Components {
             /**
              * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
              */
-            consumption: number;
+            consumption?: number;
             /**
              * The monthly HT consumption to compute the price in kWh
              */
