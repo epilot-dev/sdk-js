@@ -252,7 +252,9 @@
             "required": true
           }
         ]
-      },
+      }
+    },
+    "/v1/files/public/links/{id}": {
       "delete": {
         "operationId": "revokePublicLink",
         "parameters": [
@@ -262,6 +264,32 @@
             "required": true
           }
         ]
+      }
+    },
+    "/v2/files/upload": {
+      "post": {
+        "operationId": "uploadFileV2",
+        "parameters": [
+          {
+            "name": "file_entity_id",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v2/files": {
+      "post": {
+        "operationId": "saveFileV2",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
       }
     }
   },
