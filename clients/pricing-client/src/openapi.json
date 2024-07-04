@@ -2809,6 +2809,9 @@
                 "enum": [
                   "power"
                 ]
+              },
+              "meter_type": {
+                "$ref": "#/components/schemas/PowerMeterType"
               }
             },
             "description": "The compute price payload for power"
@@ -2891,6 +2894,15 @@
         "enum": [
           "standard",
           "special"
+        ]
+      },
+      "PowerMeterType": {
+        "type": "string",
+        "description": "The meter type for power",
+        "enum": [
+          "classic",
+          "smart",
+          "digital"
         ]
       },
       "ComputedPriceBreakdown": {
@@ -4669,6 +4681,13 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/GasConcessionType"
+              }
+            ]
+          },
+          "meter_type": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PowerMeterType"
               }
             ]
           },

@@ -1204,6 +1204,7 @@ declare namespace Components {
              * The type of energy to compute the price
              */
             type: "power";
+            meter_type?: /* The meter type for power */ PowerMeterType;
         }
         export interface ComputePriceResult {
             /**
@@ -1922,6 +1923,10 @@ declare namespace Components {
             };
         }
         /**
+         * The meter type for power
+         */
+        export type PowerMeterType = "classic" | "smart" | "digital";
+        /**
          * The price entity schema for simple pricing
          * example:
          * {
@@ -2129,6 +2134,7 @@ declare namespace Components {
             tariff_type?: TariffTypeGetAg;
             consumption_type?: ConsumptionTypeGetAg;
             concession_type?: /* The concession type for gas */ GasConcessionType;
+            meter_type?: /* The meter type for power */ PowerMeterType;
             /**
              * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
              *
