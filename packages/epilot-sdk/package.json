@@ -44,7 +44,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@epilot/address-suggestions-client": "^0.2.0",
+    "@epilot/address-suggestions-client": "^1.0.0",
     "@epilot/auth": "^0.6.0",
     "@epilot/automation-client": "^2.8.0",
     "@epilot/billing-client": "^0.3.0",
@@ -60,7 +60,7 @@
     "@epilot/notification-client": "^0.5.0",
     "@epilot/organization-client": "^0.10.0",
     "@epilot/partner-directory-client": "^0.7.0",
-    "@epilot/permissions-client": "^0.12.0",
+    "@epilot/permissions-client": "^0.13.0",
     "@epilot/pricing-client": "^3.17.0",
     "@epilot/submission-client": "^1.5.0",
     "@epilot/template-variables-client": "^1.12.0",

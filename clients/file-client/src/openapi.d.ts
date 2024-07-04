@@ -137,6 +137,38 @@ declare namespace Components {
             EntitySlug;
             _tags?: string[];
         }
+        export interface FileUpload {
+            /**
+             * example:
+             * {
+             *   "bucket": "epilot-files-prod",
+             *   "key": "123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+             * }
+             */
+            s3ref?: {
+                /**
+                 * example:
+                 * epilot-files-prod
+                 */
+                bucket: string;
+                /**
+                 * example:
+                 * 123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf
+                 */
+                key: string;
+            };
+            /**
+             * example:
+             * https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123
+             */
+            upload_url?: string; // url
+            /**
+             * Returned only if file is permanent i.e. file_entity_id is passed
+             * example:
+             * https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf
+             */
+            public_url?: string; // url
+        }
         export interface PublicLink {
             /**
              * ID of the public link
@@ -191,6 +223,37 @@ declare namespace Components {
             custom_download_url: string; // uri
         }
         export type SaveFilePayload = SaveS3FilePayload | SaveCustomFilePayload;
+        export interface SaveFilePayloadV2 {
+            [name: string]: any;
+            s3ref: {
+                /**
+                 * example:
+                 * epilot-files-prod
+                 */
+                bucket: string;
+                /**
+                 * example:
+                 * 123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf
+                 */
+                key: string;
+            };
+            /**
+             * example:
+             * document.pdf
+             */
+            filename: string;
+            /**
+             * if passed, adds a new version to existing file entity
+             */
+            file_entity_id?: string;
+            document_type?: "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown";
+            _tags?: string[];
+            access_control?: "private" | "public-read";
+            /**
+             * Custom external download url used for the file
+             */
+            custom_download_url?: string; // uri
+        }
         export interface SaveS3FilePayload {
             [name: string]: any;
             /**
@@ -223,6 +286,16 @@ declare namespace Components {
              * application/pdf
              */
             mime_type?: string;
+            /**
+             * Allows passing in custom metadata for the file, expects key-value pairs of string type
+             * example:
+             * {
+             *   "color": "blue"
+             * }
+             */
+            metadata?: {
+                [name: string]: string;
+            };
         }
         export interface VerifyCustomDownloadUrlPayload {
             /**
@@ -489,6 +562,12 @@ declare namespace Paths {
             export type $201 = Components.Schemas.FileEntity;
         }
     }
+    namespace SaveFileV2 {
+        export type RequestBody = Components.Schemas.SaveFilePayloadV2;
+        namespace Responses {
+            export type $201 = Components.Schemas.FileEntity;
+        }
+    }
     namespace UploadFile {
         namespace Parameters {
             export type FileEntityId = /**
@@ -565,6 +644,22 @@ declare namespace Paths {
                  */
                 upload_url?: string; // url
             }
+        }
+    }
+    namespace UploadFileV2 {
+        namespace Parameters {
+            export type FileEntityId = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+        }
+        export interface QueryParameters {
+            file_entity_id?: Parameters.FileEntityId;
+        }
+        export type RequestBody = Components.Schemas.UploadFilePayload;
+        namespace Responses {
+            export type $201 = Components.Schemas.FileUpload;
         }
     }
     namespace VerifyCustomDownloadUrl {
@@ -773,6 +868,34 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RevokePublicLink.Responses.$204>
+  /**
+   * uploadFileV2 - uploadFileV2
+   * 
+   * Create pre-signed S3 URL to upload a file to keep temporarily (one week). - v2
+   * 
+   * Use the createFile operation to store file file permanently.
+   * 
+   */
+  'uploadFileV2'(
+    parameters?: Parameters<Paths.UploadFileV2.QueryParameters> | null,
+    data?: Paths.UploadFileV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UploadFileV2.Responses.$201>
+  /**
+   * saveFileV2 - saveFileV2
+   * 
+   * Create / Update a permanent File entity
+   * 
+   * Makes file object permanent
+   * 
+   * Saves metadata to file entity
+   * 
+   */
+  'saveFileV2'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SaveFileV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SaveFileV2.Responses.$201>
 }
 
 export interface PathsDictionary {
@@ -988,6 +1111,8 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
+  }
+  ['/v1/files/public/links/{id}']: {
     /**
      * revokePublicLink - revokePublicLink
      * 
@@ -998,6 +1123,38 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RevokePublicLink.Responses.$204>
+  }
+  ['/v2/files/upload']: {
+    /**
+     * uploadFileV2 - uploadFileV2
+     * 
+     * Create pre-signed S3 URL to upload a file to keep temporarily (one week). - v2
+     * 
+     * Use the createFile operation to store file file permanently.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.UploadFileV2.QueryParameters> | null,
+      data?: Paths.UploadFileV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UploadFileV2.Responses.$201>
+  }
+  ['/v2/files']: {
+    /**
+     * saveFileV2 - saveFileV2
+     * 
+     * Create / Update a permanent File entity
+     * 
+     * Makes file object permanent
+     * 
+     * Saves metadata to file entity
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SaveFileV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SaveFileV2.Responses.$201>
   }
 }
 
