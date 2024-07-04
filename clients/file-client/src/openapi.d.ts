@@ -96,6 +96,33 @@ declare namespace Components {
          * ef7d985c-2385-44f4-9c71-ae06a52264f8
          */
         export type FileEntityId = string;
+        export interface FileItem {
+            /**
+             * example:
+             * epilot-files-prod
+             */
+            bucket: string;
+            /**
+             * example:
+             * 123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf
+             */
+            key: string;
+            /**
+             * example:
+             * document.pdf
+             */
+            filename?: string;
+            /**
+             * example:
+             * 1234
+             */
+            size_bytes?: number;
+            /**
+             * example:
+             * image/jpeg
+             */
+            mime_type?: string;
+        }
         export interface FileRelationItem {
             entity_id: /**
              * example:

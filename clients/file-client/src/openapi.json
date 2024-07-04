@@ -1351,6 +1351,30 @@
           "key"
         ]
       },
+      "FileItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string",
+                "example": "document.pdf"
+              },
+              "size_bytes": {
+                "type": "integer",
+                "example": 1234
+              },
+              "mime_type": {
+                "type": "string",
+                "example": "image/jpeg"
+              }
+            }
+          }
+        ]
+      },
       "FileRelationItem": {
         "type": "object",
         "properties": {
@@ -1393,9 +1417,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://file.sls.epilot.io"
-    },
     {
       "url": "https://file.sls.epilot.io"
     }
