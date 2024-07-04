@@ -44,7 +44,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@epilot/address-suggestions-client": "^0.2.0",
+    "@epilot/address-suggestions-client": "^1.0.0",
     "@epilot/auth": "^0.6.0",
     "@epilot/automation-client": "^2.8.0",
     "@epilot/billing-client": "^0.3.0",
