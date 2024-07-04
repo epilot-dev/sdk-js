@@ -809,6 +809,13 @@
             "type": "string",
             "example": "de"
           },
+          "custom_start_page": {
+            "description": "User's start page after login",
+            "type": "string",
+            "pattern": "^/app/*",
+            "default": "/app/dashboard",
+            "nullable": true
+          },
           "override_release_channel": {
             "description": "This field is used to override the release channel for the user.",
             "type": "string",
@@ -816,8 +823,18 @@
             "enum": [
               "canary",
               "rc",
-              "stable"
+              "stable",
+              null
             ]
+          },
+          "feature_preferences": {
+            "description": "User's feature preferences",
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "example": {
+              "feature_name": true
+            }
           },
           "image_uri": {
             "type": "object",
