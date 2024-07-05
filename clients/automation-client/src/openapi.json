@@ -424,7 +424,14 @@
         },
         "responses": {
           "200": {
-            "description": "execution resumed with success"
+            "description": "execution resumed with success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumeResp"
+                }
+              }
+            }
           },
           "400": {
             "description": "execution could not be resumed"
@@ -773,7 +780,8 @@
           "BAD_CONFIG",
           "INTERNAL_ERROR",
           "TRIGGER_WEBHOOK_ERROR",
-          "TEMPLATE_ERROR"
+          "TEMPLATE_ERROR",
+          "INVALID_PAYLOAD"
         ]
       },
       "ErrorDetail": {
@@ -2859,6 +2867,21 @@
         },
         "required": [
           "resume_token"
+        ]
+      },
+      "ResumeResp": {
+        "type": "object",
+        "properties": {
+          "execution": {
+            "$ref": "#/components/schemas/AutomationExecution"
+          },
+          "resumedAction": {
+            "$ref": "#/components/schemas/AnyAction"
+          }
+        },
+        "required": [
+          "execution",
+          "resumedAction"
         ]
       }
     }
