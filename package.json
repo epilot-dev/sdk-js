@@ -1,7 +1,7 @@
 {
   "name": "@epilot/sdk-monorepo",
   "private": true,
-  "version": "1.0.1",
+  "version": "4.6.1",
   "description": "Javascript SDK monorepo for epilot",
   "scripts": {
     "clean": "lerna clean",

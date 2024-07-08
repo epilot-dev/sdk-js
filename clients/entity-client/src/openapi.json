@@ -5890,6 +5890,31 @@
             "type": "boolean",
             "description": "Whether the taxonomy is enabled or not",
             "example": true
+          },
+          "order": {
+            "type": "number",
+            "description": "Position of the taxonomy",
+            "example": 10
+          },
+          "enabled_locations": {
+            "description": "List of locations where the taxonomy is enabled to be used. If empty, it's enabled for all locations.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "email-templates",
+                "emails",
+                "contacts",
+                "orders",
+                "contracts",
+                "meters",
+                "accounts",
+                "products",
+                "prices",
+                "opportunities",
+                "all_entities"
+              ]
+            }
           }
         }
       },
@@ -6823,6 +6848,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    },
     {
       "url": "https://entity.sls.epilot.io"
     }

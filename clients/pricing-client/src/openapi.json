@@ -2742,8 +2742,7 @@
       "SaveIntegrationCredentialsParams": {
         "$ref": "#/components/schemas/BasicAuthCredentials"
       },
-      "ComputePriceParams": {
-        "description": "The compute price payload",
+      "ComputePriceParamsBase": {
         "type": "object",
         "properties": {
           "postal_code": {
@@ -2777,14 +2776,6 @@
             "description": "The association id",
             "type": "string"
           },
-          "type": {
-            "description": "The product type",
-            "type": "string",
-            "enum": [
-              "power",
-              "gas"
-            ]
-          },
           "billing_period": {
             "description": "The billing period (defaults to monthly)",
             "type": "string",
@@ -2801,8 +2792,53 @@
         },
         "required": [
           "type",
-          "postal_code",
-          "consumption"
+          "postal_code"
+        ]
+      },
+      "ComputePriceParamsPower": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of energy to compute the price",
+                "enum": [
+                  "power"
+                ]
+              },
+              "meter_type": {
+                "$ref": "#/components/schemas/PowerMeterType"
+              }
+            },
+            "description": "The compute price payload for power"
+          }
+        ]
+      },
+      "ComputePriceParamsGas": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of energy to compute the price",
+                "enum": [
+                  "gas"
+                ]
+              },
+              "concession_type": {
+                "$ref": "#/components/schemas/GasConcessionType"
+              }
+            },
+            "description": "The compute price payload for gas"
+          }
         ]
       },
       "SignatureMeta": {
@@ -2839,6 +2875,34 @@
         "required": [
           "amount",
           "amount_decimal"
+        ]
+      },
+      "ComputePriceParams": {
+        "description": "The compute price payload",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsPower"
+          },
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsGas"
+          }
+        ]
+      },
+      "GasConcessionType": {
+        "description": "The concession type for gas",
+        "type": "string",
+        "enum": [
+          "standard",
+          "special"
+        ]
+      },
+      "PowerMeterType": {
+        "type": "string",
+        "description": "The meter type for power",
+        "enum": [
+          "classic",
+          "smart",
+          "digital"
         ]
       },
       "ComputedPriceBreakdown": {
@@ -4612,6 +4676,20 @@
           },
           "consumption_type": {
             "$ref": "#/components/schemas/ConsumptionTypeGetAg"
+          },
+          "concession_type": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GasConcessionType"
+              }
+            ]
+          },
+          "meter_type": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PowerMeterType"
+              }
+            ]
           },
           "markup_tiers": {
             "description": "Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.\n",

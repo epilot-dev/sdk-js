@@ -1099,7 +1099,8 @@ declare namespace Components {
         /**
          * The compute price payload
          */
-        export interface ComputePriceParams {
+        export type ComputePriceParams = /* The compute price payload */ /* The compute price payload for power */ ComputePriceParamsPower | /* The compute price payload for gas */ ComputePriceParamsGas;
+        export interface ComputePriceParamsBase {
             /**
              * The postal code to search for providers
              */
@@ -1111,7 +1112,7 @@ declare namespace Components {
             /**
              * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
              */
-            consumption: number;
+            consumption?: number;
             /**
              * The monthly HT consumption to compute the price in kWh
              */
@@ -1125,13 +1126,85 @@ declare namespace Components {
              */
             association_id?: string;
             /**
-             * The product type
+             * The billing period (defaults to monthly)
              */
-            type: "power" | "gas";
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+        }
+        /**
+         * The compute price payload for gas
+         */
+        export interface ComputePriceParamsGas {
+            /**
+             * The postal code to search for providers
+             */
+            postal_code: string;
+            /**
+             * The consumption type
+             */
+            consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
+            /**
+             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
+             */
+            consumption?: number;
+            /**
+             * The monthly HT consumption to compute the price in kWh
+             */
+            consumption_HT?: number;
+            /**
+             * The monthly NT consumption to compute the price in kWh
+             */
+            consumption_NT?: number;
+            /**
+             * The association id
+             */
+            association_id?: string;
             /**
              * The billing period (defaults to monthly)
              */
             billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            /**
+             * The type of energy to compute the price
+             */
+            type: "gas";
+            concession_type?: /* The concession type for gas */ GasConcessionType;
+        }
+        /**
+         * The compute price payload for power
+         */
+        export interface ComputePriceParamsPower {
+            /**
+             * The postal code to search for providers
+             */
+            postal_code: string;
+            /**
+             * The consumption type
+             */
+            consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
+            /**
+             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
+             */
+            consumption?: number;
+            /**
+             * The monthly HT consumption to compute the price in kWh
+             */
+            consumption_HT?: number;
+            /**
+             * The monthly NT consumption to compute the price in kWh
+             */
+            consumption_NT?: number;
+            /**
+             * The association id
+             */
+            association_id?: string;
+            /**
+             * The billing period (defaults to monthly)
+             */
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            /**
+             * The type of energy to compute the price
+             */
+            type: "power";
+            meter_type?: /* The meter type for power */ PowerMeterType;
         }
         export interface ComputePriceResult {
             /**
@@ -1394,6 +1467,10 @@ declare namespace Components {
             _title?: string;
             $relation?: EntityRelation;
         }
+        /**
+         * The concession type for gas
+         */
+        export type GasConcessionType = "standard" | "special";
         export type IntegrationCredentialsResult = /* The basic auth credentials */ BasicAuthCredentials;
         export type IntegrationId = "enet" | "getag";
         /**
@@ -1846,6 +1923,10 @@ declare namespace Components {
             };
         }
         /**
+         * The meter type for power
+         */
+        export type PowerMeterType = "classic" | "smart" | "digital";
+        /**
          * The price entity schema for simple pricing
          * example:
          * {
@@ -2052,6 +2133,8 @@ declare namespace Components {
             type?: TypeGetAg;
             tariff_type?: TariffTypeGetAg;
             consumption_type?: ConsumptionTypeGetAg;
+            concession_type?: /* The concession type for gas */ GasConcessionType;
+            meter_type?: /* The meter type for power */ PowerMeterType;
             /**
              * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
              *

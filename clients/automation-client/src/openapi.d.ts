@@ -947,6 +947,7 @@ declare namespace Components {
                 schema?: string;
                 attribute?: string;
                 attributeType?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tag" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user";
+                attributeRepeatable?: boolean;
             };
             operation?: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
             values?: string[];
@@ -1338,7 +1339,7 @@ declare namespace Components {
         export interface EqualsIgnoreCaseCondition {
             "equals-ignore-case"?: string;
         }
-        export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR" | "TEMPLATE_ERROR";
+        export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR" | "TEMPLATE_ERROR" | "INVALID_PAYLOAD";
         export interface ErrorDetail {
             explanation: string;
             context?: string;
@@ -1797,6 +1798,10 @@ declare namespace Components {
              * eyJraWQiOiJrZXkifQ==
              */
             ResumeToken;
+        }
+        export interface ResumeResp {
+            execution: AutomationExecution;
+            resumedAction: AnyAction;
         }
         /**
          * A unique token to resume a paused automation execution
@@ -2512,8 +2517,7 @@ declare namespace Paths {
     namespace ResumeExecutionWithToken {
         export type RequestBody = Components.Schemas.ResumeReq;
         namespace Responses {
-            export interface $200 {
-            }
+            export type $200 = Components.Schemas.ResumeResp;
             export interface $400 {
             }
         }
