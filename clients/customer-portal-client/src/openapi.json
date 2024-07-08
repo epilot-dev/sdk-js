@@ -430,6 +430,66 @@
         }
       }
     },
+    "/v2/portal/external-links": {
+      "get": {
+        "operationId": "getExternalLinks",
+        "summary": "getExternalLinks",
+        "description": "Retrieves the portal configuration external links.",
+        "tags": [
+          "ECP Admin",
+          "ECP"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          },
+          {
+            "in": "query",
+            "name": "contactId",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "description": "Contact ID of the user"
+          }
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal config links retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JourneyActions"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/public/portal/config": {
       "get": {
         "operationId": "getPublicPortalConfig",
@@ -1562,10 +1622,40 @@
         }
       }
     },
-    "/v2/portal/user/confirm/{id}": {
+    "/v2/portal/user/confirm": {
       "get": {
         "operationId": "confirmUser",
         "summary": "confirmUser",
+        "description": "Confirm a portal user",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "confirmation_link_token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Confirmation link token"
+            }
+          }
+        ],
+        "responses": {
+          "301": {
+            "description": "User is confirmed and redirected to the portal successfully."
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/user/confirm/{id}": {
+      "get": {
+        "operationId": "confirmUserWithUserId",
+        "summary": "confirmUserWithUserId",
         "description": "Confirm a portal user",
         "tags": [
           "Public"
@@ -1881,6 +1971,73 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/order/{id}/acceptance": {
+      "post": {
+        "operationId": "postOrderAcceptance",
+        "summary": "postOrderAcceptance",
+        "description": "Accept/decline an offer by id",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of order"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptanceDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order was accepted/declined successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3109,14 +3266,17 @@
           {
             "in": "query",
             "name": "entities",
-            "description": "Comma-separated list of entities which the activity primarily concerns",
+            "description": "Comma-separated list of entities which the activity primarily concerns. Deprecated - ignored as the list of entities is automatically determined now.",
+            "deprecated": true,
             "style": "form",
             "explode": false,
             "schema": {
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/EntityId"
-              }
+              },
+              "minItems": 1,
+              "uniqueItems": true
             }
           }
         ],
@@ -3124,10 +3284,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Activity",
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "PortalUserResetPassword"
+                    ],
+                    "description": "One of supported activity types"
+                  }
+                },
                 "required": [
-                  "type",
-                  "message"
+                  "type"
                 ]
               }
             }
@@ -3444,6 +3612,8 @@
               "items": {
                 "$ref": "#/components/schemas/EntityId"
               },
+              "minItems": 1,
+              "uniqueItems": true,
               "example": [
                 "4910096f-000a-4504-bf5a-d3774ec3032a",
                 "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
@@ -3687,7 +3857,9 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/EntityId"
-              }
+              },
+              "minItems": 1,
+              "uniqueItems": true
             }
           },
           {
@@ -4109,6 +4281,16 @@
           }
         }
       },
+      "Conflict": {
+        "description": "The request conflicts with the current state of the target resource.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
       "ContractAssignmentConflict": {
         "description": "Contract was found but is not assignable in its current state.",
         "content": {
@@ -4206,6 +4388,11 @@
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the confirmation email template upon registration"
           },
+          "advancedMFA": {
+            "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
+            "description": "ID of the advanced MFA with login link and login code"
+          },
           "forgotPassword": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the email template for forgot password"
@@ -4225,6 +4412,10 @@
           "onDocUpload": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the email template for document upload"
+          },
+          "onWorkflowStepAssigned": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the email template for workflow step assignment"
           }
         }
       },
@@ -4249,6 +4440,8 @@
             "items": {
               "$ref": "#/components/schemas/EntityId"
             },
+            "minItems": 1,
+            "uniqueItems": true,
             "description": "Array of file entity IDs"
           }
         }
@@ -4548,6 +4741,19 @@
               "billing": {
                 "type": "boolean",
                 "description": "Billing feature flag"
+              },
+              "change_due_date": {
+                "type": "boolean",
+                "description": "Change due date feature flag"
+              }
+            }
+          },
+          "advanced_mfa": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Advanced MFA feature flag"
               }
             }
           },
@@ -4779,6 +4985,9 @@
                 }
               }
             }
+          },
+          "allowed_file_extensions": {
+            "$ref": "#/components/schemas/AllowedFileExtensions"
           }
         }
       },
@@ -4807,9 +5016,6 @@
               },
               "origin": {
                 "$ref": "#/components/schemas/Origin"
-              },
-              "allowed_file_extensions": {
-                "$ref": "#/components/schemas/AllowedFileExtensions"
               },
               "org_settings": {
                 "type": "object",
@@ -6576,6 +6782,23 @@
             "$ref": "#/components/schemas/EntitySlug"
           }
         }
+      },
+      "AcceptanceDecision": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "accept",
+              "decline"
+            ],
+            "description": "Acceptance decision"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "additionalProperties": false
       },
       "TriggerPortalFlow": {
         "type": "object",

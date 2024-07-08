@@ -109,6 +109,23 @@
         ]
       }
     },
+    "/v2/portal/external-links": {
+      "get": {
+        "operationId": "getExternalLinks",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "contactId",
+            "required": false
+          }
+        ]
+      }
+    },
     "/v2/portal/public/portal/config": {
       "get": {
         "operationId": "getPublicPortalConfig",
@@ -322,9 +339,21 @@
         ]
       }
     },
-    "/v2/portal/user/confirm/{id}": {
+    "/v2/portal/user/confirm": {
       "get": {
         "operationId": "confirmUser",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "confirmation_link_token",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v2/portal/user/confirm/{id}": {
+      "get": {
+        "operationId": "confirmUserWithUserId",
         "parameters": [
           {
             "in": "query",
@@ -403,6 +432,23 @@
             "required": false
           }
         ]
+      }
+    },
+    "/v2/portal/order/{id}/acceptance": {
+      "post": {
+        "operationId": "postOrderAcceptance",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
       }
     },
     "/v2/portal/order/{id}": {
@@ -683,6 +729,7 @@
           {
             "in": "query",
             "name": "entities",
+            "deprecated": true,
             "style": "form",
             "explode": false
           }
@@ -916,6 +963,11 @@
         }
       },
       "ForbiddenByRule": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Conflict": {
         "content": {
           "application/json": {}
         }

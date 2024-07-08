@@ -9,6 +9,7 @@ import type {
 
 declare namespace Components {
     namespace Responses {
+        export type Conflict = Schemas.ErrorResp;
         export interface ContractAssignmentConflict {
             /**
              * Error message
@@ -24,6 +25,12 @@ declare namespace Components {
         export type Unauthorized = Schemas.ErrorResp;
     }
     namespace Schemas {
+        export interface AcceptanceDecision {
+            /**
+             * Acceptance decision
+             */
+            decision: "accept" | "decline";
+        }
         export interface ActionLabel {
             en?: string | null;
             de?: string | null;
@@ -773,12 +780,20 @@ declare namespace Components {
             /**
              * Array of file entity IDs
              */
-            file_entity_ids: /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            EntityId /* uuid */[];
+            file_entity_ids: [
+                /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */,
+                .../**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */[]
+            ];
         }
         export interface DocumentWidget {
             id: string;
@@ -804,6 +819,15 @@ declare namespace Components {
              * ID of the confirmation email template upon registration
              */
             confirmAccount?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * ID of the advanced MFA with login link and login code
+             */
+            advancedMFA?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -849,6 +873,15 @@ declare namespace Components {
              * ID of the email template for document upload
              */
             onDocUpload?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * ID of the email template for workflow step assignment
+             */
+            onWorkflowStepAssigned?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -1643,6 +1676,16 @@ declare namespace Components {
                  * Billing feature flag
                  */
                 billing?: boolean;
+                /**
+                 * Change due date feature flag
+                 */
+                change_due_date?: boolean;
+            };
+            advanced_mfa?: {
+                /**
+                 * Advanced MFA feature flag
+                 */
+                enabled?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -1846,6 +1889,7 @@ declare namespace Components {
                  */
                 number_of_days_before_restriction?: number;
             }[];
+            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
              * ID of the organization
              * example:
@@ -1865,7 +1909,6 @@ declare namespace Components {
              */
             org_name?: string;
             origin?: /* Origin of the portal */ Origin;
-            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
              * Organization settings
              */
@@ -2274,6 +2317,16 @@ declare namespace Components {
                  * Billing feature flag
                  */
                 billing?: boolean;
+                /**
+                 * Change due date feature flag
+                 */
+                change_due_date?: boolean;
+            };
+            advanced_mfa?: {
+                /**
+                 * Advanced MFA feature flag
+                 */
+                enabled?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -2477,6 +2530,7 @@ declare namespace Components {
                  */
                 number_of_days_before_restriction?: number;
             }[];
+            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -2738,6 +2792,22 @@ declare namespace Paths {
     }
     namespace ConfirmUser {
         namespace Parameters {
+            /**
+             * Confirmation link token
+             */
+            export type ConfirmationLinkToken = string;
+        }
+        export interface QueryParameters {
+            confirmation_link_token: /* Confirmation link token */ Parameters.ConfirmationLinkToken;
+        }
+        namespace Responses {
+            export interface $301 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ConfirmUserWithUserId {
+        namespace Parameters {
             export type Id = /**
              * Entity ID
              * example:
@@ -2770,17 +2840,30 @@ declare namespace Paths {
     }
     namespace CreateCustomEntityActivity {
         namespace Parameters {
-            export type Entities = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */[];
+            export type Entities = [
+                /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */,
+                .../**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */[]
+            ];
         }
         export interface QueryParameters {
             entities?: Parameters.Entities;
         }
-        export type RequestBody = Components.Schemas.Activity;
+        export interface RequestBody {
+            /**
+             * One of supported activity types
+             */
+            type: "PortalUserResetPassword";
+        }
         namespace Responses {
             export type $201 = Components.Schemas.ActivityItem;
             export type $401 = Components.Responses.Unauthorized;
@@ -2959,12 +3042,20 @@ declare namespace Paths {
              *   "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
              * ]
              */
-            export type EntityIds = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */[];
+            export type EntityIds = [
+                /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */,
+                .../**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */[]
+            ];
             /**
              * Initial offset to set for the search results
              * example:
@@ -3113,12 +3204,20 @@ declare namespace Paths {
              * List billing events before this date
              */
             export type DateBefore = string; // date-time
-            export type EntityId = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */[];
+            export type EntityId = [
+                /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */,
+                .../**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */[]
+            ];
             /**
              * Type of billing event to filter by
              */
@@ -3390,6 +3489,27 @@ declare namespace Paths {
                     type?: string;
                 }[];
             }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetExternalLinks {
+        namespace Parameters {
+            export type ContactId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            origin?: Parameters.Origin;
+            contactId?: Parameters.ContactId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyActions[];
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -3955,6 +4075,30 @@ declare namespace Paths {
                  */
                 login_as_token?: string;
             }
+        }
+    }
+    namespace PostOrderAcceptance {
+        namespace Parameters {
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.AcceptanceDecision;
+        namespace Responses {
+            export interface $200 {
+                data?: /* The order entity */ Components.Schemas.Order;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace ReplaceECPTemplateVariables {
@@ -4543,6 +4687,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortal.Responses.$204>
   /**
+   * getExternalLinks - getExternalLinks
+   * 
+   * Retrieves the portal configuration external links.
+   */
+  'getExternalLinks'(
+    parameters?: Parameters<Paths.GetExternalLinks.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
+  /**
    * getPublicPortalConfig - getPublicPortalConfig
    * 
    * Retrieves the public portal configuration.
@@ -4758,7 +4912,17 @@ export interface OperationMethods {
    * Confirm a portal user
    */
   'confirmUser'(
-    parameters?: Parameters<Paths.ConfirmUser.PathParameters & Paths.ConfirmUser.QueryParameters> | null,
+    parameters?: Parameters<Paths.ConfirmUser.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
+   * confirmUserWithUserId - confirmUserWithUserId
+   * 
+   * Confirm a portal user
+   */
+  'confirmUserWithUserId'(
+    parameters?: Parameters<Paths.ConfirmUserWithUserId.PathParameters & Paths.ConfirmUserWithUserId.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
@@ -4802,6 +4966,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllOrders.Responses.$200>
+  /**
+   * postOrderAcceptance - postOrderAcceptance
+   * 
+   * Accept/decline an offer by id
+   */
+  'postOrderAcceptance'(
+    parameters?: Parameters<Paths.PostOrderAcceptance.PathParameters> | null,
+    data?: Paths.PostOrderAcceptance.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PostOrderAcceptance.Responses.$200>
   /**
    * getOrder - getOrder
    * 
@@ -5225,6 +5399,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortal.Responses.$204>
   }
+  ['/v2/portal/external-links']: {
+    /**
+     * getExternalLinks - getExternalLinks
+     * 
+     * Retrieves the portal configuration external links.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetExternalLinks.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
+  }
   ['/v2/portal/public/portal/config']: {
     /**
      * getPublicPortalConfig - getPublicPortalConfig
@@ -5467,14 +5653,26 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.FetchPortalUsersByRelatedEntity.Responses.$200>
   }
-  ['/v2/portal/user/confirm/{id}']: {
+  ['/v2/portal/user/confirm']: {
     /**
      * confirmUser - confirmUser
      * 
      * Confirm a portal user
      */
     'get'(
-      parameters?: Parameters<Paths.ConfirmUser.PathParameters & Paths.ConfirmUser.QueryParameters> | null,
+      parameters?: Parameters<Paths.ConfirmUser.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
+  }
+  ['/v2/portal/user/confirm/{id}']: {
+    /**
+     * confirmUserWithUserId - confirmUserWithUserId
+     * 
+     * Confirm a portal user
+     */
+    'get'(
+      parameters?: Parameters<Paths.ConfirmUserWithUserId.PathParameters & Paths.ConfirmUserWithUserId.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
@@ -5526,6 +5724,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllOrders.Responses.$200>
+  }
+  ['/v2/portal/order/{id}/acceptance']: {
+    /**
+     * postOrderAcceptance - postOrderAcceptance
+     * 
+     * Accept/decline an offer by id
+     */
+    'post'(
+      parameters?: Parameters<Paths.PostOrderAcceptance.PathParameters> | null,
+      data?: Paths.PostOrderAcceptance.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PostOrderAcceptance.Responses.$200>
   }
   ['/v2/portal/order/{id}']: {
     /**
