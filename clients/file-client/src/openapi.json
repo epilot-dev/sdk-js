@@ -1071,6 +1071,12 @@
             "example": "application/pdf",
             "default": "application/octet-stream"
           },
+          "index_tag": {
+            "type": "string",
+            "example": "2f6a377c8e78",
+            "maxLength": 64,
+            "description": "Used to index the file at the storage layer, which helps when browsing for this file"
+          },
           "metadata": {
             "type": "object",
             "additionalProperties": {
