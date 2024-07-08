@@ -287,6 +287,12 @@ declare namespace Components {
              */
             mime_type?: string;
             /**
+             * Used to index the file at the storage layer, which helps when browsing for this file
+             * example:
+             * 2f6a377c8e78
+             */
+            index_tag?: string;
+            /**
              * Allows passing in custom metadata for the file, expects key-value pairs of string type
              * example:
              * {
