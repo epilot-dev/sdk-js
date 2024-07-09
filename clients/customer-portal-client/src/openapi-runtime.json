@@ -339,9 +339,21 @@
         ]
       }
     },
-    "/v2/portal/user/confirm/{id}": {
+    "/v2/portal/user/confirm": {
       "get": {
         "operationId": "confirmUser",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "confirmation_link_token",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v2/portal/user/confirm/{id}": {
+      "get": {
+        "operationId": "confirmUserWithUserId",
         "parameters": [
           {
             "in": "query",
@@ -717,6 +729,7 @@
           {
             "in": "query",
             "name": "entities",
+            "deprecated": true,
             "style": "form",
             "explode": false
           }
