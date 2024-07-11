@@ -218,7 +218,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Success - if the definition is created successfully",
             "content": {
               "application/json": {
@@ -1117,9 +1117,6 @@
           "label": {
             "type": "string"
           },
-          "name": {
-            "type": "string"
-          },
           "description": {
             "type": "string"
           },
@@ -1294,6 +1291,8 @@
           "timePeriod": {
             "type": "string",
             "enum": [
+              "minutes",
+              "hours",
               "days",
               "weeks",
               "months"

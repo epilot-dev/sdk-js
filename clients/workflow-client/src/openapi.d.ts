@@ -52,7 +52,7 @@ declare namespace Components {
          */
         export interface DynamicDueDate {
             numberOfUnits: number;
-            timePeriod: "days" | "weeks" | "months";
+            timePeriod: "minutes" | "hours" | "days" | "weeks" | "months";
             actionTypeCondition?: "WORKFLOW_STARTED" | "STEP_CLOSED";
             stepId?: string;
         }
@@ -74,7 +74,7 @@ declare namespace Components {
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export interface FlowSlim {
-            flow: (/* A group of Steps that define the progress of the Workflow */ SectionSimplified | StepSimplified)[];
+            flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export type ItemType = "STEP" | "SECTION";
         export interface LastEvaluatedKey {
@@ -221,21 +221,6 @@ declare namespace Components {
             status?: SectionStatus;
             type: ItemType;
             steps: Step[];
-        }
-        /**
-         * A group of Steps that define the progress of the Workflow
-         */
-        export interface SectionSimplified {
-            id: string;
-            definitionId?: string;
-            /**
-             * Name for this Section
-             * example:
-             * Lead Qualification
-             */
-            name: string;
-            type: ItemType;
-            steps: StepSimplified[];
         }
         export type SectionStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED";
         export interface Step {
@@ -658,7 +643,7 @@ declare namespace Components {
              * Version of the workflow execution
              */
             version?: number;
-            flow: (/* A group of Steps that define the progress of the Workflow */ SectionSimplified | StepSimplified)[];
+            flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export interface WorkflowExecutionUpdateReq {
             status?: WorkflowStatus;
