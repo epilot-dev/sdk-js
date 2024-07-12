@@ -1181,7 +1181,8 @@
         "description": "Origin of an attribute.",
         "enum": [
           "system_recommendation",
-          "user_manually"
+          "user_manually",
+          "entity_updating_system_recommendation"
         ]
       },
       "OperationNode": {
@@ -1604,9 +1605,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity-mapping.sls.epilot.io"
-    },
     {
       "url": "https://entity-mapping.sls.epilot.io"
     }

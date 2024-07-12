@@ -38,7 +38,7 @@ declare namespace Components {
         /**
          * Origin of an attribute.
          */
-        export type AttributeOrigin = "system_recommendation" | "user_manually";
+        export type AttributeOrigin = "system_recommendation" | "user_manually" | "entity_updating_system_recommendation";
         export interface ConditionNode {
             source?: string;
             value?: string | number | {
