@@ -20,51 +20,6 @@
     }
   ],
   "paths": {
-    "/v1/partners/{id}/invite": {
-      "post": {
-        "operationId": "invitePartner",
-        "summary": "invitePartner",
-        "tags": [
-          "partners"
-        ],
-        "description": "Create a new partner in partner directory and send an invite email to accept request",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "schema": {
-              "$ref": "#/components/schemas/PartnerId"
-            },
-            "required": true,
-            "description": "The Id of partner"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PartnerInvitationPayload"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Invited successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Partner"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unable to invite"
-          }
-        }
-      }
-    },
     "/v1/partners/{id}/approve": {
       "post": {
         "operationId": "approvePartner",
@@ -137,62 +92,6 @@
         }
       }
     },
-    "/v1/partners/{id}/invite:resendEmail": {
-      "post": {
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "schema": {
-              "$ref": "#/components/schemas/PartnerId"
-            },
-            "required": true,
-            "description": "The Id of partner"
-          }
-        ],
-        "operationId": "resendPartnerInvitation",
-        "summary": "resendPartnerInvitation",
-        "description": "Resend partner invitation email",
-        "tags": [
-          "partners"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string",
-                    "description": "Language for partner invitation email",
-                    "enum": [
-                      "en",
-                      "de"
-                    ],
-                    "default": "en"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Partner Invitation sent successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Partner"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Partner not found"
-          }
-        }
-      }
-    },
     "/v1/partners/assignables:search": {
       "post": {
         "operationId": "searchAssignable",
@@ -231,6 +130,11 @@
                     "items": {
                       "$ref": "#/components/schemas/OrganizationId"
                     }
+                  },
+                  "portalUsersEntityIdScope": {
+                    "description": "Optional parameter if 'types' contains 'ecp' type user. Portal Users will only be fetched in the context of an entity, fetching the related ones through relations and not returning placeholders anymore.",
+                    "type": "string",
+                    "default": ""
                   },
                   "types": {
                     "description": "filter results to specific types of assignables. defaults to all types",
@@ -311,10 +215,7 @@
                       "description": "organization id of assignable (optional, defaults to caller org)",
                       "type": "string"
                     }
-                  },
-                  "required": [
-                    "user_id"
-                  ]
+                  }
                 }
               }
             }

@@ -412,7 +412,7 @@ declare namespace Paths {
             /**
              * user id of assignable
              */
-            user_id: string;
+            user_id?: string;
             /**
              * organization id of assignable (optional, defaults to caller org)
              */
@@ -440,24 +440,6 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.Partner;
             export interface $404 {
-            }
-        }
-    }
-    namespace InvitePartner {
-        namespace Parameters {
-            export type Id = /**
-             * example:
-             * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
-             */
-            Components.Schemas.PartnerId;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        export type RequestBody = Components.Schemas.PartnerInvitationPayload;
-        namespace Responses {
-            export type $200 = Components.Schemas.Partner;
-            export interface $400 {
             }
         }
     }
@@ -496,29 +478,6 @@ declare namespace Paths {
             }
         }
     }
-    namespace ResendPartnerInvitation {
-        namespace Parameters {
-            export type Id = /**
-             * example:
-             * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
-             */
-            Components.Schemas.PartnerId;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        export interface RequestBody {
-            /**
-             * Language for partner invitation email
-             */
-            language?: "en" | "de";
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.Partner;
-            export interface $400 {
-            }
-        }
-    }
     namespace SearchAssignable {
         export interface RequestBody {
             /**
@@ -541,6 +500,10 @@ declare namespace Paths {
              * 123
              */
             Components.Schemas.OrganizationId[];
+            /**
+             * Optional parameter if 'types' contains 'ecp' type user. Portal Users will only be fetched in the context of an entity, fetching the related ones through relations and not returning placeholders anymore.
+             */
+            portalUsersEntityIdScope?: string;
             /**
              * filter results to specific types of assignables. defaults to all types
              */
@@ -572,16 +535,6 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * invitePartner - invitePartner
-   * 
-   * Create a new partner in partner directory and send an invite email to accept request
-   */
-  'invitePartner'(
-    parameters?: Parameters<Paths.InvitePartner.PathParameters> | null,
-    data?: Paths.InvitePartner.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.InvitePartner.Responses.$200>
-  /**
    * approvePartner - approvePartner
    * 
    * Approve partner request
@@ -601,16 +554,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RejectPartner.Responses.$200>
-  /**
-   * resendPartnerInvitation - resendPartnerInvitation
-   * 
-   * Resend partner invitation email
-   */
-  'resendPartnerInvitation'(
-    parameters?: Parameters<Paths.ResendPartnerInvitation.PathParameters> | null,
-    data?: Paths.ResendPartnerInvitation.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ResendPartnerInvitation.Responses.$200>
   /**
    * searchAssignable - searchAssignables
    * 
@@ -681,18 +624,6 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
-  ['/v1/partners/{id}/invite']: {
-    /**
-     * invitePartner - invitePartner
-     * 
-     * Create a new partner in partner directory and send an invite email to accept request
-     */
-    'post'(
-      parameters?: Parameters<Paths.InvitePartner.PathParameters> | null,
-      data?: Paths.InvitePartner.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.InvitePartner.Responses.$200>
-  }
   ['/v1/partners/{id}/approve']: {
     /**
      * approvePartner - approvePartner
@@ -716,18 +647,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RejectPartner.Responses.$200>
-  }
-  ['/v1/partners/{id}/invite:resendEmail']: {
-    /**
-     * resendPartnerInvitation - resendPartnerInvitation
-     * 
-     * Resend partner invitation email
-     */
-    'post'(
-      parameters?: Parameters<Paths.ResendPartnerInvitation.PathParameters> | null,
-      data?: Paths.ResendPartnerInvitation.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ResendPartnerInvitation.Responses.$200>
   }
   ['/v1/partners/assignables:search']: {
     /**
