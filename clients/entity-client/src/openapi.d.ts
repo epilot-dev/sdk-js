@@ -229,7 +229,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -373,7 +373,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -541,7 +541,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -737,7 +737,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -883,7 +883,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1015,7 +1015,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1149,7 +1149,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1281,7 +1281,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1423,7 +1423,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1654,7 +1654,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             /**
              * Unique name for the capability
              * example:
@@ -1769,7 +1769,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             /**
              * Unique name for the capability
              * example:
@@ -3081,7 +3081,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3344,7 +3344,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3476,7 +3476,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3608,7 +3608,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3748,7 +3748,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3888,7 +3888,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4036,7 +4036,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4173,7 +4173,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4305,7 +4305,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4437,7 +4437,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4569,7 +4569,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4702,7 +4702,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: /**
+            id?: /**
              * example:
              * taxonomy-slug:classification-slug
              */
@@ -4870,7 +4870,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5239,7 +5239,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5704,7 +5704,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5844,7 +5844,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5993,7 +5993,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -6195,7 +6195,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -6426,7 +6426,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -6559,7 +6559,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id: string;
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -7091,7 +7091,7 @@ declare namespace Paths {
             slug: Parameters.Slug;
         }
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
         }
     }
@@ -7450,6 +7450,310 @@ declare namespace Paths {
             Components.Schemas.EntityItem;
         }
     }
+    namespace GetJsonSchema {
+        namespace Parameters {
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            /**
+             * example:
+             * {
+             *   "$schema": "http://json-schema.org/draft/2020-12/schema",
+             *   "type": "object",
+             *   "properties": {
+             *     "_id": {
+             *       "type": "string",
+             *       "format": "uuid",
+             *       "example": "123e4567-e89b-12d3-a456-426614174000"
+             *     },
+             *     "_org": {
+             *       "type": "string",
+             *       "description": "Organization Id the entity belongs to",
+             *       "readOnly": true
+             *     },
+             *     "_owners": {
+             *       "type": "array",
+             *       "readOnly": true,
+             *       "items": {
+             *         "description": "The user / organization owning this entity.\n\nNote: Owner implicitly has access to the entity regardless of ACLs.\n",
+             *         "type": "object",
+             *         "properties": {
+             *           "org_id": {
+             *             "type": "string",
+             *             "example": "123"
+             *           },
+             *           "user_id": {
+             *             "type": "string",
+             *             "example": "123"
+             *           }
+             *         },
+             *         "required": [
+             *           "org_id"
+             *         ]
+             *       }
+             *     },
+             *     "_schema": {
+             *       "readOnly": true,
+             *       "type": "string"
+             *     },
+             *     "_title": {
+             *       "readOnly": true,
+             *       "type": "string"
+             *     },
+             *     "_tags": {
+             *       "type": "array",
+             *       "nullable": true,
+             *       "items": {
+             *         "type": "string"
+             *       }
+             *     },
+             *     "_created_at": {
+             *       "readOnly": true,
+             *       "type": "string",
+             *       "format": "date-time"
+             *     },
+             *     "_updated_at": {
+             *       "readOnly": true,
+             *       "type": "string",
+             *       "format": "date-time"
+             *     },
+             *     "_acl": {
+             *       "readOnly": true,
+             *       "type": "object",
+             *       "description": "Access control list (ACL) for an entity. Defines sharing access to external orgs or users.",
+             *       "additionalProperties": true,
+             *       "properties": {
+             *         "view": {
+             *           "type": "array",
+             *           "items": {
+             *             "type": "string",
+             *             "example": "org:456"
+             *           }
+             *         },
+             *         "edit": {
+             *           "type": "array",
+             *           "items": {
+             *             "type": "string",
+             *             "example": "org:456"
+             *           }
+             *         },
+             *         "delete": {
+             *           "type": "array",
+             *           "items": {
+             *             "type": "string",
+             *             "example": "org:456"
+             *           }
+             *         }
+             *       }
+             *     },
+             *     "title": {
+             *       "type": "string",
+             *       "nullable": true,
+             *       "enum": [
+             *         "Dr.",
+             *         "Prof.",
+             *         "Prof. Dr."
+             *       ]
+             *     },
+             *     "salutation": {
+             *       "type": "string",
+             *       "nullable": true,
+             *       "enum": [
+             *         "Mr.",
+             *         "Ms. / Mrs.",
+             *         "Company",
+             *         "Contact Person",
+             *         "Company/Contact Person",
+             *         "Spouse",
+             *         "Family",
+             *         "Ownership",
+             *         "Assembly",
+             *         "Other"
+             *       ]
+             *     },
+             *     "first_name": {
+             *       "type": "string"
+             *     },
+             *     "last_name": {
+             *       "type": "string"
+             *     },
+             *     "customer_number": {
+             *       "type": "string",
+             *       "nullable": true
+             *     },
+             *     "birthdate": {
+             *       "type": "string",
+             *       "format": "date",
+             *       "nullable": true
+             *     },
+             *     "account": {
+             *       "type": "object",
+             *       "nullable": true,
+             *       "properties": {
+             *         "$relation": {
+             *           "type": "array",
+             *           "items": {
+             *             "type": "object",
+             *             "properties": {
+             *               "entity_id": {
+             *                 "type": "string",
+             *                 "format": "uuid",
+             *                 "example": "123e4567-e89b-12d3-a456-426614174000"
+             *               },
+             *               "_tags": {
+             *                 "type": "array",
+             *                 "nullable": true,
+             *                 "items": {
+             *                   "type": "string"
+             *                 }
+             *               }
+             *             },
+             *             "required": [
+             *               "entity_id"
+             *             ]
+             *           }
+             *         }
+             *       },
+             *       "additionalProperties": true
+             *     },
+             *     "address": {
+             *       "type": "array",
+             *       "nullable": true,
+             *       "description": "Addresses as a list of object, the element with index 0 is treated as the primary one.\n",
+             *       "items": {
+             *         "type": "object",
+             *         "properties": {
+             *           "street": {
+             *             "type": "string",
+             *             "nullable": true
+             *           },
+             *           "street_number": {
+             *             "type": "string",
+             *             "nullable": true
+             *           },
+             *           "postal_code": {
+             *             "type": "string",
+             *             "nullable": true
+             *           },
+             *           "city": {
+             *             "type": "string",
+             *             "nullable": true
+             *           },
+             *           "country": {
+             *             "type": "string",
+             *             "nullable": true,
+             *             "enum": [
+             *               "DE",
+             *               "AT",
+             *               "CH"
+             *             ]
+             *           },
+             *           "additional_info": {
+             *             "type": "string",
+             *             "nullable": true
+             *           },
+             *           "_tags": {
+             *             "type": "array",
+             *             "nullable": true,
+             *             "items": {
+             *               "type": "string"
+             *             }
+             *           },
+             *           "_id": {
+             *             "type": "string",
+             *             "example": "xHcOoJCa07eysJ1GaQeSb"
+             *           }
+             *         },
+             *         "required": [
+             *           "street",
+             *           "street_number",
+             *           "postal_code",
+             *           "city",
+             *           "country"
+             *         ]
+             *       }
+             *     },
+             *     "email": {
+             *       "type": "array",
+             *       "nullable": true,
+             *       "description": "Email addresses as a list of object, the element with index 0 is treated as the primary one.\n",
+             *       "items": {
+             *         "type": "object",
+             *         "properties": {
+             *           "_id": {
+             *             "type": "string",
+             *             "example": "xHcOoJCa07eysJ1GaQeSb"
+             *           },
+             *           "_tags": {
+             *             "type": "array",
+             *             "nullable": true,
+             *             "items": {
+             *               "type": "string"
+             *             }
+             *           },
+             *           "email": {
+             *             "type": "string"
+             *           }
+             *         },
+             *         "required": [
+             *           "email"
+             *         ]
+             *       }
+             *     },
+             *     "phone": {
+             *       "type": "array",
+             *       "description": "Phone numbers as a list of object, the element with index 0 is treated as the primary one.\n",
+             *       "items": {
+             *         "type": "object",
+             *         "properties": {
+             *           "_id": {
+             *             "type": "string",
+             *             "example": "xHcOoJCa07eysJ1GaQeSb"
+             *           },
+             *           "_tags": {
+             *             "type": "array",
+             *             "nullable": true,
+             *             "items": {
+             *               "type": "string"
+             *             }
+             *           },
+             *           "phone": {
+             *             "type": "string"
+             *           }
+             *         },
+             *         "required": [
+             *           "phone"
+             *         ]
+             *       }
+             *     }
+             *   },
+             *   "required": [
+             *     "first_name",
+             *     "last_name",
+             *     "_id",
+             *     "_org",
+             *     "_owners",
+             *     "_schema",
+             *     "_title",
+             *     "_tags",
+             *     "_created_at",
+             *     "_updated_at",
+             *     "_acl"
+             *   ]
+             * }
+             */
+            export interface $200 {
+            }
+        }
+    }
     namespace GetRelatedEntitiesCount {
         namespace Parameters {
             export type ExcludeSchemas = /**
@@ -7679,6 +7983,23 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+        }
+    }
+    namespace GetSchemaExample {
+        namespace Parameters {
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
         }
     }
     namespace GetSchemaVersions {
@@ -8349,6 +8670,7 @@ declare namespace Paths {
              * contact
              */
             Components.Schemas.EntitySlug;
+            export type Strict = boolean;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -8357,6 +8679,7 @@ declare namespace Paths {
             activity_id?: Parameters.ActivityId;
             dry_run?: Parameters.DryRun;
             async?: Parameters.Async;
+            strict?: Parameters.Strict;
         }
         export interface RequestBody {
             /**
@@ -8588,7 +8911,27 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.DeleteSchema.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteSchema.Responses.$204>
+  ): OperationResponse<Paths.DeleteSchema.Responses.$200>
+  /**
+   * getJsonSchema - getJsonSchema
+   * 
+   * Get formal JSON schema definition draft 2020-12 for the given epilot schema
+   */
+  'getJsonSchema'(
+    parameters?: Parameters<Paths.GetJsonSchema.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetJsonSchema.Responses.$200>
+  /**
+   * getSchemaExample - getSchemaExample
+   * 
+   * Get a full example entity for the given schema
+   */
+  'getSchemaExample'(
+    parameters?: Parameters<Paths.GetSchemaExample.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSchemaExample.Responses.$200>
   /**
    * getSchemaVersions - getSchemaVersions
    * 
@@ -8759,7 +9102,6 @@ export interface OperationMethods {
    * 
    * - If no entities are matched, a new entity is created.
    * - If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.
-   * - If more than one entity is matched a `409` Error is returned
    * 
    * ## Activity
    * 
@@ -9414,7 +9756,31 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.DeleteSchema.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteSchema.Responses.$204>
+    ): OperationResponse<Paths.DeleteSchema.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/json/schema']: {
+    /**
+     * getJsonSchema - getJsonSchema
+     * 
+     * Get formal JSON schema definition draft 2020-12 for the given epilot schema
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetJsonSchema.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetJsonSchema.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/json/example']: {
+    /**
+     * getSchemaExample - getSchemaExample
+     * 
+     * Get a full example entity for the given schema
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSchemaExample.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSchemaExample.Responses.$200>
   }
   ['/v1/entity/schemas/{slug}/versions']: {
     /**
@@ -9601,7 +9967,6 @@ export interface PathsDictionary {
      * 
      * - If no entities are matched, a new entity is created.
      * - If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.
-     * - If more than one entity is matched a `409` Error is returned
      * 
      * ## Activity
      * 

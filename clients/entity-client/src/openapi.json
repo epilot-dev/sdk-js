@@ -177,8 +177,351 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/{slug}/json/schema": {
+      "get": {
+        "operationId": "getJsonSchema",
+        "summary": "getJsonSchema",
+        "description": "Get formal JSON schema definition draft 2020-12 for the given epilot schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "$schema": "http://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                      },
+                      "_org": {
+                        "type": "string",
+                        "description": "Organization Id the entity belongs to",
+                        "readOnly": true
+                      },
+                      "_owners": {
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                          "description": "The user / organization owning this entity.\n\nNote: Owner implicitly has access to the entity regardless of ACLs.\n",
+                          "type": "object",
+                          "properties": {
+                            "org_id": {
+                              "type": "string",
+                              "example": "123"
+                            },
+                            "user_id": {
+                              "type": "string",
+                              "example": "123"
+                            }
+                          },
+                          "required": [
+                            "org_id"
+                          ]
+                        }
+                      },
+                      "_schema": {
+                        "readOnly": true,
+                        "type": "string"
+                      },
+                      "_title": {
+                        "readOnly": true,
+                        "type": "string"
+                      },
+                      "_tags": {
+                        "type": "array",
+                        "nullable": true,
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "_created_at": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "_updated_at": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "_acl": {
+                        "readOnly": true,
+                        "type": "object",
+                        "description": "Access control list (ACL) for an entity. Defines sharing access to external orgs or users.",
+                        "additionalProperties": true,
+                        "properties": {
+                          "view": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "org:456"
+                            }
+                          },
+                          "edit": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "org:456"
+                            }
+                          },
+                          "delete": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "org:456"
+                            }
+                          }
+                        }
+                      },
+                      "title": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                          "Dr.",
+                          "Prof.",
+                          "Prof. Dr."
+                        ]
+                      },
+                      "salutation": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                          "Mr.",
+                          "Ms. / Mrs.",
+                          "Company",
+                          "Contact Person",
+                          "Company/Contact Person",
+                          "Spouse",
+                          "Family",
+                          "Ownership",
+                          "Assembly",
+                          "Other"
+                        ]
+                      },
+                      "first_name": {
+                        "type": "string"
+                      },
+                      "last_name": {
+                        "type": "string"
+                      },
+                      "customer_number": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "birthdate": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                      },
+                      "account": {
+                        "type": "object",
+                        "nullable": true,
+                        "properties": {
+                          "$relation": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "entity_id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "example": "123e4567-e89b-12d3-a456-426614174000"
+                                },
+                                "_tags": {
+                                  "type": "array",
+                                  "nullable": true,
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "required": [
+                                "entity_id"
+                              ]
+                            }
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "address": {
+                        "type": "array",
+                        "nullable": true,
+                        "description": "Addresses as a list of object, the element with index 0 is treated as the primary one.\n",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "street": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "street_number": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "postal_code": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "city": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "country": {
+                              "type": "string",
+                              "nullable": true,
+                              "enum": [
+                                "DE",
+                                "AT",
+                                "CH"
+                              ]
+                            },
+                            "additional_info": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "_tags": {
+                              "type": "array",
+                              "nullable": true,
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "_id": {
+                              "type": "string",
+                              "example": "xHcOoJCa07eysJ1GaQeSb"
+                            }
+                          },
+                          "required": [
+                            "street",
+                            "street_number",
+                            "postal_code",
+                            "city",
+                            "country"
+                          ]
+                        }
+                      },
+                      "email": {
+                        "type": "array",
+                        "nullable": true,
+                        "description": "Email addresses as a list of object, the element with index 0 is treated as the primary one.\n",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "_id": {
+                              "type": "string",
+                              "example": "xHcOoJCa07eysJ1GaQeSb"
+                            },
+                            "_tags": {
+                              "type": "array",
+                              "nullable": true,
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "email": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "email"
+                          ]
+                        }
+                      },
+                      "phone": {
+                        "type": "array",
+                        "description": "Phone numbers as a list of object, the element with index 0 is treated as the primary one.\n",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "_id": {
+                              "type": "string",
+                              "example": "xHcOoJCa07eysJ1GaQeSb"
+                            },
+                            "_tags": {
+                              "type": "array",
+                              "nullable": true,
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "phone": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "phone"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "first_name",
+                      "last_name",
+                      "_id",
+                      "_org",
+                      "_owners",
+                      "_schema",
+                      "_title",
+                      "_tags",
+                      "_created_at",
+                      "_updated_at",
+                      "_acl"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/{slug}/json/example": {
+      "get": {
+        "operationId": "getSchemaExample",
+        "summary": "getSchemaExample",
+        "description": "Get a full example entity for the given schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "examples": {
+                  "contact": {
+                    "$ref": "#/components/examples/ContactEntity"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -559,7 +902,7 @@
       "patch": {
         "operationId": "upsertEntity",
         "summary": "upsertEntity",
-        "description": "Create or update an entity using `unique_key`\n\n- If no entities are matched, a new entity is created.\n- If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.\n- If more than one entity is matched a `409` Error is returned\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated` or `EntityUpdated`\n",
+        "description": "Create or update an entity using `unique_key`\n\n- If no entities are matched, a new entity is created.\n- If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated` or `EntityUpdated`\n",
         "tags": [
           "Entities"
         ],
@@ -575,6 +918,16 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "name": "strict",
+            "description": "Strict mode = return 409 if more than one entity is matched",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "requestBody": {
@@ -3363,7 +3716,6 @@
           }
         },
         "required": [
-          "id",
           "name",
           "label"
         ]
@@ -4520,7 +4872,6 @@
           }
         },
         "required": [
-          "id",
           "name"
         ]
       },
@@ -4713,14 +5064,17 @@
         "additionalProperties": true,
         "properties": {
           "_id": {
+            "readOnly": true,
             "$ref": "#/components/schemas/EntityId"
           },
           "_org": {
             "type": "string",
+            "readOnly": true,
             "description": "Organization Id the entity belongs to"
           },
           "_owners": {
             "type": "array",
+            "readOnly": true,
             "items": {
               "$ref": "#/components/schemas/EntityOwner"
             }
@@ -4743,14 +5097,17 @@
           "_created_at": {
             "type": "string",
             "format": "date-time",
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           },
           "_updated_at": {
             "type": "string",
             "format": "date-time",
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           },
           "_acl": {
+            "readOnly": true,
             "$ref": "#/components/schemas/EntityAcl"
           }
         },
@@ -6849,9 +7206,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }
