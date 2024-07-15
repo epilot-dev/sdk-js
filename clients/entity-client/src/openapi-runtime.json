@@ -55,6 +55,26 @@
         ]
       }
     },
+    "/v1/entity/schemas/{slug}/json/schema": {
+      "get": {
+        "operationId": "getJsonSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ]
+      }
+    },
+    "/v1/entity/schemas/{slug}/json/example": {
+      "get": {
+        "operationId": "getSchemaExample",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ]
+      }
+    },
     "/v1/entity/schemas/{slug}/versions": {
       "get": {
         "operationId": "getSchemaVersions",
@@ -185,6 +205,11 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "name": "strict",
+            "in": "query",
+            "required": false
           }
         ],
         "requestBody": {
