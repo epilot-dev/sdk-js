@@ -1,6 +1,6 @@
 {
   "name": "epilot-sdk",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Epilot SDK",
   "main": "index.js",
   "type": "commonjs",
@@ -59,7 +59,7 @@
     "@epilot/metering-client": "^0.5.1",
     "@epilot/notification-client": "^0.5.0",
     "@epilot/organization-client": "^0.10.0",
-    "@epilot/partner-directory-client": "^0.7.3",
+    "@epilot/partner-directory-client": "^0.7.4",
     "@epilot/permissions-client": "^0.13.0",
     "@epilot/pricing-client": "^3.17.0",
     "@epilot/submission-client": "^1.5.0",
