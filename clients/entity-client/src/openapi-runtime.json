@@ -474,9 +474,25 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeRelations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
-            "$ref": "#/components/parameters/ActivityIdQueryParam"
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
         "requestBody": {
@@ -751,18 +767,6 @@
         "operationId": "listFavoriteViewsForUser"
       }
     },
-    "/v1/entity/listTaxonomies": {
-      "get": {
-        "deprecated": true,
-        "operationId": "listTaxonomies",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "include_disabled"
-          }
-        ]
-      }
-    },
     "/v1/entity/taxonomies": {
       "get": {
         "operationId": "listTaxonomies",
@@ -954,23 +958,6 @@
         ]
       }
     },
-    "/v1/entity/schemas/attribute/{slug}": {
-      "post": {
-        "operationId": "createSchemaAttribute",
-        "parameters": [
-          {
-            "name": "slug",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
     "/v1/entity/schemas/capabilities/{composite_id}": {
       "get": {
         "operationId": "getSchemaCapability",
@@ -1008,12 +995,22 @@
         ]
       }
     },
-    "/v1/entity/schemas/capability/{slug}": {
-      "post": {
-        "operationId": "createSchemaCapability",
+    "/v1/entity/schemas/group/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaGroup",
         "parameters": [
           {
-            "name": "slug",
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "put": {
+        "operationId": "putSchemaGroup",
+        "parameters": [
+          {
+            "name": "composite_id",
             "in": "path",
             "required": true
           }
@@ -1023,6 +1020,16 @@
             "application/json": {}
           }
         }
+      },
+      "delete": {
+        "operationId": "deleteSchemaGroup",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ]
       }
     }
   },
