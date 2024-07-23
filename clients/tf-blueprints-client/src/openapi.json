@@ -59,7 +59,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Progress"
+                  "$ref": "#/components/schemas/Job"
                 }
               }
             }
@@ -239,11 +239,6 @@
                     "blueprintId": {
                       "type": "string",
                       "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
-                    },
-                    "planFileContent": {
-                      "type": "string",
-                      "example": "{\"format_version\":\"1.2\",\"terraform_version\":\"1.9.2\",\"variables\":{\"automation_api_url\":{\"value\":\"https://automation.dev.sls.epilot.io\"},\"designbuilder_api_url\":{\"value\":\"https://design-builder-api.dev.sls.epilot.io\"},\"emailtemplate_api_url\":{\"value\":\"https://email-template.dev.sls.epilot.io\"}...",
-                      "description": "A JSON string representing the planned changes, see https://developer.hashicorp.com/terraform/internals/json-format"
                     }
                   }
                 }
@@ -338,7 +333,7 @@
   },
   "components": {
     "schemas": {
-      "ProgressStatus": {
+      "JobStatus": {
         "type": "string",
         "enum": [
           "STARTED",
@@ -349,11 +344,11 @@
           "FAILED"
         ]
       },
-      "Progress": {
+      "Job": {
         "type": "object",
         "properties": {
           "job_status": {
-            "$ref": "#/components/schemas/ProgressStatus"
+            "$ref": "#/components/schemas/JobStatus"
           },
           "job_id": {
             "type": "string"
@@ -361,9 +356,14 @@
           "message": {
             "type": "string"
           },
-          "time_stamp": {
+          "timestamp": {
             "type": "string",
             "format": "date-time"
+          },
+          "plan_file_content": {
+            "type": "string",
+            "example": "{\"format_version\":\"1.2\",\"terraform_version\":\"1.9.2\",\"variables\":{\"automation_api_url\":{\"value\":\"https://automation.dev.sls.epilot.io\"},\"designbuilder_api_url\":{\"value\":\"https://design-builder-api.dev.sls.epilot.io\"},\"emailtemplate_api_url\":{\"value\":\"https://email-template.dev.sls.epilot.io\"}...",
+            "description": "A JSON string representing the planned changes, see https://developer.hashicorp.com/terraform/internals/json-format"
           }
         }
       },

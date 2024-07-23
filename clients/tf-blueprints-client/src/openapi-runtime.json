@@ -19,14 +19,12 @@
             "in": "path",
             "required": true
           }
-        ],
-        "responses": {}
+        ]
       }
     },
     "/v2/blueprint/listInstalledPatches": {
       "get": {
-        "operationId": "listInstalledPatches",
-        "responses": {}
+        "operationId": "listInstalledPatches"
       }
     },
     "/v2/exportBlueprint": {
@@ -36,8 +34,7 @@
           "content": {
             "application/json": {}
           }
-        },
-        "responses": {}
+        }
       }
     },
     "/v2/uploadBlueprintTemplate": {
@@ -47,8 +44,7 @@
           "content": {
             "application/json": {}
           }
-        },
-        "responses": {}
+        }
       }
     },
     "/v2/createBlueprint": {
@@ -58,8 +54,7 @@
           "content": {
             "application/json": {}
           }
-        },
-        "responses": {}
+        }
       }
     },
     "/v2/updateBlueprint": {
@@ -69,8 +64,7 @@
           "content": {
             "application/json": {}
           }
-        },
-        "responses": {}
+        }
       }
     },
     "/v2/applyBlueprint": {
@@ -80,8 +74,7 @@
           "content": {
             "application/json": {}
           }
-        },
-        "responses": {}
+        }
       }
     }
   },

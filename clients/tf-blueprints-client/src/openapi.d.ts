@@ -13,13 +13,19 @@ declare namespace Components {
             blueprintId?: string;
             stateFileRef?: string;
         }
-        export interface Progress {
-            job_status?: ProgressStatus;
+        export interface Job {
+            job_status?: JobStatus;
             job_id?: string;
             message?: string;
-            time_stamp?: string; // date-time
+            timestamp?: string; // date-time
+            /**
+             * A JSON string representing the planned changes, see https://developer.hashicorp.com/terraform/internals/json-format
+             * example:
+             * {"format_version":"1.2","terraform_version":"1.9.2","variables":{"automation_api_url":{"value":"https://automation.dev.sls.epilot.io"},"designbuilder_api_url":{"value":"https://design-builder-api.dev.sls.epilot.io"},"emailtemplate_api_url":{"value":"https://email-template.dev.sls.epilot.io"}...
+             */
+            plan_file_content?: string;
         }
-        export type ProgressStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
+        export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
         export interface S3Reference {
             /**
              * example:
@@ -80,12 +86,6 @@ declare namespace Paths {
                  * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
                  */
                 blueprintId?: string;
-                /**
-                 * A JSON string representing the planned changes, see https://developer.hashicorp.com/terraform/internals/json-format
-                 * example:
-                 * {"format_version":"1.2","terraform_version":"1.9.2","variables":{"automation_api_url":{"value":"https://automation.dev.sls.epilot.io"},"designbuilder_api_url":{"value":"https://design-builder-api.dev.sls.epilot.io"},"emailtemplate_api_url":{"value":"https://email-template.dev.sls.epilot.io"}...
-                 */
-                planFileContent?: string;
             }
         }
     }
@@ -138,7 +138,7 @@ declare namespace Paths {
             id: Parameters.Id;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.Progress;
+            export type $200 = Components.Schemas.Job;
         }
     }
     namespace ListInstalledPatches {
