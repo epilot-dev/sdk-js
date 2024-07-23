@@ -18,7 +18,7 @@
   ],
   "servers": [
     {
-      "url": "https://tf-blueprint.dev.sls.epilot.io"
+      "url": "None"
     },
     {
       "url": "https://tf-blueprint.dev.sls.epilot.io",
@@ -126,6 +126,7 @@
                       "schema",
                       "schema_attribute",
                       "schema_capability",
+                      "schema_group",
                       "workflow_definition"
                     ]
                   },
@@ -136,11 +137,6 @@
                     },
                     "minItems": 1,
                     "maxItems": 25
-                  },
-                  "serverUrl": {
-                    "type": "string",
-                    "description": "The environment to run terraform providers against. Used for local development",
-                    "example": "https://journey-config.dev.sls.epilot.io"
                   }
                 }
               }
@@ -223,14 +219,9 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "templateFilePath": {
+                  "manifestFilePath": {
                     "type": "string",
                     "example": "example.tf"
-                  },
-                  "serverUrl": {
-                    "type": "string",
-                    "description": "The environment to run terraform providers against. Used for local development",
-                    "example": "https://journey-config.dev.sls.epilot.io"
                   }
                 }
               }
@@ -248,6 +239,11 @@
                     "blueprintId": {
                       "type": "string",
                       "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+                    },
+                    "planFileContent": {
+                      "type": "string",
+                      "example": "{\"format_version\":\"1.2\",\"terraform_version\":\"1.9.2\",\"variables\":{\"automation_api_url\":{\"value\":\"https://automation.dev.sls.epilot.io\"},\"designbuilder_api_url\":{\"value\":\"https://design-builder-api.dev.sls.epilot.io\"},\"emailtemplate_api_url\":{\"value\":\"https://email-template.dev.sls.epilot.io\"}...",
+                      "description": "A JSON string representing the planned changes, see https://developer.hashicorp.com/terraform/internals/json-format"
                     }
                   }
                 }
@@ -275,14 +271,9 @@
                     "type": "string",
                     "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
                   },
-                  "templateFilePath": {
+                  "manifestFilePath": {
                     "type": "string",
                     "example": "example.tf"
-                  },
-                  "serverUrl": {
-                    "type": "string",
-                    "description": "The environment to run terraform providers against. Used for local development",
-                    "example": "https://journey-config.dev.sls.epilot.io"
                   }
                 }
               }
@@ -321,14 +312,9 @@
                     "type": "string",
                     "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
                   },
-                  "templateFilePath": {
+                  "manifestFilePath": {
                     "type": "string",
                     "example": "example.tf"
-                  },
-                  "serverUrl": {
-                    "type": "string",
-                    "description": "The environment to run terraform providers against. Used for local development",
-                    "example": "https://journey-config.dev.sls.epilot.io"
                   }
                 }
               }

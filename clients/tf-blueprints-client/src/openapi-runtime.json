@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://tf-blueprint.dev.sls.epilot.io"
+      "url": "None"
     }
   ],
   "paths": {
@@ -19,12 +19,14 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/blueprint/listInstalledPatches": {
       "get": {
-        "operationId": "listInstalledPatches"
+        "operationId": "listInstalledPatches",
+        "responses": {}
       }
     },
     "/v2/exportBlueprint": {
@@ -34,7 +36,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/uploadBlueprintTemplate": {
@@ -44,7 +47,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/createBlueprint": {
@@ -54,7 +58,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/updateBlueprint": {
@@ -64,7 +69,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/applyBlueprint": {
@@ -74,7 +80,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     }
   },

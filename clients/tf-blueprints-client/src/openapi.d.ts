@@ -59,13 +59,7 @@ declare namespace Paths {
              * example:
              * example.tf
              */
-            templateFilePath?: string;
-            /**
-             * The environment to run terraform providers against. Used for local development
-             * example:
-             * https://journey-config.dev.sls.epilot.io
-             */
-            serverUrl?: string;
+            manifestFilePath?: string;
         }
         namespace Responses {
             export type $200 = string;
@@ -77,13 +71,7 @@ declare namespace Paths {
              * example:
              * example.tf
              */
-            templateFilePath?: string;
-            /**
-             * The environment to run terraform providers against. Used for local development
-             * example:
-             * https://journey-config.dev.sls.epilot.io
-             */
-            serverUrl?: string;
+            manifestFilePath?: string;
         }
         namespace Responses {
             export interface $200 {
@@ -92,12 +80,18 @@ declare namespace Paths {
                  * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
                  */
                 blueprintId?: string;
+                /**
+                 * A JSON string representing the planned changes, see https://developer.hashicorp.com/terraform/internals/json-format
+                 * example:
+                 * {"format_version":"1.2","terraform_version":"1.9.2","variables":{"automation_api_url":{"value":"https://automation.dev.sls.epilot.io"},"designbuilder_api_url":{"value":"https://design-builder-api.dev.sls.epilot.io"},"emailtemplate_api_url":{"value":"https://email-template.dev.sls.epilot.io"}...
+                 */
+                planFileContent?: string;
             }
         }
     }
     namespace ExportBlueprint {
         export interface RequestBody {
-            resourceType?: "journey" | "product" | "price" | "tax" | "automation_flow" | "designbuilder" | "file" | "emailtemplate" | "entity" | "schema" | "schema_attribute" | "schema_capability" | "workflow_definition";
+            resourceType?: "journey" | "product" | "price" | "tax" | "automation_flow" | "designbuilder" | "file" | "emailtemplate" | "entity" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition";
             resourceIds?: [
                 string,
                 string?,
@@ -125,12 +119,6 @@ declare namespace Paths {
                 string?,
                 string?
             ];
-            /**
-             * The environment to run terraform providers against. Used for local development
-             * example:
-             * https://journey-config.dev.sls.epilot.io
-             */
-            serverUrl?: string;
         }
         namespace Responses {
             export interface $200 {
@@ -171,13 +159,7 @@ declare namespace Paths {
              * example:
              * example.tf
              */
-            templateFilePath?: string;
-            /**
-             * The environment to run terraform providers against. Used for local development
-             * example:
-             * https://journey-config.dev.sls.epilot.io
-             */
-            serverUrl?: string;
+            manifestFilePath?: string;
         }
         namespace Responses {
             export type $200 = string;
