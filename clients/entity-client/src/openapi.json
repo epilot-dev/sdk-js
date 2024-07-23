@@ -1611,9 +1611,6 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
-          },
-          {
-            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "requestBody": {
@@ -1655,6 +1652,59 @@
                 }
               }
             }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeRelations",
+        "summary": "removeRelations",
+        "description": "Disassociate one or more entities to parent entity by removing items to a relation attribute",
+        "tags": [
+          "Relations"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RelationItem"
+                }
+              },
+              "example": [
+                {
+                  "attribute": "contacts",
+                  "entity_id": "e8878f62-2d3d-4c86-bfe7-01a4180ff048",
+                  "_tags": [
+                    "billing"
+                  ]
+                },
+                {
+                  "attribute": "contacts",
+                  "entity_id": "ee8a2af9-fb36-4981-b848-4e65275851af"
+                },
+                {
+                  "attribute": "opportunities",
+                  "entity_id": "30990430-a53d-41a2-83db-2de072dc4dd4"
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Relations deleted with success."
           }
         }
       }
@@ -2228,48 +2278,6 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/SavedViewItem"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/entity/listTaxonomies": {
-      "get": {
-        "deprecated": true,
-        "operationId": "listTaxonomies",
-        "summary": "listTaxonomies",
-        "description": "List taxonomies in an organisation",
-        "tags": [
-          "Taxonomy"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "include_disabled",
-            "description": "Include disabled taxonomies",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns list of taxonomies in an organisation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Taxonomy"
                       }
                     }
                   }
@@ -2898,49 +2906,6 @@
         }
       }
     },
-    "/v1/entity/schemas/attribute/{slug}": {
-      "post": {
-        "operationId": "createSchemaAttribute",
-        "summary": "createSchemaAttribute",
-        "description": "Adds an attribute to the schema",
-        "tags": [
-          "Schemas"
-        ],
-        "parameters": [
-          {
-            "name": "slug",
-            "description": "Schema Slug",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "contact"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Attribute"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AttributeWithCompositeID"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/entity/schemas/capabilities/{composite_id}": {
       "get": {
         "operationId": "getSchemaCapability",
@@ -3051,23 +3016,57 @@
         }
       }
     },
-    "/v1/entity/schemas/capability/{slug}": {
-      "post": {
-        "operationId": "createSchemaCapability",
-        "summary": "createSchemaCapability",
-        "description": "Adds a capability to the schema",
+    "/v1/entity/schemas/group/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaGroup",
+        "summary": "getSchemaGroup",
+        "description": "Get a schema group from given group composite ID",
         "tags": [
           "Schemas"
         ],
         "parameters": [
           {
-            "name": "slug",
-            "description": "Schema Slug",
+            "name": "composite_id",
+            "description": "Schema Slug and the Group ID",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "example": "contact"
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySchemaGroupWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putSchemaGroup",
+        "summary": "putSchemaGroup",
+        "description": "Adds or updates an capability in the schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "composite_id",
+            "description": "Schema Slug and the Group ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
             }
           }
         ],
@@ -3075,7 +3074,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EntityCapability"
+                "$ref": "#/components/schemas/EntitySchemaGroupWithCompositeID"
               }
             }
           }
@@ -3086,7 +3085,40 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EntityCapabilityWithCompositeID"
+                  "$ref": "#/components/schemas/EntitySchemaGroupWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSchemaGroup",
+        "summary": "deleteSchemaGroup",
+        "description": "Deletes a Capability from a schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "composite_id",
+            "description": "Schema Slug and the Group ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySchemaGroupWithCompositeID"
                 }
               }
             }
@@ -3283,72 +3315,19 @@
           },
           "group_settings": {
             "type": "array",
-            "description": "A dictionary of Group Titles and associated settings if present.",
+            "description": "A list of Group Titles and associated settings if present.",
             "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "string"
-                },
-                "expanded": {
-                  "type": "boolean"
-                },
-                "render_condition": {
-                  "type": "string",
-                  "example": "_is_composite_price = \"false\""
-                },
-                "order": {
-                  "description": "Render order of the group",
-                  "type": "integer",
-                  "default": 0
-                },
-                "feature_flag": {
-                  "type": "string",
-                  "example": "FF_MY_FEATURE_FLAG",
-                  "description": "This group should only be active when the feature flag is enabled"
-                },
-                "settings_flag": {
-                  "type": "array",
-                  "description": "This group should only be active when all the settings have the correct value",
-                  "items": {
-                    "$ref": "#/components/schemas/SettingFlag"
-                  }
-                },
-                "info_tooltip_title": {
-                  "type": "object",
-                  "properties": {
-                    "key": {
-                      "type": "string"
-                    },
-                    "default": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "_purpose": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ClassificationId"
-                  }
-                }
-              },
-              "required": [
-                "label",
-                "id"
-              ]
+              "$ref": "#/components/schemas/EntitySchemaGroup"
             },
             "example": [
               {
-                "id": "Contact Details",
+                "id": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14",
                 "label": "Contact Details",
                 "expanded": true,
                 "order": 1
               },
               {
-                "id": "Address Details",
+                "id": "e9a1ae28-27ba-4fa0-a79c-e279cc5c4a6e",
                 "label": "Address Details",
                 "expanded": false,
                 "order": 2,
@@ -3472,6 +3451,88 @@
           },
           {
             "$ref": "#/components/schemas/EntitySchema"
+          }
+        ]
+      },
+      "EntitySchemaGroup": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "example": "Contact Details"
+          },
+          "id": {
+            "type": "string",
+            "example": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14"
+          },
+          "order": {
+            "description": "Render order of the group",
+            "type": "integer",
+            "default": 0
+          },
+          "expanded": {
+            "description": "Expanded by default",
+            "type": "boolean",
+            "default": false
+          },
+          "render_condition": {
+            "description": "Only render group when render_condition resolves to true",
+            "type": "string",
+            "example": "_is_composite_price = \"false\""
+          },
+          "_purpose": {
+            "description": "Only render group when one of the purposes is enabled",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassificationId"
+            }
+          },
+          "feature_flag": {
+            "type": "string",
+            "example": "FF_MY_FEATURE_FLAG",
+            "description": "This group should only be active when the feature flag is enabled"
+          },
+          "settings_flag": {
+            "type": "array",
+            "description": "This group should only be active when all the settings have the correct value",
+            "items": {
+              "$ref": "#/components/schemas/SettingFlag"
+            }
+          },
+          "info_tooltip_title": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "description": "Translation key for info tooltip",
+                "type": "string"
+              },
+              "default": {
+                "description": "Default string for info tooltip",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "label",
+          "id"
+        ]
+      },
+      "EntitySchemaGroupWithCompositeID": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EntitySchemaGroup"
+          },
+          {
+            "type": "object",
+            "description": "a readonly computed ID for the group including schema slug and the group ID",
+            "properties": {
+              "composite_id": {
+                "type": "string",
+                "readOnly": true,
+                "example": "contact:e18a532b-ae79-4d86-a6a5-e5dbfb579d14"
+              }
+            }
           }
         ]
       },
@@ -6202,7 +6263,7 @@
             "example": "Purposes"
           },
           "kind": {
-            "readonly": true,
+            "readOnly": true,
             "type": "string",
             "enum": [
               "system",
@@ -6222,23 +6283,23 @@
             "example": "#FF5733"
           },
           "created_at": {
-            "readonly": true,
+            "readOnly": true,
             "type": "string",
             "format": "date-time"
           },
           "updated_at": {
-            "readonly": true,
+            "readOnly": true,
             "type": "string",
             "format": "date-time"
           },
           "deleted_at": {
-            "readonly": true,
+            "readOnly": true,
             "type": "string",
             "format": "date-time",
             "description": "Date when the taxonomy was soft-deleted (enabled: false)"
           },
           "created_by": {
-            "readonly": true,
+            "readOnly": true,
             "type": "string",
             "description": "User ID of the creator",
             "example": "10598"

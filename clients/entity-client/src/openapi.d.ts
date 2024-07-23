@@ -2413,17 +2413,17 @@ declare namespace Components {
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
-             * A dictionary of Group Titles and associated settings if present.
+             * A list of Group Titles and associated settings if present.
              * example:
              * [
              *   {
-             *     "id": "Contact Details",
+             *     "id": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14",
              *     "label": "Contact Details",
              *     "expanded": true,
              *     "order": 1
              *   },
              *   {
-             *     "id": "Address Details",
+             *     "id": "e9a1ae28-27ba-4fa0-a79c-e279cc5c4a6e",
              *     "label": "Address Details",
              *     "expanded": false,
              *     "order": 2,
@@ -2434,39 +2434,7 @@ declare namespace Components {
              *   }
              * ]
              */
-            group_settings?: {
-                label: string;
-                id: string;
-                expanded?: boolean;
-                /**
-                 * example:
-                 * _is_composite_price = "false"
-                 */
-                render_condition?: string;
-                /**
-                 * Render order of the group
-                 */
-                order?: number;
-                /**
-                 * This group should only be active when the feature flag is enabled
-                 * example:
-                 * FF_MY_FEATURE_FLAG
-                 */
-                feature_flag?: string;
-                /**
-                 * This group should only be active when all the settings have the correct value
-                 */
-                settings_flag?: SettingFlag[];
-                info_tooltip_title?: {
-                    key?: string;
-                    default?: string;
-                };
-                _purpose?: /**
-                 * example:
-                 * taxonomy-slug:classification-slug
-                 */
-                ClassificationId[];
-            }[];
+            group_settings?: EntitySchemaGroup[];
             /**
              * Custom grid definitions for the layout. These settings are composed by managed and un-managed properties:
              * - Managed Properties: are interpreted and transformed into layout styles
@@ -2547,6 +2515,122 @@ declare namespace Components {
              * }
              */
             SearchMappings;
+        }
+        export interface EntitySchemaGroup {
+            /**
+             * example:
+             * Contact Details
+             */
+            label: string;
+            /**
+             * example:
+             * e18a532b-ae79-4d86-a6a5-e5dbfb579d14
+             */
+            id: string;
+            /**
+             * Render order of the group
+             */
+            order?: number;
+            /**
+             * Expanded by default
+             */
+            expanded?: boolean;
+            /**
+             * Only render group when render_condition resolves to true
+             * example:
+             * _is_composite_price = "false"
+             */
+            render_condition?: string;
+            /**
+             * Only render group when one of the purposes is enabled
+             */
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * This group should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This group should only be active when all the settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            info_tooltip_title?: {
+                /**
+                 * Translation key for info tooltip
+                 */
+                key?: string;
+                /**
+                 * Default string for info tooltip
+                 */
+                default?: string;
+            };
+        }
+        /**
+         * a readonly computed ID for the group including schema slug and the group ID
+         */
+        export interface EntitySchemaGroupWithCompositeID {
+            /**
+             * example:
+             * Contact Details
+             */
+            label: string;
+            /**
+             * example:
+             * e18a532b-ae79-4d86-a6a5-e5dbfb579d14
+             */
+            id: string;
+            /**
+             * Render order of the group
+             */
+            order?: number;
+            /**
+             * Expanded by default
+             */
+            expanded?: boolean;
+            /**
+             * Only render group when render_condition resolves to true
+             * example:
+             * _is_composite_price = "false"
+             */
+            render_condition?: string;
+            /**
+             * Only render group when one of the purposes is enabled
+             */
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * This group should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This group should only be active when all the settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            info_tooltip_title?: {
+                /**
+                 * Translation key for info tooltip
+                 */
+                key?: string;
+                /**
+                 * Default string for info tooltip
+                 */
+                default?: string;
+            };
+            /**
+             * example:
+             * contact:e18a532b-ae79-4d86-a6a5-e5dbfb579d14
+             */
+            composite_id?: string;
         }
         /**
          * The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities.
@@ -2672,17 +2756,17 @@ declare namespace Components {
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
-             * A dictionary of Group Titles and associated settings if present.
+             * A list of Group Titles and associated settings if present.
              * example:
              * [
              *   {
-             *     "id": "Contact Details",
+             *     "id": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14",
              *     "label": "Contact Details",
              *     "expanded": true,
              *     "order": 1
              *   },
              *   {
-             *     "id": "Address Details",
+             *     "id": "e9a1ae28-27ba-4fa0-a79c-e279cc5c4a6e",
              *     "label": "Address Details",
              *     "expanded": false,
              *     "order": 2,
@@ -2693,39 +2777,7 @@ declare namespace Components {
              *   }
              * ]
              */
-            group_settings?: {
-                label: string;
-                id: string;
-                expanded?: boolean;
-                /**
-                 * example:
-                 * _is_composite_price = "false"
-                 */
-                render_condition?: string;
-                /**
-                 * Render order of the group
-                 */
-                order?: number;
-                /**
-                 * This group should only be active when the feature flag is enabled
-                 * example:
-                 * FF_MY_FEATURE_FLAG
-                 */
-                feature_flag?: string;
-                /**
-                 * This group should only be active when all the settings have the correct value
-                 */
-                settings_flag?: SettingFlag[];
-                info_tooltip_title?: {
-                    key?: string;
-                    default?: string;
-                };
-                _purpose?: /**
-                 * example:
-                 * taxonomy-slug:classification-slug
-                 */
-                ClassificationId[];
-            }[];
+            group_settings?: EntitySchemaGroup[];
             /**
              * Custom grid definitions for the layout. These settings are composed by managed and un-managed properties:
              * - Managed Properties: are interpreted and transformed into layout styles
@@ -6688,12 +6740,6 @@ declare namespace Components {
 declare namespace Paths {
     namespace AddRelations {
         namespace Parameters {
-            export type ActivityId = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
@@ -6709,7 +6755,6 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             async?: Parameters.Async;
-            activity_id?: Parameters.ActivityId;
         }
         export type RequestBody = Components.Schemas.RelationItem[];
         namespace Responses {
@@ -6899,46 +6944,6 @@ declare namespace Paths {
         export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
         namespace Responses {
             export type $201 = /* A saved entity view */ Components.Schemas.SavedViewItem;
-        }
-    }
-    namespace CreateSchemaAttribute {
-        namespace Parameters {
-            /**
-             * example:
-             * contact
-             */
-            export type Slug = string;
-        }
-        export interface PathParameters {
-            slug: /**
-             * example:
-             * contact
-             */
-            Parameters.Slug;
-        }
-        export type RequestBody = Components.Schemas.Attribute;
-        namespace Responses {
-            export type $200 = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
-        }
-    }
-    namespace CreateSchemaCapability {
-        namespace Parameters {
-            /**
-             * example:
-             * contact
-             */
-            export type Slug = string;
-        }
-        export interface PathParameters {
-            slug: /**
-             * example:
-             * contact
-             */
-            Parameters.Slug;
-        }
-        export type RequestBody = /* Capabilities the Entity has. Turn features on/off for entities. */ Components.Schemas.EntityCapability;
-        namespace Responses {
-            export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
         }
     }
     namespace CreateTaxonomy {
@@ -7131,6 +7136,25 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+        }
+    }
+    namespace DeleteSchemaGroup {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
         }
     }
     namespace DeleteTaxonomy {
@@ -8002,6 +8026,25 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetSchemaGroup {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
+        }
+    }
     namespace GetSchemaVersions {
         namespace Parameters {
             export type DraftsFrom = number;
@@ -8358,6 +8401,50 @@ declare namespace Paths {
         export type RequestBody = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
         namespace Responses {
             export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+        }
+    }
+    namespace PutSchemaGroup {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        export type RequestBody = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
+        }
+    }
+    namespace RemoveRelations {
+        namespace Parameters {
+            export type Async = boolean;
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            async?: Parameters.Async;
+        }
+        export type RequestBody = Components.Schemas.RelationItem[];
+        namespace Responses {
+            export interface $204 {
+            }
         }
     }
     namespace SearchEntities {
@@ -9368,6 +9455,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddRelations.Responses.$200>
   /**
+   * removeRelations - removeRelations
+   * 
+   * Disassociate one or more entities to parent entity by removing items to a relation attribute
+   */
+  'removeRelations'(
+    parameters?: Parameters<Paths.RemoveRelations.PathParameters & Paths.RemoveRelations.QueryParameters> | null,
+    data?: Paths.RemoveRelations.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RemoveRelations.Responses.$204>
+  /**
    * getRelationsV2 - getRelationsV2
    * 
    * Returns 1st level direct relations for an entity with pagination.
@@ -9514,16 +9611,6 @@ export interface OperationMethods {
   /**
    * listTaxonomies - listTaxonomies
    * 
-   * List taxonomies in an organisation
-   */
-  'listTaxonomies'(
-    parameters?: Parameters<Paths.ListTaxonomies.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListTaxonomies.Responses.$200>
-  /**
-   * listTaxonomies - listTaxonomies
-   * 
    * List taxonomies in an organization
    */
   'listTaxonomies'(
@@ -9662,16 +9749,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaAttribute.Responses.$200>
   /**
-   * createSchemaAttribute - createSchemaAttribute
-   * 
-   * Adds an attribute to the schema
-   */
-  'createSchemaAttribute'(
-    parameters?: Parameters<Paths.CreateSchemaAttribute.PathParameters> | null,
-    data?: Paths.CreateSchemaAttribute.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateSchemaAttribute.Responses.$200>
-  /**
    * getSchemaCapability - getSchemaCapability
    * 
    * Get a schema capability from given capability ID
@@ -9702,15 +9779,35 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaCapability.Responses.$200>
   /**
-   * createSchemaCapability - createSchemaCapability
+   * getSchemaGroup - getSchemaGroup
    * 
-   * Adds a capability to the schema
+   * Get a schema group from given group composite ID
    */
-  'createSchemaCapability'(
-    parameters?: Parameters<Paths.CreateSchemaCapability.PathParameters> | null,
-    data?: Paths.CreateSchemaCapability.RequestBody,
+  'getSchemaGroup'(
+    parameters?: Parameters<Paths.GetSchemaGroup.PathParameters> | null,
+    data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateSchemaCapability.Responses.$200>
+  ): OperationResponse<Paths.GetSchemaGroup.Responses.$200>
+  /**
+   * putSchemaGroup - putSchemaGroup
+   * 
+   * Adds or updates an capability in the schema
+   */
+  'putSchemaGroup'(
+    parameters?: Parameters<Paths.PutSchemaGroup.PathParameters> | null,
+    data?: Paths.PutSchemaGroup.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutSchemaGroup.Responses.$200>
+  /**
+   * deleteSchemaGroup - deleteSchemaGroup
+   * 
+   * Deletes a Capability from a schema
+   */
+  'deleteSchemaGroup'(
+    parameters?: Parameters<Paths.DeleteSchemaGroup.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteSchemaGroup.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -10248,6 +10345,16 @@ export interface PathsDictionary {
       data?: Paths.AddRelations.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddRelations.Responses.$200>
+    /**
+     * removeRelations - removeRelations
+     * 
+     * Disassociate one or more entities to parent entity by removing items to a relation attribute
+     */
+    'delete'(
+      parameters?: Parameters<Paths.RemoveRelations.PathParameters & Paths.RemoveRelations.QueryParameters> | null,
+      data?: Paths.RemoveRelations.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RemoveRelations.Responses.$204>
   }
   ['/v2/entity/{slug}/{id}/relations']: {
     /**
@@ -10413,18 +10520,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListFavoriteViewsForUser.Responses.$200>
   }
-  ['/v1/entity/listTaxonomies']: {
-    /**
-     * listTaxonomies - listTaxonomies
-     * 
-     * List taxonomies in an organisation
-     */
-    'get'(
-      parameters?: Parameters<Paths.ListTaxonomies.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListTaxonomies.Responses.$200>
-  }
   ['/v1/entity/taxonomies']: {
     /**
      * listTaxonomies - listTaxonomies
@@ -10581,18 +10676,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaAttribute.Responses.$200>
   }
-  ['/v1/entity/schemas/attribute/{slug}']: {
-    /**
-     * createSchemaAttribute - createSchemaAttribute
-     * 
-     * Adds an attribute to the schema
-     */
-    'post'(
-      parameters?: Parameters<Paths.CreateSchemaAttribute.PathParameters> | null,
-      data?: Paths.CreateSchemaAttribute.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateSchemaAttribute.Responses.$200>
-  }
   ['/v1/entity/schemas/capabilities/{composite_id}']: {
     /**
      * getSchemaCapability - getSchemaCapability
@@ -10625,17 +10708,37 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaCapability.Responses.$200>
   }
-  ['/v1/entity/schemas/capability/{slug}']: {
+  ['/v1/entity/schemas/group/{composite_id}']: {
     /**
-     * createSchemaCapability - createSchemaCapability
+     * getSchemaGroup - getSchemaGroup
      * 
-     * Adds a capability to the schema
+     * Get a schema group from given group composite ID
      */
-    'post'(
-      parameters?: Parameters<Paths.CreateSchemaCapability.PathParameters> | null,
-      data?: Paths.CreateSchemaCapability.RequestBody,
+    'get'(
+      parameters?: Parameters<Paths.GetSchemaGroup.PathParameters> | null,
+      data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateSchemaCapability.Responses.$200>
+    ): OperationResponse<Paths.GetSchemaGroup.Responses.$200>
+    /**
+     * putSchemaGroup - putSchemaGroup
+     * 
+     * Adds or updates an capability in the schema
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutSchemaGroup.PathParameters> | null,
+      data?: Paths.PutSchemaGroup.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutSchemaGroup.Responses.$200>
+    /**
+     * deleteSchemaGroup - deleteSchemaGroup
+     * 
+     * Deletes a Capability from a schema
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteSchemaGroup.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteSchemaGroup.Responses.$200>
   }
 }
 

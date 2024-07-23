@@ -52,7 +52,7 @@
     "@epilot/discussion-client": "^1.8.0",
     "@epilot/email-settings-client": "^0.4.0",
     "@epilot/email-template-client": "^1.4.0",
-    "@epilot/entity-client": "^4.25.5",
+    "@epilot/entity-client": "^4.26.0",
     "@epilot/entity-mapping-client": "^0.7.0",
     "@epilot/file-client": "^1.10.0",
     "@epilot/message-client": "^1.7.0",
