@@ -20,6 +20,9 @@
     },
     {
       "PortalAuth": []
+    },
+    {
+      "EitherAuth": []
     }
   ],
   "paths": {
@@ -47,7 +50,19 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Meter"
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/Meter"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "journey_actions": {
+                                "$ref": "#/components/schemas/JourneyActions"
+                              }
+                            }
+                          }
+                        ]
                       }
                     }
                   }
@@ -228,6 +243,9 @@
                         "entity": {
                           "$ref": "#/components/schemas/Meter"
                         },
+                        "journey_actions": {
+                          "$ref": "#/components/schemas/JourneyActions"
+                        },
                         "relations": {
                           "type": "array",
                           "items": {
@@ -275,8 +293,7 @@
             "name": "meter_id",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "1446829f-4b6f-474e-b978-3997d89a7928"
+              "$ref": "#/components/schemas/EntityId"
             }
           }
         ],
@@ -380,10 +397,7 @@
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
-          {
-            "PortalAuth": []
+            "EitherAuth": []
           }
         ],
         "requestBody": {
@@ -439,10 +453,7 @@
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
-          {
-            "PortalAuth": []
+            "EitherAuth": []
           }
         ],
         "requestBody": {
@@ -592,10 +603,7 @@
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
-          {
-            "PortalAuth": []
+            "EitherAuth": []
           }
         ],
         "parameters": [
@@ -732,10 +740,7 @@
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
-          {
-            "PortalAuth": []
+            "EitherAuth": []
           }
         ],
         "parameters": [
@@ -1055,10 +1060,7 @@
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
-          {
-            "PortalAuth": []
+            "EitherAuth": []
           }
         ],
         "parameters": [
@@ -1227,6 +1229,11 @@
         "scheme": "bearer",
         "description": "Authorization header with customer portal OAuth2 bearer token",
         "bearerFormat": "JWT"
+      },
+      "EitherAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Portal or Epilot Bearer Token"
       }
     },
     "schemas": {
@@ -1240,7 +1247,8 @@
         }
       },
       "EntityId": {
-        "type": "string"
+        "type": "string",
+        "format": "uuid"
       },
       "BaseEntity": {
         "type": "object",
@@ -1314,8 +1322,7 @@
         "type": "object",
         "properties": {
           "entity_id": {
-            "type": "string",
-            "example": "9a2081a2-1615-44b8-b988-d757983290dd"
+            "$ref": "#/components/schemas/EntityId"
           },
           "_slug": {
             "type": "string",
@@ -1493,13 +1500,11 @@
             "description": "The reason for recording the reading"
           },
           "meter_id": {
-            "type": "string",
-            "example": "1446829f-4b6f-474e-b978-3997d89a7928",
+            "$ref": "#/components/schemas/EntityId",
             "description": "The ID of the associated meter"
           },
           "counter_id": {
-            "type": "string",
-            "example": "991a1821-43bc-46b8-967d-64a3d87c31f8",
+            "$ref": "#/components/schemas/EntityId",
             "description": "The ID of the associated meter counter"
           },
           "direction": {
@@ -1543,8 +1548,7 @@
             ],
             "properties": {
               "_id": {
-                "type": "string",
-                "example": "991a1821-43bc-46b8-967d-64a3d87c31f8"
+                "$ref": "#/components/schemas/EntityId"
               },
               "_schema": {
                 "type": "string",
@@ -1646,12 +1650,12 @@
           }
         }
       },
-      "SubmissionMeterReading": {
+      "AuthenticatedSubmission": {
         "type": "object",
+        "nullable": true,
         "required": [
           "meterId"
         ],
-        "nullable": true,
         "properties": {
           "meterId": {
             "$ref": "#/components/schemas/Id",
@@ -1663,6 +1667,36 @@
               "$ref": "#/components/schemas/CounterReadingOnSubmission"
             },
             "description": "- The counter readings of a meter\n- This is only sent when the user is authenticated while submitting a journey\n"
+          },
+          "readingDate": {
+            "type": "string",
+            "description": "If the value is not provided, the system will be set with the time the request is processed.",
+            "example": "2022-10-10T10:10:00.000Z"
+          },
+          "readBy": {
+            "type": "string",
+            "example": "John Doe",
+            "description": "The person who recorded the reading"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Storing the feed-in record",
+            "description": "The reason for recording the reading"
+          },
+          "maloId": {
+            "type": "string",
+            "example": "A09-123",
+            "description": "The MA-LO ID of the meter"
+          }
+        }
+      },
+      "UnauthenticatedSubmission": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "meterId": {
+            "$ref": "#/components/schemas/Id",
+            "description": "The ID of the associated meter"
           },
           "readingValue": {
             "type": "number",
@@ -1688,11 +1722,6 @@
             "type": "string",
             "example": "A09-123",
             "description": "The MA-LO ID of the meter"
-          },
-          "obisNumber": {
-            "type": "string",
-            "example": "A-34",
-            "description": "The OBIS number of the meter counter"
           },
           "readingUnit": {
             "$ref": "#/components/schemas/Unit",
@@ -1729,6 +1758,16 @@
           }
         }
       },
+      "SubmissionMeterReading": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AuthenticatedSubmission"
+          },
+          {
+            "$ref": "#/components/schemas/UnauthenticatedSubmission"
+          }
+        ]
+      },
       "Unit": {
         "type": "string",
         "enum": [
@@ -1756,6 +1795,61 @@
           "360",
           "journey-submission"
         ]
+      },
+      "ActionLabel": {
+        "type": "object",
+        "properties": {
+          "en": {
+            "type": "string",
+            "nullable": true
+          },
+          "de": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Rule": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute_value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "JourneyActions": {
+        "type": "object",
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "action_label": {
+            "type": "object",
+            "$ref": "#/components/schemas/ActionLabel",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rule"
+            },
+            "nullable": true
+          }
+        }
       },
       "ReadingWithMeter": {
         "type": "object",
