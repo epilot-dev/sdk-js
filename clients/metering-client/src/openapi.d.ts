@@ -15,13 +15,53 @@ declare namespace Components {
         export type Unauthorized = Schemas.ErrorResp;
     }
     namespace Schemas {
+        export interface ActionLabel {
+            en?: string | null;
+            de?: string | null;
+        }
+        export type AuthenticatedSubmission = {
+            /**
+             * The ID of the associated meter
+             */
+            meterId: Id;
+            /**
+             * - The counter readings of a meter
+             * - This is only sent when the user is authenticated while submitting a journey
+             *
+             */
+            readings?: CounterReadingOnSubmission[];
+            /**
+             * If the value is not provided, the system will be set with the time the request is processed.
+             * example:
+             * 2022-10-10T10:10:00.000Z
+             */
+            readingDate?: string;
+            /**
+             * The person who recorded the reading
+             * example:
+             * John Doe
+             */
+            readBy?: string;
+            /**
+             * The reason for recording the reading
+             * example:
+             * Storing the feed-in record
+             */
+            reason?: string;
+            /**
+             * The MA-LO ID of the meter
+             * example:
+             * A09-123
+             */
+            maloId?: string;
+        } | null;
         export interface BaseEntity {
             /**
              * Entity ID
              * example:
              * 3fa85f64-5717-4562-b3fc-2c963f66afa6
              */
-            _id: EntityId;
+            _id: EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -80,10 +120,10 @@ declare namespace Components {
         export interface Entity {
             [name: string]: any;
         }
-        export type EntityId = string;
+        export type EntityId = string; // uuid
         export interface EntityItem {
             [name: string]: any;
-            _id: EntityId;
+            _id: EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -119,11 +159,7 @@ declare namespace Components {
             _updated_at: string; // date-time
         }
         export interface EntityRelation {
-            /**
-             * example:
-             * 9a2081a2-1615-44b8-b988-d757983290dd
-             */
-            entity_id?: string;
+            entity_id?: EntityId /* uuid */;
             _slug?: "contact" | "contract";
         }
         export interface ErrorResp {
@@ -133,8 +169,14 @@ declare namespace Components {
             message?: string;
         }
         export type Id = string;
+        export interface JourneyActions {
+            journey_id?: string | null;
+            action_label?: ActionLabel;
+            slug?: string | null;
+            rules?: Rule[] | null;
+        }
         export interface Meter {
-            _id: EntityId;
+            _id: EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -251,7 +293,7 @@ declare namespace Components {
             };
         }
         export interface MeterCounter {
-            _id: EntityId;
+            _id: EntityId /* uuid */;
             /**
              * Title of the entity
              * example:
@@ -353,16 +395,12 @@ declare namespace Components {
             reason?: string;
             /**
              * The ID of the associated meter
-             * example:
-             * 1446829f-4b6f-474e-b978-3997d89a7928
              */
-            meter_id: string;
+            meter_id: EntityId /* uuid */;
             /**
              * The ID of the associated meter counter
-             * example:
-             * 991a1821-43bc-46b8-967d-64a3d87c31f8
              */
-            counter_id?: string;
+            counter_id?: EntityId /* uuid */;
             /**
              * The direction of the reading (feed-in or feed-out)
              */
@@ -453,18 +491,19 @@ declare namespace Components {
              */
             source?: Source;
         }
+        export interface Rule {
+            entity?: string | null;
+            attribute?: string | null;
+            attribute_value?: string | null;
+        }
         export type Source = "ECP" | "ERP" | "360" | "journey-submission";
-        export type SubmissionMeterReading = {
+        export type SubmissionMeterReading = AuthenticatedSubmission | UnauthenticatedSubmission;
+        export type TariffType = "ht" | "nt";
+        export type UnauthenticatedSubmission = {
             /**
              * The ID of the associated meter
              */
-            meterId: Id;
-            /**
-             * - The counter readings of a meter
-             * - This is only sent when the user is authenticated while submitting a journey
-             *
-             */
-            readings?: CounterReadingOnSubmission[];
+            meterId?: Id;
             /**
              * The reading value of the meter when the counterId is passed or when the meterType is one-tariff
              * example:
@@ -495,12 +534,6 @@ declare namespace Components {
              * A09-123
              */
             maloId?: string;
-            /**
-             * The OBIS number of the meter counter
-             * example:
-             * A-34
-             */
-            obisNumber?: string;
             /**
              * The unit of measurement for the reading
              */
@@ -534,7 +567,6 @@ declare namespace Components {
              */
             ntValue?: number;
         } | null;
-        export type TariffType = "ht" | "nt";
         export type Unit = "w" | "wh" | "kw" | "kWh" | "kvarh" | "mw" | "mWh" | "unit" | "cubic-meter" | "hour" | "day" | "month" | "year" | "percentage";
     }
 }
@@ -705,7 +737,124 @@ declare namespace Paths {
     namespace GetCustomerMeters {
         namespace Responses {
             export interface $200 {
-                data?: Components.Schemas.Meter[];
+                data?: {
+                    _id: Components.Schemas.EntityId /* uuid */;
+                    /**
+                     * Title of the entity
+                     * example:
+                     * Example Entity
+                     */
+                    _title: string;
+                    /**
+                     * Organization ID the entity belongs to
+                     * example:
+                     * 123
+                     */
+                    _org: string;
+                    /**
+                     * Array of entity tags
+                     * example:
+                     * [
+                     *   "example",
+                     *   "mock"
+                     * ]
+                     */
+                    _tags?: string[];
+                    /**
+                     * Creation timestamp of the entity
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _created_at: string; // date-time
+                    /**
+                     * Last update timestamp of the entity
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _updated_at: string; // date-time
+                    /**
+                     * The schema type of the meter
+                     */
+                    _schema: "meter";
+                    /**
+                     * The MA-LO ID of the meter
+                     * example:
+                     * A09-123
+                     */
+                    ma_lo_id?: string;
+                    /**
+                     * The type of the meter
+                     */
+                    meter_type?: "three-phase-meter" | "bellow-gas-meter" | "rotary-piston-meter" | "smart-meter" | "performance-meter" | "maximum-meter" | "turbine-gas-meter" | "ultrasonic-gas-meter" | "alternating-current-meter" | "modern-metering-system" | "intelligent-measuring-system" | "electronic-meter";
+                    /**
+                     * The tariff type of the meter
+                     * example:
+                     * Peak load tariff
+                     */
+                    tariff_type?: string;
+                    /**
+                     * The number of the meter
+                     * example:
+                     * J-1093-1AK
+                     */
+                    meter_number?: string;
+                    /**
+                     * The sector to which the meter belongs
+                     */
+                    sector?: "power" | "water" | "gas";
+                    /**
+                     * The location information of the meter
+                     * example:
+                     * [
+                     *   {
+                     *     "country": "Germany",
+                     *     "city": "Koln",
+                     *     "postal_code": 81475,
+                     *     "street": "Melatengürtel",
+                     *     "street_number": 71,
+                     *     "additional_info": "5. Etage",
+                     *     "_tags": [
+                     *       "billing",
+                     *       "delivery"
+                     *     ]
+                     *   }
+                     * ]
+                     */
+                    location?: {
+                        [key: string]: any;
+                    };
+                    /**
+                     * The usage purpose of the meter
+                     * example:
+                     * Domestic Usage
+                     */
+                    used_for?: string;
+                    /**
+                     * The manufacturer of the meter
+                     * example:
+                     * Energy One
+                     */
+                    manufacturer?: string;
+                    /**
+                     * The calibration date of the meter
+                     * example:
+                     * 2022-10-10T00:00:00.000Z
+                     */
+                    calibration_date?: string;
+                    /**
+                     * The contract associated with the meter
+                     */
+                    contract?: {
+                        $relation?: Components.Schemas.EntityRelation[];
+                    };
+                    /**
+                     * The customer associated with the meter
+                     */
+                    customer?: {
+                        $relation?: Components.Schemas.EntityRelation[];
+                    };
+                    journey_actions?: Components.Schemas.JourneyActions;
+                }[];
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
@@ -762,7 +911,7 @@ declare namespace Paths {
     }
     namespace GetMeter {
         namespace Parameters {
-            export type Id = Components.Schemas.EntityId;
+            export type Id = Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -771,6 +920,7 @@ declare namespace Paths {
             export interface $200 {
                 data?: {
                     entity?: Components.Schemas.Meter;
+                    journey_actions?: Components.Schemas.JourneyActions;
                     relations?: Components.Schemas.EntityItem[];
                 };
             }
@@ -782,18 +932,10 @@ declare namespace Paths {
     }
     namespace GetMeterCounters {
         namespace Parameters {
-            /**
-             * example:
-             * 1446829f-4b6f-474e-b978-3997d89a7928
-             */
-            export type MeterId = string;
+            export type MeterId = Components.Schemas.EntityId /* uuid */;
         }
         export interface QueryParameters {
-            meter_id: /**
-             * example:
-             * 1446829f-4b6f-474e-b978-3997d89a7928
-             */
-            Parameters.MeterId;
+            meter_id: Parameters.MeterId;
         }
         namespace Responses {
             export interface $200 {
@@ -807,7 +949,7 @@ declare namespace Paths {
     }
     namespace GetMetersByContractId {
         namespace Parameters {
-            export type ContractId = Components.Schemas.EntityId;
+            export type ContractId = Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             contract_id: Parameters.ContractId;
@@ -901,7 +1043,7 @@ declare namespace Paths {
     }
     namespace UpdateMeter {
         namespace Parameters {
-            export type Id = Components.Schemas.EntityId;
+            export type Id = Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
