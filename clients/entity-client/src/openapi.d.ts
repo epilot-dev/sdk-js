@@ -6436,7 +6436,7 @@ declare namespace Components {
             /**
              * List of locations where the taxonomy is enabled to be used. If empty, it's enabled for all locations.
              */
-            enabled_locations?: ("email-templates" | "emails" | "contacts" | "orders" | "contracts" | "meters" | "accounts" | "products" | "prices" | "opportunities" | "all_entities" | "files")[];
+            enabled_locations?: ("account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user")[];
         }
         export interface TaxonomyClassification {
             id?: /**

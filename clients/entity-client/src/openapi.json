@@ -6320,18 +6320,23 @@
             "items": {
               "type": "string",
               "enum": [
-                "email-templates",
-                "emails",
-                "contacts",
-                "orders",
-                "contracts",
-                "meters",
-                "accounts",
-                "products",
-                "prices",
-                "opportunities",
-                "all_entities",
-                "files"
+                "account",
+                "contact",
+                "contract",
+                "email_template",
+                "file",
+                "journey",
+                "meter_counter",
+                "meter",
+                "opportunity",
+                "order",
+                "partner",
+                "price",
+                "product",
+                "submission",
+                "tax",
+                "message",
+                "portal_user"
               ]
             }
           }
