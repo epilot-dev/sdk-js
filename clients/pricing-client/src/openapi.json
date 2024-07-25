@@ -111,6 +111,82 @@
     }
   ],
   "paths": {
+    "/v1/pricing:compute": {
+      "post": {
+        "description": "Compute price",
+        "summary": "calculatePricingDetails",
+        "operationId": "$calculatePricingDetails",
+        "tags": [
+          "Order API"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "line_items": {
+                    "$ref": "#/components/schemas/PriceItemsDto"
+                  }
+                }
+              },
+              "examples": {
+                "Compute price": {
+                  "value": {
+                    "line_items": [
+                      {
+                        "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                        "price_id": "396cb5f3-ea0b-4629-99ca-303661de5a9b",
+                        "quantity": 2
+                      },
+                      {
+                        "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                        "price_id": "2abe0c6f-63ef-417b-8c85-5546359382d9",
+                        "quantity": 1,
+                        "price_mappings": [
+                          {
+                            "price_id": "2abe0c6f-63ef-417b-8c85-5546359382d9",
+                            "frequency_unit": "one_time",
+                            "value": 2,
+                            "name": "Estimated consumption",
+                            "metadata": {
+                              "journey_title": "P&G",
+                              "step_name": "Number Inputs"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pricing details result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/order": {
       "post": {
         "description": "Create an order",
@@ -1340,102 +1416,6 @@
         "responses": {
           "204": {
             "description": "Credentials deleted"
-          },
-          "400": {
-            "description": "Invalid payload",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/public/opportunity": {
-      "post": {
-        "deprecated": true,
-        "description": "This API is Deprecated. Please use the Entity API or Submission API to create opportunities.\n\nEnables the creation of a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.\nThe `opportunity_number` can be used to universally identify an opportunity within epilot platform.\n",
-        "operationId": "$createOpportunity",
-        "summary": "createOpportunity",
-        "security": [
-          {},
-          {
-            "EpilotPublicAuth": []
-          }
-        ],
-        "tags": [
-          "Deprecated"
-        ],
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Ivy-Org-ID",
-            "description": "The target Organization Id represented by the caller",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Opportunity"
-              },
-              "examples": {
-                "Opportunity containing one Order": {
-                  "value": {
-                    "billing_address": {
-                      "street": "sdf",
-                      "street_number": "1",
-                      "city": "Berlin",
-                      "postal_code": "12045",
-                      "country": "de",
-                      "additional_info": "adasd"
-                    },
-                    "delivery_address": {
-                      "street": "sdf",
-                      "street_number": "1",
-                      "city": "Berlin",
-                      "postal_code": "12045",
-                      "country": "de",
-                      "additional_info": "adasd"
-                    },
-                    "items": {
-                      "$relation": [
-                        {
-                          "entity_id": "c8dbe8f3-28b6-4d77-aae8-47bc24a2532f",
-                          "_tags": [
-                            "journey"
-                          ]
-                        }
-                      ]
-                    },
-                    "_tags": [
-                      "journey",
-                      "ORWNr4iCN"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The new Opportunity.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Opportunity"
-                }
-              }
-            }
           },
           "400": {
             "description": "Invalid payload",

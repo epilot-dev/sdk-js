@@ -3396,6 +3396,15 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $CalculatePricingDetails {
+        export interface RequestBody {
+            line_items?: /* A valid set of product prices, quantities, (discounts) and taxes from a client. */ Components.Schemas.PriceItemsDto;
+        }
+        namespace Responses {
+            export type $200 = /* The result from the calculation of a set of price items. */ Components.Schemas.PricingDetails;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace $CheckoutCart {
         export interface HeaderParameters {
             "X-Ivy-Org-ID": Parameters.XIvyOrgID;
@@ -3425,33 +3434,6 @@ declare namespace Paths {
             export type $200 = Components.Schemas.ComputePriceResult;
             export type $400 = Components.Schemas.Error;
             export type $403 = Components.Schemas.Error;
-        }
-    }
-    namespace $CreateOpportunity {
-        export interface HeaderParameters {
-            "X-Ivy-Org-ID": Parameters.XIvyOrgID;
-        }
-        namespace Parameters {
-            export type XIvyOrgID = string;
-        }
-        export type RequestBody = /**
-         * The opportunity entity
-         * example:
-         * {
-         *   "$ref": "#/components/examples/opportunity"
-         * }
-         */
-        Components.Schemas.Opportunity;
-        namespace Responses {
-            export type $201 = /**
-             * The opportunity entity
-             * example:
-             * {
-             *   "$ref": "#/components/examples/opportunity"
-             * }
-             */
-            Components.Schemas.Opportunity;
-            export type $400 = Components.Schemas.Error;
         }
     }
     namespace $DeleteCredentials {
@@ -3672,6 +3654,16 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
+   * $calculatePricingDetails - calculatePricingDetails
+   * 
+   * Compute price
+   */
+  '$calculatePricingDetails'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$CalculatePricingDetails.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$CalculatePricingDetails.Responses.$200>
+  /**
    * createOrder - createOrder
    * 
    * Create an order
@@ -3812,23 +3804,21 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
-  /**
-   * $createOpportunity - createOpportunity
-   * 
-   * This API is Deprecated. Please use the Entity API or Submission API to create opportunities.
-   * 
-   * Enables the creation of a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
-   * The `opportunity_number` can be used to universally identify an opportunity within epilot platform.
-   * 
-   */
-  '$createOpportunity'(
-    parameters?: Parameters<Paths.$CreateOpportunity.HeaderParameters> | null,
-    data?: Paths.$CreateOpportunity.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.$CreateOpportunity.Responses.$201>
 }
 
 export interface PathsDictionary {
+  ['/v1/pricing:compute']: {
+    /**
+     * $calculatePricingDetails - calculatePricingDetails
+     * 
+     * Compute price
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$CalculatePricingDetails.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$CalculatePricingDetails.Responses.$200>
+  }
   ['/v1/order']: {
     /**
      * createOrder - createOrder
@@ -3995,22 +3985,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
-  }
-  ['/v1/public/opportunity']: {
-    /**
-     * $createOpportunity - createOpportunity
-     * 
-     * This API is Deprecated. Please use the Entity API or Submission API to create opportunities.
-     * 
-     * Enables the creation of a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
-     * The `opportunity_number` can be used to universally identify an opportunity within epilot platform.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<Paths.$CreateOpportunity.HeaderParameters> | null,
-      data?: Paths.$CreateOpportunity.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.$CreateOpportunity.Responses.$201>
   }
 }
 
