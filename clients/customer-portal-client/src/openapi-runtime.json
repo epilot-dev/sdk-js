@@ -322,6 +322,17 @@
         "operationId": "deletePortalUser"
       }
     },
+    "/v2/portal/user/update:email": {
+      "put": {
+        "operationId": "updatePortalUserEmail",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v2/porta/users/by-related-entity": {
       "get": {
         "operationId": "fetchPortalUsersByRelatedEntity",

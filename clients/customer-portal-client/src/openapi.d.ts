@@ -537,6 +537,21 @@ declare namespace Components {
              * ]
              */
             contact_identifiers?: string[];
+            /**
+             * example:
+             * {
+             *   "contact": [
+             *     "name",
+             *     "address"
+             *   ],
+             *   "contract": [
+             *     "installment_amount"
+             *   ]
+             * }
+             */
+            approval_state_attributes?: {
+                [name: string]: string[];
+            };
             email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
             /**
              * Permissions granted to a portal user while accessing entities
@@ -1986,6 +2001,21 @@ declare namespace Components {
              * ]
              */
             contact_identifiers?: string[];
+            /**
+             * example:
+             * {
+             *   "contact": [
+             *     "name",
+             *     "address"
+             *   ],
+             *   "contract": [
+             *     "installment_amount"
+             *   ]
+             * }
+             */
+            approval_state_attributes?: {
+                [name: string]: string[];
+            };
             email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
             /**
              * Permissions granted to a portal user while accessing entities
@@ -2571,7 +2601,7 @@ declare namespace Components {
             /**
              * Feature settings for the portal
              */
-            feature_settings?: {
+            feature_settings: {
                 /**
                  * Start page feature flag
                  */
@@ -2652,7 +2682,7 @@ declare namespace Components {
             /**
              * Stringified object with configuration details
              */
-            config?: string;
+            config: string;
             /**
              * Deprecated. Use registration_identifiers instead.
              * example:
@@ -2662,6 +2692,21 @@ declare namespace Components {
              * ]
              */
             contact_identifiers?: string[];
+            /**
+             * example:
+             * {
+             *   "contact": [
+             *     "name",
+             *     "address"
+             *   ],
+             *   "contract": [
+             *     "installment_amount"
+             *   ]
+             * }
+             */
+            approval_state_attributes?: {
+                [name: string]: string[];
+            };
             email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
             /**
              * Permissions granted to a portal user while accessing entities
@@ -4911,6 +4956,28 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpdatePortalUserEmail {
+        export interface RequestBody {
+            /**
+             * New email address of the portal user
+             * example:
+             * john@doe.com
+             */
+            email: string;
+            /**
+             * Password of the portal user for confirmation
+             */
+            password: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* The portal user entity */ Components.Schemas.PortalUser;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace UpdateWorkflowStepAsDone {
         namespace Parameters {
             /**
@@ -5398,6 +5465,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortalUser.Responses.$200>
+  /**
+   * updatePortalUserEmail - updatePortalUserEmail
+   * 
+   * Update portal user email
+   */
+  'updatePortalUserEmail'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.UpdatePortalUserEmail.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdatePortalUserEmail.Responses.$200>
   /**
    * fetchPortalUsersByRelatedEntity - fetchPortalUsersByRelatedEntity
    * 
@@ -6142,6 +6219,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortalUser.Responses.$200>
+  }
+  ['/v2/portal/user/update:email']: {
+    /**
+     * updatePortalUserEmail - updatePortalUserEmail
+     * 
+     * Update portal user email
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.UpdatePortalUserEmail.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdatePortalUserEmail.Responses.$200>
   }
   ['/v2/porta/users/by-related-entity']: {
     /**
