@@ -322,7 +322,7 @@
         "operationId": "deletePortalUser"
       }
     },
-    "/v2/portal/user/update:email": {
+    "/v2/portal/user/update/email": {
       "put": {
         "operationId": "updatePortalUserEmail",
         "requestBody": {

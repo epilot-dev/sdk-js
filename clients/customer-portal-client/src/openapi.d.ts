@@ -6220,7 +6220,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortalUser.Responses.$200>
   }
-  ['/v2/portal/user/update:email']: {
+  ['/v2/portal/user/update/email']: {
     /**
      * updatePortalUserEmail - updatePortalUserEmail
      * 
