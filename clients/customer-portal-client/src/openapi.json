@@ -1560,6 +1560,73 @@
         }
       }
     },
+    "/v2/portal/user/update/email": {
+      "put": {
+        "operationId": "updatePortalUserEmail",
+        "summary": "updatePortalUserEmail",
+        "description": "Update portal user email",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Request payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "New email address of the portal user",
+                    "example": "john@doe.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Password of the portal user for confirmation"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Portal user email updated successfully and will receive a confirmation email soon.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PortalUser"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/porta/users/by-related-entity": {
       "get": {
         "operationId": "fetchPortalUsersByRelatedEntity",
@@ -4892,6 +4959,24 @@
               "last_name"
             ]
           },
+          "approval_state_attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "contact": [
+                "name",
+                "address"
+              ],
+              "contract": [
+                "installment_amount"
+              ]
+            }
+          },
           "email_templates": {
             "$ref": "#/components/schemas/EmailTemplates"
           },
@@ -5040,6 +5125,11 @@
           {
             "$ref": "#/components/schemas/CommonConfigAttributes"
           }
+        ],
+        "required": [
+          "config",
+          "design_id",
+          "feature_settings"
         ]
       },
       "PortalConfig": {
