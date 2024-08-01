@@ -5,23 +5,6 @@
     "version": ""
   },
   "paths": {
-    "/v1/partners/{id}/invite": {
-      "post": {
-        "operationId": "invitePartner",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
     "/v1/partners/{id}/approve": {
       "post": {
         "operationId": "approvePartner",
@@ -44,23 +27,6 @@
             "required": true
           }
         ]
-      }
-    },
-    "/v1/partners/{id}/invite:resendEmail": {
-      "post": {
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "operationId": "resendPartnerInvitation",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
       }
     },
     "/v1/partners/assignables:search": {

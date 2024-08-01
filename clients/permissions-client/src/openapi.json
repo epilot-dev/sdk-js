@@ -415,6 +415,26 @@
                       }
                     ]
                   }
+                },
+                "Portal role": {
+                  "description": "Example portal role. Implicitly used by end users of portals",
+                  "value": {
+                    "id": "123:default_end_customer_portal_role",
+                    "name": "Default End Customer Portal Role",
+                    "slug": "default_end_customer_portal_role",
+                    "type": "portal_role",
+                    "organization_id": "123",
+                    "grants": [
+                      {
+                        "action": "entity:attribute:view",
+                        "resource": "contact:*/*"
+                      },
+                      {
+                        "action": "entity:edit",
+                        "resource": "opportunity*"
+                      }
+                    ]
+                  }
                 }
               }
             }
@@ -903,6 +923,23 @@
           }
         ]
       },
+      "PortalRole": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseRole"
+          },
+          {
+            "description": "A role that is applied to end customers and installers using the Portals",
+            "properties": {
+              "type": {
+                "enum": [
+                  "portal_role"
+                ]
+              }
+            }
+          }
+        ]
+      },
       "Role": {
         "oneOf": [
           {
@@ -916,76 +953,40 @@
           },
           {
             "$ref": "#/components/schemas/PartnerRole"
+          },
+          {
+            "$ref": "#/components/schemas/PortalRole"
           }
         ]
       },
       "RolePayload": {
-        "oneOf": [
+        "allOf": [
           {
-            "allOf": [
+            "properties": {
+              "grants": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GrantWithDependencies"
+                }
+              }
+            }
+          },
+          {
+            "oneOf": [
               {
                 "$ref": "#/components/schemas/UserRole"
               },
               {
-                "properties": {
-                  "grants": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/GrantWithDependencies"
-                    }
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "allOf": [
-              {
                 "$ref": "#/components/schemas/OrgRole"
               },
-              {
-                "properties": {
-                  "grants": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/GrantWithDependencies"
-                    }
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "allOf": [
               {
                 "$ref": "#/components/schemas/ShareRole"
               },
               {
-                "properties": {
-                  "grants": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/GrantWithDependencies"
-                    }
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "allOf": [
-              {
                 "$ref": "#/components/schemas/PartnerRole"
               },
               {
-                "properties": {
-                  "grants": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/GrantWithDependencies"
-                    }
-                  }
-                }
+                "$ref": "#/components/schemas/PortalRole"
               }
             ]
           }
@@ -1002,36 +1003,6 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RoleId"
-            }
-          }
-        }
-      },
-      "OrgAssignments": {
-        "type": "object",
-        "description": "All roles attached to an users of an organization",
-        "properties": {
-          "organization_id": {
-            "$ref": "#/components/schemas/OrganizationId"
-          },
-          "assignments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Assignment"
-            }
-          }
-        }
-      },
-      "OrgRoles": {
-        "type": "object",
-        "description": "All roles attached to an users of an organization",
-        "properties": {
-          "organization_id": {
-            "$ref": "#/components/schemas/OrganizationId"
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Role"
             }
           }
         }

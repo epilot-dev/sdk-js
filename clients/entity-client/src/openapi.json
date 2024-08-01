@@ -177,8 +177,351 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/{slug}/json/schema": {
+      "get": {
+        "operationId": "getJsonSchema",
+        "summary": "getJsonSchema",
+        "description": "Get formal JSON schema definition draft 2020-12 for the given epilot schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "$schema": "http://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                      },
+                      "_org": {
+                        "type": "string",
+                        "description": "Organization Id the entity belongs to",
+                        "readOnly": true
+                      },
+                      "_owners": {
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                          "description": "The user / organization owning this entity.\n\nNote: Owner implicitly has access to the entity regardless of ACLs.\n",
+                          "type": "object",
+                          "properties": {
+                            "org_id": {
+                              "type": "string",
+                              "example": "123"
+                            },
+                            "user_id": {
+                              "type": "string",
+                              "example": "123"
+                            }
+                          },
+                          "required": [
+                            "org_id"
+                          ]
+                        }
+                      },
+                      "_schema": {
+                        "readOnly": true,
+                        "type": "string"
+                      },
+                      "_title": {
+                        "readOnly": true,
+                        "type": "string"
+                      },
+                      "_tags": {
+                        "type": "array",
+                        "nullable": true,
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "_created_at": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "_updated_at": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "_acl": {
+                        "readOnly": true,
+                        "type": "object",
+                        "description": "Access control list (ACL) for an entity. Defines sharing access to external orgs or users.",
+                        "additionalProperties": true,
+                        "properties": {
+                          "view": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "org:456"
+                            }
+                          },
+                          "edit": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "org:456"
+                            }
+                          },
+                          "delete": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "org:456"
+                            }
+                          }
+                        }
+                      },
+                      "title": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                          "Dr.",
+                          "Prof.",
+                          "Prof. Dr."
+                        ]
+                      },
+                      "salutation": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                          "Mr.",
+                          "Ms. / Mrs.",
+                          "Company",
+                          "Contact Person",
+                          "Company/Contact Person",
+                          "Spouse",
+                          "Family",
+                          "Ownership",
+                          "Assembly",
+                          "Other"
+                        ]
+                      },
+                      "first_name": {
+                        "type": "string"
+                      },
+                      "last_name": {
+                        "type": "string"
+                      },
+                      "customer_number": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "birthdate": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                      },
+                      "account": {
+                        "type": "object",
+                        "nullable": true,
+                        "properties": {
+                          "$relation": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "entity_id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "example": "123e4567-e89b-12d3-a456-426614174000"
+                                },
+                                "_tags": {
+                                  "type": "array",
+                                  "nullable": true,
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "required": [
+                                "entity_id"
+                              ]
+                            }
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "address": {
+                        "type": "array",
+                        "nullable": true,
+                        "description": "Addresses as a list of object, the element with index 0 is treated as the primary one.\n",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "street": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "street_number": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "postal_code": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "city": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "country": {
+                              "type": "string",
+                              "nullable": true,
+                              "enum": [
+                                "DE",
+                                "AT",
+                                "CH"
+                              ]
+                            },
+                            "additional_info": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "_tags": {
+                              "type": "array",
+                              "nullable": true,
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "_id": {
+                              "type": "string",
+                              "example": "xHcOoJCa07eysJ1GaQeSb"
+                            }
+                          },
+                          "required": [
+                            "street",
+                            "street_number",
+                            "postal_code",
+                            "city",
+                            "country"
+                          ]
+                        }
+                      },
+                      "email": {
+                        "type": "array",
+                        "nullable": true,
+                        "description": "Email addresses as a list of object, the element with index 0 is treated as the primary one.\n",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "_id": {
+                              "type": "string",
+                              "example": "xHcOoJCa07eysJ1GaQeSb"
+                            },
+                            "_tags": {
+                              "type": "array",
+                              "nullable": true,
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "email": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "email"
+                          ]
+                        }
+                      },
+                      "phone": {
+                        "type": "array",
+                        "description": "Phone numbers as a list of object, the element with index 0 is treated as the primary one.\n",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "_id": {
+                              "type": "string",
+                              "example": "xHcOoJCa07eysJ1GaQeSb"
+                            },
+                            "_tags": {
+                              "type": "array",
+                              "nullable": true,
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "phone": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "phone"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "first_name",
+                      "last_name",
+                      "_id",
+                      "_org",
+                      "_owners",
+                      "_schema",
+                      "_title",
+                      "_tags",
+                      "_created_at",
+                      "_updated_at",
+                      "_acl"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/{slug}/json/example": {
+      "get": {
+        "operationId": "getSchemaExample",
+        "summary": "getSchemaExample",
+        "description": "Get a full example entity for the given schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "examples": {
+                  "contact": {
+                    "$ref": "#/components/examples/ContactEntity"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -356,7 +699,7 @@
       "post": {
         "operationId": "searchEntities",
         "summary": "searchEntities",
-        "description": "Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.\n\nPassing comma-separated `x-epilot-org-id` is supported for cross-org entity search.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  },\n  \"addresses\": {\n    \"$relation_ref\": [\n      { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ],\n  \"addresses\": [\n    {\n      \"$relation_ref\": { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      \"_id\": \"123\",\n      \"address\": \"address 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation_ref\": { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n      \"_id\": \"234\",\n      \"address\": \"address 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
+        "description": "Search for entities. Supports ordering and pagination. [Lucene query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) supported for complex querying.\n\nPassing comma-separated `x-epilot-org-id` is supported for cross-org entity search.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  },\n  \"addresses\": {\n    \"$relation_ref\": [\n      { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ],\n  \"addresses\": [\n    {\n      \"$relation_ref\": { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      \"_id\": \"123\",\n      \"address\": \"address 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation_ref\": { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n      \"_id\": \"234\",\n      \"address\": \"address 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
         "tags": [
           "Entities"
         ],
@@ -365,6 +708,42 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/EntitySearchParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySearchResults"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity:list": {
+      "post": {
+        "operationId": "listEntities",
+        "summary": "listEntities",
+        "description": "List entities that meet the specified conditions.\n\nSupports the same options as entity search but utilizes filtering using a subset of [Elastic Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html) and does not perform scoring.\n",
+        "tags": [
+          "Entities"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityListParams"
               }
             }
           }
@@ -523,7 +902,7 @@
       "patch": {
         "operationId": "upsertEntity",
         "summary": "upsertEntity",
-        "description": "Create or update an entity using `unique_key`\n\n- If no entities are matched, a new entity is created.\n- If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.\n- If more than one entity is matched a `409` Error is returned\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated` or `EntityUpdated`\n",
+        "description": "Create or update an entity using `unique_key`\n\n- If no entities are matched, a new entity is created.\n- If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated` or `EntityUpdated`\n",
         "tags": [
           "Entities"
         ],
@@ -539,6 +918,16 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "name": "strict",
+            "description": "Strict mode = return 409 if more than one entity is matched",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "requestBody": {
@@ -546,6 +935,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "additionalProperties": false,
                 "properties": {
                   "unique_key": {
                     "type": "array",
@@ -1221,9 +1611,6 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
-          },
-          {
-            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "requestBody": {
@@ -1265,6 +1652,59 @@
                 }
               }
             }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeRelations",
+        "summary": "removeRelations",
+        "description": "Disassociate one or more entities to parent entity by removing items to a relation attribute",
+        "tags": [
+          "Relations"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RelationItem"
+                }
+              },
+              "example": [
+                {
+                  "attribute": "contacts",
+                  "entity_id": "e8878f62-2d3d-4c86-bfe7-01a4180ff048",
+                  "_tags": [
+                    "billing"
+                  ]
+                },
+                {
+                  "attribute": "contacts",
+                  "entity_id": "ee8a2af9-fb36-4981-b848-4e65275851af"
+                },
+                {
+                  "attribute": "opportunities",
+                  "entity_id": "30990430-a53d-41a2-83db-2de072dc4dd4"
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Relations deleted with success."
           }
         }
       }
@@ -1473,6 +1913,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "additionalProperties": false,
                 "properties": {
                   "_tags": {
                     "type": "array",
@@ -1679,7 +2120,7 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 150,
+              "default": 80,
               "minimum": 1,
               "maximum": 250
             }
@@ -1780,7 +2221,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SavedView"
+                "$ref": "#/components/schemas/SavedViewItem"
               }
             }
           }
@@ -1837,48 +2278,6 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/SavedViewItem"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/entity/listTaxonomies": {
-      "get": {
-        "deprecated": true,
-        "operationId": "listTaxonomies",
-        "summary": "listTaxonomies",
-        "description": "List taxonomies in an organisation",
-        "tags": [
-          "Taxonomy"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "include_disabled",
-            "description": "Include disabled taxonomies",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns list of taxonomies in an organisation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Taxonomy"
                       }
                     }
                   }
@@ -2434,7 +2833,7 @@
       "put": {
         "operationId": "putSchemaAttribute",
         "summary": "putSchemaAttribute",
-        "description": "Adds or updates an attribute in the schema",
+        "description": "Updates an attribute in the schema",
         "tags": [
           "Schemas"
         ],
@@ -2610,6 +3009,116 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EntityCapabilityWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/group/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaGroup",
+        "summary": "getSchemaGroup",
+        "description": "Get a schema group from given group composite ID",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "composite_id",
+            "description": "Schema Slug and the Group ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySchemaGroupWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putSchemaGroup",
+        "summary": "putSchemaGroup",
+        "description": "Adds or updates an capability in the schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "composite_id",
+            "description": "Schema Slug and the Group ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntitySchemaGroupWithCompositeID"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySchemaGroupWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSchemaGroup",
+        "summary": "deleteSchemaGroup",
+        "description": "Deletes a Capability from a schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "name": "composite_id",
+            "description": "Schema Slug and the Group ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^.+:.+$",
+              "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySchemaGroupWithCompositeID"
                 }
               }
             }
@@ -2806,72 +3315,19 @@
           },
           "group_settings": {
             "type": "array",
-            "description": "A dictionary of Group Titles and associated settings if present.",
+            "description": "A list of Group Titles and associated settings if present.",
             "items": {
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "string"
-                },
-                "expanded": {
-                  "type": "boolean"
-                },
-                "render_condition": {
-                  "type": "string",
-                  "example": "_is_composite_price = \"false\""
-                },
-                "order": {
-                  "description": "Render order of the group",
-                  "type": "integer",
-                  "default": 0
-                },
-                "feature_flag": {
-                  "type": "string",
-                  "example": "FF_MY_FEATURE_FLAG",
-                  "description": "This group should only be active when the feature flag is enabled"
-                },
-                "settings_flag": {
-                  "type": "array",
-                  "description": "This group should only be active when all the settings have the correct value",
-                  "items": {
-                    "$ref": "#/components/schemas/SettingFlag"
-                  }
-                },
-                "info_tooltip_title": {
-                  "type": "object",
-                  "properties": {
-                    "key": {
-                      "type": "string"
-                    },
-                    "default": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "_purpose": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ClassificationId"
-                  }
-                }
-              },
-              "required": [
-                "label",
-                "id"
-              ]
+              "$ref": "#/components/schemas/EntitySchemaGroup"
             },
             "example": [
               {
-                "id": "Contact Details",
+                "id": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14",
                 "label": "Contact Details",
                 "expanded": true,
                 "order": 1
               },
               {
-                "id": "Address Details",
+                "id": "e9a1ae28-27ba-4fa0-a79c-e279cc5c4a6e",
                 "label": "Address Details",
                 "expanded": false,
                 "order": 2,
@@ -2998,6 +3454,88 @@
           }
         ]
       },
+      "EntitySchemaGroup": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "example": "Contact Details"
+          },
+          "id": {
+            "type": "string",
+            "example": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14"
+          },
+          "order": {
+            "description": "Render order of the group",
+            "type": "integer",
+            "default": 0
+          },
+          "expanded": {
+            "description": "Expanded by default",
+            "type": "boolean",
+            "default": false
+          },
+          "render_condition": {
+            "description": "Only render group when render_condition resolves to true",
+            "type": "string",
+            "example": "_is_composite_price = \"false\""
+          },
+          "_purpose": {
+            "description": "Only render group when one of the purposes is enabled",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClassificationId"
+            }
+          },
+          "feature_flag": {
+            "type": "string",
+            "example": "FF_MY_FEATURE_FLAG",
+            "description": "This group should only be active when the feature flag is enabled"
+          },
+          "settings_flag": {
+            "type": "array",
+            "description": "This group should only be active when all the settings have the correct value",
+            "items": {
+              "$ref": "#/components/schemas/SettingFlag"
+            }
+          },
+          "info_tooltip_title": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "description": "Translation key for info tooltip",
+                "type": "string"
+              },
+              "default": {
+                "description": "Default string for info tooltip",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "label",
+          "id"
+        ]
+      },
+      "EntitySchemaGroupWithCompositeID": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EntitySchemaGroup"
+          },
+          {
+            "type": "object",
+            "description": "a readonly computed ID for the group including schema slug and the group ID",
+            "properties": {
+              "composite_id": {
+                "type": "string",
+                "readOnly": true,
+                "example": "contact:e18a532b-ae79-4d86-a6a5-e5dbfb579d14"
+              }
+            }
+          }
+        ]
+      },
       "Attribute": {
         "anyOf": [
           {
@@ -3107,6 +3645,11 @@
       "BaseAttribute": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID for the entity attribute",
+            "example": "d5839b94-ba20-4225-a78e-76951d352bd6"
+          },
           "name": {
             "type": "string"
           },
@@ -4270,6 +4813,11 @@
         "description": "Capabilities the Entity has. Turn features on/off for entities.",
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID for the entity capability",
+            "example": "d5839b94-ba20-4225-a78e-76951d352bd6"
+          },
           "name": {
             "type": "string",
             "description": "Unique name for the capability",
@@ -4577,14 +5125,17 @@
         "additionalProperties": true,
         "properties": {
           "_id": {
+            "readOnly": true,
             "$ref": "#/components/schemas/EntityId"
           },
           "_org": {
             "type": "string",
+            "readOnly": true,
             "description": "Organization Id the entity belongs to"
           },
           "_owners": {
             "type": "array",
+            "readOnly": true,
             "items": {
               "$ref": "#/components/schemas/EntityOwner"
             }
@@ -4607,14 +5158,17 @@
           "_created_at": {
             "type": "string",
             "format": "date-time",
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           },
           "_updated_at": {
             "type": "string",
             "format": "date-time",
-            "nullable": true
+            "nullable": true,
+            "readOnly": true
           },
           "_acl": {
+            "readOnly": true,
             "$ref": "#/components/schemas/EntityAcl"
           }
         },
@@ -4692,6 +5246,87 @@
           }
         },
         "additionalProperties": true
+      },
+      "HydratedEntity": {
+        "type": "object",
+        "description": "Entity with relation data resolved into the attribute values",
+        "properties": {
+          "_relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/EntityId"
+                }
+              },
+              "required": [
+                "entity_id"
+              ]
+            }
+          }
+        },
+        "additionalProperties": true,
+        "required": [
+          "_relations"
+        ],
+        "example": {
+          "_relations": [
+            {
+              "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            }
+          ],
+          "status": "active",
+          "customer_number": "abc123",
+          "email": [
+            {
+              "label": "work",
+              "email": "user@example.com"
+            }
+          ],
+          "phone": [
+            {
+              "label": "work",
+              "phone": "+49123456789"
+            }
+          ],
+          "first_name": "First Name",
+          "middle_name": "Middle Name",
+          "last_name": "Last Name",
+          "date_of_birth": "2019-08-24",
+          "title": "Mr.",
+          "account": [
+            {
+              "status": "active",
+              "name": "Company name",
+              "company_email": [
+                {
+                  "label": "Company email",
+                  "email": "company@example.com"
+                }
+              ],
+              "company_phone": [
+                {
+                  "label": "Support phone",
+                  "phone": "+49123456789"
+                }
+              ],
+              "company_website": "https://example.com",
+              "tax_id": "DE123456789",
+              "tax_exemption": "2019-08-24",
+              "contacts": {
+                "$relation": [
+                  {
+                    "_tags": [
+                      "CEO"
+                    ],
+                    "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  }
+                ]
+              }
+            }
+          ]
+        }
       },
       "EntityItem": {
         "allOf": [
@@ -4867,13 +5502,241 @@
         ]
       },
       "EntitySearchParams": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "q": {
+                "description": "Lucene [queries supported with ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax)",
+                "type": "string",
+                "example": "_schema:contact AND status:active"
+              },
+              "include_scores": {
+                "type": "boolean",
+                "default": false,
+                "description": "Adds a `_score` number field to results that can be used to rank by match score"
+              },
+              "sort": {},
+              "from": {},
+              "size": {},
+              "hydrate": {},
+              "fields": {},
+              "aggs": {}
+            },
+            "additionalProperties": false,
+            "required": [
+              "q"
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/EntitySearchOptions"
+          }
+        ]
+      },
+      "EntityListParams": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "filter": {
+                "$ref": "#/components/schemas/SearchFilter"
+              },
+              "allow_targeting_all_schemas": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow running the listing without any schema filter. This is disabled by default to prevent security and performance issues if done by an accident."
+              },
+              "sort": {},
+              "from": {},
+              "size": {},
+              "hydrate": {},
+              "fields": {},
+              "aggs": {}
+            },
+            "additionalProperties": false,
+            "required": [
+              "filter"
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/EntitySearchOptions"
+          }
+        ]
+      },
+      "SearchFilter": {
+        "type": "array",
+        "description": "A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.",
+        "items": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 1,
+          "properties": {
+            "term": {
+              "description": "Returns documents that contain an exact term in a provided field.\n\nTo return a document, the query term must exactly match the queried field's value, including whitespace and capitalization.\n\nYou likely DO NOT want to use this filter on text fields and want to target its .keyword instead.\n",
+              "externalDocs": {
+                "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-term-query.html"
+              },
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 1,
+              "additionalProperties": {
+                "$ref": "#/components/schemas/SearchFilterValue"
+              },
+              "example": {
+                "_schema": "contact"
+              }
+            },
+            "terms": {
+              "description": "Returns documents that contain one of the exact terms in a provided field. See term filter for more info.",
+              "externalDocs": {
+                "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html"
+              },
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 1,
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SearchFilterValue"
+                }
+              },
+              "example": {
+                "status": [
+                  "active"
+                ]
+              }
+            },
+            "ids": {
+              "description": "Returns documents based on their IDs.",
+              "externalDocs": {
+                "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-ids-query.html"
+              },
+              "type": "object",
+              "properties": {
+                "values": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "values": [
+                  "550e8400-e29b-41d4-a716-446655440000"
+                ]
+              }
+            },
+            "range": {
+              "description": "Returns documents with fields that have terms within a certain range.",
+              "externalDocs": {
+                "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-range-query.html"
+              },
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 1,
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "gt": {
+                    "$ref": "#/components/schemas/SearchFilterValue"
+                  },
+                  "gte": {
+                    "$ref": "#/components/schemas/SearchFilterValue"
+                  },
+                  "lt": {
+                    "$ref": "#/components/schemas/SearchFilterValue"
+                  },
+                  "lte": {
+                    "$ref": "#/components/schemas/SearchFilterValue"
+                  },
+                  "format": {
+                    "type": "string",
+                    "description": "The date format used to parse date values."
+                  },
+                  "relation": {
+                    "type": "string",
+                    "enum": [
+                      "INTERSECTS",
+                      "CONTAINS",
+                      "WITHIN"
+                    ],
+                    "description": "Indicates how the range query matches values for range fields."
+                  },
+                  "time_zone": {
+                    "type": "string",
+                    "description": "Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query to UTC."
+                  }
+                }
+              },
+              "example": {
+                "_created_at": {
+                  "gte": "2021-01-01T00:00:00.000Z",
+                  "lte": "2021-01-31T23:59:59.999Z"
+                }
+              }
+            },
+            "exists": {
+              "description": "Returns documents that have a value in the specified field.",
+              "externalDocs": {
+                "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html"
+              },
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "field"
+              ],
+              "example": {
+                "field": "_tags"
+              }
+            },
+            "$and": {
+              "$ref": "#/components/schemas/SearchFilter"
+            },
+            "$or": {
+              "$ref": "#/components/schemas/SearchFilter"
+            },
+            "$not": {
+              "$ref": "#/components/schemas/SearchFilter"
+            }
+          }
+        },
+        "example": [
+          {
+            "term": {
+              "_schema": "contact"
+            }
+          },
+          {
+            "terms": {
+              "status": [
+                "active"
+              ]
+            }
+          }
+        ]
+      },
+      "SearchFilterValue": {
+        "description": "A filter field value.",
+        "oneOf": [
+          {
+            "type": "string",
+            "nullable": true
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "EntitySearchOptions": {
         "type": "object",
         "properties": {
-          "q": {
-            "description": "Lucene queries supported with ElasticSearch",
-            "type": "string",
-            "example": "_schema:contact AND status:active"
-          },
           "sort": {
             "type": "string",
             "example": "_created_at:desc"
@@ -4897,11 +5760,6 @@
           "fields": {
             "$ref": "#/components/schemas/FieldsParam"
           },
-          "include_scores": {
-            "type": "boolean",
-            "default": false,
-            "description": "Adds a `_score` number field to results that can be used to rank by match score"
-          },
           "aggs": {
             "type": "object",
             "description": "Aggregation supported by ElasticSearch allows summarizing data as metrics, statistics, or other analytics.",
@@ -4913,10 +5771,7 @@
               }
             }
           }
-        },
-        "required": [
-          "q"
-        ]
+        }
       },
       "FieldsParam": {
         "type": "array",
@@ -4935,6 +5790,7 @@
       },
       "EntityImportParams": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "S3Reference": {
             "type": "object",
@@ -5099,6 +5955,7 @@
       },
       "Activity": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "type": {
             "type": "string",
@@ -5406,7 +6263,7 @@
             "example": "Purposes"
           },
           "kind": {
-            "readonly": true,
+            "readOnly": true,
             "type": "string",
             "enum": [
               "system",
@@ -5426,23 +6283,23 @@
             "example": "#FF5733"
           },
           "created_at": {
-            "readonly": true,
+            "readOnly": true,
             "type": "string",
             "format": "date-time"
           },
           "updated_at": {
-            "readonly": true,
+            "readOnly": true,
             "type": "string",
             "format": "date-time"
           },
           "deleted_at": {
-            "readonly": true,
+            "readOnly": true,
             "type": "string",
             "format": "date-time",
             "description": "Date when the taxonomy was soft-deleted (enabled: false)"
           },
           "created_by": {
-            "readonly": true,
+            "readOnly": true,
             "type": "string",
             "description": "User ID of the creator",
             "example": "10598"
@@ -5451,6 +6308,37 @@
             "type": "boolean",
             "description": "Whether the taxonomy is enabled or not",
             "example": true
+          },
+          "order": {
+            "type": "number",
+            "description": "Position of the taxonomy",
+            "example": 10
+          },
+          "enabled_locations": {
+            "description": "List of locations where the taxonomy is enabled to be used. If empty, it's enabled for all locations.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "account",
+                "contact",
+                "contract",
+                "email_template",
+                "file",
+                "journey",
+                "meter_counter",
+                "meter",
+                "opportunity",
+                "order",
+                "partner",
+                "price",
+                "product",
+                "submission",
+                "tax",
+                "message",
+                "portal_user"
+              ]
+            }
           }
         }
       },
@@ -6384,9 +7272,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }

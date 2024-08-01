@@ -140,9 +140,6 @@
                       "enum": [
                         "User created successfully"
                       ]
-                    },
-                    "response": {
-                      "$ref": "#/components/schemas/PortalUser"
                     }
                   }
                 }
@@ -420,6 +417,66 @@
         "responses": {
           "204": {
             "description": "Portal deleted successfully."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/external-links": {
+      "get": {
+        "operationId": "getExternalLinks",
+        "summary": "getExternalLinks",
+        "description": "Retrieves the portal configuration external links.",
+        "tags": [
+          "ECP Admin",
+          "ECP"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          },
+          {
+            "in": "query",
+            "name": "contactId",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "description": "Contact ID of the user"
+          }
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal config links retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JourneyActions"
+                  }
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -1129,6 +1186,12 @@
                       "items": {
                         "$ref": "#/components/schemas/EntityItem"
                       }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
+                      }
                     }
                   }
                 }
@@ -1245,124 +1308,6 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/contact/email/count": {
-      "get": {
-        "operationId": "getCountByEmail",
-        "summary": "getCountByEmail",
-        "deprecated": true,
-        "description": "Check Contact by email. Deprecated in favor of /contact/exists.",
-        "tags": [
-          "Public"
-        ],
-        "security": [],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "email",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Portal user Email Address",
-              "example": "test@test.com"
-            }
-          },
-          {
-            "in": "query",
-            "name": "org_id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Organization ID",
-              "example": 123
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Contact count for the requested email successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "number",
-                      "description": "Count of Contact",
-                      "example": 2
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/public/contact/count": {
-      "post": {
-        "deprecated": true,
-        "operationId": "getContactCount",
-        "summary": "getContactCount",
-        "description": "Return number of contacts matching identifier values. Deprecated in favor of /contact/exists.",
-        "security": [],
-        "tags": [
-          "Public"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Origin"
-            },
-            "description": "Origin of the portal"
-          }
-        ],
-        "requestBody": {
-          "description": "Request payload",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ContactCountRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Contact count for the request successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "number",
-                      "description": "Count of Contact",
-                      "example": 2
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/InvalidRequest"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -1615,6 +1560,73 @@
         }
       }
     },
+    "/v2/portal/user/update/email": {
+      "put": {
+        "operationId": "updatePortalUserEmail",
+        "summary": "updatePortalUserEmail",
+        "description": "Update portal user email",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Request payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "New email address of the portal user",
+                    "example": "john@doe.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Password of the portal user for confirmation"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Portal user email updated successfully and will receive a confirmation email soon.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PortalUser"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/porta/users/by-related-entity": {
       "get": {
         "operationId": "fetchPortalUsersByRelatedEntity",
@@ -1677,10 +1689,40 @@
         }
       }
     },
-    "/v2/portal/user/confirm/{id}": {
+    "/v2/portal/user/confirm": {
       "get": {
         "operationId": "confirmUser",
         "summary": "confirmUser",
+        "description": "Confirm a portal user",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "confirmation_link_token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Confirmation link token"
+            }
+          }
+        ],
+        "responses": {
+          "301": {
+            "description": "User is confirmed and redirected to the portal successfully."
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/user/confirm/{id}": {
+      "get": {
+        "operationId": "confirmUserWithUserId",
+        "summary": "confirmUserWithUserId",
         "description": "Confirm a portal user",
         "tags": [
           "Public"
@@ -1983,7 +2025,19 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Order"
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/Order"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "journey_actions": {
+                                "$ref": "#/components/schemas/JourneyActions"
+                              }
+                            }
+                          }
+                        ]
                       }
                     }
                   }
@@ -1996,6 +2050,73 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/order/{id}/acceptance": {
+      "post": {
+        "operationId": "postOrderAcceptance",
+        "summary": "postOrderAcceptance",
+        "description": "Accept/decline an offer by id",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of order"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptanceDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order was accepted/declined successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -2071,6 +2192,12 @@
                       "description": "The related workflows of the requested order",
                       "items": {
                         "$ref": "#/components/schemas/WorkflowExecution"
+                      }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
                       }
                     }
                   }
@@ -2203,7 +2330,19 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Opportunity"
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/Opportunity"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "journey_actions": {
+                                "$ref": "#/components/schemas/JourneyActions"
+                              }
+                            }
+                          }
+                        ]
                       }
                     }
                   }
@@ -2468,6 +2607,12 @@
                       "items": {
                         "$ref": "#/components/schemas/WorkflowExecution"
                       }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
+                      }
                     }
                   }
                 }
@@ -2601,7 +2746,19 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Contract"
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/Contract"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "journey_actions": {
+                                "$ref": "#/components/schemas/JourneyActions"
+                              }
+                            }
+                          }
+                        ]
                       }
                     }
                   }
@@ -2688,6 +2845,12 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/WorkflowExecution"
+                      }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
                       }
                     }
                   }
@@ -2894,77 +3057,6 @@
                 }
               }
             }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/entity/by-identifiers/{slug}": {
-      "post": {
-        "operationId": "getEntitiesByIdentifiers",
-        "summary": "getEntitiesByIdentifiers",
-        "deprecated": true,
-        "description": "Get entities (contract) by identifiers. Deprecated in favor of /contract/by-identifiers.",
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            },
-            "required": true,
-            "description": "The slug of the entity to search by. Currently the only supported value is 'contract'."
-          }
-        ],
-        "requestBody": {
-          "description": "The entities are retrieved successfully.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Entity",
-                "example": "```json\n  {\n    \"name\": \"My Contract\",\n    \"contract_number\": \"123\"\n  }\n```\n"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The returned Entities",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/EntityItem"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/InvalidRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -3277,14 +3369,17 @@
           {
             "in": "query",
             "name": "entities",
-            "description": "Comma-separated list of entities which the activity primarily concerns",
+            "description": "Comma-separated list of entities which the activity primarily concerns. Deprecated - ignored as the list of entities is automatically determined now.",
+            "deprecated": true,
             "style": "form",
             "explode": false,
             "schema": {
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/EntityId"
-              }
+              },
+              "minItems": 1,
+              "uniqueItems": true
             }
           }
         ],
@@ -3292,10 +3387,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Activity",
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "PortalUserResetPassword"
+                    ],
+                    "description": "One of supported activity types"
+                  }
+                },
                 "required": [
-                  "type",
-                  "message"
+                  "type"
                 ]
               }
             }
@@ -3612,6 +3715,8 @@
               "items": {
                 "$ref": "#/components/schemas/EntityId"
               },
+              "minItems": 1,
+              "uniqueItems": true,
               "example": [
                 "4910096f-000a-4504-bf5a-d3774ec3032a",
                 "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
@@ -3855,7 +3960,9 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/EntityId"
-              }
+              },
+              "minItems": 1,
+              "uniqueItems": true
             }
           },
           {
@@ -4277,6 +4384,16 @@
           }
         }
       },
+      "Conflict": {
+        "description": "The request conflicts with the current state of the target resource.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
       "ContractAssignmentConflict": {
         "description": "Contract was found but is not assignable in its current state.",
         "content": {
@@ -4374,6 +4491,11 @@
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the confirmation email template upon registration"
           },
+          "advancedMFA": {
+            "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
+            "description": "ID of the advanced MFA with login link and login code"
+          },
           "forgotPassword": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the email template for forgot password"
@@ -4393,6 +4515,10 @@
           "onDocUpload": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the email template for document upload"
+          },
+          "onWorkflowStepAssigned": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the email template for workflow step assignment"
           }
         }
       },
@@ -4417,6 +4543,8 @@
             "items": {
               "$ref": "#/components/schemas/EntityId"
             },
+            "minItems": 1,
+            "uniqueItems": true,
             "description": "Array of file entity IDs"
           }
         }
@@ -4448,16 +4576,8 @@
               "properties": {
                 "filename": {
                   "type": "string",
-                  "example": 12345,
+                  "example": "document.pdf",
                   "description": "File name"
-                },
-                "file_entity_id": {
-                  "$ref": "#/components/schemas/EntityId"
-                },
-                "document_type": {
-                  "type": "string",
-                  "example": 12345,
-                  "description": "Document type"
                 },
                 "access_control": {
                   "type": "string",
@@ -4466,15 +4586,8 @@
                     "private",
                     "public-read"
                   ],
-                  "description": "Access control level for the file"
-                },
-                "_tags": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "example": 12345,
-                  "description": "Array of file tags"
+                  "description": "Access control level for the file. Deprecated - all files are private.",
+                  "deprecated": true
                 },
                 "s3ref": {
                   "type": "object",
@@ -4594,7 +4707,128 @@
           "INSTALLER_PORTAL"
         ]
       },
-      "UpsertPortalConfig": {
+      "AllowedFileExtensions": {
+        "type": "object",
+        "description": "Allowed file extensions for upload",
+        "properties": {
+          "document": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "pdf"
+            }
+          },
+          "image": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "jpg"
+            }
+          },
+          "spreadsheet": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "xls"
+            }
+          },
+          "presentation": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "ppt"
+            }
+          },
+          "audioVideo": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "mp4"
+            }
+          },
+          "email": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "eml"
+            }
+          },
+          "archive": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "zip"
+            }
+          },
+          "cad": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "cad"
+            }
+          },
+          "calendar": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "ics"
+            }
+          },
+          "other": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "txt"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateOnlyPortalConfigAttributes": {
+        "type": "object",
+        "properties": {
+          "entity_actions": {
+            "type": "array",
+            "description": "Journey actions allowed on an entity by a portal user",
+            "items": {
+              "type": "object",
+              "properties": {
+                "journey_id": {
+                  "$ref": "#/components/schemas/EntityId"
+                },
+                "slug": {
+                  "$ref": "#/components/schemas/EntitySlug"
+                },
+                "action_Label": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string"
+                    },
+                    "de": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default_user_to_notify": {
+            "type": "object",
+            "description": "Default 360 user to notify upon an internal notification",
+            "properties": {
+              "onPendingUser": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AdminUser"
+                },
+                "description": "Default admin users for pending user notification to notify"
+              }
+            }
+          }
+        }
+      },
+      "CommonConfigAttributes": {
         "type": "object",
         "required": [
           "design_id"
@@ -4622,19 +4856,6 @@
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
           },
-          "default_user_to_notify": {
-            "type": "object",
-            "description": "Default 360 user to notify upon an internal notification",
-            "properties": {
-              "onPendingUser": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/AdminUser"
-                },
-                "description": "Default admin users for pending user notification to notify"
-              }
-            }
-          },
           "self_registration_setting": {
             "type": "string",
             "enum": [
@@ -4654,6 +4875,19 @@
               "billing": {
                 "type": "boolean",
                 "description": "Billing feature flag"
+              },
+              "change_due_date": {
+                "type": "boolean",
+                "description": "Change due date feature flag"
+              }
+            }
+          },
+          "advanced_mfa": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Advanced MFA feature flag"
               }
             }
           },
@@ -4675,6 +4909,37 @@
                 "type": "string",
                 "example": "eu-central-1_CUEQRNbUb",
                 "description": "Cognito user pool ID"
+              },
+              "password_policy": {
+                "type": "object",
+                "description": "Password policy for the portal",
+                "properties": {
+                  "minimum_length": {
+                    "type": "integer",
+                    "example": 8,
+                    "description": "Minimum password length"
+                  },
+                  "require_lowercase": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require lowercase characters"
+                  },
+                  "require_uppercase": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require uppercase characters"
+                  },
+                  "require_numbers": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require numbers"
+                  },
+                  "require_symbols": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require symbols"
+                  }
+                }
               }
             }
           },
@@ -4693,6 +4958,24 @@
               "email",
               "last_name"
             ]
+          },
+          "approval_state_attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "contact": [
+                "name",
+                "address"
+              ],
+              "contract": [
+                "installment_amount"
+              ]
+            }
           },
           "email_templates": {
             "$ref": "#/components/schemas/EmailTemplates"
@@ -4772,32 +5055,6 @@
               }
             ]
           },
-          "entity_actions": {
-            "type": "array",
-            "description": "Journey actions allowed on an entity by a portal user",
-            "items": {
-              "type": "object",
-              "properties": {
-                "journey_id": {
-                  "$ref": "#/components/schemas/EntityId"
-                },
-                "slug": {
-                  "$ref": "#/components/schemas/EntitySlug"
-                },
-                "action_Label": {
-                  "type": "object",
-                  "properties": {
-                    "en": {
-                      "type": "string"
-                    },
-                    "de": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "entity_edit_rules": {
             "type": "array",
             "description": "Rules for editing an entity by a portal user",
@@ -4854,13 +5111,31 @@
                 }
               }
             }
+          },
+          "allowed_file_extensions": {
+            "$ref": "#/components/schemas/AllowedFileExtensions"
           }
         }
+      },
+      "UpsertPortalConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateOnlyPortalConfigAttributes"
+          },
+          {
+            "$ref": "#/components/schemas/CommonConfigAttributes"
+          }
+        ],
+        "required": [
+          "config",
+          "design_id",
+          "feature_settings"
+        ]
       },
       "PortalConfig": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/UpsertPortalConfig"
+            "$ref": "#/components/schemas/CommonConfigAttributes"
           },
           {
             "properties": {
@@ -4897,16 +5172,23 @@
                       }
                     }
                   },
-                  "release_candidate": {
+                  "notracking": {
                     "type": "object",
-                    "description": "Release candidate settings",
+                    "description": "Disable Advanced Usage Metrics",
                     "properties": {
                       "enabled": {
                         "type": "boolean",
-                        "description": "Enable/Disable the release candidate feature"
+                        "description": "Disable browser-side scripts that track advanced usage metrics"
                       }
                     }
                   }
+                }
+              },
+              "feature_flags": {
+                "type": "object",
+                "description": "Feature flags for the portal",
+                "additionalProperties": {
+                  "type": "boolean"
                 }
               }
             }
@@ -5151,27 +5433,6 @@
             "$ref": "#/components/schemas/PaymentWidget"
           }
         ]
-      },
-      "ContactCountRequest": {
-        "type": "object",
-        "required": [
-          "contactIdentifiers",
-          "orgId"
-        ],
-        "properties": {
-          "orgId": {
-            "type": "string",
-            "example": 728,
-            "description": "ID of the organization"
-          },
-          "contactIdentifiers": {
-            "type": "object",
-            "description": "Identifiers to identify a contact",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        }
       },
       "ContactExistsRequest": {
         "type": "object",
@@ -6297,6 +6558,61 @@
           "action"
         ]
       },
+      "ActionLabel": {
+        "type": "object",
+        "properties": {
+          "en": {
+            "type": "string",
+            "nullable": true
+          },
+          "de": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Rule": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute_value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "JourneyActions": {
+        "type": "object",
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "action_label": {
+            "type": "object",
+            "$ref": "#/components/schemas/ActionLabel",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rule"
+            },
+            "nullable": true
+          }
+        }
+      },
       "WorkflowExecution": {
         "type": "object",
         "properties": {},
@@ -6614,6 +6930,23 @@
             "$ref": "#/components/schemas/EntitySlug"
           }
         }
+      },
+      "AcceptanceDecision": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "accept",
+              "decline"
+            ],
+            "description": "Acceptance decision"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "additionalProperties": false
       },
       "TriggerPortalFlow": {
         "type": "object",

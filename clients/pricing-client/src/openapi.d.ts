@@ -608,18 +608,7 @@ declare namespace Components {
          *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
          *   "sort": "description ASC",
          *   "from": 0,
-         *   "size": 200,
-         *   "availability": {
-         *     "location": {
-         *       "postal_code": "57008,",
-         *       "city": "Cologne,",
-         *       "street": "Media Park,",
-         *       "street_number": "8a"
-         *     },
-         *     "available_date": {
-         *       "value": "2022-05-01"
-         *     }
-         *   }
+         *   "size": 200
          * }
          */
         export interface CatalogSearch {
@@ -1094,6 +1083,10 @@ declare namespace Components {
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
             item_components?: /* Represents a price input to the pricing library. */ PriceItemDto[];
+            /**
+             * The ids of the price components that should be selected for the price calculation.
+             */
+            selected_price_component_ids?: string[];
             _price?: /**
              * The price entity schema for dynamic pricing
              * example:
@@ -1106,7 +1099,8 @@ declare namespace Components {
         /**
          * The compute price payload
          */
-        export interface ComputePriceParams {
+        export type ComputePriceParams = /* The compute price payload */ /* The compute price payload for power */ ComputePriceParamsPower | /* The compute price payload for gas */ ComputePriceParamsGas;
+        export interface ComputePriceParamsBase {
             /**
              * The postal code to search for providers
              */
@@ -1118,7 +1112,7 @@ declare namespace Components {
             /**
              * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
              */
-            consumption: number;
+            consumption?: number;
             /**
              * The monthly HT consumption to compute the price in kWh
              */
@@ -1132,13 +1126,85 @@ declare namespace Components {
              */
             association_id?: string;
             /**
-             * The product type
+             * The billing period (defaults to monthly)
              */
-            type: "power" | "gas";
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+        }
+        /**
+         * The compute price payload for gas
+         */
+        export interface ComputePriceParamsGas {
+            /**
+             * The postal code to search for providers
+             */
+            postal_code: string;
+            /**
+             * The consumption type
+             */
+            consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
+            /**
+             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
+             */
+            consumption?: number;
+            /**
+             * The monthly HT consumption to compute the price in kWh
+             */
+            consumption_HT?: number;
+            /**
+             * The monthly NT consumption to compute the price in kWh
+             */
+            consumption_NT?: number;
+            /**
+             * The association id
+             */
+            association_id?: string;
             /**
              * The billing period (defaults to monthly)
              */
             billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            /**
+             * The type of energy to compute the price
+             */
+            type: "gas";
+            concession_type?: /* The concession type for gas */ GasConcessionType;
+        }
+        /**
+         * The compute price payload for power
+         */
+        export interface ComputePriceParamsPower {
+            /**
+             * The postal code to search for providers
+             */
+            postal_code: string;
+            /**
+             * The consumption type
+             */
+            consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
+            /**
+             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
+             */
+            consumption?: number;
+            /**
+             * The monthly HT consumption to compute the price in kWh
+             */
+            consumption_HT?: number;
+            /**
+             * The monthly NT consumption to compute the price in kWh
+             */
+            consumption_NT?: number;
+            /**
+             * The association id
+             */
+            association_id?: string;
+            /**
+             * The billing period (defaults to monthly)
+             */
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            /**
+             * The type of energy to compute the price
+             */
+            type: "power";
+            meter_type?: /* The meter type for power */ PowerMeterType;
         }
         export interface ComputePriceResult {
             /**
@@ -1223,6 +1289,7 @@ declare namespace Components {
         export interface ComputedPriceComponents {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
+        export type ConsumptionTypeGetAg = "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
         /**
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
          * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
@@ -1400,8 +1467,20 @@ declare namespace Components {
             _title?: string;
             $relation?: EntityRelation;
         }
+        /**
+         * The concession type for gas
+         */
+        export type GasConcessionType = "standard" | "special";
         export type IntegrationCredentialsResult = /* The basic auth credentials */ BasicAuthCredentials;
         export type IntegrationId = "enet" | "getag";
+        /**
+         * Describes how to compute the markup per period. Either `per_unit`, `tiered_volume` or `tiered_flatfee`.
+         * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+         * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unitary price for all purchased units.
+         * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+         *
+         */
+        export type MarkupPricingModel = "per_unit" | "tiered_volume" | "tiered_flatfee";
         /**
          * A set of key-value pairs used to store meta data information about an entity.
          */
@@ -1844,6 +1923,10 @@ declare namespace Components {
             };
         }
         /**
+         * The meter type for power
+         */
+        export type PowerMeterType = "classic" | "smart" | "digital";
+        /**
          * The price entity schema for simple pricing
          * example:
          * {
@@ -1995,6 +2078,7 @@ declare namespace Components {
              * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
              */
             unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
+            get_ag?: PriceGetAg;
             /**
              * The price creation date
              */
@@ -2037,7 +2121,25 @@ declare namespace Components {
             _tags?: string[];
         }
         export interface PriceGetAg {
-            category: string;
+            category: ProductCategory;
+            markup_pricing_model?: /**
+             * Describes how to compute the markup per period. Either `per_unit`, `tiered_volume` or `tiered_flatfee`.
+             * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+             * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unitary price for all purchased units.
+             * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+             *
+             */
+            MarkupPricingModel;
+            type?: TypeGetAg;
+            tariff_type?: TariffTypeGetAg;
+            consumption_type?: ConsumptionTypeGetAg;
+            concession_type?: /* The concession type for gas */ GasConcessionType;
+            meter_type?: /* The meter type for power */ PowerMeterType;
+            /**
+             * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
+             *
+             */
+            markup_tiers?: PriceTier[];
             markup_amount: number;
             markup_amount_decimal: string;
             markup_amount_net?: number;
@@ -2249,7 +2351,7 @@ declare namespace Components {
              * The price billing period.
              */
             billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
-            /**
+            pricing_model: /**
              * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
@@ -2258,7 +2360,7 @@ declare namespace Components {
              * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
+            PricingModel;
             tiers_details?: TierDetails[];
             get_ag?: PriceGetAg;
         }
@@ -2609,6 +2711,7 @@ declare namespace Components {
                  * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
                  */
                 unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
+                get_ag?: PriceGetAg;
                 /**
                  * The price creation date
                  */
@@ -2728,6 +2831,16 @@ declare namespace Components {
             Currency;
         }
         /**
+         * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
+         * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+         * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+         * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+         * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+         * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
+         *
+         */
+        export type PricingModel = "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
+        /**
          * The product entity
          * example:
          * {
@@ -2818,6 +2931,7 @@ declare namespace Components {
              */
             _updated_at?: string;
         }
+        export type ProductCategory = "power" | "gas";
         /**
          * The provider entity
          */
@@ -3022,6 +3136,7 @@ declare namespace Components {
              */
             street: string;
         }
+        export type TariffTypeGetAg = "HT" | "NT";
         /**
          * the tax configuration
          * example:
@@ -3204,6 +3319,7 @@ declare namespace Components {
                 recurrencesByTax?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountWithTax)[];
             };
         }
+        export type TypeGetAg = "base_price" | "work_price";
         /**
          * The availability rule error
          */
@@ -3280,6 +3396,15 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $CalculatePricingDetails {
+        export interface RequestBody {
+            line_items?: /* A valid set of product prices, quantities, (discounts) and taxes from a client. */ Components.Schemas.PriceItemsDto;
+        }
+        namespace Responses {
+            export type $200 = /* The result from the calculation of a set of price items. */ Components.Schemas.PricingDetails;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace $CheckoutCart {
         export interface HeaderParameters {
             "X-Ivy-Org-ID": Parameters.XIvyOrgID;
@@ -3309,33 +3434,6 @@ declare namespace Paths {
             export type $200 = Components.Schemas.ComputePriceResult;
             export type $400 = Components.Schemas.Error;
             export type $403 = Components.Schemas.Error;
-        }
-    }
-    namespace $CreateOpportunity {
-        export interface HeaderParameters {
-            "X-Ivy-Org-ID": Parameters.XIvyOrgID;
-        }
-        namespace Parameters {
-            export type XIvyOrgID = string;
-        }
-        export type RequestBody = /**
-         * The opportunity entity
-         * example:
-         * {
-         *   "$ref": "#/components/examples/opportunity"
-         * }
-         */
-        Components.Schemas.Opportunity;
-        namespace Responses {
-            export type $201 = /**
-             * The opportunity entity
-             * example:
-             * {
-             *   "$ref": "#/components/examples/opportunity"
-             * }
-             */
-            Components.Schemas.Opportunity;
-            export type $400 = Components.Schemas.Error;
         }
     }
     namespace $DeleteCredentials {
@@ -3372,18 +3470,7 @@ declare namespace Paths {
          *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
          *   "sort": "description ASC",
          *   "from": 0,
-         *   "size": 200,
-         *   "availability": {
-         *     "location": {
-         *       "postal_code": "57008,",
-         *       "city": "Cologne,",
-         *       "street": "Media Park,",
-         *       "street_number": "8a"
-         *     },
-         *     "available_date": {
-         *       "value": "2022-05-01"
-         *     }
-         *   }
+         *   "size": 200
          * }
          */
         Components.Schemas.CatalogSearch;
@@ -3425,7 +3512,7 @@ declare namespace Paths {
     }
     namespace $SearchCatalog {
         export interface HeaderParameters {
-            "X-Ivy-Org-ID": Parameters.XIvyOrgID;
+            "X-Ivy-Org-ID"?: Parameters.XIvyOrgID;
             Authorization?: Parameters.Authorization;
         }
         namespace Parameters {
@@ -3439,18 +3526,7 @@ declare namespace Paths {
          *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
          *   "sort": "description ASC",
          *   "from": 0,
-         *   "size": 200,
-         *   "availability": {
-         *     "location": {
-         *       "postal_code": "57008,",
-         *       "city": "Cologne,",
-         *       "street": "Media Park,",
-         *       "street_number": "8a"
-         *     },
-         *     "available_date": {
-         *       "value": "2022-05-01"
-         *     }
-         *   }
+         *   "size": 200
          * }
          */
         Components.Schemas.CatalogSearch;
@@ -3577,6 +3653,16 @@ declare namespace Paths {
 }
 
 export interface OperationMethods {
+  /**
+   * $calculatePricingDetails - calculatePricingDetails
+   * 
+   * Compute price
+   */
+  '$calculatePricingDetails'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$CalculatePricingDetails.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$CalculatePricingDetails.Responses.$200>
   /**
    * createOrder - createOrder
    * 
@@ -3718,23 +3804,21 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
-  /**
-   * $createOpportunity - createOpportunity
-   * 
-   * This API is Deprecated. Please use the Entity API or Submission API to create opportunities.
-   * 
-   * Enables the creation of a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
-   * The `opportunity_number` can be used to universally identify an opportunity within epilot platform.
-   * 
-   */
-  '$createOpportunity'(
-    parameters?: Parameters<Paths.$CreateOpportunity.HeaderParameters> | null,
-    data?: Paths.$CreateOpportunity.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.$CreateOpportunity.Responses.$201>
 }
 
 export interface PathsDictionary {
+  ['/v1/pricing:compute']: {
+    /**
+     * $calculatePricingDetails - calculatePricingDetails
+     * 
+     * Compute price
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$CalculatePricingDetails.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$CalculatePricingDetails.Responses.$200>
+  }
   ['/v1/order']: {
     /**
      * createOrder - createOrder
@@ -3901,22 +3985,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
-  }
-  ['/v1/public/opportunity']: {
-    /**
-     * $createOpportunity - createOpportunity
-     * 
-     * This API is Deprecated. Please use the Entity API or Submission API to create opportunities.
-     * 
-     * Enables the creation of a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.
-     * The `opportunity_number` can be used to universally identify an opportunity within epilot platform.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<Paths.$CreateOpportunity.HeaderParameters> | null,
-      data?: Paths.$CreateOpportunity.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.$CreateOpportunity.Responses.$201>
   }
 }
 

@@ -9,6 +9,7 @@ import type {
 
 declare namespace Components {
     namespace Responses {
+        export type Conflict = Schemas.ErrorResp;
         export interface ContractAssignmentConflict {
             /**
              * Error message
@@ -24,6 +25,16 @@ declare namespace Components {
         export type Unauthorized = Schemas.ErrorResp;
     }
     namespace Schemas {
+        export interface AcceptanceDecision {
+            /**
+             * Acceptance decision
+             */
+            decision: "accept" | "decline";
+        }
+        export interface ActionLabel {
+            en?: string | null;
+            de?: string | null;
+        }
         export interface ActionWidget {
             id: string;
             type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
@@ -230,6 +241,21 @@ declare namespace Components {
              */
             phone?: string | null;
         }
+        /**
+         * Allowed file extensions for upload
+         */
+        export interface AllowedFileExtensions {
+            document?: string[];
+            image?: string[];
+            spreadsheet?: string[];
+            presentation?: string[];
+            audioVideo?: string[];
+            email?: string[];
+            archive?: string[];
+            cad?: string[];
+            calendar?: string[];
+            other?: string[];
+        }
         export interface Balance {
             /**
              * Current balance of the customer in cents. (precision 2)
@@ -386,6 +412,258 @@ declare namespace Components {
              */
             billing_amount_decimal?: string;
         } & (/* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ /* An entity that describes an installment billing event. */ InstallmentEvent | /* An entity that describes a reimbursement billing event. */ ReimbursementEvent);
+        export interface CommonConfigAttributes {
+            /**
+             * Enable/Disable the portal access
+             */
+            enabled?: boolean;
+            /**
+             * A short name to identify your portal
+             * example:
+             * Installer Portal
+             */
+            name?: string;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * abc.com
+             */
+            domain?: string;
+            /**
+             * Mark true if the domain is an Epilot domain
+             */
+            is_epilot_domain?: boolean;
+            /**
+             * ID of the design used to build the portal
+             */
+            design_id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            /**
+             * Feature settings for the portal
+             */
+            feature_settings?: {
+                /**
+                 * Start page feature flag
+                 */
+                start_page?: boolean;
+                /**
+                 * Billing feature flag
+                 */
+                billing?: boolean;
+                /**
+                 * Change due date feature flag
+                 */
+                change_due_date?: boolean;
+            };
+            advanced_mfa?: {
+                /**
+                 * Advanced MFA feature flag
+                 */
+                enabled?: boolean;
+            };
+            /**
+             * AWS Cognito Pool details for the portal
+             */
+            cognito_details?: {
+                /**
+                 * Cognito user pool client ID
+                 * example:
+                 * 6bsd0jkgoie74k2i8mrhc1vest
+                 */
+                cognito_user_pool_client_id?: string;
+                /**
+                 * Cognito user pool ARN
+                 * example:
+                 * arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341
+                 */
+                cognito_user_pool_arn?: string;
+                /**
+                 * Cognito user pool ID
+                 * example:
+                 * eu-central-1_CUEQRNbUb
+                 */
+                cognito_user_pool_id?: string;
+                /**
+                 * Password policy for the portal
+                 */
+                password_policy?: {
+                    /**
+                     * Minimum password length
+                     * example:
+                     * 8
+                     */
+                    minimum_length?: number;
+                    /**
+                     * Require lowercase characters
+                     * example:
+                     * true
+                     */
+                    require_lowercase?: boolean;
+                    /**
+                     * Require uppercase characters
+                     * example:
+                     * true
+                     */
+                    require_uppercase?: boolean;
+                    /**
+                     * Require numbers
+                     * example:
+                     * true
+                     */
+                    require_numbers?: boolean;
+                    /**
+                     * Require symbols
+                     * example:
+                     * true
+                     */
+                    require_symbols?: boolean;
+                };
+            };
+            /**
+             * Stringified object with configuration details
+             */
+            config?: string;
+            /**
+             * Deprecated. Use registration_identifiers instead.
+             * example:
+             * [
+             *   "email",
+             *   "last_name"
+             * ]
+             */
+            contact_identifiers?: string[];
+            /**
+             * example:
+             * {
+             *   "contact": [
+             *     "name",
+             *     "address"
+             *   ],
+             *   "contract": [
+             *     "installment_amount"
+             *   ]
+             * }
+             */
+            approval_state_attributes?: {
+                [name: string]: string[];
+            };
+            email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
+            /**
+             * Permissions granted to a portal user while accessing entities
+             */
+            grants?: Grant[];
+            /**
+             * Teaser & Banner Image web links
+             */
+            images?: {
+                /**
+                 * URL of the order left teaser image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg
+                 */
+                orderLeftTeaser?: string | null;
+                /**
+                 * URL of the order right teaser image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg
+                 */
+                orderRightTeaser?: string | null;
+                /**
+                 * URL of the welcome banner image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg
+                 */
+                welcomeBanner?: string | null;
+            };
+            /**
+             * Identifiers used to identify an entity by a portal user
+             */
+            entity_identifiers?: {
+                type?: {
+                    /**
+                     * Enable/Disable the entity identifier
+                     */
+                    isEnabled?: boolean;
+                    /**
+                     * Attributes used to identify an entity
+                     */
+                    attributes?: string[];
+                };
+            };
+            /**
+             * Identifiers to identify a contact of a portal user during the registration.
+             * example:
+             * [
+             *   {
+             *     "name": "email",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
+             */
+            registration_identifiers?: RegistrationIdentifier[];
+            /**
+             * Rules for editing an entity by a portal user
+             */
+            entity_edit_rules?: {
+                slug?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                /**
+                 * example:
+                 * first_name
+                 */
+                attribute?: string;
+                rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments";
+                cadence_period_type?: "days" | "weeks" | "months";
+                /**
+                 * example:
+                 * 1
+                 */
+                cadence_period?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                changes_allowed?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                grace_period?: number;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_increment?: string;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_decrement?: string;
+                /**
+                 * example:
+                 * 10
+                 */
+                number_of_days_before_restriction?: number;
+            }[];
+            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
+        }
         /**
          * The mapped contact of the portal user
          */
@@ -431,20 +709,6 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
             _schema: "contact";
-        }
-        export interface ContactCountRequest {
-            /**
-             * ID of the organization
-             * example:
-             * 728
-             */
-            orgId: string;
-            /**
-             * Identifiers to identify a contact
-             */
-            contactIdentifiers: {
-                [name: string]: string;
-            };
         }
         export interface ContactExistsRequest {
             /**
@@ -768,12 +1032,20 @@ declare namespace Components {
             /**
              * Array of file entity IDs
              */
-            file_entity_ids: /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            EntityId /* uuid */[];
+            file_entity_ids: [
+                /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */,
+                .../**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */[]
+            ];
         }
         export interface DocumentWidget {
             id: string;
@@ -799,6 +1071,15 @@ declare namespace Components {
              * ID of the confirmation email template upon registration
              */
             confirmAccount?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * ID of the advanced MFA with login link and login code
+             */
+            advancedMFA?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -844,6 +1125,15 @@ declare namespace Components {
              * ID of the email template for document upload
              */
             onDocUpload?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * ID of the email template for workflow step assignment
+             */
+            onWorkflowStepAssigned?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -1309,6 +1599,12 @@ declare namespace Components {
              */
             paid_date?: string; // date
         }
+        export interface JourneyActions {
+            journey_id?: string | null;
+            action_label?: ActionLabel;
+            slug?: string | null;
+            rules?: Rule[] | null;
+        }
         /**
          * The meter entity
          */
@@ -1610,15 +1906,6 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            /**
-             * Default 360 user to notify upon an internal notification
-             */
-            default_user_to_notify?: {
-                /**
-                 * Default admin users for pending user notification to notify
-                 */
-                onPendingUser?: AdminUser[];
-            };
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
             /**
              * Feature settings for the portal
@@ -1632,6 +1919,16 @@ declare namespace Components {
                  * Billing feature flag
                  */
                 billing?: boolean;
+                /**
+                 * Change due date feature flag
+                 */
+                change_due_date?: boolean;
+            };
+            advanced_mfa?: {
+                /**
+                 * Advanced MFA feature flag
+                 */
+                enabled?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -1655,6 +1952,41 @@ declare namespace Components {
                  * eu-central-1_CUEQRNbUb
                  */
                 cognito_user_pool_id?: string;
+                /**
+                 * Password policy for the portal
+                 */
+                password_policy?: {
+                    /**
+                     * Minimum password length
+                     * example:
+                     * 8
+                     */
+                    minimum_length?: number;
+                    /**
+                     * Require lowercase characters
+                     * example:
+                     * true
+                     */
+                    require_lowercase?: boolean;
+                    /**
+                     * Require uppercase characters
+                     * example:
+                     * true
+                     */
+                    require_uppercase?: boolean;
+                    /**
+                     * Require numbers
+                     * example:
+                     * true
+                     */
+                    require_numbers?: boolean;
+                    /**
+                     * Require symbols
+                     * example:
+                     * true
+                     */
+                    require_symbols?: boolean;
+                };
             };
             /**
              * Stringified object with configuration details
@@ -1669,6 +2001,21 @@ declare namespace Components {
              * ]
              */
             contact_identifiers?: string[];
+            /**
+             * example:
+             * {
+             *   "contact": [
+             *     "name",
+             *     "address"
+             *   ],
+             *   "contract": [
+             *     "installment_amount"
+             *   ]
+             * }
+             */
+            approval_state_attributes?: {
+                [name: string]: string[];
+            };
             email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
             /**
              * Permissions granted to a portal user while accessing entities
@@ -1732,27 +2079,6 @@ declare namespace Components {
              */
             registration_identifiers?: RegistrationIdentifier[];
             /**
-             * Journey actions allowed on an entity by a portal user
-             */
-            entity_actions?: {
-                journey_id?: /**
-                 * Entity ID
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                EntityId /* uuid */;
-                slug?: /**
-                 * URL-friendly identifier for the entity schema
-                 * example:
-                 * contact
-                 */
-                EntitySlug;
-                action_Label?: {
-                    en?: string;
-                    de?: string;
-                };
-            }[];
-            /**
              * Rules for editing an entity by a portal user
              */
             entity_edit_rules?: {
@@ -1800,6 +2126,7 @@ declare namespace Components {
                  */
                 number_of_days_before_restriction?: number;
             }[];
+            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
              * ID of the organization
              * example:
@@ -1833,14 +2160,20 @@ declare namespace Components {
                     enabled?: boolean;
                 };
                 /**
-                 * Release candidate settings
+                 * Disable Advanced Usage Metrics
                  */
-                release_candidate?: {
+                notracking?: {
                     /**
-                     * Enable/Disable the release candidate feature
+                     * Disable browser-side scripts that track advanced usage metrics
                      */
                     enabled?: boolean;
                 };
+            };
+            /**
+             * Feature flags for the portal
+             */
+            feature_flags?: {
+                [name: string]: boolean;
             };
         }
         /**
@@ -2041,6 +2374,11 @@ declare namespace Components {
              */
             paid_date?: string; // date
         }
+        export interface Rule {
+            entity?: string | null;
+            attribute?: string | null;
+            attribute_value?: string | null;
+        }
         export interface SaveEntityFile {
             entity_id: /**
              * Entity ID
@@ -2058,31 +2396,13 @@ declare namespace Components {
                 /**
                  * File name
                  * example:
-                 * 12345
+                 * document.pdf
                  */
                 filename: string;
-                file_entity_id?: /**
-                 * Entity ID
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                EntityId /* uuid */;
                 /**
-                 * Document type
-                 * example:
-                 * 12345
-                 */
-                document_type?: string;
-                /**
-                 * Access control level for the file
+                 * Access control level for the file. Deprecated - all files are private.
                  */
                 access_control?: "private" | "public-read";
-                /**
-                 * Array of file tags
-                 * example:
-                 * 12345
-                 */
-                _tags?: string[];
                 s3ref: {
                     /**
                      * S3 bucket name
@@ -2188,7 +2508,69 @@ declare namespace Components {
                 };
             };
         }
+        export interface UpdateOnlyPortalConfigAttributes {
+            /**
+             * Journey actions allowed on an entity by a portal user
+             */
+            entity_actions?: {
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
+                slug?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                action_Label?: {
+                    en?: string;
+                    de?: string;
+                };
+            }[];
+            /**
+             * Default 360 user to notify upon an internal notification
+             */
+            default_user_to_notify?: {
+                /**
+                 * Default admin users for pending user notification to notify
+                 */
+                onPendingUser?: AdminUser[];
+            };
+        }
         export interface UpsertPortalConfig {
+            /**
+             * Journey actions allowed on an entity by a portal user
+             */
+            entity_actions?: {
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
+                slug?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                action_Label?: {
+                    en?: string;
+                    de?: string;
+                };
+            }[];
+            /**
+             * Default 360 user to notify upon an internal notification
+             */
+            default_user_to_notify?: {
+                /**
+                 * Default admin users for pending user notification to notify
+                 */
+                onPendingUser?: AdminUser[];
+            };
             /**
              * Enable/Disable the portal access
              */
@@ -2209,29 +2591,17 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
-            /**
-             * ID of the design used to build the portal
-             */
             design_id: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            /**
-             * Default 360 user to notify upon an internal notification
-             */
-            default_user_to_notify?: {
-                /**
-                 * Default admin users for pending user notification to notify
-                 */
-                onPendingUser?: AdminUser[];
-            };
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
             /**
              * Feature settings for the portal
              */
-            feature_settings?: {
+            feature_settings: {
                 /**
                  * Start page feature flag
                  */
@@ -2240,6 +2610,16 @@ declare namespace Components {
                  * Billing feature flag
                  */
                 billing?: boolean;
+                /**
+                 * Change due date feature flag
+                 */
+                change_due_date?: boolean;
+            };
+            advanced_mfa?: {
+                /**
+                 * Advanced MFA feature flag
+                 */
+                enabled?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -2263,11 +2643,46 @@ declare namespace Components {
                  * eu-central-1_CUEQRNbUb
                  */
                 cognito_user_pool_id?: string;
+                /**
+                 * Password policy for the portal
+                 */
+                password_policy?: {
+                    /**
+                     * Minimum password length
+                     * example:
+                     * 8
+                     */
+                    minimum_length?: number;
+                    /**
+                     * Require lowercase characters
+                     * example:
+                     * true
+                     */
+                    require_lowercase?: boolean;
+                    /**
+                     * Require uppercase characters
+                     * example:
+                     * true
+                     */
+                    require_uppercase?: boolean;
+                    /**
+                     * Require numbers
+                     * example:
+                     * true
+                     */
+                    require_numbers?: boolean;
+                    /**
+                     * Require symbols
+                     * example:
+                     * true
+                     */
+                    require_symbols?: boolean;
+                };
             };
             /**
              * Stringified object with configuration details
              */
-            config?: string;
+            config: string;
             /**
              * Deprecated. Use registration_identifiers instead.
              * example:
@@ -2277,6 +2692,21 @@ declare namespace Components {
              * ]
              */
             contact_identifiers?: string[];
+            /**
+             * example:
+             * {
+             *   "contact": [
+             *     "name",
+             *     "address"
+             *   ],
+             *   "contract": [
+             *     "installment_amount"
+             *   ]
+             * }
+             */
+            approval_state_attributes?: {
+                [name: string]: string[];
+            };
             email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
             /**
              * Permissions granted to a portal user while accessing entities
@@ -2340,27 +2770,6 @@ declare namespace Components {
              */
             registration_identifiers?: RegistrationIdentifier[];
             /**
-             * Journey actions allowed on an entity by a portal user
-             */
-            entity_actions?: {
-                journey_id?: /**
-                 * Entity ID
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                EntityId /* uuid */;
-                slug?: /**
-                 * URL-friendly identifier for the entity schema
-                 * example:
-                 * contact
-                 */
-                EntitySlug;
-                action_Label?: {
-                    en?: string;
-                    de?: string;
-                };
-            }[];
-            /**
              * Rules for editing an entity by a portal user
              */
             entity_edit_rules?: {
@@ -2408,6 +2817,7 @@ declare namespace Components {
                  */
                 number_of_days_before_restriction?: number;
             }[];
+            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -2669,6 +3079,22 @@ declare namespace Paths {
     }
     namespace ConfirmUser {
         namespace Parameters {
+            /**
+             * Confirmation link token
+             */
+            export type ConfirmationLinkToken = string;
+        }
+        export interface QueryParameters {
+            confirmation_link_token: /* Confirmation link token */ Parameters.ConfirmationLinkToken;
+        }
+        namespace Responses {
+            export interface $301 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ConfirmUserWithUserId {
+        namespace Parameters {
             export type Id = /**
              * Entity ID
              * example:
@@ -2701,17 +3127,30 @@ declare namespace Paths {
     }
     namespace CreateCustomEntityActivity {
         namespace Parameters {
-            export type Entities = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */[];
+            export type Entities = [
+                /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */,
+                .../**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */[]
+            ];
         }
         export interface QueryParameters {
             entities?: Parameters.Entities;
         }
-        export type RequestBody = Components.Schemas.Activity;
+        export interface RequestBody {
+            /**
+             * One of supported activity types
+             */
+            type: "PortalUserResetPassword";
+        }
         namespace Responses {
             export type $201 = Components.Schemas.ActivityItem;
             export type $401 = Components.Responses.Unauthorized;
@@ -2747,7 +3186,6 @@ declare namespace Paths {
         namespace Responses {
             export interface $201 {
                 message: "User created successfully";
-                response: /* The portal user entity */ Components.Schemas.PortalUser;
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $500 = Components.Responses.InternalServerError;
@@ -2875,7 +3313,181 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                data?: /* The contract entity */ Components.Schemas.Contract[];
+                data?: {
+                    [name: string]: any;
+                    _id: /**
+                     * Entity ID
+                     * example:
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
+                     */
+                    Components.Schemas.EntityId /* uuid */;
+                    /**
+                     * Title of the entity
+                     * example:
+                     * Example Entity
+                     */
+                    _title: string;
+                    /**
+                     * Organization ID the entity belongs to
+                     * example:
+                     * 123
+                     */
+                    _org: string;
+                    /**
+                     * Array of entity tags
+                     * example:
+                     * [
+                     *   "example",
+                     *   "mock"
+                     * ]
+                     */
+                    _tags?: string[];
+                    /**
+                     * Creation timestamp of the entity
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _created_at: string; // date-time
+                    /**
+                     * Last update timestamp of the entity
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _updated_at: string; // date-time
+                    /**
+                     * The name of the contract.
+                     * example:
+                     * Grid Contract
+                     */
+                    contract_name?: string;
+                    /**
+                     * The unique identifier of the contract.
+                     * example:
+                     * 12345
+                     */
+                    contract_number?: string;
+                    /**
+                     * The status of the contract.
+                     * example:
+                     * approved
+                     */
+                    status?: "draft" | "in_approval_process" | "approved" | "active" | "deactivated" | "revoked" | "terminated" | "expired";
+                    /**
+                     * A brief description of the contract.
+                     * example:
+                     * This contract is for the supply of widgets.
+                     */
+                    description?: string;
+                    /**
+                     * The account number associated with the contract.
+                     * example:
+                     * 67890
+                     */
+                    account_number?: string;
+                    /**
+                     * The branch associated with the contract.
+                     * example:
+                     * power
+                     */
+                    branch?: "power" | "gas" | "water" | "waste_water" | "district_heating";
+                    /**
+                     * The billing address associated with the contract.
+                     * example:
+                     * 123 Main St, Anytown
+                     */
+                    billing_address?: string;
+                    /**
+                     * The delivery address associated with the contract.
+                     * example:
+                     * 456 Elm St, Anytown
+                     */
+                    delivery_address?: string;
+                    /**
+                     * Any additional addresses associated with the contract.
+                     * example:
+                     * 789 Oak St, Anytown
+                     */
+                    additional_addresses?: string;
+                    /**
+                     * The date on which the contract was terminated.
+                     * example:
+                     * 2022-01-01
+                     */
+                    termination_date?: string;
+                    /**
+                     * The reason for the termination of the contract.
+                     * example:
+                     * Non-payment
+                     */
+                    termination_reason?: string;
+                    /**
+                     * The billing period associated with the contract.
+                     * example:
+                     * monthly
+                     */
+                    billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
+                    /**
+                     * The duration of the billing period.
+                     * example:
+                     * 30
+                     */
+                    billing_duration_amount?: number;
+                    /**
+                     * The duration of the renewal period.
+                     * example:
+                     * 365
+                     */
+                    renewal_duration_amount?: number;
+                    /**
+                     * The unit of time for the renewal period.
+                     * example:
+                     * years
+                     */
+                    renewal_duration_unit?: "weeks" | "months" | "years";
+                    /**
+                     * The amount of notice required for termination of the contract.
+                     * example:
+                     * 30
+                     */
+                    notice_time_amount?: number;
+                    /**
+                     * The unit of time for the notice period.
+                     * example:
+                     * months
+                     */
+                    notice_time_unit?: "weeks" | "months" | "years";
+                    /**
+                     * The start date of the contract.
+                     * example:
+                     * 2021-01-01
+                     */
+                    start_date?: string;
+                    /**
+                     * Defines the day of the month in which the installments are due.
+                     * example:
+                     * 2
+                     */
+                    billing_due_day?: number;
+                    /**
+                     * Set amount for installments in cents. (precision 2)
+                     * example:
+                     * 10050
+                     */
+                    installment_amount?: number;
+                    /**
+                     * Current balance of the contract in cents. (precision 2)
+                     * example:
+                     * 8990
+                     */
+                    balance?: number;
+                    balance_currency?: /**
+                     * Currency code in ISO 4217 format
+                     * example:
+                     * EUR
+                     */
+                    Components.Schemas.Currency;
+                    journey_actions?: Components.Schemas.JourneyActions;
+                }[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -2891,12 +3503,20 @@ declare namespace Paths {
              *   "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
              * ]
              */
-            export type EntityIds = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */[];
+            export type EntityIds = [
+                /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */,
+                .../**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */[]
+            ];
             /**
              * Initial offset to set for the search results
              * example:
@@ -2979,7 +3599,50 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                data?: /* The opportunity entity */ Components.Schemas.Opportunity[];
+                data?: {
+                    [name: string]: any;
+                    _id: /**
+                     * Entity ID
+                     * example:
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
+                     */
+                    Components.Schemas.EntityId /* uuid */;
+                    /**
+                     * Title of the entity
+                     * example:
+                     * Example Entity
+                     */
+                    _title: string;
+                    /**
+                     * Organization ID the entity belongs to
+                     * example:
+                     * 123
+                     */
+                    _org: string;
+                    /**
+                     * Array of entity tags
+                     * example:
+                     * [
+                     *   "example",
+                     *   "mock"
+                     * ]
+                     */
+                    _tags?: string[];
+                    /**
+                     * Creation timestamp of the entity
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _created_at: string; // date-time
+                    /**
+                     * Last update timestamp of the entity
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _updated_at: string; // date-time
+                    _schema: "opportunity";
+                    journey_actions?: Components.Schemas.JourneyActions;
+                }[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -3018,7 +3681,50 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                data?: /* The order entity */ Components.Schemas.Order[];
+                data?: {
+                    [name: string]: any;
+                    _id: /**
+                     * Entity ID
+                     * example:
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
+                     */
+                    Components.Schemas.EntityId /* uuid */;
+                    /**
+                     * Title of the entity
+                     * example:
+                     * Example Entity
+                     */
+                    _title: string;
+                    /**
+                     * Organization ID the entity belongs to
+                     * example:
+                     * 123
+                     */
+                    _org: string;
+                    /**
+                     * Array of entity tags
+                     * example:
+                     * [
+                     *   "example",
+                     *   "mock"
+                     * ]
+                     */
+                    _tags?: string[];
+                    /**
+                     * Creation timestamp of the entity
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _created_at: string; // date-time
+                    /**
+                     * Last update timestamp of the entity
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _updated_at: string; // date-time
+                    _schema: "order";
+                    journey_actions?: Components.Schemas.JourneyActions;
+                }[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -3045,12 +3751,20 @@ declare namespace Paths {
              * List billing events before this date
              */
             export type DateBefore = string; // date-time
-            export type EntityId = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */[];
+            export type EntityId = [
+                /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */,
+                .../**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */[]
+            ];
             /**
              * Type of billing event to filter by
              */
@@ -3104,31 +3818,10 @@ declare namespace Paths {
                 entity?: /* The mapped contact of the portal user */ Components.Schemas.Contact;
                 files?: /* The file entity */ Components.Schemas.File[];
                 relations?: Components.Schemas.EntityItem[];
+                journey_actions?: Components.Schemas.JourneyActions[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
-            export type $404 = Components.Responses.NotFound;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetContactCount {
-        namespace Parameters {
-            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
-        }
-        export interface QueryParameters {
-            origin: Parameters.Origin;
-        }
-        export type RequestBody = Components.Schemas.ContactCountRequest;
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * Count of Contact
-                 * example:
-                 * 2
-                 */
-                count?: number;
-            }
-            export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -3213,51 +3906,11 @@ declare namespace Paths {
                  * }
                  */
                 Components.Schemas.WorkflowExecution[];
+                journey_actions?: Components.Schemas.JourneyActions[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetCountByEmail {
-        namespace Parameters {
-            /**
-             * Portal user Email Address
-             * example:
-             * test@test.com
-             */
-            export type Email = string;
-            /**
-             * Organization ID
-             * example:
-             * 123
-             */
-            export type OrgId = string;
-        }
-        export interface QueryParameters {
-            email: /**
-             * Portal user Email Address
-             * example:
-             * test@test.com
-             */
-            Parameters.Email;
-            org_id: /**
-             * Organization ID
-             * example:
-             * 123
-             */
-            Parameters.OrgId;
-        }
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * Count of Contact
-                 * example:
-                 * 2
-                 */
-                count?: number;
-            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -3297,39 +3950,6 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetEntitiesByIdentifiers {
-        namespace Parameters {
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-        }
-        /**
-         * example:
-         * ```json
-         *   {
-         *     "name": "My Contract",
-         *     "contract_number": "123"
-         *   }
-         * ```
-         *
-         */
-        export type RequestBody = Components.Schemas.Entity;
-        namespace Responses {
-            export interface $200 {
-                data?: Components.Schemas.EntityItem[];
-            }
-            export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -3416,6 +4036,27 @@ declare namespace Paths {
                     type?: string;
                 }[];
             }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetExternalLinks {
+        namespace Parameters {
+            export type ContactId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            origin?: Parameters.Origin;
+            contactId?: Parameters.ContactId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyActions[];
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -3531,6 +4172,7 @@ declare namespace Paths {
                  * }
                  */
                 Components.Schemas.WorkflowExecution[];
+                journey_actions?: Components.Schemas.JourneyActions[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -3621,6 +4263,7 @@ declare namespace Paths {
                  * }
                  */
                 Components.Schemas.WorkflowExecution[];
+                journey_actions?: Components.Schemas.JourneyActions[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -3981,6 +4624,30 @@ declare namespace Paths {
             }
         }
     }
+    namespace PostOrderAcceptance {
+        namespace Parameters {
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.AcceptanceDecision;
+        namespace Responses {
+            export interface $200 {
+                data?: /* The order entity */ Components.Schemas.Order;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ReplaceECPTemplateVariables {
         export interface RequestBody {
             [name: string]: {
@@ -4289,6 +4956,28 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpdatePortalUserEmail {
+        export interface RequestBody {
+            /**
+             * New email address of the portal user
+             * example:
+             * john@doe.com
+             */
+            email: string;
+            /**
+             * Password of the portal user for confirmation
+             */
+            password: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* The portal user entity */ Components.Schemas.PortalUser;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace UpdateWorkflowStepAsDone {
         namespace Parameters {
             /**
@@ -4567,6 +5256,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortal.Responses.$204>
   /**
+   * getExternalLinks - getExternalLinks
+   * 
+   * Retrieves the portal configuration external links.
+   */
+  'getExternalLinks'(
+    parameters?: Parameters<Paths.GetExternalLinks.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
+  /**
    * getPublicPortalConfig - getPublicPortalConfig
    * 
    * Retrieves the public portal configuration.
@@ -4717,26 +5416,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetECPContact.Responses.$200>
   /**
-   * getCountByEmail - getCountByEmail
-   * 
-   * Check Contact by email. Deprecated in favor of /contact/exists.
-   */
-  'getCountByEmail'(
-    parameters?: Parameters<Paths.GetCountByEmail.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetCountByEmail.Responses.$200>
-  /**
-   * getContactCount - getContactCount
-   * 
-   * Return number of contacts matching identifier values. Deprecated in favor of /contact/exists.
-   */
-  'getContactCount'(
-    parameters?: Parameters<Paths.GetContactCount.QueryParameters> | null,
-    data?: Paths.GetContactCount.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetContactCount.Responses.$200>
-  /**
    * checkContactExists - checkContactExists
    * 
    * True if contact with given identifiers exists.
@@ -4787,6 +5466,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortalUser.Responses.$200>
   /**
+   * updatePortalUserEmail - updatePortalUserEmail
+   * 
+   * Update portal user email
+   */
+  'updatePortalUserEmail'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.UpdatePortalUserEmail.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdatePortalUserEmail.Responses.$200>
+  /**
    * fetchPortalUsersByRelatedEntity - fetchPortalUsersByRelatedEntity
    * 
    * Get all users for a given entity
@@ -4802,7 +5491,17 @@ export interface OperationMethods {
    * Confirm a portal user
    */
   'confirmUser'(
-    parameters?: Parameters<Paths.ConfirmUser.PathParameters & Paths.ConfirmUser.QueryParameters> | null,
+    parameters?: Parameters<Paths.ConfirmUser.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
+   * confirmUserWithUserId - confirmUserWithUserId
+   * 
+   * Confirm a portal user
+   */
+  'confirmUserWithUserId'(
+    parameters?: Parameters<Paths.ConfirmUserWithUserId.PathParameters & Paths.ConfirmUserWithUserId.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
@@ -4846,6 +5545,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllOrders.Responses.$200>
+  /**
+   * postOrderAcceptance - postOrderAcceptance
+   * 
+   * Accept/decline an offer by id
+   */
+  'postOrderAcceptance'(
+    parameters?: Parameters<Paths.PostOrderAcceptance.PathParameters> | null,
+    data?: Paths.PostOrderAcceptance.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PostOrderAcceptance.Responses.$200>
   /**
    * getOrder - getOrder
    * 
@@ -4966,16 +5675,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityIdentifiers.Responses.$200>
-  /**
-   * getEntitiesByIdentifiers - getEntitiesByIdentifiers
-   * 
-   * Get entities (contract) by identifiers. Deprecated in favor of /contract/by-identifiers.
-   */
-  'getEntitiesByIdentifiers'(
-    parameters?: Parameters<Paths.GetEntitiesByIdentifiers.PathParameters> | null,
-    data?: Paths.GetEntitiesByIdentifiers.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetEntitiesByIdentifiers.Responses.$200>
   /**
    * addEndCustomerRelationToEntity - addEndCustomerRelationToEntity
    * 
@@ -5279,6 +5978,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortal.Responses.$204>
   }
+  ['/v2/portal/external-links']: {
+    /**
+     * getExternalLinks - getExternalLinks
+     * 
+     * Retrieves the portal configuration external links.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetExternalLinks.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
+  }
   ['/v2/portal/public/portal/config']: {
     /**
      * getPublicPortalConfig - getPublicPortalConfig
@@ -5453,30 +6164,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetECPContact.Responses.$200>
   }
-  ['/v2/portal/contact/email/count']: {
-    /**
-     * getCountByEmail - getCountByEmail
-     * 
-     * Check Contact by email. Deprecated in favor of /contact/exists.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetCountByEmail.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetCountByEmail.Responses.$200>
-  }
-  ['/v2/portal/public/contact/count']: {
-    /**
-     * getContactCount - getContactCount
-     * 
-     * Return number of contacts matching identifier values. Deprecated in favor of /contact/exists.
-     */
-    'post'(
-      parameters?: Parameters<Paths.GetContactCount.QueryParameters> | null,
-      data?: Paths.GetContactCount.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetContactCount.Responses.$200>
-  }
   ['/v2/portal/public/contact/exists']: {
     /**
      * checkContactExists - checkContactExists
@@ -5533,6 +6220,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortalUser.Responses.$200>
   }
+  ['/v2/portal/user/update/email']: {
+    /**
+     * updatePortalUserEmail - updatePortalUserEmail
+     * 
+     * Update portal user email
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.UpdatePortalUserEmail.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdatePortalUserEmail.Responses.$200>
+  }
   ['/v2/porta/users/by-related-entity']: {
     /**
      * fetchPortalUsersByRelatedEntity - fetchPortalUsersByRelatedEntity
@@ -5545,14 +6244,26 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.FetchPortalUsersByRelatedEntity.Responses.$200>
   }
-  ['/v2/portal/user/confirm/{id}']: {
+  ['/v2/portal/user/confirm']: {
     /**
      * confirmUser - confirmUser
      * 
      * Confirm a portal user
      */
     'get'(
-      parameters?: Parameters<Paths.ConfirmUser.PathParameters & Paths.ConfirmUser.QueryParameters> | null,
+      parameters?: Parameters<Paths.ConfirmUser.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
+  }
+  ['/v2/portal/user/confirm/{id}']: {
+    /**
+     * confirmUserWithUserId - confirmUserWithUserId
+     * 
+     * Confirm a portal user
+     */
+    'get'(
+      parameters?: Parameters<Paths.ConfirmUserWithUserId.PathParameters & Paths.ConfirmUserWithUserId.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
@@ -5604,6 +6315,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllOrders.Responses.$200>
+  }
+  ['/v2/portal/order/{id}/acceptance']: {
+    /**
+     * postOrderAcceptance - postOrderAcceptance
+     * 
+     * Accept/decline an offer by id
+     */
+    'post'(
+      parameters?: Parameters<Paths.PostOrderAcceptance.PathParameters> | null,
+      data?: Paths.PostOrderAcceptance.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PostOrderAcceptance.Responses.$200>
   }
   ['/v2/portal/order/{id}']: {
     /**
@@ -5742,18 +6465,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityIdentifiers.Responses.$200>
-  }
-  ['/v2/portal/entity/by-identifiers/{slug}']: {
-    /**
-     * getEntitiesByIdentifiers - getEntitiesByIdentifiers
-     * 
-     * Get entities (contract) by identifiers. Deprecated in favor of /contract/by-identifiers.
-     */
-    'post'(
-      parameters?: Parameters<Paths.GetEntitiesByIdentifiers.PathParameters> | null,
-      data?: Paths.GetEntitiesByIdentifiers.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetEntitiesByIdentifiers.Responses.$200>
   }
   ['/v2/portal/entity/add-end-customer/{slug}/{id}']: {
     /**

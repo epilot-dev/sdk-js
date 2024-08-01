@@ -235,6 +235,14 @@ declare namespace Components {
              */
             webhook_id?: string;
             /**
+             * The name of the webhook configuration
+             */
+            webhook_name?: string;
+            /**
+             * The name of the automation that triggered the event
+             */
+            automation_name?: string;
+            /**
              * The ID of the given organization
              */
             organization_id: string;

@@ -224,6 +224,12 @@ declare namespace Components {
          * Reference to an address attribute of another entity
          */
         export interface AddressRelationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -362,6 +368,12 @@ declare namespace Components {
          * Automation entity
          */
         export interface AutomationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -524,6 +536,12 @@ declare namespace Components {
             caller?: ActivityCallerContext;
         }
         export interface BaseAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -714,6 +732,12 @@ declare namespace Components {
          * Yes / No Toggle
          */
         export interface BooleanAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -854,6 +878,12 @@ declare namespace Components {
          * An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes)
          */
         export interface ComputedAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -980,6 +1010,12 @@ declare namespace Components {
          * Consent Management
          */
         export interface ConsentAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1108,6 +1144,12 @@ declare namespace Components {
          * Country picker
          */
         export interface CountryAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1234,6 +1276,12 @@ declare namespace Components {
          * Currency input
          */
         export interface CurrencyAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1370,6 +1418,12 @@ declare namespace Components {
          * Date or Datetime picker
          */
         export interface DateAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -1596,6 +1650,12 @@ declare namespace Components {
          */
         export interface EntityCapability {
             /**
+             * ID for the entity capability
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
+            /**
              * Unique name for the capability
              * example:
              * customer_messaging
@@ -1704,6 +1764,12 @@ declare namespace Components {
          * a readonly computed ID for the entity capability including schema slug and the capability ID
          */
         export interface EntityCapabilityWithCompositeID {
+            /**
+             * ID for the entity capability
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             /**
              * Unique name for the capability
              * example:
@@ -1947,6 +2013,77 @@ declare namespace Components {
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+        }
+        export interface EntityListParams {
+            filter: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            SearchFilter;
+            /**
+             * Allow running the listing without any schema filter. This is disabled by default to prevent security and performance issues if done by an accident.
+             */
+            allow_targeting_all_schemas?: boolean;
+            /**
+             * example:
+             * _created_at:desc
+             */
+            sort?: string;
+            from?: number;
+            /**
+             * Max search size is 1000 with higher values defaulting to 1000
+             */
+            size?: number;
+            /**
+             * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
+             */
+            hydrate?: boolean;
+            fields?: /**
+             * List of entity fields to include or exclude in the response
+             *
+             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+             *
+             * Globbing and globstart (**) is supported for nested fields.
+             *
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
+             * ]
+             */
+            FieldsParam;
+            /**
+             * Aggregation supported by ElasticSearch allows summarizing data as metrics, statistics, or other analytics.
+             * example:
+             * {
+             *   "contact-count-per-tag": {
+             *     "terms": {
+             *       "field": "_tags.keyword"
+             *     }
+             *   }
+             * }
+             */
+            aggs?: {
+                [key: string]: any;
+            };
         }
         export interface EntityOperation {
             entity: EntityId /* uuid */;
@@ -2276,17 +2413,17 @@ declare namespace Components {
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
-             * A dictionary of Group Titles and associated settings if present.
+             * A list of Group Titles and associated settings if present.
              * example:
              * [
              *   {
-             *     "id": "Contact Details",
+             *     "id": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14",
              *     "label": "Contact Details",
              *     "expanded": true,
              *     "order": 1
              *   },
              *   {
-             *     "id": "Address Details",
+             *     "id": "e9a1ae28-27ba-4fa0-a79c-e279cc5c4a6e",
              *     "label": "Address Details",
              *     "expanded": false,
              *     "order": 2,
@@ -2297,39 +2434,7 @@ declare namespace Components {
              *   }
              * ]
              */
-            group_settings?: {
-                label: string;
-                id: string;
-                expanded?: boolean;
-                /**
-                 * example:
-                 * _is_composite_price = "false"
-                 */
-                render_condition?: string;
-                /**
-                 * Render order of the group
-                 */
-                order?: number;
-                /**
-                 * This group should only be active when the feature flag is enabled
-                 * example:
-                 * FF_MY_FEATURE_FLAG
-                 */
-                feature_flag?: string;
-                /**
-                 * This group should only be active when all the settings have the correct value
-                 */
-                settings_flag?: SettingFlag[];
-                info_tooltip_title?: {
-                    key?: string;
-                    default?: string;
-                };
-                _purpose?: /**
-                 * example:
-                 * taxonomy-slug:classification-slug
-                 */
-                ClassificationId[];
-            }[];
+            group_settings?: EntitySchemaGroup[];
             /**
              * Custom grid definitions for the layout. These settings are composed by managed and un-managed properties:
              * - Managed Properties: are interpreted and transformed into layout styles
@@ -2410,6 +2515,122 @@ declare namespace Components {
              * }
              */
             SearchMappings;
+        }
+        export interface EntitySchemaGroup {
+            /**
+             * example:
+             * Contact Details
+             */
+            label: string;
+            /**
+             * example:
+             * e18a532b-ae79-4d86-a6a5-e5dbfb579d14
+             */
+            id: string;
+            /**
+             * Render order of the group
+             */
+            order?: number;
+            /**
+             * Expanded by default
+             */
+            expanded?: boolean;
+            /**
+             * Only render group when render_condition resolves to true
+             * example:
+             * _is_composite_price = "false"
+             */
+            render_condition?: string;
+            /**
+             * Only render group when one of the purposes is enabled
+             */
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * This group should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This group should only be active when all the settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            info_tooltip_title?: {
+                /**
+                 * Translation key for info tooltip
+                 */
+                key?: string;
+                /**
+                 * Default string for info tooltip
+                 */
+                default?: string;
+            };
+        }
+        /**
+         * a readonly computed ID for the group including schema slug and the group ID
+         */
+        export interface EntitySchemaGroupWithCompositeID {
+            /**
+             * example:
+             * Contact Details
+             */
+            label: string;
+            /**
+             * example:
+             * e18a532b-ae79-4d86-a6a5-e5dbfb579d14
+             */
+            id: string;
+            /**
+             * Render order of the group
+             */
+            order?: number;
+            /**
+             * Expanded by default
+             */
+            expanded?: boolean;
+            /**
+             * Only render group when render_condition resolves to true
+             * example:
+             * _is_composite_price = "false"
+             */
+            render_condition?: string;
+            /**
+             * Only render group when one of the purposes is enabled
+             */
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * This group should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This group should only be active when all the settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            info_tooltip_title?: {
+                /**
+                 * Translation key for info tooltip
+                 */
+                key?: string;
+                /**
+                 * Default string for info tooltip
+                 */
+                default?: string;
+            };
+            /**
+             * example:
+             * contact:e18a532b-ae79-4d86-a6a5-e5dbfb579d14
+             */
+            composite_id?: string;
         }
         /**
          * The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities.
@@ -2535,17 +2756,17 @@ declare namespace Components {
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
-             * A dictionary of Group Titles and associated settings if present.
+             * A list of Group Titles and associated settings if present.
              * example:
              * [
              *   {
-             *     "id": "Contact Details",
+             *     "id": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14",
              *     "label": "Contact Details",
              *     "expanded": true,
              *     "order": 1
              *   },
              *   {
-             *     "id": "Address Details",
+             *     "id": "e9a1ae28-27ba-4fa0-a79c-e279cc5c4a6e",
              *     "label": "Address Details",
              *     "expanded": false,
              *     "order": 2,
@@ -2556,39 +2777,7 @@ declare namespace Components {
              *   }
              * ]
              */
-            group_settings?: {
-                label: string;
-                id: string;
-                expanded?: boolean;
-                /**
-                 * example:
-                 * _is_composite_price = "false"
-                 */
-                render_condition?: string;
-                /**
-                 * Render order of the group
-                 */
-                order?: number;
-                /**
-                 * This group should only be active when the feature flag is enabled
-                 * example:
-                 * FF_MY_FEATURE_FLAG
-                 */
-                feature_flag?: string;
-                /**
-                 * This group should only be active when all the settings have the correct value
-                 */
-                settings_flag?: SettingFlag[];
-                info_tooltip_title?: {
-                    key?: string;
-                    default?: string;
-                };
-                _purpose?: /**
-                 * example:
-                 * taxonomy-slug:classification-slug
-                 */
-                ClassificationId[];
-            }[];
+            group_settings?: EntitySchemaGroup[];
             /**
              * Custom grid definitions for the layout. These settings are composed by managed and un-managed properties:
              * - Managed Properties: are interpreted and transformed into layout styles
@@ -2670,13 +2859,7 @@ declare namespace Components {
              */
             SearchMappings;
         }
-        export interface EntitySearchParams {
-            /**
-             * Lucene queries supported with ElasticSearch
-             * example:
-             * _schema:contact AND status:active
-             */
-            q: string;
+        export interface EntitySearchOptions {
             /**
              * example:
              * _created_at:desc
@@ -2710,9 +2893,63 @@ declare namespace Components {
              */
             FieldsParam;
             /**
+             * Aggregation supported by ElasticSearch allows summarizing data as metrics, statistics, or other analytics.
+             * example:
+             * {
+             *   "contact-count-per-tag": {
+             *     "terms": {
+             *       "field": "_tags.keyword"
+             *     }
+             *   }
+             * }
+             */
+            aggs?: {
+                [key: string]: any;
+            };
+        }
+        export interface EntitySearchParams {
+            /**
+             * Lucene [queries supported with ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax)
+             * example:
+             * _schema:contact AND status:active
+             */
+            q: string;
+            /**
              * Adds a `_score` number field to results that can be used to rank by match score
              */
             include_scores?: boolean;
+            /**
+             * example:
+             * _created_at:desc
+             */
+            sort?: string;
+            from?: number;
+            /**
+             * Max search size is 1000 with higher values defaulting to 1000
+             */
+            size?: number;
+            /**
+             * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
+             */
+            hydrate?: boolean;
+            fields?: /**
+             * List of entity fields to include or exclude in the response
+             *
+             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+             *
+             * Globbing and globstart (**) is supported for nested fields.
+             *
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
+             * ]
+             */
+            FieldsParam;
             /**
              * Aggregation supported by ElasticSearch allows summarizing data as metrics, statistics, or other analytics.
              * example:
@@ -2891,6 +3128,12 @@ declare namespace Components {
          * File or Image Attachment
          */
         export interface FileAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3078,9 +3321,82 @@ declare namespace Components {
             relations?: GetRelationsResp;
         }
         /**
+         * Entity with relation data resolved into the attribute values
+         * example:
+         * {
+         *   "_relations": [
+         *     {
+         *       "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+         *     }
+         *   ],
+         *   "status": "active",
+         *   "customer_number": "abc123",
+         *   "email": [
+         *     {
+         *       "label": "work",
+         *       "email": "user@example.com"
+         *     }
+         *   ],
+         *   "phone": [
+         *     {
+         *       "label": "work",
+         *       "phone": "+49123456789"
+         *     }
+         *   ],
+         *   "first_name": "First Name",
+         *   "middle_name": "Middle Name",
+         *   "last_name": "Last Name",
+         *   "date_of_birth": "2019-08-24",
+         *   "title": "Mr.",
+         *   "account": [
+         *     {
+         *       "status": "active",
+         *       "name": "Company name",
+         *       "company_email": [
+         *         {
+         *           "label": "Company email",
+         *           "email": "company@example.com"
+         *         }
+         *       ],
+         *       "company_phone": [
+         *         {
+         *           "label": "Support phone",
+         *           "phone": "+49123456789"
+         *         }
+         *       ],
+         *       "company_website": "https://example.com",
+         *       "tax_id": "DE123456789",
+         *       "tax_exemption": "2019-08-24",
+         *       "contacts": {
+         *         "$relation": [
+         *           {
+         *             "_tags": [
+         *               "CEO"
+         *             ],
+         *             "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+         *           }
+         *         ]
+         *       }
+         *     }
+         *   ]
+         * }
+         */
+        export interface HydratedEntity {
+            [name: string]: any;
+            _relations: {
+                entity_id: EntityId /* uuid */;
+            }[];
+        }
+        /**
          * No UI representation
          */
         export interface InternalAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3207,6 +3523,12 @@ declare namespace Components {
          * Epilot internal user info
          */
         export interface InternalUserAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3333,6 +3655,12 @@ declare namespace Components {
          * Email address for send invitation
          */
         export interface InvitationEmailAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3467,6 +3795,12 @@ declare namespace Components {
          * Link with title and href
          */
         export interface LinkAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3601,6 +3935,12 @@ declare namespace Components {
          * Multi Choice Selection
          */
         export interface MultiSelectAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3743,6 +4083,12 @@ declare namespace Components {
          * Numeric input
          */
         export interface NumberAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -3874,6 +4220,12 @@ declare namespace Components {
          * Type of attribute to render N number of ordered fields
          */
         export interface OrderedListAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4000,6 +4352,12 @@ declare namespace Components {
          * Shared Partner Organisations
          */
         export interface PartnerOrganisationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4126,6 +4484,12 @@ declare namespace Components {
          * Partner Status
          */
         export interface PartnerStatusAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4252,6 +4616,12 @@ declare namespace Components {
          * Reference to a payment method attribute of another entity
          */
         export interface PaymentMethodRelationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4380,6 +4750,16 @@ declare namespace Components {
          */
         export interface PurposeAttribute {
             /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId;
+            /**
              * example:
              * Wallbox PV
              */
@@ -4503,11 +4883,6 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            id?: /**
-             * example:
-             * taxonomy-slug:classification-slug
-             */
-            ClassificationId;
             /**
              * URL-friendly identifier for the classification
              * example:
@@ -4542,6 +4917,12 @@ declare namespace Components {
          * Entity Relationship
          */
         export interface RelationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -4905,6 +5286,12 @@ declare namespace Components {
          * Repeatable (add N number of fields)
          */
         export interface RepeatableAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5181,6 +5568,166 @@ declare namespace Components {
          */
         export type SchemaId = string; // uuid
         /**
+         * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+         * example:
+         * [
+         *   {
+         *     "term": {
+         *       "_schema": "contact"
+         *     }
+         *   },
+         *   {
+         *     "terms": {
+         *       "status": [
+         *         "active"
+         *       ]
+         *     }
+         *   }
+         * ]
+         */
+        export type SearchFilter = {
+            /**
+             * Returns documents that contain an exact term in a provided field.
+             *
+             * To return a document, the query term must exactly match the queried field's value, including whitespace and capitalization.
+             *
+             * You likely DO NOT want to use this filter on text fields and want to target its .keyword instead.
+             *
+             * example:
+             * {
+             *   "_schema": "contact"
+             * }
+             */
+            term?: {
+                [name: string]: /* A filter field value. */ SearchFilterValue;
+            };
+            /**
+             * Returns documents that contain one of the exact terms in a provided field. See term filter for more info.
+             * example:
+             * {
+             *   "status": [
+             *     "active"
+             *   ]
+             * }
+             */
+            terms?: {
+                [name: string]: /* A filter field value. */ SearchFilterValue[];
+            };
+            /**
+             * Returns documents based on their IDs.
+             * example:
+             * {
+             *   "values": [
+             *     "550e8400-e29b-41d4-a716-446655440000"
+             *   ]
+             * }
+             */
+            ids?: {
+                values?: string[];
+            };
+            /**
+             * Returns documents with fields that have terms within a certain range.
+             * example:
+             * {
+             *   "_created_at": {
+             *     "gte": "2021-01-01T00:00:00.000Z",
+             *     "lte": "2021-01-31T23:59:59.999Z"
+             *   }
+             * }
+             */
+            range?: {
+                [name: string]: {
+                    gt?: /* A filter field value. */ SearchFilterValue;
+                    gte?: /* A filter field value. */ SearchFilterValue;
+                    lt?: /* A filter field value. */ SearchFilterValue;
+                    lte?: /* A filter field value. */ SearchFilterValue;
+                    /**
+                     * The date format used to parse date values.
+                     */
+                    format?: string;
+                    /**
+                     * Indicates how the range query matches values for range fields.
+                     */
+                    relation?: "INTERSECTS" | "CONTAINS" | "WITHIN";
+                    /**
+                     * Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query to UTC.
+                     */
+                    time_zone?: string;
+                };
+            };
+            /**
+             * Returns documents that have a value in the specified field.
+             * example:
+             * {
+             *   "field": "_tags"
+             * }
+             */
+            exists?: {
+                field: string;
+            };
+            $and?: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            SearchFilter;
+            $or?: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            SearchFilter;
+            $not?: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            SearchFilter;
+        }[];
+        /**
+         * A filter field value.
+         */
+        export type SearchFilterValue = /* A filter field value. */ (string | null) | number | boolean;
+        /**
          * Advanced: explicit Elasticsearch index mapping definitions for entity data
          *
          * example:
@@ -5204,6 +5751,12 @@ declare namespace Components {
          * Dropdown select
          */
         export interface SelectAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5338,6 +5891,12 @@ declare namespace Components {
          * Sequence of unique identifiers
          */
         export interface SequenceAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5481,6 +6040,12 @@ declare namespace Components {
          * Status select
          */
         export interface StatusAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5677,6 +6242,12 @@ declare namespace Components {
          * Tags
          */
         export interface TagsAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -5856,6 +6427,16 @@ declare namespace Components {
              * true
              */
             enabled?: boolean;
+            /**
+             * Position of the taxonomy
+             * example:
+             * 10
+             */
+            order?: number;
+            /**
+             * List of locations where the taxonomy is enabled to be used. If empty, it's enabled for all locations.
+             */
+            enabled_locations?: ("account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user")[];
         }
         export interface TaxonomyClassification {
             id?: /**
@@ -5892,6 +6473,12 @@ declare namespace Components {
          * Textarea or text input
          */
         export interface TextAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -6019,6 +6606,12 @@ declare namespace Components {
          * User Relationship
          */
         export interface UserRelationAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -6147,12 +6740,6 @@ declare namespace Components {
 declare namespace Paths {
     namespace AddRelations {
         namespace Parameters {
-            export type ActivityId = /**
-             * See https://github.com/ulid/spec
-             * example:
-             * 01F130Q52Q6MWSNS8N2AVXV4JN
-             */
-            Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
@@ -6168,7 +6755,6 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             async?: Parameters.Async;
-            activity_id?: Parameters.ActivityId;
         }
         export type RequestBody = Components.Schemas.RelationItem[];
         namespace Responses {
@@ -6510,7 +7096,7 @@ declare namespace Paths {
             slug: Parameters.Slug;
         }
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
         }
     }
@@ -6550,6 +7136,25 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+        }
+    }
+    namespace DeleteSchemaGroup {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
         }
     }
     namespace DeleteTaxonomy {
@@ -6869,6 +7474,310 @@ declare namespace Paths {
             Components.Schemas.EntityItem;
         }
     }
+    namespace GetJsonSchema {
+        namespace Parameters {
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            /**
+             * example:
+             * {
+             *   "$schema": "http://json-schema.org/draft/2020-12/schema",
+             *   "type": "object",
+             *   "properties": {
+             *     "_id": {
+             *       "type": "string",
+             *       "format": "uuid",
+             *       "example": "123e4567-e89b-12d3-a456-426614174000"
+             *     },
+             *     "_org": {
+             *       "type": "string",
+             *       "description": "Organization Id the entity belongs to",
+             *       "readOnly": true
+             *     },
+             *     "_owners": {
+             *       "type": "array",
+             *       "readOnly": true,
+             *       "items": {
+             *         "description": "The user / organization owning this entity.\n\nNote: Owner implicitly has access to the entity regardless of ACLs.\n",
+             *         "type": "object",
+             *         "properties": {
+             *           "org_id": {
+             *             "type": "string",
+             *             "example": "123"
+             *           },
+             *           "user_id": {
+             *             "type": "string",
+             *             "example": "123"
+             *           }
+             *         },
+             *         "required": [
+             *           "org_id"
+             *         ]
+             *       }
+             *     },
+             *     "_schema": {
+             *       "readOnly": true,
+             *       "type": "string"
+             *     },
+             *     "_title": {
+             *       "readOnly": true,
+             *       "type": "string"
+             *     },
+             *     "_tags": {
+             *       "type": "array",
+             *       "nullable": true,
+             *       "items": {
+             *         "type": "string"
+             *       }
+             *     },
+             *     "_created_at": {
+             *       "readOnly": true,
+             *       "type": "string",
+             *       "format": "date-time"
+             *     },
+             *     "_updated_at": {
+             *       "readOnly": true,
+             *       "type": "string",
+             *       "format": "date-time"
+             *     },
+             *     "_acl": {
+             *       "readOnly": true,
+             *       "type": "object",
+             *       "description": "Access control list (ACL) for an entity. Defines sharing access to external orgs or users.",
+             *       "additionalProperties": true,
+             *       "properties": {
+             *         "view": {
+             *           "type": "array",
+             *           "items": {
+             *             "type": "string",
+             *             "example": "org:456"
+             *           }
+             *         },
+             *         "edit": {
+             *           "type": "array",
+             *           "items": {
+             *             "type": "string",
+             *             "example": "org:456"
+             *           }
+             *         },
+             *         "delete": {
+             *           "type": "array",
+             *           "items": {
+             *             "type": "string",
+             *             "example": "org:456"
+             *           }
+             *         }
+             *       }
+             *     },
+             *     "title": {
+             *       "type": "string",
+             *       "nullable": true,
+             *       "enum": [
+             *         "Dr.",
+             *         "Prof.",
+             *         "Prof. Dr."
+             *       ]
+             *     },
+             *     "salutation": {
+             *       "type": "string",
+             *       "nullable": true,
+             *       "enum": [
+             *         "Mr.",
+             *         "Ms. / Mrs.",
+             *         "Company",
+             *         "Contact Person",
+             *         "Company/Contact Person",
+             *         "Spouse",
+             *         "Family",
+             *         "Ownership",
+             *         "Assembly",
+             *         "Other"
+             *       ]
+             *     },
+             *     "first_name": {
+             *       "type": "string"
+             *     },
+             *     "last_name": {
+             *       "type": "string"
+             *     },
+             *     "customer_number": {
+             *       "type": "string",
+             *       "nullable": true
+             *     },
+             *     "birthdate": {
+             *       "type": "string",
+             *       "format": "date",
+             *       "nullable": true
+             *     },
+             *     "account": {
+             *       "type": "object",
+             *       "nullable": true,
+             *       "properties": {
+             *         "$relation": {
+             *           "type": "array",
+             *           "items": {
+             *             "type": "object",
+             *             "properties": {
+             *               "entity_id": {
+             *                 "type": "string",
+             *                 "format": "uuid",
+             *                 "example": "123e4567-e89b-12d3-a456-426614174000"
+             *               },
+             *               "_tags": {
+             *                 "type": "array",
+             *                 "nullable": true,
+             *                 "items": {
+             *                   "type": "string"
+             *                 }
+             *               }
+             *             },
+             *             "required": [
+             *               "entity_id"
+             *             ]
+             *           }
+             *         }
+             *       },
+             *       "additionalProperties": true
+             *     },
+             *     "address": {
+             *       "type": "array",
+             *       "nullable": true,
+             *       "description": "Addresses as a list of object, the element with index 0 is treated as the primary one.\n",
+             *       "items": {
+             *         "type": "object",
+             *         "properties": {
+             *           "street": {
+             *             "type": "string",
+             *             "nullable": true
+             *           },
+             *           "street_number": {
+             *             "type": "string",
+             *             "nullable": true
+             *           },
+             *           "postal_code": {
+             *             "type": "string",
+             *             "nullable": true
+             *           },
+             *           "city": {
+             *             "type": "string",
+             *             "nullable": true
+             *           },
+             *           "country": {
+             *             "type": "string",
+             *             "nullable": true,
+             *             "enum": [
+             *               "DE",
+             *               "AT",
+             *               "CH"
+             *             ]
+             *           },
+             *           "additional_info": {
+             *             "type": "string",
+             *             "nullable": true
+             *           },
+             *           "_tags": {
+             *             "type": "array",
+             *             "nullable": true,
+             *             "items": {
+             *               "type": "string"
+             *             }
+             *           },
+             *           "_id": {
+             *             "type": "string",
+             *             "example": "xHcOoJCa07eysJ1GaQeSb"
+             *           }
+             *         },
+             *         "required": [
+             *           "street",
+             *           "street_number",
+             *           "postal_code",
+             *           "city",
+             *           "country"
+             *         ]
+             *       }
+             *     },
+             *     "email": {
+             *       "type": "array",
+             *       "nullable": true,
+             *       "description": "Email addresses as a list of object, the element with index 0 is treated as the primary one.\n",
+             *       "items": {
+             *         "type": "object",
+             *         "properties": {
+             *           "_id": {
+             *             "type": "string",
+             *             "example": "xHcOoJCa07eysJ1GaQeSb"
+             *           },
+             *           "_tags": {
+             *             "type": "array",
+             *             "nullable": true,
+             *             "items": {
+             *               "type": "string"
+             *             }
+             *           },
+             *           "email": {
+             *             "type": "string"
+             *           }
+             *         },
+             *         "required": [
+             *           "email"
+             *         ]
+             *       }
+             *     },
+             *     "phone": {
+             *       "type": "array",
+             *       "description": "Phone numbers as a list of object, the element with index 0 is treated as the primary one.\n",
+             *       "items": {
+             *         "type": "object",
+             *         "properties": {
+             *           "_id": {
+             *             "type": "string",
+             *             "example": "xHcOoJCa07eysJ1GaQeSb"
+             *           },
+             *           "_tags": {
+             *             "type": "array",
+             *             "nullable": true,
+             *             "items": {
+             *               "type": "string"
+             *             }
+             *           },
+             *           "phone": {
+             *             "type": "string"
+             *           }
+             *         },
+             *         "required": [
+             *           "phone"
+             *         ]
+             *       }
+             *     }
+             *   },
+             *   "required": [
+             *     "first_name",
+             *     "last_name",
+             *     "_id",
+             *     "_org",
+             *     "_owners",
+             *     "_schema",
+             *     "_title",
+             *     "_tags",
+             *     "_created_at",
+             *     "_updated_at",
+             *     "_acl"
+             *   ]
+             * }
+             */
+            export interface $200 {
+            }
+        }
+    }
     namespace GetRelatedEntitiesCount {
         namespace Parameters {
             export type ExcludeSchemas = /**
@@ -7100,6 +8009,42 @@ declare namespace Paths {
             export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
         }
     }
+    namespace GetSchemaExample {
+        namespace Parameters {
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+        }
+    }
+    namespace GetSchemaGroup {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
+        }
+    }
     namespace GetSchemaVersions {
         namespace Parameters {
             export type DraftsFrom = number;
@@ -7174,6 +8119,12 @@ declare namespace Paths {
         namespace Responses {
             export interface $201 {
             }
+        }
+    }
+    namespace ListEntities {
+        export type RequestBody = Components.Schemas.EntityListParams;
+        namespace Responses {
+            export type $200 = Components.Schemas.EntitySearchResults;
         }
     }
     namespace ListFavoriteViewsForUser {
@@ -7452,6 +8403,50 @@ declare namespace Paths {
             export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
         }
     }
+    namespace PutSchemaGroup {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        export type RequestBody = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
+        }
+    }
+    namespace RemoveRelations {
+        namespace Parameters {
+            export type Async = boolean;
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            async?: Parameters.Async;
+        }
+        export type RequestBody = Components.Schemas.RelationItem[];
+        namespace Responses {
+            export interface $204 {
+            }
+        }
+    }
     namespace SearchEntities {
         export type RequestBody = Components.Schemas.EntitySearchParams;
         namespace Responses {
@@ -7672,7 +8667,7 @@ declare namespace Paths {
         export interface PathParameters {
             id: Parameters.Id;
         }
-        export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
+        export type RequestBody = /* A saved entity view */ Components.Schemas.SavedViewItem;
         namespace Responses {
             export type $200 = /* A saved entity view */ Components.Schemas.SavedViewItem;
         }
@@ -7762,6 +8757,7 @@ declare namespace Paths {
              * contact
              */
             Components.Schemas.EntitySlug;
+            export type Strict = boolean;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -7770,6 +8766,7 @@ declare namespace Paths {
             activity_id?: Parameters.ActivityId;
             dry_run?: Parameters.DryRun;
             async?: Parameters.Async;
+            strict?: Parameters.Strict;
         }
         export interface RequestBody {
             /**
@@ -8001,7 +8998,27 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.DeleteSchema.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteSchema.Responses.$204>
+  ): OperationResponse<Paths.DeleteSchema.Responses.$200>
+  /**
+   * getJsonSchema - getJsonSchema
+   * 
+   * Get formal JSON schema definition draft 2020-12 for the given epilot schema
+   */
+  'getJsonSchema'(
+    parameters?: Parameters<Paths.GetJsonSchema.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetJsonSchema.Responses.$200>
+  /**
+   * getSchemaExample - getSchemaExample
+   * 
+   * Get a full example entity for the given schema
+   */
+  'getSchemaExample'(
+    parameters?: Parameters<Paths.GetSchemaExample.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSchemaExample.Responses.$200>
   /**
    * getSchemaVersions - getSchemaVersions
    * 
@@ -8035,7 +9052,7 @@ export interface OperationMethods {
   /**
    * searchEntities - searchEntities
    * 
-   * Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.
+   * Search for entities. Supports ordering and pagination. [Lucene query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) supported for complex querying.
    * 
    * Passing comma-separated `x-epilot-org-id` is supported for cross-org entity search.
    * 
@@ -8108,6 +9125,19 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchEntities.Responses.$200>
   /**
+   * listEntities - listEntities
+   * 
+   * List entities that meet the specified conditions.
+   * 
+   * Supports the same options as entity search but utilizes filtering using a subset of [Elastic Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html) and does not perform scoring.
+   * 
+   */
+  'listEntities'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ListEntities.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListEntities.Responses.$200>
+  /**
    * createEntity - createEntity
    * 
    * Creates a new entity using a key.
@@ -8159,7 +9189,6 @@ export interface OperationMethods {
    * 
    * - If no entities are matched, a new entity is created.
    * - If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.
-   * - If more than one entity is matched a `409` Error is returned
    * 
    * ## Activity
    * 
@@ -8426,6 +9455,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddRelations.Responses.$200>
   /**
+   * removeRelations - removeRelations
+   * 
+   * Disassociate one or more entities to parent entity by removing items to a relation attribute
+   */
+  'removeRelations'(
+    parameters?: Parameters<Paths.RemoveRelations.PathParameters & Paths.RemoveRelations.QueryParameters> | null,
+    data?: Paths.RemoveRelations.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RemoveRelations.Responses.$204>
+  /**
    * getRelationsV2 - getRelationsV2
    * 
    * Returns 1st level direct relations for an entity with pagination.
@@ -8572,16 +9611,6 @@ export interface OperationMethods {
   /**
    * listTaxonomies - listTaxonomies
    * 
-   * List taxonomies in an organisation
-   */
-  'listTaxonomies'(
-    parameters?: Parameters<Paths.ListTaxonomies.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListTaxonomies.Responses.$200>
-  /**
-   * listTaxonomies - listTaxonomies
-   * 
    * List taxonomies in an organization
    */
   'listTaxonomies'(
@@ -8702,7 +9731,7 @@ export interface OperationMethods {
   /**
    * putSchemaAttribute - putSchemaAttribute
    * 
-   * Adds or updates an attribute in the schema
+   * Updates an attribute in the schema
    */
   'putSchemaAttribute'(
     parameters?: Parameters<Paths.PutSchemaAttribute.PathParameters> | null,
@@ -8749,6 +9778,36 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaCapability.Responses.$200>
+  /**
+   * getSchemaGroup - getSchemaGroup
+   * 
+   * Get a schema group from given group composite ID
+   */
+  'getSchemaGroup'(
+    parameters?: Parameters<Paths.GetSchemaGroup.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSchemaGroup.Responses.$200>
+  /**
+   * putSchemaGroup - putSchemaGroup
+   * 
+   * Adds or updates an capability in the schema
+   */
+  'putSchemaGroup'(
+    parameters?: Parameters<Paths.PutSchemaGroup.PathParameters> | null,
+    data?: Paths.PutSchemaGroup.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutSchemaGroup.Responses.$200>
+  /**
+   * deleteSchemaGroup - deleteSchemaGroup
+   * 
+   * Deletes a Capability from a schema
+   */
+  'deleteSchemaGroup'(
+    parameters?: Parameters<Paths.DeleteSchemaGroup.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteSchemaGroup.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -8794,7 +9853,31 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.DeleteSchema.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteSchema.Responses.$204>
+    ): OperationResponse<Paths.DeleteSchema.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/json/schema']: {
+    /**
+     * getJsonSchema - getJsonSchema
+     * 
+     * Get formal JSON schema definition draft 2020-12 for the given epilot schema
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetJsonSchema.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetJsonSchema.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/json/example']: {
+    /**
+     * getSchemaExample - getSchemaExample
+     * 
+     * Get a full example entity for the given schema
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSchemaExample.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSchemaExample.Responses.$200>
   }
   ['/v1/entity/schemas/{slug}/versions']: {
     /**
@@ -8836,7 +9919,7 @@ export interface PathsDictionary {
     /**
      * searchEntities - searchEntities
      * 
-     * Search for entities. Supports ordering and pagination. Lucene query syntax supported for complex querying.
+     * Search for entities. Supports ordering and pagination. [Lucene query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) supported for complex querying.
      * 
      * Passing comma-separated `x-epilot-org-id` is supported for cross-org entity search.
      * 
@@ -8909,6 +9992,21 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchEntities.Responses.$200>
   }
+  ['/v1/entity:list']: {
+    /**
+     * listEntities - listEntities
+     * 
+     * List entities that meet the specified conditions.
+     * 
+     * Supports the same options as entity search but utilizes filtering using a subset of [Elastic Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html) and does not perform scoring.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ListEntities.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListEntities.Responses.$200>
+  }
   ['/v1/entity/{slug}']: {
     /**
      * createEntity - createEntity
@@ -8966,7 +10064,6 @@ export interface PathsDictionary {
      * 
      * - If no entities are matched, a new entity is created.
      * - If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.
-     * - If more than one entity is matched a `409` Error is returned
      * 
      * ## Activity
      * 
@@ -9248,6 +10345,16 @@ export interface PathsDictionary {
       data?: Paths.AddRelations.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddRelations.Responses.$200>
+    /**
+     * removeRelations - removeRelations
+     * 
+     * Disassociate one or more entities to parent entity by removing items to a relation attribute
+     */
+    'delete'(
+      parameters?: Parameters<Paths.RemoveRelations.PathParameters & Paths.RemoveRelations.QueryParameters> | null,
+      data?: Paths.RemoveRelations.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RemoveRelations.Responses.$204>
   }
   ['/v2/entity/{slug}/{id}/relations']: {
     /**
@@ -9413,18 +10520,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListFavoriteViewsForUser.Responses.$200>
   }
-  ['/v1/entity/listTaxonomies']: {
-    /**
-     * listTaxonomies - listTaxonomies
-     * 
-     * List taxonomies in an organisation
-     */
-    'get'(
-      parameters?: Parameters<Paths.ListTaxonomies.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListTaxonomies.Responses.$200>
-  }
   ['/v1/entity/taxonomies']: {
     /**
      * listTaxonomies - listTaxonomies
@@ -9563,7 +10658,7 @@ export interface PathsDictionary {
     /**
      * putSchemaAttribute - putSchemaAttribute
      * 
-     * Adds or updates an attribute in the schema
+     * Updates an attribute in the schema
      */
     'put'(
       parameters?: Parameters<Paths.PutSchemaAttribute.PathParameters> | null,
@@ -9612,6 +10707,38 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaCapability.Responses.$200>
+  }
+  ['/v1/entity/schemas/group/{composite_id}']: {
+    /**
+     * getSchemaGroup - getSchemaGroup
+     * 
+     * Get a schema group from given group composite ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSchemaGroup.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSchemaGroup.Responses.$200>
+    /**
+     * putSchemaGroup - putSchemaGroup
+     * 
+     * Adds or updates an capability in the schema
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutSchemaGroup.PathParameters> | null,
+      data?: Paths.PutSchemaGroup.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutSchemaGroup.Responses.$200>
+    /**
+     * deleteSchemaGroup - deleteSchemaGroup
+     * 
+     * Deletes a Capability from a schema
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteSchemaGroup.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteSchemaGroup.Responses.$200>
   }
 }
 

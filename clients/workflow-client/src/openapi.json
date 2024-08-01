@@ -936,10 +936,10 @@
             "items": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/SectionSimplified"
+                  "$ref": "#/components/schemas/Section"
                 },
                 {
-                  "$ref": "#/components/schemas/StepSimplified"
+                  "$ref": "#/components/schemas/Step"
                 }
               ]
             }
@@ -1031,38 +1031,6 @@
           "STARTED",
           "DONE",
           "CLOSED"
-        ]
-      },
-      "SectionSimplified": {
-        "type": "object",
-        "description": "A group of Steps that define the progress of the Workflow",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "definitionId": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "description": "Name for this Section",
-            "example": "Lead Qualification"
-          },
-          "type": {
-            "$ref": "#/components/schemas/ItemType"
-          },
-          "steps": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StepSimplified"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "type",
-          "steps"
         ]
       },
       "Section": {
@@ -1701,6 +1669,8 @@
           "timePeriod": {
             "type": "string",
             "enum": [
+              "minutes",
+              "hours",
               "days",
               "weeks",
               "months"

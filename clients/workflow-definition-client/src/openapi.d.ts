@@ -47,7 +47,7 @@ declare namespace Components {
          */
         export interface DynamicDueDate {
             numberOfUnits: number;
-            timePeriod: "days" | "weeks" | "months";
+            timePeriod: "minutes" | "hours" | "days" | "weeks" | "months";
             actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSED";
             stepId?: string;
         }
@@ -57,7 +57,6 @@ declare namespace Components {
         export interface ECPDetails {
             enabled?: boolean;
             label?: string;
-            name?: string;
             description?: string;
             journey?: StepJourney;
         }
@@ -212,7 +211,7 @@ declare namespace Paths {
     namespace CreateDefinition {
         export type RequestBody = Components.Schemas.WorkflowDefinition;
         namespace Responses {
-            export type $200 = Components.Schemas.WorkflowDefinition;
+            export type $201 = Components.Schemas.WorkflowDefinition;
             export type $400 = Components.Schemas.ErrorResp;
             export type $401 = Components.Schemas.ErrorResp;
             export type $500 = Components.Schemas.ErrorResp;
@@ -342,7 +341,7 @@ export interface OperationMethods {
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateDefinition.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateDefinition.Responses.$200>
+  ): OperationResponse<Paths.CreateDefinition.Responses.$201>
   /**
    * getDefinition - getDefinition
    * 
@@ -458,7 +457,7 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateDefinition.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateDefinition.Responses.$200>
+    ): OperationResponse<Paths.CreateDefinition.Responses.$201>
   }
   ['/v1/workflows/definitions/{definitionId}']: {
     /**

@@ -124,18 +124,6 @@ declare namespace Components {
             dependencies?: Grant[];
         }
         /**
-         * All roles attached to an users of an organization
-         */
-        export interface OrgAssignments {
-            organization_id?: /**
-             * Id of an organization
-             * example:
-             * 123
-             */
-            OrganizationId;
-            assignments?: /* A role attached to an user */ Assignment[];
-        }
-        /**
          * A role automatically applied to all users in an organization.
          */
         export interface OrgRole {
@@ -183,18 +171,6 @@ declare namespace Components {
              * Professional
              */
             pricing_tier?: string;
-        }
-        /**
-         * All roles attached to an users of an organization
-         */
-        export interface OrgRoles {
-            organization_id?: /**
-             * Id of an organization
-             * example:
-             * 123
-             */
-            OrganizationId;
-            roles?: Role[];
         }
         /**
          * Id of an organization
@@ -251,7 +227,50 @@ declare namespace Components {
              */
             partner_org_id?: string;
         }
-        export type Role = /* A standard user role. Must be explicitly assigned to users. */ UserRole | /* A role automatically applied to all users in an organization. */ OrgRole | /* A role that can be assigned to users in other organizations for sharing purposes. */ ShareRole | /* A role that appears in another organization's role list that can be assigned but not modified by the partner organization. */ PartnerRole;
+        /**
+         * A role that is applied to end customers and installers using the Portals
+         */
+        export interface PortalRole {
+            id: /**
+             * Format: <organization_id>:<slug>
+             * example:
+             * 123:owner
+             */
+            RoleId;
+            /**
+             * Human-friendly name for the role
+             * example:
+             * Owner
+             */
+            name: string;
+            /**
+             * URL-friendly name for the role
+             * example:
+             * owner
+             */
+            slug: string;
+            /**
+             * Type of the role
+             */
+            type: "portal_role";
+            /**
+             * date and time then the role will expire
+             * example:
+             * 2028-07-21T17:32:28Z
+             */
+            expires_at?: string; // date-time
+            organization_id: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId;
+            /**
+             * List of grants (permissions) applied to the role
+             */
+            grants: Grant[];
+        }
+        export type Role = /* A standard user role. Must be explicitly assigned to users. */ UserRole | /* A role automatically applied to all users in an organization. */ OrgRole | /* A role that can be assigned to users in other organizations for sharing purposes. */ ShareRole | /* A role that appears in another organization's role list that can be assigned but not modified by the partner organization. */ PartnerRole | /* A role that is applied to end customers and installers using the Portals */ PortalRole;
         /**
          * Format: <organization_id>:<slug>
          * example:
@@ -259,174 +278,8 @@ declare namespace Components {
          */
         export type RoleId = string;
         export type RolePayload = {
-            id: /**
-             * Format: <organization_id>:<slug>
-             * example:
-             * 123:owner
-             */
-            RoleId;
-            /**
-             * Human-friendly name for the role
-             * example:
-             * Owner
-             */
-            name: string;
-            /**
-             * URL-friendly name for the role
-             * example:
-             * owner
-             */
-            slug: string;
-            /**
-             * Type of the role
-             */
-            type: "user_role";
-            /**
-             * date and time then the role will expire
-             * example:
-             * 2028-07-21T17:32:28Z
-             */
-            expires_at?: string; // date-time
-            organization_id: /**
-             * Id of an organization
-             * example:
-             * 123
-             */
-            OrganizationId;
-            /**
-             * List of grants (permissions) applied to the role
-             */
-            grants: GrantWithDependencies[];
-        } | {
-            id: /**
-             * Format: <organization_id>:<slug>
-             * example:
-             * 123:owner
-             */
-            RoleId;
-            /**
-             * Human-friendly name for the role
-             * example:
-             * Owner
-             */
-            name: string;
-            /**
-             * URL-friendly name for the role
-             * example:
-             * owner
-             */
-            slug: string;
-            /**
-             * Type of the role
-             */
-            type: "org_role";
-            /**
-             * date and time then the role will expire
-             * example:
-             * 2028-07-21T17:32:28Z
-             */
-            expires_at?: string; // date-time
-            organization_id: /**
-             * Id of an organization
-             * example:
-             * 123
-             */
-            OrganizationId;
-            /**
-             * List of grants (permissions) applied to the role
-             */
-            grants: GrantWithDependencies[];
-            /**
-             * The pricing tier of the organization this root role is based on
-             * example:
-             * Professional
-             */
-            pricing_tier?: string;
-        } | {
-            id: /**
-             * Format: <organization_id>:<slug>
-             * example:
-             * 123:owner
-             */
-            RoleId;
-            /**
-             * Human-friendly name for the role
-             * example:
-             * Owner
-             */
-            name: string;
-            /**
-             * URL-friendly name for the role
-             * example:
-             * owner
-             */
-            slug: string;
-            /**
-             * Type of the role
-             */
-            type: "share_role";
-            /**
-             * date and time then the role will expire
-             * example:
-             * 2028-07-21T17:32:28Z
-             */
-            expires_at?: string; // date-time
-            organization_id: /**
-             * Id of an organization
-             * example:
-             * 123
-             */
-            OrganizationId;
-            /**
-             * List of grants (permissions) applied to the role
-             */
-            grants: GrantWithDependencies[];
-        } | {
-            id: /**
-             * Format: <organization_id>:<slug>
-             * example:
-             * 123:owner
-             */
-            RoleId;
-            /**
-             * Human-friendly name for the role
-             * example:
-             * Owner
-             */
-            name: string;
-            /**
-             * URL-friendly name for the role
-             * example:
-             * owner
-             */
-            slug: string;
-            /**
-             * Type of the role
-             */
-            type: "partner_role";
-            /**
-             * date and time then the role will expire
-             * example:
-             * 2028-07-21T17:32:28Z
-             */
-            expires_at?: string; // date-time
-            organization_id: /**
-             * Id of an organization
-             * example:
-             * 123
-             */
-            OrganizationId;
-            /**
-             * List of grants (permissions) applied to the role
-             */
-            grants: GrantWithDependencies[];
-            /**
-             * Id of an organization
-             * example:
-             * 123
-             */
-            partner_org_id?: string;
-        };
+            grants?: GrantWithDependencies[];
+        } & (/* A standard user role. Must be explicitly assigned to users. */ UserRole | /* A role automatically applied to all users in an organization. */ OrgRole | /* A role that can be assigned to users in other organizations for sharing purposes. */ ShareRole | /* A role that appears in another organization's role list that can be assigned but not modified by the partner organization. */ PartnerRole | /* A role that is applied to end customers and installers using the Portals */ PortalRole);
         export interface RoleSearchInput {
             /**
              * List of role ids to filter by

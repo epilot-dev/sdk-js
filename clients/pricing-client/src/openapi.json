@@ -111,6 +111,82 @@
     }
   ],
   "paths": {
+    "/v1/pricing:compute": {
+      "post": {
+        "description": "Compute price",
+        "summary": "calculatePricingDetails",
+        "operationId": "$calculatePricingDetails",
+        "tags": [
+          "Order API"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "line_items": {
+                    "$ref": "#/components/schemas/PriceItemsDto"
+                  }
+                }
+              },
+              "examples": {
+                "Compute price": {
+                  "value": {
+                    "line_items": [
+                      {
+                        "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                        "price_id": "396cb5f3-ea0b-4629-99ca-303661de5a9b",
+                        "quantity": 2
+                      },
+                      {
+                        "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                        "price_id": "2abe0c6f-63ef-417b-8c85-5546359382d9",
+                        "quantity": 1,
+                        "price_mappings": [
+                          {
+                            "price_id": "2abe0c6f-63ef-417b-8c85-5546359382d9",
+                            "frequency_unit": "one_time",
+                            "value": 2,
+                            "name": "Estimated consumption",
+                            "metadata": {
+                              "journey_title": "P&G",
+                              "step_name": "Number Inputs"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pricing details result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/order": {
       "post": {
         "description": "Create an order",
@@ -495,7 +571,12 @@
         "description": "Checkouts a cart and executes the specified checkout `mode` process.\n\nA Checkout implicitly finalizes the provided cart (if not transient from a fast-checkout) and behaves in one of the following modes:\n- `create_order` (**default**): the payment happens at a later date or managed by 3rd-party CRM (SAP)\n- `create_invoice`: the payment happens on the online checkout (paypal, stripe, adyen)\n- `create_quote`: the checkout represents a price quote request\n\nFast checkout is also supported, by passing the Cart contents directly.\nWhen a fast checkout is performed the cart is considered transient and there is no cart persistance.\n\nIf the checkout `mode` is omitted, the `mode` will default to `create_order`.\n",
         "operationId": "$checkoutCart",
         "summary": "checkoutCart",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "tags": [
           "Cart API"
         ],
@@ -559,7 +640,12 @@
         "description": "Provides a querying functionalities over products and prices of the Catalog for a given organization.",
         "operationId": "$searchCatalog",
         "summary": "searchCatalog",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "tags": [
           "Catalog API"
         ],
@@ -568,10 +654,10 @@
             "in": "header",
             "name": "X-Ivy-Org-ID",
             "description": "The target Organization Id represented by the caller",
+            "example": 739224,
             "schema": {
               "type": "string"
-            },
-            "required": true
+            }
           },
           {
             "in": "header",
@@ -663,7 +749,12 @@
         "description": "The availability check endpoint",
         "operationId": "$availabilityCheck",
         "summary": "availabilityCheck",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "tags": [
           "Availability API"
         ],
@@ -859,7 +950,12 @@
       "post": {
         "description": "Returns the list of providers available based on a given location",
         "operationId": "$searchProviders",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "parameters": [
           {
             "in": "header",
@@ -967,7 +1063,12 @@
       "post": {
         "description": "Returns the list of streets available for a given postal code and city",
         "operationId": "$searchStreets",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "parameters": [
           {
             "in": "header",
@@ -1062,7 +1163,12 @@
       "post": {
         "description": "Returns the price for a given product type based on location and consumption",
         "operationId": "$computePrice",
-        "security": [],
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
         "parameters": [
           {
             "in": "header",
@@ -1323,97 +1429,6 @@
           }
         }
       }
-    },
-    "/v1/public/opportunity": {
-      "post": {
-        "deprecated": true,
-        "description": "This API is Deprecated. Please use the Entity API or Submission API to create opportunities.\n\nEnables the creation of a new opportunity. During the creation of an opportunity, an unique customer-readable `opportunity_number` will be generated.\nThe `opportunity_number` can be used to universally identify an opportunity within epilot platform.\n",
-        "operationId": "$createOpportunity",
-        "summary": "createOpportunity",
-        "security": [],
-        "tags": [
-          "Deprecated"
-        ],
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Ivy-Org-ID",
-            "description": "The target Organization Id represented by the caller",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Opportunity"
-              },
-              "examples": {
-                "Opportunity containing one Order": {
-                  "value": {
-                    "billing_address": {
-                      "street": "sdf",
-                      "street_number": "1",
-                      "city": "Berlin",
-                      "postal_code": "12045",
-                      "country": "de",
-                      "additional_info": "adasd"
-                    },
-                    "delivery_address": {
-                      "street": "sdf",
-                      "street_number": "1",
-                      "city": "Berlin",
-                      "postal_code": "12045",
-                      "country": "de",
-                      "additional_info": "adasd"
-                    },
-                    "items": {
-                      "$relation": [
-                        {
-                          "entity_id": "c8dbe8f3-28b6-4d77-aae8-47bc24a2532f",
-                          "_tags": [
-                            "journey"
-                          ]
-                        }
-                      ]
-                    },
-                    "_tags": [
-                      "journey",
-                      "ORWNr4iCN"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The new Opportunity.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Opportunity"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid payload",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -1422,6 +1437,12 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Epilot Bearer Token"
+      },
+      "EpilotPublicAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Public Access Bearer Token",
+        "bearerFormat": "JWT"
       }
     },
     "schemas": {
@@ -2194,6 +2215,9 @@
               }
             ]
           },
+          "get_ag": {
+            "$ref": "#/components/schemas/PriceGetAg"
+          },
           "_created_at": {
             "description": "The price creation date",
             "type": "string"
@@ -2499,18 +2523,7 @@
           "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
           "sort": "description ASC",
           "from": 0,
-          "size": 200,
-          "availability": {
-            "location": {
-              "postal_code": "57008,",
-              "city": "Cologne,",
-              "street": "Media Park,",
-              "street_number": "8a"
-            },
-            "available_date": {
-              "value": "2022-05-01"
-            }
-          }
+          "size": 200
         },
         "required": [
           "q"
@@ -2709,8 +2722,7 @@
       "SaveIntegrationCredentialsParams": {
         "$ref": "#/components/schemas/BasicAuthCredentials"
       },
-      "ComputePriceParams": {
-        "description": "The compute price payload",
+      "ComputePriceParamsBase": {
         "type": "object",
         "properties": {
           "postal_code": {
@@ -2744,14 +2756,6 @@
             "description": "The association id",
             "type": "string"
           },
-          "type": {
-            "description": "The product type",
-            "type": "string",
-            "enum": [
-              "power",
-              "gas"
-            ]
-          },
           "billing_period": {
             "description": "The billing period (defaults to monthly)",
             "type": "string",
@@ -2768,8 +2772,53 @@
         },
         "required": [
           "type",
-          "postal_code",
-          "consumption"
+          "postal_code"
+        ]
+      },
+      "ComputePriceParamsPower": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of energy to compute the price",
+                "enum": [
+                  "power"
+                ]
+              },
+              "meter_type": {
+                "$ref": "#/components/schemas/PowerMeterType"
+              }
+            },
+            "description": "The compute price payload for power"
+          }
+        ]
+      },
+      "ComputePriceParamsGas": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of energy to compute the price",
+                "enum": [
+                  "gas"
+                ]
+              },
+              "concession_type": {
+                "$ref": "#/components/schemas/GasConcessionType"
+              }
+            },
+            "description": "The compute price payload for gas"
+          }
         ]
       },
       "SignatureMeta": {
@@ -2806,6 +2855,34 @@
         "required": [
           "amount",
           "amount_decimal"
+        ]
+      },
+      "ComputePriceParams": {
+        "description": "The compute price payload",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsPower"
+          },
+          {
+            "$ref": "#/components/schemas/ComputePriceParamsGas"
+          }
+        ]
+      },
+      "GasConcessionType": {
+        "description": "The concession type for gas",
+        "type": "string",
+        "enum": [
+          "standard",
+          "special"
+        ]
+      },
+      "PowerMeterType": {
+        "type": "string",
+        "description": "The meter type for power",
+        "enum": [
+          "classic",
+          "smart",
+          "digital"
         ]
       },
       "ComputedPriceBreakdown": {
@@ -3294,6 +3371,14 @@
               "$ref": "#/components/schemas/PriceItemDto"
             }
           },
+          "selected_price_component_ids": {
+            "type": "array",
+            "description": "The ids of the price components that should be selected for the price calculation.",
+            "items": {
+              "type": "string",
+              "description": "The id of the price component"
+            }
+          },
           "_price": {
             "$ref": "#/components/schemas/CompositePrice"
           }
@@ -3752,15 +3837,7 @@
             ]
           },
           "pricing_model": {
-            "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
-            "enum": [
-              "per_unit",
-              "tiered_graduated",
-              "tiered_volume",
-              "tiered_flatfee",
-              "external_getag"
-            ]
+            "$ref": "#/components/schemas/PricingModel"
           },
           "tiers_details": {
             "type": "array",
@@ -4512,11 +4589,94 @@
           "on_request"
         ]
       },
+      "PricingModel": {
+        "type": "string",
+        "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
+        "enum": [
+          "per_unit",
+          "tiered_graduated",
+          "tiered_volume",
+          "tiered_flatfee",
+          "external_getag"
+        ]
+      },
+      "MarkupPricingModel": {
+        "type": "string",
+        "description": "Describes how to compute the markup per period. Either `per_unit`, `tiered_volume` or `tiered_flatfee`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unitary price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n",
+        "enum": [
+          "per_unit",
+          "tiered_volume",
+          "tiered_flatfee"
+        ]
+      },
+      "TypeGetAg": {
+        "type": "string",
+        "enum": [
+          "base_price",
+          "work_price"
+        ]
+      },
+      "TariffTypeGetAg": {
+        "type": "string",
+        "enum": [
+          "HT",
+          "NT"
+        ]
+      },
+      "ConsumptionTypeGetAg": {
+        "type": "string",
+        "enum": [
+          "household",
+          "heating_pump",
+          "night_storage_heating",
+          "night_storage_heating_common_meter"
+        ]
+      },
+      "ProductCategory": {
+        "type": "string",
+        "enum": [
+          "power",
+          "gas"
+        ]
+      },
       "PriceGetAg": {
         "type": "object",
         "properties": {
           "category": {
-            "type": "string"
+            "$ref": "#/components/schemas/ProductCategory"
+          },
+          "markup_pricing_model": {
+            "$ref": "#/components/schemas/MarkupPricingModel"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeGetAg"
+          },
+          "tariff_type": {
+            "$ref": "#/components/schemas/TariffTypeGetAg"
+          },
+          "consumption_type": {
+            "$ref": "#/components/schemas/ConsumptionTypeGetAg"
+          },
+          "concession_type": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GasConcessionType"
+              }
+            ]
+          },
+          "meter_type": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PowerMeterType"
+              }
+            ]
+          },
+          "markup_tiers": {
+            "description": "Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceTier"
+            }
           },
           "markup_amount": {
             "type": "number"

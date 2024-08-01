@@ -48,8 +48,48 @@
         "parameters": [
           {
             "in": "query",
-            "name": "s3FileUrl",
+            "name": "s3FileUrl"
+          },
+          {
+            "in": "query",
+            "name": "fileId"
+          }
+        ]
+      }
+    },
+    "/v1/public/availability:check": {
+      "get": {
+        "operationId": "checkAvailability",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "files",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "countryCode",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "postalCode",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "street",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "streetNumber",
+            "required": false
           }
         ]
       }

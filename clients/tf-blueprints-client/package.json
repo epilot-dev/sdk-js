@@ -1,6 +1,6 @@
 {
   "name": "@epilot/tf-blueprints-client",
-  "version": "1.4.1",
+  "version": "1.6.1",
   "description": "Client for epilot Terraform Blueprints APIs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
