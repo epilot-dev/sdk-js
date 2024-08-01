@@ -340,6 +340,154 @@
         }
       }
     },
+    "/v1/groups": {
+      "get": {
+        "operationId": "getGroups",
+        "summary": "getGroups",
+        "description": "Lists groups in organizations you have access to",
+        "tags": [
+          "Group"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Group"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createGroup",
+        "summary": "createGroup",
+        "description": "Create a new group",
+        "tags": [
+          "Group"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGroup"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Group created successfully"
+          }
+        }
+      }
+    },
+    "/v1/groups/{id}": {
+      "get": {
+        "operationId": "getGroup",
+        "summary": "getGroup",
+        "description": "Get group by id",
+        "tags": [
+          "Group"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Group id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GroupId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Group"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Group not found"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateGroup",
+        "summary": "updateGroup",
+        "description": "Update group by id",
+        "tags": [
+          "User V1"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Group id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GroupId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGroup"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Group"
+          },
+          "404": {
+            "description": "Group not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteGroup",
+        "summary": "deleteGroup",
+        "description": "Delete group by id",
+        "tags": [
+          "Group V1"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Group id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GroupId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Group deleted successfully"
+          }
+        }
+      }
+    },
     "/v2/users/public/verifyEmail": {
       "post": {
         "operationId": "verifyEmailWithToken",
@@ -651,6 +799,11 @@
       "VerificationToken": {
         "type": "string"
       },
+      "GroupId": {
+        "description": "Group unique identifier",
+        "type": "string",
+        "readOnly": true
+      },
       "UserId": {
         "description": "User's unique identifier",
         "type": "string",
@@ -809,6 +962,13 @@
             "type": "string",
             "example": "de"
           },
+          "custom_start_page": {
+            "description": "User's start page after login",
+            "type": "string",
+            "pattern": "^/app/*",
+            "default": "/app/dashboard",
+            "nullable": true
+          },
           "override_release_channel": {
             "description": "This field is used to override the release channel for the user.",
             "type": "string",
@@ -816,8 +976,18 @@
             "enum": [
               "canary",
               "rc",
-              "stable"
+              "stable",
+              null
             ]
+          },
+          "feature_preferences": {
+            "description": "User's feature preferences",
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "example": {
+              "feature_name": true
+            }
           },
           "image_uri": {
             "type": "object",
@@ -1005,6 +1175,55 @@
             "enum": [
               "code",
               "token"
+            ]
+          }
+        }
+      },
+      "UpdateGroup": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the group. Could be a department or a team.",
+            "type": "string",
+            "example": "Finance"
+          },
+          "user_ids": {
+            "description": "The list of user ids in the group.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserId"
+            },
+            "example": [
+              "123",
+              "456"
+            ]
+          }
+        }
+      },
+      "Group": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/GroupId"
+          },
+          "name": {
+            "description": "The name of the group. Could be a department or a team.",
+            "type": "string",
+            "example": "Finance"
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2024-02-08T04:44:32.246Z"
+          },
+          "user_ids": {
+            "description": "The list of user ids in the group.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserId"
+            },
+            "example": [
+              "123",
+              "456"
             ]
           }
         }

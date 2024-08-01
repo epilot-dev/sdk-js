@@ -57,6 +57,33 @@ declare namespace Components {
              */
             non_billable_users_last_month?: number;
         }
+        export interface Group {
+            id?: /* Group unique identifier */ GroupId;
+            /**
+             * The name of the group. Could be a department or a team.
+             * example:
+             * Finance
+             */
+            name?: string;
+            /**
+             * example:
+             * 2024-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * The list of user ids in the group.
+             * example:
+             * [
+             *   "123",
+             *   "456"
+             * ]
+             */
+            user_ids?: /* User's unique identifier */ UserId[];
+        }
+        /**
+         * Group unique identifier
+         */
+        export type GroupId = string;
         /**
          * Token used to invite a user to epilot
          */
@@ -210,6 +237,23 @@ declare namespace Components {
              * Language for user invitation email
              */
             language?: "en" | "de";
+        }
+        export interface UpdateGroup {
+            /**
+             * The name of the group. Could be a department or a team.
+             * example:
+             * Finance
+             */
+            name?: string;
+            /**
+             * The list of user ids in the group.
+             * example:
+             * [
+             *   "123",
+             *   "456"
+             * ]
+             */
+            user_ids?: /* User's unique identifier */ UserId[];
         }
         export interface User {
             id: /* User's unique identifier */ UserId;
@@ -383,9 +427,23 @@ declare namespace Components {
              */
             preferred_language?: string;
             /**
+             * User's start page after login
+             */
+            custom_start_page?: string | null; // ^/app/*
+            /**
              * This field is used to override the release channel for the user.
              */
-            override_release_channel?: "canary" | "rc" | "stable";
+            override_release_channel?: "canary" | "rc" | "stable" | null;
+            /**
+             * User's feature preferences
+             * example:
+             * {
+             *   "feature_name": true
+             * }
+             */
+            feature_preferences?: {
+                [name: string]: any;
+            } | null;
             /**
              * User's custom profile image
              * example:
@@ -453,6 +511,25 @@ declare namespace Paths {
             }
         }
     }
+    namespace CreateGroup {
+        export type RequestBody = Components.Schemas.UpdateGroup;
+        namespace Responses {
+            export interface $204 {
+            }
+        }
+    }
+    namespace DeleteGroup {
+        namespace Parameters {
+            export type Id = /* Group unique identifier */ Components.Schemas.GroupId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+        }
+    }
     namespace DeleteUserV2 {
         namespace Parameters {
             export type Id = /* User's unique identifier */ Components.Schemas.UserId;
@@ -462,6 +539,26 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.User;
+        }
+    }
+    namespace GetGroup {
+        namespace Parameters {
+            export type Id = /* Group unique identifier */ Components.Schemas.GroupId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Group;
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetGroups {
+        namespace Responses {
+            export interface $200 {
+                groups?: Components.Schemas.Group[];
+            }
         }
     }
     namespace GetMe {
@@ -600,6 +697,21 @@ declare namespace Paths {
             }
         }
     }
+    namespace UpdateGroup {
+        namespace Parameters {
+            export type Id = /* Group unique identifier */ Components.Schemas.GroupId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.UpdateGroup;
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace UpdateUserV2 {
         namespace Parameters {
             export type Id = /* User's unique identifier */ Components.Schemas.UserId;
@@ -708,6 +820,56 @@ export interface OperationMethods {
     data?: Paths.ResendUserInvitation.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ResendUserInvitation.Responses.$200>
+  /**
+   * getGroups - getGroups
+   * 
+   * Lists groups in organizations you have access to
+   */
+  'getGroups'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetGroups.Responses.$200>
+  /**
+   * createGroup - createGroup
+   * 
+   * Create a new group
+   */
+  'createGroup'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateGroup.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateGroup.Responses.$204>
+  /**
+   * getGroup - getGroup
+   * 
+   * Get group by id
+   */
+  'getGroup'(
+    parameters?: Parameters<Paths.GetGroup.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetGroup.Responses.$200>
+  /**
+   * updateGroup - updateGroup
+   * 
+   * Update group by id
+   */
+  'updateGroup'(
+    parameters?: Parameters<Paths.UpdateGroup.PathParameters> | null,
+    data?: Paths.UpdateGroup.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateGroup.Responses.$204>
+  /**
+   * deleteGroup - deleteGroup
+   * 
+   * Delete group by id
+   */
+  'deleteGroup'(
+    parameters?: Parameters<Paths.DeleteGroup.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteGroup.Responses.$204>
   /**
    * verifyEmailWithToken - verifyEmailWithToken
    * 
@@ -870,6 +1032,60 @@ export interface PathsDictionary {
       data?: Paths.ResendUserInvitation.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ResendUserInvitation.Responses.$200>
+  }
+  ['/v1/groups']: {
+    /**
+     * getGroups - getGroups
+     * 
+     * Lists groups in organizations you have access to
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetGroups.Responses.$200>
+    /**
+     * createGroup - createGroup
+     * 
+     * Create a new group
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateGroup.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateGroup.Responses.$204>
+  }
+  ['/v1/groups/{id}']: {
+    /**
+     * getGroup - getGroup
+     * 
+     * Get group by id
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetGroup.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetGroup.Responses.$200>
+    /**
+     * updateGroup - updateGroup
+     * 
+     * Update group by id
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateGroup.PathParameters> | null,
+      data?: Paths.UpdateGroup.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateGroup.Responses.$204>
+    /**
+     * deleteGroup - deleteGroup
+     * 
+     * Delete group by id
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteGroup.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteGroup.Responses.$204>
   }
   ['/v2/users/public/verifyEmail']: {
     /**
