@@ -231,62 +231,6 @@
           }
         ]
       }
-    },
-    "/v1/message/messages/{messageId}/genai:reply": {
-      "post": {
-        "operationId": "generateSuggestedReply",
-        "parameters": [
-          {
-            "name": "messageId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "name": "threadId",
-            "in": "query",
-            "required": true
-          }
-        ]
-      }
-    },
-    "/v1/message/threads/{threadId}/genai:info": {
-      "get": {
-        "operationId": "getInfo",
-        "parameters": [
-          {
-            "name": "threadId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "name": "messageId",
-            "in": "query"
-          }
-        ]
-      }
-    },
-    "/v1/message/threads/{threadId}/messages/{messageId}/genai:info": {
-      "patch": {
-        "operationId": "patchInfo",
-        "parameters": [
-          {
-            "name": "threadId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "name": "messageId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
     }
   },
   "components": {},
