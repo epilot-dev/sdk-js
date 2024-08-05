@@ -119,6 +119,11 @@ declare namespace Paths {
                 string?,
                 string?
             ];
+            /**
+             * example:
+             * journey_HouseConnectionJourney
+             */
+            resourceName?: string;
         }
         namespace Responses {
             export interface $200 {
