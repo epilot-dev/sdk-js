@@ -143,7 +143,8 @@
                       "user",
                       "partner_user",
                       "partner_organization",
-                      "ecp"
+                      "ecp",
+                      "group"
                     ],
                     "items": {
                       "type": "string",
@@ -151,7 +152,8 @@
                         "user",
                         "partner_user",
                         "partner_organization",
-                        "ecp"
+                        "ecp",
+                        "group"
                       ]
                     }
                   }
@@ -821,9 +823,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://partner-directory-api.sls.epilot.io"
-    },
     {
       "url": "https://partner-directory-api.sls.epilot.io"
     }

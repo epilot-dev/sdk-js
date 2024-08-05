@@ -507,7 +507,7 @@ declare namespace Paths {
             /**
              * filter results to specific types of assignables. defaults to all types
              */
-            types?: ("user" | "partner_user" | "partner_organization" | "ecp")[];
+            types?: ("user" | "partner_user" | "partner_organization" | "ecp" | "group")[];
         }
         namespace Responses {
             export interface $200 {
