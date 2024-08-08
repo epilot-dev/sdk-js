@@ -1139,6 +1139,15 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            /**
+             * ID of the email template for email update confirmation
+             */
+            confirmEmailUpdate?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
         }
         export interface Entity {
             [name: string]: any;

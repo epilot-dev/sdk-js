@@ -4519,6 +4519,10 @@
           "onWorkflowStepAssigned": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the email template for workflow step assignment"
+          },
+          "confirmEmailUpdate": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the email template for email update confirmation"
           }
         }
       },
