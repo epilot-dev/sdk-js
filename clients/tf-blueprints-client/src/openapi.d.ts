@@ -19,11 +19,15 @@ declare namespace Components {
             message?: string;
             timestamp?: string; // date-time
             /**
-             * A JSON string representing the planned changes, see https://developer.hashicorp.com/terraform/internals/json-format
-             * example:
-             * {"format_version":"1.2","terraform_version":"1.9.2","variables":{"automation_api_url":{"value":"https://automation.dev.sls.epilot.io"},"designbuilder_api_url":{"value":"https://design-builder-api.dev.sls.epilot.io"},"emailtemplate_api_url":{"value":"https://email-template.dev.sls.epilot.io"}...
+             * A URL to download the plan file
              */
             plan_file_content?: string;
+            /**
+             * A JSON string representing the resources to export
+             */
+            resources_to_export?: {
+                [key: string]: any;
+            };
         }
         export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
         export interface S3Reference {
