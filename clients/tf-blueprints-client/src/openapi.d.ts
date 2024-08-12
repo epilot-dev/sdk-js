@@ -95,6 +95,48 @@ declare namespace Paths {
     }
     namespace ExportBlueprint {
         export interface RequestBody {
+            /**
+             * A JSON string representing the resources to export
+             * example:
+             * {"journey":[{id:"4854bb2a-94f9-424d-a968-3fb17fb0bf89",name:"HouseConnectionJourney"}]}
+             */
+            resourcesToExport?: {
+                [key: string]: any;
+            };
+            /**
+             * example:
+             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+             */
+            exportedBlueprintId?: string;
+            /**
+             * example:
+             * journey_HouseConnectionJourney
+             */
+            resourceName?: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+                 */
+                blueprintId?: string;
+            }
+        }
+    }
+    namespace GetBlueprintStatus {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Job;
+        }
+    }
+    namespace GetExportResources {
+        export interface RequestBody {
             resourceType?: "journey" | "product" | "price" | "tax" | "automation_flow" | "designbuilder" | "file" | "emailtemplate" | "entity" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition";
             resourceIds?: [
                 string,
@@ -123,11 +165,6 @@ declare namespace Paths {
                 string?,
                 string?
             ];
-            /**
-             * example:
-             * journey_HouseConnectionJourney
-             */
-            resourceName?: string;
         }
         namespace Responses {
             export interface $200 {
@@ -137,17 +174,6 @@ declare namespace Paths {
                  */
                 blueprintId?: string;
             }
-        }
-    }
-    namespace GetBlueprintStatus {
-        namespace Parameters {
-            export type Id = string;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.Job;
         }
     }
     namespace ListInstalledPatches {
@@ -210,6 +236,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListInstalledPatches.Responses.$200>
+  /**
+   * getExportResources - getExportResources
+   * 
+   * Get the resources to export
+   */
+  'getExportResources'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetExportResources.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetExportResources.Responses.$200>
   /**
    * exportBlueprint - exportBlueprint
    * 
@@ -287,6 +323,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListInstalledPatches.Responses.$200>
+  }
+  ['/v2/getExportResources']: {
+    /**
+     * getExportResources - getExportResources
+     * 
+     * Get the resources to export
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetExportResources.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetExportResources.Responses.$200>
   }
   ['/v2/exportBlueprint']: {
     /**

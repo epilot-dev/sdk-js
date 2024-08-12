@@ -18,7 +18,7 @@
   ],
   "servers": [
     {
-      "url": "None"
+      "url": "https://tf-blueprint.dev.sls.epilot.io"
     },
     {
       "url": "https://tf-blueprint.dev.sls.epilot.io",
@@ -97,11 +97,11 @@
         }
       }
     },
-    "/v2/exportBlueprint": {
+    "/v2/getExportResources": {
       "post": {
-        "operationId": "exportBlueprint",
-        "summary": "exportBlueprint",
-        "description": "Export a blueprint",
+        "operationId": "getExportResources",
+        "summary": "getExportResources",
+        "description": "Get the resources to export",
         "tags": [
           "Blueprints"
         ],
@@ -137,6 +137,54 @@
                     },
                     "minItems": 1,
                     "maxItems": 25
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "blueprintId": {
+                      "type": "string",
+                      "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/exportBlueprint": {
+      "post": {
+        "operationId": "exportBlueprint",
+        "summary": "exportBlueprint",
+        "description": "Export a blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resourcesToExport": {
+                    "type": "object",
+                    "description": "A JSON string representing the resources to export",
+                    "example": "{\"journey\":[{id:\"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",name:\"HouseConnectionJourney\"}]}"
+                  },
+                  "exportedBlueprintId": {
+                    "type": "string",
+                    "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
                   },
                   "resourceName": {
                     "type": "string",
