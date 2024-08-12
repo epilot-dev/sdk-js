@@ -108,7 +108,24 @@
     },
     "/v1/groups": {
       "get": {
-        "operationId": "getGroups"
+        "operationId": "getGroups",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false
+          }
+        ]
       },
       "post": {
         "operationId": "createGroup",
@@ -147,6 +164,18 @@
       },
       "delete": {
         "operationId": "deleteGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/groups/{id}/user:next": {
+      "post": {
+        "operationId": "advanceUserAssignment",
         "parameters": [
           {
             "name": "id",

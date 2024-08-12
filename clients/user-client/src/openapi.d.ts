@@ -31,6 +31,23 @@ declare namespace Components {
              */
             cognito_user_pool_arn?: string;
         }
+        export interface CreateGroupReq {
+            /**
+             * The name of the group. Could be a department or a team.
+             * example:
+             * Finance
+             */
+            name: string;
+            /**
+             * The list of user ids in the group.
+             * example:
+             * [
+             *   "123",
+             *   "456"
+             * ]
+             */
+            user_ids?: /* User's unique identifier */ UserId[];
+        }
         export interface DataPoint {
             /**
              * Organization id
@@ -58,27 +75,161 @@ declare namespace Components {
             non_billable_users_last_month?: number;
         }
         export interface Group {
-            id?: /* Group unique identifier */ GroupId;
+            id: /* Group unique identifier */ GroupId;
+            org_id: OrganizationId;
             /**
              * The name of the group. Could be a department or a team.
              * example:
              * Finance
              */
-            name?: string;
+            name: string;
             /**
              * example:
              * 2024-02-08T04:44:32.246Z
              */
-            created_at?: string;
+            created_at: string;
             /**
-             * The list of user ids in the group.
              * example:
-             * [
-             *   "123",
-             *   "456"
-             * ]
+             * 2024-02-08T04:44:32.246Z
              */
-            user_ids?: /* User's unique identifier */ UserId[];
+            updated_at: string;
+            /**
+             * example:
+             * 123
+             */
+            crt_user_id_assigned?: string;
+            /**
+             * The list of users in the group. Only contains the full user when respective endpoint is called with a flag. Otherwise only contains the user id.
+             */
+            users?: {
+                id: /* User's unique identifier */ UserId;
+                organization_id?: OrganizationId;
+                /**
+                 * example:
+                 * 2022-02-08T04:44:32.246Z
+                 */
+                created_at?: string;
+                /**
+                 * User's display name (default: email address)
+                 * example:
+                 * Example User
+                 */
+                display_name?: string;
+                status?: "Active" | "Pending" | "Deactivated" | "Deleted";
+                /**
+                 * User's email address
+                 */
+                email?: string; // email
+                /**
+                 * User's pending email address
+                 */
+                draft_email?: string | null; // email
+                /**
+                 * User's department
+                 * example:
+                 * Sales
+                 */
+                department?: string | null;
+                /**
+                 * User's phone number
+                 * example:
+                 * 1234567890
+                 */
+                phone?: string | null;
+                /**
+                 * User's secondary phone number, preferred for communication
+                 * example:
+                 * 1234567890
+                 */
+                secondary_phone?: string | null;
+                /**
+                 * User's multi-factor authentication status
+                 * example:
+                 * false
+                 */
+                mfa_enabled?: boolean;
+                /**
+                 * User's phone number verification status
+                 * example:
+                 * true
+                 */
+                phone_verified?: boolean;
+                token?: /* Token used to invite a user to epilot */ InviteToken;
+                /**
+                 * User's email signature
+                 * example:
+                 * <p>Thanks</p>
+                 */
+                signature?: string | null;
+                /**
+                 * Whether the user's signature is enabled
+                 * example:
+                 * true
+                 */
+                is_signature_enabled?: boolean | null;
+                /**
+                 * User's preferred language
+                 * example:
+                 * de
+                 */
+                preferred_language?: string;
+                /**
+                 * User's start page after login
+                 */
+                custom_start_page?: string | null; // ^/app/*
+                /**
+                 * This field is used to override the release channel for the user.
+                 */
+                override_release_channel?: "canary" | "rc" | "stable" | null;
+                /**
+                 * User's feature preferences
+                 * example:
+                 * {
+                 *   "feature_name": true
+                 * }
+                 */
+                feature_preferences?: {
+                    [name: string]: any;
+                } | null;
+                /**
+                 * User's custom profile image
+                 * example:
+                 * {
+                 *   "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+                 *   "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+                 * }
+                 */
+                image_uri?: {
+                    [name: string]: any;
+                    original?: string; // uri
+                    thumbnail_32?: string; // uri
+                } | null;
+                /**
+                 * example:
+                 * {
+                 *   "entity_views": {
+                 *     "opportunity": "891a5409850abf8b92bd2cb7bdd2844d32ce6bec",
+                 *     "order": "628aee91-7c2f-4047-ab0d-433582a19c49"
+                 *   },
+                 *   "dashboard": "751ff121-9ac2-4511-a2e6-851f11287380"
+                 * }
+                 */
+                favorites?: {
+                    [name: string]: any;
+                };
+                properties?: {
+                    /**
+                     * example:
+                     * profileImageName
+                     */
+                    name: string;
+                    /**
+                     * example:
+                     * avatar.png
+                     */
+                    value: string;
+                }[];
+            }[];
         }
         /**
          * Group unique identifier
@@ -238,7 +389,7 @@ declare namespace Components {
              */
             language?: "en" | "de";
         }
-        export interface UpdateGroup {
+        export interface UpdateGroupReq {
             /**
              * The name of the group. Could be a department or a team.
              * example:
@@ -511,11 +662,23 @@ declare namespace Paths {
             }
         }
     }
-    namespace CreateGroup {
-        export type RequestBody = Components.Schemas.UpdateGroup;
+    namespace AdvanceUserAssignment {
+        namespace Parameters {
+            export type Id = /* Group unique identifier */ Components.Schemas.GroupId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
         namespace Responses {
-            export interface $204 {
+            export type $200 = Components.Schemas.UserV2;
+            export interface $404 {
             }
+        }
+    }
+    namespace CreateGroup {
+        export type RequestBody = Components.Schemas.CreateGroupReq;
+        namespace Responses {
+            export type $201 = Components.Schemas.Group;
         }
     }
     namespace DeleteGroup {
@@ -555,8 +718,23 @@ declare namespace Paths {
         }
     }
     namespace GetGroups {
+        namespace Parameters {
+            export type Limit = Components.Schemas.Limit;
+            export type Offset = Components.Schemas.Offset;
+            export type Query = Components.Schemas.Query;
+        }
+        export interface QueryParameters {
+            query?: Parameters.Query;
+            limit?: Parameters.Limit;
+            offset?: Parameters.Offset;
+        }
         namespace Responses {
             export interface $200 {
+                /**
+                 * example:
+                 * 1
+                 */
+                hits?: number;
                 groups?: Components.Schemas.Group[];
             }
         }
@@ -704,10 +882,9 @@ declare namespace Paths {
         export interface PathParameters {
             id: Parameters.Id;
         }
-        export type RequestBody = Components.Schemas.UpdateGroup;
+        export type RequestBody = Components.Schemas.UpdateGroupReq;
         namespace Responses {
-            export interface $204 {
-            }
+            export type $201 = Components.Schemas.Group;
             export interface $404 {
             }
         }
@@ -826,7 +1003,7 @@ export interface OperationMethods {
    * Lists groups in organizations you have access to
    */
   'getGroups'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.GetGroups.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetGroups.Responses.$200>
@@ -839,7 +1016,7 @@ export interface OperationMethods {
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateGroup.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateGroup.Responses.$204>
+  ): OperationResponse<Paths.CreateGroup.Responses.$201>
   /**
    * getGroup - getGroup
    * 
@@ -859,7 +1036,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.UpdateGroup.PathParameters> | null,
     data?: Paths.UpdateGroup.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdateGroup.Responses.$204>
+  ): OperationResponse<Paths.UpdateGroup.Responses.$201>
   /**
    * deleteGroup - deleteGroup
    * 
@@ -870,6 +1047,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteGroup.Responses.$204>
+  /**
+   * advanceUserAssignment - advanceUserAssignment
+   * 
+   * Advance user assignment to next user in line
+   */
+  'advanceUserAssignment'(
+    parameters?: Parameters<Paths.AdvanceUserAssignment.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AdvanceUserAssignment.Responses.$200>
   /**
    * verifyEmailWithToken - verifyEmailWithToken
    * 
@@ -1040,7 +1227,7 @@ export interface PathsDictionary {
      * Lists groups in organizations you have access to
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.GetGroups.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetGroups.Responses.$200>
@@ -1053,7 +1240,7 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateGroup.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateGroup.Responses.$204>
+    ): OperationResponse<Paths.CreateGroup.Responses.$201>
   }
   ['/v1/groups/{id}']: {
     /**
@@ -1075,7 +1262,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.UpdateGroup.PathParameters> | null,
       data?: Paths.UpdateGroup.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdateGroup.Responses.$204>
+    ): OperationResponse<Paths.UpdateGroup.Responses.$201>
     /**
      * deleteGroup - deleteGroup
      * 
@@ -1086,6 +1273,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteGroup.Responses.$204>
+  }
+  ['/v1/groups/{id}/user:next']: {
+    /**
+     * advanceUserAssignment - advanceUserAssignment
+     * 
+     * Advance user assignment to next user in line
+     */
+    'post'(
+      parameters?: Parameters<Paths.AdvanceUserAssignment.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AdvanceUserAssignment.Responses.$200>
   }
   ['/v2/users/public/verifyEmail']: {
     /**
