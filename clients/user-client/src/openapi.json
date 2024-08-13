@@ -379,6 +379,15 @@
             "schema": {
               "$ref": "#/components/schemas/Offset"
             }
+          },
+          {
+            "name": "hydrate",
+            "in": "query",
+            "description": "Pass it true when you want to hydrate the group with full user details",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Hydrate"
+            }
           }
         ],
         "responses": {
@@ -452,6 +461,15 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/GroupId"
+            }
+          },
+          {
+            "name": "hydrate",
+            "in": "query",
+            "description": "Pass it true when you want to hydrate the group with full user details",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Hydrate"
             }
           }
         ],
@@ -560,17 +578,20 @@
         ],
         "responses": {
           "200": {
-            "description": "Next user assigned successfully to this group as the user to be assigned",
+            "description": "Updated user group with crt_assignee updated to next user in line",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserV2"
+                  "$ref": "#/components/schemas/Group"
                 }
               }
             }
           },
           "404": {
             "description": "Group not found"
+          },
+          "422": {
+            "description": "User Group has no users assigned, thus it cannot advance to next user"
           }
         }
       }
@@ -907,6 +928,9 @@
       },
       "Offset": {
         "type": "number"
+      },
+      "Hydrate": {
+        "type": "boolean"
       },
       "Username": {
         "type": "string"
@@ -1333,25 +1357,29 @@
             "type": "string",
             "example": "2024-02-08T04:44:32.246Z"
           },
-          "crt_user_id_assigned": {
-            "type": "string",
-            "example": "123"
+          "crt_assignee": {
+            "description": "The current user assignee of the group. This is the user, from within the group, that has last been assigned to a workflow task.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserV2"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "crt_index": {
+                    "description": "The index of the current assignee in the group's user list.",
+                    "type": "number",
+                    "example": 3
+                  }
+                }
+              }
+            ]
           },
           "users": {
             "description": "The list of users in the group. Only contains the full user when respective endpoint is called with a flag. Otherwise only contains the user id.",
             "type": "array",
             "items": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/UserV2"
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "id"
-                  ]
-                }
-              ]
+              "$ref": "#/components/schemas/UserV2"
             }
           }
         },
@@ -1565,6 +1593,12 @@
           "cognito_details": {
             "$ref": "#/components/schemas/CognitoDetails"
           }
+        }
+      },
+      "DataPointsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DataPoint"
         }
       },
       "DataPoint": {

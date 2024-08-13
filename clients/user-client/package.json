@@ -1,6 +1,6 @@
 {
   "name": "@epilot/user-client",
-  "version": "3.6.1-next.3",
+  "version": "3.8.0",
   "description": "Client library for the epilot User API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -63,7 +63,7 @@
     "jest": "^26.6.3",
     "json-loader": "^0.5.7",
     "openapi-client-axios-typegen": "^7.4.1",
-    "openapicmd": "^2.1.0",
+    "openapicmd": "^2.3.2",
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.14",
     "ts-node": "^10.9.1",
