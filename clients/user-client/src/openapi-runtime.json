@@ -19,12 +19,14 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/users/me": {
       "get": {
-        "operationId": "getMeV2"
+        "operationId": "getMeV2",
+        "responses": {}
       }
     },
     "/v2/users": {
@@ -46,7 +48,8 @@
             "in": "query",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/users/{id}": {
@@ -58,7 +61,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "patch": {
         "operationId": "updateUserV2",
@@ -73,7 +77,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteUserV2",
@@ -83,7 +88,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/users/invite": {
@@ -93,7 +99,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/users/invite:resendEmail": {
@@ -103,7 +110,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/groups": {
@@ -124,8 +132,14 @@
             "name": "offset",
             "in": "query",
             "required": false
+          },
+          {
+            "name": "hydrate",
+            "in": "query",
+            "required": false
           }
-        ]
+        ],
+        "responses": {}
       },
       "post": {
         "operationId": "createGroup",
@@ -133,7 +147,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/groups/{id}": {
@@ -144,8 +159,14 @@
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "name": "hydrate",
+            "in": "query",
+            "required": false
           }
-        ]
+        ],
+        "responses": {}
       },
       "patch": {
         "operationId": "updateGroup",
@@ -160,7 +181,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteGroup",
@@ -170,7 +192,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/groups/{id}/user:next": {
@@ -182,7 +205,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/users/public/verifyEmail": {
@@ -199,7 +223,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/users/public/activate": {
@@ -216,7 +241,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/users/public/username/{username}:getLoginParameters": {
@@ -228,12 +254,14 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/users/me": {
       "get": {
-        "operationId": "getMe"
+        "operationId": "getMe",
+        "responses": {}
       }
     },
     "/v1/users": {
@@ -261,7 +289,8 @@
             "in": "query",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/users/{id}": {
@@ -273,7 +302,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/users/username/{username}:getLoginParameters": {
@@ -285,7 +315,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     }
   },
