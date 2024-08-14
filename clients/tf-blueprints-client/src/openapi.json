@@ -179,8 +179,8 @@
                 "properties": {
                   "resourcesToExport": {
                     "type": "object",
-                    "description": "A JSON string representing the resources to export",
-                    "example": "{\"journey\":[{id:\"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",name:\"HouseConnectionJourney\"}]}"
+                    "description": "A tree-like JSON object representing the resources to export",
+                    "example": "{\n  \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n  \"type\": \"journey\",\n  \"name\": \"House Connection Journey\",\n  \"dependencies\": [\n    {\n      \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n      \"type\": \"product\",\n      \"name\": \"Solar Panel\",\n      \"dependencies\": []\n    }\n  ]\n}\n"
                   },
                   "exportedBlueprintId": {
                     "type": "string",
@@ -418,7 +418,8 @@
           },
           "resources_to_export": {
             "type": "object",
-            "description": "A JSON string representing the resources to export"
+            "description": "A tree-like JSON object representing the resources to export",
+            "example": "{\n  \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n  \"type\": \"journey\",\n  \"name\": \"House Connection Journey\",\n  \"dependencies\": [\n    {\n      \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n      \"type\": \"product\",\n      \"name\": \"Solar Panel\",\n      \"dependencies\": []\n    }\n  ]\n}\n"
           }
         }
       },

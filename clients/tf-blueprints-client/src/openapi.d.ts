@@ -23,7 +23,22 @@ declare namespace Components {
              */
             plan_file_content?: string;
             /**
-             * A JSON string representing the resources to export
+             * A tree-like JSON object representing the resources to export
+             * example:
+             * {
+             *   "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
+             *   "type": "journey",
+             *   "name": "House Connection Journey",
+             *   "dependencies": [
+             *     {
+             *       "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
+             *       "type": "product",
+             *       "name": "Solar Panel",
+             *       "dependencies": []
+             *     }
+             *   ]
+             * }
+             *
              */
             resources_to_export?: {
                 [key: string]: any;
@@ -96,9 +111,22 @@ declare namespace Paths {
     namespace ExportBlueprint {
         export interface RequestBody {
             /**
-             * A JSON string representing the resources to export
+             * A tree-like JSON object representing the resources to export
              * example:
-             * {"journey":[{id:"4854bb2a-94f9-424d-a968-3fb17fb0bf89",name:"HouseConnectionJourney"}]}
+             * {
+             *   "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
+             *   "type": "journey",
+             *   "name": "House Connection Journey",
+             *   "dependencies": [
+             *     {
+             *       "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
+             *       "type": "product",
+             *       "name": "Solar Panel",
+             *       "dependencies": []
+             *     }
+             *   ]
+             * }
+             *
              */
             resourcesToExport?: {
                 [key: string]: any;
