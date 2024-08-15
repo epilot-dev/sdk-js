@@ -23,14 +23,17 @@ declare namespace Components {
              */
             address: string;
             /**
-             * Sent message status regarding to this recipient.\
-             * Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
+             * Type of the email, Internal (360 Agents), Partners, External users(Customers)
+             *
+             */
+            email_type?: "INTERNAL" | "EXTERNAL" | "PARTNER";
+            /**
+             * Sent message status regarding to this recipient.            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
              *
              */
             send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR";
             /**
-             * Information about reject, complaint or bounce event. Only available if `send_status` is REJECT, COMPLAINT, BOUNCE or ERROR.\
-             * JSON object is defined by AWS SES. Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/notification-contents.html>
+             * Information about reject, complaint or bounce event. Only available if `send_status` is REJECT, COMPLAINT, BOUNCE or ERROR.            JSON object is defined by AWS SES. Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/notification-contents.html>
              *
              */
             send_error?: {
@@ -115,14 +118,12 @@ declare namespace Components {
              */
             cid?: string;
             /**
-             * If true then this attachment should not be offered for download (at least not in the main attachments list).\
-             * The usecase is CID embedded image (aka inline image).
+             * If true then this attachment should not be offered for download (at least not in the main attachments list).            The usecase is CID embedded image (aka inline image).
              *
              */
             inline?: boolean;
             /**
-             * If true then this attachment is sent via link. The link have to be inserted to email body by API caller.\
-             * In this case, service doesn't process this attachment.
+             * If true then this attachment is sent via link. The link have to be inserted to email body by API caller.            In this case, service doesn't process this attachment.
              *
              */
             send_as_link?: boolean;
@@ -174,9 +175,7 @@ declare namespace Components {
             bcc?: Address[];
             file?: /* Message attachments */ AttachmentsRelation;
             /**
-             * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\
-             * The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\
-             * The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
+             * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.            The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.            The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
              *
              * example:
              * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
@@ -198,8 +197,7 @@ declare namespace Components {
              */
             org_read_message?: string[];
             /**
-             * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\
-             * Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
+             * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
              *
              */
             send_status?: ("SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR")[];
@@ -207,13 +205,17 @@ declare namespace Components {
              * Message type
              */
             type?: "SENT" | "RECEIVED";
+            /**
+             * Template ID used for sending message.
+             * example:
+             * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+             */
+            template_id?: string;
         }
         export interface MessageRequestParams {
             [name: string]: any;
             /**
-             * Open new thread when sending the very first message in conversation. Thread should contains context related to all messages in it (eg. topic, brand_id, opportunity_id, assigned_to,...).\
-             * Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.\
-             * `thread` or `parent_id` must be provided either.
+             * Open new thread when sending the very first message in conversation. Thread should contains context related to all messages in it (eg. topic, brand_id, opportunity_id, assigned_to,...).            Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.            `thread` or `parent_id` must be provided either.
              *
              * example:
              * {
@@ -236,8 +238,7 @@ declare namespace Components {
                 assigned_to?: string[];
             };
             /**
-             * Entity ID of parent message which this message replies to or forwards from.\
-             * If both `parent_id` and `thread` are provided, `thread` is discarded.
+             * Entity ID of parent message which this message replies to or forwards from.            If both `parent_id` and `thread` are provided, `thread` is discarded.
              *
              * example:
              * 44d7a3eb-0cce-4bd3-a7cd-0b3e652de0c2
@@ -276,6 +277,12 @@ declare namespace Components {
              */
             bcc?: Address[];
             file?: /* Message attachments */ AttachmentsRelation;
+            /**
+             * Template ID used for sending message.
+             * example:
+             * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+             */
+            template_id?: string;
         }
         export interface MessageV2 {
             /**
@@ -367,9 +374,7 @@ declare namespace Components {
             bcc?: Address[];
             file?: /* Message attachments */ AttachmentsRelation;
             /**
-             * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\
-             * The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\
-             * The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
+             * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.            The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.            The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
              *
              * example:
              * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
@@ -391,8 +396,7 @@ declare namespace Components {
              */
             org_read_message?: string[];
             /**
-             * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\
-             * Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
+             * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
              *
              */
             send_status?: ("SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR")[];
@@ -400,6 +404,12 @@ declare namespace Components {
              * Message type
              */
             type?: "SENT" | "RECEIVED";
+            /**
+             * Template ID used for sending message.
+             * example:
+             * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+             */
+            template_id?: string;
             /**
              * If true then html is not provided and must be downloaded using the html_download_url
              */
@@ -610,9 +620,7 @@ declare namespace Paths {
                 bcc?: Components.Schemas.Address[];
                 file?: /* Message attachments */ Components.Schemas.AttachmentsRelation;
                 /**
-                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\
-                 * The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\
-                 * The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
+                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.            The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.            The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
                  *
                  * example:
                  * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
@@ -634,8 +642,7 @@ declare namespace Paths {
                  */
                 org_read_message?: string[];
                 /**
-                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\
-                 * Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
+                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
                  *
                  */
                 send_status?: ("SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR")[];
@@ -643,6 +650,12 @@ declare namespace Paths {
                  * Message type
                  */
                 type?: "SENT" | "RECEIVED";
+                /**
+                 * Template ID used for sending message.
+                 * example:
+                 * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+                 */
+                template_id?: string;
             }
             export interface $403 {
             }
@@ -782,9 +795,7 @@ declare namespace Paths {
                 bcc?: Components.Schemas.Address[];
                 file?: /* Message attachments */ Components.Schemas.AttachmentsRelation;
                 /**
-                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\
-                 * The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\
-                 * The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
+                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.            The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.            The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
                  *
                  * example:
                  * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
@@ -806,8 +817,7 @@ declare namespace Paths {
                  */
                 org_read_message?: string[];
                 /**
-                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\
-                 * Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
+                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
                  *
                  */
                 send_status?: ("SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR")[];
@@ -815,6 +825,12 @@ declare namespace Paths {
                  * Message type
                  */
                 type?: "SENT" | "RECEIVED";
+                /**
+                 * Template ID used for sending message.
+                 * example:
+                 * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+                 */
+                template_id?: string;
             }
             export interface $302 {
             }
@@ -928,9 +944,7 @@ declare namespace Paths {
                 bcc?: Components.Schemas.Address[];
                 file?: /* Message attachments */ Components.Schemas.AttachmentsRelation;
                 /**
-                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\
-                 * The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\
-                 * The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
+                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.            The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.            The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
                  *
                  * example:
                  * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
@@ -952,8 +966,7 @@ declare namespace Paths {
                  */
                 org_read_message?: string[];
                 /**
-                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\
-                 * Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
+                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
                  *
                  */
                 send_status?: ("SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR")[];
@@ -961,6 +974,12 @@ declare namespace Paths {
                  * Message type
                  */
                 type?: "SENT" | "RECEIVED";
+                /**
+                 * Template ID used for sending message.
+                 * example:
+                 * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+                 */
+                template_id?: string;
                 /**
                  * If true then html is not provided and must be downloaded using the html_download_url
                  */
@@ -1209,9 +1228,7 @@ declare namespace Paths {
                 bcc?: Components.Schemas.Address[];
                 file?: /* Message attachments */ Components.Schemas.AttachmentsRelation;
                 /**
-                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\
-                 * The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\
-                 * The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
+                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.            The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.            The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
                  *
                  * example:
                  * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
@@ -1233,8 +1250,7 @@ declare namespace Paths {
                  */
                 org_read_message?: string[];
                 /**
-                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\
-                 * Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
+                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
                  *
                  */
                 send_status?: ("SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR")[];
@@ -1242,6 +1258,12 @@ declare namespace Paths {
                  * Message type
                  */
                 type?: "SENT" | "RECEIVED";
+                /**
+                 * Template ID used for sending message.
+                 * example:
+                 * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+                 */
+                template_id?: string;
             }
             export interface $403 {
             }
@@ -1409,9 +1431,7 @@ declare namespace Paths {
                 bcc?: Components.Schemas.Address[];
                 file?: /* Message attachments */ Components.Schemas.AttachmentsRelation;
                 /**
-                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\
-                 * The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\
-                 * The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
+                 * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.            The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.            The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
                  *
                  * example:
                  * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
@@ -1433,8 +1453,7 @@ declare namespace Paths {
                  */
                 org_read_message?: string[];
                 /**
-                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\
-                 * Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
+                 * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
                  *
                  */
                 send_status?: ("SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR")[];
@@ -1442,6 +1461,12 @@ declare namespace Paths {
                  * Message type
                  */
                 type?: "SENT" | "RECEIVED";
+                /**
+                 * Template ID used for sending message.
+                 * example:
+                 * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+                 */
+                template_id?: string;
             }
             export interface $403 {
             }
@@ -1694,7 +1719,7 @@ export interface OperationMethods {
   /**
    * assignUsers - assignUsers
    * 
-   * Assign users to thread for receiving notifications. 
+   * Assign users to thread for receiving notifications.
    * The operation replaces all existing assigned users in thread.
    * 
    */
@@ -1943,7 +1968,7 @@ export interface PathsDictionary {
     /**
      * assignUsers - assignUsers
      * 
-     * Assign users to thread for receiving notifications. 
+     * Assign users to thread for receiving notifications.
      * The operation replaces all existing assigned users in thread.
      * 
      */

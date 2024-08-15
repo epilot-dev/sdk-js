@@ -599,7 +599,7 @@
       "post": {
         "operationId": "assignUsers",
         "summary": "assignUsers",
-        "description": "Assign users to thread for receiving notifications. \nThe operation replaces all existing assigned users in thread.\n",
+        "description": "Assign users to thread for receiving notifications.\nThe operation replaces all existing assigned users in thread.\n",
         "tags": [
           "Threads"
         ],
@@ -945,7 +945,7 @@
           },
           "references": {
             "type": "string",
-            "description": "References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.\\\nThe last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.\\\nThe basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.\n",
+            "description": "References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.            The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.            The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.\n",
             "example": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>"
           },
           "in_reply_to": {
@@ -977,7 +977,7 @@
           },
           "send_status": {
             "type": "array",
-            "description": "Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`\\\nReference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>\n",
+            "description": "Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>\n",
             "items": {
               "type": "string",
               "enum": [
@@ -997,6 +997,11 @@
               "SENT",
               "RECEIVED"
             ]
+          },
+          "template_id": {
+            "type": "string",
+            "description": "Template ID used for sending message.",
+            "example": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
           }
         }
       },
@@ -1038,9 +1043,19 @@
             "description": "Email address",
             "example": "messaging@epilot.cloud"
           },
+          "email_type": {
+            "type": "string",
+            "description": "Type of the email, Internal (360 Agents), Partners, External users(Customers)\n",
+            "nullable": true,
+            "enum": [
+              "INTERNAL",
+              "EXTERNAL",
+              "PARTNER"
+            ]
+          },
           "send_status": {
             "type": "string",
-            "description": "Sent message status regarding to this recipient.\\\nReference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>\n",
+            "description": "Sent message status regarding to this recipient.            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>\n",
             "enum": [
               "SEND",
               "DELIVERY",
@@ -1052,7 +1067,7 @@
           },
           "send_error": {
             "type": "object",
-            "description": "Information about reject, complaint or bounce event. Only available if `send_status` is REJECT, COMPLAINT, BOUNCE or ERROR.\\\nJSON object is defined by AWS SES. Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/notification-contents.html>\n"
+            "description": "Information about reject, complaint or bounce event. Only available if `send_status` is REJECT, COMPLAINT, BOUNCE or ERROR.            JSON object is defined by AWS SES. Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/notification-contents.html>\n"
           }
         }
       },
@@ -1096,12 +1111,12 @@
           },
           "inline": {
             "type": "boolean",
-            "description": "If true then this attachment should not be offered for download (at least not in the main attachments list).\\\nThe usecase is CID embedded image (aka inline image).\n",
+            "description": "If true then this attachment should not be offered for download (at least not in the main attachments list).            The usecase is CID embedded image (aka inline image).\n",
             "default": false
           },
           "send_as_link": {
             "type": "boolean",
-            "description": "If true then this attachment is sent via link. The link have to be inserted to email body by API caller.\\\nIn this case, service doesn't process this attachment.\n",
+            "description": "If true then this attachment is sent via link. The link have to be inserted to email body by API caller.            In this case, service doesn't process this attachment.\n",
             "default": false
           }
         }
@@ -1118,7 +1133,7 @@
             "required": [
               "topic"
             ],
-            "description": "Open new thread when sending the very first message in conversation. Thread should contains context related to all messages in it (eg. topic, brand_id, opportunity_id, assigned_to,...).\\\nThread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.\\\n`thread` or `parent_id` must be provided either.\n",
+            "description": "Open new thread when sending the very first message in conversation. Thread should contains context related to all messages in it (eg. topic, brand_id, opportunity_id, assigned_to,...).            Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.            `thread` or `parent_id` must be provided either.\n",
             "properties": {
               "topic": {
                 "type": "string",
@@ -1143,7 +1158,7 @@
           },
           "parent_id": {
             "type": "string",
-            "description": "Entity ID of parent message which this message replies to or forwards from.\\\nIf both `parent_id` and `thread` are provided, `thread` is discarded.\n",
+            "description": "Entity ID of parent message which this message replies to or forwards from.            If both `parent_id` and `thread` are provided, `thread` is discarded.\n",
             "example": "44d7a3eb-0cce-4bd3-a7cd-0b3e652de0c2"
           },
           "subject": {
@@ -1190,6 +1205,11 @@
           },
           "file": {
             "$ref": "#/components/schemas/AttachmentsRelation"
+          },
+          "template_id": {
+            "type": "string",
+            "description": "Template ID used for sending message.",
+            "example": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
           }
         }
       },
