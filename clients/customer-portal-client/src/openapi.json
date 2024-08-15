@@ -1155,7 +1155,7 @@
       "get": {
         "operationId": "getContact",
         "summary": "getContact",
-        "description": "Retrieves the contact by ID.",
+        "description": "Retrieves the contact of the logged in user.",
         "tags": [
           "ECP"
         ],
@@ -1607,8 +1607,11 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/PortalUser"
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "You will receive a confirmation mail soon on your updated email address."
+                      ]
                     }
                   }
                 }
@@ -1620,6 +1623,64 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/user/resend/confirmation-email/{id}": {
+      "post": {
+        "operationId": "resendConfirmationEmail",
+        "summary": "resendConfirmationEmail",
+        "description": "Resend confirmation email",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of portal user id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmation email resent successfully for the portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "enum": [
+                        "Confirmation email sent successfully."
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -2956,8 +3017,22 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Entity",
-                "example": "```json\n  {\n    \"name\": \"My Contract\",\n    \"contract_number\": \"123\"\n  }\n```\n"
+                "type": "object",
+                "description": "Identifier-value pairs per schema to identify a contract",
+                "additionalProperties": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "contract": {
+                    "contract_number": "123456"
+                  },
+                  "meter": {
+                    "meter_number": "123456"
+                  }
+                }
               }
             }
           }
@@ -4408,7 +4483,6 @@
                     "reason": {
                       "type": "string",
                       "enum": [
-                        "MULTIPLE",
                         "DRAFT"
                       ]
                     }
@@ -5017,7 +5091,8 @@
           },
           "entity_identifiers": {
             "type": "object",
-            "description": "Identifiers used to identify an entity by a portal user",
+            "description": "Identifiers used to identify an entity by a portal user. Deprecated. Use contract_identifiers instead.",
+            "deprecated": true,
             "properties": {
               "type": {
                 "type": "object",
@@ -5038,17 +5113,34 @@
               }
             }
           },
-          "registration_identifiers": {
+          "contract_identifiers": {
             "type": "array",
-            "description": "Identifiers to identify a contact of a portal user during the registration.",
+            "description": "Identifiers to identify a contract by a portal user.",
             "items": {
-              "$ref": "#/components/schemas/RegistrationIdentifier"
+              "$ref": "#/components/schemas/ContractIdentifier"
             },
             "example": [
               {
                 "name": "email",
                 "schema": "contact"
               },
+              {
+                "name": "last_name",
+                "schema": "contact"
+              },
+              {
+                "name": "contract_number",
+                "schema": "contract"
+              }
+            ]
+          },
+          "registration_identifiers": {
+            "type": "array",
+            "description": "Identifiers to identify a contact of a portal user during the registration.",
+            "items": {
+              "$ref": "#/components/schemas/ContractIdentifier"
+            },
+            "example": [
               {
                 "name": "last_name",
                 "schema": "contact"
@@ -6923,7 +7015,7 @@
           }
         }
       },
-      "RegistrationIdentifier": {
+      "ContractIdentifier": {
         "type": "object",
         "properties": {
           "name": {

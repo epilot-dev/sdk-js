@@ -15,7 +15,7 @@ declare namespace Components {
              * Error message
              */
             message?: string;
-            reason: "MULTIPLE" | "DRAFT";
+            reason: "DRAFT";
         }
         export type Forbidden = Schemas.ErrorResp;
         export type ForbiddenByRule = Schemas.ErrorResp | Schemas.FailedRuleErrorResp;
@@ -581,7 +581,7 @@ declare namespace Components {
                 welcomeBanner?: string | null;
             };
             /**
-             * Identifiers used to identify an entity by a portal user
+             * Identifiers used to identify an entity by a portal user. Deprecated. Use contract_identifiers instead.
              */
             entity_identifiers?: {
                 type?: {
@@ -596,7 +596,7 @@ declare namespace Components {
                 };
             };
             /**
-             * Identifiers to identify a contact of a portal user during the registration.
+             * Identifiers to identify a contract by a portal user.
              * example:
              * [
              *   {
@@ -613,7 +613,22 @@ declare namespace Components {
              *   }
              * ]
              */
-            registration_identifiers?: RegistrationIdentifier[];
+            contract_identifiers?: ContractIdentifier[];
+            /**
+             * Identifiers to identify a contact of a portal user during the registration.
+             * example:
+             * [
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
+             */
+            registration_identifiers?: ContractIdentifier[];
             /**
              * Rules for editing an entity by a portal user
              */
@@ -928,6 +943,18 @@ declare namespace Components {
              * EUR
              */
             Currency;
+        }
+        export interface ContractIdentifier {
+            /**
+             * Name of the identifier/attribute
+             */
+            name?: string;
+            schema?: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
         }
         export interface CreateSSOUserRequest {
             /**
@@ -2054,7 +2081,7 @@ declare namespace Components {
                 welcomeBanner?: string | null;
             };
             /**
-             * Identifiers used to identify an entity by a portal user
+             * Identifiers used to identify an entity by a portal user. Deprecated. Use contract_identifiers instead.
              */
             entity_identifiers?: {
                 type?: {
@@ -2069,7 +2096,7 @@ declare namespace Components {
                 };
             };
             /**
-             * Identifiers to identify a contact of a portal user during the registration.
+             * Identifiers to identify a contract by a portal user.
              * example:
              * [
              *   {
@@ -2086,7 +2113,22 @@ declare namespace Components {
              *   }
              * ]
              */
-            registration_identifiers?: RegistrationIdentifier[];
+            contract_identifiers?: ContractIdentifier[];
+            /**
+             * Identifiers to identify a contact of a portal user during the registration.
+             * example:
+             * [
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
+             */
+            registration_identifiers?: ContractIdentifier[];
             /**
              * Rules for editing an entity by a portal user
              */
@@ -2277,18 +2319,6 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
             _schema: "product";
-        }
-        export interface RegistrationIdentifier {
-            /**
-             * Name of the identifier/attribute
-             */
-            name?: string;
-            schema?: /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            EntitySlug;
         }
         /**
          * An entity that describes a reimbursement billing event.
@@ -2745,7 +2775,7 @@ declare namespace Components {
                 welcomeBanner?: string | null;
             };
             /**
-             * Identifiers used to identify an entity by a portal user
+             * Identifiers used to identify an entity by a portal user. Deprecated. Use contract_identifiers instead.
              */
             entity_identifiers?: {
                 type?: {
@@ -2760,7 +2790,7 @@ declare namespace Components {
                 };
             };
             /**
-             * Identifiers to identify a contact of a portal user during the registration.
+             * Identifiers to identify a contract by a portal user.
              * example:
              * [
              *   {
@@ -2777,7 +2807,22 @@ declare namespace Components {
              *   }
              * ]
              */
-            registration_identifiers?: RegistrationIdentifier[];
+            contract_identifiers?: ContractIdentifier[];
+            /**
+             * Identifiers to identify a contact of a portal user during the registration.
+             * example:
+             * [
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
+             */
+            registration_identifiers?: ContractIdentifier[];
             /**
              * Rules for editing an entity by a portal user
              */
@@ -2973,16 +3018,22 @@ declare namespace Components {
 declare namespace Paths {
     namespace AddContractByIdentifiers {
         /**
+         * Identifier-value pairs per schema to identify a contract
          * example:
-         * ```json
-         *   {
-         *     "name": "My Contract",
-         *     "contract_number": "123"
+         * {
+         *   "contract": {
+         *     "contract_number": "123456"
+         *   },
+         *   "meter": {
+         *     "meter_number": "123456"
          *   }
-         * ```
-         *
+         * }
          */
-        export type RequestBody = Components.Schemas.Entity;
+        export interface RequestBody {
+            [name: string]: {
+                [name: string]: string;
+            };
+        }
         namespace Responses {
             export interface $200 {
                 data?: Components.Schemas.EntityItem;
@@ -4729,6 +4780,28 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ResendConfirmationEmail {
+        namespace Parameters {
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+                message?: "Confirmation email sent successfully.";
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace RevokeToken {
         export interface RequestBody {
             /**
@@ -4980,7 +5053,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                data?: /* The portal user entity */ Components.Schemas.PortalUser;
+                message?: "You will receive a confirmation mail soon on your updated email address.";
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
@@ -5397,7 +5470,7 @@ export interface OperationMethods {
   /**
    * getContact - getContact
    * 
-   * Retrieves the contact by ID.
+   * Retrieves the contact of the logged in user.
    */
   'getContact'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -5484,6 +5557,16 @@ export interface OperationMethods {
     data?: Paths.UpdatePortalUserEmail.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdatePortalUserEmail.Responses.$200>
+  /**
+   * resendConfirmationEmail - resendConfirmationEmail
+   * 
+   * Resend confirmation email
+   */
+  'resendConfirmationEmail'(
+    parameters?: Parameters<Paths.ResendConfirmationEmail.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ResendConfirmationEmail.Responses.$200>
   /**
    * fetchPortalUsersByRelatedEntity - fetchPortalUsersByRelatedEntity
    * 
@@ -6143,7 +6226,7 @@ export interface PathsDictionary {
     /**
      * getContact - getContact
      * 
-     * Retrieves the contact by ID.
+     * Retrieves the contact of the logged in user.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -6240,6 +6323,18 @@ export interface PathsDictionary {
       data?: Paths.UpdatePortalUserEmail.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdatePortalUserEmail.Responses.$200>
+  }
+  ['/v2/portal/user/resend/confirmation-email/{id}']: {
+    /**
+     * resendConfirmationEmail - resendConfirmationEmail
+     * 
+     * Resend confirmation email
+     */
+    'post'(
+      parameters?: Parameters<Paths.ResendConfirmationEmail.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ResendConfirmationEmail.Responses.$200>
   }
   ['/v2/porta/users/by-related-entity']: {
     /**

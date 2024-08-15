@@ -333,6 +333,18 @@
         }
       }
     },
+    "/v2/portal/user/resend/confirmation-email/{id}": {
+      "post": {
+        "operationId": "resendConfirmationEmail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
     "/v2/porta/users/by-related-entity": {
       "get": {
         "operationId": "fetchPortalUsersByRelatedEntity",
