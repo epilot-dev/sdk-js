@@ -759,6 +759,85 @@
       }
     },
     "/v1/workflows/closing-reasons/{reasonId}": {
+      "get": {
+        "operationId": "getClosingReason",
+        "summary": "getClosingReason",
+        "description": "Get specific closing reason by id from the organisation.",
+        "tags": [
+          "Closing Reason"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reasonId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "uuid to identify the closing reason.",
+            "example": "-poOAPBa-jFZA_AWV3zN0"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the closing reason",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReason"
+                },
+                "example": {
+                  "id": "-poOAPBa-jFZA_AWV3zN0",
+                  "title": "Closing due to example reason",
+                  "status": "ACTIVE",
+                  "lastUpdateTime": "2021-08-04T21:13:50.373Z",
+                  "creationTime": "2021-08-04T21:13:50.373Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Closing reason not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonNotFoundResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
       "patch": {
         "operationId": "changeReasonStatus",
         "summary": "changeReasonStatus",
@@ -1150,6 +1229,14 @@
       },
       "DefinitionNotFoundResp": {
         "description": "Definition could be not found",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ClosingReasonNotFoundResp": {
+        "description": "Closing reason could be not found",
         "properties": {
           "message": {
             "type": "string"

@@ -89,6 +89,16 @@
       }
     },
     "/v1/workflows/closing-reasons/{reasonId}": {
+      "get": {
+        "operationId": "getClosingReason",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reasonId",
+            "required": true
+          }
+        ]
+      },
       "patch": {
         "operationId": "changeReasonStatus",
         "parameters": [

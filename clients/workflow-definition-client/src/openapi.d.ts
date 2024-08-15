@@ -29,6 +29,12 @@ declare namespace Components {
              */
             id: string;
         }
+        /**
+         * Closing reason could be not found
+         */
+        export interface ClosingReasonNotFoundResp {
+            message?: string;
+        }
         export interface ClosingReasons {
             reasons: /* One Closing reason for a workflow */ ClosingReason[];
         }
@@ -243,6 +249,21 @@ declare namespace Paths {
             export type $200 = Components.Schemas.ClosingReasons;
         }
     }
+    namespace GetClosingReason {
+        namespace Parameters {
+            export type ReasonId = string;
+        }
+        export interface PathParameters {
+            reasonId: Parameters.ReasonId;
+        }
+        namespace Responses {
+            export type $200 = /* One Closing reason for a workflow */ Components.Schemas.ClosingReason;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $404 = /* Closing reason could be not found */ Components.Schemas.ClosingReasonNotFoundResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace GetDefinition {
         namespace Parameters {
             export type DefinitionId = string;
@@ -393,6 +414,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateClosingReason.Responses.$201>
   /**
+   * getClosingReason - getClosingReason
+   * 
+   * Get specific closing reason by id from the organisation.
+   */
+  'getClosingReason'(
+    parameters?: Parameters<Paths.GetClosingReason.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetClosingReason.Responses.$200>
+  /**
    * changeReasonStatus - changeReasonStatus
    * 
    * Change the status of a Closing Reason (eg. ACTIVE to INACTIVE).
@@ -514,6 +545,16 @@ export interface PathsDictionary {
     ): OperationResponse<Paths.CreateClosingReason.Responses.$201>
   }
   ['/v1/workflows/closing-reasons/{reasonId}']: {
+    /**
+     * getClosingReason - getClosingReason
+     * 
+     * Get specific closing reason by id from the organisation.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetClosingReason.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetClosingReason.Responses.$200>
     /**
      * changeReasonStatus - changeReasonStatus
      * 
