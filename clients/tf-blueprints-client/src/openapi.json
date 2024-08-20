@@ -420,6 +420,11 @@
             "type": "object",
             "description": "A tree-like JSON object representing the resources to export",
             "example": "{\n  \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n  \"type\": \"journey\",\n  \"name\": \"House Connection Journey\",\n  \"dependencies\": [\n    {\n      \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n      \"type\": \"product\",\n      \"name\": \"Solar Panel\",\n      \"dependencies\": []\n    }\n  ]\n}\n"
+          },
+          "resources_to_import": {
+            "type": "object",
+            "description": "A tree-like JSON object representing the resources to import",
+            "example": "{\n  \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n  \"type\": \"journey\",\n  \"name\": \"House Connection Journey\",\n  \"dependencies\": [\n    {\n      \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n      \"type\": \"product\",\n      \"name\": \"Solar Panel\",\n      \"dependencies\": []\n    }\n  ]\n}\n"
           }
         }
       },

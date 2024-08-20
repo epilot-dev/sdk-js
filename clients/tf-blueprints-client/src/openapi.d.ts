@@ -43,6 +43,27 @@ declare namespace Components {
             resources_to_export?: {
                 [key: string]: any;
             };
+            /**
+             * A tree-like JSON object representing the resources to import
+             * example:
+             * {
+             *   "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
+             *   "type": "journey",
+             *   "name": "House Connection Journey",
+             *   "dependencies": [
+             *     {
+             *       "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
+             *       "type": "product",
+             *       "name": "Solar Panel",
+             *       "dependencies": []
+             *     }
+             *   ]
+             * }
+             *
+             */
+            resources_to_import?: {
+                [key: string]: any;
+            };
         }
         export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
         export interface S3Reference {
