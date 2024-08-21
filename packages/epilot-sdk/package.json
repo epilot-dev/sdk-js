@@ -64,7 +64,7 @@
     "@epilot/pricing-client": "^3.17.0",
     "@epilot/submission-client": "^1.5.0",
     "@epilot/template-variables-client": "^1.12.0",
-    "@epilot/tf-blueprints-client": "^1.0.0",
+    "@epilot/tf-blueprints-client": "^2.0.0",
     "@epilot/user-client": "^3.5.0",
     "@epilot/workflow-client": "^1.5.4",
     "@epilot/workflow-definition-client": "^1.4.3",
