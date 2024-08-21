@@ -643,58 +643,6 @@
         }
       }
     },
-    "/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}": {
-      "get": {
-        "operationId": "listTaxonomyClassificationsForSchema",
-        "summary": "listTaxonomyClassificationsForSchema",
-        "description": "List taxonomy classifications for a given schema",
-        "tags": [
-          "Schemas"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/EntitySlugPathParam"
-          },
-          {
-            "$ref": "#/components/parameters/TaxonomySlugPathParam"
-          },
-          {
-            "in": "query",
-            "name": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of taxonomy classifications",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/TaxonomyClassification"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/entity:search": {
       "post": {
         "operationId": "searchEntities",
@@ -2339,43 +2287,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "slug": {
-                    "$ref": "#/components/schemas/TaxonomySlug"
-                  },
-                  "name": {
-                    "type": "string",
-                    "description": "A human friendly name of a Taxonomy e.g. Purpose, Product Category, Folder, Tag",
-                    "example": "Purpose"
-                  },
-                  "plural": {
-                    "type": "string",
-                    "description": "Plural name of a Taxonomy e.g. Purposes, Product Categories, Folders, Tags. Defaults to name is not provided.",
-                    "example": "Purposes"
-                  },
-                  "icon": {
-                    "type": "string",
-                    "description": "Icon name for the taxonomy (from epilot360/icons icon set)",
-                    "example": "purpose"
-                  },
-                  "color": {
-                    "type": "string",
-                    "description": "HEX Color code for the taxonomy",
-                    "example": "#FF5733"
-                  }
-                },
-                "required": [
-                  "slug",
-                  "name"
-                ],
-                "example": {
-                  "slug": "product-category",
-                  "name": "Product Category",
-                  "plural": "Product Categories",
-                  "icon": "product-hub",
-                  "color": "#FF5733"
-                }
+                "$ref": "#/components/schemas/Taxonomy"
               }
             }
           }
@@ -2439,41 +2351,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "A human friendly name of a Taxonomy e.g. Purpose, Product Category, Folder, Tag",
-                    "example": "Purpose"
-                  },
-                  "plural": {
-                    "type": "string",
-                    "description": "Plural name of a Taxonomy e.g. Purposes, Product Categories, Folders, Tags. Defaults to name is not provided.",
-                    "example": "Purposes"
-                  },
-                  "icon": {
-                    "type": "string",
-                    "description": "Icon name for the taxonomy (from epilot360/icons icon set)",
-                    "example": "purpose"
-                  },
-                  "color": {
-                    "type": "string",
-                    "description": "HEX Color code for the taxonomy",
-                    "example": "#FF5733"
-                  },
-                  "enabled": {
-                    "type": "boolean",
-                    "description": "Whether the taxonomy is enabled or not",
-                    "example": true
-                  }
-                },
-                "example": {
-                  "name": "Product Category",
-                  "plural": "Product Categories",
-                  "icon": "product-hub",
-                  "color": "#FF5733",
-                  "enabled": true
-                }
+                "$ref": "#/components/schemas/Taxonomy"
               }
             }
           }
@@ -2686,31 +2564,74 @@
         }
       }
     },
-    "/v2/entity/taxonomies/{taxonomySlug}/classifications": {
-      "post": {
-        "operationId": "createTaxonomyClassification",
-        "summary": "createTaxonomyClassification",
-        "description": "Create a new classification for a taxonomy",
+    "/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}": {
+      "get": {
+        "operationId": "listTaxonomyClassificationsForSchema",
+        "summary": "listTaxonomyClassificationsForSchema",
+        "description": "List taxonomy classifications for a given schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of taxonomy classifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TaxonomyClassification"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/entity/taxonomies/classifications/{classificationSlug}": {
+      "get": {
+        "operationId": "getTaxonomyClassification",
+        "summary": "getTaxonomyClassification",
+        "description": "Get a classification for a taxonomy",
         "tags": [
           "Taxonomy"
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TaxonomyClassification"
-              }
-            }
-          }
-        },
         "responses": {
-          "201": {
-            "description": "Taxonomy classification created",
+          "200": {
+            "description": "Taxonomy classification",
             "content": {
               "application/json": {
                 "schema": {
@@ -2719,13 +2640,11 @@
               }
             }
           },
-          "409": {
-            "description": "Taxonomy classification already exists\""
+          "404": {
+            "description": "Taxonomy classification not found"
           }
         }
-      }
-    },
-    "/v2/entity/taxonomies/{taxonomySlug}/classifications/{classificationSlug}": {
+      },
       "put": {
         "operationId": "updateTaxonomyClassification",
         "summary": "updateTaxonomyClassification",
@@ -2734,9 +2653,6 @@
           "Taxonomy"
         ],
         "parameters": [
-          {
-            "$ref": "#/components/parameters/TaxonomySlugPathParam"
-          },
           {
             "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
           }
@@ -2775,23 +2691,19 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomySlugPathParam"
-          },
-          {
             "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
-          },
-          {
-            "in": "query",
-            "name": "permanent",
-            "description": "If true, the classification will be permanently deleted",
-            "schema": {
-              "type": "boolean"
-            }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Taxonomy classification deleted"
+          "200": {
+            "description": "Taxonomy classification deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxonomyClassification"
+                }
+              }
+            }
           }
         }
       }
@@ -3454,6 +3366,74 @@
           }
         ]
       },
+      "EntityTableFilterSearch": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "The label for the search filter"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type for the search filter"
+          },
+          "value": {
+            "type": "string",
+            "description": "The value for the search filter"
+          }
+        },
+        "required": [
+          "label",
+          "type",
+          "value"
+        ]
+      },
+      "EntityTableFilterOption": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of filter option",
+            "enum": [
+              "search",
+              "filter"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "description": "The label for the filter option"
+          },
+          "label_type": {
+            "type": "string",
+            "description": "The label type for the filter option"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name for the filter option"
+          },
+          "group": {
+            "type": "string",
+            "description": "The group for the filter option"
+          },
+          "allowedSchemas": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "The allowed schemas for the filter option"
+            }
+          },
+          "relatedOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityTableFilterOption"
+            },
+            "description": "The related options for the filter option"
+          }
+        },
+        "required": [
+          "label"
+        ]
+      },
       "EntitySchemaGroup": {
         "type": "object",
         "properties": {
@@ -3749,8 +3729,7 @@
           },
           "protected": {
             "description": "Setting to `true` prevents the attribute from being modified / deleted",
-            "type": "boolean",
-            "default": true
+            "type": "boolean"
           },
           "info_helpers": {
             "description": "A set of configurations meant to document and assist the user in filling the attribute.",
@@ -6318,29 +6297,34 @@
             "description": "List of locations where the taxonomy is enabled to be used. If empty, it's enabled for all locations.",
             "type": "array",
             "items": {
-              "type": "string",
-              "enum": [
-                "account",
-                "contact",
-                "contract",
-                "email_template",
-                "file",
-                "journey",
-                "meter_counter",
-                "meter",
-                "opportunity",
-                "order",
-                "partner",
-                "price",
-                "product",
-                "submission",
-                "tax",
-                "message",
-                "portal_user"
-              ]
+              "$ref": "#/components/schemas/TaxonomyLocationId"
             }
           }
         }
+      },
+      "TaxonomyLocationId": {
+        "type": "string",
+        "enum": [
+          "account",
+          "contact",
+          "contract",
+          "email_template",
+          "file",
+          "journey",
+          "meter_counter",
+          "meter",
+          "opportunity",
+          "order",
+          "partner",
+          "price",
+          "product",
+          "submission",
+          "tax",
+          "message",
+          "portal_user",
+          "request",
+          "comment"
+        ]
       },
       "TaxonomyClassification": {
         "type": "object",
@@ -6487,7 +6471,8 @@
         "required": true,
         "schema": {
           "type": "string"
-        }
+        },
+        "example": "purpose:<name>"
       },
       "SavedViewIdPathParam": {
         "name": "id",

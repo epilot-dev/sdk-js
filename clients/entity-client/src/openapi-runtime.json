@@ -113,27 +113,6 @@
         "operationId": "listSchemaBlueprints"
       }
     },
-    "/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}": {
-      "get": {
-        "operationId": "listTaxonomyClassificationsForSchema",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/EntitySlugPathParam"
-          },
-          {
-            "$ref": "#/components/parameters/TaxonomySlugPathParam"
-          },
-          {
-            "in": "query",
-            "name": "query"
-          },
-          {
-            "in": "query",
-            "name": "size"
-          }
-        ]
-      }
-    },
     "/v1/entity:search": {
       "post": {
         "operationId": "searchEntities",
@@ -873,28 +852,39 @@
         }
       }
     },
-    "/v2/entity/taxonomies/{taxonomySlug}/classifications": {
-      "post": {
-        "operationId": "createTaxonomyClassification",
+    "/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}": {
+      "get": {
+        "operationId": "listTaxonomyClassificationsForSchema",
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomySlugPathParam"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v2/entity/taxonomies/{taxonomySlug}/classifications/{classificationSlug}": {
-      "put": {
-        "operationId": "updateTaxonomyClassification",
-        "parameters": [
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
           {
             "$ref": "#/components/parameters/TaxonomySlugPathParam"
           },
+          {
+            "in": "query",
+            "name": "query"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          }
+        ]
+      }
+    },
+    "/v2/entity/taxonomies/classifications/{classificationSlug}": {
+      "get": {
+        "operationId": "getTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ]
+      },
+      "put": {
+        "operationId": "updateTaxonomyClassification",
+        "parameters": [
           {
             "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
           }
@@ -909,14 +899,7 @@
         "operationId": "deleteTaxonomyClassification",
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomySlugPathParam"
-          },
-          {
             "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
-          },
-          {
-            "in": "query",
-            "name": "permanent"
           }
         ]
       }
