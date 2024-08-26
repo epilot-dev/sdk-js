@@ -21,7 +21,12 @@
           {
             "in": "query",
             "name": "s3FileUrl",
-            "required": true
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "fileId",
+            "required": false
           },
           {
             "in": "query",
@@ -45,6 +50,7 @@
     "/v1/suggestions:validate": {
       "get": {
         "operationId": "validateAddresses",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -90,6 +96,17 @@
             "in": "query",
             "name": "streetNumber",
             "required": false
+          }
+        ]
+      }
+    },
+    "/v1/addresses-files:validate": {
+      "get": {
+        "operationId": "validateAddressesFile",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fileId"
           }
         ]
       }

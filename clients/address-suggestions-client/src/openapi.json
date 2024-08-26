@@ -24,15 +24,12 @@
     },
     {
       "url": "https://address-suggestions-api.sls.epilot.io"
-    },
-    {
-      "url": "https://address-suggestions-api.sls.epilot.io"
     }
   ],
   "paths": {
     "/v1/public/suggestions": {
       "get": {
-        "description": "get address suggestions for the given file id",
+        "description": "Get address suggestions for the given file id",
         "parameters": [
           {
             "in": "header",
@@ -47,12 +44,22 @@
           {
             "in": "query",
             "name": "s3FileUrl",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             },
             "description": "file s3 reference",
             "example": "https://epilot-dev-user-content.s3.eu-central-1.amazonaws.com/739224/0a3639af-d4c3-4f96-bfc1-9dcbafdfaa42/availability-file-template%2520(13).csv"
+          },
+          {
+            "in": "query",
+            "name": "fileId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "file id to get suggestions from",
+            "example": "0a3639af-d4c3-4f96-bfc1-9dcbafdfaa42"
           },
           {
             "in": "query",
@@ -129,6 +136,7 @@
         "description": "Validates an addresses file, it returns an array of errors if the file is invalid",
         "operationId": "validateAddresses",
         "summary": "validate addresses file",
+        "deprecated": true,
         "tags": [
           "Addresses API"
         ],
@@ -301,6 +309,66 @@
           }
         }
       }
+    },
+    "/v1/addresses-files:validate": {
+      "get": {
+        "description": "Validates an addresses file, it returns an array of errors if the file is invalid",
+        "operationId": "validateAddressesFile",
+        "summary": "validate addresses file",
+        "tags": [
+          "Addresses API"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fileId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "file id to validate",
+            "example": "4e7b7d95-ced6-4f5f-9326-0c61f30dcadb"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The addresses validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateAddressFileResult"
+                },
+                "examples": {
+                  "Response when file has no errors": {
+                    "value": {
+                      "number_of_rules_parsed": 10,
+                      "errors": []
+                    }
+                  },
+                  "Response when file has errors": {
+                    "value": {
+                      "number_of_rules_parsed": 8,
+                      "errors": [
+                        "File must be UTF-8 encoded",
+                        "Line 3 - Postal code is missing or invalid"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -330,6 +398,31 @@
       }
     },
     "schemas": {
+      "AvailabilityLocation": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "description": "The first line of the address. Typically the street address or PO Box number."
+          },
+          "street_number": {
+            "type": "string",
+            "description": "The second line of the address. Typically the number of the apartment, suite, or unit."
+          },
+          "postal_code": {
+            "type": "string",
+            "description": "The postal code for the address."
+          },
+          "city": {
+            "type": "string",
+            "description": "The name of the city, district, village, or town."
+          },
+          "country": {
+            "type": "string",
+            "description": "The name of the country."
+          }
+        }
+      },
       "AvailabilityResult": {
         "type": "object",
         "properties": {
@@ -417,8 +510,54 @@
           }
         }
       },
+      "ValidateAddressFileResult": {
+        "description": "The address file validation result payload",
+        "type": "object",
+        "properties": {
+          "status": {
+            "description": "The status of the validation",
+            "type": "string",
+            "enum": [
+              "success",
+              "error"
+            ]
+          },
+          "rules_parsed_count": {
+            "description": "The number of rules successfully parsed",
+            "type": "number"
+          },
+          "errors": {
+            "description": "The errors found on the file",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidateAddressFileError"
+            }
+          }
+        }
+      },
       "AddressSuggestionError": {
         "description": "The availability rule error",
+        "type": "object",
+        "properties": {
+          "line": {
+            "description": "The line number where the error was found",
+            "type": "number"
+          },
+          "msg": {
+            "description": "The error message",
+            "type": "string"
+          },
+          "data": {
+            "description": "Data related to the error",
+            "type": "string"
+          }
+        },
+        "required": [
+          "msg"
+        ]
+      },
+      "ValidateAddressFileError": {
+        "description": "The address rule error",
         "type": "object",
         "properties": {
           "line": {
