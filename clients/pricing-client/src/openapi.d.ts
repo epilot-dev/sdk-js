@@ -670,7 +670,37 @@ declare namespace Components {
              *   "$ref": "#/components/examples/price"
              * }
              */
-            Price)[];
+            Price | /**
+             * The coupon configuration
+             * example:
+             * {
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            Coupon)[];
         }
         /**
          * The cart checkout request payload
@@ -1290,6 +1320,101 @@ declare namespace Components {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
         export type ConsumptionTypeGetAg = "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
+        /**
+         * The coupon configuration
+         * example:
+         * {
+         *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+         *   "_schema": "coupon",
+         *   "_org": "org_12345",
+         *   "_created_at": "2024-01-15T10:00:00.000Z",
+         *   "_updated_at": "2024-01-20T12:00:00.000Z",
+         *   "_title": "Sample Coupon",
+         *   "name": "Sample Coupon",
+         *   "type": "fixed",
+         *   "fixed_value": 555,
+         *   "fixed_value_currency": "USD",
+         *   "fixed_value_decimal": "5.55",
+         *   "active": true,
+         *   "prices": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+         *         "_tags": [
+         *           "discount",
+         *           "special"
+         *         ],
+         *         "_schema": "price"
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        export interface Coupon {
+            [name: string]: any;
+            _id: EntityId /* uuid */;
+            /**
+             * The auto-generated title for the title
+             */
+            _title: string;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org: string;
+            /**
+             * The schema of the entity, for coupons it is always `coupon`
+             */
+            _schema: "coupon";
+            _tags?: string[];
+            /**
+             * The creation date for the opportunity
+             */
+            _created_at: string; // date-time
+            /**
+             * The date the coupon was last updated
+             */
+            _updated_at: string; // date-time
+            name: string;
+            description?: string;
+            type: "fixed" | "percentage";
+            /**
+             * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
+             */
+            percentage_value?: number;
+            /**
+             * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
+             */
+            fixed_value?: number;
+            /**
+             * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
+             */
+            fixed_value_decimal?: string;
+            /**
+             * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
+             */
+            fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            active?: boolean;
+            /**
+             * The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.
+             */
+            prices?: /* The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise. */ {
+                $relation?: EntityRelation[];
+            } | /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price[];
+        }
         /**
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
          * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
