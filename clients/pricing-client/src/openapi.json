@@ -2663,6 +2663,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Price"
+                },
+                {
+                  "$ref": "#/components/schemas/Coupon"
                 }
               ]
             }
@@ -4695,6 +4698,147 @@
           },
           "_id": {
             "type": "string"
+          }
+        }
+      },
+      "Coupon": {
+        "type": "object",
+        "description": "The coupon configuration",
+        "additionalProperties": true,
+        "required": [
+          "name",
+          "type",
+          "_id",
+          "_title",
+          "_org",
+          "_schema",
+          "_created_at",
+          "_updated_at"
+        ],
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "readOnly": true
+          },
+          "_title": {
+            "type": "string",
+            "description": "The auto-generated title for the title",
+            "readOnly": true
+          },
+          "_org": {
+            "type": "string",
+            "description": "Organization Id the entity belongs to",
+            "readOnly": true
+          },
+          "_schema": {
+            "type": "string",
+            "enum": [
+              "coupon"
+            ],
+            "readOnly": true,
+            "description": "The schema of the entity, for coupons it is always `coupon`"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The creation date for the opportunity"
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The date the coupon was last updated"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "fixed",
+              "percentage"
+            ]
+          },
+          "percentage_value": {
+            "type": "number",
+            "description": "Use if type is set to percentage. The percentage to be discounted, represented as a whole integer."
+          },
+          "fixed_value": {
+            "description": "Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.",
+            "type": "number"
+          },
+          "fixed_value_decimal": {
+            "description": "Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.",
+            "type": "string"
+          },
+          "fixed_value_currency": {
+            "description": "Use if type is set to fixed. Three-letter ISO currency code, in lowercase.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Currency"
+              }
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "prices": {
+            "description": "The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.",
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                }
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Price"
+                }
+              }
+            ]
+          }
+        },
+        "example": {
+          "_id": "123e4567-e89b-12d3-a456-426614174000",
+          "_schema": "coupon",
+          "_org": "org_12345",
+          "_created_at": "2024-01-15T10:00:00.000Z",
+          "_updated_at": "2024-01-20T12:00:00.000Z",
+          "_title": "Sample Coupon",
+          "name": "Sample Coupon",
+          "type": "fixed",
+          "fixed_value": 555,
+          "fixed_value_currency": "USD",
+          "fixed_value_decimal": "5.55",
+          "active": true,
+          "prices": {
+            "$relation": [
+              {
+                "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+                "_tags": [
+                  "discount",
+                  "special"
+                ],
+                "_schema": "price"
+              }
+            ]
           }
         }
       },

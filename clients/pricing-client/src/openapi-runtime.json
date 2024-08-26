@@ -10,6 +10,17 @@
     }
   ],
   "paths": {
+    "/v1/pricing:compute": {
+      "post": {
+        "operationId": "$calculatePricingDetails",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
     "/v1/order": {
       "post": {
         "operationId": "createOrder",
@@ -63,8 +74,11 @@
         "parameters": [
           {
             "in": "header",
-            "name": "X-Ivy-Org-ID",
-            "required": true
+            "name": "X-Ivy-Org-ID"
+          },
+          {
+            "in": "header",
+            "name": "Authorization"
           }
         ],
         "requestBody": {
@@ -228,25 +242,6 @@
             "required": true
           }
         ]
-      }
-    },
-    "/v1/public/opportunity": {
-      "post": {
-        "deprecated": true,
-        "operationId": "$createOpportunity",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Ivy-Org-ID",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        }
       }
     }
   },
