@@ -113,7 +113,7 @@
   "paths": {
     "/v1/pricing:compute": {
       "post": {
-        "description": "Compute price",
+        "description": "Computes a set of pricing details that can be persisted on an entity with the pricing capability enabled, e.g: Orders or Contracts.",
         "summary": "calculatePricingDetails",
         "operationId": "$calculatePricingDetails",
         "tags": [
@@ -169,7 +169,124 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PricingDetails"
+                  "$ref": "#/components/schemas/PricingDetailsResponse"
+                },
+                "example": {
+                  "amount_subtotal": 1000,
+                  "amount_total": 1000,
+                  "amount_tax": 0,
+                  "total_details": {
+                    "amount_tax": 0,
+                    "breakdown": {
+                      "taxes": [
+                        {
+                          "tax": {
+                            "rate": 0
+                          },
+                          "amount": 0
+                        }
+                      ],
+                      "recurrences": [
+                        {
+                          "type": "one_time",
+                          "unit_amount_gross": 1000,
+                          "unit_amount_net": 1000,
+                          "amount_subtotal": 1000,
+                          "amount_total": 1000,
+                          "amount_subtotal_decimal": "10",
+                          "amount_total_decimal": "10",
+                          "amount_tax": 0
+                        }
+                      ],
+                      "recurrencesByTax": [
+                        {
+                          "type": "one_time",
+                          "amount_total": 1000,
+                          "amount_subtotal": 1000,
+                          "amount_tax": 0,
+                          "tax": {
+                            "tax": {
+                              "rate": 0
+                            },
+                            "amount": 0
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "line_items": [
+                    {
+                      "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                      "price_id": "396cb5f3-ea0b-4629-99ca-303661de5a9b",
+                      "quantity": 1,
+                      "currency": "EUR",
+                      "_price": {
+                        "description": "Standard price component",
+                        "pricing_model": "per_unit",
+                        "unit_amount_currency": "EUR",
+                        "unit_amount": 1000,
+                        "unit_amount_decimal": "10",
+                        "is_tax_inclusive": true,
+                        "price_display_in_journeys": "show_price",
+                        "active": true,
+                        "variable_price": false,
+                        "type": "one_time",
+                        "billing_period": null,
+                        "billing_duration_amount": null,
+                        "billing_duration_unit": null,
+                        "notice_time_amount": null,
+                        "notice_time_unit": null,
+                        "termination_time_amount": null,
+                        "termination_time_unit": null,
+                        "renewal_duration_amount": null,
+                        "renewal_duration_unit": null,
+                        "price_components": null,
+                        "_tags": [],
+                        "_title": "Standard price component",
+                        "_id": "396cb5f3-ea0b-4629-99ca-303661de5a9b",
+                        "internal_description": "Standard price component"
+                      },
+                      "_product": {
+                        "type": "product",
+                        "_title": "Product PH",
+                        "name": "Product PH ",
+                        "price_options": {
+                          "$relation": [
+                            {
+                              "entity_id": "396cb5f3-ea0b-4629-99ca-303661de5a9b",
+                              "_tags": [],
+                              "_schema": "price"
+                            }
+                          ]
+                        },
+                        "_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                        "active": true,
+                        "internal_name": "Product PH",
+                        "description": ""
+                      },
+                      "description": "Standard price component",
+                      "unit_amount": 1000,
+                      "unit_amount_net": 1000,
+                      "unit_amount_net_decimal": "10",
+                      "unit_amount_gross": 1000,
+                      "unit_amount_gross_decimal": "10",
+                      "unit_amount_decimal": "10",
+                      "amount_subtotal": 1000,
+                      "amount_total": 1000,
+                      "amount_tax": 0,
+                      "taxes": [
+                        {
+                          "rate": "nontaxable",
+                          "rateValue": 0,
+                          "amount": 0
+                        }
+                      ],
+                      "is_tax_inclusive": true,
+                      "amount_subtotal_decimal": "10",
+                      "amount_total_decimal": "10"
+                    }
+                  ],
+                  "currency": "EUR"
                 }
               }
             }
@@ -1191,7 +1308,7 @@
             "example": "getag"
           }
         ],
-        "summary": "computePrice",
+        "summary": "calculatePricingDetails",
         "tags": [
           "External Integrations API"
         ],
@@ -3660,7 +3777,7 @@
         "description": "Represents a price item",
         "type": "object",
         "example": {
-          "$ref": "#/components/examples/price-item"
+          "$ref": "#/components/examples/price-item/value"
         },
         "allOf": [
           {
@@ -3814,7 +3931,7 @@
         "description": "Represents a price item",
         "type": "object",
         "example": {
-          "$ref": "#/components/examples/price-item"
+          "$ref": "#/components/examples/price-item/value"
         },
         "properties": {
           "type": {
@@ -4059,6 +4176,51 @@
         }
       },
       "PricingDetails": {
+        "type": "object",
+        "description": "The result from the calculation of a set of price items.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PriceItem"
+                },
+                {
+                  "$ref": "#/components/schemas/CompositePriceItem"
+                }
+              ]
+            }
+          },
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total of all items before (discounts or) taxes are applied."
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total of all items after (discounts and) taxes are applied."
+          },
+          "unit_amount_gross": {
+            "type": "integer",
+            "description": "The unit gross amount value."
+          },
+          "unit_amount_net": {
+            "type": "integer",
+            "description": "The unit net amount value."
+          },
+          "amount_tax": {
+            "type": "integer",
+            "description": "This is the sum of all the price item tax amounts."
+          },
+          "total_details": {
+            "$ref": "#/components/schemas/TotalDetails"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        }
+      },
+      "PricingDetailsResponse": {
         "type": "object",
         "description": "The result from the calculation of a set of price items.",
         "properties": {

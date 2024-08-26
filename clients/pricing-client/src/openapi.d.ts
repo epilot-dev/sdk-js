@@ -179,7 +179,7 @@ declare namespace Components {
          * Represents a price item
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item"
+         *   "$ref": "#/components/examples/price-item/value"
          * }
          */
         export interface BasePriceItem {
@@ -770,7 +770,7 @@ declare namespace Components {
          * Represents a composite price input to the pricing library.
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item"
+         *   "$ref": "#/components/examples/price-item/value"
          * }
          */
         export interface CompositePriceItem {
@@ -916,7 +916,7 @@ declare namespace Components {
              * Represents a price item
              * example:
              * {
-             *   "$ref": "#/components/examples/price-item"
+             *   "$ref": "#/components/examples/price-item/value"
              * }
              */
             PriceItem[];
@@ -2204,7 +2204,7 @@ declare namespace Components {
          * Represents a price item
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item"
+         *   "$ref": "#/components/examples/price-item/value"
          * }
          */
         export interface PriceItem {
@@ -2745,14 +2745,14 @@ declare namespace Components {
          * Represents a price item
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item"
+         *   "$ref": "#/components/examples/price-item/value"
          * }
          */
         PriceItem | /**
          * Represents a composite price input to the pricing library.
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item"
+         *   "$ref": "#/components/examples/price-item/value"
          * }
          */
         CompositePriceItem)[];
@@ -2789,14 +2789,63 @@ declare namespace Components {
              * Represents a price item
              * example:
              * {
-             *   "$ref": "#/components/examples/price-item"
+             *   "$ref": "#/components/examples/price-item/value"
              * }
              */
             PriceItem | /**
              * Represents a composite price input to the pricing library.
              * example:
              * {
-             *   "$ref": "#/components/examples/price-item"
+             *   "$ref": "#/components/examples/price-item/value"
+             * }
+             */
+            CompositePriceItem)[];
+            /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total?: number;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            /**
+             * The unit net amount value.
+             */
+            unit_amount_net?: number;
+            /**
+             * This is the sum of all the price item tax amounts.
+             */
+            amount_tax?: number;
+            total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+        }
+        /**
+         * The result from the calculation of a set of price items.
+         */
+        export interface PricingDetailsResponse {
+            items?: (/**
+             * Represents a price item
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-item/value"
+             * }
+             */
+            PriceItem | /**
+             * Represents a composite price input to the pricing library.
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-item/value"
              * }
              */
             CompositePriceItem)[];
@@ -3401,7 +3450,7 @@ declare namespace Paths {
             line_items?: /* A valid set of product prices, quantities, (discounts) and taxes from a client. */ Components.Schemas.PriceItemsDto;
         }
         namespace Responses {
-            export type $200 = /* The result from the calculation of a set of price items. */ Components.Schemas.PricingDetails;
+            export type $200 = /* The result from the calculation of a set of price items. */ Components.Schemas.PricingDetailsResponse;
             export type $400 = Components.Schemas.Error;
         }
     }
@@ -3656,7 +3705,7 @@ export interface OperationMethods {
   /**
    * $calculatePricingDetails - calculatePricingDetails
    * 
-   * Compute price
+   * Computes a set of pricing details that can be persisted on an entity with the pricing capability enabled, e.g: Orders or Contracts.
    */
   '$calculatePricingDetails'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -3765,7 +3814,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchStreets.Responses.$200>
   /**
-   * $computePrice - computePrice
+   * $computePrice - calculatePricingDetails
    * 
    * Returns the price for a given product type based on location and consumption
    */
@@ -3811,7 +3860,7 @@ export interface PathsDictionary {
     /**
      * $calculatePricingDetails - calculatePricingDetails
      * 
-     * Compute price
+     * Computes a set of pricing details that can be persisted on an entity with the pricing capability enabled, e.g: Orders or Contracts.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -3940,7 +3989,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/integration/{integrationId}/compute-price']: {
     /**
-     * $computePrice - computePrice
+     * $computePrice - calculatePricingDetails
      * 
      * Returns the price for a given product type based on location and consumption
      */
