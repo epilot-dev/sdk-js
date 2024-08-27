@@ -82,6 +82,13 @@ declare namespace Components {
             name: string;
             order: number;
             type: ItemType;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            dueDate?: string;
+            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
+            assignedTo?: string[];
             steps: /* Action that needs to be done in a Workflow */ Step[];
         }
         /**

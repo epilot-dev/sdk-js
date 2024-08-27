@@ -216,6 +216,12 @@ declare namespace Components {
              */
             userIds?: number[];
             assignedTo?: string[];
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            dueDate?: string;
+            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             startedTime?: string;
             completedTime?: string;
             status?: SectionStatus;

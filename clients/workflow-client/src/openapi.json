@@ -1062,6 +1062,13 @@
               "type": "string"
             }
           },
+          "dueDate": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "dynamicDueDate": {
+            "$ref": "#/components/schemas/DynamicDueDate"
+          },
           "startedTime": {
             "type": "string"
           },
