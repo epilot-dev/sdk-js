@@ -417,6 +417,10 @@ declare namespace Paths {
              * organization id of assignable (optional, defaults to caller org)
              */
             org_id?: string;
+            /**
+             * group id of assignable (optional)
+             */
+            group_id?: string;
         }[];
         namespace Responses {
             export interface $200 {

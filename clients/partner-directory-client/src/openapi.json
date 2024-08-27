@@ -216,6 +216,10 @@
                     "org_id": {
                       "description": "organization id of assignable (optional, defaults to caller org)",
                       "type": "string"
+                    },
+                    "group_id": {
+                      "description": "group id of assignable (optional)",
+                      "type": "string"
                     }
                   }
                 }
@@ -823,6 +827,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://partner-directory-api.sls.epilot.io"
+    },
     {
       "url": "https://partner-directory-api.sls.epilot.io"
     }
