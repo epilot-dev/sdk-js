@@ -20,6 +20,9 @@
     },
     {
       "PortalAuth": []
+    },
+    {
+      "EitherAuth": []
     }
   ],
   "paths": {
@@ -47,7 +50,19 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Meter"
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/Meter"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "journey_actions": {
+                                "$ref": "#/components/schemas/JourneyActions"
+                              }
+                            }
+                          }
+                        ]
                       }
                     }
                   }
@@ -228,6 +243,9 @@
                         "entity": {
                           "$ref": "#/components/schemas/Meter"
                         },
+                        "journey_actions": {
+                          "$ref": "#/components/schemas/JourneyActions"
+                        },
                         "relations": {
                           "type": "array",
                           "items": {
@@ -275,8 +293,7 @@
             "name": "meter_id",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "1446829f-4b6f-474e-b978-3997d89a7928"
+              "$ref": "#/components/schemas/EntityId"
             }
           }
         ],
@@ -380,10 +397,7 @@
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
-          {
-            "PortalAuth": []
+            "EitherAuth": []
           }
         ],
         "requestBody": {
@@ -432,21 +446,30 @@
       "post": {
         "operationId": "createMeterReadings",
         "summary": "Create Meter Readings",
-        "description": "Inserts multiple meter readings at once.",
+        "description": "Inserts multiple meter readings at once. Limited to 100 readings per request.",
         "tags": [
           "ECP Admin",
           "ECP"
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
+            "EitherAuth": []
+          }
+        ],
+        "parameters": [
           {
-            "PortalAuth": []
+            "in": "query",
+            "name": "async",
+            "description": "Don't wait for the reading to become available in GetReadings API. Useful for large migrations",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "requestBody": {
-          "description": "Meter readings payload.",
+          "description": "Meter readings payload. Limited to 100 readings per request.",
           "required": true,
           "content": {
             "application/json": {
@@ -592,10 +615,7 @@
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
-          {
-            "PortalAuth": []
+            "EitherAuth": []
           }
         ],
         "parameters": [
@@ -732,10 +752,7 @@
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
-          {
-            "PortalAuth": []
+            "EitherAuth": []
           }
         ],
         "parameters": [
@@ -1055,10 +1072,7 @@
         ],
         "security": [
           {
-            "EpilotAuth": []
-          },
-          {
-            "PortalAuth": []
+            "EitherAuth": []
           }
         ],
         "parameters": [
@@ -1227,6 +1241,11 @@
         "scheme": "bearer",
         "description": "Authorization header with customer portal OAuth2 bearer token",
         "bearerFormat": "JWT"
+      },
+      "EitherAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Portal or Epilot Bearer Token"
       }
     },
     "schemas": {
@@ -1240,7 +1259,8 @@
         }
       },
       "EntityId": {
-        "type": "string"
+        "type": "string",
+        "format": "uuid"
       },
       "BaseEntity": {
         "type": "object",
@@ -1314,8 +1334,7 @@
         "type": "object",
         "properties": {
           "entity_id": {
-            "type": "string",
-            "example": "9a2081a2-1615-44b8-b988-d757983290dd"
+            "$ref": "#/components/schemas/EntityId"
           },
           "_slug": {
             "type": "string",
@@ -1461,12 +1480,27 @@
           "nt"
         ]
       },
+      "Reason": {
+        "type": "string",
+        "nullable": true,
+        "example": "Storing the feed-in record",
+        "description": "The reason for recording the reading"
+      },
+      "ReadBy": {
+        "type": "string",
+        "nullable": true,
+        "example": "John Doe",
+        "description": "The person who recorded the reading"
+      },
       "ReadingStatus": {
         "type": "string",
+        "nullable": true,
         "enum": [
           "valid",
           "in-validation",
-          "implausible"
+          "implausible",
+          null,
+          ""
         ]
       },
       "MeterReading": {
@@ -1483,23 +1517,17 @@
             "description": "The reading value of the meter"
           },
           "read_by": {
-            "type": "string",
-            "example": "John Doe",
-            "description": "The person who recorded the reading"
+            "$ref": "#/components/schemas/ReadBy"
           },
           "reason": {
-            "type": "string",
-            "example": "Storing the feed-in record",
-            "description": "The reason for recording the reading"
+            "$ref": "#/components/schemas/Reason"
           },
           "meter_id": {
-            "type": "string",
-            "example": "1446829f-4b6f-474e-b978-3997d89a7928",
+            "$ref": "#/components/schemas/EntityId",
             "description": "The ID of the associated meter"
           },
           "counter_id": {
-            "type": "string",
-            "example": "991a1821-43bc-46b8-967d-64a3d87c31f8",
+            "$ref": "#/components/schemas/EntityId",
             "description": "The ID of the associated meter counter"
           },
           "direction": {
@@ -1543,8 +1571,7 @@
             ],
             "properties": {
               "_id": {
-                "type": "string",
-                "example": "991a1821-43bc-46b8-967d-64a3d87c31f8"
+                "$ref": "#/components/schemas/EntityId"
               },
               "_schema": {
                 "type": "string",
@@ -1680,9 +1707,7 @@
             "description": "The person who recorded the reading"
           },
           "reason": {
-            "type": "string",
-            "example": "Storing the feed-in record",
-            "description": "The reason for recording the reading"
+            "$ref": "#/components/schemas/Reason"
           },
           "maloId": {
             "type": "string",
@@ -1757,6 +1782,61 @@
           "journey-submission"
         ]
       },
+      "ActionLabel": {
+        "type": "object",
+        "properties": {
+          "en": {
+            "type": "string",
+            "nullable": true
+          },
+          "de": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Rule": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute_value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "JourneyActions": {
+        "type": "object",
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "action_label": {
+            "type": "object",
+            "$ref": "#/components/schemas/ActionLabel",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rule"
+            },
+            "nullable": true
+          }
+        }
+      },
       "ReadingWithMeter": {
         "type": "object",
         "properties": {
@@ -1792,14 +1872,10 @@
             "description": "The reading value"
           },
           "read_by": {
-            "type": "string",
-            "example": "John Doe",
-            "description": "The person who recorded the reading"
+            "$ref": "#/components/schemas/ReadBy"
           },
           "reason": {
-            "type": "string",
-            "example": "Storing the feed-in record",
-            "description": "The reason for recording the reading"
+            "$ref": "#/components/schemas/Reason"
           },
           "timestamp": {
             "type": "string",

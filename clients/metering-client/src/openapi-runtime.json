@@ -87,6 +87,13 @@
     "/v1/metering/readings": {
       "post": {
         "operationId": "createMeterReadings",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "async",
+            "required": false
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
