@@ -208,6 +208,28 @@ declare namespace Components {
              */
             updated_by?: string;
         }
+        export interface CustomVariablesSearchParams {
+            /**
+             * Variable type
+             */
+            type?: "order_table" | "custom";
+            /**
+             * Search string
+             * example:
+             * logo
+             */
+            query?: string;
+            from?: number;
+            size?: number;
+            /**
+             * Sort by field
+             */
+            sort_by?: "created_at" | "name:desc" | "key";
+            /**
+             * Fields to return
+             */
+            fields?: string[];
+        }
         export interface ExternalCustomVariable {
             /**
              * example:
@@ -267,7 +289,7 @@ declare namespace Components {
              * example:
              * 63753437-c9e2-4e83-82bb-b1c666514561
              */
-            main_entity_id?: string;
+            main_entity_id?: string; // uuid
             /**
              * Brand ID
              * example:
@@ -311,10 +333,6 @@ declare namespace Components {
              */
             variables_version?: string;
         }
-        /**
-         * example:
-         * #/components/examples/ExampleVariableResult/value
-         */
         export interface VariableResult {
             type?: "simple" | "partial";
             /**
@@ -359,14 +377,6 @@ declare namespace Paths {
             }
             export interface $403 {
             }
-        }
-    }
-    namespace GenerateQRcode {
-        namespace Parameters {
-            export type Qrdata = string;
-        }
-        export interface QueryParameters {
-            qrdata?: Parameters.Qrdata;
         }
     }
     namespace GetBluePrintTableConfig {
@@ -439,6 +449,22 @@ declare namespace Paths {
             }
         }
     }
+    namespace SearchCustomVariables {
+        export type RequestBody = Components.Schemas.CustomVariablesSearchParams;
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.CustomVariable[];
+                /**
+                 * Total number of results
+                 * example:
+                 * 100
+                 */
+                hits?: number;
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace SearchVariables {
         export interface RequestBody {
             template_type: Components.Schemas.TemplateType;
@@ -454,11 +480,7 @@ declare namespace Paths {
             entity_schemas?: string[];
         }
         namespace Responses {
-            export type $200 = /**
-             * example:
-             * #/components/examples/ExampleVariableResult/value
-             */
-            Components.Schemas.VariableResult[];
+            export type $200 = Components.Schemas.VariableResult[];
         }
     }
     namespace UpdateCustomVariable {
@@ -489,16 +511,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCategories.Responses.$200>
-  /**
-   * generateQRcode - generateQRcode
-   * 
-   * Generate QR Code for the given payload
-   */
-  'generateQRcode'(
-    parameters?: Parameters<Paths.GenerateQRcode.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<any>
   /**
    * searchVariables - searchVariables
    * 
@@ -556,6 +568,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateCustomVariable.Responses.$201>
   /**
+   * searchCustomVariables - searchCustomVariables
+   * 
+   * Search custom variables
+   */
+  'searchCustomVariables'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchCustomVariables.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchCustomVariables.Responses.$200>
+  /**
    * getCustomVariable - Get custom variable
    * 
    * Get custom variable
@@ -609,18 +631,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCategories.Responses.$200>
-  }
-  ['/v1/template-variables/qrcode:generate']: {
-    /**
-     * generateQRcode - generateQRcode
-     * 
-     * Generate QR Code for the given payload
-     */
-    'get'(
-      parameters?: Parameters<Paths.GenerateQRcode.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<any>
   }
   ['/v1/template-variables:search']: {
     /**
@@ -685,6 +695,18 @@ export interface PathsDictionary {
       data?: Paths.CreateCustomVariable.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateCustomVariable.Responses.$201>
+  }
+  ['/v1/custom-variables:search']: {
+    /**
+     * searchCustomVariables - searchCustomVariables
+     * 
+     * Search custom variables
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchCustomVariables.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchCustomVariables.Responses.$200>
   }
   ['/v1/custom-variables/{id}']: {
     /**

@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.0.2",
   "info": {
     "title": "Template Variables API",
     "description": "API to provide variables for email and document templates.",
@@ -63,35 +63,6 @@
                   }
                 ]
               }
-            }
-          }
-        }
-      }
-    },
-    "/v1/template-variables/qrcode:generate": {
-      "get": {
-        "operationId": "generateQRcode",
-        "summary": "generateQRcode",
-        "description": "Generate QR Code for the given payload",
-        "tags": [
-          "variables"
-        ],
-        "parameters": [
-          {
-            "name": "qrdata",
-            "in": "query",
-            "description": "Payload of the QR code",
-            "schema": {
-              "type": "string",
-              "default": "{{table_order_items}}"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Generated QR Code",
-            "content": {
-              "image/png": {}
             }
           }
         }
@@ -349,6 +320,53 @@
         }
       }
     },
+    "/v1/custom-variables:search": {
+      "post": {
+        "operationId": "searchCustomVariables",
+        "summary": "searchCustomVariables",
+        "description": "Search custom variables",
+        "tags": [
+          "Custom variables"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomVariablesSearchParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CustomVariable"
+                      }
+                    },
+                    "hits": {
+                      "type": "integer",
+                      "description": "Total number of results",
+                      "example": 100
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/custom-variables/{id}": {
       "put": {
         "operationId": "updateCustomVariable",
@@ -512,6 +530,7 @@
           },
           "main_entity_id": {
             "type": "string",
+            "format": "uuid",
             "description": "The main entity ID. Use main entity in order to use the variable without schema slug prefix - or just pass directly to other object ID.",
             "example": "63753437-c9e2-4e83-82bb-b1c666514561"
           },
@@ -591,8 +610,49 @@
             "type": "string",
             "description": "Variable description"
           }
-        },
-        "example": "#/components/examples/ExampleVariableResult/value"
+        }
+      },
+      "CustomVariablesSearchParams": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Variable type",
+            "enum": [
+              "order_table",
+              "custom"
+            ]
+          },
+          "query": {
+            "type": "string",
+            "description": "Search string",
+            "example": "logo"
+          },
+          "from": {
+            "type": "integer",
+            "default": 0
+          },
+          "size": {
+            "type": "integer",
+            "default": 25
+          },
+          "sort_by": {
+            "type": "string",
+            "description": "Sort by field",
+            "enum": [
+              "created_at",
+              "name:desc",
+              "key"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "description": "Fields to return",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       },
       "VariableContext": {
         "type": "object",
@@ -1427,9 +1487,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://template-variables-api.sls.epilot.io"
-    },
     {
       "url": "https://template-variables-api.sls.epilot.io"
     }

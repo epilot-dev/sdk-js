@@ -12,7 +12,7 @@ const defaultSrc = process.argv[2];
 const overrideSrc = process.argv[3];
 const sourceFile = overrideSrc || defaultSrc;
 
-const OPENAPICMD = 'npx openapicmd';
+const OPENAPICMD = 'npx openapicmd@2.4.0';
 const OUTPUT_FILE = './src/openapi.json';
 const RUNTIME_FILE = './src/openapi-runtime.json';
 
