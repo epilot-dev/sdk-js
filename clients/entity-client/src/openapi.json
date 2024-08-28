@@ -3319,6 +3319,12 @@
               }
             ]
           },
+          "_purpose": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "explicit_search_mappings": {
             "$ref": "#/components/schemas/SearchMappings"
           }
@@ -5149,6 +5155,13 @@
           "_acl": {
             "readOnly": true,
             "$ref": "#/components/schemas/EntityAcl"
+          },
+          "_purpose": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
           }
         },
         "example": {
@@ -7257,9 +7270,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }

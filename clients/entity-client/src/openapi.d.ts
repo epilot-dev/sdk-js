@@ -723,6 +723,7 @@ declare namespace Components {
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+            _purpose?: string[] | null;
         }
         /**
          * Reference to blueprint
@@ -1606,6 +1607,7 @@ declare namespace Components {
             _created_at?: string | null; // date-time
             _updated_at?: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+            _purpose?: string[] | null;
         }
         /**
          * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
@@ -2013,6 +2015,7 @@ declare namespace Components {
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+            _purpose?: string[] | null;
         }
         export interface EntityListParams {
             filter: /**
@@ -2176,6 +2179,7 @@ declare namespace Components {
                 _created_at?: string | null; // date-time
                 _updated_at?: string | null; // date-time
                 _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+                _purpose?: string[] | null;
             };
             diff?: {
                 added?: /**
@@ -2503,6 +2507,7 @@ declare namespace Components {
              * ]
              */
             attributes: Attribute[];
+            _purpose?: string[];
             explicit_search_mappings?: /**
              * Advanced: explicit Elasticsearch index mapping definitions for entity data
              *
@@ -2846,6 +2851,7 @@ declare namespace Components {
              * ]
              */
             attributes: Attribute[];
+            _purpose?: string[];
             explicit_search_mappings?: /**
              * Advanced: explicit Elasticsearch index mapping definitions for entity data
              *
@@ -5228,6 +5234,7 @@ declare namespace Components {
                     _created_at: string | null; // date-time
                     _updated_at: string | null; // date-time
                     _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+                    _purpose?: string[] | null;
                 };
             }[];
             drawer_size?: "small" | "medium" | "large";
@@ -5312,6 +5319,7 @@ declare namespace Components {
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+            _purpose?: string[] | null;
             $relation?: RelationItem;
         }
         export interface RelationItem {
