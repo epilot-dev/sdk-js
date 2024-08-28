@@ -55,6 +55,28 @@ declare namespace Components {
          * The address suggestions entity array
          */
         export type AddressSuggestions = /* The address suggestions entity */ AddressSuggestion[];
+        export interface AvailabilityLocation {
+            /**
+             * The first line of the address. Typically the street address or PO Box number.
+             */
+            street?: string;
+            /**
+             * The second line of the address. Typically the number of the apartment, suite, or unit.
+             */
+            street_number?: string;
+            /**
+             * The postal code for the address.
+             */
+            postal_code?: string;
+            /**
+             * The name of the city, district, village, or town.
+             */
+            city?: string;
+            /**
+             * The name of the country.
+             */
+            country?: string;
+        }
         export interface AvailabilityResult {
             /**
              * The id of the file where the address was found
@@ -76,6 +98,40 @@ declare namespace Components {
              * The cause of the error (visible for bad requests - http 400)
              */
             cause?: string;
+        }
+        /**
+         * The address rule error
+         */
+        export interface ValidateAddressFileError {
+            /**
+             * The line number where the error was found
+             */
+            line?: number;
+            /**
+             * The error message
+             */
+            msg: string;
+            /**
+             * Data related to the error
+             */
+            data?: string;
+        }
+        /**
+         * The address file validation result payload
+         */
+        export interface ValidateAddressFileResult {
+            /**
+             * The status of the validation
+             */
+            status?: "success" | "error";
+            /**
+             * The number of rules successfully parsed
+             */
+            rules_parsed_count?: number;
+            /**
+             * The errors found on the file
+             */
+            errors?: /* The address rule error */ ValidateAddressFileError[];
         }
         /**
          * The availability map file result payload
@@ -128,13 +184,15 @@ declare namespace Paths {
         }
         namespace Parameters {
             export type CountryCodeSearchTerm = string;
+            export type FileId = string;
             export type PostalCodeSearchTerm = string;
             export type S3FileUrl = string;
             export type StreetSearchTerm = string;
             export type XEpilotOrgID = string;
         }
         export interface QueryParameters {
-            s3FileUrl: Parameters.S3FileUrl;
+            s3FileUrl?: Parameters.S3FileUrl;
+            fileId?: Parameters.FileId;
             countryCodeSearchTerm?: Parameters.CountryCodeSearchTerm;
             postalCodeSearchTerm?: Parameters.PostalCodeSearchTerm;
             streetSearchTerm?: Parameters.StreetSearchTerm;
@@ -158,13 +216,25 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace ValidateAddressesFile {
+        namespace Parameters {
+            export type FileId = string;
+        }
+        export interface QueryParameters {
+            fileId?: Parameters.FileId;
+        }
+        namespace Responses {
+            export type $200 = /* The address file validation result payload */ Components.Schemas.ValidateAddressFileResult;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
 }
 
 export interface OperationMethods {
   /**
    * getAddresses - get addresses from file
    * 
-   * get address suggestions for the given file id
+   * Get address suggestions for the given file id
    */
   'getAddresses'(
     parameters?: Parameters<Paths.GetAddresses.QueryParameters & Paths.GetAddresses.HeaderParameters> | null,
@@ -191,6 +261,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CheckAvailability.Responses.$200>
+  /**
+   * validateAddressesFile - validate addresses file
+   * 
+   * Validates an addresses file, it returns an array of errors if the file is invalid
+   */
+  'validateAddressesFile'(
+    parameters?: Parameters<Paths.ValidateAddressesFile.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateAddressesFile.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -198,7 +278,7 @@ export interface PathsDictionary {
     /**
      * getAddresses - get addresses from file
      * 
-     * get address suggestions for the given file id
+     * Get address suggestions for the given file id
      */
     'get'(
       parameters?: Parameters<Paths.GetAddresses.QueryParameters & Paths.GetAddresses.HeaderParameters> | null,
@@ -229,6 +309,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CheckAvailability.Responses.$200>
+  }
+  ['/v1/addresses-files:validate']: {
+    /**
+     * validateAddressesFile - validate addresses file
+     * 
+     * Validates an addresses file, it returns an array of errors if the file is invalid
+     */
+    'get'(
+      parameters?: Parameters<Paths.ValidateAddressesFile.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateAddressesFile.Responses.$200>
   }
 }
 

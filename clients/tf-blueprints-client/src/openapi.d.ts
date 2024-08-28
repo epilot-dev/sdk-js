@@ -24,48 +24,25 @@ declare namespace Components {
             plan_file_content?: string;
             /**
              * A tree-like JSON object representing the resources to export
-             * example:
-             * {
-             *   "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
-             *   "type": "journey",
-             *   "name": "House Connection Journey",
-             *   "dependencies": [
-             *     {
-             *       "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
-             *       "type": "product",
-             *       "name": "Solar Panel",
-             *       "dependencies": []
-             *     }
-             *   ]
-             * }
-             *
              */
-            resources_to_export?: {
-                [key: string]: any;
-            };
+            resources_to_export?: ResourceNode;
             /**
              * A tree-like JSON object representing the resources to import
-             * example:
-             * {
-             *   "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
-             *   "type": "journey",
-             *   "name": "House Connection Journey",
-             *   "dependencies": [
-             *     {
-             *       "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
-             *       "type": "product",
-             *       "name": "Solar Panel",
-             *       "dependencies": []
-             *     }
-             *   ]
-             * }
-             *
              */
-            resources_to_import?: {
-                [key: string]: any;
-            };
+            resources_to_import?: ResourceNode;
+            /**
+             * A tree-like JSON object representing the imported resources
+             */
+            imported_resources?: ResourceNode;
         }
         export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
+        export interface ResourceNode {
+            id: string;
+            type: string;
+            name?: string;
+            source_id?: string;
+            dependencies?: ResourceNode[];
+        }
         export interface S3Reference {
             /**
              * example:
@@ -186,7 +163,7 @@ declare namespace Paths {
     }
     namespace GetExportResources {
         export interface RequestBody {
-            resourceType?: "journey" | "product" | "price" | "tax" | "automation_flow" | "designbuilder" | "file" | "emailtemplate" | "entity" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition";
+            resourceType?: "journey" | "product" | "price" | "tax" | "automation_flow" | "designbuilder" | "file" | "emailtemplate" | "entity" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition" | "closing_reason" | "taxonomy_classification";
             resourceIds?: [
                 string,
                 string?,

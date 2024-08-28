@@ -179,7 +179,7 @@ declare namespace Components {
          * Represents a price item
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item"
+         *   "$ref": "#/components/examples/price-item/value"
          * }
          */
         export interface BasePriceItem {
@@ -670,7 +670,37 @@ declare namespace Components {
              *   "$ref": "#/components/examples/price"
              * }
              */
-            Price)[];
+            Price | /**
+             * The coupon configuration
+             * example:
+             * {
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            Coupon)[];
         }
         /**
          * The cart checkout request payload
@@ -770,7 +800,7 @@ declare namespace Components {
          * Represents a composite price input to the pricing library.
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item"
+         *   "$ref": "#/components/examples/price-item/value"
          * }
          */
         export interface CompositePriceItem {
@@ -916,7 +946,7 @@ declare namespace Components {
              * Represents a price item
              * example:
              * {
-             *   "$ref": "#/components/examples/price-item"
+             *   "$ref": "#/components/examples/price-item/value"
              * }
              */
             PriceItem[];
@@ -1290,6 +1320,101 @@ declare namespace Components {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
         export type ConsumptionTypeGetAg = "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
+        /**
+         * The coupon configuration
+         * example:
+         * {
+         *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+         *   "_schema": "coupon",
+         *   "_org": "org_12345",
+         *   "_created_at": "2024-01-15T10:00:00.000Z",
+         *   "_updated_at": "2024-01-20T12:00:00.000Z",
+         *   "_title": "Sample Coupon",
+         *   "name": "Sample Coupon",
+         *   "type": "fixed",
+         *   "fixed_value": 555,
+         *   "fixed_value_currency": "USD",
+         *   "fixed_value_decimal": "5.55",
+         *   "active": true,
+         *   "prices": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+         *         "_tags": [
+         *           "discount",
+         *           "special"
+         *         ],
+         *         "_schema": "price"
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        export interface Coupon {
+            [name: string]: any;
+            _id: EntityId /* uuid */;
+            /**
+             * The auto-generated title for the title
+             */
+            _title: string;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org: string;
+            /**
+             * The schema of the entity, for coupons it is always `coupon`
+             */
+            _schema: "coupon";
+            _tags?: string[];
+            /**
+             * The creation date for the opportunity
+             */
+            _created_at: string; // date-time
+            /**
+             * The date the coupon was last updated
+             */
+            _updated_at: string; // date-time
+            name: string;
+            description?: string;
+            type: "fixed" | "percentage";
+            /**
+             * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
+             */
+            percentage_value?: number;
+            /**
+             * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
+             */
+            fixed_value?: number;
+            /**
+             * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
+             */
+            fixed_value_decimal?: string;
+            /**
+             * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
+             */
+            fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            active?: boolean;
+            /**
+             * The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.
+             */
+            prices?: /* The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise. */ {
+                $relation?: EntityRelation[];
+            } | /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price[];
+        }
         /**
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
          * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
@@ -2204,7 +2329,7 @@ declare namespace Components {
          * Represents a price item
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item"
+         *   "$ref": "#/components/examples/price-item/value"
          * }
          */
         export interface PriceItem {
@@ -2745,14 +2870,14 @@ declare namespace Components {
          * Represents a price item
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item"
+         *   "$ref": "#/components/examples/price-item/value"
          * }
          */
         PriceItem | /**
          * Represents a composite price input to the pricing library.
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item"
+         *   "$ref": "#/components/examples/price-item/value"
          * }
          */
         CompositePriceItem)[];
@@ -2789,14 +2914,63 @@ declare namespace Components {
              * Represents a price item
              * example:
              * {
-             *   "$ref": "#/components/examples/price-item"
+             *   "$ref": "#/components/examples/price-item/value"
              * }
              */
             PriceItem | /**
              * Represents a composite price input to the pricing library.
              * example:
              * {
-             *   "$ref": "#/components/examples/price-item"
+             *   "$ref": "#/components/examples/price-item/value"
+             * }
+             */
+            CompositePriceItem)[];
+            /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total?: number;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            /**
+             * The unit net amount value.
+             */
+            unit_amount_net?: number;
+            /**
+             * This is the sum of all the price item tax amounts.
+             */
+            amount_tax?: number;
+            total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+        }
+        /**
+         * The result from the calculation of a set of price items.
+         */
+        export interface PricingDetailsResponse {
+            items?: (/**
+             * Represents a price item
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-item/value"
+             * }
+             */
+            PriceItem | /**
+             * Represents a composite price input to the pricing library.
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-item/value"
              * }
              */
             CompositePriceItem)[];
@@ -3401,7 +3575,7 @@ declare namespace Paths {
             line_items?: /* A valid set of product prices, quantities, (discounts) and taxes from a client. */ Components.Schemas.PriceItemsDto;
         }
         namespace Responses {
-            export type $200 = /* The result from the calculation of a set of price items. */ Components.Schemas.PricingDetails;
+            export type $200 = /* The result from the calculation of a set of price items. */ Components.Schemas.PricingDetailsResponse;
             export type $400 = Components.Schemas.Error;
         }
     }
@@ -3656,7 +3830,7 @@ export interface OperationMethods {
   /**
    * $calculatePricingDetails - calculatePricingDetails
    * 
-   * Compute price
+   * Computes a set of pricing details that can be persisted on an entity with the pricing capability enabled, e.g: Orders or Contracts.
    */
   '$calculatePricingDetails'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -3765,7 +3939,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchStreets.Responses.$200>
   /**
-   * $computePrice - computePrice
+   * $computePrice - calculatePricingDetails
    * 
    * Returns the price for a given product type based on location and consumption
    */
@@ -3811,7 +3985,7 @@ export interface PathsDictionary {
     /**
      * $calculatePricingDetails - calculatePricingDetails
      * 
-     * Compute price
+     * Computes a set of pricing details that can be persisted on an entity with the pricing capability enabled, e.g: Orders or Contracts.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -3940,7 +4114,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/integration/{integrationId}/compute-price']: {
     /**
-     * $computePrice - computePrice
+     * $computePrice - calculatePricingDetails
      * 
      * Returns the price for a given product type based on location and consumption
      */
