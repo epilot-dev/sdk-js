@@ -18,11 +18,7 @@
   ],
   "servers": [
     {
-      "url": "None"
-    },
-    {
-      "url": "https://tf-blueprint.sls.epilot.io",
-      "description": "Production server"
+      "url": "https://tf-blueprint.sls.epilot.io"
     }
   ],
   "paths": {
@@ -403,6 +399,9 @@
             "type": "string"
           },
           "source_id": {
+            "type": "string"
+          },
+          "address": {
             "type": "string"
           },
           "dependencies": {

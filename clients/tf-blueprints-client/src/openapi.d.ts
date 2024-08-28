@@ -41,6 +41,7 @@ declare namespace Components {
             type: string;
             name?: string;
             source_id?: string;
+            address?: string;
             dependencies?: ResourceNode[];
         }
         export interface S3Reference {
