@@ -1854,7 +1854,7 @@
                   "boolean",
                   "date",
                   "datetime",
-                  "tag",
+                  "tags",
                   "country",
                   "email",
                   "phone",
@@ -1865,7 +1865,9 @@
                   "multiselect",
                   "select",
                   "radio",
-                  "relation_user"
+                  "relation_user",
+                  "purpose",
+                  "label"
                 ]
               },
               "attributeRepeatable": {
