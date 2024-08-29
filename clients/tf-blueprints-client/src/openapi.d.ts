@@ -23,27 +23,29 @@ declare namespace Components {
              */
             plan_file_content?: string;
             /**
-             * A tree-like JSON object representing the resources to export
+             * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
-            resources_to_export?: ResourceNode;
+            resources_to_export?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ ResourceNode[] | ResourceNode;
             /**
-             * A tree-like JSON object representing the resources to import
+             * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
-            resources_to_import?: ResourceNode;
+            resources_to_import?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ ResourceNode[] | ResourceNode;
             /**
-             * A tree-like JSON object representing the imported resources
+             * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
-            imported_resources?: ResourceNode;
+            imported_resources?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ ResourceNode[] | ResourceNode;
         }
         export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
         export interface ResourceNode {
             id: string;
-            type: string;
+            type: ResourceNodeType;
             name?: string;
             source_id?: string;
             address?: string;
             dependencies?: ResourceNode[];
+            changes?: ("create" | "update" | "no-op" | "delete")[];
         }
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition" | "closing_reason" | "taxonomy_classification";
         export interface S3Reference {
             /**
              * example:
@@ -110,7 +112,7 @@ declare namespace Paths {
     namespace ExportBlueprint {
         export interface RequestBody {
             /**
-             * A tree-like JSON object representing the resources to export
+             * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to export
              * example:
              * {
              *   "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
@@ -127,9 +129,25 @@ declare namespace Paths {
              * }
              *
              */
-            resourcesToExport?: {
-                [key: string]: any;
-            };
+            resourcesToExport?: /**
+             * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to export
+             * example:
+             * {
+             *   "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
+             *   "type": "journey",
+             *   "name": "House Connection Journey",
+             *   "dependencies": [
+             *     {
+             *       "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
+             *       "type": "product",
+             *       "name": "Solar Panel",
+             *       "dependencies": []
+             *     }
+             *   ]
+             * }
+             *
+             */
+            Components.Schemas.ResourceNode[] | Components.Schemas.ResourceNode;
             /**
              * example:
              * 4854bb2a-94f9-424d-a968-3fb17fb0bf89

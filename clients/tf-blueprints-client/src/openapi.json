@@ -19,6 +19,9 @@
   "servers": [
     {
       "url": "https://tf-blueprint.sls.epilot.io"
+    },
+    {
+      "url": "https://tf-blueprint.sls.epilot.io"
     }
   ],
   "paths": {
@@ -168,9 +171,19 @@
                 "type": "object",
                 "properties": {
                   "resourcesToExport": {
-                    "type": "object",
-                    "description": "A tree-like JSON object representing the resources to export",
-                    "example": "{\n  \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n  \"type\": \"journey\",\n  \"name\": \"House Connection Journey\",\n  \"dependencies\": [\n    {\n      \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n      \"type\": \"product\",\n      \"name\": \"Solar Panel\",\n      \"dependencies\": []\n    }\n  ]\n}\n"
+                    "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to export",
+                    "example": "{\n  \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n  \"type\": \"journey\",\n  \"name\": \"House Connection Journey\",\n  \"dependencies\": [\n    {\n      \"id\": \"4854bb2a-94f9-424d-a968-3fb17fb0bf89\",\n      \"type\": \"product\",\n      \"name\": \"Solar Panel\",\n      \"dependencies\": []\n    }\n  ]\n}\n",
+                    "oneOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/ResourceNode"
+                        }
+                      },
+                      {
+                        "$ref": "#/components/schemas/ResourceNode"
+                      }
+                    ]
                   },
                   "exportedBlueprintId": {
                     "type": "string",
@@ -386,6 +399,27 @@
           "FAILED"
         ]
       },
+      "ResourceNodeType": {
+        "type": "string",
+        "enum": [
+          "designbuilder",
+          "journey",
+          "product",
+          "price",
+          "tax",
+          "automation_flow",
+          "entity_mapping",
+          "file",
+          "emailtemplate",
+          "schema",
+          "schema_attribute",
+          "schema_capability",
+          "schema_group",
+          "workflow_definition",
+          "closing_reason",
+          "taxonomy_classification"
+        ]
+      },
       "ResourceNode": {
         "type": "object",
         "properties": {
@@ -393,7 +427,7 @@
             "type": "string"
           },
           "type": {
-            "type": "string"
+            "$ref": "#/components/schemas/ResourceNodeType"
           },
           "name": {
             "type": "string"
@@ -408,6 +442,18 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ResourceNode"
+            }
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "create",
+                "update",
+                "no-op",
+                "delete"
+              ]
             }
           }
         },
@@ -437,16 +483,46 @@
             "description": "A URL to download the plan file"
           },
           "resources_to_export": {
-            "description": "A tree-like JSON object representing the resources to export",
-            "$ref": "#/components/schemas/ResourceNode"
+            "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceNode"
+                }
+              },
+              {
+                "$ref": "#/components/schemas/ResourceNode"
+              }
+            ]
           },
           "resources_to_import": {
-            "description": "A tree-like JSON object representing the resources to import",
-            "$ref": "#/components/schemas/ResourceNode"
+            "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceNode"
+                }
+              },
+              {
+                "$ref": "#/components/schemas/ResourceNode"
+              }
+            ]
           },
           "imported_resources": {
-            "description": "A tree-like JSON object representing the imported resources",
-            "$ref": "#/components/schemas/ResourceNode"
+            "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceNode"
+                }
+              },
+              {
+                "$ref": "#/components/schemas/ResourceNode"
+              }
+            ]
           }
         }
       },
