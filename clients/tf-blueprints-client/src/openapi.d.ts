@@ -112,42 +112,9 @@ declare namespace Paths {
     namespace ExportBlueprint {
         export interface RequestBody {
             /**
-             * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to export
-             * example:
-             * {
-             *   "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
-             *   "type": "journey",
-             *   "name": "House Connection Journey",
-             *   "dependencies": [
-             *     {
-             *       "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
-             *       "type": "product",
-             *       "name": "Solar Panel",
-             *       "dependencies": []
-             *     }
-             *   ]
-             * }
-             *
+             * An array of resource IDs to export
              */
-            resourcesToExport?: /**
-             * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to export
-             * example:
-             * {
-             *   "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
-             *   "type": "journey",
-             *   "name": "House Connection Journey",
-             *   "dependencies": [
-             *     {
-             *       "id": "4854bb2a-94f9-424d-a968-3fb17fb0bf89",
-             *       "type": "product",
-             *       "name": "Solar Panel",
-             *       "dependencies": []
-             *     }
-             *   ]
-             * }
-             *
-             */
-            Components.Schemas.ResourceNode[] | Components.Schemas.ResourceNode;
+            selectedResourceIds?: string[];
             /**
              * example:
              * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
