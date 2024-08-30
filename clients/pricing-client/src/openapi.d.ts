@@ -482,6 +482,40 @@ declare namespace Components {
                 _updated_at?: string;
             };
             /**
+             * The coupons applicable to the price item
+             */
+            coupons?: (/**
+             * The coupon configuration
+             * example:
+             * {
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            Coupon)[];
+            /**
              * Specifies whether the price is considered `inclusive` of taxes or not.
              */
             is_tax_inclusive?: boolean;
@@ -1106,6 +1140,40 @@ declare namespace Components {
                 _updated_at?: string;
             };
             /**
+             * The coupons applicable to the price item
+             */
+            coupons?: (/**
+             * The coupon configuration
+             * example:
+             * {
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            Coupon)[];
+            /**
              * Specifies whether the price is considered `inclusive` of taxes or not.
              */
             is_tax_inclusive?: boolean;
@@ -1380,7 +1448,7 @@ declare namespace Components {
             /**
              * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
              */
-            percentage_value?: number;
+            percentage_value?: string;
             /**
              * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
              */
@@ -2642,6 +2710,40 @@ declare namespace Components {
                  */
                 _updated_at?: string;
             };
+            /**
+             * The coupons applicable to the price item
+             */
+            coupons?: (/**
+             * The coupon configuration
+             * example:
+             * {
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            Coupon)[];
             /**
              * Specifies whether the price is considered `inclusive` of taxes or not.
              */

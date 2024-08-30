@@ -3402,6 +3402,18 @@
               }
             ]
           },
+          "coupons": {
+            "type": "array",
+            "description": "The coupons applicable to the price item",
+            "readOnly": true,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Coupon"
+                }
+              ]
+            }
+          },
           "is_tax_inclusive": {
             "type": "boolean",
             "description": "Specifies whether the price is considered `inclusive` of taxes or not."
@@ -4770,7 +4782,7 @@
             ]
           },
           "percentage_value": {
-            "type": "number",
+            "type": "string",
             "description": "Use if type is set to percentage. The percentage to be discounted, represented as a whole integer."
           },
           "fixed_value": {
