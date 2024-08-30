@@ -7,7 +7,8 @@
   "paths": {
     "/v1/metering/meter": {
       "get": {
-        "operationId": "getCustomerMeters"
+        "operationId": "getCustomerMeters",
+        "responses": {}
       }
     },
     "/v1/metering/contract/meters/{contract_id}": {
@@ -19,7 +20,8 @@
             "name": "contract_id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/metering/meter/{id}": {
@@ -36,7 +38,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "get": {
         "operationId": "getMeter",
@@ -46,7 +49,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/metering/counter": {
@@ -58,7 +62,8 @@
             "name": "meter_id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/metering/counter/{counter_id}": {
@@ -70,7 +75,8 @@
             "name": "counter_id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/metering/reading": {
@@ -81,7 +87,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/metering/readings": {
@@ -99,7 +106,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/metering/reading/submission": {
@@ -110,7 +118,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/metering/allowed/reading/{meter_id}": {
@@ -127,7 +136,8 @@
             "name": "timestamp",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/metering/reading/with-meter": {
@@ -138,7 +148,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/metering/reading/{meter_id}/{counter_id}": {
@@ -190,7 +201,8 @@
             "name": "sort",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       },
       "put": {
         "operationId": "updateMeterReading",
@@ -216,7 +228,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteMeterReading",
@@ -236,7 +249,8 @@
             "name": "timestamp",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/metering/down-sample/readings/{meter_id}/{counter_id}": {
@@ -277,7 +291,8 @@
             "name": "sort",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     }
   },
@@ -294,6 +309,11 @@
         }
       },
       "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFound": {
         "content": {
           "application/json": {}
         }

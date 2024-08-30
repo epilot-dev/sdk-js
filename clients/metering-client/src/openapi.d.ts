@@ -12,6 +12,7 @@ declare namespace Components {
         export type Forbidden = Schemas.ErrorResp;
         export type InternalServerError = Schemas.ErrorResp;
         export type InvalidRequest = Schemas.ErrorResp;
+        export type NotFound = Schemas.ErrorResp;
         export type Unauthorized = Schemas.ErrorResp;
     }
     namespace Schemas {
@@ -126,6 +127,12 @@ declare namespace Components {
             entity_id?: EntityId /* uuid */;
             _slug?: "contact" | "contract";
         }
+        /**
+         * URL-friendly identifier for the entity schema
+         * example:
+         * contact
+         */
+        export type EntitySlug = string;
         export interface ErrorResp {
             /**
              * Error message
@@ -203,7 +210,7 @@ declare namespace Components {
             /**
              * The sector to which the meter belongs
              */
-            sector?: "power" | "water" | "gas";
+            sector?: "power" | "water" | "gas" | "district_heating" | "waste_water";
             /**
              * The location information of the meter
              * example:
@@ -383,18 +390,6 @@ declare namespace Components {
              * The status of the reading
              */
             status?: ReadingStatus;
-            /**
-             * The minimum value for the next reading
-             * example:
-             * 250
-             */
-            minNextReadingValue?: number;
-            /**
-             * The maximum value for the next reading
-             * example:
-             * 260
-             */
-            maxNextReadingValue?: number;
         }
         /**
          * The person who recorded the reading
@@ -794,7 +789,7 @@ declare namespace Paths {
                     /**
                      * The sector to which the meter belongs
                      */
-                    sector?: "power" | "water" | "gas";
+                    sector?: "power" | "water" | "gas" | "district_heating" | "waste_water";
                     /**
                      * The location information of the meter
                      * example:

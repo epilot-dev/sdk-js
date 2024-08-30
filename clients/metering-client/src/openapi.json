@@ -448,12 +448,11 @@
         "summary": "Create Meter Readings",
         "description": "Inserts multiple meter readings at once. Limited to 100 readings per request.",
         "tags": [
-          "ECP Admin",
-          "ECP"
+          "ECP Admin"
         ],
         "security": [
           {
-            "EitherAuth": []
+            "EpilotAuth": []
           }
         ],
         "parameters": [
@@ -464,7 +463,7 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "default": false
+              "default": true
             }
           }
         ],
@@ -1218,6 +1217,16 @@
           }
         }
       },
+      "NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
       "InternalServerError": {
         "description": "Internal Server Error",
         "content": {
@@ -1246,6 +1255,12 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Portal or Epilot Bearer Token"
+      },
+      "AsOrganization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-org-id",
+        "description": "Set organization id as internal user"
       }
     },
     "schemas": {
@@ -1261,6 +1276,11 @@
       "EntityId": {
         "type": "string",
         "format": "uuid"
+      },
+      "EntitySlug": {
+        "description": "URL-friendly identifier for the entity schema",
+        "type": "string",
+        "example": "contact"
       },
       "BaseEntity": {
         "type": "object",
@@ -1401,7 +1421,9 @@
                 "enum": [
                   "power",
                   "water",
-                  "gas"
+                  "gas",
+                  "district_heating",
+                  "waste_water"
                 ],
                 "description": "The sector to which the meter belongs"
               },
@@ -1546,16 +1568,6 @@
           "status": {
             "$ref": "#/components/schemas/ReadingStatus",
             "description": "The status of the reading"
-          },
-          "minNextReadingValue": {
-            "type": "number",
-            "example": 250,
-            "description": "The minimum value for the next reading"
-          },
-          "maxNextReadingValue": {
-            "type": "number",
-            "example": 260,
-            "description": "The maximum value for the next reading"
           }
         }
       },
@@ -1891,6 +1903,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://metering.sls.epilot.io"
+    },
     {
       "url": "https://metering.sls.epilot.io"
     }
