@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.0.2",
   "info": {
     "title": "",
     "version": ""
@@ -13,18 +13,8 @@
             "name": "lang",
             "in": "query"
           }
-        ]
-      }
-    },
-    "/v1/template-variables/qrcode:generate": {
-      "get": {
-        "operationId": "generateQRcode",
-        "parameters": [
-          {
-            "name": "qrdata",
-            "in": "query"
-          }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/template-variables:search": {
@@ -34,7 +24,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/template-variables:context": {
@@ -44,7 +35,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/template-variables:replace": {
@@ -54,12 +46,14 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/custom-variables": {
       "get": {
-        "operationId": "getCustomVariables"
+        "operationId": "getCustomVariables",
+        "responses": {}
       },
       "post": {
         "operationId": "createCustomVariable",
@@ -67,7 +61,19 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/custom-variables:search": {
+      "post": {
+        "operationId": "searchCustomVariables",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v1/custom-variables/{id}": {
@@ -84,7 +90,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "get": {
         "operationId": "getCustomVariable",
@@ -94,7 +101,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteCustomVariable",
@@ -104,12 +112,14 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/custom-variables/order-table-blueprint": {
       "get": {
-        "operationId": "getBluePrintTableConfig"
+        "operationId": "getBluePrintTableConfig",
+        "responses": {}
       }
     }
   },
