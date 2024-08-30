@@ -639,8 +639,10 @@
           "sort_by": {
             "type": "string",
             "description": "Sort by field",
-            "enum": [
+            "example": [
               "created_at",
+              "created_at:desc",
+              "name",
               "name:desc",
               "key"
             ]

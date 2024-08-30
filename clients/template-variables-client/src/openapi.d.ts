@@ -223,8 +223,16 @@ declare namespace Components {
             size?: number;
             /**
              * Sort by field
+             * example:
+             * [
+             *   "created_at",
+             *   "created_at:desc",
+             *   "name",
+             *   "name:desc",
+             *   "key"
+             * ]
              */
-            sort_by?: "created_at" | "name:desc" | "key";
+            sort_by?: string;
             /**
              * Fields to return
              */
