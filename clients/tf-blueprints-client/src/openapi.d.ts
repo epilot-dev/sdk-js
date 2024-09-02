@@ -19,7 +19,7 @@ declare namespace Components {
             message?: string;
             timestamp?: string; // date-time
             /**
-             * A URL to download the plan file
+             * An URL to download the plan file
              */
             plan_file_content?: string;
             /**
@@ -27,13 +27,25 @@ declare namespace Components {
              */
             resources_to_export?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ ResourceNode[] | ResourceNode;
             /**
+             * An URL to download the resources to export when the resources are too large to be included in the response
+             */
+            large_resources_to_export_url?: string;
+            /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
             resources_to_import?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ ResourceNode[] | ResourceNode;
             /**
+             * An URL to download the resources to import when the resources are too large to be included in the response
+             */
+            large_resources_to_import_url?: string;
+            /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
             imported_resources?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ ResourceNode[] | ResourceNode;
+            /**
+             * An URL to download the imported resources when the resources are too large to be included in the response
+             */
+            large_imported_resources_url?: string;
         }
         export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
         export interface ResourceNode {

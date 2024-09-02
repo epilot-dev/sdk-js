@@ -472,7 +472,7 @@
           },
           "plan_file_content": {
             "type": "string",
-            "description": "A URL to download the plan file"
+            "description": "An URL to download the plan file"
           },
           "resources_to_export": {
             "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
@@ -488,6 +488,10 @@
               }
             ]
           },
+          "large_resources_to_export_url": {
+            "type": "string",
+            "description": "An URL to download the resources to export when the resources are too large to be included in the response"
+          },
           "resources_to_import": {
             "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
             "oneOf": [
@@ -502,6 +506,10 @@
               }
             ]
           },
+          "large_resources_to_import_url": {
+            "type": "string",
+            "description": "An URL to download the resources to import when the resources are too large to be included in the response"
+          },
           "imported_resources": {
             "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
             "oneOf": [
@@ -515,6 +523,10 @@
                 "$ref": "#/components/schemas/ResourceNode"
               }
             ]
+          },
+          "large_imported_resources_url": {
+            "type": "string",
+            "description": "An URL to download the imported resources when the resources are too large to be included in the response"
           }
         }
       },
