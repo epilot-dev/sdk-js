@@ -3934,6 +3934,31 @@
           "amount_total_decimal": {
             "type": "string",
             "description": "Total of all items after (discounts and) taxes are applied, as a string with all the decimal places."
+          },
+          "discount_amount": {
+            "type": "integer",
+            "description": "The discount amount.",
+            "readOnly": true
+          },
+          "discount_amount_decimal": {
+            "type": "string",
+            "description": "The discount amount as a string with all the decimal places.",
+            "readOnly": true
+          },
+          "discount_percentage": {
+            "type": "integer",
+            "description": "The discount percentage, if the applied coupon had a percentage type.",
+            "readOnly": true
+          },
+          "before_discount_amount_total": {
+            "type": "integer",
+            "description": "Total amount before discount is applied.",
+            "readOnly": true
+          },
+          "before_discount_amount_total_decimal": {
+            "type": "string",
+            "description": "Total amount before discount is applied as a string with all the decimal places.",
+            "readOnly": true
           }
         }
       },

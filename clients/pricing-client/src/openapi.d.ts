@@ -80,6 +80,26 @@ declare namespace Components {
              * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
              */
             amount_total_decimal?: string;
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
+            /**
+             * The discount percentage, if the applied coupon had a percentage type.
+             */
+            discount_percentage?: number;
+            /**
+             * Total amount before discount is applied.
+             */
+            before_discount_amount_total?: number;
+            /**
+             * Total amount before discount is applied as a string with all the decimal places.
+             */
+            before_discount_amount_total_decimal?: string;
         }
         /**
          * Availability check request payload
@@ -199,6 +219,26 @@ declare namespace Components {
              * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
              */
             amount_total_decimal?: string;
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
+            /**
+             * The discount percentage, if the applied coupon had a percentage type.
+             */
+            discount_percentage?: number;
+            /**
+             * Total amount before discount is applied.
+             */
+            before_discount_amount_total?: number;
+            /**
+             * Total amount before discount is applied as a string with all the decimal places.
+             */
+            before_discount_amount_total_decimal?: string;
             /**
              * price item id
              */
@@ -559,6 +599,26 @@ declare namespace Components {
              */
             amount_total_decimal?: string;
             /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
+            /**
+             * The discount percentage, if the applied coupon had a percentage type.
+             */
+            discount_percentage?: number;
+            /**
+             * Total amount before discount is applied.
+             */
+            before_discount_amount_total?: number;
+            /**
+             * Total amount before discount is applied as a string with all the decimal places.
+             */
+            before_discount_amount_total_decimal?: string;
+            /**
              * The cart identifier
              */
             id?: string;
@@ -854,6 +914,26 @@ declare namespace Components {
              * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
              */
             amount_total_decimal?: string;
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
+            /**
+             * The discount percentage, if the applied coupon had a percentage type.
+             */
+            discount_percentage?: number;
+            /**
+             * Total amount before discount is applied.
+             */
+            before_discount_amount_total?: number;
+            /**
+             * Total amount before discount is applied as a string with all the decimal places.
+             */
+            before_discount_amount_total_decimal?: string;
             /**
              * price item id
              */
@@ -2418,6 +2498,26 @@ declare namespace Components {
              */
             amount_total_decimal?: string;
             /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
+            /**
+             * The discount percentage, if the applied coupon had a percentage type.
+             */
+            discount_percentage?: number;
+            /**
+             * Total amount before discount is applied.
+             */
+            before_discount_amount_total?: number;
+            /**
+             * Total amount before discount is applied as a string with all the decimal places.
+             */
+            before_discount_amount_total_decimal?: string;
+            /**
              * price item id
              */
             _id?: string;
@@ -3242,6 +3342,26 @@ declare namespace Components {
              */
             amount_total_decimal: string;
             /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
+            /**
+             * The discount percentage, if the applied coupon had a percentage type.
+             */
+            discount_percentage?: number;
+            /**
+             * Total amount before discount is applied.
+             */
+            before_discount_amount_total?: number;
+            /**
+             * Total amount before discount is applied as a string with all the decimal places.
+             */
+            before_discount_amount_total_decimal?: string;
+            /**
              * The price type.
              */
             type?: string;
@@ -3290,6 +3410,26 @@ declare namespace Components {
              * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
              */
             amount_total_decimal: string;
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
+            /**
+             * The discount percentage, if the applied coupon had a percentage type.
+             */
+            discount_percentage?: number;
+            /**
+             * Total amount before discount is applied.
+             */
+            before_discount_amount_total?: number;
+            /**
+             * Total amount before discount is applied as a string with all the decimal places.
+             */
+            before_discount_amount_total_decimal?: string;
             /**
              * The price type.
              */
