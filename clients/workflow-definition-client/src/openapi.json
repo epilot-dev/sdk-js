@@ -989,6 +989,11 @@
             "description": "ISO String Date & Time",
             "example": "2021-04-27T12:01:13.000Z"
           },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the workflow is enabled or not",
+            "default": true
+          },
           "lastUpdateTime": {
             "type": "string",
             "description": "ISO String Date & Time",

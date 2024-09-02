@@ -173,6 +173,10 @@ declare namespace Components {
              */
             creationTime?: string;
             /**
+             * Whether the workflow is enabled or not
+             */
+            enabled?: boolean;
+            /**
              * ISO String Date & Time
              * example:
              * 2021-04-27T12:01:13.000Z
