@@ -1311,6 +1311,37 @@ declare namespace Paths {
             }
         }
     }
+    namespace UnassignThread {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        /**
+         * Entities which thread is unassigned from
+         */
+        export type RequestBody = {
+            /**
+             * Entity slug
+             * example:
+             * contact
+             */
+            slug?: string;
+            /**
+             * Entity ID
+             * example:
+             * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+             */
+            entity_id?: string;
+        }[];
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace UntrashMessage {
         namespace Parameters {
             export type Id = string;
@@ -1717,6 +1748,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AssignThread.Responses.$204>
   /**
+   * unassignThread - unassignThread
+   * 
+   * Unassign thread from entities
+   */
+  'unassignThread'(
+    parameters?: Parameters<Paths.UnassignThread.PathParameters> | null,
+    data?: Paths.UnassignThread.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UnassignThread.Responses.$204>
+  /**
    * assignUsers - assignUsers
    * 
    * Assign users to thread for receiving notifications.
@@ -1963,6 +2004,18 @@ export interface PathsDictionary {
       data?: Paths.AssignThread.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AssignThread.Responses.$204>
+  }
+  ['/v1/message/threads/{id}/unassign']: {
+    /**
+     * unassignThread - unassignThread
+     * 
+     * Unassign thread from entities
+     */
+    'post'(
+      parameters?: Parameters<Paths.UnassignThread.PathParameters> | null,
+      data?: Paths.UnassignThread.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UnassignThread.Responses.$204>
   }
   ['/v1/message/threads/{id}/assign:users']: {
     /**
