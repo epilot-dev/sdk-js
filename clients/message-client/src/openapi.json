@@ -595,6 +595,61 @@
         }
       }
     },
+    "/v1/message/threads/{id}/unassign": {
+      "post": {
+        "operationId": "unassignThread",
+        "summary": "unassignThread",
+        "description": "Unassign thread from entities",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Entities which thread is unassigned from",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "description": "Entity slug",
+                      "type": "string",
+                      "example": "contact"
+                    },
+                    "entity_id": {
+                      "description": "Entity ID",
+                      "type": "string",
+                      "example": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/message/threads/{id}/assign:users": {
       "post": {
         "operationId": "assignUsers",

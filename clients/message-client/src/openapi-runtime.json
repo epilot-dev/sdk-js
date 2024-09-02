@@ -18,10 +18,12 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "put": {
-        "operationId": "updateMessage"
+        "operationId": "updateMessage",
+        "responses": {}
       }
     },
     "/v1/message/messages/{id}": {
@@ -33,7 +35,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteMessage",
@@ -43,7 +46,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/message/messages/{id}/trash": {
@@ -55,7 +59,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/message/messages/{id}/untrash": {
@@ -67,7 +72,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/message/messages/{id}/read": {
@@ -79,7 +85,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/message/messages/{id}/unread": {
@@ -91,7 +98,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/message/threads:search": {
@@ -101,12 +109,14 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/message/threads": {
       "put": {
-        "operationId": "updateThread"
+        "operationId": "updateThread",
+        "responses": {}
       }
     },
     "/v1/message/threads/{id}": {
@@ -118,7 +128,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/message/threads/{id}/trash": {
@@ -130,7 +141,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/message/threads/{id}/untrash": {
@@ -142,7 +154,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/message/threads/{id}/read": {
@@ -154,7 +167,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/message/threads/{id}/unread": {
@@ -166,7 +180,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/message/threads/{id}/assign": {
@@ -184,7 +199,27 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/unassign": {
+      "post": {
+        "operationId": "unassignThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v1/message/threads/{id}/assign:users": {
@@ -202,7 +237,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/message/drafts": {
@@ -212,12 +248,14 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/message/drafts:send": {
       "post": {
-        "operationId": "sendDraft"
+        "operationId": "sendDraft",
+        "responses": {}
       }
     },
     "/v2/message/messages/{id}": {
@@ -229,7 +267,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     }
   },
