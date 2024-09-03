@@ -11,6 +11,11 @@
         "parameters": [
           {
             "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "in": "query",
             "name": "after_id"
           },
           {
@@ -34,11 +39,6 @@
       "get": {
         "operationId": "getNotifications",
         "parameters": [
-          {
-            "in": "query",
-            "name": "cursor",
-            "required": false
-          },
           {
             "in": "query",
             "name": "after_id"

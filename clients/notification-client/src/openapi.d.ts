@@ -394,12 +394,10 @@ declare namespace Paths {
     namespace GetNotifications {
         namespace Parameters {
             export type AfterId = number;
-            export type Cursor = string;
             export type Limit = number;
             export type NoHydrate = boolean;
         }
         export interface QueryParameters {
-            cursor?: Parameters.Cursor;
             after_id?: Parameters.AfterId;
             limit?: Parameters.Limit;
             no_hydrate?: Parameters.NoHydrate;
@@ -423,14 +421,22 @@ declare namespace Paths {
     namespace GetNotificationsV2 {
         namespace Parameters {
             export type AfterId = number;
+            export type Cursor = string;
             export type Limit = number;
         }
         export interface QueryParameters {
+            cursor?: Parameters.Cursor;
             after_id?: Parameters.AfterId;
             limit?: Parameters.Limit;
         }
         namespace Responses {
             export interface $200 {
+                /**
+                 * Base64 encoded cursor to be used for pagination
+                 * example:
+                 * eyJjcmVhd
+                 */
+                cursor?: string;
                 /**
                  * example:
                  * 1
