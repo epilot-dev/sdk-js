@@ -61,6 +61,7 @@ declare namespace Components {
         export type Id = number;
         export interface Notification {
             [name: string]: any;
+            timestamp?: string; // date-time
             /**
              * Type of notification
              * example:
@@ -148,6 +149,7 @@ declare namespace Components {
         }
         export interface NotificationBase {
             [name: string]: any;
+            timestamp?: string; // date-time
             /**
              * Type of notification
              * example:
@@ -392,6 +394,35 @@ declare namespace Paths {
     namespace GetNotifications {
         namespace Parameters {
             export type AfterId = number;
+            export type Cursor = string;
+            export type Limit = number;
+            export type NoHydrate = boolean;
+        }
+        export interface QueryParameters {
+            cursor?: Parameters.Cursor;
+            after_id?: Parameters.AfterId;
+            limit?: Parameters.Limit;
+            no_hydrate?: Parameters.NoHydrate;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * 1
+                 */
+                total?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                total_unread?: number;
+                results?: Components.Schemas.NotificationItem[];
+            }
+        }
+    }
+    namespace GetNotificationsV2 {
+        namespace Parameters {
+            export type AfterId = number;
             export type Limit = number;
         }
         export interface QueryParameters {
@@ -444,6 +475,16 @@ declare namespace Paths {
 }
 
 export interface OperationMethods {
+  /**
+   * getNotificationsV2 - getNotificationsV2
+   * 
+   * Get notifications items. These items may eventually contain entities within their payload, which can be hydrated by the client if desired by calling the Entity API directly.
+   */
+  'getNotificationsV2'(
+    parameters?: Parameters<Paths.GetNotificationsV2.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetNotificationsV2.Responses.$200>
   /**
    * getNotifications - getNotifications
    * 
@@ -507,6 +548,18 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
+  ['/v2/notification/notifications']: {
+    /**
+     * getNotificationsV2 - getNotificationsV2
+     * 
+     * Get notifications items. These items may eventually contain entities within their payload, which can be hydrated by the client if desired by calling the Entity API directly.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetNotificationsV2.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetNotificationsV2.Responses.$200>
+  }
   ['/v1/notification/notifications']: {
     /**
      * createNotification - createNotification

@@ -5,17 +5,9 @@
     "version": ""
   },
   "paths": {
-    "/v1/notification/notifications": {
-      "post": {
-        "operationId": "createNotification",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      },
+    "/v2/notification/notifications": {
       "get": {
-        "operationId": "getNotifications",
+        "operationId": "getNotificationsV2",
         "parameters": [
           {
             "in": "query",
@@ -25,7 +17,42 @@
             "in": "query",
             "name": "limit"
           }
-        ]
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/notification/notifications": {
+      "post": {
+        "operationId": "createNotification",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getNotifications",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "after_id"
+          },
+          {
+            "in": "query",
+            "name": "limit"
+          },
+          {
+            "in": "query",
+            "name": "no_hydrate"
+          }
+        ],
+        "responses": {}
       }
     },
     "/v1/notification/notifications/{id}": {
@@ -37,12 +64,14 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/notification/notifications/mark": {
       "put": {
-        "operationId": "markAllAsRead"
+        "operationId": "markAllAsRead",
+        "responses": {}
       }
     },
     "/v1/notification/notifications/{id}/mark": {
@@ -54,12 +83,14 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/notification/unreads": {
       "get": {
-        "operationId": "getTotalUnread"
+        "operationId": "getTotalUnread",
+        "responses": {}
       }
     }
   },

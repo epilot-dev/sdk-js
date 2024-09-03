@@ -17,6 +17,61 @@
     }
   ],
   "paths": {
+    "/v2/notification/notifications": {
+      "get": {
+        "operationId": "getNotificationsV2",
+        "summary": "getNotificationsV2",
+        "description": "Get notifications items. These items may eventually contain entities within their payload, which can be hydrated by the client if desired by calling the Entity API directly.",
+        "tags": [
+          "Notification"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after_id",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The numbers of items to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "total_unread": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/NotificationItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/notification/notifications": {
       "post": {
         "operationId": "createNotification",
@@ -50,6 +105,15 @@
         "parameters": [
           {
             "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Base64 encoded cursor to be used for pagination"
+          },
+          {
+            "in": "query",
             "name": "after_id",
             "schema": {
               "type": "integer"
@@ -62,6 +126,14 @@
               "type": "integer"
             },
             "description": "The numbers of items to return"
+          },
+          {
+            "in": "query",
+            "name": "no_hydrate",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "When true, the payload will not be hydrated with the entity data. This is useful when the client does not need the entity data and wants to save on API calls (performance gain). When false, the payload will be hydrated with the entity data. This is useful when the client needs the entity data to display the notification (e.g. to show the name of the contact in the notification message), but can have a significative performance impact.\n\nThis endpoint will eventually be deprecated in favor of GET /v2/notification/notifications which no longer hydrates the payload by default.\n"
           }
         ],
         "responses": {
@@ -323,6 +395,10 @@
         "type": "object",
         "additionalProperties": true,
         "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
           "type": {
             "description": "Type of notification",
             "type": "string",
@@ -484,9 +560,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://notification.sls.epilot.io"
-    },
     {
       "url": "https://notification.sls.epilot.io"
     }
