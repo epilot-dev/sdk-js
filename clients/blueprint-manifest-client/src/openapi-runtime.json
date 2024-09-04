@@ -1,0 +1,99 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://blueprint-manifest.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/blueprint-manifest/jobs/{job_id}": {
+      "get": {
+        "operationId": "getJob",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/JobID"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/jobs:createExport": {
+      "post": {
+        "operationId": "createExport",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/jobs/{job_id}:exportManifest": {
+      "post": {
+        "operationId": "exportManifest",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/JobID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest:uploadManifest": {
+      "post": {
+        "operationId": "uploadManifest",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/jobs:createPlan": {
+      "post": {
+        "operationId": "createPlan",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/jobs/{job_id}:applyPlan": {
+      "post": {
+        "operationId": "applyPlan",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/JobID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "JobID": {
+        "name": "job_id",
+        "in": "path",
+        "required": true
+      }
+    }
+  }
+}
