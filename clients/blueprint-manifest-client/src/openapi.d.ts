@@ -8,14 +8,26 @@ import type {
 } from 'openapi-client-axios'; 
 
 declare namespace Components {
+    namespace Parameters {
+        export type JobID = /**
+         * ID of an import or export job
+         * example:
+         * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+         */
+        Schemas.JobID;
+    }
+    export interface PathParameters {
+        JobID?: Parameters.JobID;
+    }
     namespace Schemas {
-        export interface InstalledPatchItem {
-            blueprintId?: string;
-            stateFileRef?: string;
-        }
         export interface Job {
             job_status?: JobStatus;
-            job_id?: string;
+            job_id?: /**
+             * ID of an import or export job
+             * example:
+             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+             */
+            JobID;
             message?: string;
             timestamp?: string; // date-time
             /**
@@ -46,8 +58,30 @@ declare namespace Components {
              * An URL to download the imported resources when the resources are too large to be included in the response
              */
             large_imported_resources_url?: string;
+            markdown?: {
+                /**
+                 * Markdown content to be displayed when showing the plan to install blueprint
+                 * example:
+                 * This is the content of the preinstall.md file
+                 *
+                 */
+                preinstall?: string;
+                /**
+                 * Markdown content to be displayed when showing the plan to install blueprint
+                 * example:
+                 * This is the content of the postinstall.md file
+                 *
+                 */
+                postinstall?: string;
+            };
         }
-        export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
+        /**
+         * ID of an import or export job
+         * example:
+         * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+         */
+        export type JobID = string;
+        export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELLED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
         export interface ResourceNode {
             id: string;
             type: ResourceNodeType;
@@ -86,13 +120,19 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
-    namespace ApplyBlueprint {
-        export interface RequestBody {
-            /**
+    namespace ApplyPlan {
+        namespace Parameters {
+            export type JobId = /**
+             * ID of an import or export job
              * example:
              * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
              */
-            blueprintId?: string;
+            Components.Schemas.JobID;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        export interface RequestBody {
             /**
              * example:
              * example.tf
@@ -103,63 +143,7 @@ declare namespace Paths {
             export type $200 = string;
         }
     }
-    namespace CreateBlueprint {
-        export interface RequestBody {
-            /**
-             * example:
-             * example.tf
-             */
-            manifestFilePath?: string;
-        }
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * example:
-                 * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
-                 */
-                blueprintId?: string;
-            }
-        }
-    }
-    namespace ExportBlueprint {
-        export interface RequestBody {
-            /**
-             * An array of resource IDs to export
-             */
-            selectedResourceIds?: string[];
-            /**
-             * example:
-             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
-             */
-            exportedBlueprintId?: string;
-            /**
-             * example:
-             * journey_HouseConnectionJourney
-             */
-            resourceName?: string;
-        }
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * example:
-                 * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
-                 */
-                blueprintId?: string;
-            }
-        }
-    }
-    namespace GetBlueprintStatus {
-        namespace Parameters {
-            export type Id = string;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.Job;
-        }
-    }
-    namespace GetExportResources {
+    namespace CreateExport {
         export interface RequestBody {
             resourceType?: "journey" | "product" | "price" | "tax" | "automation_flow" | "designbuilder" | "file" | "emailtemplate" | "entity" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition" | "closing_reason" | "taxonomy_classification";
             resourceIds?: [
@@ -192,39 +176,85 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                /**
+                jobId?: /**
+                 * ID of an import or export job
                  * example:
                  * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
                  */
-                blueprintId?: string;
+                Components.Schemas.JobID;
             }
         }
     }
-    namespace ListInstalledPatches {
-        namespace Responses {
-            export interface $200 {
-                results?: Components.Schemas.InstalledPatchItem[];
-            }
-        }
-    }
-    namespace UpdateBlueprint {
+    namespace CreatePlan {
         export interface RequestBody {
             /**
-             * example:
-             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
-             */
-            blueprintId?: string;
-            /**
+             * Path to the manifest file uploaded via `uploadManifest`
              * example:
              * example.tf
              */
             manifestFilePath?: string;
         }
         namespace Responses {
-            export type $200 = string;
+            export interface $200 {
+                /**
+                 * example:
+                 * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+                 */
+                jobId?: string;
+            }
         }
     }
-    namespace UploadBlueprintTemplate {
+    namespace ExportManifest {
+        namespace Parameters {
+            export type JobId = /**
+             * ID of an import or export job
+             * example:
+             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+             */
+            Components.Schemas.JobID;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        export interface RequestBody {
+            /**
+             * An array of resource IDs to export
+             */
+            selectedResourceIds?: string[];
+            /**
+             * example:
+             * journey_HouseConnectionJourney
+             */
+            resourceName?: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                jobId?: /**
+                 * ID of an import or export job
+                 * example:
+                 * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+                 */
+                Components.Schemas.JobID;
+            }
+        }
+    }
+    namespace GetJob {
+        namespace Parameters {
+            export type JobId = /**
+             * ID of an import or export job
+             * example:
+             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+             */
+            Components.Schemas.JobID;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Job;
+        }
+    }
+    namespace UploadManifest {
         export type RequestBody = Components.Schemas.UploadFilePayload;
         namespace Responses {
             export interface $201 {
@@ -241,185 +271,143 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * getBlueprintStatus - getBlueprintStatus
+   * getJob - getJob
    * 
    * Get the current status of a blueprint (export or import)
    */
-  'getBlueprintStatus'(
-    parameters?: Parameters<Paths.GetBlueprintStatus.PathParameters> | null,
+  'getJob'(
+    parameters?: Parameters<Paths.GetJob.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetBlueprintStatus.Responses.$200>
+  ): OperationResponse<Paths.GetJob.Responses.$200>
   /**
-   * listInstalledPatches - listInstalledPatches
+   * createExport - createExport
    * 
-   * Get the list of installed patches for org
-   */
-  'listInstalledPatches'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListInstalledPatches.Responses.$200>
-  /**
-   * getExportResources - getExportResources
-   * 
-   * Get the resources to export
-   */
-  'getExportResources'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.GetExportResources.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetExportResources.Responses.$200>
-  /**
-   * exportBlueprint - exportBlueprint
-   * 
-   * Export a blueprint
-   */
-  'exportBlueprint'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.ExportBlueprint.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ExportBlueprint.Responses.$200>
-  /**
-   * uploadBlueprintTemplate - uploadBlueprintTemplate
-   * 
-   * Create pre-signed S3 URL to upload a file.
+   * Creates a new Export Job with a list of available resources to export from the passed root resource.
    * 
    */
-  'uploadBlueprintTemplate'(
+  'createExport'(
     parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.UploadBlueprintTemplate.RequestBody,
+    data?: Paths.CreateExport.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UploadBlueprintTemplate.Responses.$201>
+  ): OperationResponse<Paths.CreateExport.Responses.$200>
   /**
-   * createBlueprint - createBlueprint
+   * exportManifest - exportManifest
    * 
-   * Create a blueprint
+   * Triggers exporting a manifest file using selected resoruce ids for a job created with `createExportJob`
    */
-  'createBlueprint'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.CreateBlueprint.RequestBody,
+  'exportManifest'(
+    parameters?: Parameters<Paths.ExportManifest.PathParameters> | null,
+    data?: Paths.ExportManifest.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
+  ): OperationResponse<Paths.ExportManifest.Responses.$200>
   /**
-   * updateBlueprint - updateBlueprint
+   * uploadManifest - uploadManifest
    * 
-   * Update a blueprint
+   * Create pre-signed S3 URL to upload a manifest file.
+   * 
    */
-  'updateBlueprint'(
+  'uploadManifest'(
     parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.UpdateBlueprint.RequestBody,
+    data?: Paths.UploadManifest.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdateBlueprint.Responses.$200>
+  ): OperationResponse<Paths.UploadManifest.Responses.$201>
   /**
-   * applyBlueprint - applyBlueprint
+   * createPlan - createPlan
    * 
-   * Apply blueprint from generated plan
+   * Creates a new import job from an uploaded manifest file and returns the plan
    */
-  'applyBlueprint'(
+  'createPlan'(
     parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.ApplyBlueprint.RequestBody,
+    data?: Paths.CreatePlan.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ApplyBlueprint.Responses.$200>
+  ): OperationResponse<Paths.CreatePlan.Responses.$200>
+  /**
+   * applyPlan - applyPlan
+   * 
+   * Apply a plan returned by `createPlan`
+   */
+  'applyPlan'(
+    parameters?: Parameters<Paths.ApplyPlan.PathParameters> | null,
+    data?: Paths.ApplyPlan.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ApplyPlan.Responses.$200>
 }
 
 export interface PathsDictionary {
-  ['/v2/blueprint/{id}/status']: {
+  ['/v1/blueprint-manifest/jobs/{job_id}']: {
     /**
-     * getBlueprintStatus - getBlueprintStatus
+     * getJob - getJob
      * 
      * Get the current status of a blueprint (export or import)
      */
     'get'(
-      parameters?: Parameters<Paths.GetBlueprintStatus.PathParameters> | null,
+      parameters?: Parameters<Paths.GetJob.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetBlueprintStatus.Responses.$200>
+    ): OperationResponse<Paths.GetJob.Responses.$200>
   }
-  ['/v2/blueprint/listInstalledPatches']: {
+  ['/v1/blueprint-manifest/jobs:createExport']: {
     /**
-     * listInstalledPatches - listInstalledPatches
+     * createExport - createExport
      * 
-     * Get the list of installed patches for org
-     */
-    'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListInstalledPatches.Responses.$200>
-  }
-  ['/v2/getExportResources']: {
-    /**
-     * getExportResources - getExportResources
-     * 
-     * Get the resources to export
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.GetExportResources.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetExportResources.Responses.$200>
-  }
-  ['/v2/exportBlueprint']: {
-    /**
-     * exportBlueprint - exportBlueprint
-     * 
-     * Export a blueprint
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.ExportBlueprint.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ExportBlueprint.Responses.$200>
-  }
-  ['/v2/uploadBlueprintTemplate']: {
-    /**
-     * uploadBlueprintTemplate - uploadBlueprintTemplate
-     * 
-     * Create pre-signed S3 URL to upload a file.
+     * Creates a new Export Job with a list of available resources to export from the passed root resource.
      * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.UploadBlueprintTemplate.RequestBody,
+      data?: Paths.CreateExport.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UploadBlueprintTemplate.Responses.$201>
+    ): OperationResponse<Paths.CreateExport.Responses.$200>
   }
-  ['/v2/createBlueprint']: {
+  ['/v1/blueprint-manifest/jobs/{job_id}:exportManifest']: {
     /**
-     * createBlueprint - createBlueprint
+     * exportManifest - exportManifest
      * 
-     * Create a blueprint
+     * Triggers exporting a manifest file using selected resoruce ids for a job created with `createExportJob`
+     */
+    'post'(
+      parameters?: Parameters<Paths.ExportManifest.PathParameters> | null,
+      data?: Paths.ExportManifest.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ExportManifest.Responses.$200>
+  }
+  ['/v1/blueprint-manifest:uploadManifest']: {
+    /**
+     * uploadManifest - uploadManifest
+     * 
+     * Create pre-signed S3 URL to upload a manifest file.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.CreateBlueprint.RequestBody,
+      data?: Paths.UploadManifest.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
+    ): OperationResponse<Paths.UploadManifest.Responses.$201>
   }
-  ['/v2/updateBlueprint']: {
+  ['/v1/blueprint-manifest/jobs:createPlan']: {
     /**
-     * updateBlueprint - updateBlueprint
+     * createPlan - createPlan
      * 
-     * Update a blueprint
+     * Creates a new import job from an uploaded manifest file and returns the plan
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.UpdateBlueprint.RequestBody,
+      data?: Paths.CreatePlan.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdateBlueprint.Responses.$200>
+    ): OperationResponse<Paths.CreatePlan.Responses.$200>
   }
-  ['/v2/applyBlueprint']: {
+  ['/v1/blueprint-manifest/jobs/{job_id}:applyPlan']: {
     /**
-     * applyBlueprint - applyBlueprint
+     * applyPlan - applyPlan
      * 
-     * Apply blueprint from generated plan
+     * Apply a plan returned by `createPlan`
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.ApplyBlueprint.RequestBody,
+      parameters?: Parameters<Paths.ApplyPlan.PathParameters> | null,
+      data?: Paths.ApplyPlan.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ApplyBlueprint.Responses.$200>
+    ): OperationResponse<Paths.ApplyPlan.Responses.$200>
   }
 }
 
