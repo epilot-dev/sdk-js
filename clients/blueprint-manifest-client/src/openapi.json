@@ -27,6 +27,9 @@
   "servers": [
     {
       "url": "https://blueprint-manifest.sls.epilot.io"
+    },
+    {
+      "url": "https://blueprint-manifest.sls.epilot.io"
     }
   ],
   "paths": {
@@ -313,7 +316,7 @@
         "enum": [
           "STARTED",
           "WAITING_USER_ACTION",
-          "CANCELLED",
+          "CANCELED",
           "IN_PROGRESS",
           "SUCCESS",
           "FAILED"
@@ -340,7 +343,7 @@
           "taxonomy_classification"
         ]
       },
-      "ResourceNode": {
+      "RootResourceNode": {
         "type": "object",
         "properties": {
           "id": {
@@ -361,7 +364,7 @@
           "dependencies": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ResourceNode"
+              "$ref": "#/components/schemas/VirtualResourceNodeGroup"
             }
           },
           "changes": {
@@ -374,6 +377,83 @@
                 "no-op",
                 "delete"
               ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ]
+      },
+      "VirtualResourceNodeGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceNodeType"
+          },
+          "name": {
+            "type": "string"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceNode"
+            }
+          },
+          "is_virtual": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ]
+      },
+      "ResourceNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceNodeType"
+          },
+          "name": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "create",
+                "update",
+                "no-op",
+                "delete"
+              ]
+            }
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceNodeType"
+                }
+              }
             }
           }
         },
@@ -413,11 +493,11 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/ResourceNode"
+                  "$ref": "#/components/schemas/RootResourceNode"
                 }
               },
               {
-                "$ref": "#/components/schemas/ResourceNode"
+                "$ref": "#/components/schemas/RootResourceNode"
               }
             ]
           },
@@ -431,11 +511,11 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/ResourceNode"
+                  "$ref": "#/components/schemas/RootResourceNode"
                 }
               },
               {
-                "$ref": "#/components/schemas/ResourceNode"
+                "$ref": "#/components/schemas/RootResourceNode"
               }
             ]
           },
@@ -449,11 +529,11 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/ResourceNode"
+                  "$ref": "#/components/schemas/RootResourceNode"
                 }
               },
               {
-                "$ref": "#/components/schemas/ResourceNode"
+                "$ref": "#/components/schemas/RootResourceNode"
               }
             ]
           },

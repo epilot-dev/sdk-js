@@ -37,7 +37,7 @@ declare namespace Components {
             /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
-            resources_to_export?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ ResourceNode[] | ResourceNode;
+            resources_to_export?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ RootResourceNode[] | RootResourceNode;
             /**
              * An URL to download the resources to export when the resources are too large to be included in the response
              */
@@ -45,7 +45,7 @@ declare namespace Components {
             /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
-            resources_to_import?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ ResourceNode[] | ResourceNode;
+            resources_to_import?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ RootResourceNode[] | RootResourceNode;
             /**
              * An URL to download the resources to import when the resources are too large to be included in the response
              */
@@ -53,7 +53,7 @@ declare namespace Components {
             /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
-            imported_resources?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ ResourceNode[] | ResourceNode;
+            imported_resources?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ RootResourceNode[] | RootResourceNode;
             /**
              * An URL to download the imported resources when the resources are too large to be included in the response
              */
@@ -81,17 +81,29 @@ declare namespace Components {
          * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
          */
         export type JobID = string;
-        export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELLED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
+        export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
         export interface ResourceNode {
             id: string;
             type: ResourceNodeType;
             name?: string;
             source_id?: string;
             address?: string;
-            dependencies?: ResourceNode[];
             changes?: ("create" | "update" | "no-op" | "delete")[];
+            parents?: {
+                id?: string;
+                type?: ResourceNodeType;
+            }[];
         }
         export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition" | "closing_reason" | "taxonomy_classification";
+        export interface RootResourceNode {
+            id: string;
+            type: ResourceNodeType;
+            name?: string;
+            source_id?: string;
+            address?: string;
+            dependencies?: VirtualResourceNodeGroup[];
+            changes?: ("create" | "update" | "no-op" | "delete")[];
+        }
         export interface S3Reference {
             /**
              * example:
@@ -116,6 +128,13 @@ declare namespace Components {
              * application/pdf
              */
             mime_type?: string;
+        }
+        export interface VirtualResourceNodeGroup {
+            id: string;
+            type: ResourceNodeType;
+            name?: string;
+            dependencies?: ResourceNode[];
+            is_virtual?: boolean;
         }
     }
 }
