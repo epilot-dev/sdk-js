@@ -1,14 +1,22 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Blueprint API",
+    "title": "Blueprint Manifest API",
     "version": "0.1.0",
-    "description": "API for managing blueprint installations in epilot"
+    "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
     {
-      "name": "Blueprints",
-      "description": "Import and Export your Blueprints"
+      "name": "Jobs",
+      "description": "Manage Export and Import Jobs"
+    },
+    {
+      "name": "Export",
+      "description": "Export a Blueprint Manifest"
+    },
+    {
+      "name": "Import",
+      "description": "Import a Blueprint Manifest"
     }
   ],
   "security": [
@@ -18,30 +26,24 @@
   ],
   "servers": [
     {
-      "url": "https://tf-blueprint.sls.epilot.io"
+      "url": "https://blueprint-manifest.sls.epilot.io"
     },
     {
-      "url": "https://tf-blueprint.sls.epilot.io"
+      "url": "https://blueprint-manifest.sls.epilot.io"
     }
   ],
   "paths": {
-    "/v2/blueprint/{id}/status": {
+    "/v1/blueprint-manifest/jobs/{job_id}": {
       "get": {
-        "operationId": "getBlueprintStatus",
-        "summary": "getBlueprintStatus",
+        "operationId": "getJob",
+        "summary": "getJob",
         "description": "Get the current status of a blueprint (export or import)",
         "tags": [
-          "Blueprints"
+          "Jobs"
         ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the blueprint",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/JobID"
           }
         ],
         "responses": {
@@ -58,43 +60,13 @@
         }
       }
     },
-    "/v2/blueprint/listInstalledPatches": {
-      "get": {
-        "operationId": "listInstalledPatches",
-        "summary": "listInstalledPatches",
-        "description": "Get the list of installed patches for org",
-        "tags": [
-          "Blueprints"
-        ],
-        "responses": {
-          "200": {
-            "description": "List of installed blueprint patches for org",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/InstalledPatchItem"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/getExportResources": {
+    "/v1/blueprint-manifest/jobs:createExport": {
       "post": {
-        "operationId": "getExportResources",
-        "summary": "getExportResources",
-        "description": "Get the resources to export",
+        "operationId": "createExport",
+        "summary": "createExport",
+        "description": "Creates a new Export Job with a list of available resources to export from the passed root resource.\n",
         "tags": [
-          "Blueprints"
+          "Export"
         ],
         "requestBody": {
           "content": {
@@ -138,15 +110,14 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Created Export Job ID",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "blueprintId": {
-                      "type": "string",
-                      "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+                    "jobId": {
+                      "$ref": "#/components/schemas/JobID"
                     }
                   }
                 }
@@ -156,13 +127,18 @@
         }
       }
     },
-    "/v2/exportBlueprint": {
+    "/v1/blueprint-manifest/jobs/{job_id}:exportManifest": {
       "post": {
-        "operationId": "exportBlueprint",
-        "summary": "exportBlueprint",
-        "description": "Export a blueprint",
+        "operationId": "exportManifest",
+        "summary": "exportManifest",
+        "description": "Triggers exporting a manifest file using selected resoruce ids for a job created with `createExportJob`",
         "tags": [
-          "Blueprints"
+          "Export"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/JobID"
+          }
         ],
         "requestBody": {
           "content": {
@@ -177,10 +153,6 @@
                       "type": "string"
                     }
                   },
-                  "exportedBlueprintId": {
-                    "type": "string",
-                    "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
-                  },
                   "resourceName": {
                     "type": "string",
                     "example": "journey_HouseConnectionJourney"
@@ -192,15 +164,14 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Export Job ID",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "blueprintId": {
-                      "type": "string",
-                      "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+                    "jobId": {
+                      "$ref": "#/components/schemas/JobID"
                     }
                   }
                 }
@@ -210,14 +181,13 @@
         }
       }
     },
-    "/v2/uploadBlueprintTemplate": {
+    "/v1/blueprint-manifest:uploadManifest": {
       "post": {
-        "operationId": "uploadBlueprintTemplate",
-        "summary": "uploadBlueprintTemplate",
-        "security": [],
-        "description": "Create pre-signed S3 URL to upload a file.\n",
+        "operationId": "uploadManifest",
+        "summary": "uploadManifest",
+        "description": "Create pre-signed S3 URL to upload a manifest file.\n",
         "tags": [
-          "Blueprints"
+          "Import"
         ],
         "requestBody": {
           "content": {
@@ -252,13 +222,13 @@
         }
       }
     },
-    "/v2/createBlueprint": {
+    "/v1/blueprint-manifest/jobs:createPlan": {
       "post": {
-        "operationId": "createBlueprint",
-        "summary": "createBlueprint",
-        "description": "Create a blueprint",
+        "operationId": "createPlan",
+        "summary": "createPlan",
+        "description": "Creates a new import job from an uploaded manifest file and returns the plan",
         "tags": [
-          "Blueprints"
+          "Import"
         ],
         "requestBody": {
           "content": {
@@ -267,6 +237,7 @@
                 "type": "object",
                 "properties": {
                   "manifestFilePath": {
+                    "description": "Path to the manifest file uploaded via `uploadManifest`",
                     "type": "string",
                     "example": "example.tf"
                   }
@@ -277,13 +248,13 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Created Import Job ID",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "blueprintId": {
+                    "jobId": {
                       "type": "string",
                       "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
                     }
@@ -295,13 +266,18 @@
         }
       }
     },
-    "/v2/updateBlueprint": {
+    "/v1/blueprint-manifest/jobs/{job_id}:applyPlan": {
       "post": {
-        "operationId": "updateBlueprint",
-        "summary": "updateBlueprint",
-        "description": "Update a blueprint",
+        "operationId": "applyPlan",
+        "summary": "applyPlan",
+        "description": "Apply a plan returned by `createPlan`",
         "tags": [
-          "Blueprints"
+          "Import"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/JobID"
+          }
         ],
         "requestBody": {
           "content": {
@@ -309,51 +285,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "blueprintId": {
-                    "type": "string",
-                    "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
-                  },
-                  "manifestFilePath": {
-                    "type": "string",
-                    "example": "example.tf"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/applyBlueprint": {
-      "post": {
-        "operationId": "applyBlueprint",
-        "summary": "applyBlueprint",
-        "description": "Apply blueprint from generated plan",
-        "tags": [
-          "Blueprints"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "blueprintId": {
-                    "type": "string",
-                    "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
-                  },
                   "manifestFilePath": {
                     "type": "string",
                     "example": "example.tf"
@@ -412,7 +343,7 @@
           "taxonomy_classification"
         ]
       },
-      "ResourceNode": {
+      "RootResourceNode": {
         "type": "object",
         "properties": {
           "id": {
@@ -433,7 +364,7 @@
           "dependencies": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ResourceNode"
+              "$ref": "#/components/schemas/VirtualResourceNodeGroup"
             }
           },
           "changes": {
@@ -454,6 +385,88 @@
           "type"
         ]
       },
+      "VirtualResourceNodeGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceNodeType"
+          },
+          "name": {
+            "type": "string"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceNode"
+            }
+          },
+          "is_virtual": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ]
+      },
+      "ResourceNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceNodeType"
+          },
+          "name": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "create",
+                "update",
+                "no-op",
+                "delete"
+              ]
+            }
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceNodeType"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ]
+      },
+      "JobID": {
+        "type": "string",
+        "description": "ID of an import or export job",
+        "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+      },
       "Job": {
         "type": "object",
         "properties": {
@@ -461,7 +474,7 @@
             "$ref": "#/components/schemas/JobStatus"
           },
           "job_id": {
-            "type": "string"
+            "$ref": "#/components/schemas/JobID"
           },
           "message": {
             "type": "string"
@@ -480,11 +493,11 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/ResourceNode"
+                  "$ref": "#/components/schemas/RootResourceNode"
                 }
               },
               {
-                "$ref": "#/components/schemas/ResourceNode"
+                "$ref": "#/components/schemas/RootResourceNode"
               }
             ]
           },
@@ -498,11 +511,11 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/ResourceNode"
+                  "$ref": "#/components/schemas/RootResourceNode"
                 }
               },
               {
-                "$ref": "#/components/schemas/ResourceNode"
+                "$ref": "#/components/schemas/RootResourceNode"
               }
             ]
           },
@@ -516,17 +529,32 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/ResourceNode"
+                  "$ref": "#/components/schemas/RootResourceNode"
                 }
               },
               {
-                "$ref": "#/components/schemas/ResourceNode"
+                "$ref": "#/components/schemas/RootResourceNode"
               }
             ]
           },
           "large_imported_resources_url": {
             "type": "string",
             "description": "An URL to download the imported resources when the resources are too large to be included in the response"
+          },
+          "markdown": {
+            "type": "object",
+            "properties": {
+              "preinstall": {
+                "type": "string",
+                "description": "Markdown content to be displayed when showing the plan to install blueprint",
+                "example": "This is the content of the preinstall.md file\n"
+              },
+              "postinstall": {
+                "type": "string",
+                "description": "Markdown content to be displayed when showing the plan to install blueprint",
+                "example": "This is the content of the postinstall.md file\n"
+              }
+            }
           }
         }
       },
@@ -560,16 +588,16 @@
             "example": "templates/main.tf"
           }
         }
-      },
-      "InstalledPatchItem": {
-        "type": "object",
-        "properties": {
-          "blueprintId": {
-            "type": "string"
-          },
-          "stateFileRef": {
-            "type": "string"
-          }
+      }
+    },
+    "parameters": {
+      "JobID": {
+        "name": "job_id",
+        "in": "path",
+        "required": true,
+        "description": "ID of an import or export job",
+        "schema": {
+          "$ref": "#/components/schemas/JobID"
         }
       }
     },

@@ -524,7 +524,7 @@ declare namespace Components {
             /**
              * The coupons applicable to the price item
              */
-            coupons?: (/**
+            _coupons?: (/**
              * The coupon configuration
              * example:
              * {
@@ -1222,7 +1222,7 @@ declare namespace Components {
             /**
              * The coupons applicable to the price item
              */
-            coupons?: (/**
+            _coupons?: (/**
              * The coupon configuration
              * example:
              * {
@@ -2813,7 +2813,7 @@ declare namespace Components {
             /**
              * The coupons applicable to the price item
              */
-            coupons?: (/**
+            _coupons?: (/**
              * The coupon configuration
              * example:
              * {

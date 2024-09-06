@@ -3402,7 +3402,7 @@
               }
             ]
           },
-          "coupons": {
+          "_coupons": {
             "type": "array",
             "description": "The coupons applicable to the price item",
             "readOnly": true,
