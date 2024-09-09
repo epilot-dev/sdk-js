@@ -192,6 +192,11 @@ declare namespace Paths {
                 string?,
                 string?
             ];
+            /**
+             * Temporary flag to indicate if multiple resources are being exported
+             */
+            isExportingMultipleResources?: boolean;
+            jobId?: string;
         }
         namespace Responses {
             export interface $200 {
@@ -245,6 +250,10 @@ declare namespace Paths {
              * journey_HouseConnectionJourney
              */
             resourceName?: string;
+            /**
+             * Temporary flag to indicate if multiple resources are being exported
+             */
+            isExportingMultipleResources?: boolean;
         }
         namespace Responses {
             export interface $200 {

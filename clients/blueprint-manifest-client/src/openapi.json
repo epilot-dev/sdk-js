@@ -102,6 +102,13 @@
                     },
                     "minItems": 1,
                     "maxItems": 25
+                  },
+                  "isExportingMultipleResources": {
+                    "type": "boolean",
+                    "description": "Temporary flag to indicate if multiple resources are being exported"
+                  },
+                  "jobId": {
+                    "type": "string"
                   }
                 }
               }
@@ -156,6 +163,10 @@
                   "resourceName": {
                     "type": "string",
                     "example": "journey_HouseConnectionJourney"
+                  },
+                  "isExportingMultipleResources": {
+                    "type": "boolean",
+                    "description": "Temporary flag to indicate if multiple resources are being exported"
                   }
                 }
               }
