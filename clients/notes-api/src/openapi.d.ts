@@ -51,11 +51,11 @@ declare namespace Components {
             /**
              * ID of the Organization that owns this Note
              */
-            _org: number;
+            _org: string;
             /**
              * The Entity schema of this Note
              */
-            _schema: "notes";
+            _schema: string;
             /**
              * The timestamp of when this Note was created
              */
@@ -78,7 +78,7 @@ declare namespace Components {
             /**
              * Standard `$relation` attribute for a Note's relationship with it's contextual Entity
              */
-            context_entities?: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Note[];
+            context_entitity?: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Note[];
             /**
              * Standard `$relation` attribute for a Note's parent Note, intended to be used by Notes comments to reference their parent Note
              */
@@ -109,22 +109,6 @@ declare namespace Paths {
         }
         export interface RequestBody {
             /**
-             * ID of the Organization that owns this Note
-             */
-            _org: number;
-            /**
-             * The Entity schema of this Note
-             */
-            _schema: "notes";
-            /**
-             * The timestamp of when this Note was created
-             */
-            _created_at: string; // date-time
-            /**
-             * The timestamp of when this Note was last updated
-             */
-            _updated_at: string; // date-time
-            /**
              * Tags associated with this Note
              */
             _tags?: string[];
@@ -135,6 +119,15 @@ declare namespace Paths {
                 [name: string]: string[];
             };
             content: Components.Schemas.LexicalNode | string;
+            /**
+             * The type of context to which the Note belongs
+             */
+            context_type: "entity" | "workflow";
+            context_id: string;
+            /**
+             * The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep
+             */
+            parent?: string;
         }
         namespace Responses {
             export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.Note;
@@ -226,22 +219,6 @@ declare namespace Paths {
         }
         export interface RequestBody {
             /**
-             * ID of the Organization that owns this Note
-             */
-            _org: number;
-            /**
-             * The Entity schema of this Note
-             */
-            _schema: "notes";
-            /**
-             * The timestamp of when this Note was created
-             */
-            _created_at: string; // date-time
-            /**
-             * The timestamp of when this Note was last updated
-             */
-            _updated_at: string; // date-time
-            /**
              * Tags associated with this Note
              */
             _tags?: string[];
@@ -252,6 +229,15 @@ declare namespace Paths {
                 [name: string]: string[];
             };
             content: Components.Schemas.LexicalNode | string;
+            /**
+             * The type of context to which the Note belongs
+             */
+            context_type: "entity" | "workflow";
+            context_id: string;
+            /**
+             * The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep
+             */
+            parent?: string;
         }
         namespace Responses {
             export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.Note;

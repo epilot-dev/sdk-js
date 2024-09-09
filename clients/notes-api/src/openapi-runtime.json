@@ -32,25 +32,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "_org": {
-                    "type": "number",
-                    "description": "ID of the Organization that owns this Note"
-                  },
-                  "_schema": {
-                    "type": "string",
-                    "enum": ["notes"],
-                    "description": "The Entity schema of this Note"
-                  },
-                  "_created_at": {
-                    "type": "string",
-                    "description": "The timestamp of when this Note was created",
-                    "format": "date-time"
-                  },
-                  "_updated_at": {
-                    "type": "string",
-                    "description": "The timestamp of when this Note was last updated",
-                    "format": "date-time"
-                  },
                   "_tags": {
                     "type": "array",
                     "items": { "type": "string" },
@@ -69,15 +50,19 @@
                       { "$ref": "#/components/schemas/LexicalNode" },
                       { "type": "string" }
                     ]
+                  },
+                  "context_type": {
+                    "type": "string",
+                    "enum": ["entity", "workflow"],
+                    "description": "The type of context to which the Note belongs"
+                  },
+                  "context_id": { "type": "string" },
+                  "parent": {
+                    "type": "string",
+                    "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
                   }
                 },
-                "required": [
-                  "_org",
-                  "_schema",
-                  "_created_at",
-                  "_updated_at",
-                  "content"
-                ]
+                "required": ["content", "context_type", "context_id"]
               }
             }
           }
@@ -146,25 +131,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "_org": {
-                    "type": "number",
-                    "description": "ID of the Organization that owns this Note"
-                  },
-                  "_schema": {
-                    "type": "string",
-                    "enum": ["notes"],
-                    "description": "The Entity schema of this Note"
-                  },
-                  "_created_at": {
-                    "type": "string",
-                    "description": "The timestamp of when this Note was created",
-                    "format": "date-time"
-                  },
-                  "_updated_at": {
-                    "type": "string",
-                    "description": "The timestamp of when this Note was last updated",
-                    "format": "date-time"
-                  },
                   "_tags": {
                     "type": "array",
                     "items": { "type": "string" },
@@ -183,15 +149,19 @@
                       { "$ref": "#/components/schemas/LexicalNode" },
                       { "type": "string" }
                     ]
+                  },
+                  "context_type": {
+                    "type": "string",
+                    "enum": ["entity", "workflow"],
+                    "description": "The type of context to which the Note belongs"
+                  },
+                  "context_id": { "type": "string" },
+                  "parent": {
+                    "type": "string",
+                    "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
                   }
                 },
-                "required": [
-                  "_org",
-                  "_schema",
-                  "_created_at",
-                  "_updated_at",
-                  "content"
-                ]
+                "required": ["content", "context_type", "context_id"]
               }
             }
           }
@@ -387,12 +357,11 @@
             "description": "Entity ID of the Note entry"
           },
           "_org": {
-            "type": "number",
+            "type": "string",
             "description": "ID of the Organization that owns this Note"
           },
           "_schema": {
             "type": "string",
-            "enum": ["notes"],
             "description": "The Entity schema of this Note"
           },
           "_created_at": {
@@ -424,7 +393,7 @@
               { "type": "string" }
             ]
           },
-          "context_entities": {
+          "context_entitity": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/Note" },
             "description": "Standard `$relation` attribute for a Note's relationship with it's contextual Entity"
