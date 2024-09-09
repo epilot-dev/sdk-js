@@ -344,6 +344,42 @@
         }
       }
     },
+    "/v2/users/{id}/groups": {
+      "get": {
+        "operationId": "getGroupsForUser",
+        "summary": "getGroupsForUser",
+        "description": "Get groups of a user",
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            },
+            "required": true,
+            "description": "The Id of user"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The returned user groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Group"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/groups": {
       "get": {
         "operationId": "getGroups",
@@ -1357,6 +1393,11 @@
             "type": "string",
             "example": "2024-02-08T04:44:32.246Z"
           },
+          "created_by": {
+            "description": "The user id of the user that created the group.",
+            "type": "string",
+            "example": "123"
+          },
           "crt_assignee": {
             "description": "The current user assignee of the group. This is the user, from within the group, that has last been assigned to a workflow task.",
             "allOf": [
@@ -1629,6 +1670,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://user.sls.epilot.io"
+    },
     {
       "url": "https://user.sls.epilot.io"
     }

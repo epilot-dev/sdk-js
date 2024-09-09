@@ -28,6 +28,15 @@
         "parameters": [
           {
             "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Base64 encoded cursor to be used for pagination"
+          },
+          {
+            "in": "query",
             "name": "after_id",
             "schema": {
               "type": "integer"
@@ -50,6 +59,11 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "cursor": {
+                      "type": "string",
+                      "example": "eyJjcmVhd",
+                      "description": "Base64 encoded cursor to be used for pagination"
+                    },
                     "total": {
                       "type": "integer",
                       "example": 1
@@ -103,15 +117,6 @@
           "Notification"
         ],
         "parameters": [
-          {
-            "in": "query",
-            "name": "cursor",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "Base64 encoded cursor to be used for pagination"
-          },
           {
             "in": "query",
             "name": "after_id",

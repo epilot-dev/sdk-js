@@ -114,6 +114,19 @@
         "responses": {}
       }
     },
+    "/v2/users/{id}/groups": {
+      "get": {
+        "operationId": "getGroupsForUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/groups": {
       "get": {
         "operationId": "getGroups",

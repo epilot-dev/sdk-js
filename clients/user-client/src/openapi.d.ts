@@ -95,6 +95,12 @@ declare namespace Components {
              */
             updated_at: string;
             /**
+             * The user id of the user that created the group.
+             * example:
+             * 123
+             */
+            created_by?: string;
+            /**
              * The current user assignee of the group. This is the user, from within the group, that has last been assigned to a workflow task.
              */
             crt_assignee?: {
@@ -754,6 +760,17 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetGroupsForUser {
+        namespace Parameters {
+            export type Id = /* User's unique identifier */ Components.Schemas.UserId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Group[];
+        }
+    }
     namespace GetMe {
         namespace Responses {
             export type $200 = Components.Schemas.User;
@@ -968,7 +985,7 @@ export interface OperationMethods {
    * Get user details by user id
    */
   'getUserV2'(
-    parameters: Parameters<Paths.GetUserV2.PathParameters>,
+    parameters?: Parameters<Paths.GetUserV2.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUserV2.Responses.$200>
@@ -978,7 +995,7 @@ export interface OperationMethods {
    * Update user details
    */
   'updateUserV2'(
-    parameters: Parameters<Paths.UpdateUserV2.PathParameters>,
+    parameters?: Parameters<Paths.UpdateUserV2.PathParameters> | null,
     data?: Paths.UpdateUserV2.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateUserV2.Responses.$200>
@@ -988,7 +1005,7 @@ export interface OperationMethods {
    * Delete user by user id
    */
   'deleteUserV2'(
-    parameters: Parameters<Paths.DeleteUserV2.PathParameters>,
+    parameters?: Parameters<Paths.DeleteUserV2.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteUserV2.Responses.$200>
@@ -1012,6 +1029,16 @@ export interface OperationMethods {
     data?: Paths.ResendUserInvitation.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ResendUserInvitation.Responses.$200>
+  /**
+   * getGroupsForUser - getGroupsForUser
+   * 
+   * Get groups of a user
+   */
+  'getGroupsForUser'(
+    parameters?: Parameters<Paths.GetGroupsForUser.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetGroupsForUser.Responses.$200>
   /**
    * getGroups - getGroups
    * 
@@ -1038,7 +1065,7 @@ export interface OperationMethods {
    * Get group by id
    */
   'getGroup'(
-    parameters: Parameters<Paths.GetGroup.QueryParameters & Paths.GetGroup.PathParameters>,
+    parameters?: Parameters<Paths.GetGroup.PathParameters & Paths.GetGroup.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetGroup.Responses.$200>
@@ -1048,7 +1075,7 @@ export interface OperationMethods {
    * Update group by id
    */
   'updateGroup'(
-    parameters: Parameters<Paths.UpdateGroup.PathParameters>,
+    parameters?: Parameters<Paths.UpdateGroup.PathParameters> | null,
     data?: Paths.UpdateGroup.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateGroup.Responses.$201>
@@ -1058,7 +1085,7 @@ export interface OperationMethods {
    * Delete group by id
    */
   'deleteGroup'(
-    parameters: Parameters<Paths.DeleteGroup.PathParameters>,
+    parameters?: Parameters<Paths.DeleteGroup.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteGroup.Responses.$204>
@@ -1068,7 +1095,7 @@ export interface OperationMethods {
    * Advance user assignment to next user in line
    */
   'advanceUserAssignment'(
-    parameters: Parameters<Paths.AdvanceUserAssignment.PathParameters>,
+    parameters?: Parameters<Paths.AdvanceUserAssignment.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AdvanceUserAssignment.Responses.$200>
@@ -1098,7 +1125,7 @@ export interface OperationMethods {
    * Get user organization login parameters by username
    */
   'getUserLoginParametersV2'(
-    parameters: Parameters<Paths.GetUserLoginParametersV2.PathParameters>,
+    parameters?: Parameters<Paths.GetUserLoginParametersV2.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUserLoginParametersV2.Responses.$200>
@@ -1128,7 +1155,7 @@ export interface OperationMethods {
    * Get user by id
    */
   'getUser'(
-    parameters: Parameters<Paths.GetUser.PathParameters>,
+    parameters?: Parameters<Paths.GetUser.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUser.Responses.$200>
@@ -1138,7 +1165,7 @@ export interface OperationMethods {
    * Get user organization login parameters by username
    */
   'getUserLoginParameters'(
-    parameters: Parameters<Paths.GetUserLoginParameters.PathParameters>,
+    parameters?: Parameters<Paths.GetUserLoginParameters.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUserLoginParameters.Responses.$200>
@@ -1186,7 +1213,7 @@ export interface PathsDictionary {
      * Get user details by user id
      */
     'get'(
-      parameters: Parameters<Paths.GetUserV2.PathParameters>,
+      parameters?: Parameters<Paths.GetUserV2.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUserV2.Responses.$200>
@@ -1196,7 +1223,7 @@ export interface PathsDictionary {
      * Update user details
      */
     'patch'(
-      parameters: Parameters<Paths.UpdateUserV2.PathParameters>,
+      parameters?: Parameters<Paths.UpdateUserV2.PathParameters> | null,
       data?: Paths.UpdateUserV2.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateUserV2.Responses.$200>
@@ -1206,7 +1233,7 @@ export interface PathsDictionary {
      * Delete user by user id
      */
     'delete'(
-      parameters: Parameters<Paths.DeleteUserV2.PathParameters>,
+      parameters?: Parameters<Paths.DeleteUserV2.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteUserV2.Responses.$200>
@@ -1234,6 +1261,18 @@ export interface PathsDictionary {
       data?: Paths.ResendUserInvitation.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ResendUserInvitation.Responses.$200>
+  }
+  ['/v2/users/{id}/groups']: {
+    /**
+     * getGroupsForUser - getGroupsForUser
+     * 
+     * Get groups of a user
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetGroupsForUser.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetGroupsForUser.Responses.$200>
   }
   ['/v1/groups']: {
     /**
@@ -1264,7 +1303,7 @@ export interface PathsDictionary {
      * Get group by id
      */
     'get'(
-      parameters: Parameters<Paths.GetGroup.QueryParameters & Paths.GetGroup.PathParameters>,
+      parameters?: Parameters<Paths.GetGroup.PathParameters & Paths.GetGroup.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetGroup.Responses.$200>
@@ -1274,7 +1313,7 @@ export interface PathsDictionary {
      * Update group by id
      */
     'patch'(
-      parameters: Parameters<Paths.UpdateGroup.PathParameters>,
+      parameters?: Parameters<Paths.UpdateGroup.PathParameters> | null,
       data?: Paths.UpdateGroup.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateGroup.Responses.$201>
@@ -1284,7 +1323,7 @@ export interface PathsDictionary {
      * Delete group by id
      */
     'delete'(
-      parameters: Parameters<Paths.DeleteGroup.PathParameters>,
+      parameters?: Parameters<Paths.DeleteGroup.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteGroup.Responses.$204>
@@ -1296,7 +1335,7 @@ export interface PathsDictionary {
      * Advance user assignment to next user in line
      */
     'post'(
-      parameters: Parameters<Paths.AdvanceUserAssignment.PathParameters>,
+      parameters?: Parameters<Paths.AdvanceUserAssignment.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AdvanceUserAssignment.Responses.$200>
@@ -1332,7 +1371,7 @@ export interface PathsDictionary {
      * Get user organization login parameters by username
      */
     'get'(
-      parameters: Parameters<Paths.GetUserLoginParametersV2.PathParameters>,
+      parameters?: Parameters<Paths.GetUserLoginParametersV2.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUserLoginParametersV2.Responses.$200>
@@ -1368,7 +1407,7 @@ export interface PathsDictionary {
      * Get user by id
      */
     'get'(
-      parameters: Parameters<Paths.GetUser.PathParameters>,
+      parameters?: Parameters<Paths.GetUser.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUser.Responses.$200>
@@ -1380,7 +1419,7 @@ export interface PathsDictionary {
      * Get user organization login parameters by username
      */
     'get'(
-      parameters: Parameters<Paths.GetUserLoginParameters.PathParameters>,
+      parameters?: Parameters<Paths.GetUserLoginParameters.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUserLoginParameters.Responses.$200>
