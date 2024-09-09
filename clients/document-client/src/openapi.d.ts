@@ -9,11 +9,36 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
-        export interface DocumentGenerationV2Request {
+        export interface ConvertDocumentRequest {
             /**
-             * Language to use for variables
+             * Input document
              */
-            language?: string;
+            input_document: {
+                s3ref: S3Reference;
+            };
+            /**
+             * Output format of the document
+             */
+            output_format: "pdf";
+            /**
+             * Filename of the output document (optional)
+             * example:
+             * converted.pdf
+             */
+            output_filename?: string;
+        }
+        export interface ConvertDocumentResponse {
+            output_document?: {
+                /**
+                 * Pre-signed URL for the converted document
+                 * example:
+                 * https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/converted.pdf
+                 */
+                preview_url?: string;
+                s3ref?: S3Reference;
+            };
+        }
+        export interface DocumentGenerationV2Request {
             /**
              * Input template document
              */
@@ -42,6 +67,12 @@ declare namespace Components {
              * Custom values for variables in the template. Takes the higher precedence than others.
              */
             variable_payload?: {
+                additionalProperties?: string;
+            };
+            /**
+             * Custom values for variables in the template. Takes the higher precedence than others.
+             */
+            context_data?: {
                 additionalProperties?: string;
             };
             template_settings?: /* Template Settings for document generation */ TemplateSettings;
@@ -139,10 +170,7 @@ declare namespace Components {
          * See https://docxtemplater.com/docs/errors/#error-schema for more details.
          *
          */
-        export type DocxTemplaterErrorDetails = [
-            /* DocxTemplater error detail */ DocxTemplaterErrorDetail?,
-            ...any[]
-        ];
+        export type DocxTemplaterErrorDetails = /* DocxTemplater error detail */ DocxTemplaterErrorDetail[];
         /**
          * Error codes for document generation:
          * - PARSE_ERROR - Error while parsing the document. Normally related with a bad template using the wrong DocxTemplater syntax.
@@ -198,7 +226,7 @@ declare namespace Components {
          * Error details for internal error. This error will appear under 'INTERNAL_ERROR' error code.
          */
         export type InternalErrorDetails = {
-            items?: any;
+            items?: /* Internal error detail */ InternalErrorDetail;
         }[];
         export interface InvalidCustomVariableErrorDetail {
             [name: string]: any;
@@ -228,10 +256,7 @@ declare namespace Components {
         /**
          * Error details for invalid custom variables. This error will appear under 'PARSE_ERROR' error code.
          */
-        export type InvalidCustomVariableErrorDetails = [
-            InvalidCustomVariableErrorDetail?,
-            ...any[]
-        ];
+        export type InvalidCustomVariableErrorDetails = InvalidCustomVariableErrorDetail[];
         export interface S3Reference {
             /**
              * example:
@@ -252,6 +277,23 @@ declare namespace Components {
              * Custom margins for the document
              */
             custom_margins?: {
+                /**
+                 * Top margin in cm
+                 * example:
+                 * 2.54
+                 */
+                top?: number;
+                /**
+                 * Bottom margin in cm
+                 * example:
+                 * 2.54
+                 */
+                bottom?: number;
+            };
+            /**
+             * Suggested margins for the document
+             */
+            suggested_margins?: {
                 /**
                  * Top margin in cm
                  * example:
@@ -305,66 +347,10 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
-    namespace GenerateDocument {
-        export interface RequestBody {
-            /**
-             * Language to use
-             * example:
-             * de
-             */
-            language?: string;
-            /**
-             * Input template document
-             */
-            template_document: {
-                /**
-                 * Document original filename
-                 * example:
-                 * my-template-{{order.order_number}}.docx
-                 */
-                filename?: string;
-                s3ref?: Components.Schemas.S3Reference;
-            };
-            /**
-             * Entity to use for variable context
-             * example:
-             * bcd0aab9-b544-42b0-8bfb-6d449d02eacc
-             */
-            context_entity_id?: string;
-            /**
-             * User Id for variable context
-             * example:
-             * 100321
-             */
-            user_id?: string;
-        }
+    namespace ConvertDocument {
+        export type RequestBody = Components.Schemas.ConvertDocumentRequest;
         namespace Responses {
-            export interface $200 {
-                /**
-                 * Pre-signed S3 GET URL for preview
-                 * example:
-                 * https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.pdf
-                 */
-                preview_url?: string;
-                /**
-                 * example:
-                 * {
-                 *   "s3ref": {
-                 *     "bucket": "document-api-preview-prod",
-                 *     "key": "preview/my-template.pdf"
-                 *   }
-                 * }
-                 */
-                output_document?: {
-                    /**
-                     * Generated document filename
-                     * example:
-                     * my-template-OR-001.pdf
-                     */
-                    filename?: string;
-                    s3ref?: Components.Schemas.S3Reference;
-                };
-            }
+            export type $200 = Components.Schemas.ConvertDocumentResponse;
         }
     }
     namespace GenerateDocumentV2 {
@@ -385,25 +371,6 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * generateDocument - generateDocument
-   * 
-   * Builds document generated from input document with variables.
-   * 
-   * Supported input document types:
-   * - .docx
-   * 
-   * Supported output document types:
-   * - .pdf
-   * 
-   * Uses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the document.
-   * 
-   */
-  'generateDocument'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.GenerateDocument.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GenerateDocument.Responses.$200>
-  /**
    * generateDocumentV2 - generateDocumentV2
    * 
    * Builds document generated from input document with variables.
@@ -423,30 +390,26 @@ export interface OperationMethods {
     data?: Paths.GenerateDocumentV2.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GenerateDocumentV2.Responses.$200>
+  /**
+   * convertDocument - convertDocument
+   * 
+   * Converts a document to a different format.
+   * 
+   * Supported input document types:
+   * - .docx
+   * 
+   * Supported output document types:
+   * - .pdf
+   * 
+   */
+  'convertDocument'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ConvertDocument.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConvertDocument.Responses.$200>
 }
 
 export interface PathsDictionary {
-  ['/v1/documents:generate']: {
-    /**
-     * generateDocument - generateDocument
-     * 
-     * Builds document generated from input document with variables.
-     * 
-     * Supported input document types:
-     * - .docx
-     * 
-     * Supported output document types:
-     * - .pdf
-     * 
-     * Uses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the document.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.GenerateDocument.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GenerateDocument.Responses.$200>
-  }
   ['/v2/documents:generate']: {
     /**
      * generateDocumentV2 - generateDocumentV2
@@ -468,6 +431,25 @@ export interface PathsDictionary {
       data?: Paths.GenerateDocumentV2.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GenerateDocumentV2.Responses.$200>
+  }
+  ['/v2/documents:convert']: {
+    /**
+     * convertDocument - convertDocument
+     * 
+     * Converts a document to a different format.
+     * 
+     * Supported input document types:
+     * - .docx
+     * 
+     * Supported output document types:
+     * - .pdf
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ConvertDocument.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConvertDocument.Responses.$200>
   }
 }
 
