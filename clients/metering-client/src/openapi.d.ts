@@ -8,6 +8,17 @@ import type {
 } from 'openapi-client-axios'; 
 
 declare namespace Components {
+    namespace Parameters {
+        export type ActivityIdQueryParam = /**
+         * See https://github.com/ulid/spec
+         * example:
+         * 01F130Q52Q6MWSNS8N2AVXV4JN
+         */
+        Schemas.ActivityId /* ulid */;
+    }
+    export interface QueryParameters {
+        ActivityIdQueryParam?: Parameters.ActivityIdQueryParam;
+    }
     namespace Responses {
         export type Forbidden = Schemas.ErrorResp;
         export type InternalServerError = Schemas.ErrorResp;
@@ -20,6 +31,12 @@ declare namespace Components {
             en?: string | null;
             de?: string | null;
         }
+        /**
+         * See https://github.com/ulid/spec
+         * example:
+         * 01F130Q52Q6MWSNS8N2AVXV4JN
+         */
+        export type ActivityId = string; // ulid
         export interface BaseEntity {
             /**
              * Entity ID
@@ -597,10 +614,17 @@ declare namespace Paths {
     }
     namespace CreateMeterReadings {
         namespace Parameters {
+            export type ActivityId = /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
         }
         export interface QueryParameters {
             async?: Parameters.Async;
+            activity_id?: Parameters.ActivityId;
         }
         export interface RequestBody {
             readings?: Components.Schemas.MeterReading[];

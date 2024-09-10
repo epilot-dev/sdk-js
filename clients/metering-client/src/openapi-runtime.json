@@ -99,6 +99,9 @@
             "in": "query",
             "name": "async",
             "required": false
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "requestBody": {
@@ -322,6 +325,13 @@
         "content": {
           "application/json": {}
         }
+      }
+    },
+    "parameters": {
+      "ActivityIdQueryParam": {
+        "name": "activity_id",
+        "in": "query",
+        "required": false
       }
     }
   },
