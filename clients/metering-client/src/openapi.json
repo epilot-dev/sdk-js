@@ -465,6 +465,9 @@
               "type": "boolean",
               "default": true
             }
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "requestBody": {
@@ -1899,13 +1902,27 @@
             "description": "The source of the reading"
           }
         }
+      },
+      "ActivityId": {
+        "type": "string",
+        "format": "ulid",
+        "description": "See https://github.com/ulid/spec",
+        "example": "01F130Q52Q6MWSNS8N2AVXV4JN"
+      }
+    },
+    "parameters": {
+      "ActivityIdQueryParam": {
+        "name": "activity_id",
+        "description": "Activity to include in event feed",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/ActivityId"
+        }
       }
     }
   },
   "servers": [
-    {
-      "url": "https://metering.sls.epilot.io"
-    },
     {
       "url": "https://metering.sls.epilot.io"
     }
