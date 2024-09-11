@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -330,3 +331,8 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type Organization = Components.Schemas.Organization;
+export type OrganizationId = Components.Schemas.OrganizationId;
+export type Settings = Components.Schemas.Settings;
+export type SettingsValue = Components.Schemas.SettingsValue;

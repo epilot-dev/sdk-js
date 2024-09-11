@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -460,3 +461,18 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type ConvertDocumentRequest = Components.Schemas.ConvertDocumentRequest;
+export type ConvertDocumentResponse = Components.Schemas.ConvertDocumentResponse;
+export type DocumentGenerationV2Request = Components.Schemas.DocumentGenerationV2Request;
+export type DocumentGenerationV2Response = Components.Schemas.DocumentGenerationV2Response;
+export type DocxTemplaterErrorDetail = Components.Schemas.DocxTemplaterErrorDetail;
+export type DocxTemplaterErrorDetails = Components.Schemas.DocxTemplaterErrorDetails;
+export type ErrorCode = Components.Schemas.ErrorCode;
+export type ErrorOutput = Components.Schemas.ErrorOutput;
+export type InternalErrorDetail = Components.Schemas.InternalErrorDetail;
+export type InternalErrorDetails = Components.Schemas.InternalErrorDetails;
+export type InvalidCustomVariableErrorDetail = Components.Schemas.InvalidCustomVariableErrorDetail;
+export type InvalidCustomVariableErrorDetails = Components.Schemas.InvalidCustomVariableErrorDetails;
+export type S3Reference = Components.Schemas.S3Reference;
+export type TemplateSettings = Components.Schemas.TemplateSettings;

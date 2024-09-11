@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -3873,7 +3874,7 @@ declare namespace Paths {
             integrationId: Parameters.IntegrationId;
         }
         namespace Responses {
-            export type $200 = /* The basic auth credentials */ Components.Schemas.BasicAuthCredentials;
+            export type $200 = Components.Schemas.IntegrationCredentialsResult;
             export type $400 = Components.Schemas.Error;
             export type $404 = Components.Schemas.Error;
         }
@@ -3919,7 +3920,7 @@ declare namespace Paths {
         export interface PathParameters {
             integrationId: Parameters.IntegrationId;
         }
-        export type RequestBody = /* The basic auth credentials */ Components.Schemas.BasicAuthCredentials;
+        export type RequestBody = Components.Schemas.SaveIntegrationCredentialsParams;
         namespace Responses {
             export interface $204 {
             }
@@ -4156,7 +4157,7 @@ export interface OperationMethods {
    * Validates an availability file, it returns an array of errors if the file is invalid
    */
   '$validateAvailabilityFile'(
-    parameters?: Parameters<Paths.$ValidateAvailabilityFile.PathParameters & Paths.$ValidateAvailabilityFile.HeaderParameters> | null,
+    parameters?: Parameters<Paths.$ValidateAvailabilityFile.HeaderParameters & Paths.$ValidateAvailabilityFile.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
@@ -4166,7 +4167,7 @@ export interface OperationMethods {
    * Returns the list of providers available based on a given location
    */
   '$searchProviders'(
-    parameters?: Parameters<Paths.$SearchProviders.PathParameters & Paths.$SearchProviders.HeaderParameters> | null,
+    parameters?: Parameters<Paths.$SearchProviders.HeaderParameters & Paths.$SearchProviders.PathParameters> | null,
     data?: Paths.$SearchProviders.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchProviders.Responses.$200>
@@ -4176,7 +4177,7 @@ export interface OperationMethods {
    * Returns the list of streets available for a given postal code and city
    */
   '$searchStreets'(
-    parameters?: Parameters<Paths.$SearchStreets.PathParameters & Paths.$SearchStreets.HeaderParameters> | null,
+    parameters?: Parameters<Paths.$SearchStreets.HeaderParameters & Paths.$SearchStreets.PathParameters> | null,
     data?: Paths.$SearchStreets.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchStreets.Responses.$200>
@@ -4186,7 +4187,7 @@ export interface OperationMethods {
    * Returns the price for a given product type based on location and consumption
    */
   '$computePrice'(
-    parameters?: Parameters<Paths.$ComputePrice.PathParameters & Paths.$ComputePrice.HeaderParameters> | null,
+    parameters?: Parameters<Paths.$ComputePrice.HeaderParameters & Paths.$ComputePrice.PathParameters> | null,
     data?: Paths.$ComputePrice.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ComputePrice.Responses.$200>
@@ -4325,7 +4326,7 @@ export interface PathsDictionary {
      * Validates an availability file, it returns an array of errors if the file is invalid
      */
     'get'(
-      parameters?: Parameters<Paths.$ValidateAvailabilityFile.PathParameters & Paths.$ValidateAvailabilityFile.HeaderParameters> | null,
+      parameters?: Parameters<Paths.$ValidateAvailabilityFile.HeaderParameters & Paths.$ValidateAvailabilityFile.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
@@ -4337,7 +4338,7 @@ export interface PathsDictionary {
      * Returns the list of providers available based on a given location
      */
     'post'(
-      parameters?: Parameters<Paths.$SearchProviders.PathParameters & Paths.$SearchProviders.HeaderParameters> | null,
+      parameters?: Parameters<Paths.$SearchProviders.HeaderParameters & Paths.$SearchProviders.PathParameters> | null,
       data?: Paths.$SearchProviders.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$SearchProviders.Responses.$200>
@@ -4349,7 +4350,7 @@ export interface PathsDictionary {
      * Returns the list of streets available for a given postal code and city
      */
     'post'(
-      parameters?: Parameters<Paths.$SearchStreets.PathParameters & Paths.$SearchStreets.HeaderParameters> | null,
+      parameters?: Parameters<Paths.$SearchStreets.HeaderParameters & Paths.$SearchStreets.PathParameters> | null,
       data?: Paths.$SearchStreets.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$SearchStreets.Responses.$200>
@@ -4361,7 +4362,7 @@ export interface PathsDictionary {
      * Returns the price for a given product type based on location and consumption
      */
     'post'(
-      parameters?: Parameters<Paths.$ComputePrice.PathParameters & Paths.$ComputePrice.HeaderParameters> | null,
+      parameters?: Parameters<Paths.$ComputePrice.HeaderParameters & Paths.$ComputePrice.PathParameters> | null,
       data?: Paths.$ComputePrice.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$ComputePrice.Responses.$200>
@@ -4405,3 +4406,99 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type Address = Components.Schemas.Address;
+export type Amounts = Components.Schemas.Amounts;
+export type AvailabilityCheckParams = Components.Schemas.AvailabilityCheckParams;
+export type AvailabilityDate = Components.Schemas.AvailabilityDate;
+export type AvailabilityFilters = Components.Schemas.AvailabilityFilters;
+export type AvailabilityLocation = Components.Schemas.AvailabilityLocation;
+export type AvailabilityResult = Components.Schemas.AvailabilityResult;
+export type BasePriceItem = Components.Schemas.BasePriceItem;
+export type BasePriceItemDto = Components.Schemas.BasePriceItemDto;
+export type BasicAuthCredentials = Components.Schemas.BasicAuthCredentials;
+export type BillingPeriod = Components.Schemas.BillingPeriod;
+export type Cart = Components.Schemas.Cart;
+export type CartDto = Components.Schemas.CartDto;
+export type CatalogSearch = Components.Schemas.CatalogSearch;
+export type CatalogSearchResult = Components.Schemas.CatalogSearchResult;
+export type CheckoutCart = Components.Schemas.CheckoutCart;
+export type CheckoutCartResult = Components.Schemas.CheckoutCartResult;
+export type CheckoutMode = Components.Schemas.CheckoutMode;
+export type CompositePrice = Components.Schemas.CompositePrice;
+export type CompositePriceItem = Components.Schemas.CompositePriceItem;
+export type CompositePriceItemDto = Components.Schemas.CompositePriceItemDto;
+export type ComputePriceParams = Components.Schemas.ComputePriceParams;
+export type ComputePriceParamsBase = Components.Schemas.ComputePriceParamsBase;
+export type ComputePriceParamsGas = Components.Schemas.ComputePriceParamsGas;
+export type ComputePriceParamsPower = Components.Schemas.ComputePriceParamsPower;
+export type ComputePriceResult = Components.Schemas.ComputePriceResult;
+export type ComputedBasePrice = Components.Schemas.ComputedBasePrice;
+export type ComputedPriceBreakdown = Components.Schemas.ComputedPriceBreakdown;
+export type ComputedPriceComponents = Components.Schemas.ComputedPriceComponents;
+export type ConsumptionTypeGetAg = Components.Schemas.ConsumptionTypeGetAg;
+export type Coupon = Components.Schemas.Coupon;
+export type Currency = Components.Schemas.Currency;
+export type Customer = Components.Schemas.Customer;
+export type EntityId = Components.Schemas.EntityId;
+export type EntityItem = Components.Schemas.EntityItem;
+export type EntityRelation = Components.Schemas.EntityRelation;
+export type Error = Components.Schemas.Error;
+export type ExternalFeeMapping = Components.Schemas.ExternalFeeMapping;
+export type ExternalFeeMappings = Components.Schemas.ExternalFeeMappings;
+export type ExternalFeeMetadata = Components.Schemas.ExternalFeeMetadata;
+export type File = Components.Schemas.File;
+export type GasConcessionType = Components.Schemas.GasConcessionType;
+export type IntegrationCredentialsResult = Components.Schemas.IntegrationCredentialsResult;
+export type IntegrationId = Components.Schemas.IntegrationId;
+export type MarkupPricingModel = Components.Schemas.MarkupPricingModel;
+export type MetaData = Components.Schemas.MetaData;
+export type Opportunity = Components.Schemas.Opportunity;
+export type OpportunitySource = Components.Schemas.OpportunitySource;
+export type Order = Components.Schemas.Order;
+export type OrderPayload = Components.Schemas.OrderPayload;
+export type OrderRelation = Components.Schemas.OrderRelation;
+export type OrderSource = Components.Schemas.OrderSource;
+export type OrderStatus = Components.Schemas.OrderStatus;
+export type PaymentMethod = Components.Schemas.PaymentMethod;
+export type PowerMeterType = Components.Schemas.PowerMeterType;
+export type Price = Components.Schemas.Price;
+export type PriceComponentRelation = Components.Schemas.PriceComponentRelation;
+export type PriceGetAg = Components.Schemas.PriceGetAg;
+export type PriceInputMapping = Components.Schemas.PriceInputMapping;
+export type PriceInputMappings = Components.Schemas.PriceInputMappings;
+export type PriceItem = Components.Schemas.PriceItem;
+export type PriceItemDto = Components.Schemas.PriceItemDto;
+export type PriceItems = Components.Schemas.PriceItems;
+export type PriceItemsDto = Components.Schemas.PriceItemsDto;
+export type PriceTier = Components.Schemas.PriceTier;
+export type PriceTierDisplayMode = Components.Schemas.PriceTierDisplayMode;
+export type PriceTierEnhanced = Components.Schemas.PriceTierEnhanced;
+export type PricingDetails = Components.Schemas.PricingDetails;
+export type PricingDetailsResponse = Components.Schemas.PricingDetailsResponse;
+export type PricingModel = Components.Schemas.PricingModel;
+export type Product = Components.Schemas.Product;
+export type ProductCategory = Components.Schemas.ProductCategory;
+export type Provider = Components.Schemas.Provider;
+export type RecurrenceAmount = Components.Schemas.RecurrenceAmount;
+export type RecurrenceAmountDto = Components.Schemas.RecurrenceAmountDto;
+export type RecurrenceAmountWithTax = Components.Schemas.RecurrenceAmountWithTax;
+export type SalesTax = Components.Schemas.SalesTax;
+export type SaveIntegrationCredentialsParams = Components.Schemas.SaveIntegrationCredentialsParams;
+export type SearchProvidersParams = Components.Schemas.SearchProvidersParams;
+export type SearchProvidersResult = Components.Schemas.SearchProvidersResult;
+export type SearchStreetsParams = Components.Schemas.SearchStreetsParams;
+export type SearchStreetsResult = Components.Schemas.SearchStreetsResult;
+export type SignatureMeta = Components.Schemas.SignatureMeta;
+export type Street = Components.Schemas.Street;
+export type TariffTypeGetAg = Components.Schemas.TariffTypeGetAg;
+export type Tax = Components.Schemas.Tax;
+export type TaxAmount = Components.Schemas.TaxAmount;
+export type TaxAmountBreakdown = Components.Schemas.TaxAmountBreakdown;
+export type TaxAmountDto = Components.Schemas.TaxAmountDto;
+export type TaxBreakdownInfo = Components.Schemas.TaxBreakdownInfo;
+export type TierDetails = Components.Schemas.TierDetails;
+export type TotalDetails = Components.Schemas.TotalDetails;
+export type TypeGetAg = Components.Schemas.TypeGetAg;
+export type ValidateAvailabilityFileError = Components.Schemas.ValidateAvailabilityFileError;
+export type ValidateAvailabilityFileResult = Components.Schemas.ValidateAvailabilityFileResult;

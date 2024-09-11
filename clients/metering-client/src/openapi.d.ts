@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Parameters {
@@ -1202,7 +1203,7 @@ export interface OperationMethods {
    * Get allowed reading for the given meter
    */
   'getAllowedReadingForMeter'(
-    parameters?: Parameters<Paths.GetAllowedReadingForMeter.PathParameters & Paths.GetAllowedReadingForMeter.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetAllowedReadingForMeter.QueryParameters & Paths.GetAllowedReadingForMeter.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllowedReadingForMeter.Responses.$200>
@@ -1225,7 +1226,7 @@ export interface OperationMethods {
    * 
    */
   'getReadingsByInterval'(
-    parameters?: Parameters<Paths.GetReadingsByInterval.PathParameters & Paths.GetReadingsByInterval.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetReadingsByInterval.QueryParameters & Paths.GetReadingsByInterval.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetReadingsByInterval.Responses.$200>
@@ -1235,7 +1236,7 @@ export interface OperationMethods {
    * Updates a meter reading.
    */
   'updateMeterReading'(
-    parameters?: Parameters<Paths.UpdateMeterReading.PathParameters & Paths.UpdateMeterReading.QueryParameters> | null,
+    parameters?: Parameters<Paths.UpdateMeterReading.QueryParameters & Paths.UpdateMeterReading.PathParameters> | null,
     data?: Paths.UpdateMeterReading.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateMeterReading.Responses.$200>
@@ -1245,7 +1246,7 @@ export interface OperationMethods {
    * Deletes a meter reading.
    */
   'deleteMeterReading'(
-    parameters?: Parameters<Paths.DeleteMeterReading.PathParameters & Paths.DeleteMeterReading.QueryParameters> | null,
+    parameters?: Parameters<Paths.DeleteMeterReading.QueryParameters & Paths.DeleteMeterReading.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteMeterReading.Responses.$200>
@@ -1258,7 +1259,7 @@ export interface OperationMethods {
    * 
    */
   'getDownSampleReadingsByInterval'(
-    parameters?: Parameters<Paths.GetDownSampleReadingsByInterval.PathParameters & Paths.GetDownSampleReadingsByInterval.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetDownSampleReadingsByInterval.QueryParameters & Paths.GetDownSampleReadingsByInterval.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetDownSampleReadingsByInterval.Responses.$200>
@@ -1378,7 +1379,7 @@ export interface PathsDictionary {
      * Get allowed reading for the given meter
      */
     'get'(
-      parameters?: Parameters<Paths.GetAllowedReadingForMeter.PathParameters & Paths.GetAllowedReadingForMeter.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetAllowedReadingForMeter.QueryParameters & Paths.GetAllowedReadingForMeter.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllowedReadingForMeter.Responses.$200>
@@ -1405,7 +1406,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetReadingsByInterval.PathParameters & Paths.GetReadingsByInterval.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetReadingsByInterval.QueryParameters & Paths.GetReadingsByInterval.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetReadingsByInterval.Responses.$200>
@@ -1415,7 +1416,7 @@ export interface PathsDictionary {
      * Updates a meter reading.
      */
     'put'(
-      parameters?: Parameters<Paths.UpdateMeterReading.PathParameters & Paths.UpdateMeterReading.QueryParameters> | null,
+      parameters?: Parameters<Paths.UpdateMeterReading.QueryParameters & Paths.UpdateMeterReading.PathParameters> | null,
       data?: Paths.UpdateMeterReading.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateMeterReading.Responses.$200>
@@ -1425,7 +1426,7 @@ export interface PathsDictionary {
      * Deletes a meter reading.
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteMeterReading.PathParameters & Paths.DeleteMeterReading.QueryParameters> | null,
+      parameters?: Parameters<Paths.DeleteMeterReading.QueryParameters & Paths.DeleteMeterReading.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteMeterReading.Responses.$200>
@@ -1440,7 +1441,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetDownSampleReadingsByInterval.PathParameters & Paths.GetDownSampleReadingsByInterval.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetDownSampleReadingsByInterval.QueryParameters & Paths.GetDownSampleReadingsByInterval.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetDownSampleReadingsByInterval.Responses.$200>
@@ -1448,3 +1449,29 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type ActionLabel = Components.Schemas.ActionLabel;
+export type ActivityId = Components.Schemas.ActivityId;
+export type BaseEntity = Components.Schemas.BaseEntity;
+export type CounterReadingOnSubmission = Components.Schemas.CounterReadingOnSubmission;
+export type Direction = Components.Schemas.Direction;
+export type Entity = Components.Schemas.Entity;
+export type EntityId = Components.Schemas.EntityId;
+export type EntityItem = Components.Schemas.EntityItem;
+export type EntityRelation = Components.Schemas.EntityRelation;
+export type EntitySlug = Components.Schemas.EntitySlug;
+export type ErrorResp = Components.Schemas.ErrorResp;
+export type Id = Components.Schemas.Id;
+export type JourneyActions = Components.Schemas.JourneyActions;
+export type Meter = Components.Schemas.Meter;
+export type MeterCounter = Components.Schemas.MeterCounter;
+export type MeterReading = Components.Schemas.MeterReading;
+export type ReadBy = Components.Schemas.ReadBy;
+export type ReadingStatus = Components.Schemas.ReadingStatus;
+export type ReadingWithMeter = Components.Schemas.ReadingWithMeter;
+export type Reason = Components.Schemas.Reason;
+export type Rule = Components.Schemas.Rule;
+export type Source = Components.Schemas.Source;
+export type SubmissionMeterReading = Components.Schemas.SubmissionMeterReading;
+export type TariffType = Components.Schemas.TariffType;
+export type Unit = Components.Schemas.Unit;

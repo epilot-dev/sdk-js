@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -878,3 +879,23 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type Assignment = Components.Schemas.Assignment;
+export type Assignments = Components.Schemas.Assignments;
+export type BaseRole = Components.Schemas.BaseRole;
+export type EqualsCondition = Components.Schemas.EqualsCondition;
+export type Grant = Components.Schemas.Grant;
+export type GrantCondition = Components.Schemas.GrantCondition;
+export type GrantWithDependencies = Components.Schemas.GrantWithDependencies;
+export type OrgRole = Components.Schemas.OrgRole;
+export type OrganizationId = Components.Schemas.OrganizationId;
+export type PartnerRole = Components.Schemas.PartnerRole;
+export type PortalRole = Components.Schemas.PortalRole;
+export type Role = Components.Schemas.Role;
+export type RoleId = Components.Schemas.RoleId;
+export type RolePayload = Components.Schemas.RolePayload;
+export type RoleSearchInput = Components.Schemas.RoleSearchInput;
+export type ShareRole = Components.Schemas.ShareRole;
+export type Slug = Components.Schemas.Slug;
+export type UserId = Components.Schemas.UserId;
+export type UserRole = Components.Schemas.UserRole;

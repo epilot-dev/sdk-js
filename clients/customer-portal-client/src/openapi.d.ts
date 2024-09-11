@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Responses {
@@ -5593,7 +5594,7 @@ export interface OperationMethods {
    * Confirm a portal user
    */
   'confirmUserWithUserId'(
-    parameters?: Parameters<Paths.ConfirmUserWithUserId.PathParameters & Paths.ConfirmUserWithUserId.QueryParameters> | null,
+    parameters?: Parameters<Paths.ConfirmUserWithUserId.QueryParameters & Paths.ConfirmUserWithUserId.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
@@ -5784,7 +5785,7 @@ export interface OperationMethods {
    * 
    */
   'getEntityActivityFeed'(
-    parameters?: Parameters<Paths.GetEntityActivityFeed.PathParameters & Paths.GetEntityActivityFeed.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetEntityActivityFeed.QueryParameters & Paths.GetEntityActivityFeed.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
@@ -5795,7 +5796,7 @@ export interface OperationMethods {
    * 
    */
   'validateCadenceEntityEditRules'(
-    parameters?: Parameters<Paths.ValidateCadenceEntityEditRules.PathParameters & Paths.ValidateCadenceEntityEditRules.QueryParameters> | null,
+    parameters?: Parameters<Paths.ValidateCadenceEntityEditRules.QueryParameters & Paths.ValidateCadenceEntityEditRules.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ValidateCadenceEntityEditRules.Responses.$200>
@@ -5939,7 +5940,7 @@ export interface OperationMethods {
    * Trigger entity access event for a portal user
    */
   'triggerEntityAccessEvent'(
-    parameters?: Parameters<Paths.TriggerEntityAccessEvent.PathParameters & Paths.TriggerEntityAccessEvent.QueryParameters> | null,
+    parameters?: Parameters<Paths.TriggerEntityAccessEvent.QueryParameters & Paths.TriggerEntityAccessEvent.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
@@ -6367,7 +6368,7 @@ export interface PathsDictionary {
      * Confirm a portal user
      */
     'get'(
-      parameters?: Parameters<Paths.ConfirmUserWithUserId.PathParameters & Paths.ConfirmUserWithUserId.QueryParameters> | null,
+      parameters?: Parameters<Paths.ConfirmUserWithUserId.QueryParameters & Paths.ConfirmUserWithUserId.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
@@ -6590,7 +6591,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetEntityActivityFeed.PathParameters & Paths.GetEntityActivityFeed.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetEntityActivityFeed.QueryParameters & Paths.GetEntityActivityFeed.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
@@ -6603,7 +6604,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.ValidateCadenceEntityEditRules.PathParameters & Paths.ValidateCadenceEntityEditRules.QueryParameters> | null,
+      parameters?: Parameters<Paths.ValidateCadenceEntityEditRules.QueryParameters & Paths.ValidateCadenceEntityEditRules.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ValidateCadenceEntityEditRules.Responses.$200>
@@ -6773,7 +6774,7 @@ export interface PathsDictionary {
      * Trigger entity access event for a portal user
      */
     'post'(
-      parameters?: Parameters<Paths.TriggerEntityAccessEvent.PathParameters & Paths.TriggerEntityAccessEvent.QueryParameters> | null,
+      parameters?: Parameters<Paths.TriggerEntityAccessEvent.QueryParameters & Paths.TriggerEntityAccessEvent.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
@@ -6817,3 +6818,72 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
+export type ActionLabel = Components.Schemas.ActionLabel;
+export type ActionWidget = Components.Schemas.ActionWidget;
+export type Activity = Components.Schemas.Activity;
+export type ActivityCallerContext = Components.Schemas.ActivityCallerContext;
+export type ActivityId = Components.Schemas.ActivityId;
+export type ActivityItem = Components.Schemas.ActivityItem;
+export type AdminUser = Components.Schemas.AdminUser;
+export type AllowedFileExtensions = Components.Schemas.AllowedFileExtensions;
+export type Balance = Components.Schemas.Balance;
+export type BaseBillingEvent = Components.Schemas.BaseBillingEvent;
+export type BaseEntity = Components.Schemas.BaseEntity;
+export type BillingEvent = Components.Schemas.BillingEvent;
+export type CommonConfigAttributes = Components.Schemas.CommonConfigAttributes;
+export type Contact = Components.Schemas.Contact;
+export type ContactExistsRequest = Components.Schemas.ContactExistsRequest;
+export type ContentWidget = Components.Schemas.ContentWidget;
+export type Contract = Components.Schemas.Contract;
+export type ContractIdentifier = Components.Schemas.ContractIdentifier;
+export type CreateSSOUserRequest = Components.Schemas.CreateSSOUserRequest;
+export type CreateUserRequest = Components.Schemas.CreateUserRequest;
+export type Currency = Components.Schemas.Currency;
+export type DeleteEntityFile = Components.Schemas.DeleteEntityFile;
+export type DocumentWidget = Components.Schemas.DocumentWidget;
+export type EmailTemplates = Components.Schemas.EmailTemplates;
+export type Entity = Components.Schemas.Entity;
+export type EntityEditRule = Components.Schemas.EntityEditRule;
+export type EntityFileCount = Components.Schemas.EntityFileCount;
+export type EntityId = Components.Schemas.EntityId;
+export type EntityItem = Components.Schemas.EntityItem;
+export type EntitySearchParams = Components.Schemas.EntitySearchParams;
+export type EntitySlug = Components.Schemas.EntitySlug;
+export type EntityWidget = Components.Schemas.EntityWidget;
+export type ErrorResp = Components.Schemas.ErrorResp;
+export type ExtraSchemaAttributes = Components.Schemas.ExtraSchemaAttributes;
+export type FailedRuleErrorResp = Components.Schemas.FailedRuleErrorResp;
+export type File = Components.Schemas.File;
+export type FileItem = Components.Schemas.FileItem;
+export type Grant = Components.Schemas.Grant;
+export type IdentifierAttribute = Components.Schemas.IdentifierAttribute;
+export type InstallmentEvent = Components.Schemas.InstallmentEvent;
+export type JourneyActions = Components.Schemas.JourneyActions;
+export type Meter = Components.Schemas.Meter;
+export type Opportunity = Components.Schemas.Opportunity;
+export type Order = Components.Schemas.Order;
+export type OrganizationSettings = Components.Schemas.OrganizationSettings;
+export type Origin = Components.Schemas.Origin;
+export type PaymentWidget = Components.Schemas.PaymentWidget;
+export type PortalConfig = Components.Schemas.PortalConfig;
+export type PortalUser = Components.Schemas.PortalUser;
+export type PortalWidget = Components.Schemas.PortalWidget;
+export type Product = Components.Schemas.Product;
+export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;
+export type Rule = Components.Schemas.Rule;
+export type SaveEntityFile = Components.Schemas.SaveEntityFile;
+export type SavePortalFile = Components.Schemas.SavePortalFile;
+export type Schema = Components.Schemas.Schema;
+export type TeaserWidget = Components.Schemas.TeaserWidget;
+export type TriggerPortalFlow = Components.Schemas.TriggerPortalFlow;
+export type UpdateOnlyPortalConfigAttributes = Components.Schemas.UpdateOnlyPortalConfigAttributes;
+export type UpsertPortalConfig = Components.Schemas.UpsertPortalConfig;
+export type UpsertPortalWidget = Components.Schemas.UpsertPortalWidget;
+export type UserRequest = Components.Schemas.UserRequest;
+export type WidgetAction = Components.Schemas.WidgetAction;
+export type WidgetBase = Components.Schemas.WidgetBase;
+export type WorfklowIdentifier = Components.Schemas.WorfklowIdentifier;
+export type WorkflowExecution = Components.Schemas.WorkflowExecution;
+export type WorkflowStep = Components.Schemas.WorkflowStep;

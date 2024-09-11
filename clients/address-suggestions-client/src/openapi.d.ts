@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -325,3 +326,13 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type AddressSuggestion = Components.Schemas.AddressSuggestion;
+export type AddressSuggestionError = Components.Schemas.AddressSuggestionError;
+export type AddressSuggestions = Components.Schemas.AddressSuggestions;
+export type AvailabilityLocation = Components.Schemas.AvailabilityLocation;
+export type AvailabilityResult = Components.Schemas.AvailabilityResult;
+export type Error = Components.Schemas.Error;
+export type ValidateAddressFileError = Components.Schemas.ValidateAddressFileError;
+export type ValidateAddressFileResult = Components.Schemas.ValidateAddressFileResult;
+export type ValidateAddressSuggestionsFileResult = Components.Schemas.ValidateAddressSuggestionsFileResult;

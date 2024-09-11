@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -459,7 +460,7 @@ export interface OperationMethods {
    * Get the comments that are treated as first comment of a thread. The fully thread will be get separately.
    */
   'getThreadsByContext'(
-    parameters?: Parameters<Paths.GetThreadsByContext.PathParameters & Paths.GetThreadsByContext.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetThreadsByContext.QueryParameters & Paths.GetThreadsByContext.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetThreadsByContext.Responses.$200>
@@ -479,7 +480,7 @@ export interface OperationMethods {
    * Get comments belong to a thread
    */
   'getThreadComments'(
-    parameters?: Parameters<Paths.GetThreadComments.PathParameters & Paths.GetThreadComments.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetThreadComments.QueryParameters & Paths.GetThreadComments.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetThreadComments.Responses.$200>
@@ -537,7 +538,7 @@ export interface PathsDictionary {
      * Get the comments that are treated as first comment of a thread. The fully thread will be get separately.
      */
     'get'(
-      parameters?: Parameters<Paths.GetThreadsByContext.PathParameters & Paths.GetThreadsByContext.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetThreadsByContext.QueryParameters & Paths.GetThreadsByContext.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetThreadsByContext.Responses.$200>
@@ -561,7 +562,7 @@ export interface PathsDictionary {
      * Get comments belong to a thread
      */
     'get'(
-      parameters?: Parameters<Paths.GetThreadComments.PathParameters & Paths.GetThreadComments.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetThreadComments.QueryParameters & Paths.GetThreadComments.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetThreadComments.Responses.$200>
@@ -569,3 +570,9 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type Attachment = Components.Schemas.Attachment;
+export type BaseEntity = Components.Schemas.BaseEntity;
+export type Comment = Components.Schemas.Comment;
+export type Reaction = Components.Schemas.Reaction;
+export type User = Components.Schemas.User;

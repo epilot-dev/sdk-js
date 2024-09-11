@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Parameters {
@@ -8933,7 +8934,7 @@ export interface OperationMethods {
    * By default gets the latest version of the Schema and to get the specific version of schema pass the id.
    */
   'getSchema'(
-    parameters?: Parameters<Paths.GetSchema.PathParameters & Paths.GetSchema.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetSchema.QueryParameters & Paths.GetSchema.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchema.Responses.$200>
@@ -8943,7 +8944,7 @@ export interface OperationMethods {
    * Create or update a schema with a new version
    */
   'putSchema'(
-    parameters?: Parameters<Paths.PutSchema.PathParameters & Paths.PutSchema.QueryParameters> | null,
+    parameters?: Parameters<Paths.PutSchema.QueryParameters & Paths.PutSchema.PathParameters> | null,
     data?: Paths.PutSchema.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PutSchema.Responses.$200>
@@ -8983,7 +8984,7 @@ export interface OperationMethods {
    * Get all versions of this schema ordered by the latest versions including drafts.
    */
   'getSchemaVersions'(
-    parameters?: Parameters<Paths.GetSchemaVersions.PathParameters & Paths.GetSchemaVersions.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetSchemaVersions.QueryParameters & Paths.GetSchemaVersions.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
@@ -9116,7 +9117,7 @@ export interface OperationMethods {
    * 
    */
   'createEntity'(
-    parameters?: Parameters<Paths.CreateEntity.PathParameters & Paths.CreateEntity.QueryParameters> | null,
+    parameters?: Parameters<Paths.CreateEntity.QueryParameters & Paths.CreateEntity.PathParameters> | null,
     data?: Paths.CreateEntity.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateEntity.Responses.$201>
@@ -9144,7 +9145,7 @@ export interface OperationMethods {
    * 
    */
   'upsertEntity'(
-    parameters?: Parameters<Paths.UpsertEntity.PathParameters & Paths.UpsertEntity.QueryParameters> | null,
+    parameters?: Parameters<Paths.UpsertEntity.QueryParameters & Paths.UpsertEntity.PathParameters> | null,
     data?: Paths.UpsertEntity.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpsertEntity.Responses.$200 | Paths.UpsertEntity.Responses.$201>
@@ -9157,7 +9158,7 @@ export interface OperationMethods {
    * 
    */
   'getEntityV2'(
-    parameters?: Parameters<Paths.GetEntityV2.PathParameters & Paths.GetEntityV2.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetEntityV2.QueryParameters & Paths.GetEntityV2.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityV2.Responses.$200>
@@ -9230,7 +9231,7 @@ export interface OperationMethods {
    * 
    */
   'getEntity'(
-    parameters?: Parameters<Paths.GetEntity.PathParameters & Paths.GetEntity.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetEntity.QueryParameters & Paths.GetEntity.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntity.Responses.$200>
@@ -9265,7 +9266,7 @@ export interface OperationMethods {
    * 
    */
   'updateEntity'(
-    parameters?: Parameters<Paths.UpdateEntity.PathParameters & Paths.UpdateEntity.QueryParameters> | null,
+    parameters?: Parameters<Paths.UpdateEntity.QueryParameters & Paths.UpdateEntity.PathParameters> | null,
     data?: Paths.UpdateEntity.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateEntity.Responses.$200>
@@ -9302,7 +9303,7 @@ export interface OperationMethods {
    * 
    */
   'patchEntity'(
-    parameters?: Parameters<Paths.PatchEntity.PathParameters & Paths.PatchEntity.QueryParameters> | null,
+    parameters?: Parameters<Paths.PatchEntity.QueryParameters & Paths.PatchEntity.PathParameters> | null,
     data?: Paths.PatchEntity.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PatchEntity.Responses.$200>
@@ -9317,7 +9318,7 @@ export interface OperationMethods {
    * 
    */
   'deleteEntity'(
-    parameters?: Parameters<Paths.DeleteEntity.PathParameters & Paths.DeleteEntity.QueryParameters> | null,
+    parameters?: Parameters<Paths.DeleteEntity.QueryParameters & Paths.DeleteEntity.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteEntity.Responses.$200>
@@ -9352,7 +9353,7 @@ export interface OperationMethods {
    * Get activity by id
    */
   'getActivity'(
-    parameters?: Parameters<Paths.GetActivity.PathParameters & Paths.GetActivity.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetActivity.QueryParameters & Paths.GetActivity.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetActivity.Responses.$200>
@@ -9362,7 +9363,7 @@ export interface OperationMethods {
    * Attach existing activity to entity activity feeds
    */
   'attachActivity'(
-    parameters?: Parameters<Paths.AttachActivity.PathParameters & Paths.AttachActivity.QueryParameters> | null,
+    parameters?: Parameters<Paths.AttachActivity.QueryParameters & Paths.AttachActivity.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AttachActivity.Responses.$200>
@@ -9373,7 +9374,7 @@ export interface OperationMethods {
    * 
    */
   'getEntityActivityFeed'(
-    parameters?: Parameters<Paths.GetEntityActivityFeed.PathParameters & Paths.GetEntityActivityFeed.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetEntityActivityFeed.QueryParameters & Paths.GetEntityActivityFeed.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
@@ -9388,7 +9389,7 @@ export interface OperationMethods {
    * 
    */
   'getRelations'(
-    parameters?: Parameters<Paths.GetRelations.PathParameters & Paths.GetRelations.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetRelations.QueryParameters & Paths.GetRelations.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelations.Responses.$200>
@@ -9398,7 +9399,7 @@ export interface OperationMethods {
    * Relates one or more entities to parent entity by adding items to a relation attribute
    */
   'addRelations'(
-    parameters?: Parameters<Paths.AddRelations.PathParameters & Paths.AddRelations.QueryParameters> | null,
+    parameters?: Parameters<Paths.AddRelations.QueryParameters & Paths.AddRelations.PathParameters> | null,
     data?: Paths.AddRelations.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddRelations.Responses.$200>
@@ -9408,7 +9409,7 @@ export interface OperationMethods {
    * Disassociate one or more entities to parent entity by removing items to a relation attribute
    */
   'removeRelations'(
-    parameters?: Parameters<Paths.RemoveRelations.PathParameters & Paths.RemoveRelations.QueryParameters> | null,
+    parameters?: Parameters<Paths.RemoveRelations.QueryParameters & Paths.RemoveRelations.PathParameters> | null,
     data?: Paths.RemoveRelations.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RemoveRelations.Responses.$204>
@@ -9423,7 +9424,7 @@ export interface OperationMethods {
    * 
    */
   'getRelationsV2'(
-    parameters?: Parameters<Paths.GetRelationsV2.PathParameters & Paths.GetRelationsV2.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetRelationsV2.QueryParameters & Paths.GetRelationsV2.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
@@ -9438,7 +9439,7 @@ export interface OperationMethods {
    * 
    */
   'getRelationsV3'(
-    parameters?: Parameters<Paths.GetRelationsV3.PathParameters & Paths.GetRelationsV3.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetRelationsV3.QueryParameters & Paths.GetRelationsV3.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelationsV3.Responses.$200>
@@ -9449,7 +9450,7 @@ export interface OperationMethods {
    * 
    */
   'getRelatedEntitiesCount'(
-    parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters & Paths.GetRelatedEntitiesCount.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetRelatedEntitiesCount.QueryParameters & Paths.GetRelatedEntitiesCount.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRelatedEntitiesCount.Responses.$200>
@@ -9459,7 +9460,7 @@ export interface OperationMethods {
    * Updates an existing relation between two entities.
    */
   'updateRelation'(
-    parameters?: Parameters<Paths.UpdateRelation.PathParameters & Paths.UpdateRelation.QueryParameters> | null,
+    parameters?: Parameters<Paths.UpdateRelation.QueryParameters & Paths.UpdateRelation.PathParameters> | null,
     data?: Paths.UpdateRelation.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateRelation.Responses.$200>
@@ -9469,7 +9470,7 @@ export interface OperationMethods {
    * Removes relation between two entities
    */
   'deleteRelation'(
-    parameters?: Parameters<Paths.DeleteRelation.PathParameters & Paths.DeleteRelation.QueryParameters> | null,
+    parameters?: Parameters<Paths.DeleteRelation.QueryParameters & Paths.DeleteRelation.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteRelation.Responses.$204>
@@ -9602,7 +9603,7 @@ export interface OperationMethods {
    * Delete a taxonomy
    */
   'deleteTaxonomy'(
-    parameters?: Parameters<Paths.DeleteTaxonomy.PathParameters & Paths.DeleteTaxonomy.QueryParameters> | null,
+    parameters?: Parameters<Paths.DeleteTaxonomy.QueryParameters & Paths.DeleteTaxonomy.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteTaxonomy.Responses.$204>
@@ -9612,7 +9613,7 @@ export interface OperationMethods {
    * Taxonomies autocomplete
    */
   'taxonomyAutocomplete'(
-    parameters?: Parameters<Paths.TaxonomyAutocomplete.PathParameters & Paths.TaxonomyAutocomplete.QueryParameters> | null,
+    parameters?: Parameters<Paths.TaxonomyAutocomplete.QueryParameters & Paths.TaxonomyAutocomplete.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TaxonomyAutocomplete.Responses.$200>
@@ -9642,7 +9643,7 @@ export interface OperationMethods {
    * List taxonomy classifications for a given schema
    */
   'listTaxonomyClassificationsForSchema'(
-    parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.PathParameters & Paths.ListTaxonomyClassificationsForSchema.QueryParameters> | null,
+    parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.QueryParameters & Paths.ListTaxonomyClassificationsForSchema.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
@@ -9788,7 +9789,7 @@ export interface PathsDictionary {
      * By default gets the latest version of the Schema and to get the specific version of schema pass the id.
      */
     'get'(
-      parameters?: Parameters<Paths.GetSchema.PathParameters & Paths.GetSchema.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetSchema.QueryParameters & Paths.GetSchema.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchema.Responses.$200>
@@ -9798,7 +9799,7 @@ export interface PathsDictionary {
      * Create or update a schema with a new version
      */
     'put'(
-      parameters?: Parameters<Paths.PutSchema.PathParameters & Paths.PutSchema.QueryParameters> | null,
+      parameters?: Parameters<Paths.PutSchema.QueryParameters & Paths.PutSchema.PathParameters> | null,
       data?: Paths.PutSchema.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PutSchema.Responses.$200>
@@ -9844,7 +9845,7 @@ export interface PathsDictionary {
      * Get all versions of this schema ordered by the latest versions including drafts.
      */
     'get'(
-      parameters?: Parameters<Paths.GetSchemaVersions.PathParameters & Paths.GetSchemaVersions.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetSchemaVersions.QueryParameters & Paths.GetSchemaVersions.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
@@ -9985,7 +9986,7 @@ export interface PathsDictionary {
      * 
      */
     'post'(
-      parameters?: Parameters<Paths.CreateEntity.PathParameters & Paths.CreateEntity.QueryParameters> | null,
+      parameters?: Parameters<Paths.CreateEntity.QueryParameters & Paths.CreateEntity.PathParameters> | null,
       data?: Paths.CreateEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateEntity.Responses.$201>
@@ -10017,7 +10018,7 @@ export interface PathsDictionary {
      * 
      */
     'patch'(
-      parameters?: Parameters<Paths.UpsertEntity.PathParameters & Paths.UpsertEntity.QueryParameters> | null,
+      parameters?: Parameters<Paths.UpsertEntity.QueryParameters & Paths.UpsertEntity.PathParameters> | null,
       data?: Paths.UpsertEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpsertEntity.Responses.$200 | Paths.UpsertEntity.Responses.$201>
@@ -10032,7 +10033,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetEntityV2.PathParameters & Paths.GetEntityV2.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetEntityV2.QueryParameters & Paths.GetEntityV2.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityV2.Responses.$200>
@@ -10107,7 +10108,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetEntity.PathParameters & Paths.GetEntity.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetEntity.QueryParameters & Paths.GetEntity.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntity.Responses.$200>
@@ -10142,7 +10143,7 @@ export interface PathsDictionary {
      * 
      */
     'put'(
-      parameters?: Parameters<Paths.UpdateEntity.PathParameters & Paths.UpdateEntity.QueryParameters> | null,
+      parameters?: Parameters<Paths.UpdateEntity.QueryParameters & Paths.UpdateEntity.PathParameters> | null,
       data?: Paths.UpdateEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateEntity.Responses.$200>
@@ -10179,7 +10180,7 @@ export interface PathsDictionary {
      * 
      */
     'patch'(
-      parameters?: Parameters<Paths.PatchEntity.PathParameters & Paths.PatchEntity.QueryParameters> | null,
+      parameters?: Parameters<Paths.PatchEntity.QueryParameters & Paths.PatchEntity.PathParameters> | null,
       data?: Paths.PatchEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchEntity.Responses.$200>
@@ -10194,7 +10195,7 @@ export interface PathsDictionary {
      * 
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteEntity.PathParameters & Paths.DeleteEntity.QueryParameters> | null,
+      parameters?: Parameters<Paths.DeleteEntity.QueryParameters & Paths.DeleteEntity.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteEntity.Responses.$200>
@@ -10235,7 +10236,7 @@ export interface PathsDictionary {
      * Get activity by id
      */
     'get'(
-      parameters?: Parameters<Paths.GetActivity.PathParameters & Paths.GetActivity.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetActivity.QueryParameters & Paths.GetActivity.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetActivity.Responses.$200>
@@ -10247,7 +10248,7 @@ export interface PathsDictionary {
      * Attach existing activity to entity activity feeds
      */
     'post'(
-      parameters?: Parameters<Paths.AttachActivity.PathParameters & Paths.AttachActivity.QueryParameters> | null,
+      parameters?: Parameters<Paths.AttachActivity.QueryParameters & Paths.AttachActivity.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AttachActivity.Responses.$200>
@@ -10260,7 +10261,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetEntityActivityFeed.PathParameters & Paths.GetEntityActivityFeed.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetEntityActivityFeed.QueryParameters & Paths.GetEntityActivityFeed.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
@@ -10277,7 +10278,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetRelations.PathParameters & Paths.GetRelations.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetRelations.QueryParameters & Paths.GetRelations.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelations.Responses.$200>
@@ -10287,7 +10288,7 @@ export interface PathsDictionary {
      * Relates one or more entities to parent entity by adding items to a relation attribute
      */
     'post'(
-      parameters?: Parameters<Paths.AddRelations.PathParameters & Paths.AddRelations.QueryParameters> | null,
+      parameters?: Parameters<Paths.AddRelations.QueryParameters & Paths.AddRelations.PathParameters> | null,
       data?: Paths.AddRelations.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddRelations.Responses.$200>
@@ -10297,7 +10298,7 @@ export interface PathsDictionary {
      * Disassociate one or more entities to parent entity by removing items to a relation attribute
      */
     'delete'(
-      parameters?: Parameters<Paths.RemoveRelations.PathParameters & Paths.RemoveRelations.QueryParameters> | null,
+      parameters?: Parameters<Paths.RemoveRelations.QueryParameters & Paths.RemoveRelations.PathParameters> | null,
       data?: Paths.RemoveRelations.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RemoveRelations.Responses.$204>
@@ -10314,7 +10315,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetRelationsV2.PathParameters & Paths.GetRelationsV2.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetRelationsV2.QueryParameters & Paths.GetRelationsV2.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelationsV2.Responses.$200>
@@ -10331,7 +10332,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetRelationsV3.PathParameters & Paths.GetRelationsV3.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetRelationsV3.QueryParameters & Paths.GetRelationsV3.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelationsV3.Responses.$200>
@@ -10344,7 +10345,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetRelatedEntitiesCount.PathParameters & Paths.GetRelatedEntitiesCount.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetRelatedEntitiesCount.QueryParameters & Paths.GetRelatedEntitiesCount.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRelatedEntitiesCount.Responses.$200>
@@ -10356,7 +10357,7 @@ export interface PathsDictionary {
      * Updates an existing relation between two entities.
      */
     'put'(
-      parameters?: Parameters<Paths.UpdateRelation.PathParameters & Paths.UpdateRelation.QueryParameters> | null,
+      parameters?: Parameters<Paths.UpdateRelation.QueryParameters & Paths.UpdateRelation.PathParameters> | null,
       data?: Paths.UpdateRelation.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateRelation.Responses.$200>
@@ -10366,7 +10367,7 @@ export interface PathsDictionary {
      * Removes relation between two entities
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteRelation.PathParameters & Paths.DeleteRelation.QueryParameters> | null,
+      parameters?: Parameters<Paths.DeleteRelation.QueryParameters & Paths.DeleteRelation.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteRelation.Responses.$204>
@@ -10515,7 +10516,7 @@ export interface PathsDictionary {
      * Delete a taxonomy
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteTaxonomy.PathParameters & Paths.DeleteTaxonomy.QueryParameters> | null,
+      parameters?: Parameters<Paths.DeleteTaxonomy.QueryParameters & Paths.DeleteTaxonomy.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteTaxonomy.Responses.$204>
@@ -10527,7 +10528,7 @@ export interface PathsDictionary {
      * Taxonomies autocomplete
      */
     'get'(
-      parameters?: Parameters<Paths.TaxonomyAutocomplete.PathParameters & Paths.TaxonomyAutocomplete.QueryParameters> | null,
+      parameters?: Parameters<Paths.TaxonomyAutocomplete.QueryParameters & Paths.TaxonomyAutocomplete.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TaxonomyAutocomplete.Responses.$200>
@@ -10563,7 +10564,7 @@ export interface PathsDictionary {
      * List taxonomy classifications for a given schema
      */
     'get'(
-      parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.PathParameters & Paths.ListTaxonomyClassificationsForSchema.QueryParameters> | null,
+      parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.QueryParameters & Paths.ListTaxonomyClassificationsForSchema.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
@@ -10699,3 +10700,98 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type Activity = Components.Schemas.Activity;
+export type ActivityCallerContext = Components.Schemas.ActivityCallerContext;
+export type ActivityId = Components.Schemas.ActivityId;
+export type ActivityItem = Components.Schemas.ActivityItem;
+export type AddressRelationAttribute = Components.Schemas.AddressRelationAttribute;
+export type Attribute = Components.Schemas.Attribute;
+export type AttributeWithCompositeID = Components.Schemas.AttributeWithCompositeID;
+export type AutomationAttribute = Components.Schemas.AutomationAttribute;
+export type BaseActivityItem = Components.Schemas.BaseActivityItem;
+export type BaseAttribute = Components.Schemas.BaseAttribute;
+export type BaseEntity = Components.Schemas.BaseEntity;
+export type BlueprintEntityId = Components.Schemas.BlueprintEntityId;
+export type BooleanAttribute = Components.Schemas.BooleanAttribute;
+export type ClassificationId = Components.Schemas.ClassificationId;
+export type ClassificationsUpdate = Components.Schemas.ClassificationsUpdate;
+export type ComputedAttribute = Components.Schemas.ComputedAttribute;
+export type ConsentAttribute = Components.Schemas.ConsentAttribute;
+export type CountryAttribute = Components.Schemas.CountryAttribute;
+export type CurrencyAttribute = Components.Schemas.CurrencyAttribute;
+export type DateAttribute = Components.Schemas.DateAttribute;
+export type Entity = Components.Schemas.Entity;
+export type EntityAcl = Components.Schemas.EntityAcl;
+export type EntityAction = Components.Schemas.EntityAction;
+export type EntityCapability = Components.Schemas.EntityCapability;
+export type EntityCapabilityWithCompositeID = Components.Schemas.EntityCapabilityWithCompositeID;
+export type EntityDefaultCreate = Components.Schemas.EntityDefaultCreate;
+export type EntityDefaultEdit = Components.Schemas.EntityDefaultEdit;
+export type EntityDefaultTable = Components.Schemas.EntityDefaultTable;
+export type EntityId = Components.Schemas.EntityId;
+export type EntityImportParams = Components.Schemas.EntityImportParams;
+export type EntityItem = Components.Schemas.EntityItem;
+export type EntityListParams = Components.Schemas.EntityListParams;
+export type EntityOperation = Components.Schemas.EntityOperation;
+export type EntityOwner = Components.Schemas.EntityOwner;
+export type EntitySchema = Components.Schemas.EntitySchema;
+export type EntitySchemaGroup = Components.Schemas.EntitySchemaGroup;
+export type EntitySchemaGroupWithCompositeID = Components.Schemas.EntitySchemaGroupWithCompositeID;
+export type EntitySchemaItem = Components.Schemas.EntitySchemaItem;
+export type EntitySearchOptions = Components.Schemas.EntitySearchOptions;
+export type EntitySearchParams = Components.Schemas.EntitySearchParams;
+export type EntitySearchResults = Components.Schemas.EntitySearchResults;
+export type EntitySlug = Components.Schemas.EntitySlug;
+export type EntityTableFilterOption = Components.Schemas.EntityTableFilterOption;
+export type EntityTableFilterSearch = Components.Schemas.EntityTableFilterSearch;
+export type EntityValidationError = Components.Schemas.EntityValidationError;
+export type EntityValidationResultError = Components.Schemas.EntityValidationResultError;
+export type EntityValidationResultSuccess = Components.Schemas.EntityValidationResultSuccess;
+export type EntityViewDisabled = Components.Schemas.EntityViewDisabled;
+export type ExportJobId = Components.Schemas.ExportJobId;
+export type FieldsParam = Components.Schemas.FieldsParam;
+export type FileAttribute = Components.Schemas.FileAttribute;
+export type GetRelatedEntitiesCount = Components.Schemas.GetRelatedEntitiesCount;
+export type GetRelationsResp = Components.Schemas.GetRelationsResp;
+export type GetRelationsRespWithPagination = Components.Schemas.GetRelationsRespWithPagination;
+export type HydratedEntity = Components.Schemas.HydratedEntity;
+export type InternalAttribute = Components.Schemas.InternalAttribute;
+export type InternalUserAttribute = Components.Schemas.InternalUserAttribute;
+export type InvitationEmailAttribute = Components.Schemas.InvitationEmailAttribute;
+export type IsTemplate = Components.Schemas.IsTemplate;
+export type Language = Components.Schemas.Language;
+export type LinkAttribute = Components.Schemas.LinkAttribute;
+export type ListSavedViewsResults = Components.Schemas.ListSavedViewsResults;
+export type MultiSelectAttribute = Components.Schemas.MultiSelectAttribute;
+export type NumberAttribute = Components.Schemas.NumberAttribute;
+export type OrderedListAttribute = Components.Schemas.OrderedListAttribute;
+export type PartnerOrganisationAttribute = Components.Schemas.PartnerOrganisationAttribute;
+export type PartnerStatusAttribute = Components.Schemas.PartnerStatusAttribute;
+export type PaymentMethodRelationAttribute = Components.Schemas.PaymentMethodRelationAttribute;
+export type PurposeAttribute = Components.Schemas.PurposeAttribute;
+export type RedirectEntityView = Components.Schemas.RedirectEntityView;
+export type RelationAttribute = Components.Schemas.RelationAttribute;
+export type RelationEntity = Components.Schemas.RelationEntity;
+export type RelationItem = Components.Schemas.RelationItem;
+export type RepeatableAttribute = Components.Schemas.RepeatableAttribute;
+export type SavedView = Components.Schemas.SavedView;
+export type SavedViewId = Components.Schemas.SavedViewId;
+export type SavedViewItem = Components.Schemas.SavedViewItem;
+export type SchemaId = Components.Schemas.SchemaId;
+export type SearchFilter = Components.Schemas.SearchFilter;
+export type SearchFilterValue = Components.Schemas.SearchFilterValue;
+export type SearchMappings = Components.Schemas.SearchMappings;
+export type SelectAttribute = Components.Schemas.SelectAttribute;
+export type SequenceAttribute = Components.Schemas.SequenceAttribute;
+export type SettingFlag = Components.Schemas.SettingFlag;
+export type StatusAttribute = Components.Schemas.StatusAttribute;
+export type SummaryAttribute = Components.Schemas.SummaryAttribute;
+export type SummaryField = Components.Schemas.SummaryField;
+export type TagsAttribute = Components.Schemas.TagsAttribute;
+export type Taxonomy = Components.Schemas.Taxonomy;
+export type TaxonomyClassification = Components.Schemas.TaxonomyClassification;
+export type TaxonomyLocationId = Components.Schemas.TaxonomyLocationId;
+export type TaxonomySlug = Components.Schemas.TaxonomySlug;
+export type TextAttribute = Components.Schemas.TextAttribute;
+export type UserRelationAttribute = Components.Schemas.UserRelationAttribute;

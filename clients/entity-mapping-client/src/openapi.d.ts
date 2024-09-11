@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -1025,3 +1026,44 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type AppendValueMapper = Components.Schemas.AppendValueMapper;
+export type AttributeOrigin = Components.Schemas.AttributeOrigin;
+export type ConditionNode = Components.Schemas.ConditionNode;
+export type CopyValueMapper = Components.Schemas.CopyValueMapper;
+export type Entity = Components.Schemas.Entity;
+export type EntityRef = Components.Schemas.EntityRef;
+export type ExecuteMappingReq = Components.Schemas.ExecuteMappingReq;
+export type ExecuteMappingResp = Components.Schemas.ExecuteMappingResp;
+export type ExecuteRelationsReq = Components.Schemas.ExecuteRelationsReq;
+export type ExecuteRelationsResp = Components.Schemas.ExecuteRelationsResp;
+export type JourneyRef = Components.Schemas.JourneyRef;
+export type Loop_Index_String = Components.Schemas.LoopIndexString;
+export type MapCondition = Components.Schemas.MapCondition;
+export type MappingAttribute = Components.Schemas.MappingAttribute;
+export type MappingAttributeMode = Components.Schemas.MappingAttributeMode;
+export type MappingAttributeV2 = Components.Schemas.MappingAttributeV2;
+export type MappingConfig = Components.Schemas.MappingConfig;
+export type MappingConfigCommonFields = Components.Schemas.MappingConfigCommonFields;
+export type MappingConfigV2 = Components.Schemas.MappingConfigV2;
+export type MappingConfigs = Components.Schemas.MappingConfigs;
+export type MappingConfigsResp = Components.Schemas.MappingConfigsResp;
+export type MappingFailure = Components.Schemas.MappingFailure;
+export type MappingHistoryEntry = Components.Schemas.MappingHistoryEntry;
+export type MappingHistoryResp = Components.Schemas.MappingHistoryResp;
+export type MappingSource = Components.Schemas.MappingSource;
+export type MappingSourceProperty = Components.Schemas.MappingSourceProperty;
+export type MappingSourceTargetType = Components.Schemas.MappingSourceTargetType;
+export type MappingWarning = Components.Schemas.MappingWarning;
+export type NewRelationItem = Components.Schemas.NewRelationItem;
+export type OperationNode = Components.Schemas.OperationNode;
+export type OperationObjectNode = Components.Schemas.OperationObjectNode;
+export type Owner = Components.Schemas.Owner;
+export type PrimitiveJSONValue = Components.Schemas.PrimitiveJSONValue;
+export type RandomOperation = Components.Schemas.RandomOperation;
+export type RelationAttribute = Components.Schemas.RelationAttribute;
+export type RelationItem = Components.Schemas.RelationItem;
+export type SearchMappingReq = Components.Schemas.SearchMappingReq;
+export type SetValueMapper = Components.Schemas.SetValueMapper;
+export type SourceConfig = Components.Schemas.SourceConfig;
+export type TargetConfig = Components.Schemas.TargetConfig;

@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -976,3 +977,16 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type Balance = Components.Schemas.Balance;
+export type BaseBillingEvent = Components.Schemas.BaseBillingEvent;
+export type BaseEntity = Components.Schemas.BaseEntity;
+export type BillingEvent = Components.Schemas.BillingEvent;
+export type Contract = Components.Schemas.Contract;
+export type ContractItem = Components.Schemas.ContractItem;
+export type Currency = Components.Schemas.Currency;
+export type EntityId = Components.Schemas.EntityId;
+export type EntityRelationItem = Components.Schemas.EntityRelationItem;
+export type EntitySlug = Components.Schemas.EntitySlug;
+export type InstallmentEvent = Components.Schemas.InstallmentEvent;
+export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;

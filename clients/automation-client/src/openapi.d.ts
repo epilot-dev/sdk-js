@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -1284,9 +1285,9 @@ declare namespace Components {
                         operation?: EntityOperation[];
                         payload?: FilterConditionOnEvent;
                         diff?: OrConditionForDiff | {
-                            added?: FilterConditionOnEvent;
-                            updated?: FilterConditionOnEvent;
-                            deleted?: FilterConditionOnEvent;
+                            added?: DiffAdded;
+                            updated?: DiffUpdated;
+                            deleted?: DiffDeleted;
                         };
                     };
                     activity?: {
@@ -1722,7 +1723,7 @@ declare namespace Components {
             $or?: FilterConditionOnEvent[];
         }
         export interface OrConditionForDiff {
-            $or?: (FilterConditionOnEvent | FilterConditionOnEvent | FilterConditionOnEvent)[];
+            $or?: (DiffAdded | DiffUpdated | DiffDeleted)[];
         }
         /**
          * example:
@@ -2835,3 +2836,92 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type ActionCondition = Components.Schemas.ActionCondition;
+export type ActivityId = Components.Schemas.ActivityId;
+export type ActivityTrigger = Components.Schemas.ActivityTrigger;
+export type AnyAction = Components.Schemas.AnyAction;
+export type AnyActionConfig = Components.Schemas.AnyActionConfig;
+export type AnyTrigger = Components.Schemas.AnyTrigger;
+export type AnythingButCondition = Components.Schemas.AnythingButCondition;
+export type ApiCallerContext = Components.Schemas.ApiCallerContext;
+export type ApiSubmissionTrigger = Components.Schemas.ApiSubmissionTrigger;
+export type AppendValueMapper = Components.Schemas.AppendValueMapper;
+export type AssignUsersToStep = Components.Schemas.AssignUsersToStep;
+export type AutomationAction = Components.Schemas.AutomationAction;
+export type AutomationActionConfig = Components.Schemas.AutomationActionConfig;
+export type AutomationActionExecutionState = Components.Schemas.AutomationActionExecutionState;
+export type AutomationActionId = Components.Schemas.AutomationActionId;
+export type AutomationExecution = Components.Schemas.AutomationExecution;
+export type AutomationExecutionId = Components.Schemas.AutomationExecutionId;
+export type AutomationFlow = Components.Schemas.AutomationFlow;
+export type AutomationFlowId = Components.Schemas.AutomationFlowId;
+export type AutomationTrigger = Components.Schemas.AutomationTrigger;
+export type CartCheckoutAction = Components.Schemas.CartCheckoutAction;
+export type CartCheckoutActionConfig = Components.Schemas.CartCheckoutActionConfig;
+export type CartCheckoutConfig = Components.Schemas.CartCheckoutConfig;
+export type Comparison = Components.Schemas.Comparison;
+export type ConditionStatement = Components.Schemas.ConditionStatement;
+export type CopyValueMapper = Components.Schemas.CopyValueMapper;
+export type CreateDocumentAction = Components.Schemas.CreateDocumentAction;
+export type CreateDocumentActionConfig = Components.Schemas.CreateDocumentActionConfig;
+export type CreateDocumentConfig = Components.Schemas.CreateDocumentConfig;
+export type DiffAdded = Components.Schemas.DiffAdded;
+export type DiffDeleted = Components.Schemas.DiffDeleted;
+export type DiffUpdated = Components.Schemas.DiffUpdated;
+export type EntityId = Components.Schemas.EntityId;
+export type EntityItemSnapshot = Components.Schemas.EntityItemSnapshot;
+export type EntityManualTrigger = Components.Schemas.EntityManualTrigger;
+export type EntityOperation = Components.Schemas.EntityOperation;
+export type EntityOperationTrigger = Components.Schemas.EntityOperationTrigger;
+export type EqualsIgnoreCaseCondition = Components.Schemas.EqualsIgnoreCaseCondition;
+export type ErrorCode = Components.Schemas.ErrorCode;
+export type ErrorDetail = Components.Schemas.ErrorDetail;
+export type ErrorOutput = Components.Schemas.ErrorOutput;
+export type ExecutionStatus = Components.Schemas.ExecutionStatus;
+export type ExistsCondition = Components.Schemas.ExistsCondition;
+export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;
+export type FrontendSubmitTrigger = Components.Schemas.FrontendSubmitTrigger;
+export type GetExecutionsResp = Components.Schemas.GetExecutionsResp;
+export type JourneySubmitTrigger = Components.Schemas.JourneySubmitTrigger;
+export type MapEntityAction = Components.Schemas.MapEntityAction;
+export type MapEntityActionConfig = Components.Schemas.MapEntityActionConfig;
+export type MapEntityConfig = Components.Schemas.MapEntityConfig;
+export type MappingAttribute = Components.Schemas.MappingAttribute;
+export type MappingAttributeMode = Components.Schemas.MappingAttributeMode;
+export type MappingAttributeV2 = Components.Schemas.MappingAttributeV2;
+export type MappingConfigRef = Components.Schemas.MappingConfigRef;
+export type NumericCondition = Components.Schemas.NumericCondition;
+export type OperationNode = Components.Schemas.OperationNode;
+export type OperationObjectNode = Components.Schemas.OperationObjectNode;
+export type OrCondition = Components.Schemas.OrCondition;
+export type OrConditionForDiff = Components.Schemas.OrConditionForDiff;
+export type OrganizationId = Components.Schemas.OrganizationId;
+export type PrefixCondition = Components.Schemas.PrefixCondition;
+export type PrimitiveJSONValue = Components.Schemas.PrimitiveJSONValue;
+export type ReceivedEmailTrigger = Components.Schemas.ReceivedEmailTrigger;
+export type RelationAttribute = Components.Schemas.RelationAttribute;
+export type ResumeReq = Components.Schemas.ResumeReq;
+export type ResumeResp = Components.Schemas.ResumeResp;
+export type ResumeToken = Components.Schemas.ResumeToken;
+export type RetryReq = Components.Schemas.RetryReq;
+export type RetryStrategy = Components.Schemas.RetryStrategy;
+export type SearchAutomationsResp = Components.Schemas.SearchAutomationsResp;
+export type SendEmailAction = Components.Schemas.SendEmailAction;
+export type SendEmailActionConfig = Components.Schemas.SendEmailActionConfig;
+export type SendEmailConfig = Components.Schemas.SendEmailConfig;
+export type SetValueMapper = Components.Schemas.SetValueMapper;
+export type StartExecutionRequest = Components.Schemas.StartExecutionRequest;
+export type SuffixCondition = Components.Schemas.SuffixCondition;
+export type TriggerCondition = Components.Schemas.TriggerCondition;
+export type TriggerEventEntityActivity = Components.Schemas.TriggerEventEntityActivity;
+export type TriggerEventEntityOperation = Components.Schemas.TriggerEventEntityOperation;
+export type TriggerEventManual = Components.Schemas.TriggerEventManual;
+export type TriggerWebhookAction = Components.Schemas.TriggerWebhookAction;
+export type TriggerWebhookActionConfig = Components.Schemas.TriggerWebhookActionConfig;
+export type TriggerWebhookConfig = Components.Schemas.TriggerWebhookConfig;
+export type TriggerWorkflowAction = Components.Schemas.TriggerWorkflowAction;
+export type TriggerWorkflowActionConfig = Components.Schemas.TriggerWorkflowActionConfig;
+export type TriggerWorkflowCondition = Components.Schemas.TriggerWorkflowCondition;
+export type TriggerWorkflowConfig = Components.Schemas.TriggerWorkflowConfig;
+export type WildcardCondition = Components.Schemas.WildcardCondition;

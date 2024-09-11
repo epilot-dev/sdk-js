@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -811,3 +812,18 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type AsyncEmailTemplateResponse = Components.Schemas.AsyncEmailTemplateResponse;
+export type Attachment = Components.Schemas.Attachment;
+export type BaseEntity = Components.Schemas.BaseEntity;
+export type BulkSendMessageJob = Components.Schemas.BulkSendMessageJob;
+export type BulkSendMessageRequest = Components.Schemas.BulkSendMessageRequest;
+export type BulkSendMessageRequestWithQuery = Components.Schemas.BulkSendMessageRequestWithQuery;
+export type EmailTemplateEntity = Components.Schemas.EmailTemplateEntity;
+export type EmailTemplateRequest = Components.Schemas.EmailTemplateRequest;
+export type EmailTemplateResponse = Components.Schemas.EmailTemplateResponse;
+export type From = Components.Schemas.From;
+export type SkipCreatingEntities = Components.Schemas.SkipCreatingEntities;
+export type TemplateType = Components.Schemas.TemplateType;
+export type To = Components.Schemas.To;
+export type VariableParameters = Components.Schemas.VariableParameters;

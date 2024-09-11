@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -734,3 +735,20 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type ActivatePartnerPayload = Components.Schemas.ActivatePartnerPayload;
+export type Address = Components.Schemas.Address;
+export type AddressGeolocation = Components.Schemas.AddressGeolocation;
+export type Assignable = Components.Schemas.Assignable;
+export type AssignableEcpPlaceholder = Components.Schemas.AssignableEcpPlaceholder;
+export type AssignableOrganization = Components.Schemas.AssignableOrganization;
+export type AssignablePartnerUser = Components.Schemas.AssignablePartnerUser;
+export type AssignableUser = Components.Schemas.AssignableUser;
+export type BaseAssignable = Components.Schemas.BaseAssignable;
+export type Geolocation = Components.Schemas.Geolocation;
+export type InviteToken = Components.Schemas.InviteToken;
+export type OrganizationId = Components.Schemas.OrganizationId;
+export type Partner = Components.Schemas.Partner;
+export type PartnerId = Components.Schemas.PartnerId;
+export type PartnerInvitationPayload = Components.Schemas.PartnerInvitationPayload;
+export type SearchGeolocation = Components.Schemas.SearchGeolocation;
