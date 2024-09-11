@@ -1,6 +1,6 @@
 {
   "name": "@epilot/document-client",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "description": "API Client for epilot document API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
