@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -602,3 +603,25 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type ChangeReasonStatusReq = Components.Schemas.ChangeReasonStatusReq;
+export type ClosingReason = Components.Schemas.ClosingReason;
+export type ClosingReasonId = Components.Schemas.ClosingReasonId;
+export type ClosingReasonNotFoundResp = Components.Schemas.ClosingReasonNotFoundResp;
+export type ClosingReasons = Components.Schemas.ClosingReasons;
+export type ClosingReasonsIds = Components.Schemas.ClosingReasonsIds;
+export type ClosingReasonsStatus = Components.Schemas.ClosingReasonsStatus;
+export type DefinitionNotFoundResp = Components.Schemas.DefinitionNotFoundResp;
+export type DynamicDueDate = Components.Schemas.DynamicDueDate;
+export type ECPDetails = Components.Schemas.ECPDetails;
+export type ErrorResp = Components.Schemas.ErrorResp;
+export type ItemType = Components.Schemas.ItemType;
+export type MaxAllowedLimit = Components.Schemas.MaxAllowedLimit;
+export type Section = Components.Schemas.Section;
+export type Step = Components.Schemas.Step;
+export type StepDescription = Components.Schemas.StepDescription;
+export type StepJourney = Components.Schemas.StepJourney;
+export type StepRequirement = Components.Schemas.StepRequirement;
+export type StepType = Components.Schemas.StepType;
+export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
+export type WorkflowDefinition = Components.Schemas.WorkflowDefinition;

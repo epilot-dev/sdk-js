@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -726,7 +727,7 @@ export interface OperationMethods {
    * Generate pre-signed download S3 url for a file
    */
   'downloadFile'(
-    parameters?: Parameters<Paths.DownloadFile.PathParameters & Paths.DownloadFile.QueryParameters> | null,
+    parameters?: Parameters<Paths.DownloadFile.QueryParameters & Paths.DownloadFile.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DownloadFile.Responses.$200>
@@ -766,7 +767,7 @@ export interface OperationMethods {
    * Generate thumbnail preview for a file entity
    */
   'previewFile'(
-    parameters?: Parameters<Paths.PreviewFile.PathParameters & Paths.PreviewFile.QueryParameters> | null,
+    parameters?: Parameters<Paths.PreviewFile.QueryParameters & Paths.PreviewFile.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
@@ -776,7 +777,7 @@ export interface OperationMethods {
    * Generate thumbnail preview for a public file entity
    */
   'previewPublicFile'(
-    parameters?: Parameters<Paths.PreviewPublicFile.PathParameters & Paths.PreviewPublicFile.QueryParameters> | null,
+    parameters?: Parameters<Paths.PreviewPublicFile.QueryParameters & Paths.PreviewPublicFile.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
@@ -959,7 +960,7 @@ export interface PathsDictionary {
      * Generate pre-signed download S3 url for a file
      */
     'get'(
-      parameters?: Parameters<Paths.DownloadFile.PathParameters & Paths.DownloadFile.QueryParameters> | null,
+      parameters?: Parameters<Paths.DownloadFile.QueryParameters & Paths.DownloadFile.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DownloadFile.Responses.$200>
@@ -1007,7 +1008,7 @@ export interface PathsDictionary {
      * Generate thumbnail preview for a file entity
      */
     'get'(
-      parameters?: Parameters<Paths.PreviewFile.PathParameters & Paths.PreviewFile.QueryParameters> | null,
+      parameters?: Parameters<Paths.PreviewFile.QueryParameters & Paths.PreviewFile.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
@@ -1019,7 +1020,7 @@ export interface PathsDictionary {
      * Generate thumbnail preview for a public file entity
      */
     'get'(
-      parameters?: Parameters<Paths.PreviewPublicFile.PathParameters & Paths.PreviewPublicFile.QueryParameters> | null,
+      parameters?: Parameters<Paths.PreviewPublicFile.QueryParameters & Paths.PreviewPublicFile.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
@@ -1165,3 +1166,22 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type CommonSaveFilePayload = Components.Schemas.CommonSaveFilePayload;
+export type DeleteFilePayload = Components.Schemas.DeleteFilePayload;
+export type DownloadFilesPayload = Components.Schemas.DownloadFilesPayload;
+export type EntityId = Components.Schemas.EntityId;
+export type EntitySlug = Components.Schemas.EntitySlug;
+export type FileEntity = Components.Schemas.FileEntity;
+export type FileEntityId = Components.Schemas.FileEntityId;
+export type FileItem = Components.Schemas.FileItem;
+export type FileRelationItem = Components.Schemas.FileRelationItem;
+export type FileUpload = Components.Schemas.FileUpload;
+export type PublicLink = Components.Schemas.PublicLink;
+export type S3Reference = Components.Schemas.S3Reference;
+export type SaveCustomFilePayload = Components.Schemas.SaveCustomFilePayload;
+export type SaveFilePayload = Components.Schemas.SaveFilePayload;
+export type SaveFilePayloadV2 = Components.Schemas.SaveFilePayloadV2;
+export type SaveS3FilePayload = Components.Schemas.SaveS3FilePayload;
+export type UploadFilePayload = Components.Schemas.UploadFilePayload;
+export type VerifyCustomDownloadUrlPayload = Components.Schemas.VerifyCustomDownloadUrlPayload;

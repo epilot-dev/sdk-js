@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Parameters {
@@ -440,3 +441,13 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type Job = Components.Schemas.Job;
+export type JobID = Components.Schemas.JobID;
+export type JobStatus = Components.Schemas.JobStatus;
+export type ResourceNode = Components.Schemas.ResourceNode;
+export type ResourceNodeType = Components.Schemas.ResourceNodeType;
+export type RootResourceNode = Components.Schemas.RootResourceNode;
+export type S3Reference = Components.Schemas.S3Reference;
+export type UploadFilePayload = Components.Schemas.UploadFilePayload;
+export type VirtualResourceNodeGroup = Components.Schemas.VirtualResourceNodeGroup;

@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -252,7 +253,7 @@ export interface OperationMethods {
    * Creates a new Note entry
    */
   'createNote'(
-    parameters: Parameters<Paths.CreateNote.PathParameters>,
+    parameters?: Parameters<Paths.CreateNote.PathParameters> | null,
     data?: Paths.CreateNote.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateNote.Responses.$200>
@@ -262,7 +263,7 @@ export interface OperationMethods {
    * Retrieves a single Note entry based on it's Entity ID
    */
   'getNote'(
-    parameters: Parameters<Paths.GetNote.PathParameters>,
+    parameters?: Parameters<Paths.GetNote.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetNote.Responses.$200>
@@ -272,7 +273,7 @@ export interface OperationMethods {
    * Updates an existing Note entry
    */
   'updateNote'(
-    parameters: Parameters<Paths.UpdateNote.PathParameters>,
+    parameters?: Parameters<Paths.UpdateNote.PathParameters> | null,
     data?: Paths.UpdateNote.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateNote.Responses.$200>
@@ -282,7 +283,7 @@ export interface OperationMethods {
    * Deletes a single Note entry based on it's Entity ID
    */
   'deleteNote'(
-    parameters: Parameters<Paths.DeleteNote.PathParameters>,
+    parameters?: Parameters<Paths.DeleteNote.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteNote.Responses.$200>
@@ -292,7 +293,7 @@ export interface OperationMethods {
    * Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`
    */
   'getNotesByContext'(
-    parameters: Parameters<Paths.GetNotesByContext.QueryParameters & Paths.GetNotesByContext.PathParameters>,
+    parameters?: Parameters<Paths.GetNotesByContext.QueryParameters & Paths.GetNotesByContext.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetNotesByContext.Responses.$200>
@@ -306,7 +307,7 @@ export interface PathsDictionary {
      * Creates a new Note entry
      */
     'post'(
-      parameters: Parameters<Paths.CreateNote.PathParameters>,
+      parameters?: Parameters<Paths.CreateNote.PathParameters> | null,
       data?: Paths.CreateNote.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateNote.Responses.$200>
@@ -318,7 +319,7 @@ export interface PathsDictionary {
      * Retrieves a single Note entry based on it's Entity ID
      */
     'get'(
-      parameters: Parameters<Paths.GetNote.PathParameters>,
+      parameters?: Parameters<Paths.GetNote.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetNote.Responses.$200>
@@ -328,7 +329,7 @@ export interface PathsDictionary {
      * Updates an existing Note entry
      */
     'put'(
-      parameters: Parameters<Paths.UpdateNote.PathParameters>,
+      parameters?: Parameters<Paths.UpdateNote.PathParameters> | null,
       data?: Paths.UpdateNote.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateNote.Responses.$200>
@@ -338,7 +339,7 @@ export interface PathsDictionary {
      * Deletes a single Note entry based on it's Entity ID
      */
     'delete'(
-      parameters: Parameters<Paths.DeleteNote.PathParameters>,
+      parameters?: Parameters<Paths.DeleteNote.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteNote.Responses.$200>
@@ -350,7 +351,7 @@ export interface PathsDictionary {
      * Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`
      */
     'get'(
-      parameters: Parameters<Paths.GetNotesByContext.QueryParameters & Paths.GetNotesByContext.PathParameters>,
+      parameters?: Parameters<Paths.GetNotesByContext.QueryParameters & Paths.GetNotesByContext.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetNotesByContext.Responses.$200>
@@ -358,3 +359,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type LexicalNode = Components.Schemas.LexicalNode;
+export type Note = Components.Schemas.Note;
+export type NotesResponse = Components.Schemas.NotesResponse;

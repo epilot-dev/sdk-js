@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -365,3 +366,13 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type Domain = Components.Schemas.Domain;
+export type EmailAddressSetting = Components.Schemas.EmailAddressSetting;
+export type EmailDomainSetting = Components.Schemas.EmailDomainSetting;
+export type RestrictDuplicatesWithinSetting = Components.Schemas.RestrictDuplicatesWithinSetting;
+export type Setting = Components.Schemas.Setting;
+export type SettingType = Components.Schemas.SettingType;
+export type SettingsResponse = Components.Schemas.SettingsResponse;
+export type SignatureSetting = Components.Schemas.SignatureSetting;
+export type WhitelistEmailAddressSetting = Components.Schemas.WhitelistEmailAddressSetting;

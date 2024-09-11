@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -193,7 +194,7 @@ export interface OperationMethods {
    * 
    */
   'listConsentEvents'(
-    parameters: Parameters<Paths.ListConsentEvents.QueryParameters & Paths.ListConsentEvents.PathParameters>,
+    parameters?: Parameters<Paths.ListConsentEvents.QueryParameters & Paths.ListConsentEvents.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListConsentEvents.Responses.$200>
@@ -204,7 +205,7 @@ export interface OperationMethods {
    * 
    */
   'handleOptInWithToken'(
-    parameters: Parameters<Paths.HandleOptInWithToken.QueryParameters & Paths.HandleOptInWithToken.PathParameters>,
+    parameters?: Parameters<Paths.HandleOptInWithToken.QueryParameters & Paths.HandleOptInWithToken.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
@@ -232,7 +233,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters: Parameters<Paths.ListConsentEvents.QueryParameters & Paths.ListConsentEvents.PathParameters>,
+      parameters?: Parameters<Paths.ListConsentEvents.QueryParameters & Paths.ListConsentEvents.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListConsentEvents.Responses.$200>
@@ -245,7 +246,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters: Parameters<Paths.HandleOptInWithToken.QueryParameters & Paths.HandleOptInWithToken.PathParameters>,
+      parameters?: Parameters<Paths.HandleOptInWithToken.QueryParameters & Paths.HandleOptInWithToken.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
@@ -253,3 +254,11 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type ConsentEvent = Components.Schemas.ConsentEvent;
+export type ConsentEventRequestBody = Components.Schemas.ConsentEventRequestBody;
+export type ConsentIdentifier = Components.Schemas.ConsentIdentifier;
+export type ConsentMeta = Components.Schemas.ConsentMeta;
+export type ConsentSource = Components.Schemas.ConsentSource;
+export type ConsentTopic = Components.Schemas.ConsentTopic;
+export type OrganizationId = Components.Schemas.OrganizationId;

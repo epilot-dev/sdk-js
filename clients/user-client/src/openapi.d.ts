@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -1065,7 +1066,7 @@ export interface OperationMethods {
    * Get group by id
    */
   'getGroup'(
-    parameters?: Parameters<Paths.GetGroup.PathParameters & Paths.GetGroup.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetGroup.QueryParameters & Paths.GetGroup.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetGroup.Responses.$200>
@@ -1303,7 +1304,7 @@ export interface PathsDictionary {
      * Get group by id
      */
     'get'(
-      parameters?: Parameters<Paths.GetGroup.PathParameters & Paths.GetGroup.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetGroup.QueryParameters & Paths.GetGroup.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetGroup.Responses.$200>
@@ -1427,3 +1428,31 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type CognitoDetails = Components.Schemas.CognitoDetails;
+export type CreateGroupReq = Components.Schemas.CreateGroupReq;
+export type DataPoint = Components.Schemas.DataPoint;
+export type DataPointsResponse = Components.Schemas.DataPointsResponse;
+export type Group = Components.Schemas.Group;
+export type GroupId = Components.Schemas.GroupId;
+export type Hydrate = Components.Schemas.Hydrate;
+export type InviteToken = Components.Schemas.InviteToken;
+export type Limit = Components.Schemas.Limit;
+export type LoginParameters = Components.Schemas.LoginParameters;
+export type Offset = Components.Schemas.Offset;
+export type Organization = Components.Schemas.Organization;
+export type OrganizationDetail = Components.Schemas.OrganizationDetail;
+export type OrganizationId = Components.Schemas.OrganizationId;
+export type PartnerInvitationToken = Components.Schemas.PartnerInvitationToken;
+export type Query = Components.Schemas.Query;
+export type SignupUserPayload = Components.Schemas.SignupUserPayload;
+export type UpdateGroupReq = Components.Schemas.UpdateGroupReq;
+export type User = Components.Schemas.User;
+export type UserActivationPayload = Components.Schemas.UserActivationPayload;
+export type UserDetail = Components.Schemas.UserDetail;
+export type UserId = Components.Schemas.UserId;
+export type UserInvitationPayload = Components.Schemas.UserInvitationPayload;
+export type UserV2 = Components.Schemas.UserV2;
+export type UserVerificationPayload = Components.Schemas.UserVerificationPayload;
+export type Username = Components.Schemas.Username;
+export type VerificationToken = Components.Schemas.VerificationToken;

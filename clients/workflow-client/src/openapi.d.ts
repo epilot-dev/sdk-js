@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -1208,3 +1209,45 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type AutomationConfig = Components.Schemas.AutomationConfig;
+export type ClosingReason = Components.Schemas.ClosingReason;
+export type ClosingReasonResp = Components.Schemas.ClosingReasonResp;
+export type CreateStepReq = Components.Schemas.CreateStepReq;
+export type DynamicDueDate = Components.Schemas.DynamicDueDate;
+export type ECPDetails = Components.Schemas.ECPDetails;
+export type ErrorResp = Components.Schemas.ErrorResp;
+export type ExecutionPaginationDynamo = Components.Schemas.ExecutionPaginationDynamo;
+export type Flow = Components.Schemas.Flow;
+export type FlowSlim = Components.Schemas.FlowSlim;
+export type ItemType = Components.Schemas.ItemType;
+export type LastEvaluatedKey = Components.Schemas.LastEvaluatedKey;
+export type PhaseInEntity = Components.Schemas.PhaseInEntity;
+export type SearchExecutionsReq = Components.Schemas.SearchExecutionsReq;
+export type SearchExecutionsResp = Components.Schemas.SearchExecutionsResp;
+export type SearchPagination = Components.Schemas.SearchPagination;
+export type SearchSorting = Components.Schemas.SearchSorting;
+export type SearchStepsReq = Components.Schemas.SearchStepsReq;
+export type SearchStepsResp = Components.Schemas.SearchStepsResp;
+export type Section = Components.Schemas.Section;
+export type SectionStatus = Components.Schemas.SectionStatus;
+export type Step = Components.Schemas.Step;
+export type StepDescription = Components.Schemas.StepDescription;
+export type StepExtended = Components.Schemas.StepExtended;
+export type StepId = Components.Schemas.StepId;
+export type StepJourney = Components.Schemas.StepJourney;
+export type StepPositionAt = Components.Schemas.StepPositionAt;
+export type StepRequirement = Components.Schemas.StepRequirement;
+export type StepSimplified = Components.Schemas.StepSimplified;
+export type StepStatus = Components.Schemas.StepStatus;
+export type StepType = Components.Schemas.StepType;
+export type TriggerType = Components.Schemas.TriggerType;
+export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
+export type UpdateStepReq = Components.Schemas.UpdateStepReq;
+export type WorkflowContext = Components.Schemas.WorkflowContext;
+export type WorkflowExecution = Components.Schemas.WorkflowExecution;
+export type WorkflowExecutionBase = Components.Schemas.WorkflowExecutionBase;
+export type WorkflowExecutionCreateReq = Components.Schemas.WorkflowExecutionCreateReq;
+export type WorkflowExecutionSlim = Components.Schemas.WorkflowExecutionSlim;
+export type WorkflowExecutionUpdateReq = Components.Schemas.WorkflowExecutionUpdateReq;
+export type WorkflowStatus = Components.Schemas.WorkflowStatus;

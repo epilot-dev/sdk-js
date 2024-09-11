@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -300,3 +301,11 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type ActionType = Components.Schemas.ActionType;
+export type BaseViewActionItem = Components.Schemas.BaseViewActionItem;
+export type EntityId = Components.Schemas.EntityId;
+export type EntitySchema = Components.Schemas.EntitySchema;
+export type PortalUserViewActionItem = Components.Schemas.PortalUserViewActionItem;
+export type UserViewActionItem = Components.Schemas.UserViewActionItem;
+export type ViewActionItem = Components.Schemas.ViewActionItem;

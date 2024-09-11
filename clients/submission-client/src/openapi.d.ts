@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -410,3 +411,8 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type OptIn = Components.Schemas.OptIn;
+export type S3Reference = Components.Schemas.S3Reference;
+export type SubmissionEntity = Components.Schemas.SubmissionEntity;
+export type SubmissionPayload = Components.Schemas.SubmissionPayload;

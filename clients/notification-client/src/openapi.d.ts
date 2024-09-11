@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -639,3 +640,14 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type Entity = Components.Schemas.Entity;
+export type EntityId = Components.Schemas.EntityId;
+export type EntityOperation = Components.Schemas.EntityOperation;
+export type EntitySlug = Components.Schemas.EntitySlug;
+export type Id = Components.Schemas.Id;
+export type Notification = Components.Schemas.Notification;
+export type NotificationBase = Components.Schemas.NotificationBase;
+export type NotificationCallerContext = Components.Schemas.NotificationCallerContext;
+export type NotificationId = Components.Schemas.NotificationId;
+export type NotificationItem = Components.Schemas.NotificationItem;
