@@ -64,6 +64,12 @@ declare namespace Components {
              */
             user_id?: string;
             /**
+             * Language
+             * example:
+             * en
+             */
+            language?: string;
+            /**
              * Custom values for variables in the template. Takes the higher precedence than others.
              */
             variable_payload?: {

@@ -362,6 +362,11 @@
             "description": "User Id for variable context",
             "example": 100321
           },
+          "language": {
+            "type": "string",
+            "description": "Language",
+            "example": "en"
+          },
           "variable_payload": {
             "description": "Custom values for variables in the template. Takes the higher precedence than others.",
             "type": "object",
