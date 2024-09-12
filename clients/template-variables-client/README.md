@@ -7,7 +7,7 @@
 
 API Client for epilot [Template Variables API](https://docs.epilot.io/api/template-variables).
 
-Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axios)
+Uses [`openapi-client-axios`](https://github.com/openapistack/openapi-client-axios)
 
 ## Installation
 

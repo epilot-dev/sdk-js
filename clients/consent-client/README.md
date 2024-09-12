@@ -7,7 +7,7 @@
 
 Client library for epilot [Consent API](https://docs.epilot.io/api/consent).
 
-Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axios)
+Uses [`openapi-client-axios`](https://github.com/openapistack/openapi-client-axios)
 
 ## Installation
 

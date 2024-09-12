@@ -18,7 +18,6 @@
   "keywords": [
     "blueprint",
     "manifest",
-    "tf-blueprints",
     "terraform"
   ],
   "scripts": {

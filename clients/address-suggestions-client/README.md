@@ -7,7 +7,7 @@
 
 Client library for epilot [Address Suggestions API](https://docs.epilot.io/api/address-suggestions)
 
-Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axios)
+Uses [`openapi-client-axios`](https://github.com/openapistack/openapi-client-axios)
 
 ## Installation
 

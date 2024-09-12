@@ -1,0 +1,67 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/sandbox/pipelines": {
+      "get": {
+        "operationId": "listPipelines",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createPipeline",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/sandbox/pipelines/{pipeline_id}": {
+      "get": {
+        "operationId": "getPipeline",
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deletePipeline",
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/sandbox/pipelines/{pipeline_id}/token": {
+      "get": {
+        "operationId": "generatePipelineToken",
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://sandbox.sls.epilot.io"
+    }
+  ]
+}

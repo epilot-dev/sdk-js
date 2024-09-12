@@ -7,7 +7,7 @@
 
 API Client for epilot [Notification API](https://docs.epilot.io/api/notification).
 
-Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axios)
+Uses [`openapi-client-axios`](https://github.com/openapistack/openapi-client-axios)
 
 ## Installation
 

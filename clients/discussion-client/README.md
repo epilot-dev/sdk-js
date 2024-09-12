@@ -7,7 +7,7 @@
 
 API Client for epilot [Discussion API](https://docs.epilot.io/api/discussion).
 
-Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axios)
+Uses [`openapi-client-axios`](https://github.com/openapistack/openapi-client-axios)
 
 ## Installation
 

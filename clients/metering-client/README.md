@@ -2,7 +2,7 @@
 
 API Client for epilot ts-sam API.
 
-Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axios)
+Uses [`openapi-client-axios`](https://github.com/openapistack/openapi-client-axios)
 
 ## Getting Started
 

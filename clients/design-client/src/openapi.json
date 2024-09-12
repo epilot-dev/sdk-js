@@ -1,0 +1,1388 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Design Builder API v2",
+    "version": "0.0.1"
+  },
+  "tags": [
+    {
+      "name": "design-builder",
+      "description": "Available design-builder over designs provided by Design Builder v2"
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://design-builder-api.epilot.io"
+    }
+  ],
+  "security": [
+    {
+      "custom_authorizer": []
+    }
+  ],
+  "paths": {
+    "/v1/designs": {
+      "get": {
+        "operationId": "getAllDesigns",
+        "summary": "getAllDesigns",
+        "description": "Scan all designs linked to a organization, based in orgId attribute from JWT auth token",
+        "tags": [
+          "design-builder"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - designs loaded with success. Empty array if org has no designs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetAllDesignsRes"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "addDesign",
+        "summary": "addDesign",
+        "description": "Create a brand new design linked to a organization, based in orgId attribute from JWT auth token",
+        "tags": [
+          "design-builder"
+        ],
+        "requestBody": {
+          "description": "Design payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDesignReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success - design created with success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddDesignRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/designs/{designId}": {
+      "get": {
+        "operationId": "getDesign",
+        "summary": "getDesign",
+        "description": "Search for a especific design owned by user organization",
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the design",
+            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - design loaded with success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDesignRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No design found"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDesign",
+        "summary": "deleteDesign",
+        "description": "Search and delete for a especific design owned by user organization",
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the design",
+            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - design deleted with success."
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No design found"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateDesign",
+        "summary": "updateDesign",
+        "description": "Update a especific design owned by user organization",
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the design",
+            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+          }
+        ],
+        "requestBody": {
+          "description": "Design payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDesignReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success - design updated with success."
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No design found"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/designs/{designId}/parse": {
+      "get": {
+        "operationId": "getThemeFromDesign",
+        "summary": "getThemeFromDesign",
+        "description": "Search for a especific design owned by user organization and parse them to a new or old theme",
+        "security": [],
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the design",
+            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+          },
+          {
+            "in": "query",
+            "name": "orgId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Organization id of the user"
+          },
+          {
+            "in": "query",
+            "name": "theme",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "NEW",
+                "OLD"
+              ]
+            },
+            "required": true,
+            "description": "Type of theme to be parsed and returned",
+            "example": "NEW"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - design parsed with success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No design found"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/designs/files": {
+      "post": {
+        "operationId": "uploadFile",
+        "summary": "uploadFile",
+        "description": "Upload a new file for the user organization bucket",
+        "tags": [
+          "design-builder"
+        ],
+        "requestBody": {
+          "description": "Upload file payload",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFileReq"
+              },
+              "encoding": {
+                "file_data": {
+                  "contentType": "image/*, application/x-font-ttf, application/x-font-opentype, application/font-woff, application/font-woff2"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success - upload with success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFileRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "getFiles",
+        "summary": "getFiles",
+        "description": "List all files for the user organization bucket",
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "LOGO",
+                "FONT"
+              ]
+            },
+            "required": false,
+            "description": "Type of files to be returned",
+            "example": "LOGO"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - files loaded with success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFilesRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/designs/limit": {
+      "get": {
+        "deprecated": true,
+        "operationId": "getLimit",
+        "summary": "getLimit",
+        "description": "Gets designs number limit from database per organization",
+        "tags": [
+          "design-builder"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - limit loaded with success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/brands": {
+      "get": {
+        "deprecated": true,
+        "operationId": "getBrands",
+        "summary": "getBrands",
+        "description": "Scan all brands linked to a organization, based in orgId attribute from JWT auth token",
+        "tags": [
+          "design-builder"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - brands loaded with success. Empty array if org has no designs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetBrandsRes"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/designs/consumer/{application}/{consumerId}": {
+      "get": {
+        "operationId": "getConsumerDesign",
+        "summary": "getConsumerDesign",
+        "description": "Search for a especific design owned by user organization",
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consumerId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the design",
+            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+          },
+          {
+            "in": "path",
+            "name": "application",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Type of application that uses the design",
+            "example": "journey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - design loaded with success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDesignRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No design found"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/designs/addConsumer/{application}/{designId}": {
+      "put": {
+        "operationId": "addConsumer",
+        "summary": "addConsumer",
+        "description": "Add a consumer that uses a specific design",
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the design",
+            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+          },
+          {
+            "in": "path",
+            "name": "application",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Type of application that uses the design",
+            "example": "journey"
+          }
+        ],
+        "requestBody": {
+          "description": "widget id payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConsumerReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success - design updated with success."
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No design found"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/designs/removeConsumer/{application}/{designId}": {
+      "put": {
+        "operationId": "removeConsumer",
+        "summary": "removeConsumer",
+        "description": "Remove a consumer that uses a specific design",
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the design",
+            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+          },
+          {
+            "in": "path",
+            "name": "application",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Type of application that uses the design",
+            "example": "journey"
+          }
+        ],
+        "requestBody": {
+          "description": "widget id payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddConsumerReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success - design updated with success."
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No design found"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "custom_authorizer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "UploadFileReq": {
+        "type": "object",
+        "properties": {
+          "file_type": {
+            "type": "string",
+            "enum": [
+              "LOGO",
+              "FONT"
+            ]
+          },
+          "file_data": {
+            "type": "string",
+            "format": "base64"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_type",
+          "file_name",
+          "file_data"
+        ]
+      },
+      "UploadFileRes": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileData"
+          }
+        ]
+      },
+      "GetFilesRes": {
+        "type": "array",
+        "items": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/FileData"
+            }
+          ]
+        }
+      },
+      "GetAllDesignsRes": {
+        "type": "object",
+        "properties": {
+          "designs": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ItemMetada"
+                },
+                {
+                  "$ref": "#/components/schemas/DesignItem"
+                },
+                {
+                  "$ref": "#/components/schemas/Custom_Style"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "GetBrandsRes": {
+        "type": "object",
+        "properties": {
+          "brands": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/BrandItem"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "AddDesignReq": {
+        "type": "object",
+        "properties": {
+          "design": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DesignItem"
+              },
+              {
+                "$ref": "#/components/schemas/Custom_Style"
+              }
+            ]
+          }
+        },
+        "required": [
+          "design"
+        ]
+      },
+      "AddDesignRes": {
+        "type": "object",
+        "properties": {
+          "design": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ItemMetada"
+              },
+              {
+                "$ref": "#/components/schemas/DesignItem"
+              },
+              {
+                "$ref": "#/components/schemas/Custom_Style"
+              }
+            ]
+          }
+        }
+      },
+      "GetDesignRes": {
+        "type": "object",
+        "properties": {
+          "design": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ItemMetada"
+              },
+              {
+                "$ref": "#/components/schemas/DesignItem"
+              },
+              {
+                "$ref": "#/components/schemas/Custom_Style"
+              }
+            ]
+          }
+        }
+      },
+      "UpdateDesignReq": {
+        "type": "object",
+        "properties": {
+          "design": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DesignItem"
+              },
+              {
+                "$ref": "#/components/schemas/Custom_Style"
+              }
+            ]
+          }
+        },
+        "required": [
+          "design"
+        ]
+      },
+      "ItemMetada": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation date and time using ISO 8601 full-time format",
+            "example": "2021-01-30T08:30:00Z"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "last_modified_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AddConsumerReq": {
+        "type": "object",
+        "properties": {
+          "consumer_id": {
+            "type": "string"
+          },
+          "consumer_name": {
+            "type": "string"
+          },
+          "should_delete": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "consumer_id",
+          "consumer_name"
+        ]
+      },
+      "DesignItem": {
+        "type": "object",
+        "properties": {
+          "brand_id": {
+            "type": "string"
+          },
+          "brand_name": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "emailaddress": {
+                "type": "string"
+              },
+              "fullname": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "userid": {
+                "type": "string"
+              }
+            }
+          },
+          "style_name": {
+            "type": "string"
+          },
+          "style": {
+            "type": "object",
+            "properties": {
+              "logo": {
+                "type": "object",
+                "$ref": "#/components/schemas/LogoData"
+              },
+              "palette": {
+                "type": "object",
+                "$ref": "#/components/schemas/PaletteData"
+              },
+              "typography": {
+                "type": "object",
+                "$ref": "#/components/schemas/TypographyData"
+              },
+              "shape": {
+                "type": "object",
+                "$ref": "#/components/schemas/ShapeData"
+              },
+              "consumer": {
+                "type": "object",
+                "$ref": "#/components/schemas/ConsumerData"
+              }
+            },
+            "required": [
+              "palette",
+              "typography",
+              "consumer"
+            ]
+          }
+        },
+        "required": [
+          "style_name",
+          "status",
+          "edited",
+          "style"
+        ]
+      },
+      "BrandItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "created_date": {
+            "type": "string"
+          },
+          "main_brand": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "updated_date": {
+            "type": "string"
+          },
+          "updated_by": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "Custom_Style": {
+        "type": "object",
+        "properties": {
+          "custom_theme": {
+            "type": "string"
+          },
+          "use_custom_theme": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ConsumerData": {
+        "type": "object",
+        "properties": {
+          "widgets": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/WidgetData"
+                }
+              ]
+            }
+          },
+          "customer_portals": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CustomerPortalData"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "widgets",
+          "customer_portals"
+        ]
+      },
+      "WidgetData": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WidgetPortalData"
+          }
+        ]
+      },
+      "CustomerPortalData": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WidgetPortalData"
+          }
+        ]
+      },
+      "LogoData": {
+        "type": "object",
+        "properties": {
+          "main": {
+            "type": "object",
+            "$ref": "#/components/schemas/FileData"
+          }
+        }
+      },
+      "PaletteData": {
+        "type": "object",
+        "properties": {
+          "primary": {
+            "type": "string"
+          },
+          "secondary": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "background": {
+            "type": "string"
+          },
+          "paper": {
+            "type": "string"
+          },
+          "navbar": {
+            "type": "string"
+          },
+          "portal_login_background": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "primary",
+          "secondary",
+          "error",
+          "background",
+          "paper",
+          "navbar"
+        ]
+      },
+      "TypographyData": {
+        "type": "object",
+        "properties": {
+          "font": {
+            "type": "object",
+            "$ref": "#/components/schemas/FontData"
+          },
+          "primary": {
+            "type": "string"
+          },
+          "secondary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "font",
+          "primary",
+          "secondary"
+        ]
+      },
+      "ShapeData": {
+        "type": "object",
+        "properties": {
+          "border_radius": {
+            "type": "number"
+          }
+        }
+      },
+      "FontData": {
+        "type": "object",
+        "properties": {
+          "font_id": {
+            "type": "string"
+          },
+          "font_name": {
+            "type": "string"
+          },
+          "font_family": {
+            "type": "string"
+          },
+          "font_weight_regular": {
+            "type": "string"
+          },
+          "font_weight_medium": {
+            "type": "string"
+          },
+          "font_weight_bold": {
+            "type": "string"
+          },
+          "urls": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/FontResponseUrl"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "font_id",
+          "font_name",
+          "urls"
+        ]
+      },
+      "FontResponseUrl": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "WOFF2",
+              "WOFF",
+              "TTF",
+              "EOT"
+            ]
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "WidgetPortalData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "ErrorResp": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "FileData": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "file_type": {
+            "type": "string",
+            "enum": [
+              "LOGO",
+              "FONT"
+            ]
+          },
+          "s3_object_key": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "s3_object_key",
+          "url"
+        ]
+      }
+    }
+  }
+}

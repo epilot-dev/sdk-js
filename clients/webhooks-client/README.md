@@ -7,7 +7,7 @@
 
 Client library for epilot [Webhooks API](https://docs.epilot.io/api/webhooks)
 
-Uses [`openapi-client-axios`](https://github.com/anttiviljami/openapi-client-axios)
+Uses [`openapi-client-axios`](https://github.com/openapistack/openapi-client-axios)
 
 ## Installation
 

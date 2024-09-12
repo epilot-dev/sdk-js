@@ -5,6 +5,11 @@ import {
   getClient as getAddressSuggestionsClient,
 } from './address-suggestions-client';
 import { default as automationClient, getClient as getAutomationClient } from './automation-client';
+import {
+  default as blueprintManifestClient,
+  getClient as getBlueprintManifestClient,
+} from './blueprint-manifest-client';
+import { default as designClient, getClient as getDesignClient } from './design-client';
 import { default as discussionClient, getClient as getDiscussionClient } from './discussion-client';
 import { default as emailSettingsClient, getClient as getEmailSettingsClient } from './email-settings-client';
 import { default as emailTemplateClient, getClient as getEmailTemplateClient } from './email-template-client';
@@ -16,15 +21,12 @@ import { default as organizationClient, getClient as getOrganizationClient } fro
 import { default as partnerClient, getClient as getPartnerClient } from './partner-directory-client';
 import { default as permissionsClient, getClient as getPermissionsClient } from './permissions-client';
 import { default as pricingClient, getClient as getPricingClient } from './pricing-client';
+import { default as sandboxClient, getClient as getSandboxClient } from './sandbox-client';
 import { default as submissionClient, getClient as getSubmissionClient } from './submission-client';
 import {
   default as templateVariablesClient,
   getClient as getTemplateVariablesClient,
 } from './template-variables-client';
-import {
-  default as terraformBlueprintsClient,
-  getClient as getTerraformBlueprintsClient,
-} from './tf-blueprints-client';
 import { default as userClient, getClient as getUserClient } from './user-client';
 import { default as workflowClient, getClient as getWorkflowClient } from './workflow-client';
 
@@ -77,13 +79,17 @@ export class EpilotClient {
   get partner() {
     return getPartnerClient();
   }
-
   get addressSuggestions() {
     return getAddressSuggestionsClient();
   }
-
-  get terraformBlueprints() {
-    return getTerraformBlueprintsClient();
+  get blueprintManifest() {
+    return getBlueprintManifestClient();
+  }
+  get sandbox() {
+    return getSandboxClient();
+  }
+  get design() {
+    return getDesignClient();
   }
 
   public authorize(token: string) {
@@ -104,7 +110,9 @@ export class EpilotClient {
     authorizeWithToken(this.templateVariables, token);
     authorizeWithToken(this.partner, token);
     authorizeWithToken(this.addressSuggestions, token);
-    authorizeWithToken(this.terraformBlueprints, token);
+    authorizeWithToken(this.blueprintManifest, token);
+    authorizeWithToken(this.sandbox, token);
+    authorizeWithToken(this.design, token);
 
     return this;
   }
@@ -129,7 +137,9 @@ export class EpilotClient {
     authorizer.configureClient(this.templateVariables);
     authorizer.configureClient(this.partner);
     authorizer.configureClient(this.addressSuggestions);
-    authorizer.configureClient(this.terraformBlueprints);
+    authorizer.configureClient(this.blueprintManifest);
+    authorizer.configureClient(this.sandbox);
+    authorizer.configureClient(this.design);
 
     return this;
   }
@@ -154,4 +164,6 @@ export { emailTemplateClient };
 export { templateVariablesClient };
 export { partnerClient };
 export { addressSuggestionsClient };
-export { terraformBlueprintsClient };
+export { blueprintManifestClient };
+export { sandboxClient };
+export { designClient };
