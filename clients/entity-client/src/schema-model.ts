@@ -1,5 +1,3 @@
-import { Components } from './openapi';
-
 export enum RelationAffinityMode {
   /**
    * For strong affinity mode on a relation attribute, deleting or creating the parent or the relation linkage will trigger a CASCADE delete or create to the relation entity itself.
@@ -8,6 +6,3 @@ export enum RelationAffinityMode {
   WEAK = 'weak',
   STRONG = 'strong',
 }
-
-export type Attribute = Components.Schemas.Attribute;
-export type AttributeType = Attribute['type'];

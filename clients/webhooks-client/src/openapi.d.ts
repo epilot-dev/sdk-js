@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -937,7 +938,7 @@ export interface OperationMethods {
    * Get failed deliveries for a given config id
    */
   'getFailuresForConfig'(
-    parameters?: Parameters<Paths.GetFailuresForConfig.PathParameters & Paths.GetFailuresForConfig.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetFailuresForConfig.QueryParameters & Paths.GetFailuresForConfig.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFailuresForConfig.Responses.$200>
@@ -967,7 +968,7 @@ export interface OperationMethods {
    * Trigger a webhook
    */
   'triggerWebhook'(
-    parameters?: Parameters<Paths.TriggerWebhook.PathParameters & Paths.TriggerWebhook.QueryParameters> | null,
+    parameters?: Parameters<Paths.TriggerWebhook.QueryParameters & Paths.TriggerWebhook.PathParameters> | null,
     data?: Paths.TriggerWebhook.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerWebhook.Responses.$200>
@@ -977,7 +978,7 @@ export interface OperationMethods {
    * Get sent events for a given webhook config
    */
   'getWehookEvents'(
-    parameters?: Parameters<Paths.GetWehookEvents.PathParameters & Paths.GetWehookEvents.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetWehookEvents.QueryParameters & Paths.GetWehookEvents.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetWehookEvents.Responses.$200>
@@ -1077,7 +1078,7 @@ export interface PathsDictionary {
      * Get failed deliveries for a given config id
      */
     'get'(
-      parameters?: Parameters<Paths.GetFailuresForConfig.PathParameters & Paths.GetFailuresForConfig.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetFailuresForConfig.QueryParameters & Paths.GetFailuresForConfig.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFailuresForConfig.Responses.$200>
@@ -1113,7 +1114,7 @@ export interface PathsDictionary {
      * Trigger a webhook
      */
     'post'(
-      parameters?: Parameters<Paths.TriggerWebhook.PathParameters & Paths.TriggerWebhook.QueryParameters> | null,
+      parameters?: Parameters<Paths.TriggerWebhook.QueryParameters & Paths.TriggerWebhook.PathParameters> | null,
       data?: Paths.TriggerWebhook.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TriggerWebhook.Responses.$200>
@@ -1125,7 +1126,7 @@ export interface PathsDictionary {
      * Get sent events for a given webhook config
      */
     'get'(
-      parameters?: Parameters<Paths.GetWehookEvents.PathParameters & Paths.GetWehookEvents.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetWehookEvents.QueryParameters & Paths.GetWehookEvents.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetWehookEvents.Responses.$200>
@@ -1157,3 +1158,24 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+export type ApiKeyConfig = Components.Schemas.ApiKeyConfig;
+export type Auth = Components.Schemas.Auth;
+export type AuthType = Components.Schemas.AuthType;
+export type BasicAuthConfig = Components.Schemas.BasicAuthConfig;
+export type CustomOAuthParameter = Components.Schemas.CustomOAuthParameter;
+export type ErrorResp = Components.Schemas.ErrorResp;
+export type EventConfigEntry = Components.Schemas.EventConfigEntry;
+export type EventConfigResp = Components.Schemas.EventConfigResp;
+export type ExecutionPayload = Components.Schemas.ExecutionPayload;
+export type FailureEntry = Components.Schemas.FailureEntry;
+export type FailureLastKey = Components.Schemas.FailureLastKey;
+export type FailuresResp = Components.Schemas.FailuresResp;
+export type Filter = Components.Schemas.Filter;
+export type HttpMethod = Components.Schemas.HttpMethod;
+export type Metadata = Components.Schemas.Metadata;
+export type OAuthConfig = Components.Schemas.OAuthConfig;
+export type PayloadConfiguration = Components.Schemas.PayloadConfiguration;
+export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
+export type WebhookConfig = Components.Schemas.WebhookConfig;
+export type WebhookEvent = Components.Schemas.WebhookEvent;
