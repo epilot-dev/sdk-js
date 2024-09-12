@@ -1,6 +1,6 @@
 {
   "name": "@epilot/billing-client",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "API Client for epilot Billing API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
