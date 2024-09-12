@@ -228,8 +228,10 @@
             "name": "context_type",
             "description": "Type of context to retrieve Notes within the targeted Entity",
             "schema": {
-              "type": "string",
-              "enum": ["opportunity", "workflows"],
+              "anyOf": [
+                { "type": "string" },
+                { "$ref": "#/components/schemas/ContextType" }
+              ],
               "description": "Type of context to retrieve Notes within the targeted Entity"
             },
             "required": true
@@ -414,6 +416,7 @@
         ],
         "description": "A note Entity object cotaining Entity metadata and content in a LexicalNode format"
       },
+      "ContextType": { "type": "string", "enum": ["opportunity", "workflows"] },
       "NotesResponse": {
         "type": "object",
         "properties": {

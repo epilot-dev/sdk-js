@@ -10,6 +10,7 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export type ContextType = "opportunity" | "workflows";
         export interface LexicalNode {
             /**
              * Metadata information about the direction of the Node instance
@@ -171,7 +172,7 @@ declare namespace Paths {
             /**
              * Type of context to retrieve Notes within the targeted Entity
              */
-            export type ContextType = "opportunity" | "workflows";
+            export type ContextType = /* Type of context to retrieve Notes within the targeted Entity */ string | Components.Schemas.ContextType;
             /**
              * The fields to return in the response
              */
@@ -360,6 +361,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type ContextType = Components.Schemas.ContextType;
 export type LexicalNode = Components.Schemas.LexicalNode;
 export type Note = Components.Schemas.Note;
 export type NotesResponse = Components.Schemas.NotesResponse;
