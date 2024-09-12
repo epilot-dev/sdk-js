@@ -623,6 +623,13 @@
               "custom"
             ]
           },
+          "tags": {
+            "type": "array",
+            "description": "The tags of custom variable",
+            "items": {
+              "type": "string"
+            }
+          },
           "query": {
             "type": "string",
             "description": "Search string",
@@ -752,6 +759,13 @@
             "type": "string",
             "description": "The key which is used for Handlebar variable syntax {{key}}",
             "example": "my_custom_table"
+          },
+          "_tags": {
+            "type": "array",
+            "description": "The tags of custom variable",
+            "items": {
+              "type": "string"
+            }
           },
           "helper_params": {
             "type": "array",

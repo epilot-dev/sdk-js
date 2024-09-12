@@ -48,6 +48,10 @@ declare namespace Components {
              */
             key?: string;
             /**
+             * The tags of custom variable
+             */
+            _tags?: string[];
+            /**
              * The helper function parameter's names
              * example:
              * [
@@ -214,6 +218,10 @@ declare namespace Components {
              * Variable type
              */
             type?: "order_table" | "custom";
+            /**
+             * The tags of custom variable
+             */
+            tags?: string[];
             /**
              * Search string
              * example:
