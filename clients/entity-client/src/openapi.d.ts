@@ -44,6 +44,7 @@ declare namespace Components {
          * contact
          */
         Schemas.EntitySlug[];
+        export type FillActivityQueryParam = boolean;
         export type FromPageQueryParam = number;
         export type HydrateEntitiesQueryParam = boolean;
         export type IncludeReverseDeprecatedQueryParam = boolean;
@@ -57,6 +58,7 @@ declare namespace Components {
         export type SavedViewIdPathParam = /* Generated uuid for a saved view */ Schemas.SavedViewId /* uuid */;
         export type TaxonomyClassificationSlugPathParam = string;
         export type TaxonomySlugPathParam = string;
+        export type TaxonomySlugQueryParam = string;
         export type TaxonomySlugQueryParamOptional = string;
     }
     export interface PathParameters {
@@ -74,6 +76,7 @@ declare namespace Components {
         ActivityIdPathParam?: Parameters.ActivityIdPathParam;
     }
     export interface QueryParameters {
+        TaxonomySlugQueryParam?: Parameters.TaxonomySlugQueryParam;
         TaxonomySlugQueryParamOptional?: Parameters.TaxonomySlugQueryParamOptional;
         AsyncOperationQueryParam?: Parameters.AsyncOperationQueryParam;
         HydrateEntitiesQueryParam?: Parameters.HydrateEntitiesQueryParam;
@@ -85,6 +88,7 @@ declare namespace Components {
         ExcludeSchemasQueryParam?: Parameters.ExcludeSchemasQueryParam;
         EntityRelationsModeQueryParam?: Parameters.EntityRelationsModeQueryParam;
         DryRunQueryParam?: Parameters.DryRunQueryParam;
+        FillActivityQueryParam?: Parameters.FillActivityQueryParam;
     }
     namespace Schemas {
         export interface Activity {
@@ -117,6 +121,12 @@ declare namespace Components {
             payload?: {
                 [name: string]: any;
             };
+            /**
+             * Indicates whether the activity is in the pending state.
+             * Pending activities are not yet visible in the activity feed and events are not yet dispatched.
+             *
+             */
+            pending?: boolean;
         }
         export interface ActivityCallerContext {
             [name: string]: any;
@@ -212,6 +222,12 @@ declare namespace Components {
             payload?: {
                 [name: string]: any;
             };
+            /**
+             * Indicates whether the activity is in the pending state.
+             * Pending activities are not yet visible in the activity feed and events are not yet dispatched.
+             *
+             */
+            pending?: boolean;
             caller?: ActivityCallerContext;
             /**
              * Count of total operations attached to this activity
@@ -364,6 +380,12 @@ declare namespace Components {
              * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
              */
             composite_id?: string;
+            /**
+             * Schema slug the attribute belongs to
+             * example:
+             * contact
+             */
+            schema?: string;
         } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute);
         /**
          * Automation entity
@@ -534,6 +556,12 @@ declare namespace Components {
             payload?: {
                 [name: string]: any;
             };
+            /**
+             * Indicates whether the activity is in the pending state.
+             * Pending activities are not yet visible in the activity feed and events are not yet dispatched.
+             *
+             */
+            pending?: boolean;
             caller?: ActivityCallerContext;
         }
         export interface BaseAttribute {
@@ -867,6 +895,12 @@ declare namespace Components {
          * taxonomy-slug:classification-slug
          */
         export type ClassificationId = string;
+        /**
+         * URL-friendly identifier for the classification
+         * example:
+         * wallbox-pv
+         */
+        export type ClassificationSlug = string;
         export interface ClassificationsUpdate {
             create?: TaxonomyClassification[];
             update?: TaxonomyClassification[];
@@ -1548,6 +1582,16 @@ declare namespace Components {
             };
             type?: "date" | "datetime";
         }
+        export interface ESClusterAssignment {
+            /**
+             * The organization for which the cluster assignment is returned
+             */
+            orgId?: string;
+            /**
+             * Name of the elastic cluster the organization is assigned to
+             */
+            cluster?: string;
+        }
         /**
          * example:
          * {
@@ -1882,6 +1926,12 @@ declare namespace Components {
              * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
              */
             composite_id?: string;
+            /**
+             * Schema slug the capability belongs to
+             * example:
+             * contact
+             */
+            schema?: string;
         }
         export interface EntityDefaultCreate {
             view_type?: "default";
@@ -2043,10 +2093,9 @@ declare namespace Components {
              */
             allow_targeting_all_schemas?: boolean;
             /**
-             * example:
-             * _created_at:desc
+             * You can pass one sort field or an array of sort fields. Each sort field can be a string
              */
-            sort?: string;
+            sort?: /* You can pass one sort field or an array of sort fields. Each sort field can be a string */ string | string[];
             from?: number;
             /**
              * Max search size is 1000 with higher values defaulting to 1000
@@ -2532,7 +2581,7 @@ declare namespace Components {
              * example:
              * e18a532b-ae79-4d86-a6a5-e5dbfb579d14
              */
-            id: string;
+            id?: string;
             /**
              * Render order of the group
              */
@@ -2589,7 +2638,7 @@ declare namespace Components {
              * example:
              * e18a532b-ae79-4d86-a6a5-e5dbfb579d14
              */
-            id: string;
+            id?: string;
             /**
              * Render order of the group
              */
@@ -2637,6 +2686,12 @@ declare namespace Components {
              * contact:e18a532b-ae79-4d86-a6a5-e5dbfb579d14
              */
             composite_id?: string;
+            /**
+             * Schema slug the group belongs to
+             * example:
+             * contact
+             */
+            schema?: string;
         }
         /**
          * The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities.
@@ -2868,10 +2923,9 @@ declare namespace Components {
         }
         export interface EntitySearchOptions {
             /**
-             * example:
-             * _created_at:desc
+             * You can pass one sort field or an array of sort fields. Each sort field can be a string
              */
-            sort?: string;
+            sort?: /* You can pass one sort field or an array of sort fields. Each sort field can be a string */ string | string[];
             from?: number;
             /**
              * Max search size is 1000 with higher values defaulting to 1000
@@ -2926,10 +2980,9 @@ declare namespace Components {
              */
             include_scores?: boolean;
             /**
-             * example:
-             * _created_at:desc
+             * You can pass one sort field or an array of sort fields. Each sort field can be a string
              */
-            sort?: string;
+            sort?: /* You can pass one sort field or an array of sort fields. Each sort field can be a string */ string | string[];
             from?: number;
             /**
              * Max search size is 1000 with higher values defaulting to 1000
@@ -3127,6 +3180,7 @@ declare namespace Components {
              */
             message: string;
         }
+        export type EntityValidationResult = /* Validation result for a successful validation */ EntityValidationResultSuccess | /* Validation result for a failed validation */ EntityValidationResultError;
         /**
          * Validation result for a failed validation
          */
@@ -3320,6 +3374,22 @@ declare namespace Components {
             enable_description?: boolean;
             default_access_control?: "public-read" | "private";
         }
+        export interface GenerateEntityTableAIFiltersRequest {
+            /**
+             * The prompt to generate the filters
+             * example:
+             * Show me all contacts that are not customers
+             */
+            prompt: string;
+            /**
+             * The main entity slug
+             * example:
+             * order
+             */
+            main_entity_slug: string;
+            filter_options: EntityTableFilterOption[];
+        }
+        export type GenerateEntityTableAIFiltersResponse = EntityTableFilterSearch[];
         export interface GetRelatedEntitiesCount {
             /**
              * example:
@@ -3431,6 +3501,127 @@ declare namespace Components {
          */
         export interface HydratedEntity {
             [name: string]: any;
+            _relations: {
+                entity_id: EntityId /* uuid */;
+            }[];
+        }
+        /**
+         * Entity with relation data resolved into the attribute values
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   },
+         *   "_relations": [
+         *     {
+         *       "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+         *     }
+         *   ],
+         *   "status": "active",
+         *   "customer_number": "abc123",
+         *   "email": [
+         *     {
+         *       "label": "work",
+         *       "email": "user@example.com"
+         *     }
+         *   ],
+         *   "phone": [
+         *     {
+         *       "label": "work",
+         *       "phone": "+49123456789"
+         *     }
+         *   ],
+         *   "first_name": "First Name",
+         *   "middle_name": "Middle Name",
+         *   "last_name": "Last Name",
+         *   "date_of_birth": "2019-08-24",
+         *   "title": "Mr.",
+         *   "account": [
+         *     {
+         *       "status": "active",
+         *       "name": "Company name",
+         *       "company_email": [
+         *         {
+         *           "label": "Company email",
+         *           "email": "company@example.com"
+         *         }
+         *       ],
+         *       "company_phone": [
+         *         {
+         *           "label": "Support phone",
+         *           "phone": "+49123456789"
+         *         }
+         *       ],
+         *       "company_website": "https://example.com",
+         *       "tax_id": "DE123456789",
+         *       "tax_exemption": "2019-08-24",
+         *       "contacts": {
+         *         "$relation": [
+         *           {
+         *             "_tags": [
+         *               "CEO"
+         *             ],
+         *             "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+         *           }
+         *         ]
+         *       }
+         *     }
+         *   ]
+         * }
+         */
+        export interface HydratedEntityItem {
+            [name: string]: any;
+            _id: EntityId /* uuid */;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org: string;
+            _owners?: /**
+             * The user / organization owning this entity.
+             *
+             * Note: Owner implicitly has access to the entity regardless of ACLs.
+             *
+             */
+            EntityOwner[];
+            _schema: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            /**
+             * Title of entity
+             */
+            _title: string | null;
+            _tags?: string[] | null;
+            _created_at: string | null; // date-time
+            _updated_at: string | null; // date-time
+            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+            _purpose?: string[] | null;
             _relations: {
                 entity_id: EntityId /* uuid */;
             }[];
@@ -6791,6 +6982,12 @@ declare namespace Components {
 declare namespace Paths {
     namespace AddRelations {
         namespace Parameters {
+            export type ActivityId = /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
@@ -6806,6 +7003,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             async?: Parameters.Async;
+            activity_id?: Parameters.ActivityId;
         }
         export type RequestBody = Components.Schemas.RelationItem[];
         namespace Responses {
@@ -6898,6 +7096,7 @@ declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type FillActivity = boolean;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -6910,6 +7109,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             activity_id?: Parameters.ActivityId;
+            fill_activity?: Parameters.FillActivity;
             async?: Parameters.Async;
         }
         export type RequestBody = /**
@@ -6995,6 +7195,24 @@ declare namespace Paths {
         export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
         namespace Responses {
             export type $201 = /* A saved entity view */ Components.Schemas.SavedViewItem;
+        }
+    }
+    namespace CreateSchemaAttribute {
+        export type RequestBody = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
+        namespace Responses {
+            export type $201 = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
+        }
+    }
+    namespace CreateSchemaCapability {
+        export type RequestBody = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+        namespace Responses {
+            export type $201 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+        }
+    }
+    namespace CreateSchemaGroup {
+        export type RequestBody = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
+        namespace Responses {
+            export type $201 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
         }
     }
     namespace CreateTaxonomy {
@@ -7222,6 +7440,60 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.ActivityItem;
+        }
+    }
+    namespace GetESPublicJwks {
+        namespace Responses {
+            export interface $200 {
+                keys?: {
+                    /**
+                     * example:
+                     * RS256
+                     */
+                    alg?: string;
+                    /**
+                     * example:
+                     * AQAB
+                     */
+                    e?: string;
+                    /**
+                     * example:
+                     * tXWU5mPMbRPczpbQwi6vbhLF4GgF3wlMDSyqo7pfeiw=
+                     */
+                    kid?: string;
+                    /**
+                     * example:
+                     * RSA
+                     */
+                    kty?: string;
+                    /**
+                     * example:
+                     * h_QDoCjZ8W_trtYXaP7_S22wf5r5Wd9XBLED78oT44bJjQXn8ddcFV8Hik65_4IYXVX_hTTU4zpxe3H8vx2j7-Zz3O59mYMp5S0MzODNEdf5Y_2o19eis0brmAJniixsNlQ9LlYkdrVamrgaxHu3ZpP_99zkfFybYeuYoQNzb3PyrT8xVnz_USs_nlFMHpGUxvvz7gfKPqxcLvgLJr4cwI9yzaSY9CD4qW181QVcnL_WzpQ8xx6AuhhHZQ1l_3GG4InTk8ahE7U2ZHVu8RrX6d01pMgc3piEcet9RgFLnhbTg3YIiKGoAbN42wJn_x3lgIAC42T9mbmTsHyUdS6nUQ
+                     */
+                    n?: string;
+                    /**
+                     * example:
+                     * sig
+                     */
+                    use?: string;
+                }[];
+            }
+        }
+    }
+    namespace GetESTokenOIDC {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * https://entity.dev.sls.epilot.io/v1/entity/public/idp
+                 */
+                issuer?: string; // uri
+                /**
+                 * example:
+                 * https://entity.dev.sls.epilot.io/v1/entity/public/idp/.well-known/jwks.json
+                 */
+                jwks_uri?: string; // uri
+            }
         }
     }
     namespace GetEntity {
@@ -8246,6 +8518,7 @@ declare namespace Paths {
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
             export type DryRun = boolean;
+            export type FillActivity = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -8260,6 +8533,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             activity_id?: Parameters.ActivityId;
+            fill_activity?: Parameters.FillActivity;
             dry_run?: Parameters.DryRun;
             async?: Parameters.Async;
         }
@@ -8531,6 +8805,7 @@ declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type FillActivity = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -8545,6 +8820,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             activity_id?: Parameters.ActivityId;
+            fill_activity?: Parameters.FillActivity;
             async?: Parameters.Async;
         }
         export type RequestBody = /**
@@ -8710,6 +8986,7 @@ declare namespace Paths {
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
             export type DryRun = boolean;
+            export type FillActivity = boolean;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -8723,6 +9000,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             activity_id?: Parameters.ActivityId;
+            fill_activity?: Parameters.FillActivity;
             dry_run?: Parameters.DryRun;
             async?: Parameters.Async;
             strict?: Parameters.Strict;
@@ -9678,6 +9956,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteTaxonomyClassification.Responses.$200>
   /**
+   * createSchemaAttribute - createSchemaAttribute
+   * 
+   * Create a schema attribute
+   */
+  'createSchemaAttribute'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateSchemaAttribute.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSchemaAttribute.Responses.$201>
+  /**
    * getSchemaAttribute - getSchemaAttribute
    * 
    * Get a schema attribute from given attribute ID
@@ -9707,6 +9995,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaAttribute.Responses.$200>
+  /**
+   * createSchemaCapability - createSchemaCapability
+   * 
+   * Create a schema capability
+   */
+  'createSchemaCapability'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateSchemaCapability.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSchemaCapability.Responses.$201>
   /**
    * getSchemaCapability - getSchemaCapability
    * 
@@ -9738,6 +10036,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaCapability.Responses.$200>
   /**
+   * createSchemaGroup - createSchemaGroup
+   * 
+   * Create a schema group
+   */
+  'createSchemaGroup'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateSchemaGroup.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSchemaGroup.Responses.$201>
+  /**
    * getSchemaGroup - getSchemaGroup
    * 
    * Get a schema group from given group composite ID
@@ -9767,6 +10075,30 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaGroup.Responses.$200>
+  /**
+   * getESPublicJwks - getESPublicJwks
+   * 
+   * Get jwks public key set to verify tokens generated by this API for Elasticsearch authentication
+   */
+  'getESPublicJwks'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetESPublicJwks.Responses.$200>
+  /**
+   * getESTokenOIDC - getESTokenOIDC
+   * 
+   * OpenID Connect configuration for Entity API serving as public identity provider
+   * 
+   * Note: This API is not a fully compliant OAuth2.0 / OIDC identity provider, but this endpoint is useful to
+   * automate the process of verifying JWT tokens.
+   * 
+   */
+  'getESTokenOIDC'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetESTokenOIDC.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -10601,6 +10933,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteTaxonomyClassification.Responses.$200>
   }
+  ['/v1/entity/schemas/attributes']: {
+    /**
+     * createSchemaAttribute - createSchemaAttribute
+     * 
+     * Create a schema attribute
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateSchemaAttribute.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSchemaAttribute.Responses.$201>
+  }
   ['/v1/entity/schemas/attributes/{composite_id}']: {
     /**
      * getSchemaAttribute - getSchemaAttribute
@@ -10632,6 +10976,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaAttribute.Responses.$200>
+  }
+  ['/v1/entity/schemas/capabilities']: {
+    /**
+     * createSchemaCapability - createSchemaCapability
+     * 
+     * Create a schema capability
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateSchemaCapability.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSchemaCapability.Responses.$201>
   }
   ['/v1/entity/schemas/capabilities/{composite_id}']: {
     /**
@@ -10665,6 +11021,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaCapability.Responses.$200>
   }
+  ['/v1/entity/schemas/group']: {
+    /**
+     * createSchemaGroup - createSchemaGroup
+     * 
+     * Create a schema group
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateSchemaGroup.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSchemaGroup.Responses.$201>
+  }
   ['/v1/entity/schemas/group/{composite_id}']: {
     /**
      * getSchemaGroup - getSchemaGroup
@@ -10697,6 +11065,34 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaGroup.Responses.$200>
   }
+  ['/v1/entity/public/idp/.well-known/jwks.json']: {
+    /**
+     * getESPublicJwks - getESPublicJwks
+     * 
+     * Get jwks public key set to verify tokens generated by this API for Elasticsearch authentication
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetESPublicJwks.Responses.$200>
+  }
+  ['/v1/entity/public/idp/.well-known/openid-configuration']: {
+    /**
+     * getESTokenOIDC - getESTokenOIDC
+     * 
+     * OpenID Connect configuration for Entity API serving as public identity provider
+     * 
+     * Note: This API is not a fully compliant OAuth2.0 / OIDC identity provider, but this endpoint is useful to
+     * automate the process of verifying JWT tokens.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetESTokenOIDC.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -10715,12 +11111,14 @@ export type BaseEntity = Components.Schemas.BaseEntity;
 export type BlueprintEntityId = Components.Schemas.BlueprintEntityId;
 export type BooleanAttribute = Components.Schemas.BooleanAttribute;
 export type ClassificationId = Components.Schemas.ClassificationId;
+export type ClassificationSlug = Components.Schemas.ClassificationSlug;
 export type ClassificationsUpdate = Components.Schemas.ClassificationsUpdate;
 export type ComputedAttribute = Components.Schemas.ComputedAttribute;
 export type ConsentAttribute = Components.Schemas.ConsentAttribute;
 export type CountryAttribute = Components.Schemas.CountryAttribute;
 export type CurrencyAttribute = Components.Schemas.CurrencyAttribute;
 export type DateAttribute = Components.Schemas.DateAttribute;
+export type ESClusterAssignment = Components.Schemas.ESClusterAssignment;
 export type Entity = Components.Schemas.Entity;
 export type EntityAcl = Components.Schemas.EntityAcl;
 export type EntityAction = Components.Schemas.EntityAction;
@@ -10746,16 +11144,20 @@ export type EntitySlug = Components.Schemas.EntitySlug;
 export type EntityTableFilterOption = Components.Schemas.EntityTableFilterOption;
 export type EntityTableFilterSearch = Components.Schemas.EntityTableFilterSearch;
 export type EntityValidationError = Components.Schemas.EntityValidationError;
+export type EntityValidationResult = Components.Schemas.EntityValidationResult;
 export type EntityValidationResultError = Components.Schemas.EntityValidationResultError;
 export type EntityValidationResultSuccess = Components.Schemas.EntityValidationResultSuccess;
 export type EntityViewDisabled = Components.Schemas.EntityViewDisabled;
 export type ExportJobId = Components.Schemas.ExportJobId;
 export type FieldsParam = Components.Schemas.FieldsParam;
 export type FileAttribute = Components.Schemas.FileAttribute;
+export type GenerateEntityTableAIFiltersRequest = Components.Schemas.GenerateEntityTableAIFiltersRequest;
+export type GenerateEntityTableAIFiltersResponse = Components.Schemas.GenerateEntityTableAIFiltersResponse;
 export type GetRelatedEntitiesCount = Components.Schemas.GetRelatedEntitiesCount;
 export type GetRelationsResp = Components.Schemas.GetRelationsResp;
 export type GetRelationsRespWithPagination = Components.Schemas.GetRelationsRespWithPagination;
 export type HydratedEntity = Components.Schemas.HydratedEntity;
+export type HydratedEntityItem = Components.Schemas.HydratedEntityItem;
 export type InternalAttribute = Components.Schemas.InternalAttribute;
 export type InternalUserAttribute = Components.Schemas.InternalUserAttribute;
 export type InvitationEmailAttribute = Components.Schemas.InvitationEmailAttribute;

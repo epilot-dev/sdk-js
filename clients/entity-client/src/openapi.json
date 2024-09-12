@@ -731,6 +731,9 @@
             "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
@@ -860,6 +863,9 @@
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
           },
           {
             "$ref": "#/components/parameters/DryRunQueryParam"
@@ -1038,6 +1044,9 @@
             "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
@@ -1080,6 +1089,9 @@
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
           },
           {
             "$ref": "#/components/parameters/DryRunQueryParam"
@@ -1559,6 +1571,9 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "requestBody": {
@@ -2708,6 +2723,37 @@
         }
       }
     },
+    "/v1/entity/schemas/attributes": {
+      "post": {
+        "operationId": "createSchemaAttribute",
+        "summary": "createSchemaAttribute",
+        "description": "Create a schema attribute",
+        "tags": [
+          "Schemas"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttributeWithCompositeID"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/entity/schemas/attributes/{composite_id}": {
       "get": {
         "operationId": "getSchemaAttribute",
@@ -2811,6 +2857,37 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AttributeWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/capabilities": {
+      "post": {
+        "operationId": "createSchemaCapability",
+        "summary": "createSchemaCapability",
+        "description": "Create a schema capability",
+        "tags": [
+          "Schemas"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityCapabilityWithCompositeID"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityCapabilityWithCompositeID"
                 }
               }
             }
@@ -2928,6 +3005,37 @@
         }
       }
     },
+    "/v1/entity/schemas/group": {
+      "post": {
+        "operationId": "createSchemaGroup",
+        "summary": "createSchemaGroup",
+        "description": "Create a schema group",
+        "tags": [
+          "Schemas"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntitySchemaGroupWithCompositeID"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySchemaGroupWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/entity/schemas/group/{composite_id}": {
       "get": {
         "operationId": "getSchemaGroup",
@@ -3031,6 +3139,98 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EntitySchemaGroupWithCompositeID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/public/idp/.well-known/jwks.json": {
+      "get": {
+        "operationId": "getESPublicJwks",
+        "summary": "getESPublicJwks",
+        "description": "Get jwks public key set to verify tokens generated by this API for Elasticsearch authentication",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Set of jwks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "alg": {
+                            "type": "string",
+                            "example": "RS256"
+                          },
+                          "e": {
+                            "type": "string",
+                            "example": "AQAB"
+                          },
+                          "kid": {
+                            "type": "string",
+                            "example": "tXWU5mPMbRPczpbQwi6vbhLF4GgF3wlMDSyqo7pfeiw="
+                          },
+                          "kty": {
+                            "type": "string",
+                            "example": "RSA"
+                          },
+                          "n": {
+                            "type": "string",
+                            "example": "h_QDoCjZ8W_trtYXaP7_S22wf5r5Wd9XBLED78oT44bJjQXn8ddcFV8Hik65_4IYXVX_hTTU4zpxe3H8vx2j7-Zz3O59mYMp5S0MzODNEdf5Y_2o19eis0brmAJniixsNlQ9LlYkdrVamrgaxHu3ZpP_99zkfFybYeuYoQNzb3PyrT8xVnz_USs_nlFMHpGUxvvz7gfKPqxcLvgLJr4cwI9yzaSY9CD4qW181QVcnL_WzpQ8xx6AuhhHZQ1l_3GG4InTk8ahE7U2ZHVu8RrX6d01pMgc3piEcet9RgFLnhbTg3YIiKGoAbN42wJn_x3lgIAC42T9mbmTsHyUdS6nUQ"
+                          },
+                          "use": {
+                            "type": "string",
+                            "example": "sig"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/public/idp/.well-known/openid-configuration": {
+      "get": {
+        "operationId": "getESTokenOIDC",
+        "summary": "getESTokenOIDC",
+        "description": "OpenID Connect configuration for Entity API serving as public identity provider\n\nNote: This API is not a fully compliant OAuth2.0 / OIDC identity provider, but this endpoint is useful to\nautomate the process of verifying JWT tokens.\n",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "OpenID Configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "issuer": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://entity.dev.sls.epilot.io/v1/entity/public/idp"
+                    },
+                    "jwks_uri": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://entity.dev.sls.epilot.io/v1/entity/public/idp/.well-known/jwks.json"
+                    }
+                  }
                 }
               }
             }
@@ -3372,6 +3572,39 @@
           }
         ]
       },
+      "GenerateEntityTableAIFiltersRequest": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "The prompt to generate the filters",
+            "example": "Show me all contacts that are not customers",
+            "maxLength": 300
+          },
+          "main_entity_slug": {
+            "type": "string",
+            "description": "The main entity slug",
+            "example": "order"
+          },
+          "filter_options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityTableFilterOption"
+            }
+          }
+        },
+        "required": [
+          "prompt",
+          "main_entity_slug",
+          "filter_options"
+        ]
+      },
+      "GenerateEntityTableAIFiltersResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/EntityTableFilterSearch"
+        }
+      },
       "EntityTableFilterSearch": {
         "type": "object",
         "properties": {
@@ -3500,8 +3733,7 @@
           }
         },
         "required": [
-          "label",
-          "id"
+          "label"
         ]
       },
       "EntitySchemaGroupWithCompositeID": {
@@ -3517,6 +3749,11 @@
                 "type": "string",
                 "readOnly": true,
                 "example": "contact:e18a532b-ae79-4d86-a6a5-e5dbfb579d14"
+              },
+              "schema": {
+                "type": "string",
+                "description": "Schema slug the group belongs to",
+                "example": "contact"
               }
             }
           }
@@ -3623,6 +3860,11 @@
                 "type": "string",
                 "readOnly": true,
                 "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+              },
+              "schema": {
+                "type": "string",
+                "description": "Schema slug the attribute belongs to",
+                "example": "contact"
               }
             }
           }
@@ -4934,6 +5176,11 @@
                 "type": "string",
                 "readOnly": true,
                 "example": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d"
+              },
+              "schema": {
+                "type": "string",
+                "description": "Schema slug the capability belongs to",
+                "example": "contact"
               }
             }
           }
@@ -5419,6 +5666,26 @@
           "errors"
         ]
       },
+      "EntityValidationResult": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/EntityValidationResultSuccess"
+          },
+          {
+            "$ref": "#/components/schemas/EntityValidationResultError"
+          }
+        ]
+      },
+      "HydratedEntityItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/HydratedEntity"
+          }
+        ]
+      },
       "GetRelationsResp": {
         "type": "array",
         "items": {
@@ -5730,8 +5997,18 @@
         "type": "object",
         "properties": {
           "sort": {
-            "type": "string",
-            "example": "_created_at:desc"
+            "description": "You can pass one sort field or an array of sort fields. Each sort field can be a string",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
           },
           "from": {
             "type": "integer",
@@ -5973,6 +6250,11 @@
                 "schema": "contact"
               }
             }
+          },
+          "pending": {
+            "type": "boolean",
+            "description": "Indicates whether the activity is in the pending state.\nPending activities are not yet visible in the activity feed and events are not yet dispatched.\n",
+            "default": false
           }
         },
         "required": [
@@ -6377,6 +6659,11 @@
         "type": "string",
         "example": "taxonomy-slug:classification-slug"
       },
+      "ClassificationSlug": {
+        "type": "string",
+        "description": "URL-friendly identifier for the classification",
+        "example": "wallbox-pv"
+      },
       "TaxonomySlug": {
         "type": "string",
         "description": "URL-friendly name for taxonomy",
@@ -6410,6 +6697,19 @@
                 }
               ]
             }
+          }
+        }
+      },
+      "ESClusterAssignment": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "description": "The organization for which the cluster assignment is returned"
+          },
+          "cluster": {
+            "type": "string",
+            "description": "Name of the elastic cluster the organization is assigned to"
           }
         }
       },
@@ -6459,6 +6759,15 @@
           ],
           "example": "price"
         }
+      },
+      "TaxonomySlugQueryParam": {
+        "name": "taxonomySlug",
+        "description": "Taxonomy slug",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "required": true
       },
       "TaxonomySlugPathParam": {
         "name": "taxonomySlug",
@@ -6609,6 +6918,16 @@
       "DryRunQueryParam": {
         "name": "dry_run",
         "description": "Dry Run mode = return results but does not perform the operation.",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "FillActivityQueryParam": {
+        "name": "fill_activity",
+        "description": "Update the diff and entity for the custom activity included in the query.\nPending state on activity is automatically ended when activity is filled.\n",
         "in": "query",
         "required": false,
         "schema": {
@@ -7270,6 +7589,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    },
     {
       "url": "https://entity.sls.epilot.io"
     }
