@@ -10,7 +10,78 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        /**
+         * Base Entity with additional, non-relational attributes that are exclusive to Notes schema
+         */
+        export interface BaseNoteEntity {
+            /**
+             * Entity ID of the Note entry
+             */
+            _id: string;
+            /**
+             * ID of the Organization that owns this Note
+             */
+            _org: string;
+            /**
+             * The Entity schema of this Note
+             */
+            _schema: string;
+            /**
+             * The timestamp of when this Note was created
+             */
+            _created_at: string; // date-time
+            /**
+             * The timestamp of when this Note was last updated
+             */
+            _updated_at: string; // date-time
+            /**
+             * Tags associated with this Note
+             */
+            _tags?: string[];
+            /**
+             * Access Control List for this Note entry
+             */
+            _acl?: {
+                [name: string]: string[];
+            };
+            content: LexicalNode | string;
+        }
         export type ContextType = "opportunity" | "workflows";
+        /**
+         * Base Entity schema
+         */
+        export interface Entity {
+            /**
+             * Entity ID of the Note entry
+             */
+            _id: string;
+            /**
+             * ID of the Organization that owns this Note
+             */
+            _org: string;
+            /**
+             * The Entity schema of this Note
+             */
+            _schema: string;
+            /**
+             * The timestamp of when this Note was created
+             */
+            _created_at: string; // date-time
+            /**
+             * The timestamp of when this Note was last updated
+             */
+            _updated_at: string; // date-time
+            /**
+             * Tags associated with this Note
+             */
+            _tags?: string[];
+            /**
+             * Access Control List for this Note entry
+             */
+            _acl?: {
+                [name: string]: string[];
+            };
+        }
         export interface LexicalNode {
             /**
              * Metadata information about the direction of the Node instance
@@ -45,7 +116,7 @@ declare namespace Components {
         /**
          * A note Entity object cotaining Entity metadata and content in a LexicalNode format
          */
-        export interface Note {
+        export interface NoteEntity {
             /**
              * Entity ID of the Note entry
              */
@@ -78,13 +149,13 @@ declare namespace Components {
             };
             content: LexicalNode | string;
             /**
-             * Standard `$relation` attribute for a Note's relationship with it's contextual Entity
+             * Standard `$relation` attribute for a Note's relationship with the Entity it belongs to
              */
-            context_entitity?: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Note[];
+            context_entity: /* Base Entity schema */ Entity[];
             /**
              * Standard `$relation` attribute for a Note's parent Note, intended to be used by Notes comments to reference their parent Note
              */
-            parent?: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Note[];
+            parent?: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ NoteEntity[];
         }
         export interface NotesResponse {
             /**
@@ -94,21 +165,12 @@ declare namespace Components {
             /**
              * The Note entries returned in this query
              */
-            results: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Note[];
+            results: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ NoteEntity[];
         }
     }
 }
 declare namespace Paths {
     namespace CreateNote {
-        namespace Parameters {
-            /**
-             * The Entity ID of the Note entry to create
-             */
-            export type Id = string;
-        }
-        export interface PathParameters {
-            id: /* The Entity ID of the Note entry to create */ Parameters.Id;
-        }
         export interface RequestBody {
             /**
              * Tags associated with this Note
@@ -121,18 +183,10 @@ declare namespace Paths {
                 [name: string]: string[];
             };
             content: Components.Schemas.LexicalNode | string;
-            /**
-             * The type of context to which the Note belongs
-             */
-            context_type: "entity" | "workflow";
-            context_id: string;
-            /**
-             * The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep
-             */
-            parent?: string;
+            entity_id: string;
         }
         namespace Responses {
-            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.Note;
+            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
         }
     }
     namespace DeleteNote {
@@ -146,7 +200,7 @@ declare namespace Paths {
             id: /* The Entity ID of the Note entry to delete */ Parameters.Id;
         }
         namespace Responses {
-            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.Note;
+            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
         }
     }
     namespace GetNote {
@@ -160,7 +214,7 @@ declare namespace Paths {
             id: /* The Entity ID of the Note entry to retrieve */ Parameters.Id;
         }
         namespace Responses {
-            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.Note;
+            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
         }
     }
     namespace GetNotesByContext {
@@ -174,17 +228,9 @@ declare namespace Paths {
              */
             export type ContextType = /* Type of context to retrieve Notes within the targeted Entity */ string | Components.Schemas.ContextType;
             /**
-             * The fields to return in the response
-             */
-            export type Fields = string[];
-            /**
              * The index of the first Note to return in this query
              */
             export type From = number;
-            /**
-             * Includes a small subset of the most recent Note comments associated with the returned Note
-             */
-            export type IncludeComments = boolean;
             /**
              * The number of Note entries to return in this query
              */
@@ -202,8 +248,6 @@ declare namespace Paths {
             sort?: /* The sort order of the returned Notes, expressed as a Lucene query */ Parameters.Sort;
             from?: /* The index of the first Note to return in this query */ Parameters.From;
             size?: /* The number of Note entries to return in this query */ Parameters.Size;
-            fields?: /* The fields to return in the response */ Parameters.Fields;
-            include_comments?: /* Includes a small subset of the most recent Note comments associated with the returned Note */ Parameters.IncludeComments;
         }
         namespace Responses {
             export type $200 = Components.Schemas.NotesResponse;
@@ -231,18 +275,10 @@ declare namespace Paths {
                 [name: string]: string[];
             };
             content: Components.Schemas.LexicalNode | string;
-            /**
-             * The type of context to which the Note belongs
-             */
-            context_type: "entity" | "workflow";
-            context_id: string;
-            /**
-             * The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep
-             */
-            parent?: string;
+            entity_id: string;
         }
         namespace Responses {
-            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.Note;
+            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
         }
     }
 }
@@ -254,7 +290,7 @@ export interface OperationMethods {
    * Creates a new Note entry
    */
   'createNote'(
-    parameters?: Parameters<Paths.CreateNote.PathParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateNote.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateNote.Responses.$200>
@@ -308,7 +344,7 @@ export interface PathsDictionary {
      * Creates a new Note entry
      */
     'post'(
-      parameters?: Parameters<Paths.CreateNote.PathParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateNote.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateNote.Responses.$200>
@@ -361,7 +397,9 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type BaseNoteEntity = Components.Schemas.BaseNoteEntity;
 export type ContextType = Components.Schemas.ContextType;
+export type Entity = Components.Schemas.Entity;
 export type LexicalNode = Components.Schemas.LexicalNode;
-export type Note = Components.Schemas.Note;
+export type NoteEntity = Components.Schemas.NoteEntity;
 export type NotesResponse = Components.Schemas.NotesResponse;

@@ -14,18 +14,6 @@
         "summary": "createNote",
         "description": "Creates a new Note entry",
         "tags": ["Notes"],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "The Entity ID of the Note entry to create",
-            "schema": {
-              "type": "string",
-              "description": "The Entity ID of the Note entry to create"
-            },
-            "required": true
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -46,23 +34,14 @@
                     "description": "Access Control List for this Note entry"
                   },
                   "content": {
-                    "anyOf": [
+                    "oneOf": [
                       { "$ref": "#/components/schemas/LexicalNode" },
                       { "type": "string" }
                     ]
                   },
-                  "context_type": {
-                    "type": "string",
-                    "enum": ["entity", "workflow"],
-                    "description": "The type of context to which the Note belongs"
-                  },
-                  "context_id": { "type": "string" },
-                  "parent": {
-                    "type": "string",
-                    "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
-                  }
+                  "entity_id": { "type": "string" }
                 },
-                "required": ["content", "context_type", "context_id"]
+                "required": ["content", "entity_id"]
               }
             }
           }
@@ -72,7 +51,7 @@
             "description": "Successful response with Note content",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Note" }
+                "schema": { "$ref": "#/components/schemas/NoteEntity" }
               }
             }
           }
@@ -102,7 +81,7 @@
             "description": "Successful response with Note content",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Note" }
+                "schema": { "$ref": "#/components/schemas/NoteEntity" }
               }
             }
           }
@@ -145,23 +124,14 @@
                     "description": "Access Control List for this Note entry"
                   },
                   "content": {
-                    "anyOf": [
+                    "oneOf": [
                       { "$ref": "#/components/schemas/LexicalNode" },
                       { "type": "string" }
                     ]
                   },
-                  "context_type": {
-                    "type": "string",
-                    "enum": ["entity", "workflow"],
-                    "description": "The type of context to which the Note belongs"
-                  },
-                  "context_id": { "type": "string" },
-                  "parent": {
-                    "type": "string",
-                    "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
-                  }
+                  "entity_id": { "type": "string" }
                 },
-                "required": ["content", "context_type", "context_id"]
+                "required": ["content", "entity_id"]
               }
             }
           }
@@ -171,7 +141,7 @@
             "description": "Successful response with Note content",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Note" }
+                "schema": { "$ref": "#/components/schemas/NoteEntity" }
               }
             }
           }
@@ -199,7 +169,7 @@
             "description": "Successful response with the deleted Note entity",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Note" }
+                "schema": { "$ref": "#/components/schemas/NoteEntity" }
               }
             }
           }
@@ -264,25 +234,6 @@
               "type": "number",
               "default": 10,
               "description": "The number of Note entries to return in this query"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "description": "The fields to return in the response",
-            "schema": {
-              "type": "array",
-              "items": { "type": "string" },
-              "description": "The fields to return in the response"
-            }
-          },
-          {
-            "in": "query",
-            "name": "include_comments",
-            "description": "Includes a small subset of the most recent Note comments associated with the returned Note",
-            "schema": {
-              "type": "boolean",
-              "description": "Includes a small subset of the most recent Note comments associated with the returned Note"
             }
           }
         ],
@@ -351,7 +302,39 @@
         },
         "required": ["indent", "version"]
       },
-      "Note": {
+      "NoteEntity": {
+        "allOf": [{ "$ref": "#/components/schemas/BaseNoteEntity" }],
+        "type": "object",
+        "properties": {
+          "context_entity": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Entity" },
+            "description": "Standard `$relation` attribute for a Note's relationship with the Entity it belongs to"
+          },
+          "parent": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/NoteEntity" },
+            "description": "Standard `$relation` attribute for a Note's parent Note, intended to be used by Notes comments to reference their parent Note"
+          }
+        },
+        "required": ["context_entity"],
+        "description": "A note Entity object cotaining Entity metadata and content in a LexicalNode format"
+      },
+      "BaseNoteEntity": {
+        "allOf": [{ "$ref": "#/components/schemas/Entity" }],
+        "type": "object",
+        "properties": {
+          "content": {
+            "oneOf": [
+              { "$ref": "#/components/schemas/LexicalNode" },
+              { "type": "string" }
+            ]
+          }
+        },
+        "required": ["content"],
+        "description": "Base Entity with additional, non-relational attributes that are exclusive to Notes schema"
+      },
+      "Entity": {
         "type": "object",
         "properties": {
           "_id": {
@@ -388,33 +371,10 @@
               "items": { "type": "string" }
             },
             "description": "Access Control List for this Note entry"
-          },
-          "content": {
-            "anyOf": [
-              { "$ref": "#/components/schemas/LexicalNode" },
-              { "type": "string" }
-            ]
-          },
-          "context_entitity": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/Note" },
-            "description": "Standard `$relation` attribute for a Note's relationship with it's contextual Entity"
-          },
-          "parent": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/Note" },
-            "description": "Standard `$relation` attribute for a Note's parent Note, intended to be used by Notes comments to reference their parent Note"
           }
         },
-        "required": [
-          "_id",
-          "_org",
-          "_schema",
-          "_created_at",
-          "_updated_at",
-          "content"
-        ],
-        "description": "A note Entity object cotaining Entity metadata and content in a LexicalNode format"
+        "required": ["_id", "_org", "_schema", "_created_at", "_updated_at"],
+        "description": "Base Entity schema"
       },
       "ContextType": { "type": "string", "enum": ["opportunity", "workflows"] },
       "NotesResponse": {
@@ -426,7 +386,7 @@
           },
           "results": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/Note" },
+            "items": { "$ref": "#/components/schemas/NoteEntity" },
             "description": "The Note entries returned in this query"
           }
         },
