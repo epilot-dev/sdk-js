@@ -512,6 +512,9 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
         ],
         "requestBody": {
@@ -1120,18 +1123,6 @@
             "required": true
           }
         ],
-        "responses": {}
-      }
-    },
-    "/v1/entity/public/idp/.well-known/jwks.json": {
-      "get": {
-        "operationId": "getESPublicJwks",
-        "responses": {}
-      }
-    },
-    "/v1/entity/public/idp/.well-known/openid-configuration": {
-      "get": {
-        "operationId": "getESTokenOIDC",
         "responses": {}
       }
     }

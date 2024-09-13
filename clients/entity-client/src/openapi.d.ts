@@ -721,7 +721,10 @@ declare namespace Components {
          *     "delete": [
          *       "org:456"
          *     ]
-         *   }
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
          * }
          */
         export interface BaseEntity {
@@ -753,6 +756,10 @@ declare namespace Components {
             _updated_at: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             _purpose?: string[] | null;
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[] | null;
         }
         /**
          * Reference to blueprint
@@ -1621,7 +1628,10 @@ declare namespace Components {
          *     "delete": [
          *       "org:456"
          *     ]
-         *   }
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
          * }
          */
         export interface Entity {
@@ -1653,6 +1663,10 @@ declare namespace Components {
             _updated_at?: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             _purpose?: string[] | null;
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[] | null;
         }
         /**
          * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
@@ -2035,7 +2049,11 @@ declare namespace Components {
          *       "org:456",
          *       "org:456"
          *     ]
-         *   }
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000",
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
          * }
          */
         export interface EntityItem {
@@ -2067,6 +2085,10 @@ declare namespace Components {
             _updated_at: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             _purpose?: string[] | null;
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[] | null;
         }
         export interface EntityListParams {
             filter: /**
@@ -2198,6 +2220,9 @@ declare namespace Components {
              *       "org:456"
              *     ]
              *   },
+             *   "_manifest": [
+             *     "123e4567-e89b-12d3-a456-426614174000"
+             *   ],
              *   "status": "Inactive"
              * }
              */
@@ -2230,6 +2255,10 @@ declare namespace Components {
                 _updated_at?: string | null; // date-time
                 _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
                 _purpose?: string[] | null;
+                /**
+                 * Manifest ID used to create/update the entity
+                 */
+                _manifest?: string /* uuid */[] | null;
             };
             diff?: {
                 added?: /**
@@ -2261,7 +2290,10 @@ declare namespace Components {
                  *     "delete": [
                  *       "org:456"
                  *     ]
-                 *   }
+                 *   },
+                 *   "_manifest": [
+                 *     "123e4567-e89b-12d3-a456-426614174000"
+                 *   ]
                  * }
                  */
                 Entity;
@@ -2294,7 +2326,10 @@ declare namespace Components {
                  *     "delete": [
                  *       "org:456"
                  *     ]
-                 *   }
+                 *   },
+                 *   "_manifest": [
+                 *     "123e4567-e89b-12d3-a456-426614174000"
+                 *   ]
                  * }
                  */
                 Entity;
@@ -2327,7 +2362,10 @@ declare namespace Components {
                  *     "delete": [
                  *       "org:456"
                  *     ]
-                 *   }
+                 *   },
+                 *   "_manifest": [
+                 *     "123e4567-e89b-12d3-a456-426614174000"
+                 *   ]
                  * }
                  */
                 Entity;
@@ -3070,7 +3108,11 @@ declare namespace Components {
              *       "org:456",
              *       "org:456"
              *     ]
-             *   }
+             *   },
+             *   "_manifest": [
+             *     "123e4567-e89b-12d3-a456-426614174000",
+             *     "123e4567-e89b-12d3-a456-426614174000"
+             *   ]
              * }
              */
             EntityItem[];
@@ -3426,7 +3468,10 @@ declare namespace Components {
          *     "delete": [
          *       "org:456"
          *     ]
-         *   }
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
          * }
          */
         RelationEntity)[];
@@ -3536,6 +3581,9 @@ declare namespace Components {
          *       "org:456"
          *     ]
          *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ],
          *   "_relations": [
          *     {
          *       "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
@@ -3622,6 +3670,10 @@ declare namespace Components {
             _updated_at: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             _purpose?: string[] | null;
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[] | null;
             _relations: {
                 entity_id: EntityId /* uuid */;
             }[];
@@ -5395,7 +5447,11 @@ declare namespace Components {
                  *       "org:456",
                  *       "org:456"
                  *     ]
-                 *   }
+                 *   },
+                 *   "_manifest": [
+                 *     "123e4567-e89b-12d3-a456-426614174000",
+                 *     "123e4567-e89b-12d3-a456-426614174000"
+                 *   ]
                  * }
                  */
                 new_entity_item?: {
@@ -5427,6 +5483,10 @@ declare namespace Components {
                     _updated_at: string | null; // date-time
                     _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
                     _purpose?: string[] | null;
+                    /**
+                     * Manifest ID used to create/update the entity
+                     */
+                    _manifest?: string /* uuid */[] | null;
                 };
             }[];
             drawer_size?: "small" | "medium" | "large";
@@ -5480,7 +5540,10 @@ declare namespace Components {
          *     "delete": [
          *       "org:456"
          *     ]
-         *   }
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
          * }
          */
         export interface RelationEntity {
@@ -5512,6 +5575,10 @@ declare namespace Components {
             _updated_at: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             _purpose?: string[] | null;
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[] | null;
             $relation?: RelationItem;
         }
         export interface RelationItem {
@@ -7141,7 +7208,10 @@ declare namespace Paths {
          *     "delete": [
          *       "org:456"
          *     ]
-         *   }
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
          * }
          */
         Components.Schemas.Entity;
@@ -7185,7 +7255,11 @@ declare namespace Paths {
              *       "org:456",
              *       "org:456"
              *     ]
-             *   }
+             *   },
+             *   "_manifest": [
+             *     "123e4567-e89b-12d3-a456-426614174000",
+             *     "123e4567-e89b-12d3-a456-426614174000"
+             *   ]
              * }
              */
             Components.Schemas.EntityItem;
@@ -7442,60 +7516,6 @@ declare namespace Paths {
             export type $200 = Components.Schemas.ActivityItem;
         }
     }
-    namespace GetESPublicJwks {
-        namespace Responses {
-            export interface $200 {
-                keys?: {
-                    /**
-                     * example:
-                     * RS256
-                     */
-                    alg?: string;
-                    /**
-                     * example:
-                     * AQAB
-                     */
-                    e?: string;
-                    /**
-                     * example:
-                     * tXWU5mPMbRPczpbQwi6vbhLF4GgF3wlMDSyqo7pfeiw=
-                     */
-                    kid?: string;
-                    /**
-                     * example:
-                     * RSA
-                     */
-                    kty?: string;
-                    /**
-                     * example:
-                     * h_QDoCjZ8W_trtYXaP7_S22wf5r5Wd9XBLED78oT44bJjQXn8ddcFV8Hik65_4IYXVX_hTTU4zpxe3H8vx2j7-Zz3O59mYMp5S0MzODNEdf5Y_2o19eis0brmAJniixsNlQ9LlYkdrVamrgaxHu3ZpP_99zkfFybYeuYoQNzb3PyrT8xVnz_USs_nlFMHpGUxvvz7gfKPqxcLvgLJr4cwI9yzaSY9CD4qW181QVcnL_WzpQ8xx6AuhhHZQ1l_3GG4InTk8ahE7U2ZHVu8RrX6d01pMgc3piEcet9RgFLnhbTg3YIiKGoAbN42wJn_x3lgIAC42T9mbmTsHyUdS6nUQ
-                     */
-                    n?: string;
-                    /**
-                     * example:
-                     * sig
-                     */
-                    use?: string;
-                }[];
-            }
-        }
-    }
-    namespace GetESTokenOIDC {
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * example:
-                 * https://entity.dev.sls.epilot.io/v1/entity/public/idp
-                 */
-                issuer?: string; // uri
-                /**
-                 * example:
-                 * https://entity.dev.sls.epilot.io/v1/entity/public/idp/.well-known/jwks.json
-                 */
-                jwks_uri?: string; // uri
-            }
-        }
-    }
     namespace GetEntity {
         namespace Parameters {
             export type Hydrate = boolean;
@@ -7555,7 +7575,11 @@ declare namespace Paths {
                  *       "org:456",
                  *       "org:456"
                  *     ]
-                 *   }
+                 *   },
+                 *   "_manifest": [
+                 *     "123e4567-e89b-12d3-a456-426614174000",
+                 *     "123e4567-e89b-12d3-a456-426614174000"
+                 *   ]
                  * }
                  */
                 Components.Schemas.EntityItem;
@@ -7598,7 +7622,11 @@ declare namespace Paths {
                  *       "org:456",
                  *       "org:456"
                  *     ]
-                 *   }
+                 *   },
+                 *   "_manifest": [
+                 *     "123e4567-e89b-12d3-a456-426614174000",
+                 *     "123e4567-e89b-12d3-a456-426614174000"
+                 *   ]
                  * }
                  */
                 Components.Schemas.EntityItem[];
@@ -7729,7 +7757,11 @@ declare namespace Paths {
              *       "org:456",
              *       "org:456"
              *     ]
-             *   }
+             *   },
+             *   "_manifest": [
+             *     "123e4567-e89b-12d3-a456-426614174000",
+             *     "123e4567-e89b-12d3-a456-426614174000"
+             *   ]
              * }
              */
             Components.Schemas.EntityItem;
@@ -7798,6 +7830,15 @@ declare namespace Paths {
              *       "nullable": true,
              *       "items": {
              *         "type": "string"
+             *       }
+             *     },
+             *     "_manifest": {
+             *       "type": "array",
+             *       "description": "Manifest ID used to create/update the entity",
+             *       "items": {
+             *         "type": "string",
+             *         "format": "uuid",
+             *         "example": "123e4567-e89b-12d3-a456-426614174000"
              *       }
              *     },
              *     "_created_at": {
@@ -8566,7 +8607,10 @@ declare namespace Paths {
          *     "delete": [
          *       "org:456"
          *     ]
-         *   }
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
          * }
          */
         Components.Schemas.Entity;
@@ -8610,7 +8654,11 @@ declare namespace Paths {
              *       "org:456",
              *       "org:456"
              *     ]
-             *   }
+             *   },
+             *   "_manifest": [
+             *     "123e4567-e89b-12d3-a456-426614174000",
+             *     "123e4567-e89b-12d3-a456-426614174000"
+             *   ]
              * }
              */
             Components.Schemas.EntityItem;
@@ -8701,6 +8749,12 @@ declare namespace Paths {
     }
     namespace RemoveRelations {
         namespace Parameters {
+            export type ActivityId = /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
@@ -8716,6 +8770,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             async?: Parameters.Async;
+            activity_id?: Parameters.ActivityId;
         }
         export type RequestBody = Components.Schemas.RelationItem[];
         namespace Responses {
@@ -8852,7 +8907,10 @@ declare namespace Paths {
          *     "delete": [
          *       "org:456"
          *     ]
-         *   }
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
          * }
          */
         Components.Schemas.Entity;
@@ -8896,7 +8954,11 @@ declare namespace Paths {
              *       "org:456",
              *       "org:456"
              *     ]
-             *   }
+             *   },
+             *   "_manifest": [
+             *     "123e4567-e89b-12d3-a456-426614174000",
+             *     "123e4567-e89b-12d3-a456-426614174000"
+             *   ]
              * }
              */
             Components.Schemas.EntityItem;
@@ -9042,7 +9104,10 @@ declare namespace Paths {
              *     "delete": [
              *       "org:456"
              *     ]
-             *   }
+             *   },
+             *   "_manifest": [
+             *     "123e4567-e89b-12d3-a456-426614174000"
+             *   ]
              * }
              */
             Components.Schemas.Entity;
@@ -9087,7 +9152,11 @@ declare namespace Paths {
              *       "org:456",
              *       "org:456"
              *     ]
-             *   }
+             *   },
+             *   "_manifest": [
+             *     "123e4567-e89b-12d3-a456-426614174000",
+             *     "123e4567-e89b-12d3-a456-426614174000"
+             *   ]
              * }
              */
             Components.Schemas.EntityItem;
@@ -9130,7 +9199,11 @@ declare namespace Paths {
              *       "org:456",
              *       "org:456"
              *     ]
-             *   }
+             *   },
+             *   "_manifest": [
+             *     "123e4567-e89b-12d3-a456-426614174000",
+             *     "123e4567-e89b-12d3-a456-426614174000"
+             *   ]
              * }
              */
             Components.Schemas.EntityItem;
@@ -9184,7 +9257,10 @@ declare namespace Paths {
          *     "delete": [
          *       "org:456"
          *     ]
-         *   }
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
          * }
          */
         Components.Schemas.Entity;
@@ -10075,30 +10151,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaGroup.Responses.$200>
-  /**
-   * getESPublicJwks - getESPublicJwks
-   * 
-   * Get jwks public key set to verify tokens generated by this API for Elasticsearch authentication
-   */
-  'getESPublicJwks'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetESPublicJwks.Responses.$200>
-  /**
-   * getESTokenOIDC - getESTokenOIDC
-   * 
-   * OpenID Connect configuration for Entity API serving as public identity provider
-   * 
-   * Note: This API is not a fully compliant OAuth2.0 / OIDC identity provider, but this endpoint is useful to
-   * automate the process of verifying JWT tokens.
-   * 
-   */
-  'getESTokenOIDC'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetESTokenOIDC.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -11064,34 +11116,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaGroup.Responses.$200>
-  }
-  ['/v1/entity/public/idp/.well-known/jwks.json']: {
-    /**
-     * getESPublicJwks - getESPublicJwks
-     * 
-     * Get jwks public key set to verify tokens generated by this API for Elasticsearch authentication
-     */
-    'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetESPublicJwks.Responses.$200>
-  }
-  ['/v1/entity/public/idp/.well-known/openid-configuration']: {
-    /**
-     * getESTokenOIDC - getESTokenOIDC
-     * 
-     * OpenID Connect configuration for Entity API serving as public identity provider
-     * 
-     * Note: This API is not a fully compliant OAuth2.0 / OIDC identity provider, but this endpoint is useful to
-     * automate the process of verifying JWT tokens.
-     * 
-     */
-    'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetESTokenOIDC.Responses.$200>
   }
 }
 
