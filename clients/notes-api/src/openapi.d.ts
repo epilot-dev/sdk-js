@@ -275,7 +275,6 @@ declare namespace Paths {
                 [name: string]: string[];
             };
             content: Components.Schemas.LexicalNode | string;
-            entity_id: string;
         }
         namespace Responses {
             export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;

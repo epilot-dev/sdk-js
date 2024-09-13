@@ -128,10 +128,9 @@
                       { "$ref": "#/components/schemas/LexicalNode" },
                       { "type": "string" }
                     ]
-                  },
-                  "entity_id": { "type": "string" }
+                  }
                 },
-                "required": ["content", "entity_id"]
+                "required": ["content"]
               }
             }
           }
