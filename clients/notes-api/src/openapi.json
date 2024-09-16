@@ -5,9 +5,6 @@
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
-  "servers": [
-    { "url": "https://ommtj50yc5.execute-api.eu-central-1.amazonaws.com" }
-  ],
   "tags": [{ "name": "Notes" }],
   "security": [{ "EpilotAuth": [] }],
   "paths": {
