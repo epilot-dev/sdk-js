@@ -420,6 +420,10 @@ declare namespace Components {
              */
             price_id?: string;
             /**
+             * The ids of the coupons applicable to the price item
+             */
+            coupon_ids?: string[];
+            /**
              * The taxes applied to the price item.
              */
             taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
@@ -1117,6 +1121,10 @@ declare namespace Components {
              * The id of the price.
              */
             price_id?: string;
+            /**
+             * The ids of the coupons applicable to the price item
+             */
+            coupon_ids?: string[];
             /**
              * The taxes applied to the price item.
              */
@@ -2708,6 +2716,10 @@ declare namespace Components {
              * The id of the price.
              */
             price_id?: string;
+            /**
+             * The ids of the coupons applicable to the price item
+             */
+            coupon_ids?: string[];
             /**
              * The taxes applied to the price item.
              */
