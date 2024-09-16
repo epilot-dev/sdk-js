@@ -5,6 +5,9 @@
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
+  "servers": [
+    { "url": "https://ommtj50yc5.execute-api.eu-central-1.amazonaws.com" }
+  ],
   "tags": [{ "name": "Notes" }],
   "security": [{ "EpilotAuth": [] }],
   "paths": {
@@ -87,7 +90,7 @@
           }
         }
       },
-      "put": {
+      "patch": {
         "operationId": "updateNote",
         "summary": "updateNote",
         "description": "Updates an existing Note entry",
@@ -110,19 +113,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "_tags": {
-                    "type": "array",
-                    "items": { "type": "string" },
-                    "description": "Tags associated with this Note"
-                  },
-                  "_acl": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "array",
-                      "items": { "type": "string" }
-                    },
-                    "description": "Access Control List for this Note entry"
-                  },
                   "content": {
                     "oneOf": [
                       { "$ref": "#/components/schemas/LexicalNode" },
@@ -305,7 +295,7 @@
         "allOf": [{ "$ref": "#/components/schemas/BaseNoteEntity" }],
         "type": "object",
         "properties": {
-          "context_entity": {
+          "context_entities": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/Entity" },
             "description": "Standard `$relation` attribute for a Note's relationship with the Entity it belongs to"
@@ -316,7 +306,7 @@
             "description": "Standard `$relation` attribute for a Note's parent Note, intended to be used by Notes comments to reference their parent Note"
           }
         },
-        "required": ["context_entity"],
+        "required": ["context_entities"],
         "description": "A note Entity object cotaining Entity metadata and content in a LexicalNode format"
       },
       "BaseNoteEntity": {

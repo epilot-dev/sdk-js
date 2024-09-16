@@ -151,7 +151,7 @@ declare namespace Components {
             /**
              * Standard `$relation` attribute for a Note's relationship with the Entity it belongs to
              */
-            context_entity: /* Base Entity schema */ Entity[];
+            context_entities: /* Base Entity schema */ Entity[];
             /**
              * Standard `$relation` attribute for a Note's parent Note, intended to be used by Notes comments to reference their parent Note
              */
@@ -264,16 +264,6 @@ declare namespace Paths {
             id: /* The Entity ID of the Note entry to update */ Parameters.Id;
         }
         export interface RequestBody {
-            /**
-             * Tags associated with this Note
-             */
-            _tags?: string[];
-            /**
-             * Access Control List for this Note entry
-             */
-            _acl?: {
-                [name: string]: string[];
-            };
             content: Components.Schemas.LexicalNode | string;
         }
         namespace Responses {
@@ -364,7 +354,7 @@ export interface PathsDictionary {
      * 
      * Updates an existing Note entry
      */
-    'put'(
+    'patch'(
       parameters?: Parameters<Paths.UpdateNote.PathParameters> | null,
       data?: Paths.UpdateNote.RequestBody,
       config?: AxiosRequestConfig  
