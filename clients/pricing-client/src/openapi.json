@@ -3366,6 +3366,15 @@
             "type": "string",
             "description": "The id of the price."
           },
+          "coupon_ids": {
+            "type": "array",
+            "description": "The ids of the coupons applicable to the price item",
+            "readOnly": true,
+            "items": {
+              "type": "string",
+              "description": "The id of the coupon"
+            }
+          },
           "taxes": {
             "type": "array",
             "description": "The taxes applied to the price item.",
