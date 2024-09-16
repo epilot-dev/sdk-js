@@ -32,6 +32,12 @@ declare namespace Components {
             password?: string;
         }
         /**
+         * Object representing custom headers as key-value pairs.
+         */
+        export interface CustomHeader {
+            [name: string]: string;
+        }
+        /**
          * Custom key/value pair of either type body, query or header
          */
         export interface CustomOAuthParameter {
@@ -277,6 +283,7 @@ declare namespace Components {
             include_relations?: boolean;
             include_activity?: boolean;
             include_changed_attributes?: boolean;
+            custom_headers?: /* Object representing custom headers as key-value pairs. */ CustomHeader;
         }
         export interface TriggerWebhookResp {
             status_code?: string;
@@ -1163,6 +1170,7 @@ export type ApiKeyConfig = Components.Schemas.ApiKeyConfig;
 export type Auth = Components.Schemas.Auth;
 export type AuthType = Components.Schemas.AuthType;
 export type BasicAuthConfig = Components.Schemas.BasicAuthConfig;
+export type CustomHeader = Components.Schemas.CustomHeader;
 export type CustomOAuthParameter = Components.Schemas.CustomOAuthParameter;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type EventConfigEntry = Components.Schemas.EventConfigEntry;

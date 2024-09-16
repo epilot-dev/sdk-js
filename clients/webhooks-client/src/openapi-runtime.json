@@ -7,7 +7,8 @@
   "paths": {
     "/v1/webhooks/configured-events": {
       "get": {
-        "operationId": "getConfiguredEvents"
+        "operationId": "getConfiguredEvents",
+        "responses": {}
       }
     },
     "/v1/webhooks/configs": {
@@ -19,7 +20,8 @@
             "name": "eventName",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       },
       "post": {
         "operationId": "createConfig",
@@ -28,7 +30,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/webhooks/configs/{configId}": {
@@ -40,7 +43,8 @@
             "name": "configId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "put": {
         "operationId": "updateConfig",
@@ -56,7 +60,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteConfig",
@@ -66,7 +71,8 @@
             "name": "configId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/webhooks/configs/{configId}/failures": {
@@ -89,7 +95,8 @@
             "name": "lastLoadedTimestamp",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/webhooks/failures": {
@@ -107,7 +114,8 @@
             "name": "lastLoadedTimestamp",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/webhooks/failures/resend": {
@@ -119,7 +127,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/webhooks/configs/{configId}/trigger": {
@@ -141,7 +150,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/webhooks/configs/{configId}/events": {
@@ -162,7 +172,8 @@
             "name": "cursor",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/webhooks/configs/{configId}/events/{eventId}": {
@@ -179,7 +190,8 @@
             "name": "eventId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/webhooks/configs/{configId}/events/{eventId}/replay": {
@@ -196,7 +208,8 @@
             "name": "eventId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     }
   },

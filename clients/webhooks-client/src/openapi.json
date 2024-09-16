@@ -1215,7 +1215,18 @@
           },
           "include_changed_attributes": {
             "type": "boolean"
+          },
+          "custom_headers": {
+            "$ref": "#/components/schemas/CustomHeader"
           }
+        }
+      },
+      "CustomHeader": {
+        "type": "object",
+        "description": "Object representing custom headers as key-value pairs.",
+        "additionalProperties": {
+          "type": "string",
+          "description": "Header value"
         }
       },
       "CustomOAuthParameter": {
