@@ -253,7 +253,7 @@ declare namespace Paths {
             export type $200 = Components.Schemas.NotesResponse;
         }
     }
-    namespace UpdateNote {
+    namespace PatchNote {
         namespace Parameters {
             /**
              * The Entity ID of the Note entry to update
@@ -294,15 +294,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetNote.Responses.$200>
   /**
-   * updateNote - updateNote
+   * patchNote - patchNote
    * 
    * Updates an existing Note entry
    */
-  'updateNote'(
-    parameters?: Parameters<Paths.UpdateNote.PathParameters> | null,
-    data?: Paths.UpdateNote.RequestBody,
+  'patchNote'(
+    parameters?: Parameters<Paths.PatchNote.PathParameters> | null,
+    data?: Paths.PatchNote.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdateNote.Responses.$200>
+  ): OperationResponse<Paths.PatchNote.Responses.$200>
   /**
    * deleteNote - deleteNote
    * 
@@ -350,15 +350,15 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetNote.Responses.$200>
     /**
-     * updateNote - updateNote
+     * patchNote - patchNote
      * 
      * Updates an existing Note entry
      */
     'patch'(
-      parameters?: Parameters<Paths.UpdateNote.PathParameters> | null,
-      data?: Paths.UpdateNote.RequestBody,
+      parameters?: Parameters<Paths.PatchNote.PathParameters> | null,
+      data?: Paths.PatchNote.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdateNote.Responses.$200>
+    ): OperationResponse<Paths.PatchNote.Responses.$200>
     /**
      * deleteNote - deleteNote
      * 

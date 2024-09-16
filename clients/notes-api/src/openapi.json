@@ -88,8 +88,8 @@
         }
       },
       "patch": {
-        "operationId": "updateNote",
-        "summary": "updateNote",
+        "operationId": "patchNote",
+        "summary": "patchNote",
         "description": "Updates an existing Note entry",
         "tags": ["Notes"],
         "parameters": [
