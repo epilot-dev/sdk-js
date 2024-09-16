@@ -17,7 +17,8 @@
           {
             "$ref": "#/components/parameters/JobID"
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/blueprint-manifest/jobs:createExport": {
@@ -27,7 +28,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/blueprint-manifest/jobs/{job_id}:exportManifest": {
@@ -42,7 +44,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/blueprint-manifest:uploadManifest": {
@@ -52,7 +55,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/blueprint-manifest/jobs:createPlan": {
@@ -62,7 +66,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/blueprint-manifest/jobs/{job_id}:applyPlan": {
@@ -77,7 +82,38 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/manifests": {
+      "get": {
+        "operationId": "listInstalledManifests",
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/manifests/{manifest_id}": {
+      "get": {
+        "operationId": "getManifest",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteManifest",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id"
+          }
+        ],
+        "responses": {}
       }
     }
   },

@@ -16,7 +16,11 @@
     },
     {
       "name": "Import",
-      "description": "Import a Blueprint Manifest"
+      "description": "Install or update a Blueprint Manifest"
+    },
+    {
+      "name": "Manifests",
+      "description": "Manage installed Manifests"
     }
   ],
   "security": [
@@ -64,7 +68,7 @@
       "post": {
         "operationId": "createExport",
         "summary": "createExport",
-        "description": "Creates a new Export Job with a list of available resources to export from the passed root resource.\n",
+        "description": "Creates a new Export Job with a list of available resources to export from the passed root resource.\n\nMultiple root resources can be added by calling this multiple times with the same jobId\n",
         "tags": [
           "Export"
         ],
@@ -103,12 +107,12 @@
                     "minItems": 1,
                     "maxItems": 25
                   },
+                  "jobId": {
+                    "$ref": "#/components/schemas/JobID"
+                  },
                   "isExportingMultipleResources": {
                     "type": "boolean",
                     "description": "Temporary flag to indicate if multiple resources are being exported"
-                  },
-                  "jobId": {
-                    "type": "string"
                   }
                 }
               }
@@ -237,7 +241,7 @@
       "post": {
         "operationId": "createPlan",
         "summary": "createPlan",
-        "description": "Creates a new import job from an uploaded manifest file and returns the plan",
+        "description": "Creates a new import job from an uploaded manifest file and returns the plan.\n\nCreates an updated plan for an installed manifest when `manifest_id` is passed\n",
         "tags": [
           "Import"
         ],
@@ -245,14 +249,50 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "manifestFilePath": {
-                    "description": "Path to the manifest file uploaded via `uploadManifest`",
-                    "type": "string",
-                    "example": "example.tf"
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "s3ref": {
+                        "allOf": [
+                          {
+                            "description": "s3ref of manifest file uploaded via `uploadManifest`"
+                          },
+                          {
+                            "$ref": "#/components/schemas/S3Reference"
+                          }
+                        ]
+                      },
+                      "manifest_id": {
+                        "allOf": [
+                          {
+                            "description": "Update an existing manifest (optional)"
+                          },
+                          {
+                            "$ref": "#/components/schemas/ManifestID"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "s3ref"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "manifestFilePath": {
+                        "deprecated": true,
+                        "description": "Manifest file key uploaded via `uploadManifest`",
+                        "type": "string",
+                        "example": "example.tf"
+                      }
+                    },
+                    "required": [
+                      "manifestFilePath"
+                    ]
                   }
-                }
+                ]
               }
             }
           }
@@ -281,7 +321,7 @@
       "post": {
         "operationId": "applyPlan",
         "summary": "applyPlan",
-        "description": "Apply a plan returned by `createPlan`",
+        "description": "Apply a plan returned by `createPlan`.",
         "tags": [
           "Import"
         ],
@@ -307,11 +347,112 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Applied Import Job ID",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "$ref": "#/components/schemas/JobID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blueprint-manifest/manifests": {
+      "get": {
+        "operationId": "listInstalledManifests",
+        "summary": "listInstalledManifests",
+        "description": "List Blueprint Manifests installed to the organization",
+        "tags": [
+          "Manifests"
+        ],
+        "responses": {
+          "200": {
+            "description": "Installed Blueprint Manifests in the organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ManifestItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blueprint-manifest/manifests/{manifest_id}": {
+      "get": {
+        "operationId": "getManifest",
+        "summary": "getManifest",
+        "description": "Get installed Manifest by ID",
+        "tags": [
+          "Manifests"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id",
+            "schema": {
+              "$ref": "#/components/schemas/ManifestID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Installed Blueprint Manifest in the Organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Manifest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteManifest",
+        "summary": "deleteManifest",
+        "description": "Remove installed manifest from the org\n\nNote that this does not delete the installed resources of the Manifest!\n",
+        "tags": [
+          "Manifests"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id",
+            "schema": {
+              "$ref": "#/components/schemas/ManifestID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted Manifest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Manifest"
                 }
               }
             }
@@ -322,6 +463,42 @@
   },
   "components": {
     "schemas": {
+      "ManifestID": {
+        "type": "string",
+        "description": "ID of an imported / installed manifest",
+        "example": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
+      },
+      "JobID": {
+        "type": "string",
+        "description": "ID of an import or export job (state machine)",
+        "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+      },
+      "Manifest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonManifestFields"
+          },
+          {
+            "$ref": "#/components/schemas/CommonMarkdownFields"
+          },
+          {
+            "$ref": "#/components/schemas/CommonImportFields"
+          },
+          {
+            "$ref": "#/components/schemas/ManifestTimestampFields"
+          }
+        ]
+      },
+      "ManifestItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonManifestFields"
+          },
+          {
+            "$ref": "#/components/schemas/ManifestTimestampFields"
+          }
+        ]
+      },
       "JobStatus": {
         "type": "string",
         "enum": [
@@ -473,101 +650,76 @@
           "type"
         ]
       },
-      "JobID": {
-        "type": "string",
-        "description": "ID of an import or export job",
-        "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
-      },
       "Job": {
-        "type": "object",
-        "properties": {
-          "job_status": {
-            "$ref": "#/components/schemas/JobStatus"
-          },
-          "job_id": {
-            "$ref": "#/components/schemas/JobID"
-          },
-          "message": {
-            "type": "string"
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "plan_file_content": {
-            "type": "string",
-            "description": "An URL to download the plan file"
-          },
-          "resources_to_export": {
-            "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
-            "oneOf": [
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/RootResourceNode"
-                }
-              },
-              {
-                "$ref": "#/components/schemas/RootResourceNode"
-              }
-            ]
-          },
-          "large_resources_to_export_url": {
-            "type": "string",
-            "description": "An URL to download the resources to export when the resources are too large to be included in the response"
-          },
-          "resources_to_import": {
-            "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
-            "oneOf": [
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/RootResourceNode"
-                }
-              },
-              {
-                "$ref": "#/components/schemas/RootResourceNode"
-              }
-            ]
-          },
-          "large_resources_to_import_url": {
-            "type": "string",
-            "description": "An URL to download the resources to import when the resources are too large to be included in the response"
-          },
-          "imported_resources": {
-            "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
-            "oneOf": [
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/RootResourceNode"
-                }
-              },
-              {
-                "$ref": "#/components/schemas/RootResourceNode"
-              }
-            ]
-          },
-          "large_imported_resources_url": {
-            "type": "string",
-            "description": "An URL to download the imported resources when the resources are too large to be included in the response"
-          },
-          "markdown": {
+        "allOf": [
+          {
             "type": "object",
             "properties": {
-              "preinstall": {
-                "type": "string",
-                "description": "Markdown content to be displayed when showing the plan to install blueprint",
-                "example": "This is the content of the preinstall.md file\n"
+              "job_id": {
+                "$ref": "#/components/schemas/JobID"
               },
-              "postinstall": {
+              "job_status": {
+                "$ref": "#/components/schemas/JobStatus"
+              },
+              "message": {
+                "type": "string"
+              },
+              "timestamp": {
                 "type": "string",
-                "description": "Markdown content to be displayed when showing the plan to install blueprint",
-                "example": "This is the content of the postinstall.md file\n"
+                "format": "date-time"
+              },
+              "plan_file_content": {
+                "type": "string",
+                "description": "An URL to download the plan file"
+              },
+              "resources_to_export": {
+                "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/RootResourceNode"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/RootResourceNode"
+                  }
+                ]
+              },
+              "large_resources_to_export_url": {
+                "type": "string",
+                "description": "An URL to download the resources to export when the resources are too large to be included in the response"
+              },
+              "resources_to_import": {
+                "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/RootResourceNode"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/RootResourceNode"
+                  }
+                ]
+              },
+              "large_resources_to_import_url": {
+                "type": "string",
+                "description": "An URL to download the resources to import when the resources are too large to be included in the response"
               }
             }
+          },
+          {
+            "$ref": "#/components/schemas/CommonImportFields"
+          },
+          {
+            "$ref": "#/components/schemas/CommonMarkdownFields"
+          },
+          {
+            "$ref": "#/components/schemas/CommonManifestFields"
           }
-        }
+        ]
       },
       "UploadFilePayload": {
         "type": "object",
@@ -592,11 +744,100 @@
         "properties": {
           "bucket": {
             "type": "string",
-            "example": "epilot-dev-blueprints"
+            "example": "blueprint-manifest-prod-blueprintsv2bucket-sybpsryropzw"
           },
           "key": {
             "type": "string",
             "example": "templates/main.tf"
+          }
+        }
+      },
+      "CommonManifestFields": {
+        "type": "object",
+        "properties": {
+          "manifest_id": {
+            "$ref": "#/components/schemas/ManifestID"
+          },
+          "source_blueprint_name": {
+            "type": "string",
+            "example": "Solar B2B"
+          },
+          "source_blueprint_slug": {
+            "type": "string",
+            "description": "URL slug of a blueprint from the epilot marketplace",
+            "example": "solar-b2b"
+          },
+          "source_blueprint_version": {
+            "type": "string",
+            "description": "Version of the blueprint (semver)",
+            "example": "1.0.0"
+          }
+        }
+      },
+      "ManifestTimestampFields": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "description": "When the manifest was first installed (applied)",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "description": "When the manifest was last updated (applied)",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CommonImportFields": {
+        "type": "object",
+        "properties": {
+          "imported_resources": {
+            "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RootResourceNode"
+                }
+              },
+              {
+                "$ref": "#/components/schemas/RootResourceNode"
+              }
+            ]
+          },
+          "large_imported_resources_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "An URL to download the imported resources when the resources are too large to be included in the response",
+            "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/large.json"
+          }
+        }
+      },
+      "CommonMarkdownFields": {
+        "type": "object",
+        "properties": {
+          "markdown": {
+            "type": "object",
+            "description": "Markdown content part of a manifest file",
+            "properties": {
+              "manifest": {
+                "type": "string",
+                "description": "Markdown content shown before installing the manifest",
+                "example": "This is the content of the manifest.md file which contains the manifest descripton.       \n"
+              },
+              "preinstall": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Markdown content to be displayed when showing the plan to install blueprint",
+                "example": "This is the content of the preinstall.md file\n"
+              },
+              "postinstall": {
+                "type": "string",
+                "description": "Markdown content to be displayed when showing the plan to install blueprint",
+                "example": "This is the content of the postinstall.md file\n"
+              }
+            }
           }
         }
       }
