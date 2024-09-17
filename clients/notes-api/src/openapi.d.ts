@@ -17,23 +17,23 @@ declare namespace Components {
             /**
              * Entity ID of the Note entry
              */
-            _id: string;
+            _id?: string;
             /**
              * ID of the Organization that owns this Note
              */
-            _org: string;
+            _org?: string;
             /**
              * The Entity schema of this Note
              */
-            _schema: string;
+            _schema?: string;
             /**
              * The timestamp of when this Note was created
              */
-            _created_at: string; // date-time
+            _created_at?: string; // date-time
             /**
              * The timestamp of when this Note was last updated
              */
-            _updated_at: string; // date-time
+            _updated_at?: string; // date-time
             /**
              * Tags associated with this Note
              */
@@ -44,7 +44,7 @@ declare namespace Components {
             _acl?: {
                 [name: string]: string[];
             };
-            content: LexicalNode | string;
+            content?: LexicalNode | string;
         }
         export type ContextType = "opportunity" | "workflows";
         /**
@@ -54,23 +54,23 @@ declare namespace Components {
             /**
              * Entity ID of the Note entry
              */
-            _id: string;
+            _id?: string;
             /**
              * ID of the Organization that owns this Note
              */
-            _org: string;
+            _org?: string;
             /**
              * The Entity schema of this Note
              */
-            _schema: string;
+            _schema?: string;
             /**
              * The timestamp of when this Note was created
              */
-            _created_at: string; // date-time
+            _created_at?: string; // date-time
             /**
              * The timestamp of when this Note was last updated
              */
-            _updated_at: string; // date-time
+            _updated_at?: string; // date-time
             /**
              * Tags associated with this Note
              */
@@ -120,23 +120,23 @@ declare namespace Components {
             /**
              * Entity ID of the Note entry
              */
-            _id: string;
+            _id?: string;
             /**
              * ID of the Organization that owns this Note
              */
-            _org: string;
+            _org?: string;
             /**
              * The Entity schema of this Note
              */
-            _schema: string;
+            _schema?: string;
             /**
              * The timestamp of when this Note was created
              */
-            _created_at: string; // date-time
+            _created_at?: string; // date-time
             /**
              * The timestamp of when this Note was last updated
              */
-            _updated_at: string; // date-time
+            _updated_at?: string; // date-time
             /**
              * Tags associated with this Note
              */
@@ -147,7 +147,7 @@ declare namespace Components {
             _acl?: {
                 [name: string]: string[];
             };
-            content: LexicalNode | string;
+            content?: LexicalNode | string;
             /**
              * Standard `$relation` attribute for a Note's relationship with the Entity it belongs to
              */
@@ -182,7 +182,7 @@ declare namespace Paths {
             _acl?: {
                 [name: string]: string[];
             };
-            content: Components.Schemas.LexicalNode | string;
+            content?: Components.Schemas.LexicalNode | string;
             entity_id: string;
         }
         namespace Responses {
@@ -263,9 +263,7 @@ declare namespace Paths {
         export interface PathParameters {
             id: /* The Entity ID of the Note entry to update */ Parameters.Id;
         }
-        export interface RequestBody {
-            content: Components.Schemas.LexicalNode | string;
-        }
+        export type RequestBody = /* Base Entity with additional, non-relational attributes that are exclusive to Notes schema */ Components.Schemas.BaseNoteEntity;
         namespace Responses {
             export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
         }

@@ -34,14 +34,14 @@
                     "description": "Access Control List for this Note entry"
                   },
                   "content": {
-                    "oneOf": [
+                    "anyOf": [
                       { "$ref": "#/components/schemas/LexicalNode" },
                       { "type": "string" }
                     ]
                   },
                   "entity_id": { "type": "string" }
                 },
-                "required": ["content", "entity_id"]
+                "required": ["entity_id"]
               }
             }
           }
@@ -107,18 +107,7 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "content": {
-                    "oneOf": [
-                      { "$ref": "#/components/schemas/LexicalNode" },
-                      { "type": "string" }
-                    ]
-                  }
-                },
-                "required": ["content"]
-              }
+              "schema": { "$ref": "#/components/schemas/BaseNoteEntity" }
             }
           }
         },
@@ -311,13 +300,12 @@
         "type": "object",
         "properties": {
           "content": {
-            "oneOf": [
+            "anyOf": [
               { "$ref": "#/components/schemas/LexicalNode" },
               { "type": "string" }
             ]
           }
         },
-        "required": ["content"],
         "description": "Base Entity with additional, non-relational attributes that are exclusive to Notes schema"
       },
       "Entity": {
@@ -359,7 +347,6 @@
             "description": "Access Control List for this Note entry"
           }
         },
-        "required": ["_id", "_org", "_schema", "_created_at", "_updated_at"],
         "description": "Base Entity schema"
       },
       "ContextType": { "type": "string", "enum": ["opportunity", "workflows"] },

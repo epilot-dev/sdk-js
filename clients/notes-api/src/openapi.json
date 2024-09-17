@@ -5,15 +5,30 @@
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
-  "tags": [{ "name": "Notes" }],
-  "security": [{ "EpilotAuth": [] }],
+  "servers": [
+    {
+      "url": "https://ommtj50yc5.execute-api.eu-central-1.amazonaws.com"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Notes"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
   "paths": {
     "/v1/note": {
       "post": {
         "operationId": "createNote",
         "summary": "createNote",
         "description": "Creates a new Note entry",
-        "tags": ["Notes"],
+        "tags": [
+          "Notes"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -22,26 +37,56 @@
                 "properties": {
                   "_tags": {
                     "type": "array",
-                    "items": { "type": "string" },
+                    "items": {
+                      "type": "string"
+                    },
                     "description": "Tags associated with this Note"
                   },
                   "_acl": {
                     "type": "object",
                     "additionalProperties": {
                       "type": "array",
-                      "items": { "type": "string" }
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "description": "Access Control List for this Note entry"
                   },
+                  "_owners": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "org_id": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "org_id",
+                        "user_id"
+                      ]
+                    }
+                  },
                   "content": {
-                    "oneOf": [
-                      { "$ref": "#/components/schemas/LexicalNode" },
-                      { "type": "string" }
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/LexicalNode"
+                      },
+                      {
+                        "type": "string"
+                      }
                     ]
                   },
-                  "entity_id": { "type": "string" }
+                  "entity_id": {
+                    "type": "string"
+                  }
                 },
-                "required": ["content", "entity_id"]
+                "required": [
+                  "entity_id"
+                ]
               }
             }
           }
@@ -51,7 +96,9 @@
             "description": "Successful response with Note content",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/NoteEntity" }
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
               }
             }
           }
@@ -63,7 +110,9 @@
         "operationId": "getNote",
         "summary": "getNote",
         "description": "Retrieves a single Note entry based on it's Entity ID",
-        "tags": ["Notes"],
+        "tags": [
+          "Notes"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -81,7 +130,9 @@
             "description": "Successful response with Note content",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/NoteEntity" }
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
               }
             }
           }
@@ -91,7 +142,9 @@
         "operationId": "patchNote",
         "summary": "patchNote",
         "description": "Updates an existing Note entry",
-        "tags": ["Notes"],
+        "tags": [
+          "Notes"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -108,16 +161,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "content": {
-                    "oneOf": [
-                      { "$ref": "#/components/schemas/LexicalNode" },
-                      { "type": "string" }
-                    ]
-                  }
-                },
-                "required": ["content"]
+                "$ref": "#/components/schemas/BaseNoteEntity"
               }
             }
           }
@@ -127,7 +171,9 @@
             "description": "Successful response with Note content",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/NoteEntity" }
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
               }
             }
           }
@@ -137,7 +183,9 @@
         "operationId": "deleteNote",
         "summary": "deleteNote",
         "description": "Deletes a single Note entry based on it's Entity ID",
-        "tags": ["Notes"],
+        "tags": [
+          "Notes"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -152,12 +200,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with the deleted Note entity",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/NoteEntity" }
-              }
-            }
+            "description": "Successful response with the deleted Note entity"
           }
         }
       }
@@ -167,7 +210,9 @@
         "operationId": "getNotesByContext",
         "summary": "getNotesByContext",
         "description": "Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`",
-        "tags": ["Notes"],
+        "tags": [
+          "Notes"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -185,8 +230,12 @@
             "description": "Type of context to retrieve Notes within the targeted Entity",
             "schema": {
               "anyOf": [
-                { "type": "string" },
-                { "$ref": "#/components/schemas/ContextType" }
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/components/schemas/ContextType"
+                }
               ],
               "description": "Type of context to retrieve Notes within the targeted Entity"
             },
@@ -228,7 +277,9 @@
             "description": "Successful response with Note content",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/NotesResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/NotesResponse"
+                }
               }
             }
           }
@@ -252,7 +303,11 @@
           "direction": {
             "type": "string",
             "nullable": true,
-            "enum": ["ltr", "rtl", null],
+            "enum": [
+              "ltr",
+              "rtl",
+              null
+            ],
             "description": "Metadata information about the direction of the Node instance"
           },
           "indent": {
@@ -264,13 +319,25 @@
             "description": "Version of the editor client that created this Node instance."
           },
           "format": {
-            "anyOf": [{ "type": "number" }, { "type": "string" }],
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
             "description": "Any combination of bold, italic, underline, strikethrough, code, subscript and superscript"
           },
           "mode": {
             "type": "string",
             "nullable": true,
-            "enum": ["normal", "token", "segmented", null],
+            "enum": [
+              "normal",
+              "token",
+              "segmented",
+              null
+            ],
             "description": "Controls how the node behaves when being edited."
           },
           "style": {
@@ -283,41 +350,100 @@
           },
           "children": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/LexicalNode" }
+            "items": {
+              "$ref": "#/components/schemas/LexicalNode"
+            }
           }
         },
-        "required": ["indent", "version"]
+        "required": [
+          "indent",
+          "version"
+        ]
       },
       "NoteEntity": {
-        "allOf": [{ "$ref": "#/components/schemas/BaseNoteEntity" }],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseNoteEntity"
+          }
+        ],
         "type": "object",
         "properties": {
           "context_entities": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/Entity" },
-            "description": "Standard `$relation` attribute for a Note's relationship with the Entity it belongs to"
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "entity_id"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "$relation"
+            ]
           },
           "parent": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "entity_id"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "$relation"
+            ]
+          },
+          "comments": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/NoteEntity" },
-            "description": "Standard `$relation` attribute for a Note's parent Note, intended to be used by Notes comments to reference their parent Note"
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            }
           }
         },
-        "required": ["context_entities"],
+        "required": [
+          "context_entities",
+          "parent"
+        ],
         "description": "A note Entity object cotaining Entity metadata and content in a LexicalNode format"
       },
       "BaseNoteEntity": {
-        "allOf": [{ "$ref": "#/components/schemas/Entity" }],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ],
         "type": "object",
         "properties": {
           "content": {
-            "oneOf": [
-              { "$ref": "#/components/schemas/LexicalNode" },
-              { "type": "string" }
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LexicalNode"
+              },
+              {
+                "type": "string"
+              }
             ]
           }
         },
-        "required": ["content"],
         "description": "Base Entity with additional, non-relational attributes that are exclusive to Notes schema"
       },
       "Entity": {
@@ -347,22 +473,49 @@
           },
           "_tags": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "description": "Tags associated with this Note"
           },
           "_acl": {
             "type": "object",
             "additionalProperties": {
               "type": "array",
-              "items": { "type": "string" }
+              "items": {
+                "type": "string"
+              }
             },
             "description": "Access Control List for this Note entry"
+          },
+          "_owners": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "org_id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "org_id",
+                "user_id"
+              ]
+            }
           }
         },
-        "required": ["_id", "_org", "_schema", "_created_at", "_updated_at"],
         "description": "Base Entity schema"
       },
-      "ContextType": { "type": "string", "enum": ["opportunity", "workflows"] },
+      "ContextType": {
+        "type": "string",
+        "enum": [
+          "opportunity",
+          "workflows"
+        ]
+      },
       "NotesResponse": {
         "type": "object",
         "properties": {
@@ -372,11 +525,16 @@
           },
           "results": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/NoteEntity" },
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            },
             "description": "The Note entries returned in this query"
           }
         },
-        "required": ["hits", "results"]
+        "required": [
+          "hits",
+          "results"
+        ]
       }
     }
   }
