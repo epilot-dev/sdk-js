@@ -3447,6 +3447,12 @@
           },
           "explicit_search_mappings": {
             "$ref": "#/components/schemas/SearchMappings"
+          },
+          "group_headlines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupHeadline"
+            }
           }
         },
         "required": [
@@ -3879,7 +3885,7 @@
           },
           "settings_flag": {
             "type": "array",
-            "description": "This attribute should only be active when all the settings have the correct value",
+            "description": "This attribute should only be active when one of the provided settings have the correct value",
             "items": {
               "$ref": "#/components/schemas/SettingFlag"
             }
@@ -4949,6 +4955,56 @@
         "required": [
           "label",
           "value"
+        ]
+      },
+      "GroupHeadline": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "layout": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string",
+            "description": "The group of headline attribute"
+          },
+          "order": {
+            "type": "integer",
+            "description": "The order of headline attribute"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "headline"
+            ]
+          },
+          "enable_divider": {
+            "type": "boolean",
+            "default": false
+          },
+          "divider": {
+            "type": "string",
+            "enum": [
+              "top_divider",
+              "bottom_divider"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "label",
+          "group",
+          "type"
         ]
       },
       "EntitySlug": {

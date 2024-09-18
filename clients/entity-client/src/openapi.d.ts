@@ -322,7 +322,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -472,7 +472,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -646,7 +646,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -850,7 +850,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -1002,7 +1002,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -1134,7 +1134,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -1268,7 +1268,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -1400,7 +1400,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -1542,7 +1542,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -2608,6 +2608,7 @@ declare namespace Components {
              * }
              */
             SearchMappings;
+            group_headlines?: GroupHeadline[];
         }
         export interface EntitySchemaGroup {
             /**
@@ -2958,6 +2959,7 @@ declare namespace Components {
              * }
              */
             SearchMappings;
+            group_headlines?: GroupHeadline[];
         }
         export interface EntitySearchOptions {
             /**
@@ -3353,7 +3355,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -3482,6 +3484,23 @@ declare namespace Components {
              */
             hits?: number;
             relations?: GetRelationsResp;
+        }
+        export interface GroupHeadline {
+            id: string; // uuid
+            name: string;
+            label: string;
+            layout?: string;
+            /**
+             * The group of headline attribute
+             */
+            group: string;
+            /**
+             * The order of headline attribute
+             */
+            order?: number;
+            type: "headline";
+            enable_divider?: boolean;
+            divider?: "top_divider" | "bottom_divider";
         }
         /**
          * Entity with relation data resolved into the attribute values
@@ -3763,7 +3782,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -3895,7 +3914,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -4027,7 +4046,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -4167,7 +4186,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -4307,7 +4326,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -4455,7 +4474,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -4592,7 +4611,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -4724,7 +4743,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -4856,7 +4875,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -4988,7 +5007,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -5129,7 +5148,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -5289,7 +5308,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -5675,7 +5694,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -6140,7 +6159,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -6280,7 +6299,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -6429,7 +6448,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -6631,7 +6650,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -6863,7 +6882,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -6996,7 +7015,7 @@ declare namespace Components {
              */
             feature_flag?: string;
             /**
-             * This attribute should only be active when all the settings have the correct value
+             * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
             value_formatter?: string;
@@ -11180,6 +11199,7 @@ export type GenerateEntityTableAIFiltersResponse = Components.Schemas.GenerateEn
 export type GetRelatedEntitiesCount = Components.Schemas.GetRelatedEntitiesCount;
 export type GetRelationsResp = Components.Schemas.GetRelationsResp;
 export type GetRelationsRespWithPagination = Components.Schemas.GetRelationsRespWithPagination;
+export type GroupHeadline = Components.Schemas.GroupHeadline;
 export type HydratedEntity = Components.Schemas.HydratedEntity;
 export type HydratedEntityItem = Components.Schemas.HydratedEntityItem;
 export type InternalAttribute = Components.Schemas.InternalAttribute;
