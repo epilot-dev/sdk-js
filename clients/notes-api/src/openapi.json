@@ -70,18 +70,17 @@
                       ]
                     }
                   },
-                  "content": {
-                    "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/LexicalNode"
-                      },
-                      {
-                        "type": "string"
-                      }
-                    ]
-                  },
                   "entity_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The Entity ID of the Entity this note will be contextually attached to"
+                  },
+                  "parent_id": {
+                    "type": "string",
+                    "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The content of the Note"
                   }
                 },
                 "required": [
@@ -161,7 +160,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BaseNoteEntity"
+                "$ref": "#/components/schemas/Entity"
               }
             }
           }
@@ -297,73 +296,10 @@
       }
     },
     "schemas": {
-      "LexicalNode": {
-        "type": "object",
-        "properties": {
-          "direction": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "ltr",
-              "rtl",
-              null
-            ],
-            "description": "Metadata information about the direction of the Node instance"
-          },
-          "indent": {
-            "type": "number",
-            "description": "The identation level of this node in relation to it's parent node."
-          },
-          "version": {
-            "type": "number",
-            "description": "Version of the editor client that created this Node instance."
-          },
-          "format": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "description": "Any combination of bold, italic, underline, strikethrough, code, subscript and superscript"
-          },
-          "mode": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "normal",
-              "token",
-              "segmented",
-              null
-            ],
-            "description": "Controls how the node behaves when being edited."
-          },
-          "style": {
-            "type": "string",
-            "description": "Allows the injection of custom styles for the node."
-          },
-          "text": {
-            "type": "string",
-            "description": "The text content of the node."
-          },
-          "children": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LexicalNode"
-            }
-          }
-        },
-        "required": [
-          "indent",
-          "version"
-        ]
-      },
       "NoteEntity": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/BaseNoteEntity"
+            "$ref": "#/components/schemas/Entity"
           }
         ],
         "type": "object",
@@ -417,6 +353,10 @@
             "items": {
               "$ref": "#/components/schemas/NoteEntity"
             }
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
           }
         },
         "required": [
@@ -424,27 +364,6 @@
           "parent"
         ],
         "description": "A note Entity object cotaining Entity metadata and content in a LexicalNode format"
-      },
-      "BaseNoteEntity": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          }
-        ],
-        "type": "object",
-        "properties": {
-          "content": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/LexicalNode"
-              },
-              {
-                "type": "string"
-              }
-            ]
-          }
-        },
-        "description": "Base Entity with additional, non-relational attributes that are exclusive to Notes schema"
       },
       "Entity": {
         "type": "object",
