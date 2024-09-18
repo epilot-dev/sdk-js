@@ -168,12 +168,17 @@ declare namespace Paths {
     namespace GetNote {
         namespace Parameters {
             /**
+             * Whether to hydrate the Note's relation attributes
+             */
+            export type Hydrate = boolean;
+            /**
              * The Entity ID of the Note entry to retrieve
              */
             export type Id = string;
         }
         export interface PathParameters {
             id: /* The Entity ID of the Note entry to retrieve */ Parameters.Id;
+            hydrate: /* Whether to hydrate the Note's relation attributes */ Parameters.Hydrate;
         }
         namespace Responses {
             export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;

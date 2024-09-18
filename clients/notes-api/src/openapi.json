@@ -122,6 +122,16 @@
               "description": "The Entity ID of the Note entry to retrieve"
             },
             "required": true
+          },
+          {
+            "in": "path",
+            "name": "hydrate",
+            "description": "Whether to hydrate the Note's relation attributes",
+            "schema": {
+              "type": "boolean",
+              "description": "Whether to hydrate the Note's relation attributes"
+            },
+            "required": true
           }
         ],
         "responses": {
