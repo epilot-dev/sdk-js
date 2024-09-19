@@ -5,11 +5,6 @@
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
-  "servers": [
-    {
-      "url": "https://ommtj50yc5.execute-api.eu-central-1.amazonaws.com"
-    }
-  ],
   "tags": [
     {
       "name": "Notes"
@@ -35,6 +30,28 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "_created_by": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "The Entity ID of the User that created this Note"
+                  },
+                  "created_by": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "The Entity ID of the User that created this Note"
+                  },
                   "_tags": {
                     "type": "array",
                     "items": {
@@ -366,6 +383,11 @@
           "content": {
             "type": "string",
             "description": "The content of the Note"
+          },
+          "pinned_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was pinned",
+            "format": "date-time"
           }
         },
         "required": [
@@ -398,6 +420,28 @@
             "type": "string",
             "description": "The timestamp of when this Note was last updated",
             "format": "date-time"
+          },
+          "_created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "description": "The Entity ID of the User that created this Note"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "description": "The Entity ID of the User that created this Note"
           },
           "_tags": {
             "type": "array",
@@ -435,13 +479,16 @@
             }
           }
         },
+        "required": [
+          "_id"
+        ],
         "description": "Base Entity schema"
       },
       "ContextType": {
         "type": "string",
         "enum": [
           "opportunity",
-          "workflows"
+          "workflow_tasks"
         ]
       },
       "NotesResponse": {

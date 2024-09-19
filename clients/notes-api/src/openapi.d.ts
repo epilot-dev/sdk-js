@@ -10,7 +10,7 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
-        export type ContextType = "opportunity" | "workflows";
+        export type ContextType = "opportunity" | "workflow_tasks";
         /**
          * Base Entity schema
          */
@@ -18,7 +18,7 @@ declare namespace Components {
             /**
              * Entity ID of the Note entry
              */
-            _id?: string;
+            _id: string;
             /**
              * ID of the Organization that owns this Note
              */
@@ -35,6 +35,14 @@ declare namespace Components {
              * The timestamp of when this Note was last updated
              */
             _updated_at?: string; // date-time
+            /**
+             * The Entity ID of the User that created this Note
+             */
+            _created_by?: /* The Entity ID of the User that created this Note */ string | number;
+            /**
+             * The Entity ID of the User that created this Note
+             */
+            created_by?: /* The Entity ID of the User that created this Note */ string | number;
             /**
              * Tags associated with this Note
              */
@@ -57,7 +65,7 @@ declare namespace Components {
             /**
              * Entity ID of the Note entry
              */
-            _id?: string;
+            _id: string;
             /**
              * ID of the Organization that owns this Note
              */
@@ -74,6 +82,14 @@ declare namespace Components {
              * The timestamp of when this Note was last updated
              */
             _updated_at?: string; // date-time
+            /**
+             * The Entity ID of the User that created this Note
+             */
+            _created_by?: /* The Entity ID of the User that created this Note */ string | number;
+            /**
+             * The Entity ID of the User that created this Note
+             */
+            created_by?: /* The Entity ID of the User that created this Note */ string | number;
             /**
              * Tags associated with this Note
              */
@@ -103,6 +119,10 @@ declare namespace Components {
              * The content of the Note
              */
             content?: string;
+            /**
+             * The timestamp of when this Note was pinned
+             */
+            pinned_at?: string; // date-time
         }
         export interface NotesResponse {
             /**
@@ -119,6 +139,14 @@ declare namespace Components {
 declare namespace Paths {
     namespace CreateNote {
         export interface RequestBody {
+            /**
+             * The Entity ID of the User that created this Note
+             */
+            _created_by?: /* The Entity ID of the User that created this Note */ string | number;
+            /**
+             * The Entity ID of the User that created this Note
+             */
+            created_by?: /* The Entity ID of the User that created this Note */ string | number;
             /**
              * Tags associated with this Note
              */
