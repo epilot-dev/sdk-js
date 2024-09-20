@@ -3317,6 +3317,51 @@
         ],
         "description": "\n| status      | description |\n|-------------|-------|\n| `draft`     | ​​Starting state for all orders, at this point we can still edit the order |\n| `quote`     | The order is in a quoting phase, bound to an expiration date |\n| `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |\n| `cancelled` | The order has been cancelled |\n| `completed` | The order is now closed and finalized |\n"
       },
+      "BasePriceItemCommon": {
+        "description": "Represents the common keys in BasePriceItem and BasePriceItemDto",
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/MetaData"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "The quantity of products being purchased."
+          },
+          "product_id": {
+            "type": "string",
+            "description": "The id of the product."
+          },
+          "price_id": {
+            "type": "string",
+            "description": "The id of the price."
+          },
+          "is_composite_price": {
+            "description": "The flag for prices that contain price components.",
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string",
+            "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
+          },
+          "price_mappings": {
+            "description": "Price mapping information required to compute totals",
+            "$ref": "#/components/schemas/PriceInputMappings"
+          },
+          "is_tax_inclusive": {
+            "type": "boolean",
+            "description": "Specifies whether the price is considered `inclusive` of taxes or not."
+          },
+          "_product": {
+            "description": "The snapshot of the product.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Product"
+              }
+            ]
+          }
+        }
+      },
       "PriceItemsDto": {
         "description": "A valid set of product prices, quantities, (discounts) and taxes from a client.",
         "type": "array",
@@ -3334,18 +3379,12 @@
       "BasePriceItemDto": {
         "description": "Represents a valid base price item from a client.",
         "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BasePriceItemCommon"
+          }
+        ],
         "properties": {
-          "metadata": {
-            "$ref": "#/components/schemas/MetaData"
-          },
-          "quantity": {
-            "type": "integer",
-            "description": "The quantity of products being purchased."
-          },
-          "price_mappings": {
-            "description": "Price mapping information required to compute totals",
-            "$ref": "#/components/schemas/PriceInputMappings"
-          },
           "external_fees_mappings": {
             "description": "External fees mapping information required to compute totals, for some pricing models",
             "$ref": "#/components/schemas/ExternalFeeMappings"
@@ -3353,18 +3392,6 @@
           "external_fees_metadata": {
             "description": "External fees metadata information required to compute totals, for some pricing models",
             "$ref": "#/components/schemas/ExternalFeeMetadata"
-          },
-          "description": {
-            "type": "string",
-            "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
-          },
-          "product_id": {
-            "type": "string",
-            "description": "The id of the product."
-          },
-          "price_id": {
-            "type": "string",
-            "description": "The id of the price."
           },
           "coupon_ids": {
             "type": "array",
@@ -3399,18 +3426,6 @@
               ]
             }
           },
-          "is_composite_price": {
-            "description": "The flag for prices that contain price components.",
-            "type": "boolean"
-          },
-          "_product": {
-            "description": "The snapshot of the product.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Product"
-              }
-            ]
-          },
           "_coupons": {
             "type": "array",
             "description": "The coupons applicable to the price item",
@@ -3422,10 +3437,6 @@
                 }
               ]
             }
-          },
-          "is_tax_inclusive": {
-            "type": "boolean",
-            "description": "Specifies whether the price is considered `inclusive` of taxes or not."
           }
         }
       },
@@ -3806,6 +3817,9 @@
         "allOf": [
           {
             "$ref": "#/components/schemas/Amounts"
+          },
+          {
+            "$ref": "#/components/schemas/BasePriceItemCommon"
           }
         ],
         "properties": {
@@ -3814,12 +3828,24 @@
             "description": "price item id",
             "readOnly": true
           },
-          "metadata": {
-            "$ref": "#/components/schemas/MetaData"
-          },
           "unit_amount": {
             "type": "integer",
             "description": "The unit amount value",
+            "readOnly": true
+          },
+          "unit_amount_decimal": {
+            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+            "type": "string",
+            "readOnly": true
+          },
+          "unit_discount_amount": {
+            "type": "integer",
+            "description": "The discount amount applied for each unit",
+            "readOnly": true
+          },
+          "unit_discount_amount_decimal": {
+            "type": "string",
+            "description": "The discount amount applied for each unit represented as a decimal string",
             "readOnly": true
           },
           "unit_amount_gross": {
@@ -3832,10 +3858,6 @@
             "description": "The unit gross amount value.",
             "readOnly": true
           },
-          "amount_tax": {
-            "type": "integer",
-            "description": "Total tax amount for this line item."
-          },
           "unit_amount_net": {
             "type": "integer",
             "description": "Net unit amount without taxes or discounts.",
@@ -3846,32 +3868,22 @@
             "description": "Net unit amount without taxes or discounts.",
             "readOnly": true
           },
-          "unit_amount_decimal": {
-            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
-            "type": "string"
+          "unit_discount_amount_net": {
+            "type": "integer",
+            "description": "The net discount amount applied for each unit",
+            "readOnly": true
+          },
+          "unit_discount_amount_net_decimal": {
+            "type": "string",
+            "description": "The net discount amount applied for each unit represented as a decimal string",
+            "readOnly": true
+          },
+          "amount_tax": {
+            "type": "integer",
+            "description": "Total tax amount for this line item."
           },
           "currency": {
             "$ref": "#/components/schemas/Currency"
-          },
-          "description": {
-            "type": "string",
-            "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
-          },
-          "quantity": {
-            "type": "integer",
-            "description": "The quantity of products being purchased."
-          },
-          "product_id": {
-            "type": "string",
-            "description": "The id of the product."
-          },
-          "price_id": {
-            "type": "string",
-            "description": "The id of the price."
-          },
-          "is_composite_price": {
-            "description": "The flag for prices that contain price components.",
-            "type": "boolean"
           },
           "_price": {
             "description": "The price snapshot data.",
@@ -3883,9 +3895,6 @@
                 "$ref": "#/components/schemas/CompositePrice"
               }
             ]
-          },
-          "_product": {
-            "$ref": "#/components/schemas/Product"
           },
           "taxes": {
             "type": "array",
@@ -3911,17 +3920,9 @@
               ]
             }
           },
-          "price_mappings": {
-            "description": "Price mapping information required to compute totals",
-            "$ref": "#/components/schemas/PriceInputMappings"
-          },
           "on_request_approved": {
             "type": "boolean",
             "description": "When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'."
-          },
-          "is_tax_inclusive": {
-            "type": "boolean",
-            "description": "Specifies whether the price is considered `inclusive` of taxes or not."
           }
         }
       },

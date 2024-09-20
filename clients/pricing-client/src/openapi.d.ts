@@ -240,51 +240,7 @@ declare namespace Components {
              * Total amount before discount is applied as a string with all the decimal places.
              */
             before_discount_amount_total_decimal?: string;
-            /**
-             * price item id
-             */
-            _id?: string;
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
-            /**
-             * The unit amount value
-             */
-            unit_amount?: number;
-            /**
-             * The unit gross amount value.
-             */
-            unit_amount_gross?: number;
-            /**
-             * The unit gross amount value.
-             */
-            unit_amount_gross_decimal?: string;
-            /**
-             * Total tax amount for this line item.
-             */
-            amount_tax?: number;
-            /**
-             * Net unit amount without taxes or discounts.
-             */
-            unit_amount_net?: number;
-            /**
-             * Net unit amount without taxes or discounts.
-             */
-            unit_amount_net_decimal?: string;
-            /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
-             */
-            unit_amount_decimal?: string;
-            currency?: /**
-             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
-             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
-             *
-             * example:
-             * EUR
-             */
-            Currency;
-            /**
-             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
-             */
-            description?: string;
             /**
              * The quantity of products being purchased.
              */
@@ -302,39 +258,9 @@ declare namespace Components {
              */
             is_composite_price?: boolean;
             /**
-             * The price snapshot data.
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
-            _price?: /* The price snapshot data. */ /**
-             * The price entity schema for simple pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/price"
-             * }
-             */
-            Price | /**
-             * The price entity schema for dynamic pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/composite-price"
-             * }
-             */
-            CompositePrice;
-            _product?: /**
-             * The product entity
-             * example:
-             * {
-             *   "$ref": "#/components/examples/product"
-             * }
-             */
-            Product;
-            /**
-             * The taxes applied to the price item.
-             */
-            taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
-            /**
-             * The sum of amounts of the price items by recurrence.
-             */
-            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            description?: string;
             price_mappings?: /**
              * example:
              * [
@@ -351,90 +277,10 @@ declare namespace Components {
              * ]
              */
             PriceInputMappings;
-            /**
-             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
-             */
-            on_request_approved?: boolean;
             /**
              * Specifies whether the price is considered `inclusive` of taxes or not.
              */
             is_tax_inclusive?: boolean;
-        }
-        /**
-         * Represents a valid base price item from a client.
-         */
-        export interface BasePriceItemDto {
-            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
-            /**
-             * The quantity of products being purchased.
-             */
-            quantity?: number;
-            /**
-             * Price mapping information required to compute totals
-             */
-            price_mappings?: /**
-             * example:
-             * [
-             *   {
-             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-             *     "frequency_unit": "weekly",
-             *     "value": 1000.245,
-             *     "name": "avg consumption",
-             *     "metadata": {
-             *       "journey_title": "energy journey",
-             *       "step_name": "avg consumption picker"
-             *     }
-             *   }
-             * ]
-             */
-            PriceInputMappings;
-            /**
-             * External fees mapping information required to compute totals, for some pricing models
-             */
-            external_fees_mappings?: /**
-             * example:
-             * [
-             *   {
-             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-             *     "frequency_unit": "weekly",
-             *     "amount_total": 1000,
-             *     "amount_total_decimal": "10.00"
-             *   }
-             * ]
-             */
-            ExternalFeeMappings;
-            /**
-             * External fees metadata information required to compute totals, for some pricing models
-             */
-            external_fees_metadata?: ExternalFeeMetadata;
-            /**
-             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
-             */
-            description?: string;
-            /**
-             * The id of the product.
-             */
-            product_id?: string;
-            /**
-             * The id of the price.
-             */
-            price_id?: string;
-            /**
-             * The ids of the coupons applicable to the price item
-             */
-            coupon_ids?: string[];
-            /**
-             * The taxes applied to the price item.
-             */
-            taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
-            /**
-             * The taxes applied to the price item.
-             */
-            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * The snapshot of the product.
              * example:
@@ -527,6 +373,394 @@ declare namespace Components {
                 _updated_at?: string;
             };
             /**
+             * price item id
+             */
+            _id?: string;
+            /**
+             * The unit amount value
+             */
+            unit_amount?: number;
+            /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
+             * The discount amount applied for each unit
+             */
+            unit_discount_amount?: number;
+            /**
+             * The discount amount applied for each unit represented as a decimal string
+             */
+            unit_discount_amount_decimal?: string;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross_decimal?: string;
+            /**
+             * Net unit amount without taxes or discounts.
+             */
+            unit_amount_net?: number;
+            /**
+             * Net unit amount without taxes or discounts.
+             */
+            unit_amount_net_decimal?: string;
+            /**
+             * The net discount amount applied for each unit
+             */
+            unit_discount_amount_net?: number;
+            /**
+             * The net discount amount applied for each unit represented as a decimal string
+             */
+            unit_discount_amount_net_decimal?: string;
+            /**
+             * Total tax amount for this line item.
+             */
+            amount_tax?: number;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * The price snapshot data.
+             */
+            _price?: /* The price snapshot data. */ /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price | /**
+             * The price entity schema for dynamic pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/composite-price"
+             * }
+             */
+            CompositePrice;
+            /**
+             * The taxes applied to the price item.
+             */
+            taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
+            /**
+             * The sum of amounts of the price items by recurrence.
+             */
+            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            /**
+             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
+             */
+            on_request_approved?: boolean;
+        }
+        /**
+         * Represents the common keys in BasePriceItem and BasePriceItemDto
+         */
+        export interface BasePriceItemCommon {
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            /**
+             * The quantity of products being purchased.
+             */
+            quantity?: number;
+            /**
+             * The id of the product.
+             */
+            product_id?: string;
+            /**
+             * The id of the price.
+             */
+            price_id?: string;
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            description?: string;
+            /**
+             * Price mapping information required to compute totals
+             */
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
+            /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
+            /**
+             * The snapshot of the product.
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            _product?: {
+                [name: string]: any;
+                /**
+                 * The description for the product
+                 */
+                description?: string;
+                /**
+                 * The product code
+                 */
+                code?: string;
+                /**
+                 * The type of Product:
+                 *
+                 * | type | description |
+                 * |----| ----|
+                 * | `product` | Represents a physical good |
+                 * | `service` | Represents a service or virtual product |
+                 *
+                 */
+                type?: "product" | "service";
+                /**
+                 * The product main name
+                 */
+                name?: string;
+                feature?: {
+                    /**
+                     * An arbitrary set of tags attached to a feature
+                     */
+                    _tags?: string[];
+                    feature?: string;
+                }[];
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to a set of file images of the product
+                 */
+                product_images?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                product_downloads?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to the availability files that define where this product is available.
+                 * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
+                 *
+                 */
+                _availability_files?: File[];
+                /**
+                 * The product id
+                 */
+                _id?: string;
+                /**
+                 * The autogenerated product title
+                 */
+                _title?: string;
+                /**
+                 * The organization id the product belongs to
+                 */
+                _org_id?: string;
+                /**
+                 * The product creation date
+                 */
+                _created_at?: string;
+                /**
+                 * The product last update date
+                 */
+                _updated_at?: string;
+            };
+        }
+        /**
+         * Represents a valid base price item from a client.
+         */
+        export interface BasePriceItemDto {
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            /**
+             * The quantity of products being purchased.
+             */
+            quantity?: number;
+            /**
+             * The id of the product.
+             */
+            product_id?: string;
+            /**
+             * The id of the price.
+             */
+            price_id?: string;
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            description?: string;
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
+            /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
+            /**
+             * The snapshot of the product.
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            _product?: {
+                [name: string]: any;
+                /**
+                 * The description for the product
+                 */
+                description?: string;
+                /**
+                 * The product code
+                 */
+                code?: string;
+                /**
+                 * The type of Product:
+                 *
+                 * | type | description |
+                 * |----| ----|
+                 * | `product` | Represents a physical good |
+                 * | `service` | Represents a service or virtual product |
+                 *
+                 */
+                type?: "product" | "service";
+                /**
+                 * The product main name
+                 */
+                name?: string;
+                feature?: {
+                    /**
+                     * An arbitrary set of tags attached to a feature
+                     */
+                    _tags?: string[];
+                    feature?: string;
+                }[];
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to a set of file images of the product
+                 */
+                product_images?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                product_downloads?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to the availability files that define where this product is available.
+                 * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
+                 *
+                 */
+                _availability_files?: File[];
+                /**
+                 * The product id
+                 */
+                _id?: string;
+                /**
+                 * The autogenerated product title
+                 */
+                _title?: string;
+                /**
+                 * The organization id the product belongs to
+                 */
+                _org_id?: string;
+                /**
+                 * The product creation date
+                 */
+                _created_at?: string;
+                /**
+                 * The product last update date
+                 */
+                _updated_at?: string;
+            };
+            external_fees_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
+             */
+            ExternalFeeMappings;
+            external_fees_metadata?: ExternalFeeMetadata;
+            /**
+             * The ids of the coupons applicable to the price item
+             */
+            coupon_ids?: string[];
+            /**
+             * The taxes applied to the price item.
+             */
+            taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
+            /**
+             * The taxes applied to the price item.
+             */
+            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
+            /**
              * The coupons applicable to the price item
              */
             _coupons?: (/**
@@ -560,10 +794,6 @@ declare namespace Components {
              * }
              */
             Coupon)[];
-            /**
-             * Specifies whether the price is considered `inclusive` of taxes or not.
-             */
-            is_tax_inclusive?: boolean;
         }
         /**
          * The basic auth credentials
@@ -939,51 +1169,7 @@ declare namespace Components {
              * Total amount before discount is applied as a string with all the decimal places.
              */
             before_discount_amount_total_decimal?: string;
-            /**
-             * price item id
-             */
-            _id?: string;
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
-            /**
-             * The unit amount value
-             */
-            unit_amount?: number;
-            /**
-             * The unit gross amount value.
-             */
-            unit_amount_gross?: number;
-            /**
-             * The unit gross amount value.
-             */
-            unit_amount_gross_decimal?: string;
-            /**
-             * Total tax amount for this line item.
-             */
-            amount_tax?: number;
-            /**
-             * Net unit amount without taxes or discounts.
-             */
-            unit_amount_net?: number;
-            /**
-             * Net unit amount without taxes or discounts.
-             */
-            unit_amount_net_decimal?: string;
-            /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
-             */
-            unit_amount_decimal?: string;
-            currency?: /**
-             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
-             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
-             *
-             * example:
-             * EUR
-             */
-            Currency;
-            /**
-             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
-             */
-            description?: string;
             /**
              * The quantity of products being purchased.
              */
@@ -1001,39 +1187,9 @@ declare namespace Components {
              */
             is_composite_price?: boolean;
             /**
-             * The price snapshot data.
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
-            _price?: /* The price snapshot data. */ /**
-             * The price entity schema for simple pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/price"
-             * }
-             */
-            Price | /**
-             * The price entity schema for dynamic pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/composite-price"
-             * }
-             */
-            CompositePrice;
-            _product?: /**
-             * The product entity
-             * example:
-             * {
-             *   "$ref": "#/components/examples/product"
-             * }
-             */
-            Product;
-            /**
-             * The taxes applied to the price item.
-             */
-            taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
-            /**
-             * The sum of amounts of the price items by recurrence.
-             */
-            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            description?: string;
             price_mappings?: /**
              * example:
              * [
@@ -1050,93 +1206,10 @@ declare namespace Components {
              * ]
              */
             PriceInputMappings;
-            /**
-             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
-             */
-            on_request_approved?: boolean;
             /**
              * Specifies whether the price is considered `inclusive` of taxes or not.
              */
             is_tax_inclusive?: boolean;
-            /**
-             * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
-             */
-            item_components?: /**
-             * Represents a price item
-             * example:
-             * {
-             *   "$ref": "#/components/examples/price-item/value"
-             * }
-             */
-            PriceItem[];
-            total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
-        }
-        /**
-         * Represents a composite price input to the pricing library.
-         */
-        export interface CompositePriceItemDto {
-            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
-            /**
-             * The quantity of products being purchased.
-             */
-            quantity?: number;
-            price_mappings?: /**
-             * example:
-             * [
-             *   {
-             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-             *     "frequency_unit": "weekly",
-             *     "value": 1000.245,
-             *     "name": "avg consumption",
-             *     "metadata": {
-             *       "journey_title": "energy journey",
-             *       "step_name": "avg consumption picker"
-             *     }
-             *   }
-             * ]
-             */
-            PriceInputMappings;
-            external_fees_mappings?: /**
-             * example:
-             * [
-             *   {
-             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-             *     "frequency_unit": "weekly",
-             *     "amount_total": 1000,
-             *     "amount_total_decimal": "10.00"
-             *   }
-             * ]
-             */
-            ExternalFeeMappings;
-            external_fees_metadata?: ExternalFeeMetadata;
-            /**
-             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
-             */
-            description?: string;
-            /**
-             * The id of the product.
-             */
-            product_id?: string;
-            /**
-             * The id of the price.
-             */
-            price_id?: string;
-            /**
-             * The ids of the coupons applicable to the price item
-             */
-            coupon_ids?: string[];
-            /**
-             * The taxes applied to the price item.
-             */
-            taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
-            /**
-             * The taxes applied to the price item.
-             */
-            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * The snapshot of the product.
              * example:
@@ -1229,6 +1302,266 @@ declare namespace Components {
                 _updated_at?: string;
             };
             /**
+             * price item id
+             */
+            _id?: string;
+            /**
+             * The unit amount value
+             */
+            unit_amount?: number;
+            /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
+             * The discount amount applied for each unit
+             */
+            unit_discount_amount?: number;
+            /**
+             * The discount amount applied for each unit represented as a decimal string
+             */
+            unit_discount_amount_decimal?: string;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross_decimal?: string;
+            /**
+             * Net unit amount without taxes or discounts.
+             */
+            unit_amount_net?: number;
+            /**
+             * Net unit amount without taxes or discounts.
+             */
+            unit_amount_net_decimal?: string;
+            /**
+             * The net discount amount applied for each unit
+             */
+            unit_discount_amount_net?: number;
+            /**
+             * The net discount amount applied for each unit represented as a decimal string
+             */
+            unit_discount_amount_net_decimal?: string;
+            /**
+             * Total tax amount for this line item.
+             */
+            amount_tax?: number;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * The price snapshot data.
+             */
+            _price?: /* The price snapshot data. */ /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price | /**
+             * The price entity schema for dynamic pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/composite-price"
+             * }
+             */
+            CompositePrice;
+            /**
+             * The taxes applied to the price item.
+             */
+            taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
+            /**
+             * The sum of amounts of the price items by recurrence.
+             */
+            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            /**
+             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
+             */
+            on_request_approved?: boolean;
+            /**
+             * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
+             */
+            item_components?: /**
+             * Represents a price item
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price-item/value"
+             * }
+             */
+            PriceItem[];
+            total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
+        }
+        /**
+         * Represents a composite price input to the pricing library.
+         */
+        export interface CompositePriceItemDto {
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            /**
+             * The quantity of products being purchased.
+             */
+            quantity?: number;
+            /**
+             * The id of the product.
+             */
+            product_id?: string;
+            /**
+             * The id of the price.
+             */
+            price_id?: string;
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            description?: string;
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
+            /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
+            /**
+             * The snapshot of the product.
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            _product?: {
+                [name: string]: any;
+                /**
+                 * The description for the product
+                 */
+                description?: string;
+                /**
+                 * The product code
+                 */
+                code?: string;
+                /**
+                 * The type of Product:
+                 *
+                 * | type | description |
+                 * |----| ----|
+                 * | `product` | Represents a physical good |
+                 * | `service` | Represents a service or virtual product |
+                 *
+                 */
+                type?: "product" | "service";
+                /**
+                 * The product main name
+                 */
+                name?: string;
+                feature?: {
+                    /**
+                     * An arbitrary set of tags attached to a feature
+                     */
+                    _tags?: string[];
+                    feature?: string;
+                }[];
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to a set of file images of the product
+                 */
+                product_images?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                product_downloads?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to the availability files that define where this product is available.
+                 * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
+                 *
+                 */
+                _availability_files?: File[];
+                /**
+                 * The product id
+                 */
+                _id?: string;
+                /**
+                 * The autogenerated product title
+                 */
+                _title?: string;
+                /**
+                 * The organization id the product belongs to
+                 */
+                _org_id?: string;
+                /**
+                 * The product creation date
+                 */
+                _created_at?: string;
+                /**
+                 * The product last update date
+                 */
+                _updated_at?: string;
+            };
+            external_fees_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
+             */
+            ExternalFeeMappings;
+            external_fees_metadata?: ExternalFeeMetadata;
+            /**
+             * The ids of the coupons applicable to the price item
+             */
+            coupon_ids?: string[];
+            /**
+             * The taxes applied to the price item.
+             */
+            taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
+            /**
+             * The taxes applied to the price item.
+             */
+            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
+            /**
              * The coupons applicable to the price item
              */
             _coupons?: (/**
@@ -1262,10 +1595,6 @@ declare namespace Components {
              * }
              */
             Coupon)[];
-            /**
-             * Specifies whether the price is considered `inclusive` of taxes or not.
-             */
-            is_tax_inclusive?: boolean;
             /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
@@ -2526,51 +2855,7 @@ declare namespace Components {
              * Total amount before discount is applied as a string with all the decimal places.
              */
             before_discount_amount_total_decimal?: string;
-            /**
-             * price item id
-             */
-            _id?: string;
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
-            /**
-             * The unit amount value
-             */
-            unit_amount?: number;
-            /**
-             * The unit gross amount value.
-             */
-            unit_amount_gross?: number;
-            /**
-             * The unit gross amount value.
-             */
-            unit_amount_gross_decimal?: string;
-            /**
-             * Total tax amount for this line item.
-             */
-            amount_tax?: number;
-            /**
-             * Net unit amount without taxes or discounts.
-             */
-            unit_amount_net?: number;
-            /**
-             * Net unit amount without taxes or discounts.
-             */
-            unit_amount_net_decimal?: string;
-            /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
-             */
-            unit_amount_decimal?: string;
-            currency?: /**
-             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
-             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
-             *
-             * example:
-             * EUR
-             */
-            Currency;
-            /**
-             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
-             */
-            description?: string;
             /**
              * The quantity of products being purchased.
              */
@@ -2588,39 +2873,9 @@ declare namespace Components {
              */
             is_composite_price?: boolean;
             /**
-             * The price snapshot data.
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
-            _price?: /* The price snapshot data. */ /**
-             * The price entity schema for simple pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/price"
-             * }
-             */
-            Price | /**
-             * The price entity schema for dynamic pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/composite-price"
-             * }
-             */
-            CompositePrice;
-            _product?: /**
-             * The product entity
-             * example:
-             * {
-             *   "$ref": "#/components/examples/product"
-             * }
-             */
-            Product;
-            /**
-             * The taxes applied to the price item.
-             */
-            taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
-            /**
-             * The sum of amounts of the price items by recurrence.
-             */
-            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            description?: string;
             price_mappings?: /**
              * example:
              * [
@@ -2637,101 +2892,10 @@ declare namespace Components {
              * ]
              */
             PriceInputMappings;
-            /**
-             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
-             */
-            on_request_approved?: boolean;
             /**
              * Specifies whether the price is considered `inclusive` of taxes or not.
              */
             is_tax_inclusive?: boolean;
-            /**
-             * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
-             */
-            type?: "one_time" | "recurring";
-            /**
-             * The price billing period.
-             */
-            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
-            pricing_model: /**
-             * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
-             * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
-             * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
-             * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
-             * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
-             * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
-             *
-             */
-            PricingModel;
-            tiers_details?: TierDetails[];
-            get_ag?: PriceGetAg;
-        }
-        /**
-         * Represents a price input to the pricing library.
-         */
-        export interface PriceItemDto {
-            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
-            /**
-             * The quantity of products being purchased.
-             */
-            quantity?: number;
-            price_mappings?: /**
-             * example:
-             * [
-             *   {
-             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-             *     "frequency_unit": "weekly",
-             *     "value": 1000.245,
-             *     "name": "avg consumption",
-             *     "metadata": {
-             *       "journey_title": "energy journey",
-             *       "step_name": "avg consumption picker"
-             *     }
-             *   }
-             * ]
-             */
-            PriceInputMappings;
-            external_fees_mappings?: /**
-             * example:
-             * [
-             *   {
-             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-             *     "frequency_unit": "weekly",
-             *     "amount_total": 1000,
-             *     "amount_total_decimal": "10.00"
-             *   }
-             * ]
-             */
-            ExternalFeeMappings;
-            external_fees_metadata?: ExternalFeeMetadata;
-            /**
-             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
-             */
-            description?: string;
-            /**
-             * The id of the product.
-             */
-            product_id?: string;
-            /**
-             * The id of the price.
-             */
-            price_id?: string;
-            /**
-             * The ids of the coupons applicable to the price item
-             */
-            coupon_ids?: string[];
-            /**
-             * The taxes applied to the price item.
-             */
-            taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
-            /**
-             * The taxes applied to the price item.
-             */
-            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * The snapshot of the product.
              * example:
@@ -2824,6 +2988,274 @@ declare namespace Components {
                 _updated_at?: string;
             };
             /**
+             * price item id
+             */
+            _id?: string;
+            /**
+             * The unit amount value
+             */
+            unit_amount?: number;
+            /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
+             * The discount amount applied for each unit
+             */
+            unit_discount_amount?: number;
+            /**
+             * The discount amount applied for each unit represented as a decimal string
+             */
+            unit_discount_amount_decimal?: string;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross?: number;
+            /**
+             * The unit gross amount value.
+             */
+            unit_amount_gross_decimal?: string;
+            /**
+             * Net unit amount without taxes or discounts.
+             */
+            unit_amount_net?: number;
+            /**
+             * Net unit amount without taxes or discounts.
+             */
+            unit_amount_net_decimal?: string;
+            /**
+             * The net discount amount applied for each unit
+             */
+            unit_discount_amount_net?: number;
+            /**
+             * The net discount amount applied for each unit represented as a decimal string
+             */
+            unit_discount_amount_net_decimal?: string;
+            /**
+             * Total tax amount for this line item.
+             */
+            amount_tax?: number;
+            currency?: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * The price snapshot data.
+             */
+            _price?: /* The price snapshot data. */ /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price | /**
+             * The price entity schema for dynamic pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/composite-price"
+             * }
+             */
+            CompositePrice;
+            /**
+             * The taxes applied to the price item.
+             */
+            taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
+            /**
+             * The sum of amounts of the price items by recurrence.
+             */
+            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            /**
+             * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
+             */
+            on_request_approved?: boolean;
+            /**
+             * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
+             */
+            type?: "one_time" | "recurring";
+            /**
+             * The price billing period.
+             */
+            billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
+            pricing_model: /**
+             * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
+             * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+             * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+             * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+             * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
+             *
+             */
+            PricingModel;
+            tiers_details?: TierDetails[];
+            get_ag?: PriceGetAg;
+        }
+        /**
+         * Represents a price input to the pricing library.
+         */
+        export interface PriceItemDto {
+            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
+            /**
+             * The quantity of products being purchased.
+             */
+            quantity?: number;
+            /**
+             * The id of the product.
+             */
+            product_id?: string;
+            /**
+             * The id of the price.
+             */
+            price_id?: string;
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
+             * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
+             */
+            description?: string;
+            price_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "value": 1000.245,
+             *     "name": "avg consumption",
+             *     "metadata": {
+             *       "journey_title": "energy journey",
+             *       "step_name": "avg consumption picker"
+             *     }
+             *   }
+             * ]
+             */
+            PriceInputMappings;
+            /**
+             * Specifies whether the price is considered `inclusive` of taxes or not.
+             */
+            is_tax_inclusive?: boolean;
+            /**
+             * The snapshot of the product.
+             * example:
+             * {
+             *   "$ref": "#/components/examples/product"
+             * }
+             */
+            _product?: {
+                [name: string]: any;
+                /**
+                 * The description for the product
+                 */
+                description?: string;
+                /**
+                 * The product code
+                 */
+                code?: string;
+                /**
+                 * The type of Product:
+                 *
+                 * | type | description |
+                 * |----| ----|
+                 * | `product` | Represents a physical good |
+                 * | `service` | Represents a service or virtual product |
+                 *
+                 */
+                type?: "product" | "service";
+                /**
+                 * The product main name
+                 */
+                name?: string;
+                feature?: {
+                    /**
+                     * An arbitrary set of tags attached to a feature
+                     */
+                    _tags?: string[];
+                    feature?: string;
+                }[];
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to a set of file images of the product
+                 */
+                product_images?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                product_downloads?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * Stores references to the availability files that define where this product is available.
+                 * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
+                 *
+                 */
+                _availability_files?: File[];
+                /**
+                 * The product id
+                 */
+                _id?: string;
+                /**
+                 * The autogenerated product title
+                 */
+                _title?: string;
+                /**
+                 * The organization id the product belongs to
+                 */
+                _org_id?: string;
+                /**
+                 * The product creation date
+                 */
+                _created_at?: string;
+                /**
+                 * The product last update date
+                 */
+                _updated_at?: string;
+            };
+            external_fees_mappings?: /**
+             * example:
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
+             */
+            ExternalFeeMappings;
+            external_fees_metadata?: ExternalFeeMetadata;
+            /**
+             * The ids of the coupons applicable to the price item
+             */
+            coupon_ids?: string[];
+            /**
+             * The taxes applied to the price item.
+             */
+            taxes?: (/* A valid tax rate from a client. */ TaxAmountDto)[];
+            /**
+             * The taxes applied to the price item.
+             */
+            recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmountDto)[];
+            /**
              * The coupons applicable to the price item
              */
             _coupons?: (/**
@@ -2857,10 +3289,6 @@ declare namespace Components {
              * }
              */
             Coupon)[];
-            /**
-             * Specifies whether the price is considered `inclusive` of taxes or not.
-             */
-            is_tax_inclusive?: boolean;
             /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
@@ -4427,6 +4855,7 @@ export type AvailabilityFilters = Components.Schemas.AvailabilityFilters;
 export type AvailabilityLocation = Components.Schemas.AvailabilityLocation;
 export type AvailabilityResult = Components.Schemas.AvailabilityResult;
 export type BasePriceItem = Components.Schemas.BasePriceItem;
+export type BasePriceItemCommon = Components.Schemas.BasePriceItemCommon;
 export type BasePriceItemDto = Components.Schemas.BasePriceItemDto;
 export type BasicAuthCredentials = Components.Schemas.BasicAuthCredentials;
 export type BillingPeriod = Components.Schemas.BillingPeriod;
