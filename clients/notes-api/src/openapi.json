@@ -28,81 +28,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "_created_by": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "number"
-                      }
-                    ],
-                    "description": "The Entity ID of the User that created this Note"
-                  },
-                  "created_by": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "number"
-                      }
-                    ],
-                    "description": "The Entity ID of the User that created this Note"
-                  },
-                  "_tags": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "Tags associated with this Note"
-                  },
-                  "_acl": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "description": "Access Control List for this Note entry"
-                  },
-                  "_owners": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "org_id": {
-                          "type": "string"
-                        },
-                        "user_id": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "org_id",
-                        "user_id"
-                      ]
-                    }
-                  },
-                  "entity_id": {
-                    "type": "string",
-                    "description": "The Entity ID of the Entity this note will be contextually attached to"
-                  },
-                  "parent_id": {
-                    "type": "string",
-                    "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
-                  },
-                  "content": {
-                    "type": "string",
-                    "description": "The content of the Note"
-                  }
-                },
-                "required": [
-                  "entity_id"
-                ]
+                "$ref": "#/components/schemas/NotePostRequestBody"
               }
             }
           }
@@ -141,7 +67,7 @@
             "required": true
           },
           {
-            "in": "path",
+            "in": "query",
             "name": "hydrate",
             "description": "Whether to hydrate the Note's relation attributes",
             "schema": {
@@ -156,7 +82,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoteEntity"
+                  "$ref": "#/components/schemas/NoteGetRequestResponse"
                 }
               }
             }
@@ -186,7 +112,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Entity"
+                "$ref": "#/components/schemas/NotePatchRequestBody"
               }
             }
           }
@@ -242,10 +168,10 @@
           {
             "in": "path",
             "name": "context_id",
-            "description": "ID of the context to from which to retrive Notes. This is the Entity ID when `context_type=entity` and the Workflow definition ID when `context_type=workflows`",
+            "description": "ID of the Entity from which to retrive Notes",
             "schema": {
               "type": "string",
-              "description": "ID of the context to from which to retrive Notes. This is the Entity ID when `context_type=entity` and the Workflow definition ID when `context_type=workflows`"
+              "description": "ID of the Entity from which to retrive Notes"
             },
             "required": true
           },
@@ -254,13 +180,10 @@
             "name": "context_type",
             "description": "Type of context to retrieve Notes within the targeted Entity",
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "$ref": "#/components/schemas/ContextType"
-                }
+              "type": "string",
+              "enum": [
+                "opportunity",
+                "workflow_tasks"
               ],
               "description": "Type of context to retrieve Notes within the targeted Entity"
             },
@@ -268,12 +191,11 @@
           },
           {
             "in": "query",
-            "name": "sort",
-            "description": "The sort order of the returned Notes, expressed as a Lucene query",
+            "name": "context_id",
+            "description": "The ID of a non-Entity context that contains Notes. Required when `context_type` is not an Entity slug",
             "schema": {
               "type": "string",
-              "default": "updated_at:desc",
-              "description": "The sort order of the returned Notes, expressed as a Lucene query"
+              "description": "The ID of a non-Entity context that contains Notes. Required when `context_type` is not an Entity slug"
             }
           },
           {
@@ -303,7 +225,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NotesResponse"
+                  "$ref": "#/components/schemas/NotesGetRequestResponse"
                 }
               }
             }
@@ -322,6 +244,40 @@
       }
     },
     "schemas": {
+      "NotePostRequestBody": {
+        "type": "object",
+        "properties": {
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with this Note"
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "The Entity ID of the Entity this note will be contextually attached to"
+          },
+          "parent_id": {
+            "type": "string",
+            "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
+          },
+          "context_workflow_tasks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The IDs of the Workflow Tasks that this Note should be attached to"
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
+          }
+        },
+        "required": [
+          "entity_id"
+        ]
+      },
       "NoteEntity": {
         "allOf": [
           {
@@ -353,26 +309,7 @@
             ]
           },
           "parent": {
-            "type": "object",
-            "properties": {
-              "$relation": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "entity_id": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "entity_id"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "$relation"
-            ]
+            "$ref": "#/components/schemas/NoteEntityParent"
           },
           "comments": {
             "type": "array",
@@ -384,6 +321,12 @@
             "type": "string",
             "description": "The content of the Note"
           },
+          "context_workflow_tasks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "pinned_at": {
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
@@ -391,8 +334,7 @@
           }
         },
         "required": [
-          "context_entities",
-          "parent"
+          "context_entities"
         ],
         "description": "A note Entity object cotaining Entity metadata and content in a LexicalNode format"
       },
@@ -484,14 +426,145 @@
         ],
         "description": "Base Entity schema"
       },
-      "ContextType": {
-        "type": "string",
-        "enum": [
-          "opportunity",
-          "workflow_tasks"
+      "NoteEntityParent": {
+        "type": "object",
+        "properties": {
+          "$relation": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "entity_id"
+              ]
+            }
+          }
+        },
+        "description": "The Note's parent Note"
+      },
+      "NoteGetRequestResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "context_entities": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "entity_id"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "$relation"
+            ]
+          },
+          "parent": {
+            "$ref": "#/components/schemas/NoteEntityParent"
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            }
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
+          },
+          "context_workflow_tasks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pinned_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was pinned",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "context_entities"
         ]
       },
-      "NotesResponse": {
+      "NotePatchRequestBody": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "context_entities": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "entity_id"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "$relation"
+            ]
+          },
+          "parent": {
+            "$ref": "#/components/schemas/NoteEntityParent"
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            }
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
+          },
+          "context_workflow_tasks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pinned_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was pinned",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "context_entities"
+        ]
+      },
+      "NotesGetRequestResponse": {
         "type": "object",
         "properties": {
           "hits": {
@@ -507,7 +580,6 @@
           }
         },
         "required": [
-          "hits",
           "results"
         ]
       }

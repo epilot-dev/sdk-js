@@ -10,7 +10,6 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
-        export type ContextType = "opportunity" | "workflow_tasks";
         /**
          * Base Entity schema
          */
@@ -109,36 +108,50 @@ declare namespace Components {
                     entity_id: string;
                 }[];
             };
-            parent: {
-                $relation: {
-                    entity_id: string;
-                }[];
-            };
+            parent?: /* The Note's parent Note */ NoteEntityParent;
             comments?: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ NoteEntity[];
             /**
              * The content of the Note
              */
             content?: string;
+            context_workflow_tasks?: string[];
             /**
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
         }
-        export interface NotesResponse {
-            /**
-             * The number of Note entries returned in this query
-             */
-            hits: number;
-            /**
-             * The Note entries returned in this query
-             */
-            results: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ NoteEntity[];
+        /**
+         * The Note's parent Note
+         */
+        export interface NoteEntityParent {
+            $relation?: {
+                entity_id: string;
+            }[];
         }
-    }
-}
-declare namespace Paths {
-    namespace CreateNote {
-        export interface RequestBody {
+        /**
+         * Base Entity schema
+         */
+        export interface NoteGetRequestResponse {
+            /**
+             * Entity ID of the Note entry
+             */
+            _id: string;
+            /**
+             * ID of the Organization that owns this Note
+             */
+            _org?: string;
+            /**
+             * The Entity schema of this Note
+             */
+            _schema?: string;
+            /**
+             * The timestamp of when this Note was created
+             */
+            _created_at?: string; // date-time
+            /**
+             * The timestamp of when this Note was last updated
+             */
+            _updated_at?: string; // date-time
             /**
              * The Entity ID of the User that created this Note
              */
@@ -161,6 +174,91 @@ declare namespace Paths {
                 org_id: string;
                 user_id: string;
             }[];
+            context_entities: {
+                $relation: {
+                    entity_id: string;
+                }[];
+            };
+            parent?: /* The Note's parent Note */ NoteEntityParent;
+            comments?: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ NoteEntity[];
+            /**
+             * The content of the Note
+             */
+            content?: string;
+            context_workflow_tasks?: string[];
+            /**
+             * The timestamp of when this Note was pinned
+             */
+            pinned_at?: string; // date-time
+        }
+        /**
+         * Base Entity schema
+         */
+        export interface NotePatchRequestBody {
+            /**
+             * Entity ID of the Note entry
+             */
+            _id: string;
+            /**
+             * ID of the Organization that owns this Note
+             */
+            _org?: string;
+            /**
+             * The Entity schema of this Note
+             */
+            _schema?: string;
+            /**
+             * The timestamp of when this Note was created
+             */
+            _created_at?: string; // date-time
+            /**
+             * The timestamp of when this Note was last updated
+             */
+            _updated_at?: string; // date-time
+            /**
+             * The Entity ID of the User that created this Note
+             */
+            _created_by?: /* The Entity ID of the User that created this Note */ string | number;
+            /**
+             * The Entity ID of the User that created this Note
+             */
+            created_by?: /* The Entity ID of the User that created this Note */ string | number;
+            /**
+             * Tags associated with this Note
+             */
+            _tags?: string[];
+            /**
+             * Access Control List for this Note entry
+             */
+            _acl?: {
+                [name: string]: string[];
+            };
+            _owners?: {
+                org_id: string;
+                user_id: string;
+            }[];
+            context_entities: {
+                $relation: {
+                    entity_id: string;
+                }[];
+            };
+            parent?: /* The Note's parent Note */ NoteEntityParent;
+            comments?: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ NoteEntity[];
+            /**
+             * The content of the Note
+             */
+            content?: string;
+            context_workflow_tasks?: string[];
+            /**
+             * The timestamp of when this Note was pinned
+             */
+            pinned_at?: string; // date-time
+        }
+        export interface NotePostRequestBody {
+            /**
+             * Tags associated with this Note
+             */
+            _tags?: string[];
             /**
              * The Entity ID of the Entity this note will be contextually attached to
              */
@@ -170,10 +268,29 @@ declare namespace Paths {
              */
             parent_id?: string;
             /**
+             * The IDs of the Workflow Tasks that this Note should be attached to
+             */
+            context_workflow_tasks?: string[];
+            /**
              * The content of the Note
              */
             content?: string;
         }
+        export interface NotesGetRequestResponse {
+            /**
+             * The number of Note entries returned in this query
+             */
+            hits?: number;
+            /**
+             * The Note entries returned in this query
+             */
+            results: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ NoteEntity[];
+        }
+    }
+}
+declare namespace Paths {
+    namespace CreateNote {
+        export type RequestBody = Components.Schemas.NotePostRequestBody;
         namespace Responses {
             export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
         }
@@ -206,22 +323,24 @@ declare namespace Paths {
         }
         export interface PathParameters {
             id: /* The Entity ID of the Note entry to retrieve */ Parameters.Id;
+        }
+        export interface QueryParameters {
             hydrate?: /* Whether to hydrate the Note's relation attributes */ Parameters.Hydrate;
         }
         namespace Responses {
-            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
+            export type $200 = /* Base Entity schema */ Components.Schemas.NoteGetRequestResponse;
         }
     }
     namespace GetNotesByContext {
         namespace Parameters {
             /**
-             * ID of the context to from which to retrive Notes. This is the Entity ID when `context_type=entity` and the Workflow definition ID when `context_type=workflows`
+             * ID of the Entity from which to retrive Notes
              */
             export type ContextId = string;
             /**
              * Type of context to retrieve Notes within the targeted Entity
              */
-            export type ContextType = /* Type of context to retrieve Notes within the targeted Entity */ string | Components.Schemas.ContextType;
+            export type ContextType = "opportunity" | "workflow_tasks";
             /**
              * The index of the first Note to return in this query
              */
@@ -230,22 +349,18 @@ declare namespace Paths {
              * The number of Note entries to return in this query
              */
             export type Size = number;
-            /**
-             * The sort order of the returned Notes, expressed as a Lucene query
-             */
-            export type Sort = string;
         }
         export interface PathParameters {
-            context_id: /* ID of the context to from which to retrive Notes. This is the Entity ID when `context_type=entity` and the Workflow definition ID when `context_type=workflows` */ Parameters.ContextId;
+            context_id: /* ID of the Entity from which to retrive Notes */ Parameters.ContextId;
         }
         export interface QueryParameters {
             context_type: /* Type of context to retrieve Notes within the targeted Entity */ Parameters.ContextType;
-            sort?: /* The sort order of the returned Notes, expressed as a Lucene query */ Parameters.Sort;
+            context_id?: /* ID of the Entity from which to retrive Notes */ Parameters.ContextId;
             from?: /* The index of the first Note to return in this query */ Parameters.From;
             size?: /* The number of Note entries to return in this query */ Parameters.Size;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.NotesResponse;
+            export type $200 = Components.Schemas.NotesGetRequestResponse;
         }
     }
     namespace PatchNote {
@@ -258,7 +373,7 @@ declare namespace Paths {
         export interface PathParameters {
             id: /* The Entity ID of the Note entry to update */ Parameters.Id;
         }
-        export type RequestBody = /* Base Entity schema */ Components.Schemas.Entity;
+        export type RequestBody = /* Base Entity schema */ Components.Schemas.NotePatchRequestBody;
         namespace Responses {
             export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
         }
@@ -282,7 +397,7 @@ export interface OperationMethods {
    * Retrieves a single Note entry based on it's Entity ID
    */
   'getNote'(
-    parameters?: Parameters<Paths.GetNote.PathParameters> | null,
+    parameters?: Parameters<Paths.GetNote.QueryParameters & Paths.GetNote.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetNote.Responses.$200>
@@ -338,7 +453,7 @@ export interface PathsDictionary {
      * Retrieves a single Note entry based on it's Entity ID
      */
     'get'(
-      parameters?: Parameters<Paths.GetNote.PathParameters> | null,
+      parameters?: Parameters<Paths.GetNote.QueryParameters & Paths.GetNote.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetNote.Responses.$200>
@@ -379,7 +494,10 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-export type ContextType = Components.Schemas.ContextType;
 export type Entity = Components.Schemas.Entity;
 export type NoteEntity = Components.Schemas.NoteEntity;
-export type NotesResponse = Components.Schemas.NotesResponse;
+export type NoteEntityParent = Components.Schemas.NoteEntityParent;
+export type NoteGetRequestResponse = Components.Schemas.NoteGetRequestResponse;
+export type NotePatchRequestBody = Components.Schemas.NotePatchRequestBody;
+export type NotePostRequestBody = Components.Schemas.NotePostRequestBody;
+export type NotesGetRequestResponse = Components.Schemas.NotesGetRequestResponse;
