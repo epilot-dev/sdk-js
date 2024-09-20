@@ -1048,6 +1048,13 @@
             "items": {
               "$ref": "#/components/schemas/UpdateEntityAttributes"
             }
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids that are associated with this workflow and used for filtering"
           }
         },
         "required": [
@@ -1167,6 +1174,13 @@
             "items": {
               "$ref": "#/components/schemas/Step"
             }
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids that are associated with this workflow and used for filtering"
           }
         },
         "required": [
