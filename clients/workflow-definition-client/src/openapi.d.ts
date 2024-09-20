@@ -91,6 +91,10 @@ declare namespace Components {
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             assignedTo?: string[];
             steps: /* Action that needs to be done in a Workflow */ Step[];
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
         }
         /**
          * Action that needs to be done in a Workflow
@@ -201,6 +205,10 @@ declare namespace Components {
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | /* Action that needs to be done in a Workflow */ Step)[];
             closingReasons?: ClosingReasonId[];
             updateEntityAttributes?: UpdateEntityAttributes[];
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
         }
     }
 }
