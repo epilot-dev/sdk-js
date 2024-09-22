@@ -20,7 +20,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/public/user": {
@@ -38,12 +39,14 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/token/validate": {
       "post": {
-        "operationId": "validateToken"
+        "operationId": "validateToken",
+        "responses": {}
       }
     },
     "/v2/portal/token/revoke": {
@@ -54,7 +57,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/sso/user": {
@@ -72,7 +76,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/public/config": {
@@ -84,7 +89,8 @@
             "name": "domain",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/config": {
@@ -96,7 +102,8 @@
             "name": "origin",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       },
       "delete": {
         "operationId": "deletePortal",
@@ -106,7 +113,8 @@
             "name": "origin",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/external-links": {
@@ -123,7 +131,8 @@
             "name": "contactId",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/public/portal/config": {
@@ -140,7 +149,8 @@
             "name": "origin",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/org/portal/config": {
@@ -152,12 +162,14 @@
             "name": "origin",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/configs": {
       "get": {
-        "operationId": "getAllPortalConfigs"
+        "operationId": "getAllPortalConfigs",
+        "responses": {}
       }
     },
     "/v2/portal/email-templates": {
@@ -175,7 +187,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "get": {
         "operationId": "getEmailTemplates",
@@ -185,7 +198,8 @@
             "name": "origin",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/public-widgets": {
@@ -202,7 +216,8 @@
             "name": "origin",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/widgets": {
@@ -220,7 +235,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "get": {
         "operationId": "getPortalWidgets",
@@ -230,7 +246,8 @@
             "name": "origin",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/replace-ecp-template-variables": {
@@ -240,27 +257,32 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/org/settings": {
       "get": {
-        "operationId": "getOrganizationSettings"
+        "operationId": "getOrganizationSettings",
+        "responses": {}
       }
     },
     "/v2/portal/schemas": {
       "get": {
-        "operationId": "getSchemas"
+        "operationId": "getSchemas",
+        "responses": {}
       }
     },
     "/v2/portal/extra-permission-attributes": {
       "get": {
-        "operationId": "extraPermissionAttributes"
+        "operationId": "extraPermissionAttributes",
+        "responses": {}
       }
     },
     "/v2/portal/contact": {
       "get": {
-        "operationId": "getContact"
+        "operationId": "getContact",
+        "responses": {}
       },
       "patch": {
         "operationId": "updateContact",
@@ -268,7 +290,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/ecp/contact": {
@@ -280,7 +303,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/public/contact/exists": {
@@ -298,17 +322,20 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/contact/valid/secondary/attributes": {
       "get": {
-        "operationId": "getValidSecondaryAttributes"
+        "operationId": "getValidSecondaryAttributes",
+        "responses": {}
       }
     },
     "/v2/portal/user": {
       "get": {
-        "operationId": "getPortalUser"
+        "operationId": "getPortalUser",
+        "responses": {}
       },
       "patch": {
         "operationId": "updatePortalUser",
@@ -316,10 +343,12 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
-        "operationId": "deletePortalUser"
+        "operationId": "deletePortalUser",
+        "responses": {}
       }
     },
     "/v2/portal/user/update/email": {
@@ -330,7 +359,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/user/resend/confirmation-email/{id}": {
@@ -342,7 +372,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/porta/users/by-related-entity": {
@@ -359,7 +390,8 @@
             "name": "slug",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/user/confirm": {
@@ -371,7 +403,8 @@
             "name": "confirmation_link_token",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/user/confirm/{id}": {
@@ -393,7 +426,8 @@
             "name": "org_id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/public/user/exists": {
@@ -415,7 +449,8 @@
             "name": "origin",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/recipients-to-notify": {
@@ -425,7 +460,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/configure-distribution": {
@@ -437,7 +473,8 @@
             "name": "origin",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/order": {
@@ -454,7 +491,8 @@
             "name": "size",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/order/{id}/acceptance": {
@@ -471,7 +509,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/order/{id}": {
@@ -483,7 +522,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "patch": {
         "operationId": "updateOrder",
@@ -498,7 +538,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/opportunity": {
@@ -515,7 +556,8 @@
             "name": "size",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/opportunities/searchable-attributes": {
@@ -532,7 +574,8 @@
             "name": "size",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/opportunities/search": {
@@ -555,7 +598,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/opportunities/{id}": {
@@ -567,7 +611,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "patch": {
         "operationId": "updateOpportunity",
@@ -583,7 +628,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/contract": {
@@ -600,7 +646,8 @@
             "name": "size",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/contract/{id}": {
@@ -612,7 +659,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "patch": {
         "operationId": "updateContract",
@@ -628,7 +676,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/contract/by-identifiers": {
@@ -639,7 +688,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/entity/identifiers/{slug}": {
@@ -651,7 +701,8 @@
             "name": "slug",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/entity/add-end-customer/{slug}/{id}": {
@@ -668,7 +719,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/entity/{slug}/{id}/activity": {
@@ -709,7 +761,8 @@
             "in": "query",
             "name": "include_relations"
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/{slug}/{id}:validateRule": {
@@ -730,7 +783,8 @@
             "in": "query",
             "name": "attribute"
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/entities-by-payment/{id}": {
@@ -742,7 +796,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/entity/activity": {
@@ -761,7 +816,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/entity/file": {
@@ -772,7 +828,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteEntityFile",
@@ -781,7 +838,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/portal/files": {
@@ -792,12 +850,14 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/registration/identifiers": {
       "get": {
-        "operationId": "getRegistrationIdentifiers"
+        "operationId": "getRegistrationIdentifiers",
+        "responses": {}
       }
     },
     "/v2/portal/user/files": {
@@ -818,7 +878,8 @@
             "in": "query",
             "name": "entity_ids"
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/user/file/{id}": {
@@ -830,7 +891,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/user/file/{id}/downloaded": {
@@ -842,12 +904,14 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/user/files/count-by-entity": {
       "get": {
-        "operationId": "getFilesCountByEntity"
+        "operationId": "getFilesCountByEntity",
+        "responses": {}
       }
     },
     "/v2/portal/billing/events": {
@@ -874,19 +938,29 @@
             "in": "query"
           },
           {
+            "name": "paid",
+            "in": "query"
+          },
+          {
             "name": "date_after",
             "in": "query"
           },
           {
             "name": "date_before",
             "in": "query"
+          },
+          {
+            "name": "sort",
+            "in": "query"
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/billing/customers/balance": {
       "get": {
-        "operationId": "getCustomerBalance"
+        "operationId": "getCustomerBalance",
+        "responses": {}
       }
     },
     "/v2/portal/admin:login-as-user": {
@@ -897,7 +971,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/entity/{schema}/access": {
@@ -919,7 +994,8 @@
             "in": "query",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/portal/entity:search": {
@@ -929,7 +1005,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/can-trigger-portal-flow": {
@@ -947,7 +1024,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/portal/workflow/{workflow_id}/{step_id}:markDone": {
@@ -964,7 +1042,8 @@
             "name": "step_id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     }
   },

@@ -257,6 +257,32 @@ declare namespace Components {
             calendar?: string[];
             other?: string[];
         }
+        export interface AuthConfig {
+            /**
+             * AWS Cognito User Pool ID
+             * example:
+             * eu-central-1_CUEQRNbUb
+             */
+            user_pool_id: string;
+            /**
+             * AWS Cognito User Pool Client ID
+             * example:
+             * 6bsd0jkgoie74k2i8mrhc1vest
+             */
+            user_pool_client_id: string;
+            /**
+             * AWS Cognito User Pool Identity Pool ID
+             * example:
+             * eu-central-1:a63af1f7-ab86-4ab5-a0eb-f461cb37c2b1
+             */
+            user_pool_identity_pool_id?: string;
+            /**
+             * Portal ID
+             * example:
+             * 7h2hwdj7hhjsdcjkq03eidna3ep
+             */
+            portal_id: string;
+        }
         export interface Balance {
             /**
              * Current balance of the customer in cents. (precision 2)
@@ -461,6 +487,10 @@ declare namespace Components {
                  */
                 change_due_date?: boolean;
             };
+            /**
+             * Access token for the portal
+             */
+            accessToken?: string;
             advanced_mfa?: {
                 /**
                  * Advanced MFA feature flag
@@ -725,6 +755,20 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
             _schema: "contact";
+        }
+        export interface ContactCountRequest {
+            /**
+             * ID of the organization
+             * example:
+             * 728
+             */
+            orgId: string;
+            /**
+             * Identifiers to identify a contact
+             */
+            contactIdentifiers: {
+                [name: string]: string;
+            };
         }
         export interface ContactExistsRequest {
             /**
@@ -1340,6 +1384,23 @@ declare namespace Components {
              * Error message
              */
             message?: string;
+        }
+        /**
+         * example:
+         * {
+         *   "exists": true,
+         *   "active": false
+         * }
+         */
+        export interface Exists {
+            /**
+             * Indicate whether the item exists
+             */
+            exists: boolean;
+            /**
+             * Indicate whether the item is active
+             */
+            active?: boolean;
         }
         export type ExtraSchemaAttributes = {
             /**
@@ -1961,6 +2022,10 @@ declare namespace Components {
                  */
                 change_due_date?: boolean;
             };
+            /**
+             * Access token for the portal
+             */
+            accessToken?: string;
             advanced_mfa?: {
                 /**
                  * Advanced MFA feature flag
@@ -2321,6 +2386,18 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "product";
         }
+        export interface RegistrationIdentifier {
+            /**
+             * Name of the identifier/attribute
+             */
+            name?: string;
+            schema?: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+        }
         /**
          * An entity that describes a reimbursement billing event.
          */
@@ -2655,6 +2732,10 @@ declare namespace Components {
                  */
                 change_due_date?: boolean;
             };
+            /**
+             * Access token for the portal
+             */
+            accessToken?: string;
             advanced_mfa?: {
                 /**
                  * Advanced MFA feature flag
@@ -3837,11 +3918,21 @@ declare namespace Paths {
              */
             export type From = number;
             /**
-             * Size of the search results
+             * Filter billing events by paid status
+             */
+            export type Paid = boolean;
+            /**
+             * Size of the search results.
              * example:
              * 100
              */
             export type Size = number;
+            /**
+             * Key to sort by
+             * example:
+             * due_date:asc
+             */
+            export type Sort = string;
         }
         export interface QueryParameters {
             from?: /**
@@ -3851,15 +3942,22 @@ declare namespace Paths {
              */
             Parameters.From;
             size?: /**
-             * Size of the search results
+             * Size of the search results.
              * example:
              * 100
              */
             Parameters.Size;
             entity_id?: Parameters.EntityId;
             event_type?: /* Type of billing event to filter by */ Parameters.EventType;
+            paid?: /* Filter billing events by paid status */ Parameters.Paid;
             date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
             date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;
+            sort?: /**
+             * Key to sort by
+             * example:
+             * due_date:asc
+             */
+            Parameters.Sort;
         }
         namespace Responses {
             export interface $200 {
@@ -4340,7 +4438,334 @@ declare namespace Paths {
             origin: Parameters.Origin;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.PortalConfig;
+            export interface $200 {
+                /**
+                 * Enable/Disable the portal access
+                 */
+                enabled?: boolean;
+                /**
+                 * A short name to identify your portal
+                 * example:
+                 * Installer Portal
+                 */
+                name?: string;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * abc.com
+                 */
+                domain?: string;
+                /**
+                 * Mark true if the domain is an Epilot domain
+                 */
+                is_epilot_domain?: boolean;
+                design_id: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
+                self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+                /**
+                 * Feature settings for the portal
+                 */
+                feature_settings?: {
+                    /**
+                     * Start page feature flag
+                     */
+                    start_page?: boolean;
+                    /**
+                     * Billing feature flag
+                     */
+                    billing?: boolean;
+                    /**
+                     * Change due date feature flag
+                     */
+                    change_due_date?: boolean;
+                };
+                /**
+                 * Access token for the portal
+                 */
+                accessToken?: string;
+                advanced_mfa?: {
+                    /**
+                     * Advanced MFA feature flag
+                     */
+                    enabled?: boolean;
+                };
+                /**
+                 * AWS Cognito Pool details for the portal
+                 */
+                cognito_details?: {
+                    /**
+                     * Cognito user pool client ID
+                     * example:
+                     * 6bsd0jkgoie74k2i8mrhc1vest
+                     */
+                    cognito_user_pool_client_id?: string;
+                    /**
+                     * Cognito user pool ARN
+                     * example:
+                     * arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341
+                     */
+                    cognito_user_pool_arn?: string;
+                    /**
+                     * Cognito user pool ID
+                     * example:
+                     * eu-central-1_CUEQRNbUb
+                     */
+                    cognito_user_pool_id?: string;
+                    /**
+                     * Password policy for the portal
+                     */
+                    password_policy?: {
+                        /**
+                         * Minimum password length
+                         * example:
+                         * 8
+                         */
+                        minimum_length?: number;
+                        /**
+                         * Require lowercase characters
+                         * example:
+                         * true
+                         */
+                        require_lowercase?: boolean;
+                        /**
+                         * Require uppercase characters
+                         * example:
+                         * true
+                         */
+                        require_uppercase?: boolean;
+                        /**
+                         * Require numbers
+                         * example:
+                         * true
+                         */
+                        require_numbers?: boolean;
+                        /**
+                         * Require symbols
+                         * example:
+                         * true
+                         */
+                        require_symbols?: boolean;
+                    };
+                };
+                /**
+                 * Stringified object with configuration details
+                 */
+                config?: string;
+                /**
+                 * Deprecated. Use registration_identifiers instead.
+                 * example:
+                 * [
+                 *   "email",
+                 *   "last_name"
+                 * ]
+                 */
+                contact_identifiers?: string[];
+                /**
+                 * example:
+                 * {
+                 *   "contact": [
+                 *     "name",
+                 *     "address"
+                 *   ],
+                 *   "contract": [
+                 *     "installment_amount"
+                 *   ]
+                 * }
+                 */
+                approval_state_attributes?: {
+                    [name: string]: string[];
+                };
+                email_templates?: /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
+                /**
+                 * Permissions granted to a portal user while accessing entities
+                 */
+                grants?: Components.Schemas.Grant[];
+                /**
+                 * Teaser & Banner Image web links
+                 */
+                images?: {
+                    /**
+                     * URL of the order left teaser image
+                     * example:
+                     * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg
+                     */
+                    orderLeftTeaser?: string | null;
+                    /**
+                     * URL of the order right teaser image
+                     * example:
+                     * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg
+                     */
+                    orderRightTeaser?: string | null;
+                    /**
+                     * URL of the welcome banner image
+                     * example:
+                     * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg
+                     */
+                    welcomeBanner?: string | null;
+                };
+                /**
+                 * Identifiers used to identify an entity by a portal user. Deprecated. Use contract_identifiers instead.
+                 */
+                entity_identifiers?: {
+                    type?: {
+                        /**
+                         * Enable/Disable the entity identifier
+                         */
+                        isEnabled?: boolean;
+                        /**
+                         * Attributes used to identify an entity
+                         */
+                        attributes?: string[];
+                    };
+                };
+                /**
+                 * Identifiers to identify a contract by a portal user.
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "email",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "last_name",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "contract_number",
+                 *     "schema": "contract"
+                 *   }
+                 * ]
+                 */
+                contract_identifiers?: Components.Schemas.ContractIdentifier[];
+                /**
+                 * Identifiers to identify a contact of a portal user during the registration.
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "last_name",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "contract_number",
+                 *     "schema": "contract"
+                 *   }
+                 * ]
+                 */
+                registration_identifiers?: Components.Schemas.ContractIdentifier[];
+                /**
+                 * Rules for editing an entity by a portal user
+                 */
+                entity_edit_rules?: {
+                    slug?: /**
+                     * URL-friendly identifier for the entity schema
+                     * example:
+                     * contact
+                     */
+                    Components.Schemas.EntitySlug;
+                    /**
+                     * example:
+                     * first_name
+                     */
+                    attribute?: string;
+                    rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments";
+                    cadence_period_type?: "days" | "weeks" | "months";
+                    /**
+                     * example:
+                     * 1
+                     */
+                    cadence_period?: number;
+                    /**
+                     * example:
+                     * 1
+                     */
+                    changes_allowed?: number;
+                    /**
+                     * example:
+                     * 1
+                     */
+                    grace_period?: number;
+                    /**
+                     * example:
+                     * 10%
+                     */
+                    allowed_increment?: string;
+                    /**
+                     * example:
+                     * 10%
+                     */
+                    allowed_decrement?: string;
+                    /**
+                     * example:
+                     * 10
+                     */
+                    number_of_days_before_restriction?: number;
+                }[];
+                allowed_file_extensions?: /* Allowed file extensions for upload */ Components.Schemas.AllowedFileExtensions;
+                /**
+                 * ID of the organization
+                 * example:
+                 * 12345
+                 */
+                id?: string;
+                /**
+                 * ID of the organization
+                 * example:
+                 * 12345
+                 */
+                organization_id?: string;
+                /**
+                 * Name of the organization
+                 * example:
+                 * ABC Company
+                 */
+                org_name?: string;
+                origin?: /* Origin of the portal */ Components.Schemas.Origin;
+                /**
+                 * Organization settings
+                 */
+                org_settings?: {
+                    /**
+                     * Canary feature flag
+                     */
+                    canary?: {
+                        /**
+                         * Enable/Disable the canary feature
+                         */
+                        enabled?: boolean;
+                    };
+                    /**
+                     * Disable Advanced Usage Metrics
+                     */
+                    notracking?: {
+                        /**
+                         * Disable browser-side scripts that track advanced usage metrics
+                         */
+                        enabled?: boolean;
+                    };
+                };
+                /**
+                 * Feature flags for the portal
+                 */
+                feature_flags?: {
+                    [name: string]: boolean;
+                };
+                certificate_details?: {
+                    /**
+                     * Status of the certificate
+                     */
+                    status?: "PENDING_VALIDATION" | "ISSUED" | "INACTIVE" | "EXPIRED" | "VALIDATION_TIMED_OUT" | "REVOKED" | "FAILED" | "PENDING_AUTO_RENEWAL";
+                    /**
+                     * Reason for failed certificate
+                     * example:
+                     * CAA_ERROR
+                     */
+                    failed_reason?: string;
+                };
+            }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -6828,12 +7253,14 @@ export type ActivityId = Components.Schemas.ActivityId;
 export type ActivityItem = Components.Schemas.ActivityItem;
 export type AdminUser = Components.Schemas.AdminUser;
 export type AllowedFileExtensions = Components.Schemas.AllowedFileExtensions;
+export type AuthConfig = Components.Schemas.AuthConfig;
 export type Balance = Components.Schemas.Balance;
 export type BaseBillingEvent = Components.Schemas.BaseBillingEvent;
 export type BaseEntity = Components.Schemas.BaseEntity;
 export type BillingEvent = Components.Schemas.BillingEvent;
 export type CommonConfigAttributes = Components.Schemas.CommonConfigAttributes;
 export type Contact = Components.Schemas.Contact;
+export type ContactCountRequest = Components.Schemas.ContactCountRequest;
 export type ContactExistsRequest = Components.Schemas.ContactExistsRequest;
 export type ContentWidget = Components.Schemas.ContentWidget;
 export type Contract = Components.Schemas.Contract;
@@ -6853,6 +7280,7 @@ export type EntitySearchParams = Components.Schemas.EntitySearchParams;
 export type EntitySlug = Components.Schemas.EntitySlug;
 export type EntityWidget = Components.Schemas.EntityWidget;
 export type ErrorResp = Components.Schemas.ErrorResp;
+export type Exists = Components.Schemas.Exists;
 export type ExtraSchemaAttributes = Components.Schemas.ExtraSchemaAttributes;
 export type FailedRuleErrorResp = Components.Schemas.FailedRuleErrorResp;
 export type File = Components.Schemas.File;
@@ -6871,6 +7299,7 @@ export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type Product = Components.Schemas.Product;
+export type RegistrationIdentifier = Components.Schemas.RegistrationIdentifier;
 export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;
 export type Rule = Components.Schemas.Rule;
 export type SaveEntityFile = Components.Schemas.SaveEntityFile;

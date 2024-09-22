@@ -567,7 +567,40 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalConfig"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PortalConfig"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "certificate_details": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "description": "Status of the certificate",
+                              "enum": [
+                                "PENDING_VALIDATION",
+                                "ISSUED",
+                                "INACTIVE",
+                                "EXPIRED",
+                                "VALIDATION_TIMED_OUT",
+                                "REVOKED",
+                                "FAILED",
+                                "PENDING_AUTO_RENEWAL"
+                              ]
+                            },
+                            "failed_reason": {
+                              "type": "string",
+                              "description": "Reason for failed certificate",
+                              "example": "CAA_ERROR"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -4011,8 +4044,9 @@
             "schema": {
               "type": "number",
               "description": "Initial offset to set for the search results",
-              "example": 0,
-              "default": 0
+              "default": 0,
+              "minimum": 0,
+              "example": 0
             }
           },
           {
@@ -4021,9 +4055,11 @@
             "required": false,
             "schema": {
               "type": "number",
-              "description": "Size of the search results",
-              "example": 100,
-              "default": 100
+              "description": "Size of the search results.",
+              "default": 100,
+              "minimum": 0,
+              "maximum": 1000,
+              "example": 100
             }
           },
           {
@@ -4053,6 +4089,14 @@
             }
           },
           {
+            "name": "paid",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "description": "Filter billing events by paid status"
+            }
+          },
+          {
             "name": "date_after",
             "in": "query",
             "schema": {
@@ -4068,6 +4112,15 @@
               "type": "string",
               "format": "date-time",
               "description": "List billing events before this date"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Key to sort by",
+              "example": "due_date:asc"
             }
           }
         ],
@@ -4532,6 +4585,12 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Portal or Epilot Bearer Token"
+      },
+      "AsOrganization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-org-id",
+        "description": "Set organization id as internal user"
       }
     },
     "schemas": {
@@ -4959,6 +5018,10 @@
                 "description": "Change due date feature flag"
               }
             }
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "Access token for the portal"
           },
           "advanced_mfa": {
             "type": "object",
@@ -5530,6 +5593,27 @@
           }
         ]
       },
+      "ContactCountRequest": {
+        "type": "object",
+        "required": [
+          "contactIdentifiers",
+          "orgId"
+        ],
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "example": 728,
+            "description": "ID of the organization"
+          },
+          "contactIdentifiers": {
+            "type": "object",
+            "description": "Identifiers to identify a contact",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ContactExistsRequest": {
         "type": "object",
         "required": [
@@ -5822,6 +5906,56 @@
               }
             }
           }
+        }
+      },
+      "AuthConfig": {
+        "type": "object",
+        "properties": {
+          "user_pool_id": {
+            "type": "string",
+            "example": "eu-central-1_CUEQRNbUb",
+            "description": "AWS Cognito User Pool ID"
+          },
+          "user_pool_client_id": {
+            "type": "string",
+            "example": "6bsd0jkgoie74k2i8mrhc1vest",
+            "description": "AWS Cognito User Pool Client ID"
+          },
+          "user_pool_identity_pool_id": {
+            "type": "string",
+            "example": "eu-central-1:a63af1f7-ab86-4ab5-a0eb-f461cb37c2b1",
+            "description": "AWS Cognito User Pool Identity Pool ID"
+          },
+          "portal_id": {
+            "type": "string",
+            "example": "7h2hwdj7hhjsdcjkq03eidna3ep",
+            "description": "Portal ID"
+          }
+        },
+        "required": [
+          "user_pool_id",
+          "user_pool_client_id",
+          "portal_id"
+        ]
+      },
+      "Exists": {
+        "type": "object",
+        "required": [
+          "exists"
+        ],
+        "properties": {
+          "exists": {
+            "type": "boolean",
+            "description": "Indicate whether the item exists"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Indicate whether the item is active"
+          }
+        },
+        "example": {
+          "exists": true,
+          "active": false
         }
       },
       "EntitySlug": {
@@ -7012,6 +7146,18 @@
           "type": {
             "type": "string",
             "description": "Type of the secondary attribute"
+          }
+        }
+      },
+      "RegistrationIdentifier": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the identifier/attribute"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/EntitySlug"
           }
         }
       },
