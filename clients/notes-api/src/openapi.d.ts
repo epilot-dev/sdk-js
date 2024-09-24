@@ -353,7 +353,6 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             context_type: Parameters.ContextType;
-            context_id?: /* ID of the Entity from which to retrive Notes */ Parameters.ContextId;
             from?: /* The index of the first Note to return in this query */ Parameters.From;
             size?: /* The number of Note entries to return in this query */ Parameters.Size;
         }

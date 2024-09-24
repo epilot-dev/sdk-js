@@ -213,15 +213,6 @@
           },
           {
             "in": "query",
-            "name": "context_id",
-            "description": "The ID of a non-Entity context that contains Notes. Required when `context_type` is not an Entity slug",
-            "schema": {
-              "type": "string",
-              "description": "The ID of a non-Entity context that contains Notes. Required when `context_type` is not an Entity slug"
-            }
-          },
-          {
-            "in": "query",
             "name": "from",
             "description": "The index of the first Note to return in this query",
             "schema": {
