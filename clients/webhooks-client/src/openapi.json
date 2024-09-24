@@ -945,13 +945,19 @@
           },
           "enableStaticIP": {
             "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive",
+              "incomplete"
+            ]
           }
         },
         "required": [
-          "eventName",
-          "url",
-          "httpMethod",
-          "auth"
+          "name",
+          "eventName"
         ],
         "example": {
           "eventName": "CustomerRequest_Created",

@@ -1,6 +1,6 @@
 {
   "name": "@epilot/webhooks-client",
-  "version": "2.13.2",
+  "version": "2.14.0",
   "description": "Client library for epilot Webhooks API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

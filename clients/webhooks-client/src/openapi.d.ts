@@ -322,21 +322,22 @@ declare namespace Components {
          */
         export interface WebhookConfig {
             id?: string;
-            name?: string;
+            name: string;
             eventName: string;
-            url: string;
+            url?: string;
             /**
              * creation timestamp
              * example:
              * 2021-04-27T12:01:13.000Z
              */
             creationTime?: string;
-            httpMethod: HttpMethod;
+            httpMethod?: HttpMethod;
             enabled?: boolean;
-            auth: Auth;
+            auth?: Auth;
             filter?: Filter;
             payloadConfiguration?: /* Configuration for the webhook payload */ PayloadConfiguration;
             enableStaticIP?: boolean;
+            status?: "active" | "inactive" | "incomplete";
         }
         export interface WebhookEvent {
             event_id: string;
