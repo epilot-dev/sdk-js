@@ -156,6 +156,33 @@
         }
       }
     },
+    "/v1/note/{id}:pin": {
+      "post": {
+        "operationId": "pinNote",
+        "summary": "pinNote",
+        "description": "Pins a single Note entry based on it's Entity ID",
+        "tags": [
+          "Notes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to pin",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to pin"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the pinned Note entity"
+          }
+        }
+      }
+    },
     "/v1/notes/{context_id}": {
       "get": {
         "operationId": "getNotesByContext",
@@ -180,12 +207,7 @@
             "name": "context_type",
             "description": "Type of context to retrieve Notes within the targeted Entity",
             "schema": {
-              "type": "string",
-              "enum": [
-                "opportunity",
-                "workflow_tasks"
-              ],
-              "description": "Type of context to retrieve Notes within the targeted Entity"
+              "$ref": "#/components/schemas/ContextType"
             },
             "required": true
           },
@@ -506,13 +528,87 @@
         ]
       },
       "NotePatchRequestBody": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Entity"
-          }
-        ],
         "type": "object",
         "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Entity ID of the Note entry"
+          },
+          "_org": {
+            "type": "string",
+            "description": "ID of the Organization that owns this Note"
+          },
+          "_schema": {
+            "type": "string",
+            "description": "The Entity schema of this Note"
+          },
+          "_created_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was created",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was last updated",
+            "format": "date-time"
+          },
+          "_created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "description": "The Entity ID of the User that created this Note"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "description": "The Entity ID of the User that created this Note"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with this Note"
+          },
+          "_acl": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Access Control List for this Note entry"
+          },
+          "_owners": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "org_id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "org_id",
+                "user_id"
+              ]
+            }
+          },
           "context_entities": {
             "type": "object",
             "properties": {
@@ -559,10 +655,15 @@
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
           }
-        },
-        "required": [
-          "context_entities"
-        ]
+        }
+      },
+      "ContextType": {
+        "type": "string",
+        "enum": [
+          "opportunity",
+          "workflow_tasks"
+        ],
+        "description": "Type of context to retrieve Notes within the targeted Entity"
       },
       "NotesGetRequestResponse": {
         "type": "object",

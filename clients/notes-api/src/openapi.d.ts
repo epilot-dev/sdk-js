@@ -11,6 +11,10 @@ import type {
 declare namespace Components {
     namespace Schemas {
         /**
+         * Type of context to retrieve Notes within the targeted Entity
+         */
+        export type ContextType = "opportunity" | "workflow_tasks";
+        /**
          * Base Entity schema
          */
         export interface Entity {
@@ -191,14 +195,11 @@ declare namespace Components {
              */
             pinned_at?: string; // date-time
         }
-        /**
-         * Base Entity schema
-         */
         export interface NotePatchRequestBody {
             /**
              * Entity ID of the Note entry
              */
-            _id: string;
+            _id?: string;
             /**
              * ID of the Organization that owns this Note
              */
@@ -237,7 +238,7 @@ declare namespace Components {
                 org_id: string;
                 user_id: string;
             }[];
-            context_entities: {
+            context_entities?: {
                 $relation: {
                     entity_id: string;
                 }[];
@@ -337,10 +338,7 @@ declare namespace Paths {
              * ID of the Entity from which to retrive Notes
              */
             export type ContextId = string;
-            /**
-             * Type of context to retrieve Notes within the targeted Entity
-             */
-            export type ContextType = "opportunity" | "workflow_tasks";
+            export type ContextType = /* Type of context to retrieve Notes within the targeted Entity */ Components.Schemas.ContextType;
             /**
              * The index of the first Note to return in this query
              */
@@ -354,7 +352,7 @@ declare namespace Paths {
             context_id: /* ID of the Entity from which to retrive Notes */ Parameters.ContextId;
         }
         export interface QueryParameters {
-            context_type: /* Type of context to retrieve Notes within the targeted Entity */ Parameters.ContextType;
+            context_type: Parameters.ContextType;
             context_id?: /* ID of the Entity from which to retrive Notes */ Parameters.ContextId;
             from?: /* The index of the first Note to return in this query */ Parameters.From;
             size?: /* The number of Note entries to return in this query */ Parameters.Size;
@@ -373,9 +371,24 @@ declare namespace Paths {
         export interface PathParameters {
             id: /* The Entity ID of the Note entry to update */ Parameters.Id;
         }
-        export type RequestBody = /* Base Entity schema */ Components.Schemas.NotePatchRequestBody;
+        export type RequestBody = Components.Schemas.NotePatchRequestBody;
         namespace Responses {
             export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
+        }
+    }
+    namespace PinNote {
+        namespace Parameters {
+            /**
+             * The Entity ID of the Note entry to pin
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /* The Entity ID of the Note entry to pin */ Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
         }
     }
 }
@@ -421,6 +434,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteNote.Responses.$200>
+  /**
+   * pinNote - pinNote
+   * 
+   * Pins a single Note entry based on it's Entity ID
+   */
+  'pinNote'(
+    parameters?: Parameters<Paths.PinNote.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PinNote.Responses.$200>
   /**
    * getNotesByContext - getNotesByContext
    * 
@@ -478,6 +501,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteNote.Responses.$200>
   }
+  ['/v1/note/{id}:pin']: {
+    /**
+     * pinNote - pinNote
+     * 
+     * Pins a single Note entry based on it's Entity ID
+     */
+    'post'(
+      parameters?: Parameters<Paths.PinNote.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PinNote.Responses.$200>
+  }
   ['/v1/notes/{context_id}']: {
     /**
      * getNotesByContext - getNotesByContext
@@ -494,6 +529,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type ContextType = Components.Schemas.ContextType;
 export type Entity = Components.Schemas.Entity;
 export type NoteEntity = Components.Schemas.NoteEntity;
 export type NoteEntityParent = Components.Schemas.NoteEntityParent;
