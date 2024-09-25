@@ -709,6 +709,10 @@ declare namespace Components {
                 number_of_days_before_restriction?: number;
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
+            /**
+             * Configured Portal extensions
+             */
+            extensions?: ExtensionConfig[];
         }
         /**
          * The mapped contact of the portal user
@@ -1401,6 +1405,226 @@ declare namespace Components {
              * Indicate whether the item is active
              */
             active?: boolean;
+        }
+        export interface Extension {
+            /**
+             * Name of the extension.
+             */
+            name: {
+                [name: string]: string;
+                /**
+                 * Name of the extension in English.
+                 */
+                en: string;
+            };
+            /**
+             * Version of the extension.
+             */
+            version: string;
+            /**
+             * Variables available to the extension configurable by the portal administrator.
+             */
+            variables?: {
+                /**
+                 * Identifier of the variable. Should not change between updates.
+                 */
+                id: string;
+                /**
+                 * Name of the variable.
+                 */
+                name: {
+                    [name: string]: string;
+                    /**
+                     * Name of the variable in English.
+                     */
+                    en: string;
+                };
+                /**
+                 * Type of the variable.
+                 */
+                type: "secret";
+                /**
+                 * Description of the variable.
+                 */
+                description?: {
+                    [name: string]: string;
+                    /**
+                     * Description of the variable in English.
+                     */
+                    en: string;
+                };
+                /**
+                 * Default value of the variable.
+                 */
+                default?: string;
+                /**
+                 * Indicate whether the variable is required.
+                 */
+                required?: boolean;
+            }[];
+            /**
+             * Widgets that can be used by portal administrator.
+             */
+            widgets?: ({
+                /**
+                 * Identifier of the widget. Should not change between updates.
+                 */
+                id?: string;
+                /**
+                 * Name of the widget.
+                 */
+                name?: {
+                    [name: string]: string;
+                    /**
+                     * Name of the widget in English.
+                     */
+                    en: string;
+                };
+                /**
+                 * Description of the widget.
+                 */
+                description?: {
+                    [name: string]: string;
+                    /**
+                     * Description of the widget in English.
+                     */
+                    en: string;
+                };
+            } & (ExtensionWidgetSeamlessLink))[];
+            /**
+             * Hooks that influence the behavior of Portal.
+             */
+            hooks?: ({
+                /**
+                 * Identifier of the hook. Should not change between updates.
+                 */
+                id?: string;
+            } & (/**
+             * Hook that replaces the built-in registration identifiers check. This hook makes the specified call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
+             *   - 200 with body `{ "contactId": "uuid" }` if exactly one contact is found
+             *   - 404 if no contact is found or more than contact is found
+             *
+             */
+            ExtensionHookRegistrationIdentifiersCheck))[];
+        }
+        export interface ExtensionConfig {
+            /**
+             * Name of the extension
+             */
+            id: string;
+            /**
+             * Status of the extension
+             */
+            status: "installed" | "enabled";
+            /**
+             * Extension option values.
+             */
+            options?: {
+                [name: string]: string;
+            };
+        }
+        export interface ExtensionHook {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id?: string;
+        }
+        /**
+         * Hook that replaces the built-in registration identifiers check. This hook makes the specified call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
+         *   - 200 with body `{ "contactId": "uuid" }` if exactly one contact is found
+         *   - 404 if no contact is found or more than contact is found
+         *
+         */
+        export interface ExtensionHookRegistrationIdentifiersCheck {
+            type: "registrationIdentifiersCheck";
+            call: {
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+            };
+        }
+        export interface ExtensionWidget {
+            /**
+             * Identifier of the widget. Should not change between updates.
+             */
+            id?: string;
+            /**
+             * Name of the widget.
+             */
+            name?: {
+                [name: string]: string;
+                /**
+                 * Name of the widget in English.
+                 */
+                en: string;
+            };
+            /**
+             * Description of the widget.
+             */
+            description?: {
+                [name: string]: string;
+                /**
+                 * Description of the widget in English.
+                 */
+                en: string;
+            };
+        }
+        export interface ExtensionWidgetSeamlessLink {
+            type?: "seamlessLink";
+            authentication?: {
+                type?: "token";
+                /**
+                 * HTTP method to use for authentication
+                 */
+                method?: string;
+                /**
+                 * URL to use for authentication
+                 */
+                url?: string;
+                /**
+                 * Parameters to append to the URL.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use for authentication
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * JSON body to use for authentication
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            redirect?: {
+                /**
+                 * URL to redirect to.
+                 */
+                url?: string;
+                /**
+                 * Parameters to append to the URL.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+            };
         }
         export type ExtraSchemaAttributes = {
             /**
@@ -2245,6 +2469,10 @@ declare namespace Components {
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
+             * Configured Portal extensions
+             */
+            extensions?: ExtensionConfig[];
+            /**
              * ID of the organization
              * example:
              * 12345
@@ -2954,6 +3182,10 @@ declare namespace Components {
                 number_of_days_before_restriction?: number;
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
+            /**
+             * Configured Portal extensions
+             */
+            extensions?: ExtensionConfig[];
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -3918,21 +4150,11 @@ declare namespace Paths {
              */
             export type From = number;
             /**
-             * Filter billing events by paid status
-             */
-            export type Paid = boolean;
-            /**
-             * Size of the search results.
+             * Size of the search results
              * example:
              * 100
              */
             export type Size = number;
-            /**
-             * Key to sort by
-             * example:
-             * due_date:asc
-             */
-            export type Sort = string;
         }
         export interface QueryParameters {
             from?: /**
@@ -3942,22 +4164,15 @@ declare namespace Paths {
              */
             Parameters.From;
             size?: /**
-             * Size of the search results.
+             * Size of the search results
              * example:
              * 100
              */
             Parameters.Size;
             entity_id?: Parameters.EntityId;
             event_type?: /* Type of billing event to filter by */ Parameters.EventType;
-            paid?: /* Filter billing events by paid status */ Parameters.Paid;
             date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
             date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;
-            sort?: /**
-             * Key to sort by
-             * example:
-             * due_date:asc
-             */
-            Parameters.Sort;
         }
         namespace Responses {
             export interface $200 {
@@ -4706,6 +4921,10 @@ declare namespace Paths {
                 }[];
                 allowed_file_extensions?: /* Allowed file extensions for upload */ Components.Schemas.AllowedFileExtensions;
                 /**
+                 * Configured Portal extensions
+                 */
+                extensions?: Components.Schemas.ExtensionConfig[];
+                /**
                  * ID of the organization
                  * example:
                  * 12345
@@ -4813,6 +5032,20 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.PortalConfig;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPortalExtensions {
+        namespace Parameters {
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            origin?: Parameters.Origin;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Extension[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -5764,6 +5997,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortal.Responses.$204>
   /**
+   * getPortalExtensions - getPortalExtensions
+   * 
+   * Retrieves the installed portal extensions.
+   */
+  'getPortalExtensions'(
+    parameters?: Parameters<Paths.GetPortalExtensions.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalExtensions.Responses.$200>
+  /**
    * getExternalLinks - getExternalLinks
    * 
    * Retrieves the portal configuration external links.
@@ -6495,6 +6738,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortal.Responses.$204>
+  }
+  ['/v2/portal/extensions']: {
+    /**
+     * getPortalExtensions - getPortalExtensions
+     * 
+     * Retrieves the installed portal extensions.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPortalExtensions.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalExtensions.Responses.$200>
   }
   ['/v2/portal/external-links']: {
     /**
@@ -7281,6 +7536,12 @@ export type EntitySlug = Components.Schemas.EntitySlug;
 export type EntityWidget = Components.Schemas.EntityWidget;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type Exists = Components.Schemas.Exists;
+export type Extension = Components.Schemas.Extension;
+export type ExtensionConfig = Components.Schemas.ExtensionConfig;
+export type ExtensionHook = Components.Schemas.ExtensionHook;
+export type ExtensionHookRegistrationIdentifiersCheck = Components.Schemas.ExtensionHookRegistrationIdentifiersCheck;
+export type ExtensionWidget = Components.Schemas.ExtensionWidget;
+export type ExtensionWidgetSeamlessLink = Components.Schemas.ExtensionWidgetSeamlessLink;
 export type ExtraSchemaAttributes = Components.Schemas.ExtraSchemaAttributes;
 export type FailedRuleErrorResp = Components.Schemas.FailedRuleErrorResp;
 export type File = Components.Schemas.File;

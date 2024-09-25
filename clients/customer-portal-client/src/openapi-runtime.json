@@ -117,6 +117,19 @@
         "responses": {}
       }
     },
+    "/v2/portal/extensions": {
+      "get": {
+        "operationId": "getPortalExtensions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/external-links": {
       "get": {
         "operationId": "getExternalLinks",
@@ -938,19 +951,11 @@
             "in": "query"
           },
           {
-            "name": "paid",
-            "in": "query"
-          },
-          {
             "name": "date_after",
             "in": "query"
           },
           {
             "name": "date_before",
-            "in": "query"
-          },
-          {
-            "name": "sort",
             "in": "query"
           }
         ],
