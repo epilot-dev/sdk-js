@@ -381,6 +381,10 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit amount before any discount is applied
+             */
+            before_discount_unit_amount?: number;
+            /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
@@ -417,9 +421,25 @@ declare namespace Components {
              */
             unit_discount_amount_net_decimal?: string;
             /**
+             * The discount amount applied to the tax
+             */
+            tax_discount_amount?: number;
+            /**
+             * The discount amount applied to the tax represented as a decimal string
+             */
+            tax_discount_amount_decimal?: string;
+            /**
              * Total tax amount for this line item.
              */
             amount_tax?: number;
+            /**
+             * The tax amount before any discount is applied
+             */
+            before_discount_tax_amount?: number;
+            /**
+             * The tax amount before any discount is applied represented as a decimal string
+             */
+            before_discount_tax_amount_decimal?: string;
             currency?: /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
@@ -1310,6 +1330,10 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit amount before any discount is applied
+             */
+            before_discount_unit_amount?: number;
+            /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
@@ -1346,9 +1370,25 @@ declare namespace Components {
              */
             unit_discount_amount_net_decimal?: string;
             /**
+             * The discount amount applied to the tax
+             */
+            tax_discount_amount?: number;
+            /**
+             * The discount amount applied to the tax represented as a decimal string
+             */
+            tax_discount_amount_decimal?: string;
+            /**
              * Total tax amount for this line item.
              */
             amount_tax?: number;
+            /**
+             * The tax amount before any discount is applied
+             */
+            before_discount_tax_amount?: number;
+            /**
+             * The tax amount before any discount is applied represented as a decimal string
+             */
+            before_discount_tax_amount_decimal?: string;
             currency?: /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
@@ -2996,6 +3036,10 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit amount before any discount is applied
+             */
+            before_discount_unit_amount?: number;
+            /**
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
@@ -3032,9 +3076,25 @@ declare namespace Components {
              */
             unit_discount_amount_net_decimal?: string;
             /**
+             * The discount amount applied to the tax
+             */
+            tax_discount_amount?: number;
+            /**
+             * The discount amount applied to the tax represented as a decimal string
+             */
+            tax_discount_amount_decimal?: string;
+            /**
              * Total tax amount for this line item.
              */
             amount_tax?: number;
+            /**
+             * The tax amount before any discount is applied
+             */
+            before_discount_tax_amount?: number;
+            /**
+             * The tax amount before any discount is applied represented as a decimal string
+             */
+            before_discount_tax_amount_decimal?: string;
             currency?: /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
