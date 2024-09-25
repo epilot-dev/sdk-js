@@ -1408,6 +1408,10 @@ declare namespace Components {
         }
         export interface Extension {
             /**
+             * Identifier of the extension. Should not change between updates.
+             */
+            id?: string;
+            /**
              * Name of the extension.
              */
             name: {

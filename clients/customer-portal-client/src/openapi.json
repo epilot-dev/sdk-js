@@ -7284,6 +7284,10 @@
       "Extension": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the extension. Should not change between updates."
+          },
           "name": {
             "type": "object",
             "properties": {
