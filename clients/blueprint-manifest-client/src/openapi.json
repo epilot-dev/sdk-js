@@ -79,25 +79,7 @@
                 "type": "object",
                 "properties": {
                   "resourceType": {
-                    "type": "string",
-                    "enum": [
-                      "journey",
-                      "product",
-                      "price",
-                      "tax",
-                      "automation_flow",
-                      "designbuilder",
-                      "file",
-                      "emailtemplate",
-                      "entity",
-                      "schema",
-                      "schema_attribute",
-                      "schema_capability",
-                      "schema_group",
-                      "workflow_definition",
-                      "closing_reason",
-                      "taxonomy_classification"
-                    ]
+                    "$ref": "#/components/schemas/ResourceNodeType"
                   },
                   "resourceIds": {
                     "type": "array",
@@ -528,7 +510,8 @@
           "schema_group",
           "workflow_definition",
           "closing_reason",
-          "taxonomy_classification"
+          "taxonomy_classification",
+          "webhook"
         ]
       },
       "RootResourceNode": {
