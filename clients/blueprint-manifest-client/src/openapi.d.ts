@@ -313,7 +313,7 @@ declare namespace Components {
                 type?: ResourceNodeType;
             }[];
         }
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition" | "closing_reason" | "taxonomy_classification";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook";
         export interface RootResourceNode {
             id: string;
             type: ResourceNodeType;
@@ -390,7 +390,7 @@ declare namespace Paths {
     }
     namespace CreateExport {
         export interface RequestBody {
-            resourceType?: "journey" | "product" | "price" | "tax" | "automation_flow" | "designbuilder" | "file" | "emailtemplate" | "entity" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition" | "closing_reason" | "taxonomy_classification";
+            resourceType?: Components.Schemas.ResourceNodeType;
             resourceIds?: [
                 string,
                 string?,
