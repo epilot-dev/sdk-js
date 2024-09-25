@@ -3833,6 +3833,11 @@
             "description": "The unit amount value",
             "readOnly": true
           },
+          "before_discount_unit_amount": {
+            "type": "integer",
+            "description": "The unit amount before any discount is applied",
+            "readOnly": true
+          },
           "unit_amount_decimal": {
             "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
             "type": "string",
@@ -3878,9 +3883,29 @@
             "description": "The net discount amount applied for each unit represented as a decimal string",
             "readOnly": true
           },
+          "tax_discount_amount": {
+            "type": "integer",
+            "description": "The discount amount applied to the tax",
+            "readOnly": true
+          },
+          "tax_discount_amount_decimal": {
+            "type": "string",
+            "description": "The discount amount applied to the tax represented as a decimal string",
+            "readOnly": true
+          },
           "amount_tax": {
             "type": "integer",
             "description": "Total tax amount for this line item."
+          },
+          "before_discount_tax_amount": {
+            "type": "integer",
+            "description": "The tax amount before any discount is applied",
+            "readOnly": true
+          },
+          "before_discount_tax_amount_decimal": {
+            "type": "string",
+            "description": "The tax amount before any discount is applied represented as a decimal string",
+            "readOnly": true
           },
           "currency": {
             "$ref": "#/components/schemas/Currency"
