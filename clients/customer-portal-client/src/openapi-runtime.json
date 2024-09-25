@@ -951,11 +951,19 @@
             "in": "query"
           },
           {
+            "name": "paid",
+            "in": "query"
+          },
+          {
             "name": "date_after",
             "in": "query"
           },
           {
             "name": "date_before",
+            "in": "query"
+          },
+          {
+            "name": "sort",
             "in": "query"
           }
         ],

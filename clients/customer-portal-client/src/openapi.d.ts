@@ -661,6 +661,18 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Journeys automatically opened on a portal user action
+             */
+            triggered_journeys?: {
+                trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER";
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
+            }[];
+            /**
              * Rules for editing an entity by a portal user
              */
             entity_edit_rules?: {
@@ -2424,6 +2436,18 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Journeys automatically opened on a portal user action
+             */
+            triggered_journeys?: {
+                trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER";
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
+            }[];
+            /**
              * Rules for editing an entity by a portal user
              */
             entity_edit_rules?: {
@@ -3137,6 +3161,18 @@ declare namespace Components {
              * ]
              */
             registration_identifiers?: ContractIdentifier[];
+            /**
+             * Journeys automatically opened on a portal user action
+             */
+            triggered_journeys?: {
+                trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER";
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
+            }[];
             /**
              * Rules for editing an entity by a portal user
              */
@@ -4154,11 +4190,21 @@ declare namespace Paths {
              */
             export type From = number;
             /**
-             * Size of the search results
+             * Filter billing events by paid status
+             */
+            export type Paid = boolean;
+            /**
+             * Size of the search results.
              * example:
              * 100
              */
             export type Size = number;
+            /**
+             * Key to sort by
+             * example:
+             * due_date:asc
+             */
+            export type Sort = string;
         }
         export interface QueryParameters {
             from?: /**
@@ -4168,15 +4214,22 @@ declare namespace Paths {
              */
             Parameters.From;
             size?: /**
-             * Size of the search results
+             * Size of the search results.
              * example:
              * 100
              */
             Parameters.Size;
             entity_id?: Parameters.EntityId;
             event_type?: /* Type of billing event to filter by */ Parameters.EventType;
+            paid?: /* Filter billing events by paid status */ Parameters.Paid;
             date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
             date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;
+            sort?: /**
+             * Key to sort by
+             * example:
+             * due_date:asc
+             */
+            Parameters.Sort;
         }
         namespace Responses {
             export interface $200 {
@@ -4875,6 +4928,18 @@ declare namespace Paths {
                  * ]
                  */
                 registration_identifiers?: Components.Schemas.ContractIdentifier[];
+                /**
+                 * Journeys automatically opened on a portal user action
+                 */
+                triggered_journeys?: {
+                    trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER";
+                    journey_id?: /**
+                     * Entity ID
+                     * example:
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
+                     */
+                    Components.Schemas.EntityId /* uuid */;
+                }[];
                 /**
                  * Rules for editing an entity by a portal user
                  */

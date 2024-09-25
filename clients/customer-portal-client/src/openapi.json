@@ -4094,8 +4094,9 @@
             "schema": {
               "type": "number",
               "description": "Initial offset to set for the search results",
-              "example": 0,
-              "default": 0
+              "default": 0,
+              "minimum": 0,
+              "example": 0
             }
           },
           {
@@ -4104,9 +4105,11 @@
             "required": false,
             "schema": {
               "type": "number",
-              "description": "Size of the search results",
-              "example": 100,
-              "default": 100
+              "description": "Size of the search results.",
+              "default": 100,
+              "minimum": 0,
+              "maximum": 1000,
+              "example": 100
             }
           },
           {
@@ -4136,6 +4139,14 @@
             }
           },
           {
+            "name": "paid",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "description": "Filter billing events by paid status"
+            }
+          },
+          {
             "name": "date_after",
             "in": "query",
             "schema": {
@@ -4151,6 +4162,15 @@
               "type": "string",
               "format": "date-time",
               "description": "List billing events before this date"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "description": "Key to sort by",
+              "example": "due_date:asc"
             }
           }
         ],
@@ -5243,6 +5263,26 @@
                 "schema": "contract"
               }
             ]
+          },
+          "triggered_journeys": {
+            "type": "array",
+            "description": "Journeys automatically opened on a portal user action",
+            "items": {
+              "type": "object",
+              "properties": {
+                "trigger_name": {
+                  "type": "string",
+                  "enum": [
+                    "FIRST_LOGIN",
+                    "ACCEPT_ORDER",
+                    "DECLINE_ORDER"
+                  ]
+                },
+                "journey_id": {
+                  "$ref": "#/components/schemas/EntityId"
+                }
+              }
+            }
           },
           "entity_edit_rules": {
             "type": "array",
