@@ -11,10 +11,6 @@ import type {
 declare namespace Components {
     namespace Schemas {
         /**
-         * Type of context to retrieve Notes within the targeted Entity
-         */
-        export type ContextType = "opportunity" | "workflow_tasks";
-        /**
          * Base Entity schema
          */
         export interface Entity {
@@ -61,6 +57,8 @@ declare namespace Components {
                 user_id: string;
             }[];
         }
+        export type EntitySlug = "account" | "billing_event" | "contact" | "contract" | "coupon" | "email_template" | "file" | "journey" | "meter" | "meter_counter" | "opportunity";
+        export type NonEntityContextType = "workflow_tasks";
         /**
          * A note Entity object cotaining Entity metadata and content in a LexicalNode format
          */
@@ -261,7 +259,7 @@ declare namespace Components {
              */
             _tags?: string[];
             /**
-             * The Entity ID of the Entity this note will be contextually attached to
+             * The Entity ID of the Entity this note will be related to
              */
             entity_id: string;
             /**
@@ -269,9 +267,13 @@ declare namespace Components {
              */
             parent_id?: string;
             /**
-             * The IDs of the Workflow Tasks that this Note should be attached to
+             * The type of context to which the Note belongs
              */
-            context_workflow_tasks?: string[];
+            context_type?: "workflow_tasks";
+            /**
+             * The ID of a non-Entity context that contains Notes. Required when `context_type` is specified
+             */
+            context_id?: string;
             /**
              * The content of the Note
              */
@@ -335,10 +337,13 @@ declare namespace Paths {
     namespace GetNotesByContext {
         namespace Parameters {
             /**
-             * ID of the Entity from which to retrive Notes
+             * Context ID
              */
             export type ContextId = string;
-            export type ContextType = /* Type of context to retrieve Notes within the targeted Entity */ Components.Schemas.ContextType;
+            /**
+             * Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`)
+             */
+            export type ContextType = /* Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`) */ Components.Schemas.EntitySlug | Components.Schemas.NonEntityContextType;
             /**
              * The index of the first Note to return in this query
              */
@@ -349,10 +354,10 @@ declare namespace Paths {
             export type Size = number;
         }
         export interface PathParameters {
-            context_id: /* ID of the Entity from which to retrive Notes */ Parameters.ContextId;
+            context_id: /* Context ID */ Parameters.ContextId;
         }
         export interface QueryParameters {
-            context_type: Parameters.ContextType;
+            context_type: /* Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`) */ Parameters.ContextType;
             from?: /* The index of the first Note to return in this query */ Parameters.From;
             size?: /* The number of Note entries to return in this query */ Parameters.Size;
         }
@@ -528,8 +533,9 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-export type ContextType = Components.Schemas.ContextType;
 export type Entity = Components.Schemas.Entity;
+export type EntitySlug = Components.Schemas.EntitySlug;
+export type NonEntityContextType = Components.Schemas.NonEntityContextType;
 export type NoteEntity = Components.Schemas.NoteEntity;
 export type NoteEntityParent = Components.Schemas.NoteEntityParent;
 export type NoteGetRequestResponse = Components.Schemas.NoteGetRequestResponse;

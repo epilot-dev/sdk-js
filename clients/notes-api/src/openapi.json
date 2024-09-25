@@ -195,19 +195,27 @@
           {
             "in": "path",
             "name": "context_id",
-            "description": "ID of the Entity from which to retrive Notes",
+            "description": "Context ID",
             "schema": {
               "type": "string",
-              "description": "ID of the Entity from which to retrive Notes"
+              "description": "Context ID"
             },
             "required": true
           },
           {
             "in": "query",
             "name": "context_type",
-            "description": "Type of context to retrieve Notes within the targeted Entity",
+            "description": "Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`)",
             "schema": {
-              "$ref": "#/components/schemas/ContextType"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/EntitySlug"
+                },
+                {
+                  "$ref": "#/components/schemas/NonEntityContextType"
+                }
+              ],
+              "description": "Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`)"
             },
             "required": true
           },
@@ -269,18 +277,25 @@
           },
           "entity_id": {
             "type": "string",
-            "description": "The Entity ID of the Entity this note will be contextually attached to"
+            "description": "The Entity ID of the Entity this note will be related to"
           },
           "parent_id": {
             "type": "string",
             "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
           },
-          "context_workflow_tasks": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "The IDs of the Workflow Tasks that this Note should be attached to"
+          "context_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NonEntityContextType"
+              },
+              {
+                "description": "The type of context to which the Note belongs"
+              }
+            ]
+          },
+          "context_id": {
+            "type": "string",
+            "description": "The ID of a non-Entity context that contains Notes. Required when `context_type` is specified"
           },
           "content": {
             "type": "string",
@@ -289,6 +304,12 @@
         },
         "required": [
           "entity_id"
+        ]
+      },
+      "NonEntityContextType": {
+        "type": "string",
+        "enum": [
+          "workflow_tasks"
         ]
       },
       "NoteEntity": {
@@ -648,13 +669,21 @@
           }
         }
       },
-      "ContextType": {
+      "EntitySlug": {
         "type": "string",
         "enum": [
-          "opportunity",
-          "workflow_tasks"
-        ],
-        "description": "Type of context to retrieve Notes within the targeted Entity"
+          "account",
+          "billing_event",
+          "contact",
+          "contract",
+          "coupon",
+          "email_template",
+          "file",
+          "journey",
+          "meter",
+          "meter_counter",
+          "opportunity"
+        ]
       },
       "NotesGetRequestResponse": {
         "type": "object",
