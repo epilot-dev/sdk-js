@@ -620,7 +620,8 @@
             "description": "Variable type",
             "enum": [
               "order_table",
-              "custom"
+              "custom",
+              "journey_link"
             ]
           },
           "tags": {
@@ -746,9 +747,9 @@
             "description": "Custom variable type",
             "enum": [
               "order_table",
-              "custom"
-            ],
-            "example": "rbse777b-3cf8-4bff-bb0c-253fd1123250"
+              "custom",
+              "journey_link"
+            ]
           },
           "name": {
             "type": "string",
