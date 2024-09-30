@@ -13,6 +13,10 @@
     {
       "name": "executions",
       "description": "Automation executions"
+    },
+    {
+      "name": "bulk",
+      "description": "Bulk job for triggering automation executions"
     }
   ],
   "security": [
@@ -288,6 +292,120 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AutomationExecution"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/automation/executions/bulk-jobs": {
+      "post": {
+        "operationId": "bulkTriggerExecutions",
+        "summary": "bulkTriggerExecutions",
+        "description": "Create a bulk job that triggers multiple automation executions",
+        "requestBody": {
+          "description": "Execution parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkTriggerRequest"
+              },
+              "example": {
+                "flow_id": "8e2e067e-3c63-4b1a-8e02-6150a3d1fd89",
+                "entity_ids": [
+                  "7791b04a-16d2-44a2-9af9-2d59c25c512f",
+                  "b35a6c51-2a15-4ef1-9623-20db37b0744f"
+                ]
+              }
+            }
+          }
+        },
+        "tags": [
+          "bulk"
+        ],
+        "responses": {
+          "202": {
+            "description": "Trigger Executions Job Info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkTriggerJob"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/automation/executions/bulk-jobs/{job_id}": {
+      "get": {
+        "operationId": "getBulkJob",
+        "summary": "getBulkJob",
+        "description": "Get the status of a bulk job that triggers multiple automation executions",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/JobId"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "bulk"
+        ],
+        "responses": {
+          "200": {
+            "description": "Bulk Job Info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkTriggerJob"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchBulkJob",
+        "summary": "patchBulkJob",
+        "description": "Approve / Cancel bulk job that triggers multiple automation executions",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/JobId"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchBulkJobRequest"
+              },
+              "example": {
+                "action": "APPROVE",
+                "task_token": "b35a6c51-2a15-4ef1-9623-20db37b0744f"
+              }
+            }
+          }
+        },
+        "tags": [
+          "bulk"
+        ],
+        "responses": {
+          "200": {
+            "description": "Bulk Job Info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkTriggerJob"
                 }
               }
             }
@@ -2213,7 +2331,181 @@
           "flow_id": {
             "$ref": "#/components/schemas/AutomationFlowId"
           }
+        },
+        "required": [
+          "entity_id",
+          "flow_id"
+        ]
+      },
+      "PatchBulkJobRequest": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "APPROVE",
+              "CANCEL"
+            ]
+          },
+          "task_token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "task_token"
+        ]
+      },
+      "BulkTriggerRequest": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "$ref": "#/components/schemas/AutomationFlowId"
+          },
+          "entity_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          },
+          "entities_query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "flow_id"
+        ]
+      },
+      "BulkTriggerJob": {
+        "type": "object",
+        "required": [
+          "job_id",
+          "org_id",
+          "flow_id",
+          "status",
+          "created_by",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "job_id": {
+            "$ref": "#/components/schemas/JobId"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "flow_id": {
+            "$ref": "#/components/schemas/AutomationFlowId"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the bulk trigger automation job\n* APPROVAL: Waiting for user approval to start the bulk trigger automation\n* IN_PROGRESS: Bulk trigger automation execution is in progress\n* SUCCESS: Bulk trigger automation execution is completed successfully\n* FAILED: Bulk trigger automation execution is failed\n* CANCELLED: Bulk trigger automation execution was cancelled\n",
+            "enum": [
+              "APPROVAL",
+              "IN_PROGRESS",
+              "SUCCESS",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User ID who created the bulk trigger automation job",
+            "example": "1234"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approved_at": {
+            "type": "string",
+            "description": "Time when the bulk trigger automation executions job was approved",
+            "format": "date-time"
+          },
+          "task_token": {
+            "type": "string",
+            "description": "Task token to approve/cancel the bulk automation job",
+            "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b"
+          },
+          "pending": {
+            "type": "array",
+            "description": "List of entity ids that are waiting for triggering automation",
+            "items": {
+              "type": "object",
+              "required": [
+                "entity_id"
+              ],
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/EntityId"
+                }
+              }
+            }
+          },
+          "triggered": {
+            "type": "array",
+            "description": "List of entity ids and automation execution ids that were triggered successfully",
+            "items": {
+              "type": "object",
+              "required": [
+                "entity_id",
+                "execution_id"
+              ],
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/EntityId"
+                },
+                "execution_id": {
+                  "$ref": "#/components/schemas/AutomationExecutionId"
+                }
+              }
+            }
+          },
+          "failed": {
+            "type": "array",
+            "description": "List of entity ids that were skipped or failed",
+            "items": {
+              "type": "object",
+              "required": [
+                "entity_id",
+                "error"
+              ],
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/EntityId"
+                },
+                "error": {
+                  "type": "string",
+                  "description": "Error message for the failed automation execution"
+                }
+              }
+            }
+          },
+          "cancelled": {
+            "type": "array",
+            "description": "List of entity ids that were cancelled from triggering automation",
+            "items": {
+              "type": "object",
+              "required": [
+                "entity_id"
+              ],
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/EntityId"
+                }
+              }
+            }
+          }
         }
+      },
+      "JobId": {
+        "type": "string",
+        "description": "Job ID for tracking the status of bulk trigger automation executions",
+        "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b"
       },
       "EntityId": {
         "type": "string",
@@ -2553,7 +2845,8 @@
                             "UpdateMeterReading",
                             "DocDownloadedFromPortal",
                             "PortalUserResetPassword",
-                            "PortalUserResetForgotPassword"
+                            "PortalUserResetForgotPassword",
+                            "SelfAssignmentFromPortal"
                           ]
                         },
                         {
