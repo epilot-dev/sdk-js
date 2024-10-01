@@ -943,6 +943,9 @@
               }
             }
           },
+          "405": {
+            "description": "Deleted entities cannot be updated. You'll need to recover the entity first before updating."
+          },
           "409": {
             "description": "Conflict: multiple entities were matched with `unique_key`"
           }
@@ -988,6 +991,55 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/entity/{slug}/{id}:restore": {
+      "patch": {
+        "operationId": "restoreEntity",
+        "summary": "restoreEntity",
+        "description": "Restores an entity by id\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityRestore`\n",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "This endpoint doesn't require a payload, but an empty object can be sent to satisfy certain HTTP clients."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The restored entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The entity is not deleted"
+          },
+          "404": {
+            "description": "The entity was not found"
           }
         }
       }
@@ -1139,7 +1191,7 @@
       "delete": {
         "operationId": "deleteEntity",
         "summary": "deleteEntity",
-        "description": "Deletes an Entity\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityDeleted`\n",
+        "description": "Deletes an Entity\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityDeleted`\n\n## Deletion Mode\n\nAll entities are soft deleted by default. To force an actual deletion from the system, provide `purge:true` to delete the entity and all its activity history permanently.\n",
         "tags": [
           "Entities"
         ],
@@ -1152,6 +1204,15 @@
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "purge",
+            "description": "Permanently deletes the entity when set to `true`",
+            "default": false,
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -5749,6 +5810,16 @@
           "attribute"
         ]
       },
+      "EntitySearchIncludeDeletedParam": {
+        "type": "string",
+        "enum": [
+          "true",
+          "false",
+          "only"
+        ],
+        "description": "Whether to include deleted entities in the search results\n- `true`: include deleted entities\n- `false`: exclude deleted entities\n- `only`: include only deleted entities\n\nBy default, no deleted entities are included in the search results.\n",
+        "default": "false"
+      },
       "EntitySearchParams": {
         "allOf": [
           {
@@ -5769,7 +5840,10 @@
               "size": {},
               "hydrate": {},
               "fields": {},
-              "aggs": {}
+              "aggs": {},
+              "include_deleted": {
+                "$ref": "#/components/schemas/EntitySearchIncludeDeletedParam"
+              }
             },
             "additionalProperties": false,
             "required": [
@@ -6028,6 +6102,9 @@
                 }
               }
             }
+          },
+          "include_deleted": {
+            "$ref": "#/components/schemas/EntitySearchIncludeDeletedParam"
           }
         }
       },

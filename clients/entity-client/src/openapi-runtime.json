@@ -240,6 +240,28 @@
         "responses": {}
       }
     },
+    "/v1/entity/{slug}/{id}:restore": {
+      "patch": {
+        "operationId": "restoreEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/entity/{slug}/{id}": {
       "get": {
         "operationId": "getEntity",
@@ -323,6 +345,11 @@
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "purge",
+            "default": false
           }
         ],
         "responses": {}

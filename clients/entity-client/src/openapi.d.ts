@@ -2159,6 +2159,16 @@ declare namespace Components {
             aggs?: {
                 [key: string]: any;
             };
+            include_deleted?: /**
+             * Whether to include deleted entities in the search results
+             * - `true`: include deleted entities
+             * - `false`: exclude deleted entities
+             * - `only`: include only deleted entities
+             *
+             * By default, no deleted entities are included in the search results.
+             *
+             */
+            EntitySearchIncludeDeletedParam;
         }
         export interface EntityOperation {
             entity: EntityId /* uuid */;
@@ -2961,6 +2971,16 @@ declare namespace Components {
             SearchMappings;
             group_headlines?: GroupHeadline[];
         }
+        /**
+         * Whether to include deleted entities in the search results
+         * - `true`: include deleted entities
+         * - `false`: exclude deleted entities
+         * - `only`: include only deleted entities
+         *
+         * By default, no deleted entities are included in the search results.
+         *
+         */
+        export type EntitySearchIncludeDeletedParam = "true" | "false" | "only";
         export interface EntitySearchOptions {
             /**
              * You can pass one sort field or an array of sort fields. Each sort field can be a string
@@ -3007,6 +3027,16 @@ declare namespace Components {
             aggs?: {
                 [key: string]: any;
             };
+            include_deleted?: /**
+             * Whether to include deleted entities in the search results
+             * - `true`: include deleted entities
+             * - `false`: exclude deleted entities
+             * - `only`: include only deleted entities
+             *
+             * By default, no deleted entities are included in the search results.
+             *
+             */
+            EntitySearchIncludeDeletedParam;
         }
         export interface EntitySearchParams {
             /**
@@ -3064,6 +3094,16 @@ declare namespace Components {
             aggs?: {
                 [key: string]: any;
             };
+            include_deleted?: /**
+             * Whether to include deleted entities in the search results
+             * - `true`: include deleted entities
+             * - `false`: exclude deleted entities
+             * - `only`: include only deleted entities
+             *
+             * By default, no deleted entities are included in the search results.
+             *
+             */
+            EntitySearchIncludeDeletedParam;
         }
         export interface EntitySearchResults {
             /**
@@ -7325,6 +7365,7 @@ declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Purge = boolean;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -7338,6 +7379,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             activity_id?: Parameters.ActivityId;
+            purge?: Parameters.Purge;
         }
         namespace Responses {
             export interface $200 {
@@ -8797,6 +8839,88 @@ declare namespace Paths {
             }
         }
     }
+    namespace RestoreEntity {
+        namespace Parameters {
+            export type ActivityId = /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            Components.Schemas.ActivityId /* ulid */;
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            slug: Parameters.Slug;
+        }
+        export interface QueryParameters {
+            activity_id?: Parameters.ActivityId;
+        }
+        /**
+         * This endpoint doesn't require a payload, but an empty object can be sent to satisfy certain HTTP clients.
+         */
+        export interface RequestBody {
+        }
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * {
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "_org": "123",
+             *   "_owners": [
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     },
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     }
+             *   ],
+             *   "_schema": "contact",
+             *   "_tags": [
+             *     "example",
+             *     "mock",
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z",
+             *   "_acl": {
+             *     "view": [
+             *       "org:456",
+             *       "org:789",
+             *       "org:456",
+             *       "org:789"
+             *     ],
+             *     "edit": [
+             *       "org:456",
+             *       "org:456"
+             *     ],
+             *     "delete": [
+             *       "org:456",
+             *       "org:456"
+             *     ]
+             *   },
+             *   "_manifest": [
+             *     "123e4567-e89b-12d3-a456-426614174000",
+             *     "123e4567-e89b-12d3-a456-426614174000"
+             *   ]
+             * }
+             */
+            Components.Schemas.EntityItem;
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace SearchEntities {
         export type RequestBody = Components.Schemas.EntitySearchParams;
         namespace Responses {
@@ -9226,6 +9350,8 @@ declare namespace Paths {
              * }
              */
             Components.Schemas.EntityItem;
+            export interface $405 {
+            }
             export interface $409 {
             }
         }
@@ -9536,6 +9662,21 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityV2.Responses.$200>
   /**
+   * restoreEntity - restoreEntity
+   * 
+   * Restores an entity by id
+   * 
+   * ## Activity
+   * 
+   * If no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityRestore`
+   * 
+   */
+  'restoreEntity'(
+    parameters?: Parameters<Paths.RestoreEntity.QueryParameters & Paths.RestoreEntity.PathParameters> | null,
+    data?: Paths.RestoreEntity.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RestoreEntity.Responses.$200>
+  /**
    * getEntity - getEntity
    * 
    * Gets Entity and relations by id.
@@ -9688,6 +9829,10 @@ export interface OperationMethods {
    * ## Activity
    * 
    * If no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityDeleted`
+   * 
+   * ## Deletion Mode
+   * 
+   * All entities are soft deleted by default. To force an actual deletion from the system, provide `purge:true` to delete the entity and all its activity history permanently.
    * 
    */
   'deleteEntity'(
@@ -10441,6 +10586,23 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityV2.Responses.$200>
   }
+  ['/v1/entity/{slug}/{id}:restore']: {
+    /**
+     * restoreEntity - restoreEntity
+     * 
+     * Restores an entity by id
+     * 
+     * ## Activity
+     * 
+     * If no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityRestore`
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.RestoreEntity.QueryParameters & Paths.RestoreEntity.PathParameters> | null,
+      data?: Paths.RestoreEntity.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RestoreEntity.Responses.$200>
+  }
   ['/v1/entity/{slug}/{id}']: {
     /**
      * getEntity - getEntity
@@ -10595,6 +10757,10 @@ export interface PathsDictionary {
      * ## Activity
      * 
      * If no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityDeleted`
+     * 
+     * ## Deletion Mode
+     * 
+     * All entities are soft deleted by default. To force an actual deletion from the system, provide `purge:true` to delete the entity and all its activity history permanently.
      * 
      */
     'delete'(
@@ -11180,6 +11346,7 @@ export type EntitySchema = Components.Schemas.EntitySchema;
 export type EntitySchemaGroup = Components.Schemas.EntitySchemaGroup;
 export type EntitySchemaGroupWithCompositeID = Components.Schemas.EntitySchemaGroupWithCompositeID;
 export type EntitySchemaItem = Components.Schemas.EntitySchemaItem;
+export type EntitySearchIncludeDeletedParam = Components.Schemas.EntitySearchIncludeDeletedParam;
 export type EntitySearchOptions = Components.Schemas.EntitySearchOptions;
 export type EntitySearchParams = Components.Schemas.EntitySearchParams;
 export type EntitySearchResults = Components.Schemas.EntitySearchResults;
