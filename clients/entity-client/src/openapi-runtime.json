@@ -1152,6 +1152,57 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/entity/schemas/headline": {
+      "post": {
+        "operationId": "createSchemaGroupHeadline",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/headline/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaGroupHeadline",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putSchemaGroupHeadline",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSchemaGroupHeadline",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {

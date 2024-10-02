@@ -15,13 +15,13 @@ declare namespace Components {
          * example:
          * 01F130Q52Q6MWSNS8N2AVXV4JN
          */
-        Schemas.ActivityId /* ulid */;
+        Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
         export type ActivityIdQueryParam = /**
          * See https://github.com/ulid/spec
          * example:
          * 01F130Q52Q6MWSNS8N2AVXV4JN
          */
-        Schemas.ActivityId /* ulid */;
+        Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
         export type AsyncOperationQueryParam = boolean;
         export type DryRunQueryParam = boolean;
         export type EntityIdPathParam = Schemas.EntityId /* uuid */;
@@ -184,14 +184,14 @@ declare namespace Components {
          * example:
          * 01F130Q52Q6MWSNS8N2AVXV4JN
          */
-        export type ActivityId = string; // ulid
+        export type ActivityId = string; // ulid ^01[0-9a-zA-Z]{24}$
         export interface ActivityItem {
             _id?: /**
              * See https://github.com/ulid/spec
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            ActivityId /* ulid */;
+            ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
             timestamp?: string; // date-time
             /**
              * example:
@@ -525,7 +525,7 @@ declare namespace Components {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            ActivityId /* ulid */;
+            ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
             timestamp?: string; // date-time
             /**
              * example:
@@ -2182,7 +2182,7 @@ declare namespace Components {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            ActivityId /* ulid */;
+            ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
             operation: "createEntity" | "updateEntity" | "deleteEntity";
             /**
              * example:
@@ -3541,6 +3541,37 @@ declare namespace Components {
             type: "headline";
             enable_divider?: boolean;
             divider?: "top_divider" | "bottom_divider";
+        }
+        /**
+         * a readonly computed ID for the entity group headline including schema slug and the headline ID
+         */
+        export interface GroupHeadlineWithCompositeID {
+            id: string; // uuid
+            name: string;
+            label: string;
+            layout?: string;
+            /**
+             * The group of headline attribute
+             */
+            group: string;
+            /**
+             * The order of headline attribute
+             */
+            order?: number;
+            type: "headline";
+            enable_divider?: boolean;
+            divider?: "top_divider" | "bottom_divider";
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            composite_id?: string;
+            /**
+             * Schema slug the capability belongs to
+             * example:
+             * contact
+             */
+            schema?: string;
         }
         /**
          * Entity with relation data resolved into the attribute values
@@ -7113,7 +7144,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
             export type Async = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
@@ -7144,7 +7175,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -7220,7 +7251,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
             export type Async = boolean;
             export type FillActivity = boolean;
             export type Slug = /**
@@ -7348,6 +7379,12 @@ declare namespace Paths {
             export type $201 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
         }
     }
+    namespace CreateSchemaGroupHeadline {
+        export type RequestBody = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
+        namespace Responses {
+            export type $201 = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
+        }
+    }
     namespace CreateTaxonomy {
         export type RequestBody = Components.Schemas.Taxonomy;
         namespace Responses {
@@ -7363,7 +7400,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Purge = boolean;
             export type Slug = /**
@@ -7393,7 +7430,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
             export type Async = boolean;
             export type Attribute = string;
             export type EntityId = string;
@@ -7506,6 +7543,25 @@ declare namespace Paths {
             export type $200 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
         }
     }
+    namespace DeleteSchemaGroupHeadline {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
+        }
+    }
     namespace DeleteTaxonomy {
         namespace Parameters {
             export type Permanent = boolean;
@@ -7562,7 +7618,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
             export type OperationsFrom = number;
             export type OperationsSize = number;
         }
@@ -8408,6 +8464,25 @@ declare namespace Paths {
             export type $200 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
         }
     }
+    namespace GetSchemaGroupHeadline {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
+        }
+    }
     namespace GetSchemaVersions {
         namespace Parameters {
             export type DraftsFrom = number;
@@ -8617,7 +8692,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
             export type Async = boolean;
             export type DryRun = boolean;
             export type FillActivity = boolean;
@@ -8808,6 +8883,26 @@ declare namespace Paths {
             export type $200 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
         }
     }
+    namespace PutSchemaGroupHeadline {
+        namespace Parameters {
+            /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            export type CompositeId = string; // ^.+:.+$
+        }
+        export interface PathParameters {
+            composite_id: /**
+             * example:
+             * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
+             */
+            Parameters.CompositeId /* ^.+:.+$ */;
+        }
+        export type RequestBody = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
+        namespace Responses {
+            export type $200 = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
+        }
+    }
     namespace RemoveRelations {
         namespace Parameters {
             export type ActivityId = /**
@@ -8815,7 +8910,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
             export type Async = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
@@ -8846,7 +8941,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -9001,7 +9096,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
             export type Async = boolean;
             export type FillActivity = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
@@ -9114,7 +9209,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
             export type Async = boolean;
             export type Attribute = string;
             export type EntityId = string;
@@ -9188,7 +9283,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid */;
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
             export type Async = boolean;
             export type DryRun = boolean;
             export type FillActivity = boolean;
@@ -10315,6 +10410,46 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaGroup.Responses.$200>
+  /**
+   * createSchemaGroupHeadline - createSchemaGroupHeadline
+   * 
+   * Create a headline in a schema group
+   */
+  'createSchemaGroupHeadline'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateSchemaGroupHeadline.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSchemaGroupHeadline.Responses.$201>
+  /**
+   * getSchemaGroupHeadline - getSchemaGroupHeadline
+   * 
+   * Get a group headline from schema from given headline composite ID
+   */
+  'getSchemaGroupHeadline'(
+    parameters?: Parameters<Paths.GetSchemaGroupHeadline.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSchemaGroupHeadline.Responses.$200>
+  /**
+   * putSchemaGroupHeadline - putSchemaGroupHeadline
+   * 
+   * Adds or updates a group headline in the schema
+   */
+  'putSchemaGroupHeadline'(
+    parameters?: Parameters<Paths.PutSchemaGroupHeadline.PathParameters> | null,
+    data?: Paths.PutSchemaGroupHeadline.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutSchemaGroupHeadline.Responses.$200>
+  /**
+   * deleteSchemaGroupHeadline - deleteSchemaGroupHeadline
+   * 
+   * Deletes a group headline from a schema
+   */
+  'deleteSchemaGroupHeadline'(
+    parameters?: Parameters<Paths.DeleteSchemaGroupHeadline.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteSchemaGroupHeadline.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -11302,6 +11437,50 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaGroup.Responses.$200>
   }
+  ['/v1/entity/schemas/headline']: {
+    /**
+     * createSchemaGroupHeadline - createSchemaGroupHeadline
+     * 
+     * Create a headline in a schema group
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateSchemaGroupHeadline.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSchemaGroupHeadline.Responses.$201>
+  }
+  ['/v1/entity/schemas/headline/{composite_id}']: {
+    /**
+     * getSchemaGroupHeadline - getSchemaGroupHeadline
+     * 
+     * Get a group headline from schema from given headline composite ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSchemaGroupHeadline.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSchemaGroupHeadline.Responses.$200>
+    /**
+     * putSchemaGroupHeadline - putSchemaGroupHeadline
+     * 
+     * Adds or updates a group headline in the schema
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutSchemaGroupHeadline.PathParameters> | null,
+      data?: Paths.PutSchemaGroupHeadline.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutSchemaGroupHeadline.Responses.$200>
+    /**
+     * deleteSchemaGroupHeadline - deleteSchemaGroupHeadline
+     * 
+     * Deletes a group headline from a schema
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteSchemaGroupHeadline.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteSchemaGroupHeadline.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -11367,6 +11546,7 @@ export type GetRelatedEntitiesCount = Components.Schemas.GetRelatedEntitiesCount
 export type GetRelationsResp = Components.Schemas.GetRelationsResp;
 export type GetRelationsRespWithPagination = Components.Schemas.GetRelationsRespWithPagination;
 export type GroupHeadline = Components.Schemas.GroupHeadline;
+export type GroupHeadlineWithCompositeID = Components.Schemas.GroupHeadlineWithCompositeID;
 export type HydratedEntity = Components.Schemas.HydratedEntity;
 export type HydratedEntityItem = Components.Schemas.HydratedEntityItem;
 export type InternalAttribute = Components.Schemas.InternalAttribute;
