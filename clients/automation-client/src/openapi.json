@@ -1794,6 +1794,9 @@
             "items": {
               "$ref": "#/components/schemas/AssignUsersToStep"
             }
+          },
+          "filter_with_purposes": {
+            "type": "boolean"
           }
         }
       },

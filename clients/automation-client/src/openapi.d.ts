@@ -2526,6 +2526,7 @@ declare namespace Components {
              * ]
              */
             AssignUsersToStep[];
+            filter_with_purposes?: boolean;
         }
         export interface WildcardCondition {
             wildcard?: string;
