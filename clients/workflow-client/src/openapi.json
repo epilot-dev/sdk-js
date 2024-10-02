@@ -701,6 +701,13 @@
             "items": {
               "$ref": "#/components/schemas/WorkflowContext"
             }
+          },
+          "purposes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "An array of purposes to filter workflow phases."
           }
         },
         "required": [
@@ -709,7 +716,6 @@
         "example": {
           "workflowId": "j3f23fh23uif98",
           "trigger": "AUTOMATIC",
-          "dueDate": "2021-04-27T12:01:13.000Z",
           "contexts": [
             {
               "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
@@ -886,6 +892,13 @@
           "version": {
             "type": "integer",
             "description": "Version of the workflow execution"
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering"
           }
         }
       },
@@ -1033,6 +1046,44 @@
           "CLOSED"
         ]
       },
+      "SectionSimplified": {
+        "type": "object",
+        "description": "A group of Steps that define the progress of the Workflow",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "definitionId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name for this Section",
+            "example": "Lead Qualification"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ItemType"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StepSimplified"
+            }
+          },
+          "assignedTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "steps"
+        ]
+      },
       "Section": {
         "type": "object",
         "description": "A group of Steps that define the progress of the Workflow",
@@ -1086,6 +1137,13 @@
             "items": {
               "$ref": "#/components/schemas/Step"
             }
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids (purposes in this case) that are associated with this section and used for filtering"
           }
         },
         "required": [
@@ -1462,6 +1520,13 @@
           "index"
         ]
       },
+      "UpdateStepResp": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Step"
+          }
+        ]
+      },
       "SearchStepsResp": {
         "type": "object",
         "properties": {
@@ -1629,6 +1694,92 @@
           },
           "phase_progress": {
             "type": "number"
+          }
+        }
+      },
+      "WorkflowInEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "definition_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "duedate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_update_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "progress": {
+            "type": "number"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "task_name": {
+            "type": "string"
+          },
+          "task_assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "task_duedate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "task_execution_type": {
+            "$ref": "#/components/schemas/StepType"
+          },
+          "task_status": {
+            "$ref": "#/components/schemas/StepStatus"
+          },
+          "phase_id": {
+            "type": "string"
+          },
+          "phase_name": {
+            "type": "string"
+          },
+          "phase_assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phase_progress": {
+            "type": "number"
+          },
+          "phases_in_progress": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhaseInEntity"
+            }
+          },
+          "selected_closing_reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          },
+          "closing_reason_description": {
+            "type": "string"
           }
         }
       },

@@ -228,6 +228,26 @@ declare namespace Components {
             status?: SectionStatus;
             type: ItemType;
             steps: Step[];
+            /**
+             * Taxonomy ids (purposes in this case) that are associated with this section and used for filtering
+             */
+            taxonomies?: string[];
+        }
+        /**
+         * A group of Steps that define the progress of the Workflow
+         */
+        export interface SectionSimplified {
+            id: string;
+            definitionId?: string;
+            /**
+             * Name for this Section
+             * example:
+             * Lead Qualification
+             */
+            name: string;
+            type: ItemType;
+            steps: StepSimplified[];
+            assignedTo?: string[];
         }
         export type SectionStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED";
         export interface Step {
@@ -409,6 +429,46 @@ declare namespace Components {
             startedTime?: string;
             completedTime?: string;
         }
+        export interface UpdateStepResp {
+            id: string;
+            definitionId?: string;
+            /**
+             * This field is deprecated. It will be soon removed. Please use only id.
+             */
+            entityRefId?: string;
+            name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
+            type: ItemType;
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * enabled flag results from calculating the requirements
+             */
+            enabled?: boolean;
+            requirements?: /* describe the requirement for step enablement */ StepRequirement[];
+            executionType?: StepType;
+            sectionId?: string;
+            executionId?: string;
+            /**
+             * This field is deprecated. Please use assignedTo
+             */
+            userIds?: number[];
+            assignedTo?: string[];
+            /**
+             * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToInProgress?: string;
+            status?: StepStatus;
+            created?: string;
+            lastUpdated?: string;
+            startedTime?: string;
+            completedTime?: string;
+            dueDate?: string;
+            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
+            manuallyCreated?: boolean;
+            automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
+            journey?: StepJourney;
+        }
         export interface WorkflowContext {
             id: string;
             title: string;
@@ -505,6 +565,10 @@ declare namespace Components {
              * Version of the workflow execution
              */
             version?: number;
+            /**
+             * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export interface WorkflowExecutionBase {
@@ -550,13 +614,16 @@ declare namespace Components {
              * Version of the workflow execution
              */
             version?: number;
+            /**
+             * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
         }
         /**
          * example:
          * {
          *   "workflowId": "j3f23fh23uif98",
          *   "trigger": "AUTOMATIC",
-         *   "dueDate": "2021-04-27T12:01:13.000Z",
          *   "contexts": [
          *     {
          *       "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
@@ -574,6 +641,10 @@ declare namespace Components {
             trigger?: TriggerType;
             assignedTo?: string[];
             contexts?: WorkflowContext[];
+            /**
+             * An array of purposes to filter workflow phases.
+             */
+            purposes?: string[];
         }
         /**
          * example:
@@ -650,6 +721,10 @@ declare namespace Components {
              * Version of the workflow execution
              */
             version?: number;
+            /**
+             * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export interface WorkflowExecutionUpdateReq {
@@ -669,6 +744,29 @@ declare namespace Components {
              */
             completedTime?: string;
         }
+        export interface WorkflowInEntity {
+            id?: string;
+            definition_id?: string;
+            name?: string;
+            status?: WorkflowStatus;
+            assignees?: string[];
+            duedate?: string; // date-time
+            last_update_time?: string; // date-time
+            progress?: number;
+            task_id?: string;
+            task_name?: string;
+            task_assignees?: string[];
+            task_duedate?: string; // date-time
+            task_execution_type?: StepType;
+            task_status?: StepStatus;
+            phase_id?: string;
+            phase_name?: string;
+            phase_assignees?: string[];
+            phase_progress?: number;
+            phases_in_progress?: PhaseInEntity[];
+            selected_closing_reasons?: ClosingReason[];
+            closing_reason_description?: string;
+        }
         export type WorkflowStatus = "STARTED" | "DONE" | "CLOSED";
     }
 }
@@ -679,7 +777,6 @@ declare namespace Paths {
          * {
          *   "workflowId": "j3f23fh23uif98",
          *   "trigger": "AUTOMATIC",
-         *   "dueDate": "2021-04-27T12:01:13.000Z",
          *   "contexts": [
          *     {
          *       "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
@@ -1230,6 +1327,7 @@ export type SearchSorting = Components.Schemas.SearchSorting;
 export type SearchStepsReq = Components.Schemas.SearchStepsReq;
 export type SearchStepsResp = Components.Schemas.SearchStepsResp;
 export type Section = Components.Schemas.Section;
+export type SectionSimplified = Components.Schemas.SectionSimplified;
 export type SectionStatus = Components.Schemas.SectionStatus;
 export type Step = Components.Schemas.Step;
 export type StepDescription = Components.Schemas.StepDescription;
@@ -1244,10 +1342,12 @@ export type StepType = Components.Schemas.StepType;
 export type TriggerType = Components.Schemas.TriggerType;
 export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
 export type UpdateStepReq = Components.Schemas.UpdateStepReq;
+export type UpdateStepResp = Components.Schemas.UpdateStepResp;
 export type WorkflowContext = Components.Schemas.WorkflowContext;
 export type WorkflowExecution = Components.Schemas.WorkflowExecution;
 export type WorkflowExecutionBase = Components.Schemas.WorkflowExecutionBase;
 export type WorkflowExecutionCreateReq = Components.Schemas.WorkflowExecutionCreateReq;
 export type WorkflowExecutionSlim = Components.Schemas.WorkflowExecutionSlim;
 export type WorkflowExecutionUpdateReq = Components.Schemas.WorkflowExecutionUpdateReq;
+export type WorkflowInEntity = Components.Schemas.WorkflowInEntity;
 export type WorkflowStatus = Components.Schemas.WorkflowStatus;
