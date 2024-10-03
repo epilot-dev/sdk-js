@@ -96,7 +96,11 @@
                     "type": "boolean",
                     "description": "Temporary flag to indicate if multiple resources are being exported"
                   }
-                }
+                },
+                "required": [
+                  "resourceType",
+                  "resourceIds"
+                ]
               }
             }
           }
@@ -154,7 +158,11 @@
                     "type": "boolean",
                     "description": "Temporary flag to indicate if multiple resources are being exported"
                   }
-                }
+                },
+                "required": [
+                  "resourceName",
+                  "selectedResourceIds"
+                ]
               }
             }
           }
@@ -262,12 +270,22 @@
                   },
                   {
                     "type": "object",
+                    "deprecated": true,
                     "properties": {
                       "manifestFilePath": {
                         "deprecated": true,
-                        "description": "Manifest file key uploaded via `uploadManifest`",
-                        "type": "string",
-                        "example": "example.tf"
+                        "description": "Manifest s3 key uploaded via `uploadManifest`",
+                        "type": "string"
+                      },
+                      "manifest_id": {
+                        "allOf": [
+                          {
+                            "description": "Update an existing manifest (optional)"
+                          },
+                          {
+                            "$ref": "#/components/schemas/ManifestID"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -508,74 +526,47 @@
           "schema_attribute",
           "schema_capability",
           "schema_group",
+          "schema_group_headline",
           "workflow_definition",
           "closing_reason",
           "taxonomy_classification",
           "webhook"
         ]
       },
-      "RootResourceNode": {
+      "PlanChanges": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "create",
+            "update",
+            "no-op",
+            "delete"
+          ]
+        }
+      },
+      "CommonResourceNode": {
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the resource"
           },
           "type": {
-            "$ref": "#/components/schemas/ResourceNodeType"
+            "$ref": "#/components/schemas/ResourceNodeType",
+            "description": "Type of the resource"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the resource"
           },
           "source_id": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "dependencies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/VirtualResourceNodeGroup"
-            }
-          },
-          "changes": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "create",
-                "update",
-                "no-op",
-                "delete"
-              ]
-            }
-          }
-        },
-        "required": [
-          "id",
-          "type"
-        ]
-      },
-      "VirtualResourceNodeGroup": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "type": {
-            "$ref": "#/components/schemas/ResourceNodeType"
-          },
-          "name": {
-            "type": "string"
-          },
-          "dependencies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ResourceNode"
-            }
+            "type": "string",
+            "description": "Source ID of the resource"
           },
           "is_virtual": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the resource is virtual"
           }
         },
         "required": [
@@ -583,54 +574,100 @@
           "type"
         ]
       },
-      "ResourceNode": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
+      "RootResourceNode": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonResourceNode"
           },
-          "type": {
-            "$ref": "#/components/schemas/ResourceNodeType"
-          },
-          "name": {
-            "type": "string"
-          },
-          "source_id": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "changes": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "create",
-                "update",
-                "no-op",
-                "delete"
-              ]
-            }
-          },
-          "parents": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
+          {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string",
+                "description": "Terraform address of the resource"
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/VirtualResourceNodeGroup"
                 },
-                "type": {
-                  "$ref": "#/components/schemas/ResourceNodeType"
-                }
+                "description": "Dependencies of the resource",
+                "nullable": true
+              },
+              "changes": {
+                "$ref": "#/components/schemas/PlanChanges"
               }
             }
           }
-        },
-        "required": [
-          "id",
-          "type"
+        ]
+      },
+      "VirtualResourceNodeGroup": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonResourceNode"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceNode"
+                }
+              },
+              "is_virtual": {
+                "type": "boolean",
+                "enum": [
+                  true
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ResourceNode": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonResourceNode"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string",
+                "description": "Terraform address of the resource"
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceNode"
+                },
+                "description": "Dependencies of the resource",
+                "nullable": true
+              },
+              "parents": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "$ref": "#/components/schemas/ResourceNodeType"
+                    }
+                  }
+                }
+              },
+              "source_id": {
+                "description": "Original ID of the exported resource",
+                "type": "string"
+              },
+              "changes": {
+                "$ref": "#/components/schemas/PlanChanges"
+              }
+            }
+          }
         ]
       },
       "Job": {
@@ -709,13 +746,7 @@
         "properties": {
           "filename": {
             "type": "string",
-            "example": "main.tf"
-          },
-          "mime_type": {
-            "description": "MIME type of file",
-            "type": "string",
-            "example": "application/pdf",
-            "default": "application/octet-stream"
+            "example": "example.manifest.zip"
           }
         },
         "required": [
@@ -733,7 +764,11 @@
             "type": "string",
             "example": "templates/main.tf"
           }
-        }
+        },
+        "required": [
+          "bucket",
+          "key"
+        ]
       },
       "CommonManifestFields": {
         "type": "object",
