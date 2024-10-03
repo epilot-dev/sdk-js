@@ -86,6 +86,28 @@ declare namespace Components {
                 postinstall?: string;
             };
         }
+        export interface CommonResourceNode {
+            /**
+             * ID of the resource
+             */
+            id: string;
+            /**
+             * Type of the resource
+             */
+            type: ResourceNodeType;
+            /**
+             * Name of the resource
+             */
+            name?: string;
+            /**
+             * Source ID of the resource
+             */
+            source_id?: string;
+            /**
+             * Whether the resource is virtual
+             */
+            is_virtual?: boolean;
+        }
         export interface Job {
             job_id?: /**
              * ID of an import or export job (state machine)
@@ -182,7 +204,7 @@ declare namespace Components {
          * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
          */
         export type JobID = string;
-        export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
+        export type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
         export interface Manifest {
             manifest_id?: /**
              * ID of an imported / installed manifest
@@ -301,59 +323,106 @@ declare namespace Components {
              */
             updated_at?: string; // date-time
         }
+        export type PlanChanges = ("create" | "update" | "no-op" | "delete")[];
         export interface ResourceNode {
+            /**
+             * ID of the resource
+             */
             id: string;
             type: ResourceNodeType;
+            /**
+             * Name of the resource
+             */
             name?: string;
+            /**
+             * Original ID of the exported resource
+             */
             source_id?: string;
+            /**
+             * Whether the resource is virtual
+             */
+            is_virtual?: boolean;
+            /**
+             * Terraform address of the resource
+             */
             address?: string;
-            changes?: ("create" | "update" | "no-op" | "delete")[];
+            /**
+             * Dependencies of the resource
+             */
+            dependencies?: ResourceNode[] | null;
             parents?: {
                 id?: string;
                 type?: ResourceNodeType;
             }[];
+            changes?: PlanChanges;
         }
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "custom_variable";
         export interface RootResourceNode {
+            /**
+             * ID of the resource
+             */
             id: string;
             type: ResourceNodeType;
+            /**
+             * Name of the resource
+             */
             name?: string;
+            /**
+             * Source ID of the resource
+             */
             source_id?: string;
+            /**
+             * Whether the resource is virtual
+             */
+            is_virtual?: boolean;
+            /**
+             * Terraform address of the resource
+             */
             address?: string;
-            dependencies?: VirtualResourceNodeGroup[];
-            changes?: ("create" | "update" | "no-op" | "delete")[];
+            /**
+             * Dependencies of the resource
+             */
+            dependencies?: VirtualResourceNodeGroup[] | null;
+            changes?: PlanChanges;
         }
         export interface S3Reference {
             /**
              * example:
              * blueprint-manifest-prod-blueprintsv2bucket-sybpsryropzw
              */
-            bucket?: string;
+            bucket: string;
             /**
              * example:
              * templates/main.tf
              */
-            key?: string;
+            key: string;
         }
         export interface UploadFilePayload {
             /**
              * example:
-             * main.tf
+             * example.manifest.zip
              */
             filename: string;
-            /**
-             * MIME type of file
-             * example:
-             * application/pdf
-             */
-            mime_type?: string;
         }
         export interface VirtualResourceNodeGroup {
+            /**
+             * ID of the resource
+             */
             id: string;
             type: ResourceNodeType;
+            /**
+             * Name of the resource
+             */
             name?: string;
+            /**
+             * Source ID of the resource
+             */
+            source_id?: string;
+            /**
+             * Whether the resource is virtual
+             */
+            is_virtual?: true;
             dependencies?: ResourceNode[];
-            is_virtual?: boolean;
         }
     }
 }
@@ -390,8 +459,8 @@ declare namespace Paths {
     }
     namespace CreateExport {
         export interface RequestBody {
-            resourceType?: Components.Schemas.ResourceNodeType;
-            resourceIds?: [
+            resourceType: Components.Schemas.ResourceNodeType;
+            resourceIds: [
                 string,
                 string?,
                 string?,
@@ -450,12 +519,12 @@ declare namespace Paths {
                  * example:
                  * blueprint-manifest-prod-blueprintsv2bucket-sybpsryropzw
                  */
-                bucket?: string;
+                bucket: string;
                 /**
                  * example:
                  * templates/main.tf
                  */
-                key?: string;
+                key: string;
             };
             /**
              * ID of an imported / installed manifest
@@ -465,11 +534,15 @@ declare namespace Paths {
             manifest_id?: string;
         } | {
             /**
-             * Manifest file key uploaded via `uploadManifest`
-             * example:
-             * example.tf
+             * Manifest s3 key uploaded via `uploadManifest`
              */
             manifestFilePath: string;
+            /**
+             * ID of an imported / installed manifest
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            manifest_id?: string;
         };
         namespace Responses {
             export interface $200 {
@@ -513,12 +586,12 @@ declare namespace Paths {
             /**
              * An array of resource IDs to export
              */
-            selectedResourceIds?: string[];
+            selectedResourceIds: string[];
             /**
              * example:
              * journey_HouseConnectionJourney
              */
-            resourceName?: string;
+            resourceName: string;
             /**
              * Temporary flag to indicate if multiple resources are being exported
              */
@@ -821,6 +894,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type CommonImportFields = Components.Schemas.CommonImportFields;
 export type CommonManifestFields = Components.Schemas.CommonManifestFields;
 export type CommonMarkdownFields = Components.Schemas.CommonMarkdownFields;
+export type CommonResourceNode = Components.Schemas.CommonResourceNode;
 export type Job = Components.Schemas.Job;
 export type JobID = Components.Schemas.JobID;
 export type JobStatus = Components.Schemas.JobStatus;
@@ -828,6 +902,7 @@ export type Manifest = Components.Schemas.Manifest;
 export type ManifestID = Components.Schemas.ManifestID;
 export type ManifestItem = Components.Schemas.ManifestItem;
 export type ManifestTimestampFields = Components.Schemas.ManifestTimestampFields;
+export type PlanChanges = Components.Schemas.PlanChanges;
 export type ResourceNode = Components.Schemas.ResourceNode;
 export type ResourceNodeType = Components.Schemas.ResourceNodeType;
 export type RootResourceNode = Components.Schemas.RootResourceNode;
