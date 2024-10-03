@@ -526,11 +526,11 @@
           "schema_attribute",
           "schema_capability",
           "schema_group",
-          "schema_group_headline",
           "workflow_definition",
           "closing_reason",
           "taxonomy_classification",
-          "webhook"
+          "webhook",
+          "custom_variable"
         ]
       },
       "PlanChanges": {
@@ -842,7 +842,7 @@
               "manifest": {
                 "type": "string",
                 "description": "Markdown content shown before installing the manifest",
-                "example": "This is the content of the manifest.md file which contains the manifest descripton.       \n"
+                "example": "This is the content of the manifest.md file which contains the manifest descripton.\n"
               },
               "preinstall": {
                 "type": "string",
