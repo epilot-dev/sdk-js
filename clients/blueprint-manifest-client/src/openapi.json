@@ -34,6 +34,9 @@
     },
     {
       "url": "https://blueprint-manifest.sls.epilot.io"
+    },
+    {
+      "url": "https://blueprint-manifest.sls.epilot.io"
     }
   ],
   "paths": {
@@ -502,6 +505,7 @@
       "JobStatus": {
         "type": "string",
         "enum": [
+          "PENDING",
           "STARTED",
           "WAITING_USER_ACTION",
           "CANCELED",

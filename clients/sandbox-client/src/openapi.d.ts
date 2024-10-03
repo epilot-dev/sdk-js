@@ -64,6 +64,7 @@ declare namespace Components {
              * Production
              */
             production_org_name?: string;
+            created_at?: string; // date-time
         }
         /**
          * Unique identifier for a pipeline.
@@ -106,6 +107,7 @@ declare namespace Components {
              * Production
              */
             production_org_name?: string;
+            created_at?: string; // date-time
         }
         /**
          * The role of the other organization in the pipeline from the perspective of the caller's organization

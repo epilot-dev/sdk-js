@@ -234,6 +234,11 @@
           "production_org_name": {
             "type": "string",
             "example": "Production"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
           }
         }
       },
