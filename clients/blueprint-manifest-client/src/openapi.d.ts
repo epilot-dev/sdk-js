@@ -57,6 +57,10 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            /**
+             * Whether the manifest comes from a trusted source and is signed by epilot
+             */
+            is_verified?: boolean;
         }
         export interface CommonMarkdownFields {
             /**
@@ -138,6 +142,10 @@ declare namespace Components {
              * An URL to download the resources to import when the resources are too large to be included in the response
              */
             large_resources_to_import_url?: string;
+            /**
+             * Whether the manifest comes from a trusted source and is signed by epilot
+             */
+            is_verified?: boolean;
             /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
@@ -230,6 +238,10 @@ declare namespace Components {
              */
             source_blueprint_version?: string;
             /**
+             * Whether the manifest comes from a trusted source and is signed by epilot
+             */
+            is_verified?: boolean;
+            /**
              * Markdown content part of a manifest file
              */
             markdown?: {
@@ -304,6 +316,10 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            /**
+             * Whether the manifest comes from a trusted source and is signed by epilot
+             */
+            is_verified?: boolean;
             /**
              * When the manifest was first installed (applied)
              */

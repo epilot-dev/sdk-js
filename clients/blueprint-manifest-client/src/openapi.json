@@ -731,6 +731,10 @@
               "large_resources_to_import_url": {
                 "type": "string",
                 "description": "An URL to download the resources to import when the resources are too large to be included in the response"
+              },
+              "is_verified": {
+                "type": "boolean",
+                "description": "Whether the manifest comes from a trusted source and is signed by epilot"
               }
             }
           },
@@ -793,6 +797,10 @@
             "type": "string",
             "description": "Version of the blueprint (semver)",
             "example": "1.0.0"
+          },
+          "is_verified": {
+            "type": "boolean",
+            "description": "Whether the manifest comes from a trusted source and is signed by epilot"
           }
         }
       },
