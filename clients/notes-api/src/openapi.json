@@ -8,6 +8,12 @@
   "tags": [
     {
       "name": "Notes"
+    },
+    {
+      "name": "Attachments"
+    },
+    {
+      "name": "Pinning"
     }
   ],
   "security": [
@@ -156,33 +162,6 @@
         }
       }
     },
-    "/v1/note/{id}:pin": {
-      "post": {
-        "operationId": "pinNote",
-        "summary": "pinNote",
-        "description": "Pins a single Note entry based on it's Entity ID",
-        "tags": [
-          "Notes"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "The Entity ID of the Note entry to pin",
-            "schema": {
-              "type": "string",
-              "description": "The Entity ID of the Note entry to pin"
-            },
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response with the pinned Note entity"
-          }
-        }
-      }
-    },
     "/v1/notes/{context_id}": {
       "get": {
         "operationId": "getNotesByContext",
@@ -253,6 +232,95 @@
           }
         }
       }
+    },
+    "/v1/note/{id}/pin": {
+      "post": {
+        "operationId": "pinNote",
+        "summary": "pinNote",
+        "description": "Pins a single Note entry based on it's Entity ID",
+        "tags": [
+          "Pinning"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to pin",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to pin"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the pinned Note entity"
+          }
+        }
+      }
+    },
+    "/v1/note/{id}/attachments": {
+      "post": {
+        "operationId": "createFileAttachment",
+        "summary": "createFileAttachment",
+        "description": "Attaches a File to a Note",
+        "tags": [
+          "Attachments"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to attach files to",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to attach files to"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to attach files to",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to attach files to"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the updated Note Entity"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteFileAttachment",
+        "summary": "deleteFileAttachment",
+        "description": "Attaches a File to a Note",
+        "tags": [
+          "Attachments"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to attach files to",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to attach files to"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The Entity has been deleted successfully"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -277,7 +345,7 @@
           },
           "entity_id": {
             "type": "string",
-            "description": "The Entity ID of the Entity this note will be related to"
+            "description": "The Entity ID of the Entity this Note will be related to"
           },
           "parent_id": {
             "type": "string",
@@ -300,6 +368,13 @@
           "content": {
             "type": "string",
             "description": "The content of the Note"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of File Entity IDs attached to the Note"
           }
         },
         "required": [
@@ -542,109 +617,12 @@
       "NotePatchRequestBody": {
         "type": "object",
         "properties": {
-          "_id": {
-            "type": "string",
-            "description": "Entity ID of the Note entry"
-          },
-          "_org": {
-            "type": "string",
-            "description": "ID of the Organization that owns this Note"
-          },
-          "_schema": {
-            "type": "string",
-            "description": "The Entity schema of this Note"
-          },
-          "_created_at": {
-            "type": "string",
-            "description": "The timestamp of when this Note was created",
-            "format": "date-time"
-          },
-          "_updated_at": {
-            "type": "string",
-            "description": "The timestamp of when this Note was last updated",
-            "format": "date-time"
-          },
-          "_created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ],
-            "description": "The Entity ID of the User that created this Note"
-          },
-          "created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ],
-            "description": "The Entity ID of the User that created this Note"
-          },
           "_tags": {
             "type": "array",
             "items": {
               "type": "string"
             },
             "description": "Tags associated with this Note"
-          },
-          "_acl": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "description": "Access Control List for this Note entry"
-          },
-          "_owners": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "org_id": {
-                  "type": "string"
-                },
-                "user_id": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "org_id",
-                "user_id"
-              ]
-            }
-          },
-          "context_entities": {
-            "type": "object",
-            "properties": {
-              "$relation": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "entity_id": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "entity_id"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "$relation"
-            ]
-          },
-          "parent": {
-            "$ref": "#/components/schemas/NoteEntityParent"
           },
           "comments": {
             "type": "array",
@@ -655,12 +633,6 @@
           "content": {
             "type": "string",
             "description": "The content of the Note"
-          },
-          "context_workflow_tasks": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           },
           "pinned_at": {
             "type": "string",

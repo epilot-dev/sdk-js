@@ -31,10 +31,8 @@ declare namespace Components {
             id?: string;
             /**
              * Custom variable type
-             * example:
-             * rbse777b-3cf8-4bff-bb0c-253fd1123250
              */
-            type?: "order_table" | "custom";
+            type?: "order_table" | "custom" | "journey_link";
             /**
              * Custom variable name
              * example:
@@ -217,7 +215,7 @@ declare namespace Components {
             /**
              * Variable type
              */
-            type?: "order_table" | "custom";
+            type?: "order_table" | "custom" | "journey_link";
             /**
              * The tags of custom variable
              */

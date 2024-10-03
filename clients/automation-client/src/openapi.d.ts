@@ -53,7 +53,7 @@ declare namespace Components {
                  * submission
                  */
                 schema?: string;
-                types?: (("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword") | string)[];
+                types?: (("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword" | "SelfAssignmentFromPortal") | string)[];
             };
         }
         export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | AutomationAction;
@@ -774,6 +774,114 @@ declare namespace Components {
              */
             id?: string; // uuid
         }
+        export interface BulkTriggerJob {
+            job_id: /**
+             * Job ID for tracking the status of bulk trigger automation executions
+             * example:
+             * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+             */
+            JobId;
+            org_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            OrganizationId;
+            flow_id: /**
+             * example:
+             * 7791b04a-16d2-44a2-9af9-2d59c25c512f
+             */
+            AutomationFlowId;
+            /**
+             * Status of the bulk trigger automation job
+             * * APPROVAL: Waiting for user approval to start the bulk trigger automation
+             * * IN_PROGRESS: Bulk trigger automation execution is in progress
+             * * SUCCESS: Bulk trigger automation execution is completed successfully
+             * * FAILED: Bulk trigger automation execution is failed
+             * * CANCELLED: Bulk trigger automation execution was cancelled
+             *
+             */
+            status: "APPROVAL" | "IN_PROGRESS" | "SUCCESS" | "FAILED" | "CANCELLED";
+            /**
+             * User ID who created the bulk trigger automation job
+             * example:
+             * 1234
+             */
+            created_by: string;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            /**
+             * Time when the bulk trigger automation executions job was approved
+             */
+            approved_at?: string; // date-time
+            /**
+             * Task token to approve/cancel the bulk automation job
+             * example:
+             * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+             */
+            task_token?: string;
+            /**
+             * List of entity ids that are waiting for triggering automation
+             */
+            pending?: {
+                entity_id: /**
+                 * example:
+                 * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+                 */
+                EntityId;
+            }[];
+            /**
+             * List of entity ids and automation execution ids that were triggered successfully
+             */
+            triggered?: {
+                entity_id: /**
+                 * example:
+                 * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+                 */
+                EntityId;
+                execution_id: /**
+                 * example:
+                 * 9baf184f-bc81-4128-bca3-d974c90a12c4
+                 */
+                AutomationExecutionId;
+            }[];
+            /**
+             * List of entity ids that were skipped or failed
+             */
+            failed?: {
+                entity_id: /**
+                 * example:
+                 * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+                 */
+                EntityId;
+                /**
+                 * Error message for the failed automation execution
+                 */
+                error: string;
+            }[];
+            /**
+             * List of entity ids that were cancelled from triggering automation
+             */
+            cancelled?: {
+                entity_id: /**
+                 * example:
+                 * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+                 */
+                EntityId;
+            }[];
+        }
+        export interface BulkTriggerRequest {
+            flow_id: /**
+             * example:
+             * 7791b04a-16d2-44a2-9af9-2d59c25c512f
+             */
+            AutomationFlowId;
+            entity_ids?: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId[];
+            entities_query?: string;
+        }
         /**
          * Creates an order entity with prices from journey
          */
@@ -1381,6 +1489,12 @@ declare namespace Components {
             total: number;
             results: AutomationExecution[];
         }
+        /**
+         * Job ID for tracking the status of bulk trigger automation executions
+         * example:
+         * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+         */
+        export type JobId = string;
         export interface JourneySubmitTrigger {
             /**
              * example:
@@ -1731,6 +1845,10 @@ declare namespace Components {
          * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
          */
         export type OrganizationId = string;
+        export interface PatchBulkJobRequest {
+            action: "APPROVE" | "CANCEL";
+            task_token: string;
+        }
         export interface PrefixCondition {
             prefix?: string;
         }
@@ -2020,12 +2138,12 @@ declare namespace Components {
             value: any;
         }
         export interface StartExecutionRequest {
-            entity_id?: /**
+            entity_id: /**
              * example:
              * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
              */
             EntityId;
-            flow_id?: /**
+            flow_id: /**
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
@@ -2408,6 +2526,7 @@ declare namespace Components {
              * ]
              */
             AssignUsersToStep[];
+            filter_with_purposes?: boolean;
         }
         export interface WildcardCondition {
             wildcard?: string;
@@ -2415,6 +2534,12 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace BulkTriggerExecutions {
+        export type RequestBody = Components.Schemas.BulkTriggerRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.BulkTriggerJob;
+        }
+    }
     namespace CancelExecution {
         namespace Parameters {
             export type ExecutionId = /**
@@ -2449,6 +2574,22 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.AutomationFlow;
+        }
+    }
+    namespace GetBulkJob {
+        namespace Parameters {
+            export type JobId = /**
+             * Job ID for tracking the status of bulk trigger automation executions
+             * example:
+             * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+             */
+            Components.Schemas.JobId;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BulkTriggerJob;
         }
     }
     namespace GetExecution {
@@ -2498,6 +2639,23 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.AutomationFlow;
+        }
+    }
+    namespace PatchBulkJob {
+        namespace Parameters {
+            export type JobId = /**
+             * Job ID for tracking the status of bulk trigger automation executions
+             * example:
+             * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+             */
+            Components.Schemas.JobId;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        export type RequestBody = Components.Schemas.PatchBulkJobRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.BulkTriggerJob;
         }
     }
     namespace PutFlow {
@@ -2660,6 +2818,36 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.StartExecution.Responses.$201>
   /**
+   * bulkTriggerExecutions - bulkTriggerExecutions
+   * 
+   * Create a bulk job that triggers multiple automation executions
+   */
+  'bulkTriggerExecutions'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.BulkTriggerExecutions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkTriggerExecutions.Responses.$202>
+  /**
+   * getBulkJob - getBulkJob
+   * 
+   * Get the status of a bulk job that triggers multiple automation executions
+   */
+  'getBulkJob'(
+    parameters?: Parameters<Paths.GetBulkJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBulkJob.Responses.$200>
+  /**
+   * patchBulkJob - patchBulkJob
+   * 
+   * Approve / Cancel bulk job that triggers multiple automation executions
+   */
+  'patchBulkJob'(
+    parameters?: Parameters<Paths.PatchBulkJob.PathParameters> | null,
+    data?: Paths.PatchBulkJob.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PatchBulkJob.Responses.$200>
+  /**
    * getExecution - getExecution
    * 
    * Get automation execution
@@ -2783,6 +2971,40 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.StartExecution.Responses.$201>
   }
+  ['/v1/automation/executions/bulk-jobs']: {
+    /**
+     * bulkTriggerExecutions - bulkTriggerExecutions
+     * 
+     * Create a bulk job that triggers multiple automation executions
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.BulkTriggerExecutions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkTriggerExecutions.Responses.$202>
+  }
+  ['/v1/automation/executions/bulk-jobs/{job_id}']: {
+    /**
+     * getBulkJob - getBulkJob
+     * 
+     * Get the status of a bulk job that triggers multiple automation executions
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBulkJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBulkJob.Responses.$200>
+    /**
+     * patchBulkJob - patchBulkJob
+     * 
+     * Approve / Cancel bulk job that triggers multiple automation executions
+     */
+    'patch'(
+      parameters?: Parameters<Paths.PatchBulkJob.PathParameters> | null,
+      data?: Paths.PatchBulkJob.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PatchBulkJob.Responses.$200>
+  }
   ['/v1/automation/executions/{execution_id}']: {
     /**
      * getExecution - getExecution
@@ -2858,6 +3080,8 @@ export type AutomationExecutionId = Components.Schemas.AutomationExecutionId;
 export type AutomationFlow = Components.Schemas.AutomationFlow;
 export type AutomationFlowId = Components.Schemas.AutomationFlowId;
 export type AutomationTrigger = Components.Schemas.AutomationTrigger;
+export type BulkTriggerJob = Components.Schemas.BulkTriggerJob;
+export type BulkTriggerRequest = Components.Schemas.BulkTriggerRequest;
 export type CartCheckoutAction = Components.Schemas.CartCheckoutAction;
 export type CartCheckoutActionConfig = Components.Schemas.CartCheckoutActionConfig;
 export type CartCheckoutConfig = Components.Schemas.CartCheckoutConfig;
@@ -2884,6 +3108,7 @@ export type ExistsCondition = Components.Schemas.ExistsCondition;
 export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;
 export type FrontendSubmitTrigger = Components.Schemas.FrontendSubmitTrigger;
 export type GetExecutionsResp = Components.Schemas.GetExecutionsResp;
+export type JobId = Components.Schemas.JobId;
 export type JourneySubmitTrigger = Components.Schemas.JourneySubmitTrigger;
 export type MapEntityAction = Components.Schemas.MapEntityAction;
 export type MapEntityActionConfig = Components.Schemas.MapEntityActionConfig;
@@ -2898,6 +3123,7 @@ export type OperationObjectNode = Components.Schemas.OperationObjectNode;
 export type OrCondition = Components.Schemas.OrCondition;
 export type OrConditionForDiff = Components.Schemas.OrConditionForDiff;
 export type OrganizationId = Components.Schemas.OrganizationId;
+export type PatchBulkJobRequest = Components.Schemas.PatchBulkJobRequest;
 export type PrefixCondition = Components.Schemas.PrefixCondition;
 export type PrimitiveJSONValue = Components.Schemas.PrimitiveJSONValue;
 export type ReceivedEmailTrigger = Components.Schemas.ReceivedEmailTrigger;

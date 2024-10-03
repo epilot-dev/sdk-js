@@ -107,6 +107,46 @@
         "responses": {}
       }
     },
+    "/v1/automation/executions/bulk-jobs": {
+      "post": {
+        "operationId": "bulkTriggerExecutions",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/automation/executions/bulk-jobs/{job_id}": {
+      "get": {
+        "operationId": "getBulkJob",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchBulkJob",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/automation/executions/{execution_id}": {
       "get": {
         "operationId": "getExecution",
