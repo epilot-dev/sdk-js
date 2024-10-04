@@ -34,9 +34,6 @@
     },
     {
       "url": "https://blueprint-manifest.sls.epilot.io"
-    },
-    {
-      "url": "https://blueprint-manifest.sls.epilot.io"
     }
   ],
   "paths": {
@@ -530,6 +527,7 @@
           "schema_attribute",
           "schema_capability",
           "schema_group",
+          "schema_group_headline",
           "workflow_definition",
           "closing_reason",
           "taxonomy_classification",
