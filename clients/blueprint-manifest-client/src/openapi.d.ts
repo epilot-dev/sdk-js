@@ -57,6 +57,10 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            /**
+             * Whether the manifest comes from a trusted source and is signed by epilot
+             */
+            is_verified?: boolean;
         }
         export interface CommonMarkdownFields {
             /**
@@ -139,6 +143,10 @@ declare namespace Components {
              */
             large_resources_to_import_url?: string;
             /**
+             * Whether the manifest comes from a trusted source and is signed by epilot
+             */
+            is_verified?: boolean;
+            /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
             imported_resources?: /* An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import */ RootResourceNode[] | RootResourceNode;
@@ -204,7 +212,7 @@ declare namespace Components {
          * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
          */
         export type JobID = string;
-        export type JobStatus = "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
+        export type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
         export interface Manifest {
             manifest_id?: /**
              * ID of an imported / installed manifest
@@ -229,6 +237,10 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            /**
+             * Whether the manifest comes from a trusted source and is signed by epilot
+             */
+            is_verified?: boolean;
             /**
              * Markdown content part of a manifest file
              */
@@ -305,6 +317,10 @@ declare namespace Components {
              */
             source_blueprint_version?: string;
             /**
+             * Whether the manifest comes from a trusted source and is signed by epilot
+             */
+            is_verified?: boolean;
+            /**
              * When the manifest was first installed (applied)
              */
             created_at?: string; // date-time
@@ -356,7 +372,7 @@ declare namespace Components {
             }[];
             changes?: PlanChanges;
         }
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "custom_variable";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "custom_variable";
         export interface RootResourceNode {
             /**
              * ID of the resource
