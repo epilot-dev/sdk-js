@@ -10,7 +10,6 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
-        export type ContextType = "workflow_execution" | "workflow_task";
         /**
          * Base Entity schema
          */
@@ -125,10 +124,7 @@ declare namespace Components {
              * The content of the Note
              */
             content?: string;
-            contexts?: {
-                type: ContextType;
-                id: string;
-            }[];
+            context_workflow_tasks?: string[];
             /**
              * The timestamp of when this Note was pinned
              */
@@ -207,10 +203,7 @@ declare namespace Components {
              * The content of the Note
              */
             content?: string;
-            contexts?: {
-                type: ContextType;
-                id: string;
-            }[];
+            context_workflow_tasks?: string[];
             /**
              * The timestamp of when this Note was pinned
              */
@@ -234,10 +227,6 @@ declare namespace Components {
              * The content of the Note
              */
             content?: string;
-            contexts?: {
-                type: ContextType;
-                id: string;
-            }[];
             /**
              * The timestamp of when this Note was pinned
              */
@@ -334,10 +323,7 @@ declare namespace Components {
              * The content of the Note
              */
             content?: string;
-            contexts?: {
-                type: ContextType;
-                id: string;
-            }[];
+            context_workflow_tasks?: string[];
             /**
              * The timestamp of when this Note was pinned
              */
@@ -632,7 +618,6 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-export type ContextType = Components.Schemas.ContextType;
 export type Entity = Components.Schemas.Entity;
 export type EntitySlug = Components.Schemas.EntitySlug;
 export type NonEntityContextType = Components.Schemas.NonEntityContextType;

@@ -5,6 +5,11 @@
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
+  "servers": [
+    {
+      "url": "https://nhk0fu5x85.execute-api.eu-central-1.amazonaws.com"
+    }
+  ],
   "tags": [
     {
       "name": "Notes"
@@ -426,22 +431,10 @@
             "type": "string",
             "description": "The content of the Note"
           },
-          "contexts": {
+          "context_workflow_tasks": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "$ref": "#/components/schemas/ContextType"
-                },
-                "id": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "type",
-                "id"
-              ]
+              "type": "string"
             }
           },
           "pinned_at": {
@@ -563,13 +556,6 @@
         },
         "description": "The Note's parent Note"
       },
-      "ContextType": {
-        "type": "string",
-        "enum": [
-          "workflow_execution",
-          "workflow_task"
-        ]
-      },
       "NoteGetRequestResponse": {
         "allOf": [
           {
@@ -633,22 +619,10 @@
             "type": "string",
             "description": "The content of the Note"
           },
-          "contexts": {
+          "context_workflow_tasks": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "$ref": "#/components/schemas/ContextType"
-                },
-                "id": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "type",
-                "id"
-              ]
+              "type": "string"
             }
           },
           "pinned_at": {
@@ -700,24 +674,6 @@
           "content": {
             "type": "string",
             "description": "The content of the Note"
-          },
-          "contexts": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "$ref": "#/components/schemas/ContextType"
-                },
-                "id": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "type",
-                "id"
-              ]
-            }
           },
           "pinned_at": {
             "type": "string",
@@ -857,22 +813,10 @@
             "type": "string",
             "description": "The content of the Note"
           },
-          "contexts": {
+          "context_workflow_tasks": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "$ref": "#/components/schemas/ContextType"
-                },
-                "id": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "type",
-                "id"
-              ]
+              "type": "string"
             }
           },
           "pinned_at": {
