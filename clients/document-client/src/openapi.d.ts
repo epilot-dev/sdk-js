@@ -155,6 +155,76 @@ declare namespace Components {
             };
             template_settings?: /* Template Settings for document generation */ TemplateSettings;
         }
+        export interface DocumentMetaRequest {
+            /**
+             * Input template document
+             */
+            template_document?: {
+                s3ref?: S3Reference;
+            };
+        }
+        export interface DocumentMetaResponse {
+            /**
+             * Page margins for the document
+             */
+            page_margins?: {
+                /**
+                 * Top margin in cm
+                 * example:
+                 * 2.54
+                 */
+                top?: number;
+                /**
+                 * Bottom margin in cm
+                 * example:
+                 * 2.54
+                 */
+                bottom?: number;
+                /**
+                 * Left margin in cm
+                 * example:
+                 * 2.54
+                 */
+                left?: number;
+                /**
+                 * Right margin in cm
+                 * example:
+                 * 2.54
+                 */
+                right?: number;
+                /**
+                 * Header margin in cm
+                 * example:
+                 * 2.54
+                 */
+                header?: number;
+                /**
+                 * Footer margin in cm
+                 * example:
+                 * 2.54
+                 */
+                footer?: number;
+            };
+            /**
+             * List of variables in the document
+             * example:
+             * [
+             *   "order.billing_contact.0.salutation",
+             *   "order.billing_contact.0.title",
+             *   "order_table",
+             *   "stayHardStatic",
+             *   "opportunity[attribute_name]",
+             *   "opportunity[\"attribute_name\"]",
+             *   "opportunity.[attribute_name]",
+             *   "attribute_name",
+             *   "opportunities.0.attribute_name",
+             *   "opportunities[0].attribute_name",
+             *   "contact.opportunities[0].attribute_name",
+             *   "opportunities[Primary].attribute_name"
+             * ]
+             */
+            variables?: string[];
+        }
         /**
          * DocxTemplater error detail
          */
@@ -374,9 +444,31 @@ declare namespace Paths {
             export type $200 = Components.Schemas.DocumentGenerationV2Response;
         }
     }
+    namespace GetTemplateMeta {
+        export type RequestBody = Components.Schemas.DocumentMetaRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.DocumentMetaResponse;
+            export type $400 = Components.Schemas.ErrorOutput;
+            export type $403 = Components.Schemas.ErrorOutput;
+        }
+    }
 }
 
 export interface OperationMethods {
+  /**
+   * getTemplateMeta - getTemplateMeta
+   * 
+   * Get metadata for a document template
+   * 
+   * Supported input document types:
+   * - .docx
+   * 
+   */
+  'getTemplateMeta'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetTemplateMeta.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetTemplateMeta.Responses.$200>
   /**
    * generateDocumentV2 - generateDocumentV2
    * 
@@ -417,6 +509,22 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
+  ['/v2/documents:meta']: {
+    /**
+     * getTemplateMeta - getTemplateMeta
+     * 
+     * Get metadata for a document template
+     * 
+     * Supported input document types:
+     * - .docx
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetTemplateMeta.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetTemplateMeta.Responses.$200>
+  }
   ['/v2/documents:generate']: {
     /**
      * generateDocumentV2 - generateDocumentV2
@@ -466,6 +574,8 @@ export type ConvertDocumentRequest = Components.Schemas.ConvertDocumentRequest;
 export type ConvertDocumentResponse = Components.Schemas.ConvertDocumentResponse;
 export type DocumentGenerationV2Request = Components.Schemas.DocumentGenerationV2Request;
 export type DocumentGenerationV2Response = Components.Schemas.DocumentGenerationV2Response;
+export type DocumentMetaRequest = Components.Schemas.DocumentMetaRequest;
+export type DocumentMetaResponse = Components.Schemas.DocumentMetaResponse;
 export type DocxTemplaterErrorDetail = Components.Schemas.DocxTemplaterErrorDetail;
 export type DocxTemplaterErrorDetails = Components.Schemas.DocxTemplaterErrorDetails;
 export type ErrorCode = Components.Schemas.ErrorCode;

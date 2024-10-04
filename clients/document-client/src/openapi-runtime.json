@@ -5,6 +5,17 @@
     "version": ""
   },
   "paths": {
+    "/v2/documents:meta": {
+      "post": {
+        "operationId": "getTemplateMeta",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/documents:generate": {
       "post": {
         "operationId": "generateDocumentV2",
@@ -38,10 +49,5 @@
       }
     }
   },
-  "components": {},
-  "servers": [
-    {
-      "url": "https://document.sls.epilot.io"
-    }
-  ]
+  "components": {}
 }

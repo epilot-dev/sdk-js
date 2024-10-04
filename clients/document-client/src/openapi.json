@@ -17,6 +17,61 @@
     }
   ],
   "paths": {
+    "/v2/documents:meta": {
+      "post": {
+        "operationId": "getTemplateMeta",
+        "summary": "getTemplateMeta",
+        "description": "Get metadata for a document template\n\nSupported input document types:\n- .docx\n",
+        "tags": [
+          "Documents"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentMetaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Document metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentMetaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOutput"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOutput"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": null
+          }
+        }
+      }
+    },
     "/v2/documents:generate": {
       "post": {
         "operationId": "generateDocumentV2",
@@ -334,6 +389,82 @@
           }
         }
       },
+      "DocumentMetaRequest": {
+        "type": "object",
+        "properties": {
+          "template_document": {
+            "description": "Input template document",
+            "type": "object",
+            "properties": {
+              "s3ref": {
+                "$ref": "#/components/schemas/S3Reference"
+              }
+            }
+          }
+        }
+      },
+      "DocumentMetaResponse": {
+        "type": "object",
+        "properties": {
+          "page_margins": {
+            "description": "Page margins for the document",
+            "type": "object",
+            "properties": {
+              "top": {
+                "description": "Top margin in cm",
+                "type": "number",
+                "example": 2.54
+              },
+              "bottom": {
+                "description": "Bottom margin in cm",
+                "type": "number",
+                "example": 2.54
+              },
+              "left": {
+                "description": "Left margin in cm",
+                "type": "number",
+                "example": 2.54
+              },
+              "right": {
+                "description": "Right margin in cm",
+                "type": "number",
+                "example": 2.54
+              },
+              "header": {
+                "description": "Header margin in cm",
+                "type": "number",
+                "example": 2.54
+              },
+              "footer": {
+                "description": "Footer margin in cm",
+                "type": "number",
+                "example": 2.54
+              }
+            }
+          },
+          "variables": {
+            "description": "List of variables in the document",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "order.billing_contact.0.salutation",
+              "order.billing_contact.0.title",
+              "order_table",
+              "stayHardStatic",
+              "opportunity[attribute_name]",
+              "opportunity[\"attribute_name\"]",
+              "opportunity.[attribute_name]",
+              "attribute_name",
+              "opportunities.0.attribute_name",
+              "opportunities[0].attribute_name",
+              "contact.opportunities[0].attribute_name",
+              "opportunities[Primary].attribute_name"
+            ]
+          }
+        }
+      },
       "DocumentGenerationV2Request": {
         "type": "object",
         "properties": {
@@ -541,13 +672,5 @@
         }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://document.sls.epilot.io"
-    },
-    {
-      "url": "https://document.sls.epilot.io"
-    }
-  ]
+  }
 }
