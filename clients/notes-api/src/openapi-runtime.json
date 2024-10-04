@@ -1,370 +1,1317 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "version": "2.0.0",
-    "title": "Notes API",
-    "description": "Facade API Backend for Epilot Notes feature"
+    "title": "",
+    "version": ""
   },
-  "tags": [{ "name": "Notes" }],
-  "security": [{ "EpilotAuth": [] }],
   "paths": {
-    "/v1/note": {
-      "post": {
-        "operationId": "createNote",
-        "summary": "createNote",
-        "description": "Creates a new Note entry",
-        "tags": ["Notes"],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "_tags": {
-                    "type": "array",
-                    "items": { "type": "string" },
-                    "description": "Tags associated with this Note"
-                  },
-                  "_acl": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "array",
-                      "items": { "type": "string" }
-                    },
-                    "description": "Access Control List for this Note entry"
-                  },
-                  "content": {
-                    "anyOf": [
-                      { "$ref": "#/components/schemas/LexicalNode" },
-                      { "type": "string" }
-                    ]
-                  },
-                  "entity_id": { "type": "string" }
-                },
-                "required": ["entity_id"]
-              }
-            }
+    "/v1/entity/schemas": {
+      "get": {
+        "operationId": "listSchemas",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "unpublished"
           }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response with Note content",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/NoteEntity" }
-              }
-            }
-          }
-        }
+        ],
+        "responses": {}
       }
     },
-    "/v1/note/{id}": {
+    "/v1/entity/schemas/{slug}": {
       "get": {
-        "operationId": "getNote",
-        "summary": "getNote",
-        "description": "Retrieves a single Note entry based on it's Entity ID",
-        "tags": ["Notes"],
+        "operationId": "getSchema",
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "description": "The Entity ID of the Note entry to retrieve",
-            "schema": {
-              "type": "string",
-              "description": "The Entity ID of the Note entry to retrieve"
-            },
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "id"
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Successful response with Note content",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/NoteEntity" }
-              }
-            }
-          }
-        }
+        "responses": {}
       },
-      "patch": {
-        "operationId": "patchNote",
-        "summary": "patchNote",
-        "description": "Updates an existing Note entry",
-        "tags": ["Notes"],
+      "put": {
+        "operationId": "putSchema",
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "description": "The Entity ID of the Note entry to update",
-            "schema": {
-              "type": "string",
-              "description": "The Entity ID of the Note entry to update"
-            },
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "draft"
           }
         ],
         "requestBody": {
           "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/BaseNoteEntity" }
-            }
+            "application/json": {}
           }
         },
-        "responses": {
-          "200": {
-            "description": "Successful response with Note content",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/NoteEntity" }
-              }
-            }
-          }
-        }
+        "responses": {}
       },
       "delete": {
-        "operationId": "deleteNote",
-        "summary": "deleteNote",
-        "description": "Deletes a single Note entry based on it's Entity ID",
-        "tags": ["Notes"],
+        "operationId": "deleteSchema",
         "parameters": [
           {
-            "in": "path",
-            "name": "id",
-            "description": "The Entity ID of the Note entry to delete",
-            "schema": {
-              "type": "string",
-              "description": "The Entity ID of the Note entry to delete"
-            },
-            "required": true
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Successful response with the deleted Note entity",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/NoteEntity" }
-              }
-            }
-          }
-        }
+        "responses": {}
       }
     },
-    "/v1/notes/{context_id}": {
+    "/v1/entity/schemas/{slug}/json/schema": {
       "get": {
-        "operationId": "getNotesByContext",
-        "summary": "getNotesByContext",
-        "description": "Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`",
-        "tags": ["Notes"],
+        "operationId": "getJsonSchema",
         "parameters": [
           {
-            "in": "path",
-            "name": "context_id",
-            "description": "ID of the context to from which to retrive Notes. This is the Entity ID when `context_type=entity` and the Workflow definition ID when `context_type=workflows`",
-            "schema": {
-              "type": "string",
-              "description": "ID of the context to from which to retrive Notes. This is the Entity ID when `context_type=entity` and the Workflow definition ID when `context_type=workflows`"
-            },
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}/json/example": {
+      "get": {
+        "operationId": "getSchemaExample",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}/versions": {
+      "get": {
+        "operationId": "getSchemaVersions",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "versions_from"
+          },
+          {
+            "in": "query",
+            "name": "versions_size"
+          },
+          {
+            "in": "query",
+            "name": "drafts_from"
+          },
+          {
+            "in": "query",
+            "name": "drafts_size"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/blueprints": {
+      "get": {
+        "operationId": "listSchemaBlueprints",
+        "responses": {}
+      }
+    },
+    "/v1/entity:search": {
+      "post": {
+        "operationId": "searchEntities",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity:list": {
+      "post": {
+        "operationId": "listEntities",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}": {
+      "post": {
+        "operationId": "createEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}:validate": {
+      "post": {
+        "operationId": "validateEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathPriceParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}:upsert": {
+      "patch": {
+        "operationId": "upsertEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DryRunQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "name": "strict",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/entity/{slug}/{id}": {
+      "get": {
+        "operationId": "getEntityV2",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}:restore": {
+      "patch": {
+        "operationId": "restoreEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}": {
+      "get": {
+        "operationId": "getEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DryRunQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          },
+          "required": true
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "purge",
+            "default": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity:autocomplete": {
+      "get": {
+        "operationId": "autocomplete",
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query"
+          },
+          {
+            "name": "attribute",
+            "in": "query",
             "required": true
           },
           {
+            "name": "slug",
+            "in": "query"
+          },
+          {
+            "name": "size",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/activity": {
+      "post": {
+        "operationId": "createActivity",
+        "parameters": [
+          {
             "in": "query",
-            "name": "context_type",
-            "description": "Type of context to retrieve Notes within the targeted Entity",
-            "schema": {
-              "anyOf": [
-                { "type": "string" },
-                { "$ref": "#/components/schemas/ContextType" }
-              ],
-              "description": "Type of context to retrieve Notes within the targeted Entity"
-            },
-            "required": true
+            "name": "entities",
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/activity/{id}": {
+      "get": {
+        "operationId": "getActivity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ActivityIdPathParam"
           },
           {
             "in": "query",
-            "name": "sort",
-            "description": "The sort order of the returned Notes, expressed as a Lucene query",
-            "schema": {
-              "type": "string",
-              "default": "updated_at:desc",
-              "description": "The sort order of the returned Notes, expressed as a Lucene query"
-            }
+            "name": "operations_size"
           },
           {
             "in": "query",
-            "name": "from",
-            "description": "The index of the first Note to return in this query",
-            "schema": {
-              "type": "number",
-              "default": 0,
-              "description": "The index of the first Note to return in this query"
-            }
+            "name": "operations_from"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/activity/{id}:attach": {
+      "post": {
+        "operationId": "attachActivity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ActivityIdPathParam"
+          },
+          {
+            "in": "query",
+            "name": "entities",
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}/activity": {
+      "get": {
+        "operationId": "getEntityActivityFeed",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "query",
+            "name": "after"
+          },
+          {
+            "in": "query",
+            "name": "before"
+          },
+          {
+            "$ref": "#/components/parameters/FromPageQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          },
+          {
+            "in": "query",
+            "name": "type"
+          },
+          {
+            "in": "query",
+            "name": "include_relations"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}/relations": {
+      "get": {
+        "operationId": "getRelations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeReverseQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FromPageQueryParam"
           },
           {
             "in": "query",
             "name": "size",
-            "description": "The number of Note entries to return in this query",
-            "schema": {
-              "type": "number",
-              "default": 10,
-              "description": "The number of Note entries to return in this query"
-            }
+            "required": false
+          },
+          {
+            "$ref": "#/components/parameters/IncludeSchemasQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Successful response with Note content",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/NotesResponse" }
-              }
-            }
+        "responses": {}
+      },
+      "post": {
+        "operationId": "addRelations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
           }
-        }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "removeRelations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/entity/{slug}/{id}/relations": {
+      "get": {
+        "operationId": "getRelationsV2",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "query"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeReverseQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FromPageQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          },
+          {
+            "in": "query",
+            "name": "fields"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/entity/{slug}/{id}/relations": {
+      "get": {
+        "operationId": "getRelationsV3",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeReverseDeprecatedQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FromPageQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "$ref": "#/components/parameters/IncludeSchemasQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityRelationsModeQueryParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/entity/{slug}/{id}/relations/count": {
+      "get": {
+        "operationId": "getRelatedEntitiesCount",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}/relations/{attribute}/{entity_id}": {
+      "put": {
+        "operationId": "updateRelation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteRelation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity:export": {
+      "post": {
+        "operationId": "exportEntities",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id"
+          },
+          {
+            "in": "query",
+            "name": "is_template"
+          },
+          {
+            "in": "query",
+            "name": "language"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity:import": {
+      "post": {
+        "operationId": "importEntities",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/views": {
+      "get": {
+        "operationId": "listSavedViews",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "slug",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/view": {
+      "post": {
+        "operationId": "createSavedView",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/view/{id}": {
+      "get": {
+        "operationId": "getSavedView",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateSavedView",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSavedView",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/views/favorites": {
+      "get": {
+        "operationId": "listFavoriteViewsForUser",
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies": {
+      "get": {
+        "operationId": "listTaxonomies",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_disabled"
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createTaxonomy",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/{taxonomySlug}": {
+      "get": {
+        "operationId": "getTaxonomy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateTaxonomy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteTaxonomy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "permanent"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/{taxonomySlug}:autocomplete": {
+      "get": {
+        "operationId": "taxonomyAutocomplete",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "query"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/classifications:search": {
+      "post": {
+        "operationId": "taxonomiesClassificationsSearch",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugQueryParamOptional"
+          },
+          {
+            "in": "query",
+            "name": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/{taxonomySlug}/classifications": {
+      "post": {
+        "operationId": "updateClassificationsForTaxonomy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}": {
+      "get": {
+        "operationId": "listTaxonomyClassificationsForSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "query"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/entity/taxonomies/classifications/{classificationSlug}": {
+      "get": {
+        "operationId": "getTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/attributes": {
+      "post": {
+        "operationId": "createSchemaAttribute",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/attributes/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaAttribute",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putSchemaAttribute",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSchemaAttribute",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/capabilities": {
+      "post": {
+        "operationId": "createSchemaCapability",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/capabilities/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaCapability",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putSchemaCapability",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSchemaCapability",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/group": {
+      "post": {
+        "operationId": "createSchemaGroup",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/group/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaGroup",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putSchemaGroup",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSchemaGroup",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/headline": {
+      "post": {
+        "operationId": "createSchemaGroupHeadline",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/headline/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaGroupHeadline",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putSchemaGroupHeadline",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSchemaGroupHeadline",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
       }
     }
   },
   "components": {
-    "securitySchemes": {
-      "EpilotAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Authorization header with epilot OAuth2 bearer token",
-        "bearerFormat": "JWT"
-      }
-    },
-    "schemas": {
-      "LexicalNode": {
-        "type": "object",
-        "properties": {
-          "direction": {
-            "type": "string",
-            "nullable": true,
-            "enum": ["ltr", "rtl", null],
-            "description": "Metadata information about the direction of the Node instance"
-          },
-          "indent": {
-            "type": "number",
-            "description": "The identation level of this node in relation to it's parent node."
-          },
-          "version": {
-            "type": "number",
-            "description": "Version of the editor client that created this Node instance."
-          },
-          "format": {
-            "anyOf": [{ "type": "number" }, { "type": "string" }],
-            "description": "Any combination of bold, italic, underline, strikethrough, code, subscript and superscript"
-          },
-          "mode": {
-            "type": "string",
-            "nullable": true,
-            "enum": ["normal", "token", "segmented", null],
-            "description": "Controls how the node behaves when being edited."
-          },
-          "style": {
-            "type": "string",
-            "description": "Allows the injection of custom styles for the node."
-          },
-          "text": {
-            "type": "string",
-            "description": "The text content of the node."
-          },
-          "children": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/LexicalNode" }
-          }
-        },
-        "required": ["indent", "version"]
+    "parameters": {
+      "EntityIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
       },
-      "NoteEntity": {
-        "allOf": [{ "$ref": "#/components/schemas/BaseNoteEntity" }],
-        "type": "object",
-        "properties": {
-          "context_entities": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/Entity" },
-            "description": "Standard `$relation` attribute for a Note's relationship with the Entity it belongs to"
-          },
-          "parent": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/NoteEntity" },
-            "description": "Standard `$relation` attribute for a Note's parent Note, intended to be used by Notes comments to reference their parent Note"
-          }
-        },
-        "required": ["context_entities"],
-        "description": "A note Entity object cotaining Entity metadata and content in a LexicalNode format"
+      "EntitySlugPathParam": {
+        "name": "slug",
+        "in": "path",
+        "required": true
       },
-      "BaseNoteEntity": {
-        "allOf": [{ "$ref": "#/components/schemas/Entity" }],
-        "type": "object",
-        "properties": {
-          "content": {
-            "anyOf": [
-              { "$ref": "#/components/schemas/LexicalNode" },
-              { "type": "string" }
-            ]
-          }
-        },
-        "description": "Base Entity with additional, non-relational attributes that are exclusive to Notes schema"
+      "EntitySlugPathPriceParam": {
+        "name": "slug",
+        "in": "path",
+        "required": true
       },
-      "Entity": {
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string",
-            "description": "Entity ID of the Note entry"
-          },
-          "_org": {
-            "type": "string",
-            "description": "ID of the Organization that owns this Note"
-          },
-          "_schema": {
-            "type": "string",
-            "description": "The Entity schema of this Note"
-          },
-          "_created_at": {
-            "type": "string",
-            "description": "The timestamp of when this Note was created",
-            "format": "date-time"
-          },
-          "_updated_at": {
-            "type": "string",
-            "description": "The timestamp of when this Note was last updated",
-            "format": "date-time"
-          },
-          "_tags": {
-            "type": "array",
-            "items": { "type": "string" },
-            "description": "Tags associated with this Note"
-          },
-          "_acl": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": { "type": "string" }
-            },
-            "description": "Access Control List for this Note entry"
-          }
-        },
-        "description": "Base Entity schema"
+      "TaxonomySlugQueryParam": {
+        "name": "taxonomySlug",
+        "in": "query",
+        "required": true
       },
-      "ContextType": { "type": "string", "enum": ["opportunity", "workflows"] },
-      "NotesResponse": {
-        "type": "object",
-        "properties": {
-          "hits": {
-            "type": "number",
-            "description": "The number of Note entries returned in this query"
-          },
-          "results": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/NoteEntity" },
-            "description": "The Note entries returned in this query"
-          }
-        },
-        "required": ["hits", "results"]
+      "TaxonomySlugPathParam": {
+        "name": "taxonomySlug",
+        "in": "path",
+        "required": true
+      },
+      "TaxonomySlugQueryParamOptional": {
+        "name": "taxonomySlug",
+        "in": "query"
+      },
+      "TaxonomyClassificationSlugPathParam": {
+        "name": "classificationSlug",
+        "in": "path",
+        "required": true
+      },
+      "SavedViewIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
+      "AsyncOperationQueryParam": {
+        "name": "async",
+        "in": "query",
+        "required": false
+      },
+      "HydrateEntitiesQueryParam": {
+        "name": "hydrate",
+        "in": "query"
+      },
+      "ActivityIdQueryParam": {
+        "name": "activity_id",
+        "in": "query",
+        "required": false
+      },
+      "ActivityIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
+      "FromPageQueryParam": {
+        "name": "from",
+        "in": "query"
+      },
+      "IncludeReverseDeprecatedQueryParam": {
+        "name": "include_reverse",
+        "in": "query",
+        "deprecated": true
+      },
+      "IncludeReverseQueryParam": {
+        "name": "include_reverse",
+        "in": "query"
+      },
+      "IncludeSchemasQueryParam": {
+        "name": "include_schemas",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false
+      },
+      "ExcludeSchemasQueryParam": {
+        "name": "exclude_schemas",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false
+      },
+      "EntityRelationsModeQueryParam": {
+        "name": "mode",
+        "in": "query",
+        "required": false
+      },
+      "DryRunQueryParam": {
+        "name": "dry_run",
+        "in": "query",
+        "required": false
+      },
+      "FillActivityQueryParam": {
+        "name": "fill_activity",
+        "in": "query",
+        "required": false
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    }
+  ]
 }
