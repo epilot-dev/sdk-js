@@ -10,6 +10,7 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export type ContextType = "workflow_execution" | "workflow_tasks";
         /**
          * Base Entity schema
          */
@@ -60,9 +61,9 @@ declare namespace Components {
         export type EntitySlug = "account" | "billing_event" | "contact" | "contract" | "coupon" | "email_template" | "file" | "journey" | "meter" | "meter_counter" | "opportunity";
         export type NonEntityContextType = "workflow_tasks";
         /**
-         * A note Entity object cotaining Entity metadata and content in a LexicalNode format
+         * A note Entity object cotaining Entity metadata and content. Relational attributes are not hydrated in place.
          */
-        export interface NoteEntity {
+        export interface NonHydratedNoteEntity {
             /**
              * Entity ID of the Note entry
              */
@@ -119,16 +120,84 @@ declare namespace Components {
                     entity_id: string;
                 }[];
             };
-            comments?: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ NoteEntity[];
+            comments?: /* A note Entity object cotaining Entity metadata and content. Relational attributes are not hydrated in place. */ NonHydratedNoteEntity[];
             /**
              * The content of the Note
              */
             content?: string;
-            context_workflow_tasks?: string[];
+            contexts?: {
+                type: ContextType;
+                id: string;
+            }[];
             /**
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            context_workflow_tasks?: string[];
+        }
+        /**
+         * A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place.
+         */
+        export interface NoteEntity {
+            /**
+             * Entity ID of the Note entry
+             */
+            _id: string;
+            /**
+             * ID of the Organization that owns this Note
+             */
+            _org?: string;
+            /**
+             * The Entity schema of this Note
+             */
+            _schema?: string;
+            /**
+             * The timestamp of when this Note was created
+             */
+            _created_at?: string; // date-time
+            /**
+             * The timestamp of when this Note was last updated
+             */
+            _updated_at?: string; // date-time
+            /**
+             * The Entity ID of the User that created this Note
+             */
+            _created_by?: /* The Entity ID of the User that created this Note */ string | number;
+            /**
+             * The Entity ID of the User that created this Note
+             */
+            created_by?: /* The Entity ID of the User that created this Note */ string | number;
+            /**
+             * Tags associated with this Note
+             */
+            _tags?: string[];
+            /**
+             * Access Control List for this Note entry
+             */
+            _acl?: {
+                [name: string]: string[];
+            };
+            _owners?: {
+                org_id: string;
+                user_id: string;
+            }[];
+            context_entities?: /* Base Entity schema */ Entity[];
+            parent?: /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ NoteEntity[];
+            attachments?: /* Base Entity schema */ Entity[];
+            comments?: /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ NoteEntity[];
+            /**
+             * The content of the Note
+             */
+            content?: string;
+            contexts?: {
+                type: ContextType;
+                id: string;
+            }[];
+            /**
+             * The timestamp of when this Note was pinned
+             */
+            pinned_at?: string; // date-time
+            context_workflow_tasks?: string[];
         }
         /**
          * The Note's parent Note
@@ -184,30 +253,23 @@ declare namespace Components {
                 org_id: string;
                 user_id: string;
             }[];
-            context_entities: {
-                $relation: {
-                    entity_id: string;
-                }[];
-            };
-            parent?: /* The Note's parent Note */ NoteEntityParent;
-            /**
-             * The Note's parent Note
-             */
-            attachments?: {
-                $relation?: {
-                    entity_id: string;
-                }[];
-            };
-            comments?: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ NoteEntity[];
+            context_entities?: /* Base Entity schema */ Entity[];
+            parent?: /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ NoteEntity[];
+            attachments?: /* Base Entity schema */ Entity[];
+            comments?: /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ NoteEntity[];
             /**
              * The content of the Note
              */
             content?: string;
-            context_workflow_tasks?: string[];
+            contexts?: {
+                type: ContextType;
+                id: string;
+            }[];
             /**
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            context_workflow_tasks?: string[];
         }
         export interface NotePatchRequestBody {
             /**
@@ -222,15 +284,20 @@ declare namespace Components {
                     entity_id: string;
                 }[];
             };
-            comments?: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ NoteEntity[];
+            comments?: /* A note Entity object cotaining Entity metadata and content. Relational attributes are not hydrated in place. */ NonHydratedNoteEntity[];
             /**
              * The content of the Note
              */
             content?: string;
+            contexts?: {
+                type: ContextType;
+                id: string;
+            }[];
             /**
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            context_workflow_tasks?: string[];
         }
         export interface NotePostRequestBody {
             /**
@@ -266,7 +333,7 @@ declare namespace Components {
             /**
              * Entity ID of the Note entry
              */
-            _id: string;
+            _id?: string;
             /**
              * ID of the Organization that owns this Note
              */
@@ -305,7 +372,7 @@ declare namespace Components {
                 org_id: string;
                 user_id: string;
             }[];
-            context_entities: {
+            context_entities?: {
                 $relation: {
                     entity_id: string;
                 }[];
@@ -323,11 +390,15 @@ declare namespace Components {
              * The content of the Note
              */
             content?: string;
-            context_workflow_tasks?: string[];
+            contexts?: {
+                type: ContextType;
+                id: string;
+            }[];
             /**
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            context_workflow_tasks?: string[];
         }
         export interface NotesGetRequestResponse {
             /**
@@ -337,7 +408,7 @@ declare namespace Components {
             /**
              * The Note entries returned in this query
              */
-            results: /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ NoteEntity[];
+            results: /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ NoteEntity[];
         }
     }
 }
@@ -345,7 +416,7 @@ declare namespace Paths {
     namespace CreateNote {
         export type RequestBody = Components.Schemas.NotePostRequestBody;
         namespace Responses {
-            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
+            export type $200 = /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ Components.Schemas.NoteEntity;
         }
     }
     namespace DeleteNote {
@@ -393,7 +464,7 @@ declare namespace Paths {
             /**
              * Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`)
              */
-            export type ContextType = /* Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`) */ Components.Schemas.EntitySlug | Components.Schemas.NonEntityContextType;
+            export type ContextType = /* Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`) */ Components.Schemas.EntitySlug | Components.Schemas.ContextType;
             /**
              * The index of the first Note to return in this query
              */
@@ -427,7 +498,7 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.NotePatchRequestBody;
         namespace Responses {
-            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
+            export type $200 = /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ Components.Schemas.NoteEntity;
         }
     }
     namespace PinNote {
@@ -457,7 +528,7 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.NotePutRequestBody;
         namespace Responses {
-            export type $200 = /* A note Entity object cotaining Entity metadata and content in a LexicalNode format */ Components.Schemas.NoteEntity;
+            export type $200 = /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ Components.Schemas.NoteEntity;
         }
     }
 }
@@ -618,9 +689,11 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type ContextType = Components.Schemas.ContextType;
 export type Entity = Components.Schemas.Entity;
 export type EntitySlug = Components.Schemas.EntitySlug;
 export type NonEntityContextType = Components.Schemas.NonEntityContextType;
+export type NonHydratedNoteEntity = Components.Schemas.NonHydratedNoteEntity;
 export type NoteEntity = Components.Schemas.NoteEntity;
 export type NoteEntityParent = Components.Schemas.NoteEntityParent;
 export type NoteGetRequestResponse = Components.Schemas.NoteGetRequestResponse;

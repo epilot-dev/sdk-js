@@ -5,11 +5,6 @@
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
-  "servers": [
-    {
-      "url": "https://nhk0fu5x85.execute-api.eu-central-1.amazonaws.com"
-    }
-  ],
   "tags": [
     {
       "name": "Notes"
@@ -234,7 +229,7 @@
                   "$ref": "#/components/schemas/EntitySlug"
                 },
                 {
-                  "$ref": "#/components/schemas/NonEntityContextType"
+                  "$ref": "#/components/schemas/ContextType"
                 }
               ],
               "description": "Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`)"
@@ -377,49 +372,22 @@
         "type": "object",
         "properties": {
           "context_entities": {
-            "type": "object",
-            "properties": {
-              "$relation": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "entity_id": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "entity_id"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "$relation"
-            ]
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
           },
           "parent": {
-            "$ref": "#/components/schemas/NoteEntityParent"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            }
           },
           "attachments": {
-            "type": "object",
-            "properties": {
-              "$relation": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "entity_id": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "entity_id"
-                  ]
-                }
-              }
-            },
-            "description": "The Note's parent Note"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
           },
           "comments": {
             "type": "array",
@@ -431,22 +399,37 @@
             "type": "string",
             "description": "The content of the Note"
           },
-          "context_workflow_tasks": {
+          "contexts": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ]
             }
           },
           "pinned_at": {
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "context_workflow_tasks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
-        "required": [
-          "context_entities"
-        ],
-        "description": "A note Entity object cotaining Entity metadata and content in a LexicalNode format"
+        "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place."
       },
       "Entity": {
         "type": "object",
@@ -536,27 +519,152 @@
         ],
         "description": "Base Entity schema"
       },
-      "NoteEntityParent": {
+      "ContextType": {
+        "type": "string",
+        "enum": [
+          "workflow_execution",
+          "workflow_tasks"
+        ]
+      },
+      "NoteGetRequestResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ],
         "type": "object",
         "properties": {
-          "$relation": {
+          "context_entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
+          },
+          "parent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            }
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
+          },
+          "contexts": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "entity_id": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
                   "type": "string"
                 }
               },
               "required": [
-                "entity_id"
+                "type",
+                "id"
               ]
             }
+          },
+          "pinned_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was pinned",
+            "format": "date-time"
+          },
+          "context_workflow_tasks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
-        },
-        "description": "The Note's parent Note"
+        }
       },
-      "NoteGetRequestResponse": {
+      "NotePatchRequestBody": {
+        "type": "object",
+        "properties": {
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with this Note"
+          },
+          "attachments": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "entity_id"
+                  ]
+                }
+              }
+            },
+            "description": "The Note's parent Note"
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NonHydratedNoteEntity"
+            }
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ]
+            }
+          },
+          "pinned_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was pinned",
+            "format": "date-time"
+          },
+          "context_workflow_tasks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "NonHydratedNoteEntity": {
         "allOf": [
           {
             "$ref": "#/components/schemas/Entity"
@@ -612,75 +720,67 @@
           "comments": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/NoteEntity"
+              "$ref": "#/components/schemas/NonHydratedNoteEntity"
             }
           },
           "content": {
             "type": "string",
             "description": "The content of the Note"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ]
+            }
+          },
+          "pinned_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was pinned",
+            "format": "date-time"
           },
           "context_workflow_tasks": {
             "type": "array",
             "items": {
               "type": "string"
             }
-          },
-          "pinned_at": {
-            "type": "string",
-            "description": "The timestamp of when this Note was pinned",
-            "format": "date-time"
           }
         },
         "required": [
           "context_entities"
-        ]
+        ],
+        "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are not hydrated in place."
       },
-      "NotePatchRequestBody": {
+      "NoteEntityParent": {
         "type": "object",
         "properties": {
-          "_tags": {
+          "$relation": {
             "type": "array",
             "items": {
-              "type": "string"
-            },
-            "description": "Tags associated with this Note"
-          },
-          "attachments": {
-            "type": "object",
-            "properties": {
-              "$relation": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "entity_id": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "entity_id"
-                  ]
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "type": "string"
                 }
-              }
-            },
-            "description": "The Note's parent Note"
-          },
-          "comments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NoteEntity"
+              },
+              "required": [
+                "entity_id"
+              ]
             }
-          },
-          "content": {
-            "type": "string",
-            "description": "The content of the Note"
-          },
-          "pinned_at": {
-            "type": "string",
-            "description": "The timestamp of when this Note was pinned",
-            "format": "date-time"
           }
-        }
+        },
+        "description": "The Note's parent Note"
       },
       "NotePutRequestBody": {
         "type": "object",
@@ -813,22 +913,36 @@
             "type": "string",
             "description": "The content of the Note"
           },
-          "context_workflow_tasks": {
+          "contexts": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ]
             }
           },
           "pinned_at": {
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "context_workflow_tasks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
-        },
-        "required": [
-          "_id",
-          "context_entities"
-        ]
+        }
       },
       "EntitySlug": {
         "type": "string",
