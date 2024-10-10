@@ -59,7 +59,6 @@ declare namespace Components {
             }[];
         }
         export type EntitySlug = "account" | "billing_event" | "contact" | "contract" | "coupon" | "email_template" | "file" | "journey" | "meter" | "meter_counter" | "opportunity";
-        export type NonEntityContextType = "workflow_tasks";
         /**
          * A note Entity object cotaining Entity metadata and content. Relational attributes are not hydrated in place.
          */
@@ -312,14 +311,10 @@ declare namespace Components {
              * The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep
              */
             parent_id?: string;
-            /**
-             * The type of context to which the Note belongs
-             */
-            context_type?: "workflow_tasks";
-            /**
-             * The ID of a non-Entity context that contains Notes. Required when `context_type` is specified
-             */
-            context_id?: string;
+            contexts?: {
+                type: ContextType;
+                id: string;
+            }[];
             /**
              * The content of the Note
              */
@@ -692,7 +687,6 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type ContextType = Components.Schemas.ContextType;
 export type Entity = Components.Schemas.Entity;
 export type EntitySlug = Components.Schemas.EntitySlug;
-export type NonEntityContextType = Components.Schemas.NonEntityContextType;
 export type NonHydratedNoteEntity = Components.Schemas.NonHydratedNoteEntity;
 export type NoteEntity = Components.Schemas.NoteEntity;
 export type NoteEntityParent = Components.Schemas.NoteEntityParent;

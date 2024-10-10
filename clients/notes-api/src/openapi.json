@@ -327,19 +327,23 @@
             "type": "string",
             "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
           },
-          "context_type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/NonEntityContextType"
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
               },
-              {
-                "description": "The type of context to which the Note belongs"
-              }
-            ]
-          },
-          "context_id": {
-            "type": "string",
-            "description": "The ID of a non-Entity context that contains Notes. Required when `context_type` is specified"
+              "required": [
+                "type",
+                "id"
+              ]
+            }
           },
           "content": {
             "type": "string",
@@ -357,9 +361,10 @@
           "entity_id"
         ]
       },
-      "NonEntityContextType": {
+      "ContextType": {
         "type": "string",
         "enum": [
+          "workflow_execution",
           "workflow_tasks"
         ]
       },
@@ -518,13 +523,6 @@
           "_id"
         ],
         "description": "Base Entity schema"
-      },
-      "ContextType": {
-        "type": "string",
-        "enum": [
-          "workflow_execution",
-          "workflow_tasks"
-        ]
       },
       "NoteGetRequestResponse": {
         "allOf": [
