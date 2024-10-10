@@ -615,6 +615,12 @@
               "$ref": "#/components/schemas/ActionCondition"
             }
           },
+          "schedules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionSchedule"
+            }
+          },
           "actions": {
             "type": "array",
             "description": "The actions (nodes) of the automation flow",
@@ -814,6 +820,10 @@
           "condition_id": {
             "type": "string",
             "description": "Condition Id to be checked before executing the action"
+          },
+          "schedule_id": {
+            "type": "string",
+            "description": "Schedule Id which indicates the schedule of the action"
           }
         }
       },
@@ -1794,9 +1804,6 @@
             "items": {
               "$ref": "#/components/schemas/AssignUsersToStep"
             }
-          },
-          "filter_with_purposes": {
-            "type": "boolean"
           }
         }
       },
@@ -1942,6 +1949,10 @@
           "source": {
             "type": "object",
             "properties": {
+              "id": {
+                "type": "string",
+                "description": "The id of the action or trigger"
+              },
               "origin": {
                 "type": "string",
                 "enum": [
@@ -1956,9 +1967,6 @@
                   "workflow",
                   "journey_block"
                 ]
-              },
-              "id": {
-                "type": "string"
               },
               "schema": {
                 "type": "string"
@@ -2063,6 +2071,40 @@
           }
         }
       },
+      "ActionSchedule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Schedule Id"
+          },
+          "scheduleId": {
+            "type": "string",
+            "description": "The id of the configured scheduler"
+          },
+          "source": {
+            "type": "object",
+            "description": "The source of the schedule_at timestamp that will be used to schedule the action",
+            "id": {
+              "type": "string",
+              "description": "The iGd of the action or trigger"
+            },
+            "origin": {
+              "type": "string",
+              "enum": [
+                "trigger",
+                "action"
+              ]
+            },
+            "schema": {
+              "type": "string"
+            },
+            "attribute": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "AutomationExecutionId": {
         "type": "string",
         "example": "9baf184f-bc81-4128-bca3-d974c90a12c4"
@@ -2110,6 +2152,12 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ActionCondition"
+            }
+          },
+          "schedules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionSchedule"
             }
           },
           "actions": {
@@ -2304,7 +2352,8 @@
           "success",
           "failed",
           "cancelled",
-          "skipped"
+          "skipped",
+          "scheduled"
         ]
       },
       "GetExecutionsResp": {

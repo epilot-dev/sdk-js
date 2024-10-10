@@ -35,6 +35,22 @@ declare namespace Components {
              */
             ConditionStatement[];
         }
+        export interface ActionSchedule {
+            /**
+             * Schedule Id
+             */
+            id?: string;
+            /**
+             * The id of the configured scheduler
+             */
+            scheduleId?: string;
+            /**
+             * The source of the schedule_at timestamp that will be used to schedule the action
+             */
+            source?: {
+                [key: string]: any;
+            };
+        }
         /**
          * example:
          * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
@@ -549,6 +565,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -608,6 +628,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
         }
         export interface AutomationActionExecutionState {
             execution_status?: ExecutionStatus;
@@ -669,6 +693,7 @@ declare namespace Components {
              */
             AutomationActionId;
             conditions?: ActionCondition[];
+            schedules?: ActionSchedule[];
             actions: AnyAction[];
             resume_token?: /**
              * A unique token to resume a paused automation execution
@@ -721,6 +746,7 @@ declare namespace Components {
              */
             entity_schema?: string;
             conditions?: ActionCondition[];
+            schedules?: ActionSchedule[];
             /**
              * The actions (nodes) of the automation flow
              */
@@ -929,6 +955,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -989,6 +1019,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
         }
         export interface CartCheckoutConfig {
             /**
@@ -1050,9 +1084,12 @@ declare namespace Components {
              */
             id?: string; // uuid
             source?: {
+                /**
+                 * The id of the action or trigger
+                 */
+                id?: string;
                 origin?: "trigger" | "action";
                 originType?: "entity" | "workflow" | "journey_block";
-                id?: string;
                 schema?: string;
                 attribute?: string;
                 attributeType?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label";
@@ -1122,6 +1159,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1197,6 +1238,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
         }
         export interface CreateDocumentConfig {
             template_id?: string;
@@ -1463,7 +1508,7 @@ declare namespace Components {
                 details?: ErrorDetail[];
             };
         }
-        export type ExecutionStatus = "pending" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped";
+        export type ExecutionStatus = "pending" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled";
         export interface ExistsCondition {
             exists?: boolean;
         }
@@ -1550,6 +1595,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1727,6 +1776,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
         }
         export interface MapEntityConfig {
             mapping_config?: MappingConfigRef;
@@ -1984,6 +2037,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -2053,6 +2110,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
         }
         export interface SendEmailConfig {
             email_template_id?: string;
@@ -2260,6 +2321,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -2332,6 +2397,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
         }
         export interface TriggerWebhookConfig {
             entity_sources?: string[];
@@ -2385,6 +2454,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -2476,6 +2549,10 @@ declare namespace Components {
              * Condition Id to be checked before executing the action
              */
             condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
         }
         /**
          * example:
@@ -2526,7 +2603,6 @@ declare namespace Components {
              * ]
              */
             AssignUsersToStep[];
-            filter_with_purposes?: boolean;
         }
         export interface WildcardCondition {
             wildcard?: string;
@@ -3061,6 +3137,7 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type ActionCondition = Components.Schemas.ActionCondition;
+export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type ActivityId = Components.Schemas.ActivityId;
 export type ActivityTrigger = Components.Schemas.ActivityTrigger;
 export type AnyAction = Components.Schemas.AnyAction;
