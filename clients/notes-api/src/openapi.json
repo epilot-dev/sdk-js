@@ -200,7 +200,7 @@
         }
       }
     },
-    "/v1/notes/{context_id}": {
+    "/v1/notes/{entity_id}": {
       "get": {
         "operationId": "getNotesByContext",
         "summary": "getNotesByContext",
@@ -211,30 +211,35 @@
         "parameters": [
           {
             "in": "path",
-            "name": "context_id",
-            "description": "Context ID",
+            "name": "entity_id",
+            "description": "The ID of the Contextual Entity from where to retrieve Notes",
             "schema": {
               "type": "string",
-              "description": "Context ID"
+              "description": "The ID of the Contextual Entity from where to retrieve Notes"
             },
             "required": true
           },
           {
             "in": "query",
-            "name": "context_type",
-            "description": "Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`)",
+            "name": "contexts",
             "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/EntitySlug"
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "$ref": "#/components/schemas/ContextType"
+                  },
+                  "id": {
+                    "type": "string"
+                  }
                 },
-                {
-                  "$ref": "#/components/schemas/ContextType"
-                }
-              ],
-              "description": "Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`)"
-            },
-            "required": true
+                "required": [
+                  "type",
+                  "id"
+                ]
+              }
+            }
           },
           {
             "in": "query",
@@ -327,13 +332,20 @@
             "type": "string",
             "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
           },
-          "contexts": {
+          "additional_contexts": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
                 "type": {
-                  "$ref": "#/components/schemas/ContextType"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/EntitySlug"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ContextType"
+                    }
+                  ]
                 },
                 "id": {
                   "type": "string"
@@ -361,11 +373,27 @@
           "entity_id"
         ]
       },
+      "EntitySlug": {
+        "type": "string",
+        "enum": [
+          "account",
+          "billing_event",
+          "contact",
+          "contract",
+          "coupon",
+          "email_template",
+          "file",
+          "journey",
+          "meter",
+          "meter_counter",
+          "opportunity"
+        ]
+      },
       "ContextType": {
         "type": "string",
         "enum": [
           "workflow_execution",
-          "workflow_tasks"
+          "workflow_task"
         ]
       },
       "NoteEntity": {
@@ -941,22 +969,6 @@
             }
           }
         }
-      },
-      "EntitySlug": {
-        "type": "string",
-        "enum": [
-          "account",
-          "billing_event",
-          "contact",
-          "contract",
-          "coupon",
-          "email_template",
-          "file",
-          "journey",
-          "meter",
-          "meter_counter",
-          "opportunity"
-        ]
       },
       "NotesGetRequestResponse": {
         "type": "object",

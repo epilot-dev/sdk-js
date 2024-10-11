@@ -10,7 +10,7 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
-        export type ContextType = "workflow_execution" | "workflow_tasks";
+        export type ContextType = "workflow_execution" | "workflow_task";
         /**
          * Base Entity schema
          */
@@ -311,8 +311,8 @@ declare namespace Components {
              * The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep
              */
             parent_id?: string;
-            contexts?: {
-                type: ContextType;
+            additional_contexts?: {
+                type: EntitySlug | ContextType;
                 id: string;
             }[];
             /**
@@ -452,14 +452,14 @@ declare namespace Paths {
     }
     namespace GetNotesByContext {
         namespace Parameters {
+            export type Contexts = {
+                type: Components.Schemas.ContextType;
+                id: string;
+            }[];
             /**
-             * Context ID
+             * The ID of the Contextual Entity from where to retrieve Notes
              */
-            export type ContextId = string;
-            /**
-             * Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`)
-             */
-            export type ContextType = /* Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`) */ Components.Schemas.EntitySlug | Components.Schemas.ContextType;
+            export type EntityId = string;
             /**
              * The index of the first Note to return in this query
              */
@@ -470,10 +470,10 @@ declare namespace Paths {
             export type Size = number;
         }
         export interface PathParameters {
-            context_id: /* Context ID */ Parameters.ContextId;
+            entity_id: /* The ID of the Contextual Entity from where to retrieve Notes */ Parameters.EntityId;
         }
         export interface QueryParameters {
-            context_type: /* Type of context to retrieve Notes the Notes from. This can be either an Entity slug, or a non-Entity context (eg. `workflow-tasks`) */ Parameters.ContextType;
+            contexts?: Parameters.Contexts;
             from?: /* The index of the first Note to return in this query */ Parameters.From;
             size?: /* The number of Note entries to return in this query */ Parameters.Size;
         }
@@ -656,7 +656,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteNote.Responses.$200>
   }
-  ['/v1/notes/{context_id}']: {
+  ['/v1/notes/{entity_id}']: {
     /**
      * getNotesByContext - getNotesByContext
      * 
