@@ -132,7 +132,6 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
-            context_workflow_tasks?: string[];
         }
         /**
          * A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place.
@@ -196,7 +195,6 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
-            context_workflow_tasks?: string[];
         }
         /**
          * The Note's parent Note
@@ -268,7 +266,6 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
-            context_workflow_tasks?: string[];
         }
         export interface NotePatchRequestBody {
             /**
@@ -296,7 +293,6 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
-            context_workflow_tasks?: string[];
         }
         export interface NotePostRequestBody {
             /**
@@ -393,7 +389,6 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
-            context_workflow_tasks?: string[];
         }
         export interface NotesGetRequestResponse {
             /**

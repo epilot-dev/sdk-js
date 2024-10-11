@@ -454,12 +454,6 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
-          },
-          "context_workflow_tasks": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         },
         "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place."
@@ -610,12 +604,6 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
-          },
-          "context_workflow_tasks": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       },
@@ -681,12 +669,6 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
-          },
-          "context_workflow_tasks": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       },
@@ -775,12 +757,6 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
-          },
-          "context_workflow_tasks": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         },
         "required": [
@@ -961,12 +937,6 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
-          },
-          "context_workflow_tasks": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       },
