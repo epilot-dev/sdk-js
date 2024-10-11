@@ -39,17 +39,24 @@ declare namespace Components {
             /**
              * Schedule Id
              */
-            id?: string;
+            id: string;
             /**
-             * The id of the configured scheduler
+             * The id of the configured scheduler which will be added on automation triggered
              */
             scheduleId?: string;
+            source: /* The source of the schedule_at timestamp that will be used to schedule the action */ ActionScheduleSource;
+        }
+        /**
+         * The source of the schedule_at timestamp that will be used to schedule the action
+         */
+        export interface ActionScheduleSource {
             /**
-             * The source of the schedule_at timestamp that will be used to schedule the action
+             * The iGd of the action or trigger
              */
-            source?: {
-                [key: string]: any;
-            };
+            id: string;
+            origin: "trigger" | "action";
+            schema: string;
+            attribute: string;
         }
         /**
          * example:
@@ -819,14 +826,16 @@ declare namespace Components {
             AutomationFlowId;
             /**
              * Status of the bulk trigger automation job
-             * * APPROVAL: Waiting for user approval to start the bulk trigger automation
-             * * IN_PROGRESS: Bulk trigger automation execution is in progress
-             * * SUCCESS: Bulk trigger automation execution is completed successfully
-             * * FAILED: Bulk trigger automation execution is failed
-             * * CANCELLED: Bulk trigger automation execution was cancelled
+             * * approval: Waiting for user approval to start the bulk trigger automation
+             * * starting: Starting automation executions
+             * * in_progress: Automation execution are currently running
+             * * send_report: Automation executions finished running. Report is being created & sent to the user who initiated the bulk trigger automation
+             * * finished: Automation executions finished running. Some may have failed. Check the status of each entity.
+             * * failed: Bulk trigger automation execution failed. Some executions might have started. Check the status of each entity.
+             * * cancelled: Bulk trigger automation execution was cancelled
              *
              */
-            status: "APPROVAL" | "IN_PROGRESS" | "SUCCESS" | "FAILED" | "CANCELLED";
+            status: "approval" | "starting" | "in_progress" | "send_report" | "finished" | "failed" | "cancelled";
             /**
              * User ID who created the bulk trigger automation job
              * example:
@@ -846,54 +855,13 @@ declare namespace Components {
              */
             task_token?: string;
             /**
-             * List of entity ids that are waiting for triggering automation
+             * Entity ID of the report file entity
              */
-            pending?: {
-                entity_id: /**
-                 * example:
-                 * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
-                 */
-                EntityId;
-            }[];
+            report_file_entity_id?: string;
             /**
-             * List of entity ids and automation execution ids that were triggered successfully
+             * List of entities & their automation execution id & status
              */
-            triggered?: {
-                entity_id: /**
-                 * example:
-                 * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
-                 */
-                EntityId;
-                execution_id: /**
-                 * example:
-                 * 9baf184f-bc81-4128-bca3-d974c90a12c4
-                 */
-                AutomationExecutionId;
-            }[];
-            /**
-             * List of entity ids that were skipped or failed
-             */
-            failed?: {
-                entity_id: /**
-                 * example:
-                 * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
-                 */
-                EntityId;
-                /**
-                 * Error message for the failed automation execution
-                 */
-                error: string;
-            }[];
-            /**
-             * List of entity ids that were cancelled from triggering automation
-             */
-            cancelled?: {
-                entity_id: /**
-                 * example:
-                 * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
-                 */
-                EntityId;
-            }[];
+            execution_summary: /* Execution item for bulk trigger automation. It maps each entity to its automation execution id & status */ ExecItem[];
         }
         export interface BulkTriggerRequest {
             flow_id: /**
@@ -1507,6 +1475,26 @@ declare namespace Components {
                 [name: string]: any;
                 details?: ErrorDetail[];
             };
+        }
+        /**
+         * Execution item for bulk trigger automation. It maps each entity to its automation execution id & status
+         */
+        export interface ExecItem {
+            entity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
+            execution_id?: /**
+             * example:
+             * 9baf184f-bc81-4128-bca3-d974c90a12c4
+             */
+            AutomationExecutionId;
+            execution_status: ExecutionStatus;
+            /**
+             * Error message for the failed automation execution
+             */
+            error?: string;
         }
         export type ExecutionStatus = "pending" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled";
         export interface ExistsCondition {
@@ -2603,6 +2591,7 @@ declare namespace Components {
              * ]
              */
             AssignUsersToStep[];
+            filter_with_purposes?: boolean;
         }
         export interface WildcardCondition {
             wildcard?: string;
@@ -3138,6 +3127,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type ActionCondition = Components.Schemas.ActionCondition;
 export type ActionSchedule = Components.Schemas.ActionSchedule;
+export type ActionScheduleSource = Components.Schemas.ActionScheduleSource;
 export type ActivityId = Components.Schemas.ActivityId;
 export type ActivityTrigger = Components.Schemas.ActivityTrigger;
 export type AnyAction = Components.Schemas.AnyAction;
@@ -3180,6 +3170,7 @@ export type EqualsIgnoreCaseCondition = Components.Schemas.EqualsIgnoreCaseCondi
 export type ErrorCode = Components.Schemas.ErrorCode;
 export type ErrorDetail = Components.Schemas.ErrorDetail;
 export type ErrorOutput = Components.Schemas.ErrorOutput;
+export type ExecItem = Components.Schemas.ExecItem;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
 export type ExistsCondition = Components.Schemas.ExistsCondition;
 export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;

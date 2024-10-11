@@ -1804,6 +1804,9 @@
             "items": {
               "$ref": "#/components/schemas/AssignUsersToStep"
             }
+          },
+          "filter_with_purposes": {
+            "type": "boolean"
           }
         }
       },
@@ -2071,6 +2074,35 @@
           }
         }
       },
+      "ActionScheduleSource": {
+        "type": "object",
+        "description": "The source of the schedule_at timestamp that will be used to schedule the action",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The iGd of the action or trigger"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "trigger",
+              "action"
+            ]
+          },
+          "schema": {
+            "type": "string"
+          },
+          "attribute": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "origin",
+          "schema",
+          "attribute"
+        ]
+      },
       "ActionSchedule": {
         "type": "object",
         "properties": {
@@ -2080,30 +2112,16 @@
           },
           "scheduleId": {
             "type": "string",
-            "description": "The id of the configured scheduler"
+            "description": "The id of the configured scheduler which will be added on automation triggered"
           },
           "source": {
-            "type": "object",
-            "description": "The source of the schedule_at timestamp that will be used to schedule the action",
-            "id": {
-              "type": "string",
-              "description": "The iGd of the action or trigger"
-            },
-            "origin": {
-              "type": "string",
-              "enum": [
-                "trigger",
-                "action"
-              ]
-            },
-            "schema": {
-              "type": "string"
-            },
-            "attribute": {
-              "type": "string"
-            }
+            "$ref": "#/components/schemas/ActionScheduleSource"
           }
-        }
+        },
+        "required": [
+          "id",
+          "source"
+        ]
       },
       "AutomationExecutionId": {
         "type": "string",
@@ -2437,7 +2455,8 @@
           "status",
           "created_by",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "execution_summary"
         ],
         "properties": {
           "job_id": {
@@ -2451,13 +2470,15 @@
           },
           "status": {
             "type": "string",
-            "description": "Status of the bulk trigger automation job\n* APPROVAL: Waiting for user approval to start the bulk trigger automation\n* IN_PROGRESS: Bulk trigger automation execution is in progress\n* SUCCESS: Bulk trigger automation execution is completed successfully\n* FAILED: Bulk trigger automation execution is failed\n* CANCELLED: Bulk trigger automation execution was cancelled\n",
+            "description": "Status of the bulk trigger automation job\n* approval: Waiting for user approval to start the bulk trigger automation\n* starting: Starting automation executions\n* in_progress: Automation execution are currently running\n* send_report: Automation executions finished running. Report is being created & sent to the user who initiated the bulk trigger automation\n* finished: Automation executions finished running. Some may have failed. Check the status of each entity.\n* failed: Bulk trigger automation execution failed. Some executions might have started. Check the status of each entity.\n* cancelled: Bulk trigger automation execution was cancelled\n",
             "enum": [
-              "APPROVAL",
-              "IN_PROGRESS",
-              "SUCCESS",
-              "FAILED",
-              "CANCELLED"
+              "approval",
+              "starting",
+              "in_progress",
+              "send_report",
+              "finished",
+              "failed",
+              "cancelled"
             ]
           },
           "created_by": {
@@ -2483,74 +2504,39 @@
             "description": "Task token to approve/cancel the bulk automation job",
             "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b"
           },
-          "pending": {
-            "type": "array",
-            "description": "List of entity ids that are waiting for triggering automation",
-            "items": {
-              "type": "object",
-              "required": [
-                "entity_id"
-              ],
-              "properties": {
-                "entity_id": {
-                  "$ref": "#/components/schemas/EntityId"
-                }
-              }
-            }
+          "report_file_entity_id": {
+            "type": "string",
+            "description": "Entity ID of the report file entity"
           },
-          "triggered": {
+          "execution_summary": {
             "type": "array",
-            "description": "List of entity ids and automation execution ids that were triggered successfully",
+            "description": "List of entities & their automation execution id & status",
             "items": {
-              "type": "object",
-              "required": [
-                "entity_id",
-                "execution_id"
-              ],
-              "properties": {
-                "entity_id": {
-                  "$ref": "#/components/schemas/EntityId"
-                },
-                "execution_id": {
-                  "$ref": "#/components/schemas/AutomationExecutionId"
-                }
-              }
+              "$ref": "#/components/schemas/ExecItem"
             }
+          }
+        }
+      },
+      "ExecItem": {
+        "type": "object",
+        "description": "Execution item for bulk trigger automation. It maps each entity to its automation execution id & status",
+        "required": [
+          "entity_id",
+          "execution_status"
+        ],
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
           },
-          "failed": {
-            "type": "array",
-            "description": "List of entity ids that were skipped or failed",
-            "items": {
-              "type": "object",
-              "required": [
-                "entity_id",
-                "error"
-              ],
-              "properties": {
-                "entity_id": {
-                  "$ref": "#/components/schemas/EntityId"
-                },
-                "error": {
-                  "type": "string",
-                  "description": "Error message for the failed automation execution"
-                }
-              }
-            }
+          "execution_id": {
+            "$ref": "#/components/schemas/AutomationExecutionId"
           },
-          "cancelled": {
-            "type": "array",
-            "description": "List of entity ids that were cancelled from triggering automation",
-            "items": {
-              "type": "object",
-              "required": [
-                "entity_id"
-              ],
-              "properties": {
-                "entity_id": {
-                  "$ref": "#/components/schemas/EntityId"
-                }
-              }
-            }
+          "execution_status": {
+            "$ref": "#/components/schemas/ExecutionStatus"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for the failed automation execution"
           }
         }
       },
