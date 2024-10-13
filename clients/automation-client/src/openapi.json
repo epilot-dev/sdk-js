@@ -909,7 +909,8 @@
           "INTERNAL_ERROR",
           "TRIGGER_WEBHOOK_ERROR",
           "TEMPLATE_ERROR",
-          "INVALID_PAYLOAD"
+          "INVALID_PAYLOAD",
+          "INVALID_SCHEDULE_CONFIG"
         ]
       },
       "ErrorDetail": {
@@ -2110,7 +2111,7 @@
             "type": "string",
             "description": "Schedule Id"
           },
-          "scheduleId": {
+          "configuredSchedulerId": {
             "type": "string",
             "description": "The id of the configured scheduler which will be added on automation triggered"
           },
@@ -2503,10 +2504,6 @@
             "type": "string",
             "description": "Task token to approve/cancel the bulk automation job",
             "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b"
-          },
-          "report_file_entity_id": {
-            "type": "string",
-            "description": "Entity ID of the report file entity"
           },
           "execution_summary": {
             "type": "array",

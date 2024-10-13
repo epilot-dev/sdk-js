@@ -43,7 +43,7 @@ declare namespace Components {
             /**
              * The id of the configured scheduler which will be added on automation triggered
              */
-            scheduleId?: string;
+            configuredSchedulerId?: string;
             source: /* The source of the schedule_at timestamp that will be used to schedule the action */ ActionScheduleSource;
         }
         /**
@@ -855,10 +855,6 @@ declare namespace Components {
              */
             task_token?: string;
             /**
-             * Entity ID of the report file entity
-             */
-            report_file_entity_id?: string;
-            /**
              * List of entities & their automation execution id & status
              */
             execution_summary: /* Execution item for bulk trigger automation. It maps each entity to its automation execution id & status */ ExecItem[];
@@ -1462,7 +1458,7 @@ declare namespace Components {
         export interface EqualsIgnoreCaseCondition {
             "equals-ignore-case"?: string;
         }
-        export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR" | "TEMPLATE_ERROR" | "INVALID_PAYLOAD";
+        export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR" | "TEMPLATE_ERROR" | "INVALID_PAYLOAD" | "INVALID_SCHEDULE_CONFIG";
         export interface ErrorDetail {
             explanation: string;
             context?: string;
