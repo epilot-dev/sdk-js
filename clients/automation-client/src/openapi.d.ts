@@ -43,7 +43,7 @@ declare namespace Components {
             /**
              * The id of the configured scheduler which will be added on automation triggered
              */
-            configuredSchedulerId?: string;
+            configuredScheduleId?: string;
             source: /* The source of the schedule_at timestamp that will be used to schedule the action */ ActionScheduleSource;
         }
         /**
