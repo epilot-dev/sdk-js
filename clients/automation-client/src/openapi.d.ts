@@ -44,6 +44,9 @@ declare namespace Components {
              * The id of the configured scheduler which will be added on automation triggered
              */
             configuredScheduleId?: string;
+            numberOfUnits?: number;
+            timePeriod?: "minutes" | "hours" | "days" | "weeks" | "months";
+            timeRelation?: "after" | "before";
             source: /* The source of the schedule_at timestamp that will be used to schedule the action */ ActionScheduleSource;
         }
         /**
@@ -51,7 +54,7 @@ declare namespace Components {
          */
         export interface ActionScheduleSource {
             /**
-             * The iGd of the action or trigger
+             * The id of the action or trigger
              */
             id: string;
             origin: "trigger" | "action";
