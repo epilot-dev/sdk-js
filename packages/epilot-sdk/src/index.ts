@@ -4,6 +4,7 @@ import {
   default as addressSuggestionsClient,
   getClient as getAddressSuggestionsClient,
 } from './address-suggestions-client';
+import { default as auditLogsClient, getClient as getAuditLogsClient } from './audit-logs-client';
 import { default as automationClient, getClient as getAutomationClient } from './automation-client';
 import {
   default as blueprintManifestClient,
@@ -91,6 +92,9 @@ export class EpilotClient {
   get design() {
     return getDesignClient();
   }
+  get auditLogs() {
+    return getAuditLogsClient();
+  }
 
   public authorize(token: string) {
     authorizeWithToken(this.entity, token);
@@ -113,6 +117,7 @@ export class EpilotClient {
     authorizeWithToken(this.blueprintManifest, token);
     authorizeWithToken(this.sandbox, token);
     authorizeWithToken(this.design, token);
+    authorizeWithToken(this.auditLogs, token);
 
     return this;
   }
@@ -140,6 +145,7 @@ export class EpilotClient {
     authorizer.configureClient(this.blueprintManifest);
     authorizer.configureClient(this.sandbox);
     authorizer.configureClient(this.design);
+    authorizer.configureClient(this.auditLogs);
 
     return this;
   }
@@ -167,3 +173,4 @@ export { addressSuggestionsClient };
 export { blueprintManifestClient };
 export { sandboxClient };
 export { designClient };
+export { auditLogsClient };

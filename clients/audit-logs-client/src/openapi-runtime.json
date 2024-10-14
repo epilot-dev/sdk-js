@@ -1,0 +1,85 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://audit-logs.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/logs": {
+      "get": {
+        "operationId": "getLogs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit"
+          },
+          {
+            "in": "query",
+            "name": "page"
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "service_name",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "event_name",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "caller_user_email",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "caller_user_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/logs/{logId}": {
+      "get": {
+        "operationId": "getLogById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "logId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteLogById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "logId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}

@@ -54,6 +54,7 @@
     "@epilot/design-client": "^0.1.0",
     "@epilot/discussion-client": "^1.9.1",
     "@epilot/email-settings-client": "^0.5.1",
+    "@epilot/audit-logs-client": "^0.1.0",
     "@epilot/email-template-client": "^1.8.1",
     "@epilot/entity-client": "^4.29.2",
     "@epilot/entity-mapping-client": "^0.9.1",

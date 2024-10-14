@@ -62,6 +62,7 @@ describe('EpilotClient', () => {
       expect(eclient.blueprintManifest).not.toBeNull();
       expect(eclient.design).not.toBeNull();
       expect(eclient.sandbox).not.toBeNull();
+      expect(eclient.auditLogs).not.toBeNull();
     });
   });
 

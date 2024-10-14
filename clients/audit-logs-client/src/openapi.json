@@ -1,0 +1,285 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Audit Log",
+    "version": "1.0.0",
+    "description": "Service for managing and retrieving auditing logs in the scope of an organization\n"
+  },
+  "servers": [
+    {
+      "url": "https://audit-logs.sls.epilot.io"
+    },
+    {
+      "url": "https://audit-logs.sls.epilot.io"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v1/logs": {
+      "get": {
+        "operationId": "getLogs",
+        "summary": "getLogs",
+        "description": "Retrieve Audit Log events. Optionally, you can filter them by organization.",
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "description": "Maximum number of results to return."
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "description": "Page number to return."
+            }
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "description": "Timestamp of the event in ISO 8601 format",
+            "example": "2021-06-01T12:00:00Z"
+          },
+          {
+            "in": "query",
+            "name": "service_name",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Name of the service that triggered the event",
+            "example": "workflows"
+          },
+          {
+            "in": "query",
+            "name": "event_name",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Action that was performed (event name)",
+            "example": "deleteWorkflow"
+          },
+          {
+            "in": "query",
+            "name": "caller_user_email",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Email of the user who initiated the event",
+            "example": "max.mustermann@mail.com"
+          },
+          {
+            "in": "query",
+            "name": "caller_user_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "ID of the user who initiated the event",
+            "example": 123456
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "HTTP method",
+            "example": "POST"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - audit logs where loaded successfully. Empty array if org has no executions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "logs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Event"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "Total number of logs",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/logs/{logId}": {
+      "get": {
+        "operationId": "getLogById",
+        "summary": "getLogById",
+        "description": "Retrieve Audit Log events",
+        "tags": [
+          "Audit Log"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "logId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "ID of the log event",
+            "example": "2843c005-c5b0-4df2-94ee-1ca2ddd998ac"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit log was loaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "log": {
+                      "$ref": "#/components/schemas/Event"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteLogById",
+        "summary": "deleteLogById",
+        "description": "Delete Audit Log event",
+        "tags": [
+          "Audit Log"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "logId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "ID of the log event",
+            "example": "2843c005-c5b0-4df2-94ee-1ca2ddd998ac"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Audit log was deleted successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Caller": {
+        "type": "object",
+        "properties": {
+          "user_email": {
+            "type": "string",
+            "description": "Email of the user",
+            "example": "max.mustermann@mail.com"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "ID of the user",
+            "example": 123456
+          },
+          "is_system_call": {
+            "type": "boolean",
+            "description": "Indicates if the call was made by a system",
+            "example": false
+          }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the log event",
+            "example": "2843c005-c5b0-4df2-94ee-1ca2ddd998ac"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "ID of the organization",
+            "example": 123456
+          },
+          "service_name": {
+            "type": "string",
+            "description": "Name of the service",
+            "example": "workflows"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Action that was performed",
+            "example": "deleteWorkflow"
+          },
+          "status_code": {
+            "type": "integer",
+            "description": "HTTP status code",
+            "example": 200
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the event",
+            "example": "2021-06-01T12:00:00Z"
+          },
+          "caller": {
+            "$ref": "#/components/schemas/Caller"
+          },
+          "http": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method",
+                "example": "GET"
+              }
+            }
+          },
+          "detail": {
+            "type": "string",
+            "description": "Contains the stringified request body",
+            "example": "{\"workflow_id\": \"123456\"}"
+          }
+        }
+      }
+    }
+  }
+}
