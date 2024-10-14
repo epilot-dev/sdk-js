@@ -53,8 +53,7 @@
             "in": "query",
             "name": "timestamp",
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "type": "string"
             },
             "required": false,
             "description": "Timestamp of the event in ISO 8601 format",
@@ -205,6 +204,51 @@
   },
   "components": {
     "schemas": {
+      "HttpContext": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "HTTP method",
+            "example": "GET"
+          },
+          "ip": {
+            "type": "string",
+            "description": "IP address of the caller",
+            "example": null
+          },
+          "user_agent": {
+            "type": "string",
+            "description": "User agent of the caller",
+            "example": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+          },
+          "headers": {
+            "type": "object",
+            "description": "HTTP headers",
+            "example": {
+              "Authorization": "Bearer token"
+            }
+          },
+          "query": {
+            "type": "object",
+            "description": "Query parameters",
+            "example": {
+              "limit": 50,
+              "page": 0
+            }
+          },
+          "path": {
+            "type": "string",
+            "description": "Path of the request",
+            "example": "/v1/logs"
+          },
+          "domainName": {
+            "type": "string",
+            "description": "Domain name of the request",
+            "example": "audit-logs.sls.epilot.io"
+          }
+        }
+      },
       "Caller": {
         "type": "object",
         "properties": {
@@ -256,7 +300,6 @@
           },
           "timestamp": {
             "type": "string",
-            "format": "date-time",
             "description": "Timestamp of the event",
             "example": "2021-06-01T12:00:00Z"
           },
@@ -264,14 +307,7 @@
             "$ref": "#/components/schemas/Caller"
           },
           "http": {
-            "type": "object",
-            "properties": {
-              "method": {
-                "type": "string",
-                "description": "HTTP method",
-                "example": "GET"
-              }
-            }
+            "$ref": "#/components/schemas/HttpContext"
           },
           "detail": {
             "type": "string",
