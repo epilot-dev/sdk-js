@@ -44,9 +44,6 @@ declare namespace Components {
              * The id of the configured scheduler which will be added on automation triggered
              */
             configuredScheduleId?: string;
-            numberOfUnits?: number;
-            timePeriod?: "minutes" | "hours" | "days" | "weeks" | "months";
-            timeRelation?: "after" | "before";
             source: /* The source of the schedule_at timestamp that will be used to schedule the action */ ActionScheduleSource;
         }
         /**
@@ -54,7 +51,7 @@ declare namespace Components {
          */
         export interface ActionScheduleSource {
             /**
-             * The id of the action or trigger
+             * The iGd of the action or trigger
              */
             id: string;
             origin: "trigger" | "action";
@@ -858,6 +855,10 @@ declare namespace Components {
              */
             task_token?: string;
             /**
+             * Entity ID of the report file entity
+             */
+            report_file_entity_id?: string;
+            /**
              * List of entities & their automation execution id & status
              */
             execution_summary: /* Execution item for bulk trigger automation. It maps each entity to its automation execution id & status */ ExecItem[];
@@ -868,11 +869,7 @@ declare namespace Components {
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
             AutomationFlowId;
-            entity_ids?: /**
-             * example:
-             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
-             */
-            EntityId[];
+            entities_refs?: EntityRef[];
             entities_query?: string;
         }
         /**
@@ -1458,6 +1455,14 @@ declare namespace Components {
                 };
             };
         }
+        export interface EntityRef {
+            entity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
+            entity_schema: string;
+        }
         export interface EqualsIgnoreCaseCondition {
             "equals-ignore-case"?: string;
         }
@@ -1484,6 +1489,7 @@ declare namespace Components {
              * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
              */
             EntityId;
+            entity_schema?: string;
             execution_id?: /**
              * example:
              * 9baf184f-bc81-4128-bca3-d974c90a12c4
@@ -3165,6 +3171,7 @@ export type EntityItemSnapshot = Components.Schemas.EntityItemSnapshot;
 export type EntityManualTrigger = Components.Schemas.EntityManualTrigger;
 export type EntityOperation = Components.Schemas.EntityOperation;
 export type EntityOperationTrigger = Components.Schemas.EntityOperationTrigger;
+export type EntityRef = Components.Schemas.EntityRef;
 export type EqualsIgnoreCaseCondition = Components.Schemas.EqualsIgnoreCaseCondition;
 export type ErrorCode = Components.Schemas.ErrorCode;
 export type ErrorDetail = Components.Schemas.ErrorDetail;

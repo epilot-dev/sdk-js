@@ -2081,7 +2081,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "The id of the action or trigger"
+            "description": "The iGd of the action or trigger"
           },
           "origin": {
             "type": "string",
@@ -2114,26 +2114,6 @@
           "configuredScheduleId": {
             "type": "string",
             "description": "The id of the configured scheduler which will be added on automation triggered"
-          },
-          "numberOfUnits": {
-            "type": "number"
-          },
-          "timePeriod": {
-            "type": "string",
-            "enum": [
-              "minutes",
-              "hours",
-              "days",
-              "weeks",
-              "months"
-            ]
-          },
-          "timeRelation": {
-            "type": "string",
-            "enum": [
-              "after",
-              "before"
-            ]
           },
           "source": {
             "$ref": "#/components/schemas/ActionScheduleSource"
@@ -2453,10 +2433,10 @@
           "flow_id": {
             "$ref": "#/components/schemas/AutomationFlowId"
           },
-          "entity_ids": {
+          "entities_refs": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/EntityId"
+              "$ref": "#/components/schemas/EntityRef"
             }
           },
           "entities_query": {
@@ -2466,6 +2446,21 @@
         "required": [
           "flow_id"
         ]
+      },
+      "EntityRef": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "entity_schema"
+        ],
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "entity_schema": {
+            "type": "string"
+          }
+        }
       },
       "BulkTriggerJob": {
         "type": "object",
@@ -2525,6 +2520,10 @@
             "description": "Task token to approve/cancel the bulk automation job",
             "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b"
           },
+          "report_file_entity_id": {
+            "type": "string",
+            "description": "Entity ID of the report file entity"
+          },
           "execution_summary": {
             "type": "array",
             "description": "List of entities & their automation execution id & status",
@@ -2544,6 +2543,9 @@
         "properties": {
           "entity_id": {
             "$ref": "#/components/schemas/EntityId"
+          },
+          "entity_schema": {
+            "type": "string"
           },
           "execution_id": {
             "$ref": "#/components/schemas/AutomationExecutionId"
