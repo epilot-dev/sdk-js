@@ -304,6 +304,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -453,6 +457,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -627,6 +635,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -832,6 +844,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -984,6 +1000,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -1115,6 +1135,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -1250,6 +1274,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -1381,6 +1409,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -1523,6 +1555,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -1734,6 +1770,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema capabilility
+             */
+            _manifest?: string /* uuid */[] | null;
             ui_hooks?: {
                 [name: string]: any;
                 /**
@@ -1849,6 +1889,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema capabilility
+             */
+            _manifest?: string /* uuid */[] | null;
             ui_hooks?: {
                 [name: string]: any;
                 /**
@@ -2654,6 +2698,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema group
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * This group should only be active when the feature flag is enabled
              * example:
              * FF_MY_FEATURE_FLAG
@@ -2710,6 +2758,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema group
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * This group should only be active when the feature flag is enabled
              * example:
@@ -3377,6 +3429,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -3526,7 +3582,7 @@ declare namespace Components {
             relations?: GetRelationsResp;
         }
         export interface GroupHeadline {
-            id: string; // uuid
+            id?: string; // uuid
             name: string;
             label: string;
             layout?: string;
@@ -3541,12 +3597,16 @@ declare namespace Components {
             type: "headline";
             enable_divider?: boolean;
             divider?: "top_divider" | "bottom_divider";
+            /**
+             * Manifest ID used to create/update the schema group headline
+             */
+            _manifest?: string /* uuid */[] | null;
         }
         /**
          * a readonly computed ID for the entity group headline including schema slug and the headline ID
          */
         export interface GroupHeadlineWithCompositeID {
-            id: string; // uuid
+            id?: string; // uuid
             name: string;
             label: string;
             layout?: string;
@@ -3561,6 +3621,10 @@ declare namespace Components {
             type: "headline";
             enable_divider?: boolean;
             divider?: "top_divider" | "bottom_divider";
+            /**
+             * Manifest ID used to create/update the schema group headline
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * example:
              * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
@@ -3835,6 +3899,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -3967,6 +4035,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -4098,6 +4170,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -4239,6 +4315,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -4378,6 +4458,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -4527,6 +4611,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -4664,6 +4752,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -4795,6 +4887,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -4928,6 +5024,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -5059,6 +5159,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -5200,6 +5304,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the taxonomy classification
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -5360,6 +5468,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -5746,6 +5858,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -6212,6 +6328,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -6351,6 +6471,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -6500,6 +6624,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -6703,6 +6831,10 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
              *
@@ -6860,6 +6992,10 @@ declare namespace Components {
             ClassificationId[];
             created_at?: string; // date-time
             updated_at?: string; // date-time
+            /**
+             * Manifest ID used to create/update the taxonomy classification
+             */
+            _manifest?: string /* uuid */[] | null;
         }
         export type TaxonomyLocationId = "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment";
         /**
@@ -6934,6 +7070,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.
@@ -7067,6 +7207,10 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
             /**
              * A set of constraints applicable to the attribute.
              * These constraints should and will be enforced by the attribute renderer.

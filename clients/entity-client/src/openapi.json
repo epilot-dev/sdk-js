@@ -3834,6 +3834,16 @@
               "$ref": "#/components/schemas/ClassificationId"
             }
           },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the schema group",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            },
+            "nullable": true
+          },
           "feature_flag": {
             "type": "string",
             "example": "FF_MY_FEATURE_FLAG",
@@ -4072,6 +4082,16 @@
             "items": {
               "$ref": "#/components/schemas/ClassificationId"
             }
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the schema attribute",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            },
+            "nullable": true
           },
           "constraints": {
             "type": "object",
@@ -5199,10 +5219,19 @@
               "top_divider",
               "bottom_divider"
             ]
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the schema group headline",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            },
+            "nullable": true
           }
         },
         "required": [
-          "id",
           "name",
           "label",
           "group",
@@ -5267,6 +5296,16 @@
             "items": {
               "$ref": "#/components/schemas/ClassificationId"
             }
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the schema capabilility",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            },
+            "nullable": true
           },
           "ui_hooks": {
             "type": "array",
@@ -6880,6 +6919,16 @@
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the taxonomy classification",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            },
+            "nullable": true
           }
         },
         "required": [
