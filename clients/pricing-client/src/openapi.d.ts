@@ -831,6 +831,12 @@ declare namespace Components {
              * 123456
              */
             password: string;
+            /**
+             * The base URL
+             * example:
+             * https://api.example.com
+             */
+            base_url?: string;
         }
         export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
         /**
@@ -2009,6 +2015,313 @@ declare namespace Components {
              */
             cause?: string;
         }
+        export interface ExternalBasePrice {
+            /**
+             * A flag to indicate if the price is variable.
+             *
+             */
+            variable_price?: boolean;
+            /**
+             * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
+             * example:
+             * kWh
+             */
+            unit?: string;
+            /**
+             * The currency of the price. ISO 4217 currency code. E.g. EUR.
+             * example:
+             * EUR
+             */
+            currency?: string;
+            /**
+             * The price type.
+             */
+            type: "one_time" | "recurring";
+            /**
+             * The billing period of the price.
+             */
+            billing_period?: BillingPeriod;
+            /**
+             * The unit gross amount value, as a string with all the decimal places.
+             * example:
+             * 1.19
+             */
+            unit_amount_gross_decimal: string;
+            /**
+             * The unit net amount value, as a string with all the decimal places.
+             * example:
+             * 1.00
+             */
+            unit_amount_net_decimal: string;
+            /**
+             * Total of all items before discounts or taxes, as a string with all the decimal places.
+             * example:
+             * 1.00
+             */
+            amount_subtotal_decimal: string;
+            /**
+             * Total of all items after discounts and taxes, as a string with all the decimal places.
+             * example:
+             * 1.19
+             */
+            amount_total_decimal: string;
+            tax?: {
+                /**
+                 * The tax name.
+                 * example:
+                 * VAT
+                 */
+                name?: string;
+                /**
+                 * The tax description.
+                 * example:
+                 * Value Added Tax
+                 */
+                description?: string;
+                /**
+                 * The type of the tax.
+                 * example:
+                 * VAT
+                 */
+                type?: "VAT" | "GST" | "Custom";
+                /**
+                 * The tax rate applied.
+                 * example:
+                 * 19
+                 */
+                rate: number;
+                /**
+                 * The region code of the tax.
+                 * example:
+                 * DE
+                 */
+                region?: string;
+                /**
+                 * The region label of the tax.
+                 * example:
+                 * Germany
+                 */
+                region_label?: string;
+            };
+            /**
+             * The way the price should be displayed in the journeys.
+             */
+            price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request";
+            /**
+             * A flag to indicate if the price is tax inclusive.
+             */
+            is_tax_inclusive?: boolean;
+            /**
+             * Fees structure with static and variable amounts
+             */
+            fees?: {
+                /**
+                 * The billing period of the fee values (e.g. monthly).
+                 */
+                billing_period: BillingPeriod;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_total_decimal: string;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_static_decimal: string;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_variable_decimal: string;
+                /**
+                 * Breakdown of the fee values
+                 */
+                breakdown: {
+                    /**
+                     * Static breakdown of fees
+                     */
+                    static?: {
+                        [name: string]: {
+                            /**
+                             * The amount of the fee, as a string with all the decimal places.
+                             * example:
+                             * 1.00
+                             */
+                            amount_decimal?: string;
+                        };
+                    };
+                    /**
+                     * Variable breakdown of fees
+                     */
+                    variable?: {
+                        [name: string]: {
+                            /**
+                             * example:
+                             * 1.00
+                             */
+                            amount_decimal: string;
+                            /**
+                             * The unit of the fee (e.g. kWh) if applicable.
+                             */
+                            unit?: string;
+                        };
+                    };
+                };
+            };
+        }
+        export interface ExternalCompositePrice {
+            /**
+             * A flag to indicate if the price is variable.
+             *
+             */
+            variable_price?: boolean;
+            /**
+             * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
+             * example:
+             * kWh
+             */
+            unit?: string;
+            /**
+             * The currency of the price. ISO 4217 currency code. E.g. EUR.
+             * example:
+             * EUR
+             */
+            currency?: string;
+            /**
+             * The price type.
+             */
+            type: "one_time" | "recurring";
+            billing_period?: BillingPeriod;
+            /**
+             * The unit gross amount value, as a string with all the decimal places.
+             * example:
+             * 1.19
+             */
+            unit_amount_gross_decimal: string;
+            /**
+             * The unit net amount value, as a string with all the decimal places.
+             * example:
+             * 1.00
+             */
+            unit_amount_net_decimal: string;
+            /**
+             * Total of all items before discounts or taxes, as a string with all the decimal places.
+             * example:
+             * 1.00
+             */
+            amount_subtotal_decimal: string;
+            /**
+             * Total of all items after discounts and taxes, as a string with all the decimal places.
+             * example:
+             * 1.19
+             */
+            amount_total_decimal: string;
+            tax?: {
+                /**
+                 * The tax name.
+                 * example:
+                 * VAT
+                 */
+                name?: string;
+                /**
+                 * The tax description.
+                 * example:
+                 * Value Added Tax
+                 */
+                description?: string;
+                /**
+                 * The type of the tax.
+                 * example:
+                 * VAT
+                 */
+                type?: "VAT" | "GST" | "Custom";
+                /**
+                 * The tax rate applied.
+                 * example:
+                 * 19
+                 */
+                rate: number;
+                /**
+                 * The region code of the tax.
+                 * example:
+                 * DE
+                 */
+                region?: string;
+                /**
+                 * The region label of the tax.
+                 * example:
+                 * Germany
+                 */
+                region_label?: string;
+            };
+            /**
+             * The way the price should be displayed in the journeys.
+             */
+            price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request";
+            /**
+             * A flag to indicate if the price is tax inclusive.
+             */
+            is_tax_inclusive?: boolean;
+            /**
+             * Fees structure with static and variable amounts
+             */
+            fees?: {
+                billing_period: BillingPeriod;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_total_decimal: string;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_static_decimal: string;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_variable_decimal: string;
+                /**
+                 * Breakdown of the fee values
+                 */
+                breakdown: {
+                    /**
+                     * Static breakdown of fees
+                     */
+                    static?: {
+                        [name: string]: {
+                            /**
+                             * The amount of the fee, as a string with all the decimal places.
+                             * example:
+                             * 1.00
+                             */
+                            amount_decimal?: string;
+                        };
+                    };
+                    /**
+                     * Variable breakdown of fees
+                     */
+                    variable?: {
+                        [name: string]: {
+                            /**
+                             * example:
+                             * 1.00
+                             */
+                            amount_decimal: string;
+                            /**
+                             * The unit of the fee (e.g. kWh) if applicable.
+                             */
+                            unit?: string;
+                        };
+                    };
+                };
+            };
+            is_composite_price: true;
+            price_components: ExternalSimplePrice[];
+            total_details: /* Details of the total price including shipping and tax amounts. */ ExternalPriceTotalDetails;
+        }
         /**
          * example:
          * {
@@ -2099,6 +2412,248 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
+        /**
+         * Details of the total price including shipping and tax amounts.
+         */
+        export interface ExternalPriceTotalDetails {
+            /**
+             * A breakdown of the recurrences of amounts.
+             */
+            breakdown: {
+                recurrences?: {
+                    /**
+                     * Total of all items before discounts or taxes, as a string with all the decimal places.
+                     * example:
+                     * 1.00
+                     */
+                    amount_subtotal_decimal: string;
+                    /**
+                     * Total of all items after discounts and taxes, as a string with all the decimal places.
+                     * example:
+                     * 1.19
+                     */
+                    amount_total_decimal: string;
+                    /**
+                     * The price type.
+                     * example:
+                     * one_time
+                     */
+                    type: "one_time" | "recurring";
+                    /**
+                     * The billing period of the price.
+                     */
+                    billing_period?: BillingPeriod;
+                }[];
+            };
+        }
+        /**
+         * An external product & price information (already computed) from an external catalog.
+         */
+        export interface ExternalProduct {
+            /**
+             * The ID of the product in the external catalog.
+             */
+            id: string;
+            /**
+             * The name of the product.
+             */
+            name: string;
+            /**
+             * A description of the product.
+             */
+            description?: string;
+            /**
+             * A list of features of the product.
+             */
+            features?: string[];
+            /**
+             * A list of image URLs of the product. RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.
+             *
+             */
+            product_image_urls?: string[];
+            /**
+             * A list of file/attachment URLs of the product RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.
+             *
+             */
+            product_downloads_urls?: string[];
+            /**
+             * Legal footnotes for the product.
+             */
+            legal_footnotes?: string;
+            /**
+             * Additional notes for the product.
+             */
+            additional_notes?: string[];
+            /**
+             * Recommendation settings for the product.
+             * example:
+             * {
+             *   "is_recommended": true,
+             *   "recommended_label": "Best Value"
+             * }
+             */
+            recommendation_settings?: {
+                /**
+                 * Flag to enable or disable the recommendation for this product.
+                 */
+                is_recommended?: boolean;
+                /**
+                 * Label to display when the product is recommended.
+                 */
+                recommended_label?: string;
+            };
+            price: ExternalSimplePrice | ExternalCompositePrice;
+        }
+        export interface ExternalSimplePrice {
+            /**
+             * A flag to indicate if the price is variable.
+             *
+             */
+            variable_price?: boolean;
+            /**
+             * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
+             * example:
+             * kWh
+             */
+            unit?: string;
+            /**
+             * The currency of the price. ISO 4217 currency code. E.g. EUR.
+             * example:
+             * EUR
+             */
+            currency?: string;
+            /**
+             * The price type.
+             */
+            type: "one_time" | "recurring";
+            billing_period?: BillingPeriod;
+            /**
+             * The unit gross amount value, as a string with all the decimal places.
+             * example:
+             * 1.19
+             */
+            unit_amount_gross_decimal: string;
+            /**
+             * The unit net amount value, as a string with all the decimal places.
+             * example:
+             * 1.00
+             */
+            unit_amount_net_decimal: string;
+            /**
+             * Total of all items before discounts or taxes, as a string with all the decimal places.
+             * example:
+             * 1.00
+             */
+            amount_subtotal_decimal: string;
+            /**
+             * Total of all items after discounts and taxes, as a string with all the decimal places.
+             * example:
+             * 1.19
+             */
+            amount_total_decimal: string;
+            tax?: {
+                /**
+                 * The tax name.
+                 * example:
+                 * VAT
+                 */
+                name?: string;
+                /**
+                 * The tax description.
+                 * example:
+                 * Value Added Tax
+                 */
+                description?: string;
+                /**
+                 * The type of the tax.
+                 * example:
+                 * VAT
+                 */
+                type?: "VAT" | "GST" | "Custom";
+                /**
+                 * The tax rate applied.
+                 * example:
+                 * 19
+                 */
+                rate: number;
+                /**
+                 * The region code of the tax.
+                 * example:
+                 * DE
+                 */
+                region?: string;
+                /**
+                 * The region label of the tax.
+                 * example:
+                 * Germany
+                 */
+                region_label?: string;
+            };
+            /**
+             * The way the price should be displayed in the journeys.
+             */
+            price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request";
+            /**
+             * A flag to indicate if the price is tax inclusive.
+             */
+            is_tax_inclusive?: boolean;
+            /**
+             * Fees structure with static and variable amounts
+             */
+            fees?: {
+                billing_period: BillingPeriod;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_total_decimal: string;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_static_decimal: string;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_variable_decimal: string;
+                /**
+                 * Breakdown of the fee values
+                 */
+                breakdown: {
+                    /**
+                     * Static breakdown of fees
+                     */
+                    static?: {
+                        [name: string]: {
+                            /**
+                             * The amount of the fee, as a string with all the decimal places.
+                             * example:
+                             * 1.00
+                             */
+                            amount_decimal?: string;
+                        };
+                    };
+                    /**
+                     * Variable breakdown of fees
+                     */
+                    variable?: {
+                        [name: string]: {
+                            /**
+                             * example:
+                             * 1.00
+                             */
+                            amount_decimal: string;
+                            /**
+                             * The unit of the fee (e.g. kWh) if applicable.
+                             */
+                            unit?: string;
+                        };
+                    };
+                };
+            };
+            is_composite_price: false;
+        }
         export interface File {
             [name: string]: any;
             _id: string;
@@ -2123,7 +2678,62 @@ declare namespace Components {
          */
         export type GasConcessionType = "standard" | "special";
         export type IntegrationCredentialsResult = /* The basic auth credentials */ BasicAuthCredentials;
-        export type IntegrationId = "enet" | "getag";
+        export type IntegrationId = "getag" | "ikom";
+        export interface JourneyContext {
+            /**
+             * The ID of the journey.
+             * example:
+             * 8d0a2235-97ce-42d0-88a3-e374634ca44e
+             */
+            journey_id: string;
+            /**
+             * The name of the journey.
+             * example:
+             * journey name
+             */
+            journey_name: string;
+            /**
+             * The name of the step where the products selection is happening.
+             * example:
+             * step name
+             */
+            current_step_name: string;
+            /**
+             * The name of the block where the products selection is happening.
+             * example:
+             * block name
+             */
+            current_block_name: string;
+            /**
+             * The steps of the journey.
+             */
+            steps_data: {
+                /**
+                 * The name of the step.
+                 */
+                step_name: string;
+                /**
+                 * The index of the step.
+                 */
+                step_index: number;
+                /**
+                 * The data of the blocks.
+                 * example:
+                 * {
+                 *   "Adresse": {
+                 *     "countryCode": "DE",
+                 *     "city": "Koblenz",
+                 *     "zipCode": "56068",
+                 *     "streetName": "Am Alten Hospital",
+                 *     "houseNumber": "123"
+                 *   }
+                 * }
+                 */
+                blocks: {
+                    [name: string]: any;
+                };
+            }[];
+        }
         /**
          * Describes how to compute the markup per period. Either `per_unit`, `tiered_volume` or `tiered_flatfee`.
          * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
@@ -3985,6 +4595,16 @@ declare namespace Components {
         }
         export type SalesTax = "nontaxable" | "reduced" | "standard";
         export type SaveIntegrationCredentialsParams = /* The basic auth credentials */ BasicAuthCredentials;
+        export interface SearchExternalCatalogParams {
+            context: JourneyContext;
+        }
+        export interface SearchExternalCatalogResult {
+            /**
+             * The number os results returned.
+             */
+            hits: number;
+            results: /* An external product & price information (already computed) from an external catalog. */ ExternalProduct[];
+        }
         /**
          * A search providers payload
          */
@@ -4469,6 +5089,20 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $SearchExternalCatalog {
+        namespace Parameters {
+            export type IntegrationId = Components.Schemas.IntegrationId;
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId;
+        }
+        export type RequestBody = Components.Schemas.SearchExternalCatalogParams;
+        namespace Responses {
+            export type $200 = Components.Schemas.SearchExternalCatalogResult;
+            export type $400 = Components.Schemas.Error;
+            export type $403 = Components.Schemas.Error;
+        }
+    }
     namespace $SearchProviders {
         export interface HeaderParameters {
             "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
@@ -4662,6 +5296,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
   /**
+   * $searchExternalCatalog - searchExternalCatalog
+   * 
+   * Returns the list of available products (including computed prices) based on a given context.
+   */
+  '$searchExternalCatalog'(
+    parameters?: Parameters<Paths.$SearchExternalCatalog.PathParameters> | null,
+    data?: Paths.$SearchExternalCatalog.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$SearchExternalCatalog.Responses.$200>
+  /**
    * $searchProviders - searchProviders
    * 
    * Returns the list of providers available based on a given location
@@ -4831,6 +5475,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
   }
+  ['/v1/public/integration/{integrationId}/external-catalog']: {
+    /**
+     * $searchExternalCatalog - searchExternalCatalog
+     * 
+     * Returns the list of available products (including computed prices) based on a given context.
+     */
+    'post'(
+      parameters?: Parameters<Paths.$SearchExternalCatalog.PathParameters> | null,
+      data?: Paths.$SearchExternalCatalog.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$SearchExternalCatalog.Responses.$200>
+  }
   ['/v1/public/integration/{integrationId}/providers:search']: {
     /**
      * $searchProviders - searchProviders
@@ -4945,13 +5601,19 @@ export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
 export type EntityRelation = Components.Schemas.EntityRelation;
 export type Error = Components.Schemas.Error;
+export type ExternalBasePrice = Components.Schemas.ExternalBasePrice;
+export type ExternalCompositePrice = Components.Schemas.ExternalCompositePrice;
 export type ExternalFeeMapping = Components.Schemas.ExternalFeeMapping;
 export type ExternalFeeMappings = Components.Schemas.ExternalFeeMappings;
 export type ExternalFeeMetadata = Components.Schemas.ExternalFeeMetadata;
+export type ExternalPriceTotalDetails = Components.Schemas.ExternalPriceTotalDetails;
+export type ExternalProduct = Components.Schemas.ExternalProduct;
+export type ExternalSimplePrice = Components.Schemas.ExternalSimplePrice;
 export type File = Components.Schemas.File;
 export type GasConcessionType = Components.Schemas.GasConcessionType;
 export type IntegrationCredentialsResult = Components.Schemas.IntegrationCredentialsResult;
 export type IntegrationId = Components.Schemas.IntegrationId;
+export type JourneyContext = Components.Schemas.JourneyContext;
 export type MarkupPricingModel = Components.Schemas.MarkupPricingModel;
 export type MetaData = Components.Schemas.MetaData;
 export type Opportunity = Components.Schemas.Opportunity;
@@ -4986,6 +5648,8 @@ export type RecurrenceAmountDto = Components.Schemas.RecurrenceAmountDto;
 export type RecurrenceAmountWithTax = Components.Schemas.RecurrenceAmountWithTax;
 export type SalesTax = Components.Schemas.SalesTax;
 export type SaveIntegrationCredentialsParams = Components.Schemas.SaveIntegrationCredentialsParams;
+export type SearchExternalCatalogParams = Components.Schemas.SearchExternalCatalogParams;
+export type SearchExternalCatalogResult = Components.Schemas.SearchExternalCatalogResult;
 export type SearchProvidersParams = Components.Schemas.SearchProvidersParams;
 export type SearchProvidersResult = Components.Schemas.SearchProvidersResult;
 export type SearchStreetsParams = Components.Schemas.SearchStreetsParams;
