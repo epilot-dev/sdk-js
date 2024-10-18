@@ -1,6 +1,6 @@
 {
   "name": "@epilot/audit-logs-client",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "JavaScript client library for the epilot Audit Logs API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
     "test": "jest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/audit-logs.yaml",
+    "openapi": "node ../../scripts/update-openapi.js ../../../backend/svc-audit-log-api/packages/functions/src/api/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",

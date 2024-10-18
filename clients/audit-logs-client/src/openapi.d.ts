@@ -89,12 +89,6 @@ declare namespace Components {
              */
             ip?: string;
             /**
-             * User agent of the caller
-             * example:
-             * Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3
-             */
-            user_agent?: string;
-            /**
              * HTTP headers
              * example:
              * {
@@ -113,6 +107,16 @@ declare namespace Components {
              * }
              */
             query?: {
+                [key: string]: any;
+            };
+            /**
+             * Path parameters
+             * example:
+             * {
+             *   "eventId": "2843c005-c5b0-4df2-94ee-1ca2ddd998ac"
+             * }
+             */
+            pathParams?: {
                 [key: string]: any;
             };
             /**
