@@ -2081,7 +2081,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "The iGd of the action or trigger"
+            "description": "The id of the action or trigger"
           },
           "origin": {
             "type": "string",
@@ -2114,6 +2114,26 @@
           "configuredScheduleId": {
             "type": "string",
             "description": "The id of the configured scheduler which will be added on automation triggered"
+          },
+          "numberOfUnits": {
+            "type": "number"
+          },
+          "timePeriod": {
+            "type": "string",
+            "enum": [
+              "minutes",
+              "hours",
+              "days",
+              "weeks",
+              "months"
+            ]
+          },
+          "timeRelation": {
+            "type": "string",
+            "enum": [
+              "after",
+              "before"
+            ]
           },
           "source": {
             "$ref": "#/components/schemas/ActionScheduleSource"
