@@ -24,6 +24,12 @@ declare namespace Components {
              */
             user_id?: string;
             /**
+             * Type of the system call
+             * example:
+             * automation
+             */
+            system_call_type?: string;
+            /**
              * Indicates if the call was made by a system
              * example:
              * false

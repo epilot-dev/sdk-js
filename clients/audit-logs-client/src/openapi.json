@@ -264,6 +264,11 @@
             "description": "ID of the user",
             "example": 123456
           },
+          "system_call_type": {
+            "type": "string",
+            "description": "Type of the system call",
+            "example": "automation"
+          },
           "is_system_call": {
             "type": "boolean",
             "description": "Indicates if the call was made by a system",
