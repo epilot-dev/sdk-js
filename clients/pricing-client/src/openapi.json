@@ -5395,112 +5395,9 @@
           "id"
         ]
       },
-      "ExternalBasePrice": {
+      "ExternalPriceFees": {
         "type": "object",
         "properties": {
-          "variable_price": {
-            "type": "boolean",
-            "description": "A flag to indicate if the price is variable.\n"
-          },
-          "unit": {
-            "description": "The unit of measurement used for display purposes and possibly for calculations when the price is variable.",
-            "type": "string",
-            "example": "kWh"
-          },
-          "currency": {
-            "type": "string",
-            "description": "The currency of the price. ISO 4217 currency code. E.g. EUR.",
-            "default": "EUR",
-            "example": "EUR"
-          },
-          "type": {
-            "type": "string",
-            "description": "The price type.",
-            "enum": [
-              "one_time",
-              "recurring"
-            ]
-          },
-          "billing_period": {
-            "$ref": "#/components/schemas/BillingPeriod",
-            "description": "The billing period of the price."
-          },
-          "unit_amount_gross_decimal": {
-            "type": "string",
-            "example": "1.19",
-            "description": "The unit gross amount value, as a string with all the decimal places."
-          },
-          "unit_amount_net_decimal": {
-            "type": "string",
-            "description": "The unit net amount value, as a string with all the decimal places.",
-            "example": "1.00"
-          },
-          "amount_subtotal_decimal": {
-            "type": "string",
-            "description": "Total of all items before discounts or taxes, as a string with all the decimal places.",
-            "example": "1.00"
-          },
-          "amount_total_decimal": {
-            "type": "string",
-            "description": "Total of all items after discounts and taxes, as a string with all the decimal places.",
-            "example": "1.19"
-          },
-          "tax": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "The tax name.",
-                "example": "VAT"
-              },
-              "description": {
-                "type": "string",
-                "description": "The tax description.",
-                "example": "Value Added Tax"
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "VAT",
-                  "GST",
-                  "Custom"
-                ],
-                "description": "The type of the tax.",
-                "example": "VAT"
-              },
-              "rate": {
-                "type": "number",
-                "description": "The tax rate applied.",
-                "example": 19
-              },
-              "region": {
-                "type": "string",
-                "description": "The region code of the tax.",
-                "example": "DE"
-              },
-              "region_label": {
-                "type": "string",
-                "description": "The region label of the tax.",
-                "example": "Germany"
-              }
-            },
-            "required": [
-              "rate"
-            ]
-          },
-          "price_display_in_journeys": {
-            "type": "string",
-            "enum": [
-              "show_price",
-              "show_as_starting_price",
-              "show_as_on_request"
-            ],
-            "description": "The way the price should be displayed in the journeys."
-          },
-          "is_tax_inclusive": {
-            "type": "boolean",
-            "description": "A flag to indicate if the price is tax inclusive."
-          },
           "fees": {
             "type": "object",
             "description": "Fees structure with static and variable amounts",
@@ -5573,20 +5470,12 @@
               "breakdown"
             ]
           }
-        },
-        "required": [
-          "type",
-          "unit_amount_decimal",
-          "unit_amount_gross_decimal",
-          "unit_amount_net_decimal",
-          "amount_subtotal_decimal",
-          "amount_total_decimal"
-        ]
+        }
       },
       "ExternalSimplePrice": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/ExternalBasePrice"
+            "$ref": "#/components/schemas/ExternalPriceFees"
           },
           {
             "type": "object",
@@ -5596,10 +5485,106 @@
                 "enum": [
                   false
                 ]
+              },
+              "variable_price": {
+                "type": "boolean",
+                "description": "A flag to indicate if the price is variable.\n"
+              },
+              "unit": {
+                "description": "The unit of measurement used for display purposes and possibly for calculations when the price is variable.",
+                "type": "string",
+                "example": "kWh"
+              },
+              "currency": {
+                "type": "string",
+                "description": "The currency of the price. ISO 4217 currency code. E.g. EUR.",
+                "default": "EUR",
+                "example": "EUR"
+              },
+              "type": {
+                "type": "string",
+                "description": "The price type.",
+                "enum": [
+                  "one_time",
+                  "recurring"
+                ]
+              },
+              "billing_period": {
+                "$ref": "#/components/schemas/BillingPeriod",
+                "description": "The billing period of the price."
+              },
+              "unit_amount_gross_decimal": {
+                "type": "string",
+                "example": "1.19",
+                "description": "The unit gross amount value, as a string with all the decimal places."
+              },
+              "unit_amount_net_decimal": {
+                "type": "string",
+                "description": "The unit net amount value, as a string with all the decimal places.",
+                "example": "1.00"
+              },
+              "amount_subtotal_decimal": {
+                "type": "string",
+                "description": "Total of all items before discounts or taxes, as a string with all the decimal places.",
+                "example": "1.00"
+              },
+              "amount_total_decimal": {
+                "type": "string",
+                "description": "Total of all items after discounts and taxes, as a string with all the decimal places.",
+                "example": "1.19"
+              },
+              "tax": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The tax name.",
+                    "example": "VAT"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The tax description.",
+                    "example": "Value Added Tax"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "VAT",
+                      "GST",
+                      "Custom"
+                    ],
+                    "description": "The type of the tax.",
+                    "example": "VAT"
+                  },
+                  "rate": {
+                    "type": "number",
+                    "description": "The tax rate applied.",
+                    "example": 19
+                  },
+                  "region": {
+                    "type": "string",
+                    "description": "The region code of the tax.",
+                    "example": "DE"
+                  },
+                  "region_label": {
+                    "type": "string",
+                    "description": "The region label of the tax.",
+                    "example": "Germany"
+                  }
+                },
+                "required": [
+                  "rate"
+                ]
               }
             },
             "required": [
-              "is_composite_price"
+              "is_composite_price",
+              "type",
+              "unit_amount_decimal",
+              "unit_amount_gross_decimal",
+              "unit_amount_net_decimal",
+              "amount_subtotal_decimal",
+              "amount_total_decimal"
             ]
           }
         ]
@@ -5607,7 +5592,7 @@
       "ExternalCompositePrice": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/ExternalBasePrice"
+            "$ref": "#/components/schemas/ExternalPriceFees"
           },
           {
             "type": "object",
@@ -7199,7 +7184,7 @@
       "external-catalog-sample-1": {
         "value": [
           {
-            "id": "73f857a4-0fbc-4aa6-983f-87c0d6d41111",
+            "id": "12312414",
             "name": "Home Energy Package",
             "description": "Composite home energy solution with solar panels and battery",
             "features": [
@@ -7208,27 +7193,16 @@
               "Smart energy management"
             ],
             "product_image_urls": [
-              "https://epilot-dev-user-content.s3.eu-central-1.amazonaws.com/739224/13e79129-6087-4e6a-b801-3752e8e9490c/solar_panel_ph.jpeg"
+              "https://example.com/images/home-energy-package.jpg"
             ],
             "legal_footnotes": "Installation and permitting fees may vary by location.",
             "price": {
               "is_composite_price": true,
-              "currency": "EUR",
-              "type": "recurring",
-              "billing_period": "monthly",
-              "unit_amount_gross_decimal": "29.38",
-              "unit_amount_net_decimal": "24.7",
-              "amount_subtotal_decimal": "419.110616246297",
-              "amount_total_decimal": "498.741633333333",
-              "price_display_in_journeys": "show_price",
               "price_components": [
                 {
-                  "is_composite_price": false,
                   "type": "recurring",
                   "billing_period": "monthly",
-                  "is_tax_inclusive": true,
                   "variable_price": true,
-                  "price_display_in_journeys": "show_price",
                   "unit": "kWh",
                   "amount_subtotal_decimal": "11.244355742297",
                   "amount_total_decimal": "13.380783333333",
@@ -7243,30 +7217,17 @@
                   }
                 },
                 {
-                  "is_composite_price": false,
-                  "price_display_in_journeys": "show_price",
-                  "variable_price": true,
-                  "type": "recurring",
-                  "billing_period": "monthly",
-                  "is_tax_inclusive": true,
-                  "unit": "kWh",
-                  "amount_subtotal_decimal": "407.866260504",
-                  "amount_total_decimal": "485.36085",
-                  "unit_amount_net_decimal": "14",
-                  "unit_amount_gross_decimal": "16",
-                  "currency": "EUR",
-                  "tax": {
-                    "name": "VAT",
-                    "type": "VAT",
-                    "rate": 19,
-                    "region": "DE"
-                  }
+                  "type": "one_time",
+                  "unit_amount_net_decimal": "99",
+                  "unit_amount_gross_decimal": "99",
+                  "amount_subtotal_decimal": "99",
+                  "amount_total_decimal": "99",
+                  "currency": "EUR"
                 }
               ],
               "fees": {
                 "amount_total_decimal": "410.84",
                 "amount_variable_decimal": "356.58",
-                "amount_static_decimal": "54.26",
                 "billing_period": "yearly",
                 "breakdown": {
                   "static": {
@@ -7308,43 +7269,7 @@
                       "billing_period": "monthly",
                       "amount_subtotal_decimal": "419.110616246297",
                       "amount_total_decimal": "498.741633333333"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          {
-            "id": "73f857a4-0fbc-4aa6-983f-87c0d6d41000",
-            "name": "Solar Panel X1",
-            "description": "High-efficiency solar panel for residential use",
-            "additional_notes": [
-              "Includes mounting hardware",
-              "Professional installation recommended"
-            ],
-            "price": {
-              "is_composite_price": true,
-              "currency": "EUR",
-              "type": "one_time",
-              "unit_amount_net_decimal": "99",
-              "unit_amount_gross_decimal": "99",
-              "amount_subtotal_decimal": "99",
-              "amount_total_decimal": "99",
-              "price_components": [
-                {
-                  "is_composite_price": false,
-                  "type": "one_time",
-                  "unit_amount_net_decimal": "99",
-                  "unit_amount_gross_decimal": "99",
-                  "amount_subtotal_decimal": "99",
-                  "amount_total_decimal": "99",
-                  "is_tax_inclusive": true,
-                  "currency": "EUR"
-                }
-              ],
-              "total_details": {
-                "breakdown": {
-                  "recurrences": [
+                    },
                     {
                       "type": "one_time",
                       "amount_subtotal_decimal": "99",
@@ -7352,35 +7277,6 @@
                     }
                   ]
                 }
-              }
-            }
-          },
-          {
-            "id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
-            "name": "Solar Panel X2",
-            "description": "High-efficiency solar panel for residential use",
-            "product_image_urls": [
-              "https://epilot-dev-user-content.s3.eu-central-1.amazonaws.com/739224/temp/379c442c-6e9b-40b9-806e-30ee5802754c/2-20-2-21-23-39-29m.jpeg"
-            ],
-            "recommendation_settings": {
-              "is_recommended": true,
-              "recommended_label": "Best Value"
-            },
-            "price": {
-              "is_composite_price": false,
-              "currency": "EUR",
-              "price_display_in_journeys": "show_price",
-              "type": "one_time",
-              "unit_amount_net_decimal": "25",
-              "unit_amount_gross_decimal": "25",
-              "amount_subtotal_decimal": "25",
-              "amount_total_decimal": "25",
-              "is_tax_inclusive": true,
-              "tax": {
-                "name": "no-tax",
-                "type": "VAT",
-                "rate": 0,
-                "region": "DE"
               }
             }
           }

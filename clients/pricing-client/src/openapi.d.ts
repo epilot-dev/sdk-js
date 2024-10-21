@@ -2015,254 +2015,7 @@ declare namespace Components {
              */
             cause?: string;
         }
-        export interface ExternalBasePrice {
-            /**
-             * A flag to indicate if the price is variable.
-             *
-             */
-            variable_price?: boolean;
-            /**
-             * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
-             * example:
-             * kWh
-             */
-            unit?: string;
-            /**
-             * The currency of the price. ISO 4217 currency code. E.g. EUR.
-             * example:
-             * EUR
-             */
-            currency?: string;
-            /**
-             * The price type.
-             */
-            type: "one_time" | "recurring";
-            /**
-             * The billing period of the price.
-             */
-            billing_period?: BillingPeriod;
-            /**
-             * The unit gross amount value, as a string with all the decimal places.
-             * example:
-             * 1.19
-             */
-            unit_amount_gross_decimal: string;
-            /**
-             * The unit net amount value, as a string with all the decimal places.
-             * example:
-             * 1.00
-             */
-            unit_amount_net_decimal: string;
-            /**
-             * Total of all items before discounts or taxes, as a string with all the decimal places.
-             * example:
-             * 1.00
-             */
-            amount_subtotal_decimal: string;
-            /**
-             * Total of all items after discounts and taxes, as a string with all the decimal places.
-             * example:
-             * 1.19
-             */
-            amount_total_decimal: string;
-            tax?: {
-                /**
-                 * The tax name.
-                 * example:
-                 * VAT
-                 */
-                name?: string;
-                /**
-                 * The tax description.
-                 * example:
-                 * Value Added Tax
-                 */
-                description?: string;
-                /**
-                 * The type of the tax.
-                 * example:
-                 * VAT
-                 */
-                type?: "VAT" | "GST" | "Custom";
-                /**
-                 * The tax rate applied.
-                 * example:
-                 * 19
-                 */
-                rate: number;
-                /**
-                 * The region code of the tax.
-                 * example:
-                 * DE
-                 */
-                region?: string;
-                /**
-                 * The region label of the tax.
-                 * example:
-                 * Germany
-                 */
-                region_label?: string;
-            };
-            /**
-             * The way the price should be displayed in the journeys.
-             */
-            price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request";
-            /**
-             * A flag to indicate if the price is tax inclusive.
-             */
-            is_tax_inclusive?: boolean;
-            /**
-             * Fees structure with static and variable amounts
-             */
-            fees?: {
-                /**
-                 * The billing period of the fee values (e.g. monthly).
-                 */
-                billing_period: BillingPeriod;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_total_decimal: string;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_static_decimal: string;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_variable_decimal: string;
-                /**
-                 * Breakdown of the fee values
-                 */
-                breakdown: {
-                    /**
-                     * Static breakdown of fees
-                     */
-                    static?: {
-                        [name: string]: {
-                            /**
-                             * The amount of the fee, as a string with all the decimal places.
-                             * example:
-                             * 1.00
-                             */
-                            amount_decimal?: string;
-                        };
-                    };
-                    /**
-                     * Variable breakdown of fees
-                     */
-                    variable?: {
-                        [name: string]: {
-                            /**
-                             * example:
-                             * 1.00
-                             */
-                            amount_decimal: string;
-                            /**
-                             * The unit of the fee (e.g. kWh) if applicable.
-                             */
-                            unit?: string;
-                        };
-                    };
-                };
-            };
-        }
         export interface ExternalCompositePrice {
-            /**
-             * A flag to indicate if the price is variable.
-             *
-             */
-            variable_price?: boolean;
-            /**
-             * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
-             * example:
-             * kWh
-             */
-            unit?: string;
-            /**
-             * The currency of the price. ISO 4217 currency code. E.g. EUR.
-             * example:
-             * EUR
-             */
-            currency?: string;
-            /**
-             * The price type.
-             */
-            type: "one_time" | "recurring";
-            billing_period?: BillingPeriod;
-            /**
-             * The unit gross amount value, as a string with all the decimal places.
-             * example:
-             * 1.19
-             */
-            unit_amount_gross_decimal: string;
-            /**
-             * The unit net amount value, as a string with all the decimal places.
-             * example:
-             * 1.00
-             */
-            unit_amount_net_decimal: string;
-            /**
-             * Total of all items before discounts or taxes, as a string with all the decimal places.
-             * example:
-             * 1.00
-             */
-            amount_subtotal_decimal: string;
-            /**
-             * Total of all items after discounts and taxes, as a string with all the decimal places.
-             * example:
-             * 1.19
-             */
-            amount_total_decimal: string;
-            tax?: {
-                /**
-                 * The tax name.
-                 * example:
-                 * VAT
-                 */
-                name?: string;
-                /**
-                 * The tax description.
-                 * example:
-                 * Value Added Tax
-                 */
-                description?: string;
-                /**
-                 * The type of the tax.
-                 * example:
-                 * VAT
-                 */
-                type?: "VAT" | "GST" | "Custom";
-                /**
-                 * The tax rate applied.
-                 * example:
-                 * 19
-                 */
-                rate: number;
-                /**
-                 * The region code of the tax.
-                 * example:
-                 * DE
-                 */
-                region?: string;
-                /**
-                 * The region label of the tax.
-                 * example:
-                 * Germany
-                 */
-                region_label?: string;
-            };
-            /**
-             * The way the price should be displayed in the journeys.
-             */
-            price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request";
-            /**
-             * A flag to indicate if the price is tax inclusive.
-             */
-            is_tax_inclusive?: boolean;
             /**
              * Fees structure with static and variable amounts
              */
@@ -2412,6 +2165,66 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
+        export interface ExternalPriceFees {
+            /**
+             * Fees structure with static and variable amounts
+             */
+            fees?: {
+                /**
+                 * The billing period of the fee values (e.g. monthly).
+                 */
+                billing_period: BillingPeriod;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_total_decimal: string;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_static_decimal: string;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_variable_decimal: string;
+                /**
+                 * Breakdown of the fee values
+                 */
+                breakdown: {
+                    /**
+                     * Static breakdown of fees
+                     */
+                    static?: {
+                        [name: string]: {
+                            /**
+                             * The amount of the fee, as a string with all the decimal places.
+                             * example:
+                             * 1.00
+                             */
+                            amount_decimal?: string;
+                        };
+                    };
+                    /**
+                     * Variable breakdown of fees
+                     */
+                    variable?: {
+                        [name: string]: {
+                            /**
+                             * example:
+                             * 1.00
+                             */
+                            amount_decimal: string;
+                            /**
+                             * The unit of the fee (e.g. kWh) if applicable.
+                             */
+                            unit?: string;
+                        };
+                    };
+                };
+            };
+        }
         /**
          * Details of the total price including shipping and tax amounts.
          */
@@ -2506,6 +2319,62 @@ declare namespace Components {
         }
         export interface ExternalSimplePrice {
             /**
+             * Fees structure with static and variable amounts
+             */
+            fees?: {
+                billing_period: BillingPeriod;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_total_decimal: string;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_static_decimal: string;
+                /**
+                 * example:
+                 * 1.00
+                 */
+                amount_variable_decimal: string;
+                /**
+                 * Breakdown of the fee values
+                 */
+                breakdown: {
+                    /**
+                     * Static breakdown of fees
+                     */
+                    static?: {
+                        [name: string]: {
+                            /**
+                             * The amount of the fee, as a string with all the decimal places.
+                             * example:
+                             * 1.00
+                             */
+                            amount_decimal?: string;
+                        };
+                    };
+                    /**
+                     * Variable breakdown of fees
+                     */
+                    variable?: {
+                        [name: string]: {
+                            /**
+                             * example:
+                             * 1.00
+                             */
+                            amount_decimal: string;
+                            /**
+                             * The unit of the fee (e.g. kWh) if applicable.
+                             */
+                            unit?: string;
+                        };
+                    };
+                };
+            };
+            is_composite_price: false;
+            /**
              * A flag to indicate if the price is variable.
              *
              */
@@ -2589,70 +2458,6 @@ declare namespace Components {
                  */
                 region_label?: string;
             };
-            /**
-             * The way the price should be displayed in the journeys.
-             */
-            price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request";
-            /**
-             * A flag to indicate if the price is tax inclusive.
-             */
-            is_tax_inclusive?: boolean;
-            /**
-             * Fees structure with static and variable amounts
-             */
-            fees?: {
-                billing_period: BillingPeriod;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_total_decimal: string;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_static_decimal: string;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_variable_decimal: string;
-                /**
-                 * Breakdown of the fee values
-                 */
-                breakdown: {
-                    /**
-                     * Static breakdown of fees
-                     */
-                    static?: {
-                        [name: string]: {
-                            /**
-                             * The amount of the fee, as a string with all the decimal places.
-                             * example:
-                             * 1.00
-                             */
-                            amount_decimal?: string;
-                        };
-                    };
-                    /**
-                     * Variable breakdown of fees
-                     */
-                    variable?: {
-                        [name: string]: {
-                            /**
-                             * example:
-                             * 1.00
-                             */
-                            amount_decimal: string;
-                            /**
-                             * The unit of the fee (e.g. kWh) if applicable.
-                             */
-                            unit?: string;
-                        };
-                    };
-                };
-            };
-            is_composite_price: false;
         }
         export interface File {
             [name: string]: any;
@@ -5601,11 +5406,11 @@ export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
 export type EntityRelation = Components.Schemas.EntityRelation;
 export type Error = Components.Schemas.Error;
-export type ExternalBasePrice = Components.Schemas.ExternalBasePrice;
 export type ExternalCompositePrice = Components.Schemas.ExternalCompositePrice;
 export type ExternalFeeMapping = Components.Schemas.ExternalFeeMapping;
 export type ExternalFeeMappings = Components.Schemas.ExternalFeeMappings;
 export type ExternalFeeMetadata = Components.Schemas.ExternalFeeMetadata;
+export type ExternalPriceFees = Components.Schemas.ExternalPriceFees;
 export type ExternalPriceTotalDetails = Components.Schemas.ExternalPriceTotalDetails;
 export type ExternalProduct = Components.Schemas.ExternalProduct;
 export type ExternalSimplePrice = Components.Schemas.ExternalSimplePrice;
