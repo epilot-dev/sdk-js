@@ -18,7 +18,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/order": {
@@ -29,7 +30,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/order/{id}": {
@@ -86,7 +88,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/catalog": {
@@ -97,7 +100,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/public/availability:check": {
@@ -115,7 +119,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/validate-availability/{id}": {
@@ -132,7 +137,27 @@
             "name": "X-Epilot-Org-ID",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/public/integration/{integrationId}/external-catalog": {
+      "post": {
+        "operationId": "$searchExternalCatalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v1/public/integration/{integrationId}/providers:search": {
@@ -155,7 +180,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/public/integration/{integrationId}/streets:search": {
@@ -178,7 +204,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/public/integration/{integrationId}/compute-price": {
@@ -200,7 +227,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/integration/{integrationId}/credentials": {
@@ -212,7 +240,8 @@
             "name": "integrationId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/integration/{integrationId}/credentials:save": {
@@ -229,7 +258,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/integration/{integrationId}/credentials:delete": {
@@ -241,7 +271,8 @@
             "name": "integrationId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     }
   },
