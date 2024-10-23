@@ -5607,6 +5607,10 @@
           {
             "type": "object",
             "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the composite price."
+              },
               "is_composite_price": {
                 "type": "boolean",
                 "enum": [

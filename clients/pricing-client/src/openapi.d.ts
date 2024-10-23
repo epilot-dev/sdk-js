@@ -2072,6 +2072,10 @@ declare namespace Components {
                     };
                 };
             };
+            /**
+             * The name of the composite price.
+             */
+            name?: string;
             is_composite_price: true;
             price_components: ExternalSimplePrice[];
             total_details: /* Details of the total price including shipping and tax amounts. */ ExternalPriceTotalDetails;
