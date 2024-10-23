@@ -1908,7 +1908,8 @@ declare namespace Components {
             _updated_at: string; // date-time
             name: string;
             description?: string;
-            type: "fixed" | "percentage";
+            type?: "fixed" | "percentage";
+            category?: "discount" | "bonus";
             /**
              * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
              */
@@ -2379,6 +2380,10 @@ declare namespace Components {
              *
              */
             variable_price?: boolean;
+            /**
+             * The name of the price.
+             */
+            name?: string;
             /**
              * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
              * example:

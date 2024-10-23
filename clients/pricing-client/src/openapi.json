@@ -4858,7 +4858,6 @@
         "additionalProperties": true,
         "required": [
           "name",
-          "type",
           "_id",
           "_title",
           "_org",
@@ -4918,6 +4917,13 @@
             "enum": [
               "fixed",
               "percentage"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "discount",
+              "bonus"
             ]
           },
           "percentage_value": {
@@ -5489,6 +5495,10 @@
               "variable_price": {
                 "type": "boolean",
                 "description": "A flag to indicate if the price is variable.\n"
+              },
+              "name": {
+                "type": "string",
+                "description": "The name of the price."
               },
               "unit": {
                 "description": "The unit of measurement used for display purposes and possibly for calculations when the price is variable.",
@@ -7197,9 +7207,11 @@
             ],
             "legal_footnotes": "Installation and permitting fees may vary by location.",
             "price": {
+              "name": "Home Energy Package",
               "is_composite_price": true,
               "price_components": [
                 {
+                  "name": "Working Price",
                   "type": "recurring",
                   "billing_period": "monthly",
                   "variable_price": true,
@@ -7217,6 +7229,7 @@
                   }
                 },
                 {
+                  "name": "Base Price",
                   "type": "one_time",
                   "unit_amount_net_decimal": "99",
                   "unit_amount_gross_decimal": "99",
