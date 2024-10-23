@@ -11,48 +11,13 @@
   ],
   "paths": {
     "/v1/logs": {
-      "get": {
+      "post": {
         "operationId": "getLogs",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "limit"
-          },
-          {
-            "in": "query",
-            "name": "page"
-          },
-          {
-            "in": "query",
-            "name": "timestamp",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "service_name",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "event_name",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "caller_user_email",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "caller_user_id",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "method",
-            "required": false
+        "requestBody": {
+          "content": {
+            "application/json": {}
           }
-        ],
+        },
         "responses": {}
       }
     },

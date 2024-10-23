@@ -23,93 +23,22 @@
   ],
   "paths": {
     "/v1/logs": {
-      "get": {
+      "post": {
         "operationId": "getLogs",
         "summary": "getLogs",
         "description": "Retrieve Audit Log events. Optionally, you can filter them by organization.",
         "tags": [
           "Events"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "default": 50,
-              "description": "Maximum number of results to return."
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOptions"
+              }
             }
-          },
-          {
-            "in": "query",
-            "name": "page",
-            "schema": {
-              "type": "integer",
-              "default": 0,
-              "description": "Page number to return."
-            }
-          },
-          {
-            "in": "query",
-            "name": "timestamp",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "Timestamp of the event in ISO 8601 format",
-            "example": "2021-06-01T12:00:00Z"
-          },
-          {
-            "in": "query",
-            "name": "service_name",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "Name of the service that triggered the event",
-            "example": "workflows"
-          },
-          {
-            "in": "query",
-            "name": "event_name",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "Action that was performed (event name)",
-            "example": "deleteWorkflow"
-          },
-          {
-            "in": "query",
-            "name": "caller_user_email",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "Email of the user who initiated the event",
-            "example": "max.mustermann@mail.com"
-          },
-          {
-            "in": "query",
-            "name": "caller_user_id",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "ID of the user who initiated the event",
-            "example": 123456
-          },
-          {
-            "in": "query",
-            "name": "method",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "HTTP method",
-            "example": "POST"
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "Success - audit logs where loaded successfully. Empty array if org has no executions.",
@@ -204,6 +133,72 @@
   },
   "components": {
     "schemas": {
+      "SearchOptions": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "example": 50
+          },
+          "page": {
+            "type": "integer",
+            "description": "Page number to return",
+            "example": 0
+          },
+          "timestamp": {
+            "type": "object",
+            "description": "Timestamp of the event in ISO 8601 format",
+            "example": "2021-06-01T12:00:00Z",
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              }
+            }
+          },
+          "service_name": {
+            "type": "string",
+            "description": "Name of the service that triggered the event",
+            "example": "workflows"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Action that was performed (event name)",
+            "example": "deleteWorkflow"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "Outcome of the event i.e. success or failed events",
+            "enum": [
+              "success",
+              "failure"
+            ]
+          },
+          "method": {
+            "type": "string",
+            "description": "HTTP method",
+            "example": "POST"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "description": "Email of the user who initiated the event",
+                "example": "max.mustermann@mail.com"
+              },
+              "user_id": {
+                "type": "string",
+                "description": "ID of the user who initiated the event",
+                "example": 123456
+              }
+            }
+          }
+        }
+      },
       "HttpContext": {
         "type": "object",
         "properties": {

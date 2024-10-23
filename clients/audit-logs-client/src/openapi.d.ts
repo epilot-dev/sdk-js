@@ -138,6 +138,65 @@ declare namespace Components {
              */
             domainName?: string;
         }
+        export interface SearchOptions {
+            /**
+             * Maximum number of results to return
+             * example:
+             * 50
+             */
+            limit?: number;
+            /**
+             * Page number to return
+             * example:
+             * 0
+             */
+            page?: number;
+            /**
+             * Timestamp of the event in ISO 8601 format
+             * example:
+             * 2021-06-01T12:00:00Z
+             */
+            timestamp?: {
+                from?: string;
+                to?: string;
+            };
+            /**
+             * Name of the service that triggered the event
+             * example:
+             * workflows
+             */
+            service_name?: string;
+            /**
+             * Action that was performed (event name)
+             * example:
+             * deleteWorkflow
+             */
+            event_name?: string;
+            /**
+             * Outcome of the event i.e. success or failed events
+             */
+            outcome?: "success" | "failure";
+            /**
+             * HTTP method
+             * example:
+             * POST
+             */
+            method?: string;
+            user?: {
+                /**
+                 * Email of the user who initiated the event
+                 * example:
+                 * max.mustermann@mail.com
+                 */
+                email?: string;
+                /**
+                 * ID of the user who initiated the event
+                 * example:
+                 * 123456
+                 */
+                user_id?: string;
+            };
+        }
     }
 }
 declare namespace Paths {
@@ -167,32 +226,7 @@ declare namespace Paths {
         }
     }
     namespace GetLogs {
-        namespace Parameters {
-            export type CallerUserEmail = string;
-            export type CallerUserId = string;
-            export type EventName = string;
-            /**
-             * Maximum number of results to return.
-             */
-            export type Limit = number;
-            export type Method = string;
-            /**
-             * Page number to return.
-             */
-            export type Page = number;
-            export type ServiceName = string;
-            export type Timestamp = string;
-        }
-        export interface QueryParameters {
-            limit?: /* Maximum number of results to return. */ Parameters.Limit;
-            page?: /* Page number to return. */ Parameters.Page;
-            timestamp?: Parameters.Timestamp;
-            service_name?: Parameters.ServiceName;
-            event_name?: Parameters.EventName;
-            caller_user_email?: Parameters.CallerUserEmail;
-            caller_user_id?: Parameters.CallerUserId;
-            method?: Parameters.Method;
-        }
+        export type RequestBody = Components.Schemas.SearchOptions;
         namespace Responses {
             export interface $200 {
                 logs?: Components.Schemas.Event[];
@@ -214,8 +248,8 @@ export interface OperationMethods {
    * Retrieve Audit Log events. Optionally, you can filter them by organization.
    */
   'getLogs'(
-    parameters?: Parameters<Paths.GetLogs.QueryParameters> | null,
-    data?: any,
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetLogs.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetLogs.Responses.$200>
   /**
@@ -247,9 +281,9 @@ export interface PathsDictionary {
      * 
      * Retrieve Audit Log events. Optionally, you can filter them by organization.
      */
-    'get'(
-      parameters?: Parameters<Paths.GetLogs.QueryParameters> | null,
-      data?: any,
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetLogs.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetLogs.Responses.$200>
   }
@@ -282,3 +316,4 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type Caller = Components.Schemas.Caller;
 export type Event = Components.Schemas.Event;
 export type HttpContext = Components.Schemas.HttpContext;
+export type SearchOptions = Components.Schemas.SearchOptions;
