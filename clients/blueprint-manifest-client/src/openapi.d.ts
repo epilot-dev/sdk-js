@@ -112,6 +112,21 @@ declare namespace Components {
              */
             is_virtual?: boolean;
         }
+        export interface FormattedError {
+            error?: string | {
+                [key: string]: any;
+            };
+            code?: FormattedErrorCodes;
+            data?: FormattedErrorData;
+        }
+        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error";
+        export interface FormattedErrorData {
+            resource?: {
+                id?: string;
+                name?: string;
+                type?: string;
+            };
+        }
         export interface Job {
             job_id?: /**
              * ID of an import or export job (state machine)
@@ -146,6 +161,7 @@ declare namespace Components {
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
             is_verified?: boolean;
+            errors?: FormattedError[];
             /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
@@ -214,6 +230,12 @@ declare namespace Components {
         export type JobID = string;
         export type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
         export interface Manifest {
+            import_job_id?: /**
+             * ID of an import or export job (state machine)
+             * example:
+             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+             */
+            JobID;
             manifest_id?: /**
              * ID of an imported / installed manifest
              * example:
@@ -911,6 +933,9 @@ export type CommonImportFields = Components.Schemas.CommonImportFields;
 export type CommonManifestFields = Components.Schemas.CommonManifestFields;
 export type CommonMarkdownFields = Components.Schemas.CommonMarkdownFields;
 export type CommonResourceNode = Components.Schemas.CommonResourceNode;
+export type FormattedError = Components.Schemas.FormattedError;
+export type FormattedErrorCodes = Components.Schemas.FormattedErrorCodes;
+export type FormattedErrorData = Components.Schemas.FormattedErrorData;
 export type Job = Components.Schemas.Job;
 export type JobID = Components.Schemas.JobID;
 export type JobStatus = Components.Schemas.JobStatus;

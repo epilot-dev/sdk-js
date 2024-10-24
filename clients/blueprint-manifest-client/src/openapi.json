@@ -476,6 +476,14 @@
       "Manifest": {
         "allOf": [
           {
+            "type": "object",
+            "properties": {
+              "import_job_id": {
+                "$ref": "#/components/schemas/JobID"
+              }
+            }
+          },
+          {
             "$ref": "#/components/schemas/CommonManifestFields"
           },
           {
@@ -733,6 +741,12 @@
               "is_verified": {
                 "type": "boolean",
                 "description": "Whether the manifest comes from a trusted source and is signed by epilot"
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FormattedError"
+                }
               }
             }
           },
@@ -866,6 +880,57 @@
                 "example": "This is the content of the postinstall.md file\n"
               }
             }
+          }
+        }
+      },
+      "FormattedErrorCodes": {
+        "type": "string",
+        "enum": [
+          "dependency_extraction",
+          "resource_not_found",
+          "resource_fetch_api_error",
+          "resource_fetch_unknown_error",
+          "terraform_cli_process_error",
+          "terraform_import_block_process_error"
+        ]
+      },
+      "FormattedErrorData": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "FormattedError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          },
+          "code": {
+            "$ref": "#/components/schemas/FormattedErrorCodes"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FormattedErrorData"
           }
         }
       }
