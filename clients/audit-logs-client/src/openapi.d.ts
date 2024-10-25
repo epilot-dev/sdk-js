@@ -81,6 +81,16 @@ declare namespace Components {
              * {"workflow_id": "123456"}
              */
             detail?: string;
+            /**
+             * Description of the event
+             * example:
+             * Workflow with ID 123456 was deleted
+             */
+            activity?: string;
+            /**
+             * URL of the ressource that was modified
+             */
+            source_url?: string;
         }
         export interface HttpContext {
             /**

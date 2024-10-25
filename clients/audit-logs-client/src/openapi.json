@@ -315,6 +315,15 @@
             "type": "string",
             "description": "Contains the stringified request body",
             "example": "{\"workflow_id\": \"123456\"}"
+          },
+          "activity": {
+            "type": "string",
+            "description": "Description of the event",
+            "example": "Workflow with ID 123456 was deleted"
+          },
+          "source_url": {
+            "type": "string",
+            "description": "URL of the ressource that was modified"
           }
         }
       }
