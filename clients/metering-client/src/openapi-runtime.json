@@ -113,6 +113,28 @@
         "responses": {}
       }
     },
+    "/v2/metering/readings": {
+      "post": {
+        "operationId": "batchWriteMeterReadings",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "async",
+            "required": false
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/metering/reading/submission": {
       "post": {
         "operationId": "createMeterReadingFromSubmission",
@@ -255,48 +277,6 @@
         ],
         "responses": {}
       }
-    },
-    "/v1/metering/down-sample/readings/{meter_id}/{counter_id}": {
-      "get": {
-        "operationId": "getDownSampleReadingsByInterval",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "meter_id",
-            "required": true
-          },
-          {
-            "in": "path",
-            "name": "counter_id",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "start_date",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "end_date",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "group_by"
-          },
-          {
-            "in": "query",
-            "name": "direction",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "sort",
-            "required": false
-          }
-        ],
-        "responses": {}
-      }
     }
   },
   "components": {
@@ -322,6 +302,36 @@
         }
       },
       "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestUpdateMeter": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestCreateMeterReading": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestCreateMeterReadings": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestCreateMeterReadingFromSubmission": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestCreateReadingWithMeter": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestUpdateMeterReading": {
         "content": {
           "application/json": {}
         }

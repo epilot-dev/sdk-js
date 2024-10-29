@@ -193,7 +193,7 @@
             }
           },
           "400": {
-            "$ref": "#/components/responses/InvalidRequest"
+            "$ref": "#/components/responses/InvalidRequestUpdateMeter"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -428,7 +428,7 @@
             }
           },
           "400": {
-            "$ref": "#/components/responses/InvalidRequest"
+            "$ref": "#/components/responses/InvalidRequestCreateMeterReading"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -509,7 +509,105 @@
             }
           },
           "400": {
-            "$ref": "#/components/responses/InvalidRequest"
+            "$ref": "#/components/responses/InvalidRequestCreateMeterReadings"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/metering/readings": {
+      "post": {
+        "operationId": "batchWriteMeterReadings",
+        "summary": "Batch Write Readings",
+        "description": "Upserts/Deletes multiple meter readings at once. Limited to 100 readings per request.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "async",
+            "description": "Don't wait for the reading to become available in GetReadings API. Useful for large migrations",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "description": "Meter readings payload. Limited to 100 readings per request.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "readings": {
+                    "type": "array",
+                    "items": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/MeterReading"
+                        },
+                        {
+                          "properties": {
+                            "operation": {
+                              "type": "string",
+                              "enum": [
+                                "create",
+                                "update",
+                                "delete"
+                              ],
+                              "default": "create"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter readings created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterReading"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequestCreateMeterReadings"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -592,7 +690,7 @@
             }
           },
           "400": {
-            "$ref": "#/components/responses/InvalidRequest"
+            "$ref": "#/components/responses/InvalidRequestCreateMeterReadingFromSubmission"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -729,7 +827,7 @@
             }
           },
           "400": {
-            "$ref": "#/components/responses/InvalidRequest"
+            "$ref": "#/components/responses/InvalidRequestCreateReadingWithMeter"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -965,7 +1063,7 @@
             }
           },
           "400": {
-            "$ref": "#/components/responses/InvalidRequest"
+            "$ref": "#/components/responses/InvalidRequestUpdateMeterReading"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -1062,130 +1160,6 @@
           }
         }
       }
-    },
-    "/v1/metering/down-sample/readings/{meter_id}/{counter_id}": {
-      "get": {
-        "operationId": "getDownSampleReadingsByInterval",
-        "summary": "Get Down Sample Readings by Interval",
-        "description": "Retrieves the downsampled data of the entire readings specified in an interval.\nIf the start_date and end_date are equal, then it returns the readings of the specified date.\nThe start_date should be less than or equal to the end_date.\n",
-        "tags": [
-          "ECP Admin",
-          "ECP"
-        ],
-        "security": [
-          {
-            "EitherAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "meter_id",
-            "schema": {
-              "$ref": "#/components/schemas/Id"
-            },
-            "required": true,
-            "description": "The ID of the meter."
-          },
-          {
-            "in": "path",
-            "name": "counter_id",
-            "schema": {
-              "$ref": "#/components/schemas/Id"
-            },
-            "required": true,
-            "description": "The ID of the counter."
-          },
-          {
-            "in": "query",
-            "name": "start_date",
-            "required": false,
-            "description": "If not provided, the system will default to 2000-01-01.",
-            "schema": {
-              "type": "string",
-              "example": "2022-10-01"
-            }
-          },
-          {
-            "in": "query",
-            "name": "end_date",
-            "required": false,
-            "description": "If not provided, the system will default to today's date.",
-            "schema": {
-              "type": "string",
-              "example": "2022-10-10"
-            }
-          },
-          {
-            "in": "query",
-            "name": "group_by",
-            "schema": {
-              "type": "string",
-              "default": "day",
-              "enum": [
-                "day",
-                "week",
-                "month",
-                "year"
-              ]
-            }
-          },
-          {
-            "in": "query",
-            "name": "direction",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/Direction"
-            }
-          },
-          {
-            "in": "query",
-            "name": "sort",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "asc",
-              "enum": [
-                "asc",
-                "desc"
-              ]
-            },
-            "description": "If this value is provided as \"asc\", then the results will be sorted by the timestamp field in ascending order.\nIf this value is provided as \"desc\", then the results will be sorted by the timestamp field in descending order.\n"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Downsampled readings retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/MeterReading"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/InvalidRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
     }
   },
   "components": {
@@ -1236,6 +1210,168 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "InvalidRequestUpdateMeter": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "missing_params"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "InvalidRequestCreateMeterReading": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "contract_period",
+                        "no_counter",
+                        "no_direction",
+                        "timestamp_future",
+                        "less_than_previous",
+                        "greater_than_subsequent",
+                        "meter_decommissioned"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "InvalidRequestCreateMeterReadings": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "too_many_records",
+                        "timestamp_future",
+                        "duplicate_reading",
+                        "less_than_previous"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "InvalidRequestCreateMeterReadingFromSubmission": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "timestamp_future",
+                        "less_than_previous",
+                        "greater_than_subsequent"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "InvalidRequestCreateReadingWithMeter": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "missing_params",
+                        "timestamp_future",
+                        "less_than_previous",
+                        "contract_period",
+                        "greater_than_subsequent"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "InvalidRequestUpdateMeterReading": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "missing_params",
+                        "timestamp_future",
+                        "less_than_previous",
+                        "greater_than_subsequent"
+                      ]
+                    }
+                  }
+                }
+              ]
             }
           }
         }

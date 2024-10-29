@@ -24,6 +24,48 @@ declare namespace Components {
         export type Forbidden = Schemas.ErrorResp;
         export type InternalServerError = Schemas.ErrorResp;
         export type InvalidRequest = Schemas.ErrorResp;
+        export interface InvalidRequestCreateMeterReading {
+            /**
+             * Error message
+             */
+            message?: string;
+            reason?: "contract_period" | "no_counter" | "no_direction" | "timestamp_future" | "less_than_previous" | "greater_than_subsequent" | "meter_decommissioned";
+        }
+        export interface InvalidRequestCreateMeterReadingFromSubmission {
+            /**
+             * Error message
+             */
+            message?: string;
+            reason?: "timestamp_future" | "less_than_previous" | "greater_than_subsequent";
+        }
+        export interface InvalidRequestCreateMeterReadings {
+            /**
+             * Error message
+             */
+            message?: string;
+            reason?: "too_many_records" | "timestamp_future" | "duplicate_reading" | "less_than_previous";
+        }
+        export interface InvalidRequestCreateReadingWithMeter {
+            /**
+             * Error message
+             */
+            message?: string;
+            reason?: "missing_params" | "timestamp_future" | "less_than_previous" | "contract_period" | "greater_than_subsequent";
+        }
+        export interface InvalidRequestUpdateMeter {
+            /**
+             * Error message
+             */
+            message?: string;
+            reason?: "missing_params";
+        }
+        export interface InvalidRequestUpdateMeterReading {
+            /**
+             * Error message
+             */
+            message?: string;
+            reason?: "missing_params" | "timestamp_future" | "less_than_previous" | "greater_than_subsequent";
+        }
         export type NotFound = Schemas.ErrorResp;
         export type Unauthorized = Schemas.ErrorResp;
     }
@@ -571,13 +613,71 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace BatchWriteMeterReadings {
+        namespace Parameters {
+            export type ActivityId = /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            Components.Schemas.ActivityId /* ulid */;
+            export type Async = boolean;
+        }
+        export interface QueryParameters {
+            async?: Parameters.Async;
+            activity_id?: Parameters.ActivityId;
+        }
+        export interface RequestBody {
+            readings?: {
+                /**
+                 * The reading value of the meter
+                 * example:
+                 * 240
+                 */
+                value: number;
+                read_by?: /**
+                 * The person who recorded the reading
+                 * example:
+                 * John Doe
+                 */
+                Components.Schemas.ReadBy;
+                reason?: /**
+                 * The reason for recording the reading
+                 * example:
+                 * Storing the feed-in record
+                 */
+                Components.Schemas.Reason;
+                meter_id: Components.Schemas.EntityId /* uuid */;
+                counter_id?: Components.Schemas.EntityId /* uuid */;
+                direction?: Components.Schemas.Direction;
+                /**
+                 * If the value is not provided, the system will be set with the time the request is processed.
+                 * example:
+                 * 2022-10-10T00:00:00.000Z
+                 */
+                timestamp?: string;
+                source: Components.Schemas.Source;
+                status?: Components.Schemas.ReadingStatus;
+                operation?: "create" | "update" | "delete";
+            }[];
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.MeterReading[];
+            }
+            export type $400 = Components.Responses.InvalidRequestCreateMeterReadings;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace CreateMeterReading {
         export type RequestBody = Components.Schemas.MeterReading;
         namespace Responses {
             export interface $200 {
                 data?: Components.Schemas.MeterReading;
             }
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $400 = Components.Responses.InvalidRequestCreateMeterReading;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -607,7 +707,7 @@ declare namespace Paths {
             export interface $200 {
                 message?: "Successfully Processed";
             }
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $400 = Components.Responses.InvalidRequestCreateMeterReadingFromSubmission;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -634,7 +734,7 @@ declare namespace Paths {
             export interface $200 {
                 data?: Components.Schemas.MeterReading[];
             }
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $400 = Components.Responses.InvalidRequestCreateMeterReadings;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -646,7 +746,7 @@ declare namespace Paths {
             export interface $200 {
                 data?: Components.Schemas.MeterReading;
             }
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $400 = Components.Responses.InvalidRequestCreateReadingWithMeter;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -875,53 +975,6 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace GetDownSampleReadingsByInterval {
-        namespace Parameters {
-            export type CounterId = Components.Schemas.Id;
-            export type Direction = Components.Schemas.Direction;
-            /**
-             * example:
-             * 2022-10-10
-             */
-            export type EndDate = string;
-            export type GroupBy = "day" | "week" | "month" | "year";
-            export type MeterId = Components.Schemas.Id;
-            export type Sort = "asc" | "desc";
-            /**
-             * example:
-             * 2022-10-01
-             */
-            export type StartDate = string;
-        }
-        export interface PathParameters {
-            meter_id: Parameters.MeterId;
-            counter_id: Parameters.CounterId;
-        }
-        export interface QueryParameters {
-            start_date?: /**
-             * example:
-             * 2022-10-01
-             */
-            Parameters.StartDate;
-            end_date?: /**
-             * example:
-             * 2022-10-10
-             */
-            Parameters.EndDate;
-            group_by?: Parameters.GroupBy;
-            direction?: Parameters.Direction;
-            sort?: Parameters.Sort;
-        }
-        namespace Responses {
-            export interface $200 {
-                data?: Components.Schemas.MeterReading[];
-            }
-            export type $400 = Components.Responses.InvalidRequest;
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
     namespace GetMeter {
         namespace Parameters {
             export type Id = Components.Schemas.EntityId /* uuid */;
@@ -1066,7 +1119,7 @@ declare namespace Paths {
             export interface $200 {
                 data?: Components.Schemas.Meter;
             }
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $400 = Components.Responses.InvalidRequestUpdateMeter;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -1098,7 +1151,7 @@ declare namespace Paths {
             export interface $200 {
                 data?: Components.Schemas.MeterReading;
             }
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $400 = Components.Responses.InvalidRequestUpdateMeterReading;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -1188,6 +1241,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReadings.Responses.$200>
   /**
+   * batchWriteMeterReadings - Batch Write Readings
+   * 
+   * Upserts/Deletes multiple meter readings at once. Limited to 100 readings per request.
+   */
+  'batchWriteMeterReadings'(
+    parameters?: Parameters<Paths.BatchWriteMeterReadings.QueryParameters> | null,
+    data?: Paths.BatchWriteMeterReadings.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BatchWriteMeterReadings.Responses.$200>
+  /**
    * createMeterReadingFromSubmission - Create Meter Reading from Submission
    * 
    * Creates a reading from a journey submission.
@@ -1250,19 +1313,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteMeterReading.Responses.$200>
-  /**
-   * getDownSampleReadingsByInterval - Get Down Sample Readings by Interval
-   * 
-   * Retrieves the downsampled data of the entire readings specified in an interval.
-   * If the start_date and end_date are equal, then it returns the readings of the specified date.
-   * The start_date should be less than or equal to the end_date.
-   * 
-   */
-  'getDownSampleReadingsByInterval'(
-    parameters?: Parameters<Paths.GetDownSampleReadingsByInterval.QueryParameters & Paths.GetDownSampleReadingsByInterval.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetDownSampleReadingsByInterval.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1360,6 +1410,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMeterReadings.Responses.$200>
   }
+  ['/v2/metering/readings']: {
+    /**
+     * batchWriteMeterReadings - Batch Write Readings
+     * 
+     * Upserts/Deletes multiple meter readings at once. Limited to 100 readings per request.
+     */
+    'post'(
+      parameters?: Parameters<Paths.BatchWriteMeterReadings.QueryParameters> | null,
+      data?: Paths.BatchWriteMeterReadings.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BatchWriteMeterReadings.Responses.$200>
+  }
   ['/v1/metering/reading/submission']: {
     /**
      * createMeterReadingFromSubmission - Create Meter Reading from Submission
@@ -1430,21 +1492,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteMeterReading.Responses.$200>
-  }
-  ['/v1/metering/down-sample/readings/{meter_id}/{counter_id}']: {
-    /**
-     * getDownSampleReadingsByInterval - Get Down Sample Readings by Interval
-     * 
-     * Retrieves the downsampled data of the entire readings specified in an interval.
-     * If the start_date and end_date are equal, then it returns the readings of the specified date.
-     * The start_date should be less than or equal to the end_date.
-     * 
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetDownSampleReadingsByInterval.QueryParameters & Paths.GetDownSampleReadingsByInterval.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetDownSampleReadingsByInterval.Responses.$200>
   }
 }
 
