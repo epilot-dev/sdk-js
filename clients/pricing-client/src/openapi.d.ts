@@ -2307,7 +2307,9 @@ declare namespace Components {
              * example:
              * {
              *   "is_recommended": true,
-             *   "recommended_label": "Best Value"
+             *   "recommended_label": "Best Value",
+             *   "recommended_color": "#00FF00",
+             *   "recommended_label_color": "#FFFFFF"
              * }
              */
             recommendation_settings?: {
@@ -2319,6 +2321,14 @@ declare namespace Components {
                  * Label to display when the product is recommended.
                  */
                 recommended_label?: string;
+                /**
+                 * Color to display when the product is recommended.
+                 */
+                recommended_color?: string;
+                /**
+                 * Color of the recommended label.
+                 */
+                recommended_label_color?: string;
             };
             price: ExternalSimplePrice | ExternalCompositePrice;
         }
@@ -2405,6 +2415,38 @@ declare namespace Components {
              */
             type: "one_time" | "recurring";
             billing_period?: BillingPeriod;
+            /**
+             * The billing period duration
+             */
+            billing_duration_amount?: number;
+            /**
+             * The billing period duration unit
+             */
+            billing_duration_unit?: "weeks" | "months" | "years";
+            /**
+             * The notice period duration
+             */
+            notice_time_amount?: number;
+            /**
+             * The notice period duration unit
+             */
+            notice_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The termination period duration
+             */
+            termination_time_amount?: number;
+            /**
+             * The termination period duration unit
+             */
+            termination_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The renewal period duration
+             */
+            renewal_duration_amount?: number;
+            /**
+             * The renewal period duration unit
+             */
+            renewal_duration_unit?: "weeks" | "months" | "years";
             /**
              * The unit gross amount value, as a string with all the decimal places.
              * example:
