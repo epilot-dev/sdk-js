@@ -4059,6 +4059,16 @@
             "description": "The discount amount as a string with all the decimal places.",
             "readOnly": true
           },
+          "bonus_amount": {
+            "type": "integer",
+            "description": "The bonus amount.",
+            "readOnly": true
+          },
+          "bonus_amount_decimal": {
+            "type": "string",
+            "description": "The bonus amount as a string with all the decimal places.",
+            "readOnly": true
+          },
           "discount_percentage": {
             "type": "integer",
             "description": "The discount percentage, if the applied coupon had a percentage type.",

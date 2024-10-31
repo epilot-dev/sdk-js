@@ -90,6 +90,14 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
+             * The bonus amount.
+             */
+            bonus_amount?: number;
+            /**
+             * The bonus amount as a string with all the decimal places.
+             */
+            bonus_amount_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -228,6 +236,14 @@ declare namespace Components {
              * The discount amount as a string with all the decimal places.
              */
             discount_amount_decimal?: string;
+            /**
+             * The bonus amount.
+             */
+            bonus_amount?: number;
+            /**
+             * The bonus amount as a string with all the decimal places.
+             */
+            bonus_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -868,6 +884,14 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
+             * The bonus amount.
+             */
+            bonus_amount?: number;
+            /**
+             * The bonus amount as a string with all the decimal places.
+             */
+            bonus_amount_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -1183,6 +1207,14 @@ declare namespace Components {
              * The discount amount as a string with all the decimal places.
              */
             discount_amount_decimal?: string;
+            /**
+             * The bonus amount.
+             */
+            bonus_amount?: number;
+            /**
+             * The bonus amount as a string with all the decimal places.
+             */
+            bonus_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -3350,6 +3382,14 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
+             * The bonus amount.
+             */
+            bonus_amount?: number;
+            /**
+             * The bonus amount as a string with all the decimal places.
+             */
+            bonus_amount_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -4317,6 +4357,14 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
+             * The bonus amount.
+             */
+            bonus_amount?: number;
+            /**
+             * The bonus amount as a string with all the decimal places.
+             */
+            bonus_amount_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -4385,6 +4433,14 @@ declare namespace Components {
              * The discount amount as a string with all the decimal places.
              */
             discount_amount_decimal?: string;
+            /**
+             * The bonus amount.
+             */
+            bonus_amount?: number;
+            /**
+             * The bonus amount as a string with all the decimal places.
+             */
+            bonus_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
