@@ -158,6 +158,9 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ValidateEntityQueryParam"
           }
         ],
         "requestBody": {
@@ -171,6 +174,22 @@
     "/v1/entity/{slug}:validate": {
       "post": {
         "operationId": "validateEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathPriceParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/entity/{slug}:validate": {
+      "post": {
+        "operationId": "validateEntityV2",
         "parameters": [
           {
             "$ref": "#/components/parameters/EntitySlugPathPriceParam"
@@ -202,6 +221,9 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ValidateEntityQueryParam"
           },
           {
             "name": "strict",
@@ -295,6 +317,9 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ValidateEntityQueryParam"
           }
         ],
         "requestBody": {
@@ -324,6 +349,9 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ValidateEntityQueryParam"
           }
         ],
         "requestBody": {
@@ -1306,6 +1334,10 @@
         "name": "fill_activity",
         "in": "query",
         "required": false
+      },
+      "ValidateEntityQueryParam": {
+        "name": "validate",
+        "in": "query"
       }
     }
   },

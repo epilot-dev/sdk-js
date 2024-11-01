@@ -60,6 +60,7 @@ declare namespace Components {
         export type TaxonomySlugPathParam = string;
         export type TaxonomySlugQueryParam = string;
         export type TaxonomySlugQueryParamOptional = string;
+        export type ValidateEntityQueryParam = boolean;
     }
     export interface PathParameters {
         EntityIdPathParam?: Parameters.EntityIdPathParam;
@@ -89,6 +90,7 @@ declare namespace Components {
         EntityRelationsModeQueryParam?: Parameters.EntityRelationsModeQueryParam;
         DryRunQueryParam?: Parameters.DryRunQueryParam;
         FillActivityQueryParam?: Parameters.FillActivityQueryParam;
+        ValidateEntityQueryParam?: Parameters.ValidateEntityQueryParam;
     }
     namespace Schemas {
         export interface Activity {
@@ -2478,6 +2480,16 @@ declare namespace Components {
             plural: string;
             /**
              * example:
+             * Example description
+             */
+            description?: string;
+            /**
+             * example:
+             * https://docs.epilot.io/docs/pricing/entities
+             */
+            docs_url?: string; // uri
+            /**
+             * example:
              * false
              */
             published?: boolean;
@@ -2835,6 +2847,16 @@ declare namespace Components {
              * Contacts
              */
             plural: string;
+            /**
+             * example:
+             * Example description
+             */
+            description?: string;
+            /**
+             * example:
+             * https://docs.epilot.io/docs/pricing/entities
+             */
+            docs_url?: string; // uri
             /**
              * example:
              * false
@@ -3335,6 +3357,71 @@ declare namespace Components {
             errors: [
             ];
         }
+        export interface EntityValidationV2Error {
+            /**
+             * validation keyword.
+             */
+            keyword: string;
+            /**
+             * JSON Pointer to the location in the data instance (e.g., `"/prop/1/subProp"`).
+             */
+            instance_path: string;
+            /**
+             * JSON Pointer to the location of the failing keyword in the schema.
+             */
+            schema_path: string;
+            /**
+             * Additional information about error.
+             */
+            params: {
+                [name: string]: any;
+            };
+            /**
+             * Set for errors in `propertyNames` keyword schema. `instance_path` still points to the object in this case.
+             */
+            property_name?: string;
+            /**
+             * The error message.
+             */
+            message?: string;
+            /**
+             * The value of the failing keyword in the schema.
+             */
+            schema?: {
+                [key: string]: any;
+            };
+            /**
+             * The schema containing the keyword.
+             */
+            parent_schema?: {
+                [name: string]: any;
+            };
+            /**
+             * The data validated by the keyword.
+             */
+            data?: {
+                [name: string]: any;
+            };
+        }
+        export type EntityValidationV2Result = /* Validation result for a successful validation */ EntityValidationV2ResultSuccess | /* Validation result for a failed validation */ EntityValidationV2ResultError;
+        /**
+         * Validation result for a failed validation
+         */
+        export interface EntityValidationV2ResultError {
+            status: "error";
+            errors: [
+                EntityValidationV2Error,
+                ...EntityValidationV2Error[]
+            ];
+        }
+        /**
+         * Validation result for a successful validation
+         */
+        export interface EntityValidationV2ResultSuccess {
+            status: "success";
+            errors: [
+            ];
+        }
         export interface EntityViewDisabled {
             view_type?: "disabled";
         }
@@ -3597,6 +3684,11 @@ declare namespace Components {
             type: "headline";
             enable_divider?: boolean;
             divider?: "top_divider" | "bottom_divider";
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * Manifest ID used to create/update the schema group headline
              */
@@ -3621,6 +3713,11 @@ declare namespace Components {
             type: "headline";
             enable_divider?: boolean;
             divider?: "top_divider" | "bottom_divider";
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
             /**
              * Manifest ID used to create/update the schema group headline
              */
@@ -7404,6 +7501,7 @@ declare namespace Paths {
              * contact
              */
             Components.Schemas.EntitySlug;
+            export type Validate = boolean;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -7412,6 +7510,7 @@ declare namespace Paths {
             activity_id?: Parameters.ActivityId;
             fill_activity?: Parameters.FillActivity;
             async?: Parameters.Async;
+            validate?: Parameters.Validate;
         }
         export type RequestBody = /**
          * example:
@@ -7497,6 +7596,7 @@ declare namespace Paths {
              * }
              */
             Components.Schemas.EntityItem;
+            export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationV2ResultError;
         }
     }
     namespace CreateSavedView {
@@ -8847,6 +8947,7 @@ declare namespace Paths {
              * contact
              */
             Components.Schemas.EntitySlug;
+            export type Validate = boolean;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -8857,6 +8958,7 @@ declare namespace Paths {
             fill_activity?: Parameters.FillActivity;
             dry_run?: Parameters.DryRun;
             async?: Parameters.Async;
+            validate?: Parameters.Validate;
         }
         export type RequestBody = /**
          * example:
@@ -8944,6 +9046,7 @@ declare namespace Paths {
             Components.Schemas.EntityItem;
             export interface $409 {
             }
+            export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationV2ResultError;
         }
     }
     namespace PutSchema {
@@ -9250,6 +9353,7 @@ declare namespace Paths {
              * contact
              */
             Components.Schemas.EntitySlug;
+            export type Validate = boolean;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -9259,6 +9363,7 @@ declare namespace Paths {
             activity_id?: Parameters.ActivityId;
             fill_activity?: Parameters.FillActivity;
             async?: Parameters.Async;
+            validate?: Parameters.Validate;
         }
         export type RequestBody = /**
          * example:
@@ -9344,6 +9449,7 @@ declare namespace Paths {
              * }
              */
             Components.Schemas.EntityItem;
+            export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationV2ResultError;
         }
     }
     namespace UpdateRelation {
@@ -9438,6 +9544,7 @@ declare namespace Paths {
              */
             Components.Schemas.EntitySlug;
             export type Strict = boolean;
+            export type Validate = boolean;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -9447,6 +9554,7 @@ declare namespace Paths {
             fill_activity?: Parameters.FillActivity;
             dry_run?: Parameters.DryRun;
             async?: Parameters.Async;
+            validate?: Parameters.Validate;
             strict?: Parameters.Strict;
         }
         export interface RequestBody {
@@ -9593,6 +9701,7 @@ declare namespace Paths {
             }
             export interface $409 {
             }
+            export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationV2ResultError;
         }
     }
     namespace ValidateEntity {
@@ -9651,6 +9760,64 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = /* Validation result for a successful validation */ Components.Schemas.EntityValidationResultSuccess;
             export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationResultError;
+        }
+    }
+    namespace ValidateEntityV2 {
+        namespace Parameters {
+            /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * price
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * price
+             */
+            Parameters.Slug;
+        }
+        export type RequestBody = /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
+         * }
+         */
+        Components.Schemas.Entity;
+        namespace Responses {
+            export type $200 = /* Validation result for a successful validation */ Components.Schemas.EntityValidationV2ResultSuccess;
+            export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationV2ResultError;
         }
     }
 }
@@ -9869,6 +10036,16 @@ export interface OperationMethods {
     data?: Paths.ValidateEntity.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ValidateEntity.Responses.$200>
+  /**
+   * validateEntityV2 - validateEntityV2
+   * 
+   * Validates an entity against the schema.
+   */
+  'validateEntityV2'(
+    parameters?: Parameters<Paths.ValidateEntityV2.PathParameters> | null,
+    data?: Paths.ValidateEntityV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateEntityV2.Responses.$200>
   /**
    * upsertEntity - upsertEntity
    * 
@@ -10234,7 +10411,11 @@ export interface OperationMethods {
   /**
    * exportEntities - exportEntities
    * 
-   * create export file of entities
+   * Export entity data in a CSV-format. The export will export data as close as possible to what is visible on Entity UI tables.
+   * The values exported as in some cases, transformed to human-readable values.
+   * 
+   * To force the export of raw values, use the `#` prefix in front of your field name when specifying the field on the `fields` param.
+   * 
    */
   'exportEntities'(
     parameters?: Parameters<Paths.ExportEntities.QueryParameters> | null,
@@ -10830,6 +11011,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ValidateEntity.Responses.$200>
   }
+  ['/v2/entity/{slug}:validate']: {
+    /**
+     * validateEntityV2 - validateEntityV2
+     * 
+     * Validates an entity against the schema.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ValidateEntityV2.PathParameters> | null,
+      data?: Paths.ValidateEntityV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateEntityV2.Responses.$200>
+  }
   ['/v1/entity/{slug}:upsert']: {
     /**
      * upsertEntity - upsertEntity
@@ -11224,7 +11417,11 @@ export interface PathsDictionary {
     /**
      * exportEntities - exportEntities
      * 
-     * create export file of entities
+     * Export entity data in a CSV-format. The export will export data as close as possible to what is visible on Entity UI tables.
+     * The values exported as in some cases, transformed to human-readable values.
+     * 
+     * To force the export of raw values, use the `#` prefix in front of your field name when specifying the field on the `fields` param.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.ExportEntities.QueryParameters> | null,
@@ -11680,6 +11877,10 @@ export type EntityValidationError = Components.Schemas.EntityValidationError;
 export type EntityValidationResult = Components.Schemas.EntityValidationResult;
 export type EntityValidationResultError = Components.Schemas.EntityValidationResultError;
 export type EntityValidationResultSuccess = Components.Schemas.EntityValidationResultSuccess;
+export type EntityValidationV2Error = Components.Schemas.EntityValidationV2Error;
+export type EntityValidationV2Result = Components.Schemas.EntityValidationV2Result;
+export type EntityValidationV2ResultError = Components.Schemas.EntityValidationV2ResultError;
+export type EntityValidationV2ResultSuccess = Components.Schemas.EntityValidationV2ResultSuccess;
 export type EntityViewDisabled = Components.Schemas.EntityViewDisabled;
 export type ExportJobId = Components.Schemas.ExportJobId;
 export type FieldsParam = Components.Schemas.FieldsParam;
