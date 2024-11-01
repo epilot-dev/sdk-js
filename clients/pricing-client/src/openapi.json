@@ -4059,14 +4059,14 @@
             "description": "The discount amount as a string with all the decimal places.",
             "readOnly": true
           },
-          "bonus_amount": {
+          "cashback_amount": {
             "type": "integer",
-            "description": "The bonus amount.",
+            "description": "The cashback amount.",
             "readOnly": true
           },
-          "bonus_amount_decimal": {
+          "cashback_amount_decimal": {
             "type": "string",
-            "description": "The bonus amount as a string with all the decimal places.",
+            "description": "The cashback amount as a string with all the decimal places.",
             "readOnly": true
           },
           "discount_percentage": {

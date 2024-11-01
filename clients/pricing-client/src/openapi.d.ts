@@ -90,13 +90,13 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
-             * The bonus amount.
+             * The cashback amount.
              */
-            bonus_amount?: number;
+            cashback_amount?: number;
             /**
-             * The bonus amount as a string with all the decimal places.
+             * The cashback amount as a string with all the decimal places.
              */
-            bonus_amount_decimal?: string;
+            cashback_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -237,13 +237,13 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
-             * The bonus amount.
+             * The cashback amount.
              */
-            bonus_amount?: number;
+            cashback_amount?: number;
             /**
-             * The bonus amount as a string with all the decimal places.
+             * The cashback amount as a string with all the decimal places.
              */
-            bonus_amount_decimal?: string;
+            cashback_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -884,13 +884,13 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
-             * The bonus amount.
+             * The cashback amount.
              */
-            bonus_amount?: number;
+            cashback_amount?: number;
             /**
-             * The bonus amount as a string with all the decimal places.
+             * The cashback amount as a string with all the decimal places.
              */
-            bonus_amount_decimal?: string;
+            cashback_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -1208,13 +1208,13 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
-             * The bonus amount.
+             * The cashback amount.
              */
-            bonus_amount?: number;
+            cashback_amount?: number;
             /**
-             * The bonus amount as a string with all the decimal places.
+             * The cashback amount as a string with all the decimal places.
              */
-            bonus_amount_decimal?: string;
+            cashback_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -3382,13 +3382,13 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
-             * The bonus amount.
+             * The cashback amount.
              */
-            bonus_amount?: number;
+            cashback_amount?: number;
             /**
-             * The bonus amount as a string with all the decimal places.
+             * The cashback amount as a string with all the decimal places.
              */
-            bonus_amount_decimal?: string;
+            cashback_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -4357,13 +4357,13 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
-             * The bonus amount.
+             * The cashback amount.
              */
-            bonus_amount?: number;
+            cashback_amount?: number;
             /**
-             * The bonus amount as a string with all the decimal places.
+             * The cashback amount as a string with all the decimal places.
              */
-            bonus_amount_decimal?: string;
+            cashback_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -4434,13 +4434,13 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
-             * The bonus amount.
+             * The cashback amount.
              */
-            bonus_amount?: number;
+            cashback_amount?: number;
             /**
-             * The bonus amount as a string with all the decimal places.
+             * The cashback amount as a string with all the decimal places.
              */
-            bonus_amount_decimal?: string;
+            cashback_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
