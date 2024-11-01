@@ -4933,7 +4933,7 @@
             "type": "string",
             "enum": [
               "discount",
-              "bonus"
+              "cashback"
             ]
           },
           "percentage_value": {

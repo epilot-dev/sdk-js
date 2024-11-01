@@ -1941,7 +1941,7 @@ declare namespace Components {
             name: string;
             description?: string;
             type?: "fixed" | "percentage";
-            category?: "discount" | "bonus";
+            category?: "discount" | "cashback";
             /**
              * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
              */
