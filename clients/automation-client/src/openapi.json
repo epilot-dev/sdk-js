@@ -2087,7 +2087,9 @@
             "type": "string",
             "enum": [
               "trigger",
-              "action"
+              "action",
+              "action_task",
+              "automation"
             ]
           },
           "schema": {

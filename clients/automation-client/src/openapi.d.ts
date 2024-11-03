@@ -57,7 +57,7 @@ declare namespace Components {
              * The id of the action or trigger
              */
             id: string;
-            origin: "trigger" | "action";
+            origin: "trigger" | "action" | "action_task" | "automation";
             schema: string;
             attribute: string;
         }
