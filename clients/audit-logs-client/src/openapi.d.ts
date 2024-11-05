@@ -23,18 +23,7 @@ declare namespace Components {
              * 123456
              */
             user_id?: string;
-            /**
-             * Type of the system call
-             * example:
-             * automation
-             */
-            system_call_type?: string;
-            /**
-             * Indicates if the call was made by a system
-             * example:
-             * false
-             */
-            is_system_call?: boolean;
+            trigger_type?: "user" | "api" | "automation";
         }
         export interface Event {
             /**
@@ -210,18 +199,6 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
-    namespace DeleteLogById {
-        namespace Parameters {
-            export type LogId = string;
-        }
-        export interface PathParameters {
-            logId: Parameters.LogId;
-        }
-        namespace Responses {
-            export interface $204 {
-            }
-        }
-    }
     namespace GetLogById {
         namespace Parameters {
             export type LogId = string;
@@ -272,16 +249,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetLogById.Responses.$200>
-  /**
-   * deleteLogById - deleteLogById
-   * 
-   * Delete Audit Log event
-   */
-  'deleteLogById'(
-    parameters?: Parameters<Paths.DeleteLogById.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteLogById.Responses.$204>
 }
 
 export interface PathsDictionary {
@@ -308,16 +275,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetLogById.Responses.$200>
-    /**
-     * deleteLogById - deleteLogById
-     * 
-     * Delete Audit Log event
-     */
-    'delete'(
-      parameters?: Parameters<Paths.DeleteLogById.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteLogById.Responses.$204>
   }
 }
 

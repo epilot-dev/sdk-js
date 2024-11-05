@@ -32,17 +32,6 @@
           }
         ],
         "responses": {}
-      },
-      "delete": {
-        "operationId": "deleteLogById",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "logId",
-            "required": true
-          }
-        ],
-        "responses": {}
       }
     }
   },
