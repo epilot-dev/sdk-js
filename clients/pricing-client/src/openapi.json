@@ -3472,6 +3472,10 @@
             "description": "External fees metadata information required to compute totals, for some pricing models",
             "$ref": "#/components/schemas/ExternalFeeMetadata"
           },
+          "_immutable_pricing_details": {
+            "description": "Immutable pricing details for external products/prices",
+            "$ref": "#/components/schemas/PricingDetails"
+          },
           "coupon_ids": {
             "type": "array",
             "description": "The ids of the coupons applicable to the price item",

@@ -784,6 +784,7 @@ declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
              * The ids of the coupons applicable to the price item
              */
@@ -1627,6 +1628,7 @@ declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
              * The ids of the coupons applicable to the price item
              */
@@ -3809,6 +3811,7 @@ declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
              * The ids of the coupons applicable to the price item
              */
