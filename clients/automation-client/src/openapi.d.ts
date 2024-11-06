@@ -13,6 +13,10 @@ declare namespace Components {
         export interface ActionCondition {
             id?: string;
             /**
+             * Schedule Id which indicates the schedule of the actions inside the condition
+             */
+            schedule_id?: string;
+            /**
              * Result of the condition evaluation
              */
             evaluationResult?: boolean;

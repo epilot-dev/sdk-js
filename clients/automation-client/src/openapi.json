@@ -2063,6 +2063,10 @@
           "id": {
             "type": "string"
           },
+          "schedule_id": {
+            "type": "string",
+            "description": "Schedule Id which indicates the schedule of the actions inside the condition"
+          },
           "evaluationResult": {
             "type": "boolean",
             "description": "Result of the condition evaluation"
