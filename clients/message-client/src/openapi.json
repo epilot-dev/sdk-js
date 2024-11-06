@@ -270,6 +270,45 @@
         }
       }
     },
+    "/v2/message/messages/{id}/read": {
+      "post": {
+        "operationId": "markReadMessageV2",
+        "summary": "markReadMessageV2",
+        "description": "Mark message as read within a scope",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Message ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadMessagePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/message/messages/{id}/unread": {
       "post": {
         "operationId": "markUnreadMessage",
@@ -289,6 +328,45 @@
             }
           }
         ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v2/message/messages/{id}/unread": {
+      "post": {
+        "operationId": "markUnreadMessageV2",
+        "summary": "markUnreadMessageV2",
+        "description": "Mark message as unread within a scope",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Message ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadMessagePayload"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "Success"
@@ -506,6 +584,45 @@
         }
       }
     },
+    "/v2/message/threads/{id}/read": {
+      "post": {
+        "operationId": "markReadThreadV2",
+        "summary": "markReadThreadV2",
+        "description": "Mark thread as read within a scope",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadMessagePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/message/threads/{id}/unread": {
       "post": {
         "operationId": "markUnreadThread",
@@ -525,6 +642,45 @@
             }
           }
         ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v2/message/threads/{id}/unread": {
+      "post": {
+        "operationId": "markUnreadThreadV2",
+        "summary": "markUnreadThreadV2",
+        "description": "Mark thread as unread within a scope",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadMessagePayload"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "Success"
@@ -853,7 +1009,7 @@
           },
           "_org": {
             "type": "string",
-            "description": "Ivy Organization ID the entity belongs to",
+            "description": "Organization ID the entity belongs to",
             "example": "206801"
           },
           "_schema": {
@@ -899,7 +1055,7 @@
           },
           "assigned_to": {
             "type": "array",
-            "description": "Ivy User ID of who the message is assigned to. Default is the user who sends message.",
+            "description": "User ID of who the message is assigned to. Default is the user who sends message.",
             "items": {
               "type": "string",
               "example": [
@@ -910,7 +1066,7 @@
           },
           "org_read_message": {
             "type": "array",
-            "description": "Ivy Organization ID of organization read the message.",
+            "description": "Organization ID of organization read the message.",
             "items": {
               "type": "string",
               "example": [
@@ -950,7 +1106,7 @@
           },
           "sender": {
             "type": "string",
-            "description": "Ivy User ID of user sends the message.",
+            "description": "User ID of user sends the message.",
             "example": "206801"
           },
           "subject": {
@@ -1010,7 +1166,7 @@
           },
           "user_read_message": {
             "type": "array",
-            "description": "Ivy User ID of user read the message.",
+            "description": "User ID of user read the message.",
             "items": {
               "type": "string",
               "example": [
@@ -1021,7 +1177,7 @@
           },
           "org_read_message": {
             "type": "array",
-            "description": "Ivy Organization ID of organization read the message.",
+            "description": "Organization ID of organization read the message.",
             "items": {
               "type": "string",
               "example": [
@@ -1159,6 +1315,10 @@
             "type": "boolean",
             "description": "To indicate this file relation is message attachment. If false then this file will not be sent and simply kept as a file relation."
           },
+          "may_be_signature_attachment": {
+            "type": "boolean",
+            "description": "To indicate this file relation may be signature attachment. If true then this file will be sent as signature attachment and not related to any entity."
+          },
           "cid": {
             "type": "string",
             "description": "Content ID (for inline)",
@@ -1196,7 +1356,7 @@
               },
               "assigned_to": {
                 "type": "array",
-                "description": "Ivy User ID of who the message is assigned to. Default is the user who sends message.",
+                "description": "User ID of who the message is assigned to. Default is the user who sends message.",
                 "items": {
                   "type": "string"
                 }
@@ -1290,10 +1450,44 @@
             "default": 10
           }
         }
+      },
+      "ReadMessagePayload": {
+        "type": "object",
+        "required": [
+          "scopes"
+        ],
+        "properties": {
+          "scopes": {
+            "description": "The scopes to be used when marking an item as read or unread. The read status will be synced for all provided scopes.",
+            "example": [
+              "organization",
+              "user"
+            ],
+            "type": "array",
+            "default": [
+              "organization",
+              "user"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ReadingScope"
+            }
+          }
+        }
+      },
+      "ReadingScope": {
+        "description": "Who is marking an item as read or unread.",
+        "type": "string",
+        "enum": [
+          "organization",
+          "user"
+        ]
       }
     }
   },
   "servers": [
+    {
+      "url": "https://message.sls.epilot.io"
+    },
     {
       "url": "https://message.sls.epilot.io"
     }
