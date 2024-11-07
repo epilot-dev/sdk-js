@@ -857,7 +857,8 @@
         "description": "different behaviors for retrying failed execution actions.",
         "enum": [
           "RETRY_AND_RESUME",
-          "RETRY_AND_STOP"
+          "RETRY_AND_STOP",
+          "RETRY_ALL_ACTIONS_IF_PARENT_CONDITION"
         ]
       },
       "AutomationAction": {

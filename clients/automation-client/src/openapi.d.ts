@@ -1988,7 +1988,7 @@ declare namespace Components {
         /**
          * different behaviors for retrying failed execution actions.
          */
-        export type RetryStrategy = "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+        export type RetryStrategy = "RETRY_AND_RESUME" | "RETRY_AND_STOP" | "RETRY_ALL_ACTIONS_IF_PARENT_CONDITION";
         export interface SearchAutomationsResp {
             total: number;
             results: AutomationFlow[];
