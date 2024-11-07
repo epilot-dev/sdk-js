@@ -23,8 +23,8 @@
       "description": "Entity Events"
     },
     {
-      "name": "Export",
-      "description": "Export and Import entities via files"
+      "name": "Import-Export",
+      "description": "Import and Export entities via portable files (CSV)"
     },
     {
       "name": "Saved Views",
@@ -2139,7 +2139,7 @@
         "summary": "exportEntities",
         "description": "Export entity data in a CSV-format. The export will export data as close as possible to what is visible on Entity UI tables.\nThe values exported as in some cases, transformed to human-readable values.\n\nTo force the export of raw values, use the `#` prefix in front of your field name when specifying the field on the `fields` param.\n",
         "tags": [
-          "Export"
+          "Import-Export"
         ],
         "parameters": [
           {
@@ -2189,7 +2189,7 @@
         "summary": "Import Entities",
         "description": "This endpoint enables the import of entities into the platform.\nThe entities should be provided in a CSV format inside an S3 bucket.\nThis API will return the `job_id`` which can be used to fetch the status of the import process.\n",
         "tags": [
-          "Entity Import"
+          "Import-Export"
         ],
         "parameters": [
           {
@@ -2590,6 +2590,154 @@
         }
       }
     },
+    "/v1/entity/taxonomies/{taxonomySlug}/classifications": {
+      "post": {
+        "operationId": "updateClassificationsForTaxonomy",
+        "summary": "updateClassificationsForTaxonomy",
+        "description": "Update the classifications for a taxonomy",
+        "tags": [
+          "Taxonomy"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassificationsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Taxonomies classifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "created": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TaxonomyClassification"
+                      }
+                    },
+                    "updated": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TaxonomyClassification"
+                      }
+                    },
+                    "deleted": {
+                      "type": "object",
+                      "items": {
+                        "$ref": "#/components/schemas/ClassificationId"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/entity/taxonomies/classifications/{classificationSlug}": {
+      "get": {
+        "operationId": "getTaxonomyClassification",
+        "summary": "getTaxonomyClassification",
+        "description": "Get a classification for a taxonomy",
+        "tags": [
+          "Taxonomy"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Taxonomy classification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxonomyClassification"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Taxonomy classification not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateTaxonomyClassification",
+        "summary": "updateTaxonomyClassification",
+        "description": "Update a classification for a taxonomy",
+        "tags": [
+          "Taxonomy"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxonomyClassification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Taxonomy classification updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxonomyClassification"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Taxonomy classification not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTaxonomyClassification",
+        "summary": "deleteTaxonomyClassification",
+        "description": "Delete a classification for a taxonomy",
+        "tags": [
+          "Taxonomy"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Taxonomy classification deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxonomyClassification"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/entity/taxonomies/{taxonomySlug}:autocomplete": {
       "get": {
         "operationId": "taxonomyAutocomplete",
@@ -2702,62 +2850,6 @@
         }
       }
     },
-    "/v1/entity/taxonomies/{taxonomySlug}/classifications": {
-      "post": {
-        "operationId": "updateClassificationsForTaxonomy",
-        "summary": "updateClassificationsForTaxonomy",
-        "description": "Update the classifications for a taxonomy",
-        "tags": [
-          "Taxonomy"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/TaxonomySlugPathParam"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ClassificationsUpdate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Taxonomies classifications",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "created": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/TaxonomyClassification"
-                      }
-                    },
-                    "updated": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/TaxonomyClassification"
-                      }
-                    },
-                    "deleted": {
-                      "type": "object",
-                      "items": {
-                        "$ref": "#/components/schemas/ClassificationId"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}": {
       "get": {
         "operationId": "listTaxonomyClassificationsForSchema",
@@ -2810,91 +2902,150 @@
         }
       }
     },
-    "/v2/entity/taxonomies/classifications/{classificationSlug}": {
+    "/v1/entity/taxonomies/jobs": {
       "get": {
-        "operationId": "getTaxonomyClassification",
-        "summary": "getTaxonomyClassification",
-        "description": "Get a classification for a taxonomy",
+        "operationId": "getJobs",
+        "summary": "getJobs",
+        "description": "Gets bulk jobs by job status",
         "tags": [
           "Taxonomy"
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "$ref": "#/components/schemas/TaxonomyBulkJobStatus"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Taxonomy classification",
+            "description": "Returns the jobs matching the given query or the active jobs if no status is provided",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TaxonomyClassification"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TaxonomyBulkJob"
+                  }
                 }
               }
             }
-          },
-          "404": {
-            "description": "Taxonomy classification not found"
           }
         }
-      },
-      "put": {
-        "operationId": "updateTaxonomyClassification",
-        "summary": "updateTaxonomyClassification",
-        "description": "Update a classification for a taxonomy",
+      }
+    },
+    "/v1/entity/taxonomies/classifications:move": {
+      "post": {
+        "operationId": "bulkMoveClassifications",
+        "summary": "bulkMoveClassifications",
+        "description": "Moves classifications from one taxonomy to another, through a bulk async operation which\nalso updates all references from the old classification to the new one under the target taxonomy.\n",
         "tags": [
           "Taxonomy"
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+            "in": "query",
+            "name": "target_taxonomy",
+            "description": "The target taxonomy to which the classifications will be moved",
+            "schema": {
+              "$ref": "#/components/schemas/TaxonomySlug"
+            }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TaxonomyClassification"
+                "type": "object",
+                "properties": {
+                  "classification_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ClassificationId"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "classification_ids": [
+                  "taxonomy-slug:classification-slug"
+                ]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Taxonomy classification updated",
+            "description": "Returns the job id for the async job and current status",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TaxonomyClassification"
+                  "$ref": "#/components/schemas/TaxonomyBulkJobTriggerResponse"
+                },
+                "example": {
+                  "job_id": "123",
+                  "status": "PENDING"
                 }
               }
             }
-          },
-          "404": {
-            "description": "Taxonomy classification not found"
           }
         }
-      },
-      "delete": {
-        "operationId": "deleteTaxonomyClassification",
-        "summary": "deleteTaxonomyClassification",
-        "description": "Delete a classification for a taxonomy",
+      }
+    },
+    "/v1/entity/taxonomies/classifications:delete": {
+      "post": {
+        "operationId": "bulkDeleteClassifications",
+        "summary": "bulkDeleteClassifications",
+        "description": "Archives or permanently deletes taxonomy classifications. When permanent is true, the classifications are deleted through a bulk \nasync operation which also deletes all references of the deleted classifications from the entities referencing them.\n",
         "tags": [
           "Taxonomy"
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+            "in": "query",
+            "name": "permanent",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to permanently delete the classifications or just archive them"
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "classification_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ClassificationId"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "classification_ids": [
+                  "taxonomy-slug:classification-slug"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Taxonomy classification deleted",
+            "description": "Returns the job id for the async job and current status",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TaxonomyClassification"
+                  "$ref": "#/components/schemas/TaxonomyBulkJobTriggerResponse"
+                },
+                "example": {
+                  "job_id": "123",
+                  "status": "PENDING"
                 }
               }
             }
@@ -4287,6 +4438,9 @@
                 ]
               },
               "multiline": {
+                "type": "boolean"
+              },
+              "rich_text": {
                 "type": "boolean"
               }
             }
@@ -7207,6 +7361,49 @@
           }
         }
       },
+      "TaxonomyBulkJobTriggerResponse": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaxonomyBulkJobStatus"
+          }
+        }
+      },
+      "TaxonomyBulkJobStatus": {
+        "type": "string",
+        "description": "The status of the bulk job",
+        "enum": [
+          "PENDING",
+          "FAILED",
+          "COMPLETED"
+        ]
+      },
+      "TaxonomyBulkJobType": {
+        "type": "string",
+        "enum": [
+          "MOVE_LABELS",
+          "DELETE_LABELS"
+        ]
+      },
+      "TaxonomyBulkJob": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaxonomyBulkJobStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TaxonomyBulkJobType"
+          }
+        }
+      },
       "ESClusterAssignment": {
         "type": "object",
         "properties": {
@@ -8116,6 +8313,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    },
     {
       "url": "https://entity.sls.epilot.io"
     }

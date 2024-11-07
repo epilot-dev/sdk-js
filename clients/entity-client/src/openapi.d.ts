@@ -7065,6 +7065,20 @@ declare namespace Components {
              */
             enabled_locations?: TaxonomyLocationId[];
         }
+        export interface TaxonomyBulkJob {
+            job_id?: string; // uuid
+            status?: /* The status of the bulk job */ TaxonomyBulkJobStatus;
+            type?: TaxonomyBulkJobType;
+        }
+        /**
+         * The status of the bulk job
+         */
+        export type TaxonomyBulkJobStatus = "PENDING" | "FAILED" | "COMPLETED";
+        export interface TaxonomyBulkJobTriggerResponse {
+            job_id?: string; // uuid
+            status?: /* The status of the bulk job */ TaxonomyBulkJobStatus;
+        }
+        export type TaxonomyBulkJobType = "MOVE_LABELS" | "DELETE_LABELS";
         export interface TaxonomyClassification {
             id?: /**
              * example:
@@ -7237,6 +7251,7 @@ declare namespace Components {
             };
             type?: "string";
             multiline?: boolean;
+            rich_text?: boolean;
         }
         /**
          * User Relationship
@@ -7471,6 +7486,47 @@ declare namespace Paths {
                     [name: string]: any;
                 })[];
             }
+        }
+    }
+    namespace BulkDeleteClassifications {
+        namespace Parameters {
+            export type Permanent = boolean;
+        }
+        export interface QueryParameters {
+            permanent?: Parameters.Permanent;
+        }
+        export interface RequestBody {
+            classification_ids?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            Components.Schemas.ClassificationId[];
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.TaxonomyBulkJobTriggerResponse;
+        }
+    }
+    namespace BulkMoveClassifications {
+        namespace Parameters {
+            export type TargetTaxonomy = /**
+             * URL-friendly name for taxonomy
+             * example:
+             * purpose
+             */
+            Components.Schemas.TaxonomySlug;
+        }
+        export interface QueryParameters {
+            target_taxonomy?: Parameters.TargetTaxonomy;
+        }
+        export interface RequestBody {
+            classification_ids?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            Components.Schemas.ClassificationId[];
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.TaxonomyBulkJobTriggerResponse;
         }
     }
     namespace CreateActivity {
@@ -8126,6 +8182,17 @@ declare namespace Paths {
              * }
              */
             Components.Schemas.EntityItem;
+        }
+    }
+    namespace GetJobs {
+        namespace Parameters {
+            export type Status = /* The status of the bulk job */ Components.Schemas.TaxonomyBulkJobStatus;
+        }
+        export interface QueryParameters {
+            status?: Parameters.Status;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.TaxonomyBulkJob[];
         }
     }
     namespace GetJsonSchema {
@@ -10546,26 +10613,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteTaxonomy.Responses.$204>
   /**
-   * taxonomyAutocomplete - taxonomyAutocomplete
-   * 
-   * Taxonomies autocomplete
-   */
-  'taxonomyAutocomplete'(
-    parameters?: Parameters<Paths.TaxonomyAutocomplete.QueryParameters & Paths.TaxonomyAutocomplete.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.TaxonomyAutocomplete.Responses.$200>
-  /**
-   * taxonomiesClassificationsSearch - taxonomiesClassificationsSearch
-   * 
-   * List taxonomy classifications in an organization based on taxonomy slug
-   */
-  'taxonomiesClassificationsSearch'(
-    parameters?: Parameters<Paths.TaxonomiesClassificationsSearch.QueryParameters> | null,
-    data?: Paths.TaxonomiesClassificationsSearch.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.TaxonomiesClassificationsSearch.Responses.$200>
-  /**
    * updateClassificationsForTaxonomy - updateClassificationsForTaxonomy
    * 
    * Update the classifications for a taxonomy
@@ -10575,16 +10622,6 @@ export interface OperationMethods {
     data?: Paths.UpdateClassificationsForTaxonomy.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
-  /**
-   * listTaxonomyClassificationsForSchema - listTaxonomyClassificationsForSchema
-   * 
-   * List taxonomy classifications for a given schema
-   */
-  'listTaxonomyClassificationsForSchema'(
-    parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.QueryParameters & Paths.ListTaxonomyClassificationsForSchema.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
   /**
    * getTaxonomyClassification - getTaxonomyClassification
    * 
@@ -10615,6 +10652,70 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteTaxonomyClassification.Responses.$200>
+  /**
+   * taxonomyAutocomplete - taxonomyAutocomplete
+   * 
+   * Taxonomies autocomplete
+   */
+  'taxonomyAutocomplete'(
+    parameters?: Parameters<Paths.TaxonomyAutocomplete.QueryParameters & Paths.TaxonomyAutocomplete.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TaxonomyAutocomplete.Responses.$200>
+  /**
+   * taxonomiesClassificationsSearch - taxonomiesClassificationsSearch
+   * 
+   * List taxonomy classifications in an organization based on taxonomy slug
+   */
+  'taxonomiesClassificationsSearch'(
+    parameters?: Parameters<Paths.TaxonomiesClassificationsSearch.QueryParameters> | null,
+    data?: Paths.TaxonomiesClassificationsSearch.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TaxonomiesClassificationsSearch.Responses.$200>
+  /**
+   * listTaxonomyClassificationsForSchema - listTaxonomyClassificationsForSchema
+   * 
+   * List taxonomy classifications for a given schema
+   */
+  'listTaxonomyClassificationsForSchema'(
+    parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.QueryParameters & Paths.ListTaxonomyClassificationsForSchema.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
+  /**
+   * getJobs - getJobs
+   * 
+   * Gets bulk jobs by job status
+   */
+  'getJobs'(
+    parameters?: Parameters<Paths.GetJobs.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetJobs.Responses.$200>
+  /**
+   * bulkMoveClassifications - bulkMoveClassifications
+   * 
+   * Moves classifications from one taxonomy to another, through a bulk async operation which
+   * also updates all references from the old classification to the new one under the target taxonomy.
+   * 
+   */
+  'bulkMoveClassifications'(
+    parameters?: Parameters<Paths.BulkMoveClassifications.QueryParameters> | null,
+    data?: Paths.BulkMoveClassifications.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkMoveClassifications.Responses.$200>
+  /**
+   * bulkDeleteClassifications - bulkDeleteClassifications
+   * 
+   * Archives or permanently deletes taxonomy classifications. When permanent is true, the classifications are deleted through a bulk 
+   * async operation which also deletes all references of the deleted classifications from the entities referencing them.
+   * 
+   */
+  'bulkDeleteClassifications'(
+    parameters?: Parameters<Paths.BulkDeleteClassifications.QueryParameters> | null,
+    data?: Paths.BulkDeleteClassifications.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkDeleteClassifications.Responses.$200>
   /**
    * createSchemaAttribute - createSchemaAttribute
    * 
@@ -11566,30 +11667,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteTaxonomy.Responses.$204>
   }
-  ['/v1/entity/taxonomies/{taxonomySlug}:autocomplete']: {
-    /**
-     * taxonomyAutocomplete - taxonomyAutocomplete
-     * 
-     * Taxonomies autocomplete
-     */
-    'get'(
-      parameters?: Parameters<Paths.TaxonomyAutocomplete.QueryParameters & Paths.TaxonomyAutocomplete.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.TaxonomyAutocomplete.Responses.$200>
-  }
-  ['/v1/entity/taxonomies/classifications:search']: {
-    /**
-     * taxonomiesClassificationsSearch - taxonomiesClassificationsSearch
-     * 
-     * List taxonomy classifications in an organization based on taxonomy slug
-     */
-    'post'(
-      parameters?: Parameters<Paths.TaxonomiesClassificationsSearch.QueryParameters> | null,
-      data?: Paths.TaxonomiesClassificationsSearch.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.TaxonomiesClassificationsSearch.Responses.$200>
-  }
   ['/v1/entity/taxonomies/{taxonomySlug}/classifications']: {
     /**
      * updateClassificationsForTaxonomy - updateClassificationsForTaxonomy
@@ -11601,18 +11678,6 @@ export interface PathsDictionary {
       data?: Paths.UpdateClassificationsForTaxonomy.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
-  }
-  ['/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}']: {
-    /**
-     * listTaxonomyClassificationsForSchema - listTaxonomyClassificationsForSchema
-     * 
-     * List taxonomy classifications for a given schema
-     */
-    'get'(
-      parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.QueryParameters & Paths.ListTaxonomyClassificationsForSchema.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
   }
   ['/v2/entity/taxonomies/classifications/{classificationSlug}']: {
     /**
@@ -11645,6 +11710,82 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteTaxonomyClassification.Responses.$200>
+  }
+  ['/v1/entity/taxonomies/{taxonomySlug}:autocomplete']: {
+    /**
+     * taxonomyAutocomplete - taxonomyAutocomplete
+     * 
+     * Taxonomies autocomplete
+     */
+    'get'(
+      parameters?: Parameters<Paths.TaxonomyAutocomplete.QueryParameters & Paths.TaxonomyAutocomplete.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TaxonomyAutocomplete.Responses.$200>
+  }
+  ['/v1/entity/taxonomies/classifications:search']: {
+    /**
+     * taxonomiesClassificationsSearch - taxonomiesClassificationsSearch
+     * 
+     * List taxonomy classifications in an organization based on taxonomy slug
+     */
+    'post'(
+      parameters?: Parameters<Paths.TaxonomiesClassificationsSearch.QueryParameters> | null,
+      data?: Paths.TaxonomiesClassificationsSearch.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TaxonomiesClassificationsSearch.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}']: {
+    /**
+     * listTaxonomyClassificationsForSchema - listTaxonomyClassificationsForSchema
+     * 
+     * List taxonomy classifications for a given schema
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListTaxonomyClassificationsForSchema.QueryParameters & Paths.ListTaxonomyClassificationsForSchema.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
+  }
+  ['/v1/entity/taxonomies/jobs']: {
+    /**
+     * getJobs - getJobs
+     * 
+     * Gets bulk jobs by job status
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetJobs.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetJobs.Responses.$200>
+  }
+  ['/v1/entity/taxonomies/classifications:move']: {
+    /**
+     * bulkMoveClassifications - bulkMoveClassifications
+     * 
+     * Moves classifications from one taxonomy to another, through a bulk async operation which
+     * also updates all references from the old classification to the new one under the target taxonomy.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.BulkMoveClassifications.QueryParameters> | null,
+      data?: Paths.BulkMoveClassifications.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkMoveClassifications.Responses.$200>
+  }
+  ['/v1/entity/taxonomies/classifications:delete']: {
+    /**
+     * bulkDeleteClassifications - bulkDeleteClassifications
+     * 
+     * Archives or permanently deletes taxonomy classifications. When permanent is true, the classifications are deleted through a bulk 
+     * async operation which also deletes all references of the deleted classifications from the entities referencing them.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.BulkDeleteClassifications.QueryParameters> | null,
+      data?: Paths.BulkDeleteClassifications.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkDeleteClassifications.Responses.$200>
   }
   ['/v1/entity/schemas/attributes']: {
     /**
@@ -11928,6 +12069,10 @@ export type SummaryAttribute = Components.Schemas.SummaryAttribute;
 export type SummaryField = Components.Schemas.SummaryField;
 export type TagsAttribute = Components.Schemas.TagsAttribute;
 export type Taxonomy = Components.Schemas.Taxonomy;
+export type TaxonomyBulkJob = Components.Schemas.TaxonomyBulkJob;
+export type TaxonomyBulkJobStatus = Components.Schemas.TaxonomyBulkJobStatus;
+export type TaxonomyBulkJobTriggerResponse = Components.Schemas.TaxonomyBulkJobTriggerResponse;
+export type TaxonomyBulkJobType = Components.Schemas.TaxonomyBulkJobType;
 export type TaxonomyClassification = Components.Schemas.TaxonomyClassification;
 export type TaxonomyLocationId = Components.Schemas.TaxonomyLocationId;
 export type TaxonomySlug = Components.Schemas.TaxonomySlug;

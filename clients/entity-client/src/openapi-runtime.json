@@ -917,6 +917,56 @@
         "responses": {}
       }
     },
+    "/v1/entity/taxonomies/{taxonomySlug}/classifications": {
+      "post": {
+        "operationId": "updateClassificationsForTaxonomy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/entity/taxonomies/classifications/{classificationSlug}": {
+      "get": {
+        "operationId": "getTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/entity/taxonomies/{taxonomySlug}:autocomplete": {
       "get": {
         "operationId": "taxonomyAutocomplete",
@@ -956,22 +1006,6 @@
         "responses": {}
       }
     },
-    "/v1/entity/taxonomies/{taxonomySlug}/classifications": {
-      "post": {
-        "operationId": "updateClassificationsForTaxonomy",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/TaxonomySlugPathParam"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
     "/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}": {
       "get": {
         "operationId": "listTaxonomyClassificationsForSchema",
@@ -994,21 +1028,25 @@
         "responses": {}
       }
     },
-    "/v2/entity/taxonomies/classifications/{classificationSlug}": {
+    "/v1/entity/taxonomies/jobs": {
       "get": {
-        "operationId": "getTaxonomyClassification",
+        "operationId": "getJobs",
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+            "in": "query",
+            "name": "status"
           }
         ],
         "responses": {}
-      },
-      "put": {
-        "operationId": "updateTaxonomyClassification",
+      }
+    },
+    "/v1/entity/taxonomies/classifications:move": {
+      "post": {
+        "operationId": "bulkMoveClassifications",
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+            "in": "query",
+            "name": "target_taxonomy"
           }
         ],
         "requestBody": {
@@ -1017,14 +1055,22 @@
           }
         },
         "responses": {}
-      },
-      "delete": {
-        "operationId": "deleteTaxonomyClassification",
+      }
+    },
+    "/v1/entity/taxonomies/classifications:delete": {
+      "post": {
+        "operationId": "bulkDeleteClassifications",
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+            "in": "query",
+            "name": "permanent"
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
