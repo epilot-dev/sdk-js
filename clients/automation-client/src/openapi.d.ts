@@ -47,7 +47,7 @@ declare namespace Components {
             /**
              * The id of the configured scheduler which will be added on automation triggered
              */
-            configuredScheduleId?: string;
+            scheduleApiId?: string;
             numberOfUnits?: number;
             timePeriod?: "minutes" | "hours" | "days" | "weeks" | "months";
             timeRelation?: "after" | "before";

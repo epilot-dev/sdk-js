@@ -2117,7 +2117,7 @@
             "type": "string",
             "description": "Schedule Id"
           },
-          "configuredScheduleId": {
+          "scheduleApiId": {
             "type": "string",
             "description": "The id of the configured scheduler which will be added on automation triggered"
           },
