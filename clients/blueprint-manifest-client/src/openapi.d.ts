@@ -48,6 +48,7 @@ declare namespace Components {
             token_id?: string;
         }
         export interface CommonImportFields {
+            source_type?: ManifestSource;
             /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
@@ -196,6 +197,7 @@ declare namespace Components {
              */
             is_verified?: boolean;
             errors?: FormattedError[];
+            source_type?: ManifestSource;
             /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
@@ -339,6 +341,7 @@ declare namespace Components {
                  */
                 postinstall?: string;
             };
+            source_type?: ManifestSource;
             /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
@@ -409,6 +412,7 @@ declare namespace Components {
              */
             updated_at?: string; // date-time
         }
+        export type ManifestSource = "file" | "marketplace" | "sandbox";
         export interface ManifestTimestampFields {
             /**
              * When the manifest was first installed (applied)
@@ -629,6 +633,10 @@ declare namespace Paths {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             manifest_id?: string;
+            /**
+             * Source of the manifest
+             */
+            source?: "file" | "marketplace" | "sandbox";
         } | {
             /**
              * Manifest s3 key uploaded via `uploadManifest`
@@ -640,6 +648,10 @@ declare namespace Paths {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             manifest_id?: string;
+            /**
+             * Source of the manifest
+             */
+            source?: "file" | "marketplace" | "sandbox";
         };
         namespace Responses {
             export interface $200 {
@@ -1002,6 +1014,7 @@ export type JobStatus = Components.Schemas.JobStatus;
 export type Manifest = Components.Schemas.Manifest;
 export type ManifestID = Components.Schemas.ManifestID;
 export type ManifestItem = Components.Schemas.ManifestItem;
+export type ManifestSource = Components.Schemas.ManifestSource;
 export type ManifestTimestampFields = Components.Schemas.ManifestTimestampFields;
 export type PlanChanges = Components.Schemas.PlanChanges;
 export type ResourceNode = Components.Schemas.ResourceNode;
