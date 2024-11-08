@@ -103,31 +103,6 @@
             }
           }
         }
-      },
-      "delete": {
-        "operationId": "deleteLogById",
-        "summary": "deleteLogById",
-        "description": "Delete Audit Log event",
-        "tags": [
-          "Audit Log"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "logId",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "description": "ID of the log event",
-            "example": "2843c005-c5b0-4df2-94ee-1ca2ddd998ac"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Audit log was deleted successfully"
-          }
-        }
       }
     }
   },
@@ -259,15 +234,13 @@
             "description": "ID of the user",
             "example": 123456
           },
-          "system_call_type": {
+          "trigger_type": {
             "type": "string",
-            "description": "Type of the system call",
-            "example": "automation"
-          },
-          "is_system_call": {
-            "type": "boolean",
-            "description": "Indicates if the call was made by a system",
-            "example": false
+            "enum": [
+              "user",
+              "api",
+              "automation"
+            ]
           }
         }
       },

@@ -62,7 +62,7 @@ declare namespace Components {
              */
             _title: string;
             /**
-             * Ivy Organization ID the entity belongs to
+             * Organization ID the entity belongs to
              * example:
              * 206801
              */
@@ -113,6 +113,10 @@ declare namespace Components {
              */
             is_message_attachment?: boolean;
             /**
+             * To indicate this file relation may be signature attachment. If true then this file will be sent as signature attachment and not related to any entity.
+             */
+            may_be_signature_attachment?: boolean;
+            /**
              * Content ID (for inline)
              * example:
              * fb222496-a1a5-4639-94f2-07b5e35e4068
@@ -137,7 +141,7 @@ declare namespace Components {
              */
             message_id?: string;
             /**
-             * Ivy User ID of user sends the message.
+             * User ID of user sends the message.
              * example:
              * 206801
              */
@@ -190,11 +194,11 @@ declare namespace Components {
              */
             in_reply_to?: string;
             /**
-             * Ivy User ID of user read the message.
+             * User ID of user read the message.
              */
             user_read_message?: string[];
             /**
-             * Ivy Organization ID of organization read the message.
+             * Organization ID of organization read the message.
              */
             org_read_message?: string[];
             /**
@@ -234,7 +238,7 @@ declare namespace Components {
                  */
                 topic: string;
                 /**
-                 * Ivy User ID of who the message is assigned to. Default is the user who sends message.
+                 * User ID of who the message is assigned to. Default is the user who sends message.
                  */
                 assigned_to?: string[];
             };
@@ -297,7 +301,7 @@ declare namespace Components {
              */
             _title: string;
             /**
-             * Ivy Organization ID the entity belongs to
+             * Organization ID the entity belongs to
              * example:
              * 206801
              */
@@ -336,7 +340,7 @@ declare namespace Components {
              */
             message_id?: string;
             /**
-             * Ivy User ID of user sends the message.
+             * User ID of user sends the message.
              * example:
              * 206801
              */
@@ -389,11 +393,11 @@ declare namespace Components {
              */
             in_reply_to?: string;
             /**
-             * Ivy User ID of user read the message.
+             * User ID of user read the message.
              */
             user_read_message?: string[];
             /**
-             * Ivy Organization ID of organization read the message.
+             * Organization ID of organization read the message.
              */
             org_read_message?: string[];
             /**
@@ -422,6 +426,21 @@ declare namespace Components {
              */
             html_download_url?: string;
         }
+        export interface ReadMessagePayload {
+            /**
+             * The scopes to be used when marking an item as read or unread. The read status will be synced for all provided scopes.
+             * example:
+             * [
+             *   "organization",
+             *   "user"
+             * ]
+             */
+            scopes: /* Who is marking an item as read or unread. */ ReadingScope[];
+        }
+        /**
+         * Who is marking an item as read or unread.
+         */
+        export type ReadingScope = "organization" | "user";
         export interface SearchParams {
             /**
              * Lucene query syntax supported with ElasticSearch
@@ -443,11 +462,11 @@ declare namespace Components {
              */
             topic: string;
             /**
-             * Ivy User ID of who the message is assigned to. Default is the user who sends message.
+             * User ID of who the message is assigned to. Default is the user who sends message.
              */
             assigned_to?: string[];
             /**
-             * Ivy Organization ID of organization read the message.
+             * Organization ID of organization read the message.
              */
             org_read_message?: string[];
             /**
@@ -543,7 +562,7 @@ declare namespace Paths {
                  */
                 _title: string;
                 /**
-                 * Ivy Organization ID the entity belongs to
+                 * Organization ID the entity belongs to
                  * example:
                  * 206801
                  */
@@ -582,7 +601,7 @@ declare namespace Paths {
                  */
                 message_id?: string;
                 /**
-                 * Ivy User ID of user sends the message.
+                 * User ID of user sends the message.
                  * example:
                  * 206801
                  */
@@ -635,11 +654,11 @@ declare namespace Paths {
                  */
                 in_reply_to?: string;
                 /**
-                 * Ivy User ID of user read the message.
+                 * User ID of user read the message.
                  */
                 user_read_message?: string[];
                 /**
-                 * Ivy Organization ID of organization read the message.
+                 * Organization ID of organization read the message.
                  */
                 org_read_message?: string[];
                 /**
@@ -718,7 +737,7 @@ declare namespace Paths {
                  */
                 _title: string;
                 /**
-                 * Ivy Organization ID the entity belongs to
+                 * Organization ID the entity belongs to
                  * example:
                  * 206801
                  */
@@ -757,7 +776,7 @@ declare namespace Paths {
                  */
                 message_id?: string;
                 /**
-                 * Ivy User ID of user sends the message.
+                 * User ID of user sends the message.
                  * example:
                  * 206801
                  */
@@ -810,11 +829,11 @@ declare namespace Paths {
                  */
                 in_reply_to?: string;
                 /**
-                 * Ivy User ID of user read the message.
+                 * User ID of user read the message.
                  */
                 user_read_message?: string[];
                 /**
-                 * Ivy Organization ID of organization read the message.
+                 * Organization ID of organization read the message.
                  */
                 org_read_message?: string[];
                 /**
@@ -867,7 +886,7 @@ declare namespace Paths {
                  */
                 _title: string;
                 /**
-                 * Ivy Organization ID the entity belongs to
+                 * Organization ID the entity belongs to
                  * example:
                  * 206801
                  */
@@ -906,7 +925,7 @@ declare namespace Paths {
                  */
                 message_id?: string;
                 /**
-                 * Ivy User ID of user sends the message.
+                 * User ID of user sends the message.
                  * example:
                  * 206801
                  */
@@ -959,11 +978,11 @@ declare namespace Paths {
                  */
                 in_reply_to?: string;
                 /**
-                 * Ivy User ID of user read the message.
+                 * User ID of user read the message.
                  */
                 user_read_message?: string[];
                 /**
-                 * Ivy Organization ID of organization read the message.
+                 * Organization ID of organization read the message.
                  */
                 org_read_message?: string[];
                 /**
@@ -1010,6 +1029,21 @@ declare namespace Paths {
             }
         }
     }
+    namespace MarkReadMessageV2 {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.ReadMessagePayload;
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace MarkReadThread {
         namespace Parameters {
             export type Id = string;
@@ -1017,6 +1051,21 @@ declare namespace Paths {
         export interface PathParameters {
             id: Parameters.Id;
         }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace MarkReadThreadV2 {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.ReadMessagePayload;
         namespace Responses {
             export interface $204 {
             }
@@ -1038,6 +1087,21 @@ declare namespace Paths {
             }
         }
     }
+    namespace MarkUnreadMessageV2 {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.ReadMessagePayload;
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace MarkUnreadThread {
         namespace Parameters {
             export type Id = string;
@@ -1045,6 +1109,21 @@ declare namespace Paths {
         export interface PathParameters {
             id: Parameters.Id;
         }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace MarkUnreadThreadV2 {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.ReadMessagePayload;
         namespace Responses {
             export interface $204 {
             }
@@ -1077,7 +1156,7 @@ declare namespace Paths {
                      */
                     _title: string;
                     /**
-                     * Ivy Organization ID the entity belongs to
+                     * Organization ID the entity belongs to
                      * example:
                      * 206801
                      */
@@ -1116,11 +1195,11 @@ declare namespace Paths {
                      */
                     topic: string;
                     /**
-                     * Ivy User ID of who the message is assigned to. Default is the user who sends message.
+                     * User ID of who the message is assigned to. Default is the user who sends message.
                      */
                     assigned_to?: string[];
                     /**
-                     * Ivy Organization ID of organization read the message.
+                     * Organization ID of organization read the message.
                      */
                     org_read_message?: string[];
                     latest_message?: Components.Schemas.Message;
@@ -1151,7 +1230,7 @@ declare namespace Paths {
                  */
                 _title: string;
                 /**
-                 * Ivy Organization ID the entity belongs to
+                 * Organization ID the entity belongs to
                  * example:
                  * 206801
                  */
@@ -1190,7 +1269,7 @@ declare namespace Paths {
                  */
                 message_id?: string;
                 /**
-                 * Ivy User ID of user sends the message.
+                 * User ID of user sends the message.
                  * example:
                  * 206801
                  */
@@ -1243,11 +1322,11 @@ declare namespace Paths {
                  */
                 in_reply_to?: string;
                 /**
-                 * Ivy User ID of user read the message.
+                 * User ID of user read the message.
                  */
                 user_read_message?: string[];
                 /**
-                 * Ivy Organization ID of organization read the message.
+                 * Organization ID of organization read the message.
                  */
                 org_read_message?: string[];
                 /**
@@ -1385,7 +1464,7 @@ declare namespace Paths {
                  */
                 _title: string;
                 /**
-                 * Ivy Organization ID the entity belongs to
+                 * Organization ID the entity belongs to
                  * example:
                  * 206801
                  */
@@ -1424,7 +1503,7 @@ declare namespace Paths {
                  */
                 message_id?: string;
                 /**
-                 * Ivy User ID of user sends the message.
+                 * User ID of user sends the message.
                  * example:
                  * 206801
                  */
@@ -1477,11 +1556,11 @@ declare namespace Paths {
                  */
                 in_reply_to?: string;
                 /**
-                 * Ivy User ID of user read the message.
+                 * User ID of user read the message.
                  */
                 user_read_message?: string[];
                 /**
-                 * Ivy Organization ID of organization read the message.
+                 * Organization ID of organization read the message.
                  */
                 org_read_message?: string[];
                 /**
@@ -1521,7 +1600,7 @@ declare namespace Paths {
                  */
                 _title: string;
                 /**
-                 * Ivy Organization ID the entity belongs to
+                 * Organization ID the entity belongs to
                  * example:
                  * 206801
                  */
@@ -1560,11 +1639,11 @@ declare namespace Paths {
                  */
                 topic: string;
                 /**
-                 * Ivy User ID of who the message is assigned to. Default is the user who sends message.
+                 * User ID of who the message is assigned to. Default is the user who sends message.
                  */
                 assigned_to?: string[];
                 /**
-                 * Ivy Organization ID of organization read the message.
+                 * Organization ID of organization read the message.
                  */
                 org_read_message?: string[];
                 latest_message?: Components.Schemas.Message;
@@ -1654,6 +1733,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MarkReadMessage.Responses.$204>
   /**
+   * markReadMessageV2 - markReadMessageV2
+   * 
+   * Mark message as read within a scope
+   */
+  'markReadMessageV2'(
+    parameters?: Parameters<Paths.MarkReadMessageV2.PathParameters> | null,
+    data?: Paths.MarkReadMessageV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MarkReadMessageV2.Responses.$204>
+  /**
    * markUnreadMessage - markUnreadMessage
    * 
    * Mark message as unread
@@ -1663,6 +1752,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MarkUnreadMessage.Responses.$204>
+  /**
+   * markUnreadMessageV2 - markUnreadMessageV2
+   * 
+   * Mark message as unread within a scope
+   */
+  'markUnreadMessageV2'(
+    parameters?: Parameters<Paths.MarkUnreadMessageV2.PathParameters> | null,
+    data?: Paths.MarkUnreadMessageV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MarkUnreadMessageV2.Responses.$204>
   /**
    * searchThreads - searchThreads
    * 
@@ -1729,6 +1828,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MarkReadThread.Responses.$204>
   /**
+   * markReadThreadV2 - markReadThreadV2
+   * 
+   * Mark thread as read within a scope
+   */
+  'markReadThreadV2'(
+    parameters?: Parameters<Paths.MarkReadThreadV2.PathParameters> | null,
+    data?: Paths.MarkReadThreadV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MarkReadThreadV2.Responses.$204>
+  /**
    * markUnreadThread - markUnreadThread
    * 
    * Mark thread as unread
@@ -1738,6 +1847,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MarkUnreadThread.Responses.$204>
+  /**
+   * markUnreadThreadV2 - markUnreadThreadV2
+   * 
+   * Mark thread as unread within a scope
+   */
+  'markUnreadThreadV2'(
+    parameters?: Parameters<Paths.MarkUnreadThreadV2.PathParameters> | null,
+    data?: Paths.MarkUnreadThreadV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MarkUnreadThreadV2.Responses.$204>
   /**
    * assignThread - assignThread
    * 
@@ -1893,6 +2012,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MarkReadMessage.Responses.$204>
   }
+  ['/v2/message/messages/{id}/read']: {
+    /**
+     * markReadMessageV2 - markReadMessageV2
+     * 
+     * Mark message as read within a scope
+     */
+    'post'(
+      parameters?: Parameters<Paths.MarkReadMessageV2.PathParameters> | null,
+      data?: Paths.MarkReadMessageV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MarkReadMessageV2.Responses.$204>
+  }
   ['/v1/message/messages/{id}/unread']: {
     /**
      * markUnreadMessage - markUnreadMessage
@@ -1904,6 +2035,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MarkUnreadMessage.Responses.$204>
+  }
+  ['/v2/message/messages/{id}/unread']: {
+    /**
+     * markUnreadMessageV2 - markUnreadMessageV2
+     * 
+     * Mark message as unread within a scope
+     */
+    'post'(
+      parameters?: Parameters<Paths.MarkUnreadMessageV2.PathParameters> | null,
+      data?: Paths.MarkUnreadMessageV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MarkUnreadMessageV2.Responses.$204>
   }
   ['/v1/message/threads:search']: {
     /**
@@ -1982,6 +2125,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MarkReadThread.Responses.$204>
   }
+  ['/v2/message/threads/{id}/read']: {
+    /**
+     * markReadThreadV2 - markReadThreadV2
+     * 
+     * Mark thread as read within a scope
+     */
+    'post'(
+      parameters?: Parameters<Paths.MarkReadThreadV2.PathParameters> | null,
+      data?: Paths.MarkReadThreadV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MarkReadThreadV2.Responses.$204>
+  }
   ['/v1/message/threads/{id}/unread']: {
     /**
      * markUnreadThread - markUnreadThread
@@ -1993,6 +2148,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MarkUnreadThread.Responses.$204>
+  }
+  ['/v2/message/threads/{id}/unread']: {
+    /**
+     * markUnreadThreadV2 - markUnreadThreadV2
+     * 
+     * Mark thread as unread within a scope
+     */
+    'post'(
+      parameters?: Parameters<Paths.MarkUnreadThreadV2.PathParameters> | null,
+      data?: Paths.MarkUnreadThreadV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MarkUnreadThreadV2.Responses.$204>
   }
   ['/v1/message/threads/{id}/assign']: {
     /**
@@ -2089,5 +2256,7 @@ export type File = Components.Schemas.File;
 export type Message = Components.Schemas.Message;
 export type MessageRequestParams = Components.Schemas.MessageRequestParams;
 export type MessageV2 = Components.Schemas.MessageV2;
+export type ReadMessagePayload = Components.Schemas.ReadMessagePayload;
+export type ReadingScope = Components.Schemas.ReadingScope;
 export type SearchParams = Components.Schemas.SearchParams;
 export type Thread = Components.Schemas.Thread;

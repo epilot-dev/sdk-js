@@ -13,6 +13,26 @@
     {
       "name": "Variables",
       "description": "Variable service"
+    },
+    {
+      "name": "email_template_schema",
+      "x-displayName": "Email Template",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/EmailTemplateEntity\" />\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "APIs",
+      "tags": [
+        "Email templates",
+        "Variables"
+      ]
+    },
+    {
+      "name": "Schemas",
+      "tags": [
+        "email_template_schema"
+      ]
     }
   ],
   "security": [
@@ -87,6 +107,52 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EmailTemplateResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateTemplateDetail",
+        "summary": "updateTemplateDetail",
+        "description": "Update email template by ID",
+        "tags": [
+          "Email templates"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Template entity ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailTemplateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTemplateEntity"
                 }
               }
             }
@@ -186,6 +252,11 @@
                     "type": "boolean",
                     "description": "If true then skip document generation. This is useful when you want to replace html variables only. Speeds up the process.\n",
                     "default": false
+                  },
+                  "add_unsubscribe_link": {
+                    "type": "boolean",
+                    "description": "If true then add unsubscribe link to email template body.\n",
+                    "default": false
                   }
                 }
               }
@@ -241,9 +312,11 @@
                       },
                       "action": {
                         "type": "string",
-                        "description": "Trigger an APPROVE OR CANCEL action for the bulk message request",
+                        "description": "Trigger an APPROVE OR CANCEL action for the bulk message request.\n\n* APPROVE: Alias for APPROVE_WITH_CONSENT\n* APPROVE_WITH_CONSENT: Approve the bulk message request and send emails to queued recipients with consent\n* APPROVE_ALL: Approve the bulk message request and send emails to all queued recipients, including those without consent\n* CANCEL: Cancel the bulk message request\n",
                         "enum": [
                           "APPROVE",
+                          "APPROVE_WITH_CONSENT",
+                          "APPROVE_ALL",
                           "CANCEL"
                         ]
                       }
@@ -375,6 +448,26 @@
             "description": "Updated date",
             "format": "date-time",
             "example": "2021-02-10T09:14:31.990Z"
+          },
+          "_purpose": {
+            "type": "array",
+            "description": "Entity Purposes",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "a0ec23ac-12f8-4d89-9a63-91cba3787f2a",
+              "310cd388-2f15-4b5b-8f98-ca14c1e03304"
+            ]
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the entity",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
           }
         }
       },
@@ -397,6 +490,26 @@
             },
             "example": [
               "template"
+            ]
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the entity",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          },
+          "_purpose": {
+            "type": "array",
+            "description": "Entity Purposes",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "a0ec23ac-12f8-4d89-9a63-91cba3787f2a",
+              "310cd388-2f15-4b5b-8f98-ca14c1e03304"
             ]
           },
           "name": {
@@ -472,12 +585,12 @@
           },
           "created_by": {
             "description": "Created by",
-            "type": "number",
+            "type": "string",
             "example": 1234
           },
           "updated_by": {
             "description": "Updated by",
-            "type": "number",
+            "type": "string",
             "example": 1234
           }
         }
@@ -561,12 +674,12 @@
               },
               "created_by": {
                 "description": "Created by",
-                "type": "number",
+                "type": "string",
                 "example": 1234
               },
               "updated_by": {
                 "description": "Updated by",
-                "type": "number",
+                "type": "string",
                 "example": 1234
               },
               "system_template": {
@@ -649,7 +762,6 @@
       "From": {
         "type": "object",
         "required": [
-          "name",
           "email"
         ],
         "properties": {
@@ -666,7 +778,6 @@
       "To": {
         "type": "object",
         "required": [
-          "name",
           "email"
         ],
         "properties": {
@@ -677,6 +788,176 @@
           "email": {
             "type": "string",
             "example": "ny.huynh@axonactive.com"
+          }
+        }
+      },
+      "PresignedRequest": {
+        "type": "object",
+        "required": [
+          "id",
+          "filename",
+          "content_type"
+        ],
+        "properties": {
+          "id": {
+            "description": "UUID",
+            "type": "string",
+            "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b"
+          },
+          "filename": {
+            "description": "File name",
+            "type": "string",
+            "example": "order.pdf"
+          },
+          "content_type": {
+            "description": "Content type",
+            "type": "string",
+            "example": "application/pdf"
+          }
+        }
+      },
+      "PresignedResponse": {
+        "type": "object",
+        "required": [
+          "download_url",
+          "upload_url"
+        ],
+        "properties": {
+          "download_url": {
+            "type": "string",
+            "description": "URL to download the attachment. This URL is not accessible until attachment is uploaded successfully.",
+            "example": "https://go.epilot.cloud/attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf"
+          },
+          "upload_url": {
+            "description": "Post presigned URL to upload file",
+            "type": "object",
+            "required": [
+              "url",
+              "fields"
+            ],
+            "properties": {
+              "url": {
+                "type": "number",
+                "description": "URL to upload the attachment",
+                "example": "https://s3.eu-central-1.amazonaws.com/893487340562-message-attachment"
+              },
+              "fields": {
+                "type": "object",
+                "description": "Fields are provided by AWS to authenticate and validate the request. All fields should be included in form-data when performing upload request.",
+                "example": {}
+              }
+            }
+          }
+        }
+      },
+      "AttachmentResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "description": "Total attachments",
+            "type": "number",
+            "example": 10
+          },
+          "attachments": {
+            "description": "List attachments",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "filename": {
+                  "description": "File name",
+                  "type": "string",
+                  "example": "order.docx"
+                },
+                "bucket": {
+                  "description": "Bucket name",
+                  "type": "string",
+                  "example": "epilot-playground-upload-document"
+                },
+                "object_key": {
+                  "description": "Object key",
+                  "type": "string",
+                  "example": "9f561bea-f0d9-4e96-b7a9-879fc1643ac0.docx"
+                },
+                "url": {
+                  "description": "URL",
+                  "type": "string",
+                  "example": "https://epilot-playground-upload-document.s3.eu-central-1.amazonaws.com/9f561bea-f0d9-4e96-b7a9-879fc1643ac0.docx"
+                },
+                "document_type": {
+                  "description": "Document type:\n* 0: Static docs\n* 1: Templates\n",
+                  "type": "number",
+                  "example": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User's display name (default: email address)",
+            "example": "Example User"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "example": 1234567890
+          },
+          "preferred_language": {
+            "type": "string",
+            "example": "de"
+          },
+          "image_uri": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "original": {
+                "type": "string",
+                "format": "uri"
+              },
+              "thumbnail_32": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "example": {
+              "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+              "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+            }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "profileImageName"
+                },
+                "value": {
+                  "type": "string",
+                  "example": "avatar.png"
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ]
+            }
           }
         }
       },
@@ -815,6 +1096,7 @@
       },
       "BulkSendMessageRequest": {
         "type": "object",
+        "description": "It takes a list of entity ids, treating each as a separate mainEntity to construct individual messages.\nFor e.g; if there some opportunityIds are provided, then each opportunityId is treated as a separate mainEntity to construct individual messages.\n",
         "required": [
           "email_template_id",
           "recipient_ids"
@@ -839,11 +1121,17 @@
               "3fa85f64-5717-4562-b3fc-2c963f66afa7",
               "3fa85f64-5717-4562-b3fc-2c963f66afa8"
             ]
+          },
+          "add_unsubscribe_link": {
+            "type": "boolean",
+            "description": "If true then add unsubscribe link to email template body.\n",
+            "default": false
           }
         }
       },
       "BulkSendMessageRequestWithQuery": {
         "type": "object",
+        "description": "It takes an entity query to derive recipient_ids, treating each as a separate mainEntity to construct individual messages.\nFor e.g; if the query is provided as `_schema:opportunity AND status:PENDING`,\n  then all the opportunity Ids with status PENDING are treated as separate mainEntity to construct individual messages.\n",
         "required": [
           "email_template_id",
           "recipient_query"
@@ -861,6 +1149,11 @@
             "type": "string",
             "description": "Entity search query to select recipients",
             "example": "_schema:contact AND consent_email_marketing:active"
+          },
+          "add_unsubscribe_link": {
+            "type": "boolean",
+            "description": "If true then add unsubscribe link to email template body.\n",
+            "default": false
           }
         }
       },
@@ -933,6 +1226,15 @@
             "format": "date-time",
             "readonly": true
           },
+          "approve_action": {
+            "type": "string",
+            "description": "Type of approval action for the bulk message request.\n\n* APPROVE_WITH_CONSENT: Approve the bulk message request and send emails to queued recipients with consent\n* APPROVE_ALL: Approve the bulk message request and send emails to all queued recipients, including those without consent\n",
+            "enum": [
+              "APPROVE_WITH_CONSENT",
+              "APPROVE_ALL"
+            ],
+            "readonly": true
+          },
           "task_token": {
             "type": "string",
             "description": "Task token to approve or cancel the bulk message action",
@@ -951,7 +1253,9 @@
             "items": {
               "type": "object",
               "required": [
-                "entity_id"
+                "entity_id",
+                "email_to",
+                "email_with_consent"
               ],
               "properties": {
                 "entity_id": {
@@ -960,6 +1264,16 @@
                   "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                 },
                 "email_to": {
+                  "description": "Recipient emails",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Recipient email address",
+                    "example": "recipient@example.com"
+                  }
+                },
+                "email_with_consent": {
+                  "description": "Recipient emails with consent",
                   "type": "array",
                   "items": {
                     "type": "string",
@@ -1031,6 +1345,31 @@
               }
             }
           }
+        }
+      },
+      "CreateSystemTemplatesReq": {
+        "type": "object",
+        "properties": {
+          "template_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "DoubleOptIn_Email_DE",
+              "Einladung Kundenportal",
+              "Partner_Kooperation_Email_DE"
+            ]
+          }
+        },
+        "required": [
+          "template_names"
+        ]
+      },
+      "CreateSystemTemplatesResp": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/BaseEntity"
         }
       }
     }

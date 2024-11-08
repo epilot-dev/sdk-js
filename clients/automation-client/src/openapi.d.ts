@@ -13,6 +13,10 @@ declare namespace Components {
         export interface ActionCondition {
             id?: string;
             /**
+             * Schedule Id which indicates the schedule of the actions inside the condition
+             */
+            schedule_id?: string;
+            /**
              * Result of the condition evaluation
              */
             evaluationResult?: boolean;
@@ -43,7 +47,7 @@ declare namespace Components {
             /**
              * The id of the configured scheduler which will be added on automation triggered
              */
-            configuredScheduleId?: string;
+            scheduleApiId?: string;
             numberOfUnits?: number;
             timePeriod?: "minutes" | "hours" | "days" | "weeks" | "months";
             timeRelation?: "after" | "before";
@@ -57,7 +61,7 @@ declare namespace Components {
              * The id of the action or trigger
              */
             id: string;
-            origin: "trigger" | "action";
+            origin: "trigger" | "action" | "action_task" | "automation";
             schema: string;
             attribute: string;
         }
@@ -1984,7 +1988,7 @@ declare namespace Components {
         /**
          * different behaviors for retrying failed execution actions.
          */
-        export type RetryStrategy = "RETRY_AND_RESUME" | "RETRY_AND_STOP";
+        export type RetryStrategy = "RETRY_AND_RESUME" | "RETRY_AND_STOP" | "RETRY_ALL_ACTIONS_IF_PARENT_CONDITION";
         export interface SearchAutomationsResp {
             total: number;
             results: AutomationFlow[];

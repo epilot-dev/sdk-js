@@ -21,6 +21,32 @@ declare namespace Components {
         JobID?: Parameters.JobID;
     }
     namespace Schemas {
+        export interface CallerIdentity {
+            /**
+             * a human readable name of the caller (e.g. user name, token name or email address)
+             * example:
+             * manifest@epilot.cloud
+             */
+            name?: any;
+            /**
+             * epilot organization id
+             * example:
+             * 911690
+             */
+            org_id: string;
+            /**
+             * epilot user id, when called by a user
+             * example:
+             * 11001045
+             */
+            user_id?: string;
+            /**
+             * token id, when called by API token
+             * example:
+             * api_5ZugdRXasLfWBypHi93Fk
+             */
+            token_id?: string;
+        }
         export interface CommonImportFields {
             /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
@@ -58,9 +84,17 @@ declare namespace Components {
              */
             source_blueprint_version?: string;
             /**
+             * A URL to download the source blueprint file used to import the blueprint
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
+             */
+            source_blueprint_file?: string;
+            /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
             is_verified?: boolean;
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
         }
         export interface CommonMarkdownFields {
             /**
@@ -221,6 +255,14 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            /**
+             * A URL to download the source blueprint file used to import the blueprint
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
+             */
+            source_blueprint_file?: string;
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
         }
         /**
          * ID of an import or export job (state machine)
@@ -260,9 +302,17 @@ declare namespace Components {
              */
             source_blueprint_version?: string;
             /**
+             * A URL to download the source blueprint file used to import the blueprint
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
+             */
+            source_blueprint_file?: string;
+            /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
             is_verified?: boolean;
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
             /**
              * Markdown content part of a manifest file
              */
@@ -339,9 +389,17 @@ declare namespace Components {
              */
             source_blueprint_version?: string;
             /**
+             * A URL to download the source blueprint file used to import the blueprint
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
+             */
+            source_blueprint_file?: string;
+            /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
             is_verified?: boolean;
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
             /**
              * When the manifest was first installed (applied)
              */
@@ -479,10 +537,11 @@ declare namespace Paths {
         }
         export interface RequestBody {
             /**
+             * This is no longer used
              * example:
              * example.tf
              */
-            manifestFilePath?: string;
+            manifestFilePath?: string | null;
         }
         namespace Responses {
             export interface $200 {
@@ -929,6 +988,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type CommonImportFields = Components.Schemas.CommonImportFields;
 export type CommonManifestFields = Components.Schemas.CommonManifestFields;
 export type CommonMarkdownFields = Components.Schemas.CommonMarkdownFields;

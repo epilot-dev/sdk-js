@@ -12,7 +12,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/email-template/templates/{id}": {
@@ -24,7 +25,24 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateTemplateDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v1/email-template/templates:replace": {
@@ -34,7 +52,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/email-template/templates:replaceAsync": {
@@ -50,7 +69,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/email-template/templates:bulkSendMessage": {
@@ -60,7 +80,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/email-template/templates:revert": {
@@ -70,7 +91,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     }
   },

@@ -113,6 +113,52 @@ declare namespace Components {
              */
             copy_to_message?: boolean;
         } | null;
+        export interface AttachmentResponse {
+            /**
+             * Total attachments
+             * example:
+             * 10
+             */
+            total?: number;
+            /**
+             * List attachments
+             */
+            attachments?: {
+                /**
+                 * File name
+                 * example:
+                 * order.docx
+                 */
+                filename?: string;
+                /**
+                 * Bucket name
+                 * example:
+                 * epilot-playground-upload-document
+                 */
+                bucket?: string;
+                /**
+                 * Object key
+                 * example:
+                 * 9f561bea-f0d9-4e96-b7a9-879fc1643ac0.docx
+                 */
+                object_key?: string;
+                /**
+                 * URL
+                 * example:
+                 * https://epilot-playground-upload-document.s3.eu-central-1.amazonaws.com/9f561bea-f0d9-4e96-b7a9-879fc1643ac0.docx
+                 */
+                url?: string;
+                /**
+                 * Document type:
+                 * * 0: Static docs
+                 * * 1: Templates
+                 *
+                 * example:
+                 * 0
+                 */
+                document_type?: number;
+            }[];
+        }
         export interface BaseEntity {
             /**
              * Entity ID
@@ -156,6 +202,19 @@ declare namespace Components {
              * 2021-02-10T09:14:31.990Z
              */
             _updated_at: string; // date-time
+            /**
+             * Entity Purposes
+             * example:
+             * [
+             *   "a0ec23ac-12f8-4d89-9a63-91cba3787f2a",
+             *   "310cd388-2f15-4b5b-8f98-ca14c1e03304"
+             * ]
+             */
+            _purpose?: string[];
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
         }
         export interface BulkSendMessageJob {
             /**
@@ -182,7 +241,18 @@ declare namespace Components {
              *
              */
             status: "PROCESSING" | "QUEUEING" | "APPROVAL" | "SENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
-            request: BulkSendMessageRequest | BulkSendMessageRequestWithQuery;
+            request: /**
+             * It takes a list of entity ids, treating each as a separate mainEntity to construct individual messages.
+             * For e.g; if there some opportunityIds are provided, then each opportunityId is treated as a separate mainEntity to construct individual messages.
+             *
+             */
+            BulkSendMessageRequest | /**
+             * It takes an entity query to derive recipient_ids, treating each as a separate mainEntity to construct individual messages.
+             * For e.g; if the query is provided as `_schema:opportunity AND status:PENDING`,
+             *   then all the opportunity Ids with status PENDING are treated as separate mainEntity to construct individual messages.
+             *
+             */
+            BulkSendMessageRequestWithQuery;
             /**
              * User ID who created the bulk message action
              * example:
@@ -201,6 +271,14 @@ declare namespace Components {
              * Time when the bulk message action was last updated
              */
             approved_at?: string; // date-time
+            /**
+             * Type of approval action for the bulk message request.
+             *
+             * * APPROVE_WITH_CONSENT: Approve the bulk message request and send emails to queued recipients with consent
+             * * APPROVE_ALL: Approve the bulk message request and send emails to all queued recipients, including those without consent
+             *
+             */
+            approve_action?: "APPROVE_WITH_CONSENT" | "APPROVE_ALL";
             /**
              * Task token to approve or cancel the bulk message action
              * example:
@@ -223,7 +301,14 @@ declare namespace Components {
                  * 3fa85f64-5717-4562-b3fc-2c963f66afa6
                  */
                 entity_id: string;
-                email_to?: string[];
+                /**
+                 * Recipient emails
+                 */
+                email_to: string[];
+                /**
+                 * Recipient emails with consent
+                 */
+                email_with_consent: string[];
             }[];
             /**
              * List of entity ids and message ids that were sent successfully
@@ -260,6 +345,11 @@ declare namespace Components {
                 email_to?: string[];
             }[];
         }
+        /**
+         * It takes a list of entity ids, treating each as a separate mainEntity to construct individual messages.
+         * For e.g; if there some opportunityIds are provided, then each opportunityId is treated as a separate mainEntity to construct individual messages.
+         *
+         */
         export interface BulkSendMessageRequest {
             skip_creating_entities?: /* When true, it lets to send only the email by skip creating the thread & message entities. */ SkipCreatingEntities;
             /**
@@ -278,7 +368,18 @@ declare namespace Components {
              * ]
              */
             recipient_ids: string[];
+            /**
+             * If true then add unsubscribe link to email template body.
+             *
+             */
+            add_unsubscribe_link?: boolean;
         }
+        /**
+         * It takes an entity query to derive recipient_ids, treating each as a separate mainEntity to construct individual messages.
+         * For e.g; if the query is provided as `_schema:opportunity AND status:PENDING`,
+         *   then all the opportunity Ids with status PENDING are treated as separate mainEntity to construct individual messages.
+         *
+         */
         export interface BulkSendMessageRequestWithQuery {
             skip_creating_entities?: /* When true, it lets to send only the email by skip creating the thread & message entities. */ SkipCreatingEntities;
             /**
@@ -293,7 +394,24 @@ declare namespace Components {
              * _schema:contact AND consent_email_marketing:active
              */
             recipient_query: string;
+            /**
+             * If true then add unsubscribe link to email template body.
+             *
+             */
+            add_unsubscribe_link?: boolean;
         }
+        export interface CreateSystemTemplatesReq {
+            /**
+             * example:
+             * [
+             *   "DoubleOptIn_Email_DE",
+             *   "Einladung Kundenportal",
+             *   "Partner_Kooperation_Email_DE"
+             * ]
+             */
+            template_names: string[];
+        }
+        export type CreateSystemTemplatesResp = BaseEntity[];
         export interface EmailTemplateEntity {
             /**
              * Entity ID
@@ -337,6 +455,19 @@ declare namespace Components {
              * 2021-02-10T09:14:31.990Z
              */
             _updated_at: string; // date-time
+            /**
+             * Entity Purposes
+             * example:
+             * [
+             *   "a0ec23ac-12f8-4d89-9a63-91cba3787f2a",
+             *   "310cd388-2f15-4b5b-8f98-ca14c1e03304"
+             * ]
+             */
+            _purpose?: string[];
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
             /**
              * name
              * example:
@@ -391,13 +522,13 @@ declare namespace Components {
              * example:
              * 1234
              */
-            created_by?: number;
+            created_by?: string;
             /**
              * Updated by
              * example:
              * 1234
              */
-            updated_by?: number;
+            updated_by?: string;
             /**
              * If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...
              * Remember to add default content of template to system_template enum for revert to original feature
@@ -421,6 +552,19 @@ declare namespace Components {
              * ]
              */
             _tags?: string[];
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
+            /**
+             * Entity Purposes
+             * example:
+             * [
+             *   "a0ec23ac-12f8-4d89-9a63-91cba3787f2a",
+             *   "310cd388-2f15-4b5b-8f98-ca14c1e03304"
+             * ]
+             */
+            _purpose?: string[];
             /**
              * name
              * example:
@@ -486,13 +630,13 @@ declare namespace Components {
              * example:
              * 1234
              */
-            created_by?: number;
+            created_by?: string;
             /**
              * Updated by
              * example:
              * 1234
              */
-            updated_by?: number;
+            updated_by?: string;
         }
         export interface EmailTemplateResponse {
             entity?: EmailTemplateEntity;
@@ -505,12 +649,59 @@ declare namespace Components {
              * example:
              * epilot
              */
-            name: string;
+            name?: string;
             /**
              * example:
              * no-reply@epilot.cloud
              */
             email: string;
+        }
+        export interface PresignedRequest {
+            /**
+             * UUID
+             * example:
+             * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+             */
+            id: string;
+            /**
+             * File name
+             * example:
+             * order.pdf
+             */
+            filename: string;
+            /**
+             * Content type
+             * example:
+             * application/pdf
+             */
+            content_type: string;
+        }
+        export interface PresignedResponse {
+            /**
+             * URL to download the attachment. This URL is not accessible until attachment is uploaded successfully.
+             * example:
+             * https://go.epilot.cloud/attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf
+             */
+            download_url: string;
+            /**
+             * Post presigned URL to upload file
+             */
+            upload_url: {
+                /**
+                 * URL to upload the attachment
+                 * example:
+                 * https://s3.eu-central-1.amazonaws.com/893487340562-message-attachment
+                 */
+                url: number;
+                /**
+                 * Fields are provided by AWS to authenticate and validate the request. All fields should be included in form-data when performing upload request.
+                 * example:
+                 * {}
+                 */
+                fields: {
+                    [key: string]: any;
+                };
+            };
         }
         /**
          * When true, it lets to send only the email by skip creating the thread & message entities.
@@ -522,12 +713,57 @@ declare namespace Components {
              * example:
              * Ny Huynh
              */
-            name: string;
+            name?: string;
             /**
              * example:
              * ny.huynh@axonactive.com
              */
             email: string;
+        }
+        export interface UserResponse {
+            id?: string;
+            organization_id?: string;
+            /**
+             * User's display name (default: email address)
+             * example:
+             * Example User
+             */
+            display_name?: string;
+            email?: string; // email
+            /**
+             * example:
+             * 1234567890
+             */
+            phone?: string | null;
+            /**
+             * example:
+             * de
+             */
+            preferred_language?: string;
+            /**
+             * example:
+             * {
+             *   "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+             *   "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+             * }
+             */
+            image_uri?: {
+                [name: string]: any;
+                original?: string; // uri
+                thumbnail_32?: string; // uri
+            };
+            properties?: {
+                /**
+                 * example:
+                 * profileImageName
+                 */
+                name: string;
+                /**
+                 * example:
+                 * avatar.png
+                 */
+                value: string;
+            }[];
         }
         export interface VariableParameters {
             template_type: TemplateType;
@@ -563,7 +799,18 @@ declare namespace Components {
 }
 declare namespace Paths {
     namespace BulkSendMessage {
-        export type RequestBody = Components.Schemas.BulkSendMessageRequestWithQuery | Components.Schemas.BulkSendMessageRequest | {
+        export type RequestBody = /**
+         * It takes an entity query to derive recipient_ids, treating each as a separate mainEntity to construct individual messages.
+         * For e.g; if the query is provided as `_schema:opportunity AND status:PENDING`,
+         *   then all the opportunity Ids with status PENDING are treated as separate mainEntity to construct individual messages.
+         *
+         */
+        Components.Schemas.BulkSendMessageRequestWithQuery | /**
+         * It takes a list of entity ids, treating each as a separate mainEntity to construct individual messages.
+         * For e.g; if there some opportunityIds are provided, then each opportunityId is treated as a separate mainEntity to construct individual messages.
+         *
+         */
+        Components.Schemas.BulkSendMessageRequest | {
             /**
              * Job ID for tracking the status of a bulk message request
              * example:
@@ -571,9 +818,15 @@ declare namespace Paths {
              */
             job_id: string;
             /**
-             * Trigger an APPROVE OR CANCEL action for the bulk message request
+             * Trigger an APPROVE OR CANCEL action for the bulk message request.
+             *
+             * * APPROVE: Alias for APPROVE_WITH_CONSENT
+             * * APPROVE_WITH_CONSENT: Approve the bulk message request and send emails to queued recipients with consent
+             * * APPROVE_ALL: Approve the bulk message request and send emails to all queued recipients, including those without consent
+             * * CANCEL: Cancel the bulk message request
+             *
              */
-            action?: "APPROVE" | "CANCEL";
+            action?: "APPROVE" | "APPROVE_WITH_CONSENT" | "APPROVE_ALL" | "CANCEL";
         };
         namespace Responses {
             export type $200 = Components.Schemas.BulkSendMessageJob;
@@ -635,6 +888,11 @@ declare namespace Paths {
              *
              */
             skip_document_generation?: boolean;
+            /**
+             * If true then add unsubscribe link to email template body.
+             *
+             */
+            add_unsubscribe_link?: boolean;
         }
         namespace Responses {
             export type $200 = Components.Schemas.AsyncEmailTemplateResponse;
@@ -665,6 +923,22 @@ declare namespace Paths {
             }
         }
     }
+    namespace UpdateTemplateDetail {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.EmailTemplateRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.EmailTemplateEntity;
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -688,6 +962,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetTemplateDetail.Responses.$200>
+  /**
+   * updateTemplateDetail - updateTemplateDetail
+   * 
+   * Update email template by ID
+   */
+  'updateTemplateDetail'(
+    parameters?: Parameters<Paths.UpdateTemplateDetail.PathParameters> | null,
+    data?: Paths.UpdateTemplateDetail.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateTemplateDetail.Responses.$200>
   /**
    * replaceVariables - replaceVariables
    * 
@@ -757,6 +1041,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetTemplateDetail.Responses.$200>
+    /**
+     * updateTemplateDetail - updateTemplateDetail
+     * 
+     * Update email template by ID
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateTemplateDetail.PathParameters> | null,
+      data?: Paths.UpdateTemplateDetail.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateTemplateDetail.Responses.$200>
   }
   ['/v1/email-template/templates:replace']: {
     /**
@@ -815,15 +1109,21 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type AsyncEmailTemplateResponse = Components.Schemas.AsyncEmailTemplateResponse;
 export type Attachment = Components.Schemas.Attachment;
+export type AttachmentResponse = Components.Schemas.AttachmentResponse;
 export type BaseEntity = Components.Schemas.BaseEntity;
 export type BulkSendMessageJob = Components.Schemas.BulkSendMessageJob;
 export type BulkSendMessageRequest = Components.Schemas.BulkSendMessageRequest;
 export type BulkSendMessageRequestWithQuery = Components.Schemas.BulkSendMessageRequestWithQuery;
+export type CreateSystemTemplatesReq = Components.Schemas.CreateSystemTemplatesReq;
+export type CreateSystemTemplatesResp = Components.Schemas.CreateSystemTemplatesResp;
 export type EmailTemplateEntity = Components.Schemas.EmailTemplateEntity;
 export type EmailTemplateRequest = Components.Schemas.EmailTemplateRequest;
 export type EmailTemplateResponse = Components.Schemas.EmailTemplateResponse;
 export type From = Components.Schemas.From;
+export type PresignedRequest = Components.Schemas.PresignedRequest;
+export type PresignedResponse = Components.Schemas.PresignedResponse;
 export type SkipCreatingEntities = Components.Schemas.SkipCreatingEntities;
 export type TemplateType = Components.Schemas.TemplateType;
 export type To = Components.Schemas.To;
+export type UserResponse = Components.Schemas.UserResponse;
 export type VariableParameters = Components.Schemas.VariableParameters;

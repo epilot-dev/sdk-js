@@ -90,6 +90,14 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
+             * The cashback amount.
+             */
+            cashback_amount?: number;
+            /**
+             * The cashback amount as a string with all the decimal places.
+             */
+            cashback_amount_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -228,6 +236,14 @@ declare namespace Components {
              * The discount amount as a string with all the decimal places.
              */
             discount_amount_decimal?: string;
+            /**
+             * The cashback amount.
+             */
+            cashback_amount?: number;
+            /**
+             * The cashback amount as a string with all the decimal places.
+             */
+            cashback_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -768,6 +784,7 @@ declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
              * The ids of the coupons applicable to the price item
              */
@@ -867,6 +884,14 @@ declare namespace Components {
              * The discount amount as a string with all the decimal places.
              */
             discount_amount_decimal?: string;
+            /**
+             * The cashback amount.
+             */
+            cashback_amount?: number;
+            /**
+             * The cashback amount as a string with all the decimal places.
+             */
+            cashback_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -1183,6 +1208,14 @@ declare namespace Components {
              * The discount amount as a string with all the decimal places.
              */
             discount_amount_decimal?: string;
+            /**
+             * The cashback amount.
+             */
+            cashback_amount?: number;
+            /**
+             * The cashback amount as a string with all the decimal places.
+             */
+            cashback_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -1595,6 +1628,7 @@ declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
              * The ids of the coupons applicable to the price item
              */
@@ -1909,7 +1943,7 @@ declare namespace Components {
             name: string;
             description?: string;
             type?: "fixed" | "percentage";
-            category?: "discount" | "bonus";
+            category?: "discount" | "cashback";
             /**
              * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
              */
@@ -2307,7 +2341,9 @@ declare namespace Components {
              * example:
              * {
              *   "is_recommended": true,
-             *   "recommended_label": "Best Value"
+             *   "recommended_label": "Best Value",
+             *   "recommended_color": "#00FF00",
+             *   "recommended_label_color": "#FFFFFF"
              * }
              */
             recommendation_settings?: {
@@ -2319,6 +2355,14 @@ declare namespace Components {
                  * Label to display when the product is recommended.
                  */
                 recommended_label?: string;
+                /**
+                 * Color to display when the product is recommended.
+                 */
+                recommended_color?: string;
+                /**
+                 * Color of the recommended label.
+                 */
+                recommended_label_color?: string;
             };
             price: ExternalSimplePrice | ExternalCompositePrice;
         }
@@ -2405,6 +2449,38 @@ declare namespace Components {
              */
             type: "one_time" | "recurring";
             billing_period?: BillingPeriod;
+            /**
+             * The billing period duration
+             */
+            billing_duration_amount?: number;
+            /**
+             * The billing period duration unit
+             */
+            billing_duration_unit?: "weeks" | "months" | "years";
+            /**
+             * The notice period duration
+             */
+            notice_time_amount?: number;
+            /**
+             * The notice period duration unit
+             */
+            notice_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The termination period duration
+             */
+            termination_time_amount?: number;
+            /**
+             * The termination period duration unit
+             */
+            termination_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The renewal period duration
+             */
+            renewal_duration_amount?: number;
+            /**
+             * The renewal period duration unit
+             */
+            renewal_duration_unit?: "weeks" | "months" | "years";
             /**
              * The unit gross amount value, as a string with all the decimal places.
              * example:
@@ -3308,6 +3384,14 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
+             * The cashback amount.
+             */
+            cashback_amount?: number;
+            /**
+             * The cashback amount as a string with all the decimal places.
+             */
+            cashback_amount_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -3727,6 +3811,7 @@ declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
              * The ids of the coupons applicable to the price item
              */
@@ -4275,6 +4360,14 @@ declare namespace Components {
              */
             discount_amount_decimal?: string;
             /**
+             * The cashback amount.
+             */
+            cashback_amount?: number;
+            /**
+             * The cashback amount as a string with all the decimal places.
+             */
+            cashback_amount_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -4343,6 +4436,14 @@ declare namespace Components {
              * The discount amount as a string with all the decimal places.
              */
             discount_amount_decimal?: string;
+            /**
+             * The cashback amount.
+             */
+            cashback_amount?: number;
+            /**
+             * The cashback amount as a string with all the decimal places.
+             */
+            cashback_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */

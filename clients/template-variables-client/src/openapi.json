@@ -257,7 +257,7 @@
                       "items": {
                         "type": "string"
                       },
-                      "example": "\"[Brand Name GmbH] Order confirmation\",\n\"Hello Customer Name \n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n\"]\n"
+                      "example": "\"[Brand Name GmbH] Order confirmation\",\n\"Hello Customer Name\n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n\"]\n"
                     }
                   }
                 }
@@ -312,10 +312,20 @@
         },
         "responses": {
           "201": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomVariable"
+                }
+              }
+            }
           },
           "403": {
             "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict - Custom variable with the same key already exists"
           }
         }
       }
@@ -398,10 +408,20 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomVariable"
+                }
+              }
+            }
           },
           "403": {
             "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict - Custom variable with the same key already exists"
           }
         }
       },
@@ -1504,6 +1524,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://template-variables-api.sls.epilot.io"
+    },
     {
       "url": "https://template-variables-api.sls.epilot.io"
     }

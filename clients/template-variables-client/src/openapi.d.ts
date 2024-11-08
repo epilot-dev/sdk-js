@@ -374,9 +374,10 @@ declare namespace Paths {
     namespace CreateCustomVariable {
         export type RequestBody = Components.Schemas.CustomVariable;
         namespace Responses {
-            export interface $201 {
-            }
+            export type $201 = Components.Schemas.CustomVariable;
             export interface $403 {
+            }
+            export interface $409 {
             }
         }
     }
@@ -507,9 +508,10 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.CustomVariable;
         namespace Responses {
-            export interface $200 {
-            }
+            export type $200 = Components.Schemas.CustomVariable;
             export interface $403 {
+            }
+            export interface $409 {
             }
         }
     }

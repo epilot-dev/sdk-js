@@ -337,8 +337,11 @@
                 "type": "object",
                 "properties": {
                   "manifestFilePath": {
+                    "description": "This is no longer used",
                     "type": "string",
-                    "example": "example.tf"
+                    "example": "example.tf",
+                    "deprecated": true,
+                    "nullable": true
                   }
                 }
               }
@@ -810,9 +813,20 @@
             "description": "Version of the blueprint (semver)",
             "example": "1.0.0"
           },
+          "source_blueprint_file": {
+            "type": "string",
+            "description": "A URL to download the source blueprint file used to import the blueprint",
+            "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip"
+          },
           "is_verified": {
             "type": "boolean",
             "description": "Whether the manifest comes from a trusted source and is signed by epilot"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
           }
         }
       },
@@ -937,6 +951,33 @@
             "$ref": "#/components/schemas/FormattedErrorData"
           }
         }
+      },
+      "CallerIdentity": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "a human readable name of the caller (e.g. user name, token name or email address)",
+            "example": "manifest@epilot.cloud"
+          },
+          "org_id": {
+            "description": "epilot organization id",
+            "type": "string",
+            "example": "911690"
+          },
+          "user_id": {
+            "description": "epilot user id, when called by a user",
+            "type": "string",
+            "example": "11001045"
+          },
+          "token_id": {
+            "description": "token id, when called by API token",
+            "type": "string",
+            "example": "api_5ZugdRXasLfWBypHi93Fk"
+          }
+        },
+        "required": [
+          "org_id"
+        ]
       }
     },
     "parameters": {

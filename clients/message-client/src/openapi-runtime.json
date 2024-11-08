@@ -89,6 +89,25 @@
         "responses": {}
       }
     },
+    "/v2/message/messages/{id}/read": {
+      "post": {
+        "operationId": "markReadMessageV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/message/messages/{id}/unread": {
       "post": {
         "operationId": "markUnreadMessage",
@@ -99,6 +118,25 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v2/message/messages/{id}/unread": {
+      "post": {
+        "operationId": "markUnreadMessageV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
@@ -171,6 +209,25 @@
         "responses": {}
       }
     },
+    "/v2/message/threads/{id}/read": {
+      "post": {
+        "operationId": "markReadThreadV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/message/threads/{id}/unread": {
       "post": {
         "operationId": "markUnreadThread",
@@ -181,6 +238,25 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v2/message/threads/{id}/unread": {
+      "post": {
+        "operationId": "markUnreadThreadV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

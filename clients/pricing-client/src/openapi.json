@@ -3472,6 +3472,10 @@
             "description": "External fees metadata information required to compute totals, for some pricing models",
             "$ref": "#/components/schemas/ExternalFeeMetadata"
           },
+          "_immutable_pricing_details": {
+            "description": "Immutable pricing details for external products/prices",
+            "$ref": "#/components/schemas/PricingDetails"
+          },
           "coupon_ids": {
             "type": "array",
             "description": "The ids of the coupons applicable to the price item",
@@ -4057,6 +4061,16 @@
           "discount_amount_decimal": {
             "type": "string",
             "description": "The discount amount as a string with all the decimal places.",
+            "readOnly": true
+          },
+          "cashback_amount": {
+            "type": "integer",
+            "description": "The cashback amount.",
+            "readOnly": true
+          },
+          "cashback_amount_decimal": {
+            "type": "string",
+            "description": "The cashback amount as a string with all the decimal places.",
             "readOnly": true
           },
           "discount_percentage": {
@@ -4923,7 +4937,7 @@
             "type": "string",
             "enum": [
               "discount",
-              "bonus"
+              "cashback"
             ]
           },
           "percentage_value": {
@@ -5377,11 +5391,21 @@
               "recommended_label": {
                 "type": "string",
                 "description": "Label to display when the product is recommended."
+              },
+              "recommended_color": {
+                "type": "string",
+                "description": "Color to display when the product is recommended."
+              },
+              "recommended_label_color": {
+                "type": "string",
+                "description": "Color of the recommended label."
               }
             },
             "example": {
               "is_recommended": true,
-              "recommended_label": "Best Value"
+              "recommended_label": "Best Value",
+              "recommended_color": "#00FF00",
+              "recommended_label_color": "#FFFFFF"
             }
           },
           "price": {
@@ -5522,6 +5546,58 @@
               "billing_period": {
                 "$ref": "#/components/schemas/BillingPeriod",
                 "description": "The billing period of the price."
+              },
+              "billing_duration_amount": {
+                "description": "The billing period duration",
+                "type": "number"
+              },
+              "billing_duration_unit": {
+                "description": "The billing period duration unit",
+                "type": "string",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ]
+              },
+              "notice_time_amount": {
+                "description": "The notice period duration",
+                "type": "number"
+              },
+              "notice_time_unit": {
+                "description": "The notice period duration unit",
+                "type": "string",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ]
+              },
+              "termination_time_amount": {
+                "description": "The termination period duration",
+                "type": "number"
+              },
+              "termination_time_unit": {
+                "description": "The termination period duration unit",
+                "type": "string",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ]
+              },
+              "renewal_duration_amount": {
+                "description": "The renewal period duration",
+                "type": "number"
+              },
+              "renewal_duration_unit": {
+                "description": "The renewal period duration unit",
+                "type": "string",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ]
               },
               "unit_amount_gross_decimal": {
                 "type": "string",

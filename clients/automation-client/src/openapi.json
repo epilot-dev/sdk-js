@@ -857,7 +857,8 @@
         "description": "different behaviors for retrying failed execution actions.",
         "enum": [
           "RETRY_AND_RESUME",
-          "RETRY_AND_STOP"
+          "RETRY_AND_STOP",
+          "RETRY_ALL_ACTIONS_IF_PARENT_CONDITION"
         ]
       },
       "AutomationAction": {
@@ -2063,6 +2064,10 @@
           "id": {
             "type": "string"
           },
+          "schedule_id": {
+            "type": "string",
+            "description": "Schedule Id which indicates the schedule of the actions inside the condition"
+          },
           "evaluationResult": {
             "type": "boolean",
             "description": "Result of the condition evaluation"
@@ -2087,7 +2092,9 @@
             "type": "string",
             "enum": [
               "trigger",
-              "action"
+              "action",
+              "action_task",
+              "automation"
             ]
           },
           "schema": {
@@ -2111,7 +2118,7 @@
             "type": "string",
             "description": "Schedule Id"
           },
-          "configuredScheduleId": {
+          "scheduleApiId": {
             "type": "string",
             "description": "The id of the configured scheduler which will be added on automation triggered"
           },
