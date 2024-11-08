@@ -827,6 +827,9 @@
           "manifest_id": {
             "$ref": "#/components/schemas/ManifestID"
           },
+          "source_type": {
+            "$ref": "#/components/schemas/ManifestSource"
+          },
           "source_blueprint_name": {
             "type": "string",
             "example": "Solar B2B"

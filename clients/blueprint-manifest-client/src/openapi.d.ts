@@ -67,6 +67,7 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             ManifestID;
+            source_type?: ManifestSource;
             /**
              * example:
              * Solar B2B
@@ -286,6 +287,7 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             ManifestID;
+            source_type?: ManifestSource;
             /**
              * example:
              * Solar B2B
@@ -341,7 +343,6 @@ declare namespace Components {
                  */
                 postinstall?: string;
             };
-            source_type?: ManifestSource;
             /**
              * An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import
              */
@@ -374,6 +375,7 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             ManifestID;
+            source_type?: ManifestSource;
             /**
              * example:
              * Solar B2B
