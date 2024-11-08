@@ -858,7 +858,7 @@
         "enum": [
           "RETRY_AND_RESUME",
           "RETRY_AND_STOP",
-          "RETRY_ALL_ACTIONS_IF_PARENT_CONDITION"
+          "RETRY_ALL_PARENT_CONDITION_ACTIONS"
         ]
       },
       "AutomationAction": {
