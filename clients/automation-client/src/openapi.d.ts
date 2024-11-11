@@ -1983,6 +1983,10 @@ declare namespace Components {
          */
         export type ResumeToken = string;
         export interface RetryReq {
+            /**
+             * The condition id to retry when retry strategy is RETRY_ALL_PARENT_CONDITION_ACTIONS
+             */
+            condition_id?: string;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
         }
         /**

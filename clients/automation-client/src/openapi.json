@@ -3234,6 +3234,10 @@
       "RetryReq": {
         "type": "object",
         "properties": {
+          "condition_id": {
+            "type": "string",
+            "description": "The condition id to retry when retry strategy is RETRY_ALL_PARENT_CONDITION_ACTIONS"
+          },
           "retry_strategy": {
             "$ref": "#/components/schemas/RetryStrategy"
           }
