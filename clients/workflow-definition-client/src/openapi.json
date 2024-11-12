@@ -319,6 +319,279 @@
         }
       }
     },
+    "/v2/flows/templates": {
+      "get": {
+        "operationId": "listFlowTemplates",
+        "summary": "listFlowTemplates",
+        "description": "List all Flow Templates for a customer",
+        "tags": [
+          "Flows V2"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - flow templates loaded with success. Empty array if customer has no flows defined.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowTemplatesList"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createFlowTemplate",
+        "summary": "createFlowTemplate",
+        "description": "Create a new Flow Template.",
+        "tags": [
+          "Flows V2"
+        ],
+        "requestBody": {
+          "description": "Flow Template payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowTemplate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success - if the flow template is created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/templates/{flowId}": {
+      "get": {
+        "operationId": "getFlowTemplate",
+        "summary": "getFlowTemplate",
+        "description": "Get specific FLow template for a customer",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "schema": {
+              "$ref": "#/components/schemas/FlowTemplateId"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the Flow Template",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Definition Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefinitionNotFoundResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateFlowTemplate",
+        "summary": "updateFlowTemplate",
+        "description": "Update Flow Template.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "schema": {
+              "$ref": "#/components/schemas/FlowTemplateId"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "description": "Flow Template payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowTemplate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Flow template has been updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteFlowTemplate",
+        "summary": "deleteFlowTemplate",
+        "description": "Delete Flow Template.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "schema": {
+              "$ref": "#/components/schemas/FlowTemplateId"
+            },
+            "required": true,
+            "description": "Id of the flow template to de deleted."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Flow template has been deleted successfully"
+          },
+          "401": {
+            "description": "Failed to authenticate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No definition found"
+          }
+        }
+      }
+    },
     "/v1/workflows/definitions/{definitionId}": {
       "get": {
         "operationId": "getDefinition",
@@ -972,6 +1245,500 @@
       }
     },
     "schemas": {
+      "FlowTemplate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "description": "ISO String Date & Time",
+            "example": "2021-04-27T12:01:13.000Z"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the workflow is enabled or not",
+            "default": true
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "ISO String Date & Time",
+            "example": "2021-04-27T12:01:13.000Z"
+          },
+          "due_date": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "dynamic_due_date": {
+            "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "assigned_to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "available_in_ecp": {
+            "type": "boolean",
+            "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
+          },
+          "phases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Phase"
+            }
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Task"
+            }
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Edge"
+            }
+          },
+          "closing_reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReasonId"
+            }
+          },
+          "update_entity_attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpdateEntityAttributes"
+            }
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          }
+        },
+        "required": [
+          "name",
+          "tasks",
+          "edges"
+        ]
+      },
+      "FlowTemplatesList": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowTemplate"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "FlowTemplateId": {
+        "type": "string",
+        "description": "Short unique id (length 8) to identify the Flow Template.",
+        "example": "7hj28akg"
+      },
+      "Task": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ManualTask"
+          },
+          {
+            "$ref": "#/components/schemas/AutomationTask"
+          },
+          {
+            "$ref": "#/components/schemas/DecisionTask"
+          }
+        ]
+      },
+      "ManualTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TaskBase"
+          }
+        ]
+      },
+      "AutomationTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TaskBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "automation_config"
+            ],
+            "properties": {
+              "automation_config": {
+                "type": "object",
+                "properties": {
+                  "flow_id": {
+                    "type": "string",
+                    "description": "Id of the configured automation to run"
+                  }
+                },
+                "required": [
+                  "flow_id"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "DecisionTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TaskBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "conditions"
+            ],
+            "properties": {
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Condition"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "TaskBase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "$ref": "#/components/schemas/StepDescription"
+          },
+          "journey": {
+            "$ref": "#/components/schemas/StepJourney"
+          },
+          "due_date": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "dynamic_due_date": {
+            "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "requirements": {
+            "type": "array",
+            "description": "requirements that need to be fulfilled in order to enable the task while flow instances are running",
+            "items": {
+              "$ref": "#/components/schemas/EnableRequirement"
+            }
+          },
+          "assigned_to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ecp": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "installer": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          },
+          "phase_id": {
+            "type": "string"
+          },
+          "task_type": {
+            "$ref": "#/components/schemas/TaskType"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "task_type"
+        ]
+      },
+      "Phase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "due_date": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "dynamic_due_date": {
+            "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "assigned_to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "TaskType": {
+        "type": "string",
+        "enum": [
+          "MANUAL",
+          "AUTOMATION",
+          "DECISION"
+        ]
+      },
+      "Edge": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "from_id": {
+            "type": "string"
+          },
+          "to_id": {
+            "type": "string"
+          },
+          "condition_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "from_id",
+          "to_id"
+        ]
+      },
+      "Condition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "logical_operator": {
+            "type": "string",
+            "enum": [
+              "AND",
+              "OR"
+            ]
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Statement"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "logical_operator",
+          "statements"
+        ]
+      },
+      "Statement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/EvaluationSource"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/Operator"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "operator",
+          "values"
+        ]
+      },
+      "EvaluationSource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the action or trigger"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "trigger",
+              "action"
+            ]
+          },
+          "origin_type": {
+            "type": "string",
+            "enum": [
+              "entity",
+              "workflow",
+              "journey_block"
+            ]
+          },
+          "schema": {
+            "type": "string"
+          },
+          "attribute": {
+            "type": "string"
+          },
+          "attribute_type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "text",
+              "number",
+              "boolean",
+              "date",
+              "datetime",
+              "tags",
+              "country",
+              "email",
+              "phone",
+              "product",
+              "price",
+              "status",
+              "relation",
+              "multiselect",
+              "select",
+              "radio",
+              "relation_user",
+              "purpose",
+              "label"
+            ]
+          },
+          "attribute_repeatable": {
+            "type": "boolean"
+          },
+          "attribute_operation": {
+            "enum": [
+              "all",
+              "updated",
+              "added",
+              "deleted"
+            ]
+          }
+        }
+      },
+      "Operator": {
+        "type": "string",
+        "enum": [
+          "equals",
+          "not_equals",
+          "any_of",
+          "none_of",
+          "contains",
+          "not_contains",
+          "starts_with",
+          "ends_with",
+          "greater_than",
+          "less_than",
+          "greater_than_or_equals",
+          "less_than_or_equals",
+          "is_empty",
+          "is_not_empty"
+        ]
+      },
+      "DueDateConfig": {
+        "description": "Set due date for the task based on a dynamic condition",
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "minutes",
+              "hours",
+              "days",
+              "weeks",
+              "months"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "WORKFLOW_STARTED",
+              "TASK_FINISHED"
+            ]
+          },
+          "task_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "duration",
+          "unit",
+          "type"
+        ]
+      },
+      "EnableRequirement": {
+        "description": "describe the requirement for a task to be enabled",
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string"
+          },
+          "phase_id": {
+            "type": "string"
+          },
+          "when": {
+            "type": "string",
+            "enum": [
+              "TASK_FINISHED",
+              "PHASE_FINISHED"
+            ]
+          }
+        },
+        "required": [
+          "when"
+        ]
+      },
       "WorkflowDefinition": {
         "type": "object",
         "properties": {
@@ -1132,6 +1899,13 @@
           },
           "installer": {
             "$ref": "#/components/schemas/ECPDetails"
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids that are associated with this workflow and used for filtering"
           }
         },
         "required": [
