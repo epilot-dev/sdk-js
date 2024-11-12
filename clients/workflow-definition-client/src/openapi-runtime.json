@@ -12,12 +12,14 @@
   "paths": {
     "/v1/workflows/limits/max-allowed": {
       "get": {
-        "operationId": "getMaxAllowedLimit"
+        "operationId": "getMaxAllowedLimit",
+        "responses": {}
       }
     },
     "/v1/workflows/definitions": {
       "get": {
-        "operationId": "getDefinitions"
+        "operationId": "getDefinitions",
+        "responses": {}
       },
       "post": {
         "operationId": "createDefinition",
@@ -26,7 +28,65 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/templates": {
+      "get": {
+        "operationId": "listFlowTemplates",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createFlowTemplate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/templates/{flowId}": {
+      "get": {
+        "operationId": "getFlowTemplate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateFlowTemplate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteFlowTemplate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          }
+        ],
+        "responses": {}
       }
     },
     "/v1/workflows/definitions/{definitionId}": {
@@ -38,7 +98,8 @@
             "name": "definitionId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "put": {
         "operationId": "updateDefinition",
@@ -54,7 +115,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteDefinition",
@@ -64,7 +126,8 @@
             "name": "definitionId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/workflows/closing-reasons": {
@@ -76,7 +139,8 @@
             "name": "includeInactive",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       },
       "post": {
         "operationId": "createClosingReason",
@@ -85,7 +149,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/workflows/closing-reasons/{reasonId}": {
@@ -97,7 +162,8 @@
             "name": "reasonId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "patch": {
         "operationId": "changeReasonStatus",
@@ -112,7 +178,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/workflows/definitions/{definitionId}/closing-reasons": {
@@ -124,7 +191,8 @@
             "name": "definitionId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "patch": {
         "operationId": "setWorkflowClosingReasons",
@@ -140,7 +208,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     }
   },

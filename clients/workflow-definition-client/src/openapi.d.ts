@@ -10,6 +10,37 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface AutomationTask {
+            id: string;
+            name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
+            journey?: StepJourney;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            /**
+             * requirements that need to be fulfilled in order to enable the task while flow instances are running
+             */
+            requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            assigned_to?: string[];
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            phase_id?: string;
+            task_type: TaskType;
+            automation_config: {
+                /**
+                 * Id of the configured automation to run
+                 */
+                flow_id: string;
+            };
+        }
         export interface ChangeReasonStatusReq {
             status: ClosingReasonsStatus;
         }
@@ -43,6 +74,37 @@ declare namespace Components {
             reasons: ClosingReasonId[];
         }
         export type ClosingReasonsStatus = "ACTIVE" | "INACTIVE";
+        export interface Condition {
+            id: string;
+            logical_operator: "AND" | "OR";
+            statements: Statement[];
+        }
+        export interface DecisionTask {
+            id: string;
+            name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
+            journey?: StepJourney;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            /**
+             * requirements that need to be fulfilled in order to enable the task while flow instances are running
+             */
+            requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            assigned_to?: string[];
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            phase_id?: string;
+            task_type: TaskType;
+            conditions: Condition[];
+        }
         /**
          * Definition could be not found
          */
@@ -50,12 +112,21 @@ declare namespace Components {
             message?: string;
         }
         /**
+         * Set due date for the task based on a dynamic condition
+         */
+        export interface DueDateConfig {
+            duration: number;
+            unit: "minutes" | "hours" | "days" | "weeks" | "months";
+            type: "WORKFLOW_STARTED" | "TASK_FINISHED";
+            task_id?: string;
+        }
+        /**
          * set a Duedate for a step then a specific
          */
         export interface DynamicDueDate {
             numberOfUnits: number;
             timePeriod: "minutes" | "hours" | "days" | "weeks" | "months";
-            actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSED";
+            actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSE";
             stepId?: string;
         }
         /**
@@ -67,13 +138,131 @@ declare namespace Components {
             description?: string;
             journey?: StepJourney;
         }
+        export interface Edge {
+            id: string;
+            from_id: string;
+            to_id: string;
+            condition_id?: string;
+        }
+        /**
+         * describe the requirement for a task to be enabled
+         */
+        export interface EnableRequirement {
+            task_id?: string;
+            phase_id?: string;
+            when: "TASK_FINISHED" | "PHASE_FINISHED";
+        }
         export interface ErrorResp {
             message?: string;
         }
+        export interface EvaluationSource {
+            /**
+             * The id of the action or trigger
+             */
+            id?: string;
+            origin?: "trigger" | "action";
+            origin_type?: "entity" | "workflow" | "journey_block";
+            schema?: string;
+            attribute?: string;
+            attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label";
+            attribute_repeatable?: boolean;
+            attribute_operation?: "all" | "updated" | "added" | "deleted";
+        }
+        export interface FlowTemplate {
+            id?: string;
+            name: string;
+            description?: string;
+            /**
+             * ISO String Date & Time
+             * example:
+             * 2021-04-27T12:01:13.000Z
+             */
+            created_at?: string;
+            /**
+             * Whether the workflow is enabled or not
+             */
+            enabled?: boolean;
+            /**
+             * ISO String Date & Time
+             * example:
+             * 2021-04-27T12:01:13.000Z
+             */
+            updated_at?: string;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            assigned_to?: string[];
+            /**
+             * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
+             */
+            available_in_ecp?: boolean;
+            phases?: Phase[];
+            tasks: Task[];
+            edges: Edge[];
+            closing_reasons?: ClosingReasonId[];
+            update_entity_attributes?: UpdateEntityAttributes[];
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+        }
+        /**
+         * Short unique id (length 8) to identify the Flow Template.
+         * example:
+         * 7hj28akg
+         */
+        export type FlowTemplateId = string;
+        export interface FlowTemplatesList {
+            results: FlowTemplate[];
+        }
         export type ItemType = "STEP" | "SECTION";
+        export interface ManualTask {
+            id: string;
+            name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
+            journey?: StepJourney;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            /**
+             * requirements that need to be fulfilled in order to enable the task while flow instances are running
+             */
+            requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            assigned_to?: string[];
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            phase_id?: string;
+            task_type: TaskType;
+        }
         export interface MaxAllowedLimit {
             currentNoOfWorkflows?: number;
             maxAllowed?: number;
+        }
+        export type Operator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+        export interface Phase {
+            id: string;
+            name: string;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            assigned_to?: string[];
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
         }
         /**
          * A group of Steps that define the progress of the Workflow
@@ -95,6 +284,12 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+        }
+        export interface Statement {
+            id: string;
+            source: EvaluationSource;
+            operator: Operator;
+            values: string[];
         }
         /**
          * Action that needs to be done in a Workflow
@@ -130,6 +325,10 @@ declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
         }
         /**
          * Longer information regarding Task
@@ -152,6 +351,33 @@ declare namespace Components {
             condition: "CLOSED";
         }
         export type StepType = "MANUAL" | "AUTOMATION";
+        export type Task = ManualTask | AutomationTask | DecisionTask;
+        export interface TaskBase {
+            id: string;
+            name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
+            journey?: StepJourney;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            /**
+             * requirements that need to be fulfilled in order to enable the task while flow instances are running
+             */
+            requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            assigned_to?: string[];
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            phase_id?: string;
+            task_type: TaskType;
+        }
+        export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION";
         export interface UpdateEntityAttributes {
             source: "workflow_status" | "current_section" | "current_step";
             target: {
@@ -243,12 +469,41 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace CreateFlowTemplate {
+        export type RequestBody = Components.Schemas.FlowTemplate;
+        namespace Responses {
+            export type $201 = Components.Schemas.FlowTemplate;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace DeleteDefinition {
         namespace Parameters {
             export type DefinitionId = string;
         }
         export interface PathParameters {
             definitionId: Parameters.DefinitionId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $401 = Components.Schemas.ErrorResp;
+            export interface $404 {
+            }
+        }
+    }
+    namespace DeleteFlowTemplate {
+        namespace Parameters {
+            export type FlowId = /**
+             * Short unique id (length 8) to identify the Flow Template.
+             * example:
+             * 7hj28akg
+             */
+            Components.Schemas.FlowTemplateId;
+        }
+        export interface PathParameters {
+            flowId: Parameters.FlowId;
         }
         namespace Responses {
             export interface $204 {
@@ -305,6 +560,26 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace GetFlowTemplate {
+        namespace Parameters {
+            export type FlowId = /**
+             * Short unique id (length 8) to identify the Flow Template.
+             * example:
+             * 7hj28akg
+             */
+            Components.Schemas.FlowTemplateId;
+        }
+        export interface PathParameters {
+            flowId: Parameters.FlowId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FlowTemplate;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $404 = /* Definition could be not found */ Components.Schemas.DefinitionNotFoundResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace GetMaxAllowedLimit {
         namespace Responses {
             export type $200 = Components.Schemas.MaxAllowedLimit;
@@ -320,6 +595,12 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.ClosingReasonsIds;
+        }
+    }
+    namespace ListFlowTemplates {
+        namespace Responses {
+            export type $200 = Components.Schemas.FlowTemplatesList;
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace SetWorkflowClosingReasons {
@@ -345,6 +626,26 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.WorkflowDefinition;
         namespace Responses {
             export type $200 = Components.Schemas.WorkflowDefinition;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
+    namespace UpdateFlowTemplate {
+        namespace Parameters {
+            export type FlowId = /**
+             * Short unique id (length 8) to identify the Flow Template.
+             * example:
+             * 7hj28akg
+             */
+            Components.Schemas.FlowTemplateId;
+        }
+        export interface PathParameters {
+            flowId: Parameters.FlowId;
+        }
+        export type RequestBody = Components.Schemas.FlowTemplate;
+        namespace Responses {
+            export type $200 = Components.Schemas.FlowTemplate;
             export type $400 = Components.Schemas.ErrorResp;
             export type $401 = Components.Schemas.ErrorResp;
             export type $500 = Components.Schemas.ErrorResp;
@@ -383,6 +684,56 @@ export interface OperationMethods {
     data?: Paths.CreateDefinition.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateDefinition.Responses.$201>
+  /**
+   * listFlowTemplates - listFlowTemplates
+   * 
+   * List all Flow Templates for a customer
+   */
+  'listFlowTemplates'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListFlowTemplates.Responses.$200>
+  /**
+   * createFlowTemplate - createFlowTemplate
+   * 
+   * Create a new Flow Template.
+   */
+  'createFlowTemplate'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateFlowTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateFlowTemplate.Responses.$201>
+  /**
+   * getFlowTemplate - getFlowTemplate
+   * 
+   * Get specific FLow template for a customer
+   */
+  'getFlowTemplate'(
+    parameters?: Parameters<Paths.GetFlowTemplate.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFlowTemplate.Responses.$200>
+  /**
+   * updateFlowTemplate - updateFlowTemplate
+   * 
+   * Update Flow Template.
+   */
+  'updateFlowTemplate'(
+    parameters?: Parameters<Paths.UpdateFlowTemplate.PathParameters> | null,
+    data?: Paths.UpdateFlowTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateFlowTemplate.Responses.$200>
+  /**
+   * deleteFlowTemplate - deleteFlowTemplate
+   * 
+   * Delete Flow Template.
+   */
+  'deleteFlowTemplate'(
+    parameters?: Parameters<Paths.DeleteFlowTemplate.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteFlowTemplate.Responses.$204>
   /**
    * getDefinition - getDefinition
    * 
@@ -510,6 +861,60 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateDefinition.Responses.$201>
   }
+  ['/v2/flows/templates']: {
+    /**
+     * listFlowTemplates - listFlowTemplates
+     * 
+     * List all Flow Templates for a customer
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListFlowTemplates.Responses.$200>
+    /**
+     * createFlowTemplate - createFlowTemplate
+     * 
+     * Create a new Flow Template.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateFlowTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateFlowTemplate.Responses.$201>
+  }
+  ['/v2/flows/templates/{flowId}']: {
+    /**
+     * getFlowTemplate - getFlowTemplate
+     * 
+     * Get specific FLow template for a customer
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFlowTemplate.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFlowTemplate.Responses.$200>
+    /**
+     * updateFlowTemplate - updateFlowTemplate
+     * 
+     * Update Flow Template.
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateFlowTemplate.PathParameters> | null,
+      data?: Paths.UpdateFlowTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateFlowTemplate.Responses.$200>
+    /**
+     * deleteFlowTemplate - deleteFlowTemplate
+     * 
+     * Delete Flow Template.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteFlowTemplate.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteFlowTemplate.Responses.$204>
+  }
   ['/v1/workflows/definitions/{definitionId}']: {
     /**
      * getDefinition - getDefinition
@@ -612,6 +1017,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type AutomationTask = Components.Schemas.AutomationTask;
 export type ChangeReasonStatusReq = Components.Schemas.ChangeReasonStatusReq;
 export type ClosingReason = Components.Schemas.ClosingReason;
 export type ClosingReasonId = Components.Schemas.ClosingReasonId;
@@ -619,17 +1025,33 @@ export type ClosingReasonNotFoundResp = Components.Schemas.ClosingReasonNotFound
 export type ClosingReasons = Components.Schemas.ClosingReasons;
 export type ClosingReasonsIds = Components.Schemas.ClosingReasonsIds;
 export type ClosingReasonsStatus = Components.Schemas.ClosingReasonsStatus;
+export type Condition = Components.Schemas.Condition;
+export type DecisionTask = Components.Schemas.DecisionTask;
 export type DefinitionNotFoundResp = Components.Schemas.DefinitionNotFoundResp;
+export type DueDateConfig = Components.Schemas.DueDateConfig;
 export type DynamicDueDate = Components.Schemas.DynamicDueDate;
 export type ECPDetails = Components.Schemas.ECPDetails;
+export type Edge = Components.Schemas.Edge;
+export type EnableRequirement = Components.Schemas.EnableRequirement;
 export type ErrorResp = Components.Schemas.ErrorResp;
+export type EvaluationSource = Components.Schemas.EvaluationSource;
+export type FlowTemplate = Components.Schemas.FlowTemplate;
+export type FlowTemplateId = Components.Schemas.FlowTemplateId;
+export type FlowTemplatesList = Components.Schemas.FlowTemplatesList;
 export type ItemType = Components.Schemas.ItemType;
+export type ManualTask = Components.Schemas.ManualTask;
 export type MaxAllowedLimit = Components.Schemas.MaxAllowedLimit;
+export type Operator = Components.Schemas.Operator;
+export type Phase = Components.Schemas.Phase;
 export type Section = Components.Schemas.Section;
+export type Statement = Components.Schemas.Statement;
 export type Step = Components.Schemas.Step;
 export type StepDescription = Components.Schemas.StepDescription;
 export type StepJourney = Components.Schemas.StepJourney;
 export type StepRequirement = Components.Schemas.StepRequirement;
 export type StepType = Components.Schemas.StepType;
+export type Task = Components.Schemas.Task;
+export type TaskBase = Components.Schemas.TaskBase;
+export type TaskType = Components.Schemas.TaskType;
 export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
 export type WorkflowDefinition = Components.Schemas.WorkflowDefinition;
