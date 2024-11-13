@@ -849,6 +849,9 @@
             "description": "A URL to download the source blueprint file used to import the blueprint",
             "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip"
           },
+          "source_blueprint_file_ref": {
+            "$ref": "#/components/schemas/S3Reference"
+          },
           "is_verified": {
             "type": "boolean",
             "description": "Whether the manifest comes from a trusted source and is signed by epilot"

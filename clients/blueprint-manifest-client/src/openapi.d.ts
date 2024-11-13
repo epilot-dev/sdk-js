@@ -91,6 +91,7 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
              */
             source_blueprint_file?: string;
+            source_blueprint_file_ref?: S3Reference;
             /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
@@ -264,6 +265,7 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
              */
             source_blueprint_file?: string;
+            source_blueprint_file_ref?: S3Reference;
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
         }
@@ -311,6 +313,7 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
              */
             source_blueprint_file?: string;
+            source_blueprint_file_ref?: S3Reference;
             /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
@@ -399,6 +402,7 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
              */
             source_blueprint_file?: string;
+            source_blueprint_file_ref?: S3Reference;
             /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
