@@ -344,17 +344,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -590,17 +595,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -727,17 +737,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -1316,17 +1331,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -1571,17 +1591,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -3491,17 +3516,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -3754,17 +3784,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -4273,17 +4308,22 @@ declare namespace Components {
             /**
              * Stores references to a set of file images of the product
              */
-            product_images?: {
+            product_images?: /* Stores references to a set of file images of the product */ {
                 $relation?: EntityRelation[];
-            };
+            } | File[];
             /**
              * Stores references to a set of files downloadable from the product.
              * e.g: tech specifications, quality control sheets, privacy policy agreements
              *
              */
-            product_downloads?: {
+            product_downloads?: /**
+             * Stores references to a set of files downloadable from the product.
+             * e.g: tech specifications, quality control sheets, privacy policy agreements
+             *
+             */
+            {
                 $relation?: EntityRelation[];
-            };
+            } | File[];
             /**
              * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
              */

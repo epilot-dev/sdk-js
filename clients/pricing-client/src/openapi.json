@@ -65,6 +65,11 @@
       "name": "dynamic_price_schema",
       "x-displayName": "Composite Price",
       "description": "<SchemaDefinition schemaRef=\"#/components/schemas/CompositePrice\" exampleRef=\"#/components/examples/composite-price\" />\n"
+    },
+    {
+      "name": "coupon_schema",
+      "x-displayName": "Coupon",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Coupon\" />\n"
     }
   ],
   "x-tagGroups": [
@@ -80,7 +85,8 @@
       "tags": [
         "product_schema",
         "simple_price_schema",
-        "dynamic_price_schema"
+        "dynamic_price_schema",
+        "coupon_schema"
       ]
     },
     {
@@ -1723,28 +1729,48 @@
             }
           },
           "product_images": {
-            "type": "object",
             "description": "Stores references to a set of file images of the product",
-            "properties": {
-              "$relation": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                }
+              },
+              {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/EntityRelation"
+                  "$ref": "#/components/schemas/File"
                 }
               }
-            }
+            ]
           },
           "product_downloads": {
-            "type": "object",
             "description": "Stores references to a set of files downloadable from the product.\ne.g: tech specifications, quality control sheets, privacy policy agreements\n",
-            "properties": {
-              "$relation": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                }
+              },
+              {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/EntityRelation"
+                  "$ref": "#/components/schemas/File"
                 }
               }
-            }
+            ]
           },
           "price_options": {
             "type": "object",
@@ -4350,7 +4376,7 @@
           "items": {
             "type": "array",
             "items": {
-              "oneOf": [
+              "anyOf": [
                 {
                   "$ref": "#/components/schemas/PriceItem"
                 },
