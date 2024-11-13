@@ -1,6 +1,6 @@
 {
   "name": "epilot-sdk",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Epilot SDK",
   "main": "index.js",
   "type": "commonjs",
