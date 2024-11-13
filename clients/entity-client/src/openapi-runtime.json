@@ -376,8 +376,7 @@
           },
           {
             "in": "query",
-            "name": "purge",
-            "default": false
+            "name": "purge"
           }
         ],
         "responses": {}
@@ -996,6 +995,10 @@
           {
             "in": "query",
             "name": "query"
+          },
+          {
+            "in": "query",
+            "name": "archived"
           }
         ],
         "requestBody": {
@@ -1028,9 +1031,9 @@
         "responses": {}
       }
     },
-    "/v1/entity/taxonomies/jobs": {
+    "/v1/entity/taxonomies/bulk-jobs": {
       "get": {
-        "operationId": "getJobs",
+        "operationId": "getTaxonomyBulkActionJobs",
         "parameters": [
           {
             "in": "query",
@@ -1040,15 +1043,22 @@
         "responses": {}
       }
     },
+    "/v1/entity/taxonomies/bulk-jobs/{job_id}": {
+      "get": {
+        "operationId": "getTaxonomyBulkActionJobById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/entity/taxonomies/classifications:move": {
       "post": {
         "operationId": "bulkMoveClassifications",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "target_taxonomy"
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {}
@@ -1060,12 +1070,6 @@
     "/v1/entity/taxonomies/classifications:delete": {
       "post": {
         "operationId": "bulkDeleteClassifications",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "permanent"
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {}

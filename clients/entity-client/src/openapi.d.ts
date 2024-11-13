@@ -21,7 +21,7 @@ declare namespace Components {
          * example:
          * 01F130Q52Q6MWSNS8N2AVXV4JN
          */
-        Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
+        Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
         export type AsyncOperationQueryParam = boolean;
         export type DryRunQueryParam = boolean;
         export type EntityIdPathParam = Schemas.EntityId /* uuid */;
@@ -240,6 +240,146 @@ declare namespace Components {
             operations?: EntityOperation[];
         }
         /**
+         * Address attribute
+         */
+        export interface AddressAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: any;
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
+            group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This attribute should only be active when one of the provided settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
+            type?: "address";
+            /**
+             * Default fields visible on addresses
+             */
+            default_address_fields?: ("postal_code" | "city" | "street" | "street_number" | "plot_area" | "plot_of_land" | "suburb" | "country" | "additional_info" | "coordinates" | "start_date" | "end_date")[];
+        }
+        /**
          * Reference to an address attribute of another entity
          */
         export interface AddressRelationAttribute {
@@ -376,7 +516,7 @@ declare namespace Components {
             type?: "relation_address";
             has_primary?: boolean;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute;
         /**
          * a readonly computed ID for the attribute including schema slug and the attribute ID
          */
@@ -392,7 +532,7 @@ declare namespace Components {
              * contact
              */
             schema?: string;
-        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute);
+        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute);
         /**
          * Automation entity
          */
@@ -2490,6 +2630,11 @@ declare namespace Components {
             docs_url?: string; // uri
             /**
              * example:
+             * customer_relations
+             */
+            category?: "customer_relations" | "sales" | "product_hub" | "contracts" | "journeys" | "messaging" | "system";
+            /**
+             * example:
              * false
              */
             published?: boolean;
@@ -2857,6 +3002,11 @@ declare namespace Components {
              * https://docs.epilot.io/docs/pricing/entities
              */
             docs_url?: string; // uri
+            /**
+             * example:
+             * customer_relations
+             */
+            category?: "customer_relations" | "sales" | "product_hub" | "contracts" | "journeys" | "messaging" | "system";
             /**
              * example:
              * false
@@ -5480,8 +5630,18 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Color of the classification
+             * example:
+             * #FF5733
+             */
+            color?: string;
             created_at?: string; // date-time
             updated_at?: string; // date-time
+            /**
+             * Archived classification are not visible in the UI
+             */
+            archived?: boolean;
             type?: "purpose";
         }
         /**
@@ -7065,20 +7225,60 @@ declare namespace Components {
              */
             enabled_locations?: TaxonomyLocationId[];
         }
+        /**
+         * example:
+         * {
+         *   "job_id": "123e4567-e89b-12d3-a456-426614174000",
+         *   "status": "PENDING",
+         *   "action_type": "MOVE_LABELS",
+         *   "created_by": 10598,
+         *   "created_at": "2024-01-01T00:00:00.000Z",
+         *   "updated_at": "2024-01-01T00:00:00.000Z",
+         *   "org": 66,
+         *   "progress": 0.5
+         * }
+         */
         export interface TaxonomyBulkJob {
             job_id?: string; // uuid
-            status?: /* The status of the bulk job */ TaxonomyBulkJobStatus;
-            type?: TaxonomyBulkJobType;
+            job_status?: /* The status of the bulk job */ TaxonomyBulkJobStatus;
+            action_type?: TaxonomyBulkJobActionType;
+            request?: {
+                target_taxonomy?: /**
+                 * URL-friendly name for taxonomy
+                 * example:
+                 * purpose
+                 */
+                TaxonomySlug;
+                classification_ids?: /**
+                 * example:
+                 * taxonomy-slug:classification-slug
+                 */
+                ClassificationId[];
+            };
+            output?: {
+                target_entities?: EntityId /* uuid */[];
+                affected_entities?: EntityId /* uuid */[];
+                failures_count?: number;
+                failed_entities?: EntityId /* uuid */[];
+            };
+            created_by?: string;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            org?: string;
+            /**
+             * Progress of the job on a scale of 0 to 1
+             */
+            progress?: number;
         }
+        export type TaxonomyBulkJobActionType = "MOVE_CLASSIFICATIONS" | "DELETE_CLASSIFICATIONS";
         /**
          * The status of the bulk job
          */
-        export type TaxonomyBulkJobStatus = "PENDING" | "FAILED" | "COMPLETED";
+        export type TaxonomyBulkJobStatus = "PENDING" | "FAILED" | "COMPLETED" | "CANCELLED";
         export interface TaxonomyBulkJobTriggerResponse {
             job_id?: string; // uuid
             status?: /* The status of the bulk job */ TaxonomyBulkJobStatus;
         }
-        export type TaxonomyBulkJobType = "MOVE_LABELS" | "DELETE_LABELS";
         export interface TaxonomyClassification {
             id?: /**
              * example:
@@ -7101,8 +7301,18 @@ declare namespace Components {
              * taxonomy-slug:classification-slug
              */
             ClassificationId[];
+            /**
+             * Color of the classification
+             * example:
+             * #FF5733
+             */
+            color?: string;
             created_at?: string; // date-time
             updated_at?: string; // date-time
+            /**
+             * Archived classification are not visible in the UI
+             */
+            archived?: boolean;
             /**
              * Manifest ID used to create/update the taxonomy classification
              */
@@ -7400,7 +7610,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
             export type Async = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
@@ -7489,13 +7699,11 @@ declare namespace Paths {
         }
     }
     namespace BulkDeleteClassifications {
-        namespace Parameters {
-            export type Permanent = boolean;
-        }
-        export interface QueryParameters {
-            permanent?: Parameters.Permanent;
-        }
         export interface RequestBody {
+            /**
+             * Job ID for tracking the status of a bulk operation request
+             */
+            job_id?: string;
             classification_ids?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -7507,18 +7715,20 @@ declare namespace Paths {
         }
     }
     namespace BulkMoveClassifications {
-        namespace Parameters {
-            export type TargetTaxonomy = /**
+        export interface RequestBody {
+            /**
+             * Job ID for tracking the status of a bulk operation request
+             */
+            job_id?: string;
+            /**
+             * The target taxonomy to which the classifications will be moved
+             */
+            target_taxonomy?: /**
              * URL-friendly name for taxonomy
              * example:
              * purpose
              */
             Components.Schemas.TaxonomySlug;
-        }
-        export interface QueryParameters {
-            target_taxonomy?: Parameters.TargetTaxonomy;
-        }
-        export interface RequestBody {
             classification_ids?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -7548,7 +7758,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
             export type Async = boolean;
             export type FillActivity = boolean;
             export type Slug = /**
@@ -7700,7 +7910,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Purge = boolean;
             export type Slug = /**
@@ -7730,7 +7940,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
             export type Async = boolean;
             export type Attribute = string;
             export type EntityId = string;
@@ -8184,17 +8394,6 @@ declare namespace Paths {
             Components.Schemas.EntityItem;
         }
     }
-    namespace GetJobs {
-        namespace Parameters {
-            export type Status = /* The status of the bulk job */ Components.Schemas.TaxonomyBulkJobStatus;
-        }
-        export interface QueryParameters {
-            status?: Parameters.Status;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.TaxonomyBulkJob[];
-        }
-    }
     namespace GetJsonSchema {
         namespace Parameters {
             export type Slug = /**
@@ -8314,7 +8513,8 @@ declare namespace Paths {
              *       "enum": [
              *         "Dr.",
              *         "Prof.",
-             *         "Prof. Dr."
+             *         "Prof. Dr.",
+             *         null
              *       ]
              *     },
              *     "salutation": {
@@ -8330,7 +8530,8 @@ declare namespace Paths {
              *         "Family",
              *         "Ownership",
              *         "Assembly",
-             *         "Other"
+             *         "Other",
+             *         null
              *       ]
              *     },
              *     "first_name": {
@@ -8407,7 +8608,8 @@ declare namespace Paths {
              *             "enum": [
              *               "DE",
              *               "AT",
-             *               "CH"
+             *               "CH",
+             *               null
              *             ]
              *           },
              *           "additional_info": {
@@ -8852,6 +9054,54 @@ declare namespace Paths {
             export type $200 = Components.Schemas.Taxonomy;
         }
     }
+    namespace GetTaxonomyBulkActionJobById {
+        namespace Parameters {
+            export type JobId = string;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * {
+             *   "job_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "status": "PENDING",
+             *   "action_type": "MOVE_LABELS",
+             *   "created_by": 10598,
+             *   "created_at": "2024-01-01T00:00:00.000Z",
+             *   "updated_at": "2024-01-01T00:00:00.000Z",
+             *   "org": 66,
+             *   "progress": 0.5
+             * }
+             */
+            Components.Schemas.TaxonomyBulkJob[];
+        }
+    }
+    namespace GetTaxonomyBulkActionJobs {
+        namespace Parameters {
+            export type Status = /* The status of the bulk job */ Components.Schemas.TaxonomyBulkJobStatus;
+        }
+        export interface QueryParameters {
+            status?: Parameters.Status;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * {
+             *   "job_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "status": "PENDING",
+             *   "action_type": "MOVE_LABELS",
+             *   "created_by": 10598,
+             *   "created_at": "2024-01-01T00:00:00.000Z",
+             *   "updated_at": "2024-01-01T00:00:00.000Z",
+             *   "org": 66,
+             *   "progress": 0.5
+             * }
+             */
+            Components.Schemas.TaxonomyBulkJob[];
+        }
+    }
     namespace GetTaxonomyClassification {
         namespace Parameters {
             export type ClassificationSlug = string;
@@ -9003,7 +9253,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
             export type Async = boolean;
             export type DryRun = boolean;
             export type FillActivity = boolean;
@@ -9224,7 +9474,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
             export type Async = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
@@ -9255,7 +9505,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -9340,6 +9590,11 @@ declare namespace Paths {
         namespace Parameters {
             /**
              * example:
+             * false
+             */
+            export type Archived = boolean;
+            /**
+             * example:
              * sales
              */
             export type Query = string;
@@ -9352,6 +9607,11 @@ declare namespace Paths {
              * sales
              */
             Parameters.Query;
+            archived?: /**
+             * example:
+             * false
+             */
+            Parameters.Archived;
         }
         export interface RequestBody {
             classificationIds?: /**
@@ -9410,7 +9670,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
             export type Async = boolean;
             export type FillActivity = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
@@ -9526,7 +9786,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
             export type Async = boolean;
             export type Attribute = string;
             export type EntityId = string;
@@ -9600,7 +9860,7 @@ declare namespace Paths {
              * example:
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
-            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("");
+            Components.Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
             export type Async = boolean;
             export type DryRun = boolean;
             export type FillActivity = boolean;
@@ -10683,15 +10943,30 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
   /**
-   * getJobs - getJobs
+   * getTaxonomyBulkActionJobs - getTaxonomyBulkActionJobs
    * 
-   * Gets bulk jobs by job status
+   * Gets bulk actions jobs by job status:
+   * - <undefined> = all active jobs
+   * - PENDING = all active jobs
+   * - FAILED = all failed jobs
+   * - COMPLETED = all completed jobs
+   * 
    */
-  'getJobs'(
-    parameters?: Parameters<Paths.GetJobs.QueryParameters> | null,
+  'getTaxonomyBulkActionJobs'(
+    parameters?: Parameters<Paths.GetTaxonomyBulkActionJobs.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetJobs.Responses.$200>
+  ): OperationResponse<Paths.GetTaxonomyBulkActionJobs.Responses.$200>
+  /**
+   * getTaxonomyBulkActionJobById - getTaxonomyBulkActionJobById
+   * 
+   * Gets a bulk action job by job id
+   */
+  'getTaxonomyBulkActionJobById'(
+    parameters?: Parameters<Paths.GetTaxonomyBulkActionJobById.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetTaxonomyBulkActionJobById.Responses.$200>
   /**
    * bulkMoveClassifications - bulkMoveClassifications
    * 
@@ -10700,19 +10975,20 @@ export interface OperationMethods {
    * 
    */
   'bulkMoveClassifications'(
-    parameters?: Parameters<Paths.BulkMoveClassifications.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.BulkMoveClassifications.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.BulkMoveClassifications.Responses.$200>
   /**
    * bulkDeleteClassifications - bulkDeleteClassifications
    * 
-   * Archives or permanently deletes taxonomy classifications. When permanent is true, the classifications are deleted through a bulk 
-   * async operation which also deletes all references of the deleted classifications from the entities referencing them.
+   * Permanently deletes taxonomy classifications. The classifications are deleted through a bulk 
+   * async operation which also deletes all references of the deleted classifications from the entities 
+   * referencing them.
    * 
    */
   'bulkDeleteClassifications'(
-    parameters?: Parameters<Paths.BulkDeleteClassifications.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.BulkDeleteClassifications.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.BulkDeleteClassifications.Responses.$200>
@@ -11747,17 +12023,34 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListTaxonomyClassificationsForSchema.Responses.$200>
   }
-  ['/v1/entity/taxonomies/jobs']: {
+  ['/v1/entity/taxonomies/bulk-jobs']: {
     /**
-     * getJobs - getJobs
+     * getTaxonomyBulkActionJobs - getTaxonomyBulkActionJobs
      * 
-     * Gets bulk jobs by job status
+     * Gets bulk actions jobs by job status:
+     * - <undefined> = all active jobs
+     * - PENDING = all active jobs
+     * - FAILED = all failed jobs
+     * - COMPLETED = all completed jobs
+     * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetJobs.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetTaxonomyBulkActionJobs.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetJobs.Responses.$200>
+    ): OperationResponse<Paths.GetTaxonomyBulkActionJobs.Responses.$200>
+  }
+  ['/v1/entity/taxonomies/bulk-jobs/{job_id}']: {
+    /**
+     * getTaxonomyBulkActionJobById - getTaxonomyBulkActionJobById
+     * 
+     * Gets a bulk action job by job id
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetTaxonomyBulkActionJobById.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetTaxonomyBulkActionJobById.Responses.$200>
   }
   ['/v1/entity/taxonomies/classifications:move']: {
     /**
@@ -11768,7 +12061,7 @@ export interface PathsDictionary {
      * 
      */
     'post'(
-      parameters?: Parameters<Paths.BulkMoveClassifications.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.BulkMoveClassifications.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.BulkMoveClassifications.Responses.$200>
@@ -11777,12 +12070,13 @@ export interface PathsDictionary {
     /**
      * bulkDeleteClassifications - bulkDeleteClassifications
      * 
-     * Archives or permanently deletes taxonomy classifications. When permanent is true, the classifications are deleted through a bulk 
-     * async operation which also deletes all references of the deleted classifications from the entities referencing them.
+     * Permanently deletes taxonomy classifications. The classifications are deleted through a bulk 
+     * async operation which also deletes all references of the deleted classifications from the entities 
+     * referencing them.
      * 
      */
     'post'(
-      parameters?: Parameters<Paths.BulkDeleteClassifications.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.BulkDeleteClassifications.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.BulkDeleteClassifications.Responses.$200>
@@ -11971,6 +12265,7 @@ export type Activity = Components.Schemas.Activity;
 export type ActivityCallerContext = Components.Schemas.ActivityCallerContext;
 export type ActivityId = Components.Schemas.ActivityId;
 export type ActivityItem = Components.Schemas.ActivityItem;
+export type AddressAttribute = Components.Schemas.AddressAttribute;
 export type AddressRelationAttribute = Components.Schemas.AddressRelationAttribute;
 export type Attribute = Components.Schemas.Attribute;
 export type AttributeWithCompositeID = Components.Schemas.AttributeWithCompositeID;
@@ -12070,9 +12365,9 @@ export type SummaryField = Components.Schemas.SummaryField;
 export type TagsAttribute = Components.Schemas.TagsAttribute;
 export type Taxonomy = Components.Schemas.Taxonomy;
 export type TaxonomyBulkJob = Components.Schemas.TaxonomyBulkJob;
+export type TaxonomyBulkJobActionType = Components.Schemas.TaxonomyBulkJobActionType;
 export type TaxonomyBulkJobStatus = Components.Schemas.TaxonomyBulkJobStatus;
 export type TaxonomyBulkJobTriggerResponse = Components.Schemas.TaxonomyBulkJobTriggerResponse;
-export type TaxonomyBulkJobType = Components.Schemas.TaxonomyBulkJobType;
 export type TaxonomyClassification = Components.Schemas.TaxonomyClassification;
 export type TaxonomyLocationId = Components.Schemas.TaxonomyLocationId;
 export type TaxonomySlug = Components.Schemas.TaxonomySlug;

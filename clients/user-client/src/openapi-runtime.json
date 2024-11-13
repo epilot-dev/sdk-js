@@ -240,6 +240,19 @@
         "responses": {}
       }
     },
+    "/v2/users/public/checkToken": {
+      "get": {
+        "operationId": "checkInviteToken",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/users/public/activate": {
       "post": {
         "operationId": "activateUser",
@@ -258,6 +271,19 @@
         "responses": {}
       }
     },
+    "/v2/users/public/reject": {
+      "delete": {
+        "operationId": "rejectInvite",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/users/public/username/{username}:getLoginParameters": {
       "get": {
         "operationId": "getUserLoginParametersV2",
@@ -268,6 +294,17 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v2/users/switchOrganization": {
+      "post": {
+        "operationId": "switchOrganization",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

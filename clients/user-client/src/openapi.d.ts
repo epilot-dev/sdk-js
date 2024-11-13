@@ -107,11 +107,8 @@ declare namespace Components {
             crt_assignee?: {
                 id?: /* User's unique identifier */ UserId;
                 organization_id?: OrganizationId;
-                /**
-                 * example:
-                 * 2022-02-08T04:44:32.246Z
-                 */
-                created_at?: string;
+                created_at?: string; // date-time
+                activated_at?: string; // date-time
                 /**
                  * User's display name (default: email address)
                  * example:
@@ -218,6 +215,26 @@ declare namespace Components {
                  * }
                  */
                 favorites?: {
+                    [name: string]: any;
+                };
+                /**
+                 * example:
+                 * {
+                 *   "added_participant_opportunity": true,
+                 *   "assigned_opportunity": true,
+                 *   "assigned_task": true,
+                 *   "comment_opportunity": true,
+                 *   "deleted_task": true,
+                 *   "escalated_task": true,
+                 *   "message_receive_opportunity": true,
+                 *   "message_send_opportunity": true,
+                 *   "created_task": true,
+                 *   "created_opportunity_manual": true,
+                 *   "created_opportunity_auto": true,
+                 *   "deleted_opportunity": true
+                 * }
+                 */
+                email_notification_setting?: {
                     [name: string]: any;
                 };
                 properties?: {
@@ -522,11 +539,8 @@ declare namespace Components {
         export interface UserV2 {
             id?: /* User's unique identifier */ UserId;
             organization_id?: OrganizationId;
-            /**
-             * example:
-             * 2022-02-08T04:44:32.246Z
-             */
-            created_at?: string;
+            created_at?: string; // date-time
+            activated_at?: string; // date-time
             /**
              * User's display name (default: email address)
              * example:
@@ -635,6 +649,26 @@ declare namespace Components {
             favorites?: {
                 [name: string]: any;
             };
+            /**
+             * example:
+             * {
+             *   "added_participant_opportunity": true,
+             *   "assigned_opportunity": true,
+             *   "assigned_task": true,
+             *   "comment_opportunity": true,
+             *   "deleted_task": true,
+             *   "escalated_task": true,
+             *   "message_receive_opportunity": true,
+             *   "message_send_opportunity": true,
+             *   "created_task": true,
+             *   "created_opportunity_manual": true,
+             *   "created_opportunity_auto": true,
+             *   "deleted_opportunity": true
+             * }
+             */
+            email_notification_setting?: {
+                [name: string]: any;
+            };
             properties?: {
                 /**
                  * example:
@@ -672,6 +706,8 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
             }
+            export interface $400 {
+            }
             export interface $404 {
             }
         }
@@ -688,6 +724,44 @@ declare namespace Paths {
             export interface $404 {
             }
             export interface $422 {
+            }
+        }
+    }
+    namespace CheckInviteToken {
+        namespace Parameters {
+            export type Token = /* Token used to invite a user to epilot */ Components.Schemas.InviteToken;
+        }
+        export interface QueryParameters {
+            token: Parameters.Token;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Organization ID of the organization that invited the user
+                 */
+                invitation_org_id: string;
+                /**
+                 * Name of the organization that invited the user
+                 */
+                invitation_org_name: string;
+                /**
+                 * Logo URL of the organization that invited the user
+                 */
+                invitation_org_logo_url?: string;
+                /**
+                 * Logo Thumbnail URL of the organization that invited the user
+                 */
+                invitation_org_logo_thumbnail_url?: string;
+                /**
+                 * User ID of the invited user
+                 */
+                invitee_user_id: string;
+                /**
+                 * Organization ID of the primary organization of the user (when inviting an existing epilot user)
+                 */
+                invitee_primary_org_id?: string;
+            }
+            export interface $404 {
             }
         }
     }
@@ -874,6 +948,25 @@ declare namespace Paths {
             }
         }
     }
+    namespace RejectInvite {
+        namespace Parameters {
+            export type Token = /* Token used to invite a user to epilot */ Components.Schemas.InviteToken;
+        }
+        export interface QueryParameters {
+            token: Parameters.Token;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * true
+                 */
+                success?: boolean;
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace ResendUserInvitation {
         export interface RequestBody {
             /**
@@ -905,6 +998,19 @@ declare namespace Paths {
             export interface $200 {
                 user?: Components.Schemas.User;
                 organization?: Components.Schemas.Organization;
+            }
+        }
+    }
+    namespace SwitchOrganization {
+        export interface RequestBody {
+            org_id: Components.Schemas.OrganizationId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * A login token for the new organization to be used with CUSTOM_AUTH flow against login parameters
+                 */
+                login_token: string;
             }
         }
     }
@@ -1013,7 +1119,8 @@ export interface OperationMethods {
   /**
    * inviteUser - inviteUser
    * 
-   * Creates a new user in the caller's organization and sends an invite email to activate
+   * Creates a new user in the caller's organization and sends an invite email to activate the user
+   * 
    */
   'inviteUser'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1111,6 +1218,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.VerifyEmailWithToken.Responses.$200>
   /**
+   * checkInviteToken - checkInviteToken
+   * 
+   * Check an invite token
+   */
+  'checkInviteToken'(
+    parameters?: Parameters<Paths.CheckInviteToken.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CheckInviteToken.Responses.$200>
+  /**
    * activateUser - activateUser
    * 
    * Activate user using an invite token
@@ -1121,15 +1238,38 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ActivateUser.Responses.$200>
   /**
+   * rejectInvite - rejectInvite
+   * 
+   * Reject an invite
+   */
+  'rejectInvite'(
+    parameters?: Parameters<Paths.RejectInvite.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RejectInvite.Responses.$200>
+  /**
    * getUserLoginParametersV2 - getUserLoginParametersV2
    * 
    * Get user organization login parameters by username
+   * 
+   * The first item in the list corresponds to the user's primary organization and must be used for initial login.
+   * 
    */
   'getUserLoginParametersV2'(
     parameters?: Parameters<Paths.GetUserLoginParametersV2.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUserLoginParametersV2.Responses.$200>
+  /**
+   * switchOrganization - switchOrganization
+   * 
+   * Switch to another organization the user is part of
+   */
+  'switchOrganization'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SwitchOrganization.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SwitchOrganization.Responses.$200>
   /**
    * getMe - getMe
    * 
@@ -1243,7 +1383,8 @@ export interface PathsDictionary {
     /**
      * inviteUser - inviteUser
      * 
-     * Creates a new user in the caller's organization and sends an invite email to activate
+     * Creates a new user in the caller's organization and sends an invite email to activate the user
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1353,6 +1494,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.VerifyEmailWithToken.Responses.$200>
   }
+  ['/v2/users/public/checkToken']: {
+    /**
+     * checkInviteToken - checkInviteToken
+     * 
+     * Check an invite token
+     */
+    'get'(
+      parameters?: Parameters<Paths.CheckInviteToken.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CheckInviteToken.Responses.$200>
+  }
   ['/v2/users/public/activate']: {
     /**
      * activateUser - activateUser
@@ -1365,17 +1518,44 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ActivateUser.Responses.$200>
   }
+  ['/v2/users/public/reject']: {
+    /**
+     * rejectInvite - rejectInvite
+     * 
+     * Reject an invite
+     */
+    'delete'(
+      parameters?: Parameters<Paths.RejectInvite.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RejectInvite.Responses.$200>
+  }
   ['/v2/users/public/username/{username}:getLoginParameters']: {
     /**
      * getUserLoginParametersV2 - getUserLoginParametersV2
      * 
      * Get user organization login parameters by username
+     * 
+     * The first item in the list corresponds to the user's primary organization and must be used for initial login.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetUserLoginParametersV2.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUserLoginParametersV2.Responses.$200>
+  }
+  ['/v2/users/switchOrganization']: {
+    /**
+     * switchOrganization - switchOrganization
+     * 
+     * Switch to another organization the user is part of
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SwitchOrganization.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SwitchOrganization.Responses.$200>
   }
   ['/v1/users/me']: {
     /**
