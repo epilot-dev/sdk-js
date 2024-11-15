@@ -2075,6 +2075,13 @@ declare namespace Components {
              */
             cause?: string;
         }
+        /**
+         * An external product & price information (already computed) from an external catalog.
+         */
+        export interface ExternalCatalogItem {
+            pricing_details: /* The result from the calculation of a set of price items. */ PricingDetails;
+            _meta: /* Signature meta data payload */ SignatureMeta;
+        }
         export interface ExternalCompositePrice {
             /**
              * Fees structure with static and variable amounts
@@ -2322,74 +2329,6 @@ declare namespace Components {
                     billing_period?: BillingPeriod;
                 }[];
             };
-        }
-        /**
-         * An external product & price information (already computed) from an external catalog.
-         */
-        export interface ExternalProduct {
-            /**
-             * The ID of the product in the external catalog.
-             */
-            id: string;
-            /**
-             * The name of the product.
-             */
-            name: string;
-            /**
-             * A description of the product.
-             */
-            description?: string;
-            /**
-             * A list of features of the product.
-             */
-            features?: string[];
-            /**
-             * A list of image URLs of the product. RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.
-             *
-             */
-            product_image_urls?: string[];
-            /**
-             * A list of file/attachment URLs of the product RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.
-             *
-             */
-            product_downloads_urls?: string[];
-            /**
-             * Legal footnotes for the product.
-             */
-            legal_footnotes?: string;
-            /**
-             * Additional notes for the product.
-             */
-            additional_notes?: string[];
-            /**
-             * Recommendation settings for the product.
-             * example:
-             * {
-             *   "is_recommended": true,
-             *   "recommended_label": "Best Value",
-             *   "recommended_color": "#00FF00",
-             *   "recommended_label_color": "#FFFFFF"
-             * }
-             */
-            recommendation_settings?: {
-                /**
-                 * Flag to enable or disable the recommendation for this product.
-                 */
-                is_recommended?: boolean;
-                /**
-                 * Label to display when the product is recommended.
-                 */
-                recommended_label?: string;
-                /**
-                 * Color to display when the product is recommended.
-                 */
-                recommended_color?: string;
-                /**
-                 * Color of the recommended label.
-                 */
-                recommended_label_color?: string;
-            };
-            price: ExternalSimplePrice | ExternalCompositePrice;
         }
         export interface ExternalSimplePrice {
             /**
@@ -4558,7 +4497,7 @@ declare namespace Components {
              * The number os results returned.
              */
             hits: number;
-            results: /* An external product & price information (already computed) from an external catalog. */ ExternalProduct[];
+            results: /* An external product & price information (already computed) from an external catalog. */ ExternalCatalogItem[];
         }
         /**
          * A search providers payload
@@ -5556,13 +5495,13 @@ export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
 export type EntityRelation = Components.Schemas.EntityRelation;
 export type Error = Components.Schemas.Error;
+export type ExternalCatalogItem = Components.Schemas.ExternalCatalogItem;
 export type ExternalCompositePrice = Components.Schemas.ExternalCompositePrice;
 export type ExternalFeeMapping = Components.Schemas.ExternalFeeMapping;
 export type ExternalFeeMappings = Components.Schemas.ExternalFeeMappings;
 export type ExternalFeeMetadata = Components.Schemas.ExternalFeeMetadata;
 export type ExternalPriceFees = Components.Schemas.ExternalPriceFees;
 export type ExternalPriceTotalDetails = Components.Schemas.ExternalPriceTotalDetails;
-export type ExternalProduct = Components.Schemas.ExternalProduct;
 export type ExternalSimplePrice = Components.Schemas.ExternalSimplePrice;
 export type File = Components.Schemas.File;
 export type GasConcessionType = Components.Schemas.GasConcessionType;
