@@ -511,6 +511,20 @@
             "properties": {
               "import_job_id": {
                 "$ref": "#/components/schemas/JobID"
+              },
+              "previous_jobs_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of job IDs that were used to install the manifest"
+              },
+              "previous_jobs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Job"
+                },
+                "description": "List of jobs that were used to install the manifest"
               }
             }
           },
@@ -846,6 +860,7 @@
           },
           "source_blueprint_file": {
             "type": "string",
+            "deprecated": true,
             "description": "A URL to download the source blueprint file used to import the blueprint",
             "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip"
           },
@@ -861,6 +876,11 @@
           },
           "updated_by": {
             "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "manifest_version": {
+            "type": "string",
+            "description": "Version of the manifest (semver)",
+            "example": "1.0.0"
           }
         }
       },

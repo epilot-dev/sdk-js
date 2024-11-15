@@ -98,6 +98,12 @@ declare namespace Components {
             is_verified?: boolean;
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            /**
+             * Version of the manifest (semver)
+             * example:
+             * 1.0.0
+             */
+            manifest_version?: string;
         }
         export interface CommonMarkdownFields {
             /**
@@ -268,6 +274,12 @@ declare namespace Components {
             source_blueprint_file_ref?: S3Reference;
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            /**
+             * Version of the manifest (semver)
+             * example:
+             * 1.0.0
+             */
+            manifest_version?: string;
         }
         /**
          * ID of an import or export job (state machine)
@@ -283,6 +295,14 @@ declare namespace Components {
              * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
              */
             JobID;
+            /**
+             * List of job IDs that were used to install the manifest
+             */
+            previous_jobs_ids?: string[];
+            /**
+             * List of jobs that were used to install the manifest
+             */
+            previous_jobs?: Job[];
             manifest_id?: /**
              * ID of an imported / installed manifest
              * example:
@@ -320,6 +340,12 @@ declare namespace Components {
             is_verified?: boolean;
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            /**
+             * Version of the manifest (semver)
+             * example:
+             * 1.0.0
+             */
+            manifest_version?: string;
             /**
              * Markdown content part of a manifest file
              */
@@ -409,6 +435,12 @@ declare namespace Components {
             is_verified?: boolean;
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            /**
+             * Version of the manifest (semver)
+             * example:
+             * 1.0.0
+             */
+            manifest_version?: string;
             /**
              * When the manifest was first installed (applied)
              */
