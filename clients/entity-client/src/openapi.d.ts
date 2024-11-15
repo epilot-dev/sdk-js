@@ -377,7 +377,7 @@ declare namespace Components {
             /**
              * Default fields visible on addresses
              */
-            default_address_fields?: ("postal_code" | "city" | "street" | "street_number" | "plot_area" | "plot_of_land" | "suburb" | "country" | "additional_info" | "coordinates" | "start_date" | "end_date")[];
+            default_address_fields?: ("postal_code" | "city" | "street" | "street_number" | "plot_area" | "plot_of_land" | "suburb" | "country" | "additional_info" | "coordinates" | "start_date" | "end_date" | "salutation" | "title" | "first_name" | "last_name" | "company_name")[];
         }
         /**
          * Reference to an address attribute of another entity
@@ -908,6 +908,7 @@ declare namespace Components {
             _tags?: string[] | null;
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
+            _deleted_at?: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             _purpose?: string[] | null;
             /**
@@ -1839,6 +1840,7 @@ declare namespace Components {
             _tags?: string[] | null;
             _created_at?: string | null; // date-time
             _updated_at?: string | null; // date-time
+            _deleted_at?: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             _purpose?: string[] | null;
             /**
@@ -2269,6 +2271,7 @@ declare namespace Components {
             _tags?: string[] | null;
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
+            _deleted_at?: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             _purpose?: string[] | null;
             /**
@@ -2449,6 +2452,7 @@ declare namespace Components {
                 _tags?: string[] | null;
                 _created_at?: string | null; // date-time
                 _updated_at?: string | null; // date-time
+                _deleted_at?: string | null; // date-time
                 _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
                 _purpose?: string[] | null;
                 /**
@@ -4069,6 +4073,7 @@ declare namespace Components {
             _tags?: string[] | null;
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
+            _deleted_at?: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             _purpose?: string[] | null;
             /**
@@ -5940,6 +5945,7 @@ declare namespace Components {
                     _tags?: string[] | null;
                     _created_at: string | null; // date-time
                     _updated_at: string | null; // date-time
+                    _deleted_at?: string | null; // date-time
                     _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
                     _purpose?: string[] | null;
                     /**
@@ -6032,6 +6038,7 @@ declare namespace Components {
             _tags?: string[] | null;
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
+            _deleted_at?: string | null; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
             _purpose?: string[] | null;
             /**

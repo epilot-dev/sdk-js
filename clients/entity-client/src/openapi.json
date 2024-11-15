@@ -5184,7 +5184,12 @@
                     "additional_info",
                     "coordinates",
                     "start_date",
-                    "end_date"
+                    "end_date",
+                    "salutation",
+                    "title",
+                    "first_name",
+                    "last_name",
+                    "company_name"
                   ]
                 }
               }
@@ -6009,6 +6014,12 @@
             "readOnly": true
           },
           "_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true
+          },
+          "_deleted_at": {
             "type": "string",
             "format": "date-time",
             "nullable": true,
