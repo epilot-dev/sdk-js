@@ -17,6 +17,27 @@
     {
       "name": "Public",
       "description": "Public APIs"
+    },
+    {
+      "name": "portal_user_schema",
+      "x-displayName": "Portal User",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/PortalUser\" />\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "APIs",
+      "tags": [
+        "ECP",
+        "ECP Admin",
+        "Public"
+      ]
+    },
+    {
+      "name": "Schemas",
+      "tags": [
+        "portal_user_schema"
+      ]
     }
   ],
   "security": [
@@ -522,8 +543,74 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/JourneyActions"
+                    "$ref": "#/components/schemas/ExternalLink"
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/resolve:external-link/{id}": {
+      "get": {
+        "operationId": "getResolvedExternalLink",
+        "summary": "getResolvedExternalLink",
+        "description": "Retrieves a resolved portal external link.",
+        "tags": [
+          "ECP Admin",
+          "ECP"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "description": "ID of the External Link"
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          },
+          {
+            "in": "query",
+            "name": "contactId",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "description": "Contact ID of the user"
+          }
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resolved portal config link retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalLink"
                 }
               }
             }
@@ -1444,6 +1531,10 @@
                       "type": "boolean",
                       "description": "Whether the contact exists with the given identifier values",
                       "example": true
+                    },
+                    "contactId": {
+                      "$ref": "#/components/schemas/EntityId",
+                      "description": "ID of the contact if exists"
                     }
                   }
                 }
@@ -1851,11 +1942,44 @@
               "type": "string",
               "description": "Confirmation link token"
             }
+          },
+          {
+            "in": "query",
+            "name": "use_redirect",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Should the operation result in a 301 redirect",
+              "default": true
+            }
           }
         ],
         "responses": {
+          "200": {
+            "description": "Returned in case of successful user confirmation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "confirmed"
+                  ],
+                  "properties": {
+                    "exists": {
+                      "type": "boolean",
+                      "description": "Is the user confirmed",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
           "301": {
             "description": "User is confirmed and redirected to the portal successfully."
+          },
+          "400": {
+            "$ref": "#/components/responses/ConfirmUserInvalidRequest"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -4618,6 +4742,33 @@
             }
           }
         }
+      },
+      "ConfirmUserInvalidRequest": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "invalid_token"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "reason"
+                  ]
+                }
+              ]
+            }
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -4705,7 +4856,7 @@
           },
           "confirmEmailUpdate": {
             "$ref": "#/components/schemas/EntityId",
-            "description": "ID of the email template for email update confirmation"
+            "description": "ID of the email template for setting password while updating email"
           }
         }
       },
@@ -5000,6 +5151,13 @@
               }
             }
           },
+          "extensions": {
+            "type": "array",
+            "description": "Configured Portal extensions",
+            "items": {
+              "$ref": "#/components/schemas/ExtensionConfig"
+            }
+          },
           "default_user_to_notify": {
             "type": "object",
             "description": "Default 360 user to notify upon an internal notification",
@@ -5066,6 +5224,10 @@
               "change_due_date": {
                 "type": "boolean",
                 "description": "Change due date feature flag"
+              },
+              "new_design": {
+                "type": "boolean",
+                "description": "Enable or disable the new design for the portal"
               }
             }
           },
@@ -5170,13 +5332,6 @@
           },
           "email_templates": {
             "$ref": "#/components/schemas/EmailTemplates"
-          },
-          "grants": {
-            "type": "array",
-            "description": "Permissions granted to a portal user while accessing entities",
-            "items": {
-              "$ref": "#/components/schemas/Grant"
-            }
           },
           "images": {
             "type": "object",
@@ -5343,13 +5498,6 @@
           },
           "allowed_file_extensions": {
             "$ref": "#/components/schemas/AllowedFileExtensions"
-          },
-          "extensions": {
-            "type": "array",
-            "description": "Configured Portal extensions",
-            "items": {
-              "$ref": "#/components/schemas/ExtensionConfig"
-            }
           }
         }
       },
@@ -5426,6 +5574,13 @@
                 "additionalProperties": {
                   "type": "boolean"
                 }
+              },
+              "grants": {
+                "type": "array",
+                "description": "Permissions granted to a portal user while accessing entities",
+                "items": {
+                  "$ref": "#/components/schemas/Grant"
+                }
               }
             }
           }
@@ -5464,7 +5619,8 @@
               "ENTITY_WIDGET",
               "TEASER_WIDGET",
               "DOCUMENT_WIDGET",
-              "PAYMENT_WIDGET"
+              "PAYMENT_WIDGET",
+              "METER_READING_WIDGET"
             ]
           },
           "listIndex": {
@@ -5496,6 +5652,36 @@
         }
       },
       "EntityWidget": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WidgetBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "MeterReadingWidget": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WidgetBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "MeterChartWidget": {
         "allOf": [
           {
             "$ref": "#/components/schemas/WidgetBase"
@@ -5667,6 +5853,12 @@
           },
           {
             "$ref": "#/components/schemas/PaymentWidget"
+          },
+          {
+            "$ref": "#/components/schemas/MeterReadingWidget"
+          },
+          {
+            "$ref": "#/components/schemas/MeterChartWidget"
           }
         ]
       },
@@ -6920,6 +7112,82 @@
           }
         }
       },
+      "ExternalLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the external link"
+          },
+          "label": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "link",
+              "journey",
+              "seamless"
+            ]
+          },
+          "link": {
+            "type": "string",
+            "description": "The URL of the external link"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "attribute": {
+            "type": "string",
+            "description": "Attribute associated with the link"
+          },
+          "entity": {
+            "type": "string",
+            "description": "Entity associated with the link"
+          },
+          "attribute_value": {
+            "type": "string",
+            "description": "Attribute value for the link"
+          },
+          "icon": {
+            "type": "object",
+            "description": "Configuration of the icon for the external link",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the icon"
+              },
+              "color": {
+                "type": "string",
+                "description": "The color of the icon"
+              },
+              "size": {
+                "type": "integer",
+                "description": "Size of the icon in pixels"
+              }
+            }
+          },
+          "extension_link_id": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Seamless link identifier in a form of [extensionId, linkId]"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "type",
+          "link"
+        ]
+      },
       "WorkflowExecution": {
         "type": "object",
         "properties": {},
@@ -7345,68 +7613,85 @@
             ],
             "description": "Name of the extension."
           },
+          "description": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Name of the extension in English."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Name of the extension in some other language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Name of the extension."
+          },
           "version": {
             "type": "string",
             "description": "Version of the extension."
           },
-          "variables": {
+          "options": {
             "type": "array",
-            "description": "Variables available to the extension configurable by the portal administrator.",
+            "description": "Options available to the extension configurable by the portal administrator.",
             "items": {
               "type": "object",
               "properties": {
                 "id": {
                   "type": "string",
-                  "description": "Identifier of the variable. Should not change between updates."
+                  "description": "Identifier of the option. Should not change between updates."
                 },
                 "name": {
                   "type": "object",
                   "properties": {
                     "en": {
                       "type": "string",
-                      "description": "Name of the variable in English."
+                      "description": "Name of the option in English."
                     }
                   },
                   "additionalProperties": {
                     "type": "string",
-                    "description": "Name of the variable in some other language denoted by ISO 3166-1 alpha-2 code."
+                    "description": "Name of the option in some other language denoted by ISO 3166-1 alpha-2 code."
                   },
                   "required": [
                     "en"
                   ],
-                  "description": "Name of the variable."
+                  "description": "Name of the option."
                 },
                 "type": {
                   "type": "string",
                   "enum": [
                     "secret"
                   ],
-                  "description": "Type of the variable."
+                  "description": "Type of the option."
                 },
                 "description": {
                   "type": "object",
                   "properties": {
                     "en": {
                       "type": "string",
-                      "description": "Description of the variable in English."
+                      "description": "Description of the option in English."
                     }
                   },
                   "additionalProperties": {
                     "type": "string",
-                    "description": "Description of the variable in some other language denoted by ISO 3166-1 alpha-2 code."
+                    "description": "Description of the option in some other language denoted by ISO 3166-1 alpha-2 code."
                   },
                   "required": [
                     "en"
                   ],
-                  "description": "Description of the variable."
+                  "description": "Description of the option."
                 },
                 "default": {
                   "type": "string",
-                  "description": "Default value of the variable."
+                  "description": "Default value of the option."
                 },
                 "required": {
                   "type": "boolean",
-                  "description": "Indicate whether the variable is required.",
+                  "description": "Indicate whether the option is required.",
                   "default": false
                 }
               },
@@ -7417,20 +7702,13 @@
               ]
             }
           },
-          "widgets": {
+          "links": {
             "type": "array",
-            "description": "Widgets that can be used by portal administrator.",
+            "description": "External links added to the portal.",
             "items": {
               "allOf": [
                 {
-                  "$ref": "#/components/schemas/ExtensionWidget"
-                },
-                {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/ExtensionWidgetSeamlessLink"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/ExtensionSeamlessLink"
                 }
               ]
             }
@@ -7460,67 +7738,56 @@
           "description"
         ]
       },
-      "ExtensionWidget": {
+      "ExtensionSeamlessLink": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
-            "description": "Identifier of the widget. Should not change between updates."
+            "description": "Identifier of the link. Should not change between updates."
           },
           "name": {
             "type": "object",
             "properties": {
               "en": {
                 "type": "string",
-                "description": "Name of the widget in English."
+                "description": "Name of the extension in English."
               }
             },
             "additionalProperties": {
               "type": "string",
-              "description": "Name of the widget in some other language denoted by ISO 3166-1 alpha-2 code."
+              "description": "Name of the extension in some other language denoted by ISO 3166-1 alpha-2 code."
             },
             "required": [
               "en"
             ],
-            "description": "Name of the widget."
+            "description": "Name of the extension."
           },
           "description": {
             "type": "object",
             "properties": {
               "en": {
                 "type": "string",
-                "description": "Description of the widget in English."
+                "description": "Name of the extension in English."
               }
             },
             "additionalProperties": {
               "type": "string",
-              "description": "Description of the widget in some other language denoted by ISO 3166-1 alpha-2 code."
+              "description": "Name of the extension in some other language denoted by ISO 3166-1 alpha-2 code."
             },
             "required": [
               "en"
             ],
-            "description": "Description of the widget."
-          }
-        }
-      },
-      "ExtensionWidgetSeamlessLink": {
-        "type": "object",
-        "properties": {
+            "description": "Name of the extension."
+          },
           "type": {
             "type": "string",
             "enum": [
-              "seamlessLink"
+              "seamless"
             ]
           },
-          "authentication": {
+          "auth": {
             "type": "object",
             "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "token"
-                ]
-              },
               "method": {
                 "type": "string",
                 "description": "HTTP method to use for authentication",
@@ -7528,11 +7795,11 @@
               },
               "url": {
                 "type": "string",
-                "description": "URL to use for authentication"
+                "description": "URL to use for authentication. Supports variable interpolation."
               },
               "params": {
                 "type": "object",
-                "description": "Parameters to append to the URL.",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
                 "additionalProperties": {
                   "type": "string"
                 },
@@ -7540,7 +7807,7 @@
               },
               "headers": {
                 "type": "object",
-                "description": "Headers to use for authentication",
+                "description": "Headers to use for authentication. Supports variable interpolation.",
                 "additionalProperties": {
                   "type": "string"
                 },
@@ -7548,24 +7815,27 @@
               },
               "body": {
                 "type": "object",
-                "description": "JSON body to use for authentication",
+                "description": "JSON body to use for authentication. Supports variable interpolation.",
                 "additionalProperties": {
                   "type": "string"
                 },
                 "default": {}
               }
-            }
+            },
+            "required": [
+              "url"
+            ]
           },
           "redirect": {
             "type": "object",
             "properties": {
               "url": {
                 "type": "string",
-                "description": "URL to redirect to."
+                "description": "URL to redirect to. Supports variable interpolation."
               },
               "params": {
                 "type": "object",
-                "description": "Parameters to append to the URL.",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
                 "additionalProperties": {
                   "type": "string"
                 },
@@ -7573,7 +7843,13 @@
               }
             }
           }
-        }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "redirect"
+        ]
       },
       "ExtensionHook": {
         "type": "object",
@@ -7585,13 +7861,54 @@
         }
       },
       "ExtensionHookRegistrationIdentifiersCheck": {
-        "description": "Hook that replaces the built-in registration identifiers check. This hook makes the specified call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:\n  - 200 with body `{ \"contactId\": \"uuid\" }` if exactly one contact is found\n  - 404 if no contact is found or more than contact is found\n",
+        "description": "Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:\n  - 200 with contact id if exactly one contact is found\n  - 404 if no contact is found or more than contact is found\n",
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
             "enum": [
               "registrationIdentifiersCheck"
+            ]
+          },
+          "auth": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for authentication",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to use for authentication. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
             ]
           },
           "call": {
@@ -7603,7 +7920,7 @@
               },
               "params": {
                 "type": "object",
-                "description": "Parameters to append to the URL.",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
                 "additionalProperties": {
                   "type": "string"
                 },
@@ -7616,11 +7933,16 @@
                   "type": "string"
                 },
                 "default": {}
+              },
+              "result": {
+                "type": "string",
+                "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contactId}}`. Supports variable interpolation."
               }
             },
             "required": [
               "url",
-              "headers"
+              "headers",
+              "result"
             ]
           }
         },

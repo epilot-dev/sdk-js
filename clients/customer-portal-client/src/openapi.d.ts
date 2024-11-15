@@ -10,6 +10,13 @@ import type {
 
 declare namespace Components {
     namespace Responses {
+        export interface ConfirmUserInvalidRequest {
+            /**
+             * Error message
+             */
+            message?: string;
+            reason: "invalid_token";
+        }
         export type Conflict = Schemas.ErrorResp;
         export interface ContractAssignmentConflict {
             /**
@@ -38,7 +45,7 @@ declare namespace Components {
         }
         export interface ActionWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -486,6 +493,10 @@ declare namespace Components {
                  * Change due date feature flag
                  */
                 change_due_date?: boolean;
+                /**
+                 * Enable or disable the new design for the portal
+                 */
+                new_design?: boolean;
             };
             /**
              * Access token for the portal
@@ -584,10 +595,6 @@ declare namespace Components {
                 [name: string]: string[];
             };
             email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
-            /**
-             * Permissions granted to a portal user while accessing entities
-             */
-            grants?: Grant[];
             /**
              * Teaser & Banner Image web links
              */
@@ -721,10 +728,6 @@ declare namespace Components {
                 number_of_days_before_restriction?: number;
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
-            /**
-             * Configured Portal extensions
-             */
-            extensions?: ExtensionConfig[];
         }
         /**
          * The mapped contact of the portal user
@@ -813,7 +816,7 @@ declare namespace Components {
         }
         export interface ContentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1137,7 +1140,7 @@ declare namespace Components {
         }
         export interface DocumentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1228,7 +1231,7 @@ declare namespace Components {
              */
             EntityId /* uuid */;
             /**
-             * ID of the email template for email update confirmation
+             * ID of the email template for setting password while updating email
              */
             confirmEmailUpdate?: /**
              * Entity ID
@@ -1380,7 +1383,7 @@ declare namespace Components {
         export type EntitySlug = "contact" | "contract" | "file" | "order" | "opportunity" | "product" | "price" | "meter" | "meter_counter";
         export interface EntityWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1434,79 +1437,130 @@ declare namespace Components {
                 en: string;
             };
             /**
+             * Name of the extension.
+             */
+            description: {
+                [name: string]: string;
+                /**
+                 * Name of the extension in English.
+                 */
+                en: string;
+            };
+            /**
              * Version of the extension.
              */
             version: string;
             /**
-             * Variables available to the extension configurable by the portal administrator.
+             * Options available to the extension configurable by the portal administrator.
              */
-            variables?: {
+            options?: {
                 /**
-                 * Identifier of the variable. Should not change between updates.
+                 * Identifier of the option. Should not change between updates.
                  */
                 id: string;
                 /**
-                 * Name of the variable.
+                 * Name of the option.
                  */
                 name: {
                     [name: string]: string;
                     /**
-                     * Name of the variable in English.
+                     * Name of the option in English.
                      */
                     en: string;
                 };
                 /**
-                 * Type of the variable.
+                 * Type of the option.
                  */
                 type: "secret";
                 /**
-                 * Description of the variable.
+                 * Description of the option.
                  */
                 description?: {
                     [name: string]: string;
                     /**
-                     * Description of the variable in English.
+                     * Description of the option in English.
                      */
                     en: string;
                 };
                 /**
-                 * Default value of the variable.
+                 * Default value of the option.
                  */
                 default?: string;
                 /**
-                 * Indicate whether the variable is required.
+                 * Indicate whether the option is required.
                  */
                 required?: boolean;
             }[];
             /**
-             * Widgets that can be used by portal administrator.
+             * External links added to the portal.
              */
-            widgets?: ({
+            links?: {
                 /**
-                 * Identifier of the widget. Should not change between updates.
+                 * Identifier of the link. Should not change between updates.
                  */
-                id?: string;
+                id: string;
                 /**
-                 * Name of the widget.
+                 * Name of the extension.
                  */
-                name?: {
+                name: {
                     [name: string]: string;
                     /**
-                     * Name of the widget in English.
+                     * Name of the extension in English.
                      */
                     en: string;
                 };
                 /**
-                 * Description of the widget.
+                 * Name of the extension.
                  */
                 description?: {
                     [name: string]: string;
                     /**
-                     * Description of the widget in English.
+                     * Name of the extension in English.
                      */
                     en: string;
                 };
-            } & (ExtensionWidgetSeamlessLink))[];
+                type: "seamless";
+                auth?: {
+                    /**
+                     * HTTP method to use for authentication
+                     */
+                    method?: string;
+                    /**
+                     * URL to use for authentication. Supports variable interpolation.
+                     */
+                    url: string;
+                    /**
+                     * Parameters to append to the URL. Supports variable interpolation.
+                     */
+                    params?: {
+                        [name: string]: string;
+                    };
+                    /**
+                     * Headers to use for authentication. Supports variable interpolation.
+                     */
+                    headers?: {
+                        [name: string]: string;
+                    };
+                    /**
+                     * JSON body to use for authentication. Supports variable interpolation.
+                     */
+                    body?: {
+                        [name: string]: string;
+                    };
+                };
+                redirect: {
+                    /**
+                     * URL to redirect to. Supports variable interpolation.
+                     */
+                    url?: string;
+                    /**
+                     * Parameters to append to the URL. Supports variable interpolation.
+                     */
+                    params?: {
+                        [name: string]: string;
+                    };
+                };
+            }[];
             /**
              * Hooks that influence the behavior of Portal.
              */
@@ -1516,8 +1570,8 @@ declare namespace Components {
                  */
                 id?: string;
             } & (/**
-             * Hook that replaces the built-in registration identifiers check. This hook makes the specified call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
-             *   - 200 with body `{ "contactId": "uuid" }` if exactly one contact is found
+             * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
+             *   - 200 with contact id if exactly one contact is found
              *   - 404 if no contact is found or more than contact is found
              *
              */
@@ -1546,20 +1600,48 @@ declare namespace Components {
             id?: string;
         }
         /**
-         * Hook that replaces the built-in registration identifiers check. This hook makes the specified call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
-         *   - 200 with body `{ "contactId": "uuid" }` if exactly one contact is found
+         * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
+         *   - 200 with contact id if exactly one contact is found
          *   - 404 if no contact is found or more than contact is found
          *
          */
         export interface ExtensionHookRegistrationIdentifiersCheck {
             type: "registrationIdentifiersCheck";
+            auth?: {
+                /**
+                 * HTTP method to use for authentication
+                 */
+                method?: string;
+                /**
+                 * URL to use for authentication. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use for authentication. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * JSON body to use for authentication. Supports variable interpolation.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
             call: {
                 /**
                  * URL to call. Supports variable interpolation.
                  */
                 url: string;
                 /**
-                 * Parameters to append to the URL.
+                 * Parameters to append to the URL. Supports variable interpolation.
                  */
                 params?: {
                     [name: string]: string;
@@ -1570,77 +1652,128 @@ declare namespace Components {
                 headers: {
                     [name: string]: string;
                 };
+                /**
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contactId}}`. Supports variable interpolation.
+                 */
+                result: string;
             };
         }
-        export interface ExtensionWidget {
+        export interface ExtensionSeamlessLink {
             /**
-             * Identifier of the widget. Should not change between updates.
+             * Identifier of the link. Should not change between updates.
              */
-            id?: string;
+            id: string;
             /**
-             * Name of the widget.
+             * Name of the extension.
              */
-            name?: {
+            name: {
                 [name: string]: string;
                 /**
-                 * Name of the widget in English.
+                 * Name of the extension in English.
                  */
                 en: string;
             };
             /**
-             * Description of the widget.
+             * Name of the extension.
              */
             description?: {
                 [name: string]: string;
                 /**
-                 * Description of the widget in English.
+                 * Name of the extension in English.
                  */
                 en: string;
             };
-        }
-        export interface ExtensionWidgetSeamlessLink {
-            type?: "seamlessLink";
-            authentication?: {
-                type?: "token";
+            type: "seamless";
+            auth?: {
                 /**
                  * HTTP method to use for authentication
                  */
                 method?: string;
                 /**
-                 * URL to use for authentication
+                 * URL to use for authentication. Supports variable interpolation.
                  */
-                url?: string;
+                url: string;
                 /**
-                 * Parameters to append to the URL.
+                 * Parameters to append to the URL. Supports variable interpolation.
                  */
                 params?: {
                     [name: string]: string;
                 };
                 /**
-                 * Headers to use for authentication
+                 * Headers to use for authentication. Supports variable interpolation.
                  */
                 headers?: {
                     [name: string]: string;
                 };
                 /**
-                 * JSON body to use for authentication
+                 * JSON body to use for authentication. Supports variable interpolation.
                  */
                 body?: {
                     [name: string]: string;
                 };
             };
-            redirect?: {
+            redirect: {
                 /**
-                 * URL to redirect to.
+                 * URL to redirect to. Supports variable interpolation.
                  */
                 url?: string;
                 /**
-                 * Parameters to append to the URL.
+                 * Parameters to append to the URL. Supports variable interpolation.
                  */
                 params?: {
                     [name: string]: string;
                 };
             };
+        }
+        export interface ExternalLink {
+            /**
+             * Unique identifier for the external link
+             */
+            id: string;
+            label: {
+                [name: string]: string;
+            };
+            type: "link" | "journey" | "seamless";
+            /**
+             * The URL of the external link
+             */
+            link: string;
+            rules?: {
+                [key: string]: any;
+            }[];
+            /**
+             * Attribute associated with the link
+             */
+            attribute?: string;
+            /**
+             * Entity associated with the link
+             */
+            entity?: string;
+            /**
+             * Attribute value for the link
+             */
+            attribute_value?: string;
+            /**
+             * Configuration of the icon for the external link
+             */
+            icon?: {
+                /**
+                 * The name of the icon
+                 */
+                name?: string;
+                /**
+                 * The color of the icon
+                 */
+                color?: string;
+                /**
+                 * Size of the icon in pixels
+                 */
+                size?: number;
+            };
+            /**
+             * Seamless link identifier in a form of [extensionId, linkId]
+             */
+            extension_link_id?: string[];
         }
         export type ExtraSchemaAttributes = {
             /**
@@ -1989,6 +2122,40 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "meter";
         }
+        export interface MeterChartWidget {
+            id: string;
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
+            /**
+             * Index of the widget in the list, used for ordering (left or right)
+             */
+            listIndex: number;
+            headline?: {
+                en?: string;
+                de?: string;
+            };
+            subHeadline?: {
+                en?: string;
+                de?: string;
+            };
+            schema?: string;
+        }
+        export interface MeterReadingWidget {
+            id: string;
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
+            /**
+             * Index of the widget in the list, used for ordering (left or right)
+             */
+            listIndex: number;
+            headline?: {
+                en?: string;
+                de?: string;
+            };
+            subHeadline?: {
+                en?: string;
+                de?: string;
+            };
+            schema?: string;
+        }
         /**
          * The opportunity entity
          */
@@ -2203,7 +2370,7 @@ declare namespace Components {
         export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
         export interface PaymentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2261,6 +2428,10 @@ declare namespace Components {
                  * Change due date feature flag
                  */
                 change_due_date?: boolean;
+                /**
+                 * Enable or disable the new design for the portal
+                 */
+                new_design?: boolean;
             };
             /**
              * Access token for the portal
@@ -2359,10 +2530,6 @@ declare namespace Components {
                 [name: string]: string[];
             };
             email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
-            /**
-             * Permissions granted to a portal user while accessing entities
-             */
-            grants?: Grant[];
             /**
              * Teaser & Banner Image web links
              */
@@ -2497,10 +2664,6 @@ declare namespace Components {
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
-             * Configured Portal extensions
-             */
-            extensions?: ExtensionConfig[];
-            /**
              * ID of the organization
              * example:
              * 12345
@@ -2548,6 +2711,10 @@ declare namespace Components {
             feature_flags?: {
                 [name: string]: boolean;
             };
+            /**
+             * Permissions granted to a portal user while accessing entities
+             */
+            grants?: Grant[];
         }
         /**
          * The portal user entity
@@ -2595,7 +2762,7 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "portal_user";
         }
-        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget;
+        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget;
         /**
          * The product entity
          */
@@ -2843,7 +3010,7 @@ declare namespace Components {
         }
         export interface TeaserWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2904,6 +3071,10 @@ declare namespace Components {
                 };
             }[];
             /**
+             * Configured Portal extensions
+             */
+            extensions?: ExtensionConfig[];
+            /**
              * Default 360 user to notify upon an internal notification
              */
             default_user_to_notify?: {
@@ -2935,6 +3106,10 @@ declare namespace Components {
                     de?: string;
                 };
             }[];
+            /**
+             * Configured Portal extensions
+             */
+            extensions?: ExtensionConfig[];
             /**
              * Default 360 user to notify upon an internal notification
              */
@@ -2987,6 +3162,10 @@ declare namespace Components {
                  * Change due date feature flag
                  */
                 change_due_date?: boolean;
+                /**
+                 * Enable or disable the new design for the portal
+                 */
+                new_design?: boolean;
             };
             /**
              * Access token for the portal
@@ -3085,10 +3264,6 @@ declare namespace Components {
                 [name: string]: string[];
             };
             email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
-            /**
-             * Permissions granted to a portal user while accessing entities
-             */
-            grants?: Grant[];
             /**
              * Teaser & Banner Image web links
              */
@@ -3222,10 +3397,6 @@ declare namespace Components {
                 number_of_days_before_restriction?: number;
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
-            /**
-             * Configured Portal extensions
-             */
-            extensions?: ExtensionConfig[];
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -3266,7 +3437,7 @@ declare namespace Components {
         }
         export interface WidgetBase {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -3464,6 +3635,15 @@ declare namespace Paths {
                  * true
                  */
                 exists?: boolean;
+                /**
+                 * ID of the contact if exists
+                 */
+                contactId?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
@@ -3497,13 +3677,27 @@ declare namespace Paths {
              * Confirmation link token
              */
             export type ConfirmationLinkToken = string;
+            /**
+             * Should the operation result in a 301 redirect
+             */
+            export type UseRedirect = boolean;
         }
         export interface QueryParameters {
             confirmation_link_token: /* Confirmation link token */ Parameters.ConfirmationLinkToken;
+            use_redirect?: /* Should the operation result in a 301 redirect */ Parameters.UseRedirect;
         }
         namespace Responses {
+            export interface $200 {
+                /**
+                 * Is the user confirmed
+                 * example:
+                 * true
+                 */
+                exists?: boolean;
+            }
             export interface $301 {
             }
+            export type $400 = Components.Responses.ConfirmUserInvalidRequest;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -4487,7 +4681,7 @@ declare namespace Paths {
             contactId?: Parameters.ContactId;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.JourneyActions[];
+            export type $200 = Components.Schemas.ExternalLink[];
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -4754,6 +4948,10 @@ declare namespace Paths {
                      * Change due date feature flag
                      */
                     change_due_date?: boolean;
+                    /**
+                     * Enable or disable the new design for the portal
+                     */
+                    new_design?: boolean;
                 };
                 /**
                  * Access token for the portal
@@ -4852,10 +5050,6 @@ declare namespace Paths {
                     [name: string]: string[];
                 };
                 email_templates?: /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
-                /**
-                 * Permissions granted to a portal user while accessing entities
-                 */
-                grants?: Components.Schemas.Grant[];
                 /**
                  * Teaser & Banner Image web links
                  */
@@ -4990,10 +5184,6 @@ declare namespace Paths {
                 }[];
                 allowed_file_extensions?: /* Allowed file extensions for upload */ Components.Schemas.AllowedFileExtensions;
                 /**
-                 * Configured Portal extensions
-                 */
-                extensions?: Components.Schemas.ExtensionConfig[];
-                /**
                  * ID of the organization
                  * example:
                  * 12345
@@ -5041,6 +5231,10 @@ declare namespace Paths {
                 feature_flags?: {
                     [name: string]: boolean;
                 };
+                /**
+                 * Permissions granted to a portal user while accessing entities
+                 */
+                grants?: Components.Schemas.Grant[];
                 certificate_details?: {
                     /**
                      * Status of the certificate
@@ -5267,6 +5461,36 @@ declare namespace Paths {
                     [name: string]: Components.Schemas.IdentifierAttribute[];
                 };
             }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetResolvedExternalLink {
+        namespace Parameters {
+            export type ContactId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            origin?: Parameters.Origin;
+            contactId?: Parameters.ContactId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ExternalLink;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -6086,6 +6310,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
   /**
+   * getResolvedExternalLink - getResolvedExternalLink
+   * 
+   * Retrieves a resolved portal external link.
+   */
+  'getResolvedExternalLink'(
+    parameters?: Parameters<Paths.GetResolvedExternalLink.QueryParameters & Paths.GetResolvedExternalLink.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetResolvedExternalLink.Responses.$200>
+  /**
    * getPublicPortalConfig - getPublicPortalConfig
    * 
    * Retrieves the public portal configuration.
@@ -6324,7 +6558,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.ConfirmUser.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.ConfirmUser.Responses.$200>
   /**
    * confirmUserWithUserId - confirmUserWithUserId
    * 
@@ -6832,6 +7066,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
   }
+  ['/v2/portal/resolve:external-link/{id}']: {
+    /**
+     * getResolvedExternalLink - getResolvedExternalLink
+     * 
+     * Retrieves a resolved portal external link.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetResolvedExternalLink.QueryParameters & Paths.GetResolvedExternalLink.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetResolvedExternalLink.Responses.$200>
+  }
   ['/v2/portal/public/portal/config']: {
     /**
      * getPublicPortalConfig - getPublicPortalConfig
@@ -7108,7 +7354,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.ConfirmUser.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.ConfirmUser.Responses.$200>
   }
   ['/v2/portal/user/confirm/{id}']: {
     /**
@@ -7609,8 +7855,8 @@ export type Extension = Components.Schemas.Extension;
 export type ExtensionConfig = Components.Schemas.ExtensionConfig;
 export type ExtensionHook = Components.Schemas.ExtensionHook;
 export type ExtensionHookRegistrationIdentifiersCheck = Components.Schemas.ExtensionHookRegistrationIdentifiersCheck;
-export type ExtensionWidget = Components.Schemas.ExtensionWidget;
-export type ExtensionWidgetSeamlessLink = Components.Schemas.ExtensionWidgetSeamlessLink;
+export type ExtensionSeamlessLink = Components.Schemas.ExtensionSeamlessLink;
+export type ExternalLink = Components.Schemas.ExternalLink;
 export type ExtraSchemaAttributes = Components.Schemas.ExtraSchemaAttributes;
 export type FailedRuleErrorResp = Components.Schemas.FailedRuleErrorResp;
 export type File = Components.Schemas.File;
@@ -7620,6 +7866,8 @@ export type IdentifierAttribute = Components.Schemas.IdentifierAttribute;
 export type InstallmentEvent = Components.Schemas.InstallmentEvent;
 export type JourneyActions = Components.Schemas.JourneyActions;
 export type Meter = Components.Schemas.Meter;
+export type MeterChartWidget = Components.Schemas.MeterChartWidget;
+export type MeterReadingWidget = Components.Schemas.MeterReadingWidget;
 export type Opportunity = Components.Schemas.Opportunity;
 export type Order = Components.Schemas.Order;
 export type OrganizationSettings = Components.Schemas.OrganizationSettings;
