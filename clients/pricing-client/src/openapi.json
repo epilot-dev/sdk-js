@@ -4099,6 +4099,24 @@
             "description": "The cashback amount as a string with all the decimal places.",
             "readOnly": true
           },
+          "cashback_period": {
+            "type": "string",
+            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
+            "enum": [
+              "0",
+              "12"
+            ]
+          },
+          "after_cashback_amount_total": {
+            "type": "integer",
+            "description": "Total amount after cashback is applied.",
+            "readOnly": true
+          },
+          "after_cashback_amount_total_decimal": {
+            "type": "string",
+            "description": "Total amount after cashback is applied as a string with all the decimal places.",
+            "readOnly": true
+          },
           "discount_percentage": {
             "type": "integer",
             "description": "The discount percentage, if the applied coupon had a percentage type.",
@@ -4260,6 +4278,24 @@
             "description": "Currency"
           }
         },
+        "CashbackAmount": {
+          "type": "object",
+          "description": "An amount associated with a specific cashback period.",
+          "properties": {
+            "cashback_period": {
+              "type": "string",
+              "description": "The cashback period, for now it's limited to either 0 months or 12 months",
+              "enum": [
+                "0",
+                "12"
+              ]
+            },
+            "amount_total": {
+              "type": "integer",
+              "description": "The sum of all cashbacks for a specific cashback period"
+            }
+          }
+        },
         "required": [
           "amount_subtotal",
           "amount_total",
@@ -4350,6 +4386,17 @@
                   "oneOf": [
                     {
                       "$ref": "#/components/schemas/RecurrenceAmount"
+                    }
+                  ]
+                }
+              },
+              "cashbacks": {
+                "type": "array",
+                "description": "The list of cashback sums for each cashback period.",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CashbackAmount"
                     }
                   ]
                 }
