@@ -5033,6 +5033,14 @@
               }
             ]
           },
+          "cashback_period": {
+            "type": "string",
+            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
+            "enum": [
+              "0",
+              "12"
+            ]
+          },
           "active": {
             "type": "boolean"
           },
