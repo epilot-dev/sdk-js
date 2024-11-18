@@ -98,6 +98,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -244,6 +256,18 @@ declare namespace Components {
              * The cashback amount as a string with all the decimal places.
              */
             cashback_amount_decimal?: string;
+            /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -908,6 +932,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -995,6 +1031,19 @@ declare namespace Components {
             consents?: {
                 [name: string]: any;
             };
+        }
+        /**
+         * An amount associated with a specific cashback period.
+         */
+        export interface CashbackAmount {
+            /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * The sum of all cashbacks for a specific cashback period
+             */
+            amount_total?: number;
         }
         /**
          * A catalog search payload
@@ -1231,6 +1280,18 @@ declare namespace Components {
              * The cashback amount as a string with all the decimal places.
              */
             cashback_amount_decimal?: string;
+            /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -1992,6 +2053,10 @@ declare namespace Components {
              * EUR
              */
             Currency;
+            /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
             active?: boolean;
             /**
              * The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.
@@ -2074,13 +2139,6 @@ declare namespace Components {
              * The cause of the error (visible for bad requests - http 400)
              */
             cause?: string;
-        }
-        /**
-         * An external product & price information (already computed) from an external catalog.
-         */
-        export interface ExternalCatalogItem {
-            pricing_details: /* The result from the calculation of a set of price items. */ PricingDetails;
-            _meta: /* Signature meta data payload */ SignatureMeta;
         }
         export interface ExternalCompositePrice {
             /**
@@ -2329,6 +2387,74 @@ declare namespace Components {
                     billing_period?: BillingPeriod;
                 }[];
             };
+        }
+        /**
+         * An external product & price information (already computed) from an external catalog.
+         */
+        export interface ExternalProduct {
+            /**
+             * The ID of the product in the external catalog.
+             */
+            id: string;
+            /**
+             * The name of the product.
+             */
+            name: string;
+            /**
+             * A description of the product.
+             */
+            description?: string;
+            /**
+             * A list of features of the product.
+             */
+            features?: string[];
+            /**
+             * A list of image URLs of the product. RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.
+             *
+             */
+            product_image_urls?: string[];
+            /**
+             * A list of file/attachment URLs of the product RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.
+             *
+             */
+            product_downloads_urls?: string[];
+            /**
+             * Legal footnotes for the product.
+             */
+            legal_footnotes?: string;
+            /**
+             * Additional notes for the product.
+             */
+            additional_notes?: string[];
+            /**
+             * Recommendation settings for the product.
+             * example:
+             * {
+             *   "is_recommended": true,
+             *   "recommended_label": "Best Value",
+             *   "recommended_color": "#00FF00",
+             *   "recommended_label_color": "#FFFFFF"
+             * }
+             */
+            recommendation_settings?: {
+                /**
+                 * Flag to enable or disable the recommendation for this product.
+                 */
+                is_recommended?: boolean;
+                /**
+                 * Label to display when the product is recommended.
+                 */
+                recommended_label?: string;
+                /**
+                 * Color to display when the product is recommended.
+                 */
+                recommended_color?: string;
+                /**
+                 * Color of the recommended label.
+                 */
+                recommended_label_color?: string;
+            };
+            price: ExternalSimplePrice | ExternalCompositePrice;
         }
         export interface ExternalSimplePrice {
             /**
@@ -3356,6 +3482,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -4347,6 +4485,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -4424,6 +4574,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -4497,7 +4659,7 @@ declare namespace Components {
              * The number os results returned.
              */
             hits: number;
-            results: /* An external product & price information (already computed) from an external catalog. */ ExternalCatalogItem[];
+            results: /* An external product & price information (already computed) from an external catalog. */ ExternalProduct[];
         }
         /**
          * A search providers payload
@@ -4744,6 +4906,10 @@ declare namespace Components {
                  * The aggregated price items tax amount per rate.
                  */
                 recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+                /**
+                 * The list of cashback sums for each cashback period.
+                 */
+                cashbacks?: (/* An amount associated with a specific cashback period. */ CashbackAmount)[];
                 /**
                  * The aggregated price items recurrences by tax rate
                  */
@@ -5471,6 +5637,7 @@ export type BasicAuthCredentials = Components.Schemas.BasicAuthCredentials;
 export type BillingPeriod = Components.Schemas.BillingPeriod;
 export type Cart = Components.Schemas.Cart;
 export type CartDto = Components.Schemas.CartDto;
+export type CashbackAmount = Components.Schemas.CashbackAmount;
 export type CatalogSearch = Components.Schemas.CatalogSearch;
 export type CatalogSearchResult = Components.Schemas.CatalogSearchResult;
 export type CheckoutCart = Components.Schemas.CheckoutCart;
@@ -5495,13 +5662,13 @@ export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
 export type EntityRelation = Components.Schemas.EntityRelation;
 export type Error = Components.Schemas.Error;
-export type ExternalCatalogItem = Components.Schemas.ExternalCatalogItem;
 export type ExternalCompositePrice = Components.Schemas.ExternalCompositePrice;
 export type ExternalFeeMapping = Components.Schemas.ExternalFeeMapping;
 export type ExternalFeeMappings = Components.Schemas.ExternalFeeMappings;
 export type ExternalFeeMetadata = Components.Schemas.ExternalFeeMetadata;
 export type ExternalPriceFees = Components.Schemas.ExternalPriceFees;
 export type ExternalPriceTotalDetails = Components.Schemas.ExternalPriceTotalDetails;
+export type ExternalProduct = Components.Schemas.ExternalProduct;
 export type ExternalSimplePrice = Components.Schemas.ExternalSimplePrice;
 export type File = Components.Schemas.File;
 export type GasConcessionType = Components.Schemas.GasConcessionType;

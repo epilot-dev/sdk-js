@@ -4099,6 +4099,24 @@
             "description": "The cashback amount as a string with all the decimal places.",
             "readOnly": true
           },
+          "cashback_period": {
+            "type": "string",
+            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
+            "enum": [
+              "0",
+              "12"
+            ]
+          },
+          "after_cashback_amount_total": {
+            "type": "integer",
+            "description": "Total amount after cashback is applied.",
+            "readOnly": true
+          },
+          "after_cashback_amount_total_decimal": {
+            "type": "string",
+            "description": "Total amount after cashback is applied as a string with all the decimal places.",
+            "readOnly": true
+          },
           "discount_percentage": {
             "type": "integer",
             "description": "The discount percentage, if the applied coupon had a percentage type.",
@@ -4267,6 +4285,24 @@
           "amount_total_decimal"
         ]
       },
+      "CashbackAmount": {
+        "type": "object",
+        "description": "An amount associated with a specific cashback period.",
+        "properties": {
+          "cashback_period": {
+            "type": "string",
+            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
+            "enum": [
+              "0",
+              "12"
+            ]
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "The sum of all cashbacks for a specific cashback period"
+          }
+        }
+      },
       "RecurrenceAmountWithTax": {
         "type": "object",
         "description": "An amount associated with a specific recurrence.",
@@ -4350,6 +4386,17 @@
                   "oneOf": [
                     {
                       "$ref": "#/components/schemas/RecurrenceAmount"
+                    }
+                  ]
+                }
+              },
+              "cashbacks": {
+                "type": "array",
+                "description": "The list of cashback sums for each cashback period.",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CashbackAmount"
                     }
                   ]
                 }
@@ -4986,6 +5033,14 @@
               }
             ]
           },
+          "cashback_period": {
+            "type": "string",
+            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
+            "enum": [
+              "0",
+              "12"
+            ]
+          },
           "active": {
             "type": "boolean"
           },
@@ -5349,7 +5404,7 @@
           "results": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ExternalCatalogItem"
+              "$ref": "#/components/schemas/ExternalProduct"
             }
           }
         },
@@ -5358,20 +5413,97 @@
           "hits"
         ]
       },
-      "ExternalCatalogItem": {
+      "ExternalProduct": {
         "type": "object",
         "description": "An external product & price information (already computed) from an external catalog.",
         "properties": {
-          "pricing_details": {
-            "$ref": "#/components/schemas/PricingDetails"
+          "id": {
+            "type": "string",
+            "description": "The ID of the product in the external catalog."
           },
-          "_meta": {
-            "$ref": "#/components/schemas/SignatureMeta"
+          "name": {
+            "type": "string",
+            "description": "The name of the product."
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of the product."
+          },
+          "features": {
+            "type": "array",
+            "description": "A list of features of the product.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "product_image_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of image URLs of the product. RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.\n"
+          },
+          "product_downloads_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of file/attachment URLs of the product RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.\n"
+          },
+          "legal_footnotes": {
+            "type": "string",
+            "description": "Legal footnotes for the product."
+          },
+          "additional_notes": {
+            "type": "array",
+            "description": "Additional notes for the product.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recommendation_settings": {
+            "type": "object",
+            "description": "Recommendation settings for the product.",
+            "properties": {
+              "is_recommended": {
+                "type": "boolean",
+                "description": "Flag to enable or disable the recommendation for this product."
+              },
+              "recommended_label": {
+                "type": "string",
+                "description": "Label to display when the product is recommended."
+              },
+              "recommended_color": {
+                "type": "string",
+                "description": "Color to display when the product is recommended."
+              },
+              "recommended_label_color": {
+                "type": "string",
+                "description": "Color of the recommended label."
+              }
+            },
+            "example": {
+              "is_recommended": true,
+              "recommended_label": "Best Value",
+              "recommended_color": "#00FF00",
+              "recommended_label_color": "#FFFFFF"
+            }
+          },
+          "price": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ExternalSimplePrice"
+              },
+              {
+                "$ref": "#/components/schemas/ExternalCompositePrice"
+              }
+            ]
           }
         },
         "required": [
-          "pricing_details",
-          "_meta"
+          "price",
+          "name",
+          "id"
         ]
       },
       "ExternalPriceFees": {
