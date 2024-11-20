@@ -501,6 +501,407 @@
         }
       }
     },
+    "/v2/portal/consumption": {
+      "get": {
+        "operationId": "getConsumption",
+        "summary": "Get Consumption",
+        "description": "Get energy consumption data between a given time period.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true,
+            "description": "Start date for consumption data (ISO 8601 format)."
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true,
+            "description": "End date for consumption data (ISO 8601 format)."
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PT15M",
+                "PT1H",
+                "P1D",
+                "P1M"
+              ]
+            },
+            "required": true,
+            "description": "Interval between consumption data points (e.g., PT15M for 15 minutes, PT1H for hourly). Not all intervals have to be supported."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consumption data returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "ISO 8601 timestamp of the consumption record."
+                      },
+                      "value": {
+                        "type": "number",
+                        "description": "The consumption value."
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time)."
+                      }
+                    },
+                    "required": [
+                      "value",
+                      "unit",
+                      "timestamp"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/costs": {
+      "get": {
+        "operationId": "getCosts",
+        "summary": "Get Costs",
+        "description": "Get energy cost data between a given time period.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true,
+            "description": "Start date for cost data (ISO 8601 format)."
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true,
+            "description": "End date for cost data (ISO 8601 format)."
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PT15M",
+                "PT1H",
+                "P1D",
+                "P1M"
+              ]
+            },
+            "required": true,
+            "description": "Interval between cost data points (e.g., PT15M for 15 minutes, PT1H for hourly). Not all intervals have to be supported."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cost data returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "ISO 8601 timestamp of the cost record."
+                      },
+                      "unit_amount": {
+                        "type": "integer",
+                        "description": "Cost in cents, e.g. 1234 for 12,34 €.",
+                        "example": 1234
+                      },
+                      "unit_amount_currency": {
+                        "type": "string",
+                        "description": "ISO 4217:2015 currency.",
+                        "example": "EUR"
+                      },
+                      "unit_amount_decimal": {
+                        "type": "string",
+                        "description": "Cost in decimal format, e.g. \"12.34\".",
+                        "example": "12.34"
+                      },
+                      "tax_behavior": {
+                        "type": "string",
+                        "description": "Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.",
+                        "enum": [
+                          "inclusive",
+                          "exclusive"
+                        ],
+                        "example": "exclusive"
+                      },
+                      "tax_rate": {
+                        "type": "integer",
+                        "description": "Tax rate in percent, e.g. 19 for 19%.",
+                        "example": 19
+                      }
+                    },
+                    "required": [
+                      "timestamp",
+                      "unit_amount",
+                      "unit_amount_currency",
+                      "unit_amount_decimal",
+                      "tax_behavior",
+                      "tax_rate"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/prices": {
+      "get": {
+        "operationId": "getPrices",
+        "summary": "Get Prices",
+        "description": "Get energy prices data between a given time period.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true,
+            "description": "Start date for price data (ISO 8601 format)."
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true,
+            "description": "End date for price data (ISO 8601 format)."
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PT15M",
+                "PT1H",
+                "P1D",
+                "P1M"
+              ]
+            },
+            "required": true,
+            "description": "Interval between price data points (e.g., PT15M for 15 minutes, PT1H for hourly). Not all intervals have to be supported."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Price data returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "ISO 8601 timestamp of the price record."
+                      },
+                      "unit_amount": {
+                        "type": "integer",
+                        "description": "Cost in cents, e.g. 1234 for 12,34 €.",
+                        "example": 1234
+                      },
+                      "unit_amount_currency": {
+                        "type": "string",
+                        "description": "ISO 4217:2015 currency.",
+                        "example": "EUR"
+                      },
+                      "unit_amount_decimal": {
+                        "type": "string",
+                        "description": "Cost in decimal format, e.g. \"12.34\".",
+                        "example": "12.34"
+                      },
+                      "components": {
+                        "type": "object",
+                        "description": "Optional price components.",
+                        "properties": {
+                          "auction_price_amount": {
+                            "type": "integer",
+                            "description": "Market price in cents, e.g. 1000 for 10,00 €.",
+                            "example": 1000
+                          },
+                          "auction_price_amount_decimal": {
+                            "type": "string",
+                            "description": "Market price in decimal format, e.g. \"10.00\".",
+                            "example": "10.00"
+                          },
+                          "taxes_levies_amount": {
+                            "type": "integer",
+                            "description": "Taxes/Levies other than tax specified on the price level in cents, e.g. 50 for 00,50 €.",
+                            "example": 50
+                          },
+                          "taxes_levies_amount_decimal": {
+                            "type": "string",
+                            "description": "Taxes/Levies other than tax specified on the price level in decimal format, e.g. \"0.50\".",
+                            "example": "0.50"
+                          },
+                          "source_fee_amount": {
+                            "type": "integer",
+                            "description": "Fee associated with the source, e.g. Green Energy Certificate fee in cents, e.g. 50 for 00,50 €.",
+                            "example": 50
+                          },
+                          "source_fee_amount_decimal": {
+                            "type": "string",
+                            "description": "Fee associated with the source, e.g. Green Energy Certificate fee in decimal format, e.g. \"0.50\".",
+                            "example": "0.50"
+                          },
+                          "grid_fee_amount": {
+                            "type": "integer",
+                            "description": "Fee associated with the transmission/distribution in cents, e.g. 100 for 1,00 €.",
+                            "example": 100
+                          },
+                          "grid_fee_amount_decimal": {
+                            "type": "string",
+                            "description": "Fee associated with the transmission/distribution in decimal format, e.g. \"1.00\".",
+                            "example": "1.00"
+                          },
+                          "margin_amount": {
+                            "type": "integer",
+                            "description": "Margin in cents, e.g. 34 for 0,34 €.",
+                            "example": 34
+                          },
+                          "margin_amount_decimal": {
+                            "type": "string",
+                            "description": "Margin in decimal format, e.g. \"0.34\".",
+                            "example": "0.34"
+                          }
+                        }
+                      },
+                      "tax_behavior": {
+                        "type": "string",
+                        "description": "Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.",
+                        "enum": [
+                          "inclusive",
+                          "exclusive"
+                        ],
+                        "example": "exclusive"
+                      },
+                      "tax_rate": {
+                        "type": "integer",
+                        "description": "Tax rate in percent, e.g. 19 for 19%.",
+                        "example": 19
+                      }
+                    },
+                    "required": [
+                      "timestamp",
+                      "unit_amount",
+                      "unit_amount_currency",
+                      "unit_amount_decimal",
+                      "tax_behavior",
+                      "tax_rate"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/external-links": {
       "get": {
         "operationId": "getExternalLinks",
@@ -1965,7 +2366,7 @@
                     "confirmed"
                   ],
                   "properties": {
-                    "exists": {
+                    "confirmed": {
                       "type": "boolean",
                       "description": "Is the user confirmed",
                       "example": true
@@ -3209,7 +3610,7 @@
       "post": {
         "operationId": "addContractByIdentifiers",
         "summary": "addContractByIdentifiers",
-        "description": "Self-assign contract by pre-configured identifiers.",
+        "description": "Self-assign contract(s) by pre-configured identifiers.",
         "tags": [
           "ECP"
         ],
@@ -3225,7 +3626,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Identifier-value pairs per schema to identify a contract",
+                "description": "Identifier-value pairs per schema to identify the contract",
                 "additionalProperties": {
                   "type": "object",
                   "additionalProperties": {
@@ -3246,14 +3647,17 @@
         },
         "responses": {
           "200": {
-            "description": "Contract was assigned successfully.",
+            "description": "Contract(s) assigned successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "data": {
-                      "$ref": "#/components/schemas/EntityItem"
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
                     },
                     "hits": {
                       "type": "number",
@@ -4709,8 +5113,10 @@
                   "properties": {
                     "reason": {
                       "type": "string",
+                      "description": "Reason why the contract is not assignable. If the reason is \"MULTIPLE\", the contract is not assignable because multiple contracts were found and the business logic does not allow it.",
                       "enum": [
-                        "DRAFT"
+                        "DRAFT",
+                        "MULTIPLE"
                       ]
                     }
                   },
@@ -5620,7 +6026,8 @@
               "TEASER_WIDGET",
               "DOCUMENT_WIDGET",
               "PAYMENT_WIDGET",
-              "METER_READING_WIDGET"
+              "METER_READING_WIDGET",
+              "METER_CHART_WIDGET"
             ]
           },
           "listIndex": {
@@ -7664,6 +8071,7 @@
                 "type": {
                   "type": "string",
                   "enum": [
+                    "text",
                     "secret"
                   ],
                   "description": "Type of the option."
@@ -7725,6 +8133,18 @@
                   "oneOf": [
                     {
                       "$ref": "#/components/schemas/ExtensionHookRegistrationIdentifiersCheck"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ExtensionHookContractIdentification"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ExtensionHookPriceDataRetrieval"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ExtensionHookConsumptionDataRetrieval"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ExtensionHookCostDataRetrieval"
                     }
                   ]
                 }
@@ -7784,6 +8204,11 @@
             "enum": [
               "seamless"
             ]
+          },
+          "condition": {
+            "type": "string",
+            "description": "Controls whether the link should be shown. Supports variable interpolation.",
+            "example": "{{Contact.customer_number | is_not_empty}}"
           },
           "auth": {
             "type": "object",
@@ -7936,13 +8361,370 @@
               },
               "result": {
                 "type": "string",
-                "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contactId}}`. Supports variable interpolation."
+                "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation."
               }
             },
             "required": [
               "url",
               "headers",
               "result"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ]
+      },
+      "ExtensionHookContractIdentification": {
+        "description": "Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:\n  - 200 if found with either:\n    - contract_id array\n    - contact_id string\n  - 404 if no contract is found\nIf `contact_id` is provided in the response, Contracts are retrieved from this Contact.\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "contractIdentification"
+            ]
+          },
+          "auth": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for authentication",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to use for authentication. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ]
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url",
+              "headers",
+              "result"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ]
+      },
+      "ExtensionHookPriceDataRetrieval": {
+        "description": "Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:\n  - 200 with the time series data\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "priceDataRetrieval"
+            ]
+          },
+          "auth": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for authentication",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to use for authentication. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ]
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ]
+      },
+      "ExtensionHookConsumptionDataRetrieval": {
+        "description": "Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:\n  - 200 with the time series data\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "consumptionDataRetrieval"
+            ]
+          },
+          "auth": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for authentication",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to use for authentication. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ]
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ]
+      },
+      "ExtensionHookCostDataRetrieval": {
+        "description": "Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:\n  - 200 with the time series data\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "costDataRetrieval"
+            ]
+          },
+          "auth": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for authentication",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to use for authentication. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ]
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
             ]
           }
         },

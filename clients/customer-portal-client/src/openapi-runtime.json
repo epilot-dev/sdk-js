@@ -130,6 +130,75 @@
         "responses": {}
       }
     },
+    "/v2/portal/consumption": {
+      "get": {
+        "operationId": "getConsumption",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/costs": {
+      "get": {
+        "operationId": "getCosts",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/prices": {
+      "get": {
+        "operationId": "getPrices",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/external-links": {
       "get": {
         "operationId": "getExternalLinks",
