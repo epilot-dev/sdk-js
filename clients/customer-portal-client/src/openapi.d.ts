@@ -23,7 +23,10 @@ declare namespace Components {
              * Error message
              */
             message?: string;
-            reason: "DRAFT";
+            /**
+             * Reason why the contract is not assignable. If the reason is "MULTIPLE", the contract is not assignable because multiple contracts were found and the business logic does not allow it.
+             */
+            reason: "DRAFT" | "MULTIPLE";
         }
         export type Forbidden = Schemas.ErrorResp;
         export type ForbiddenByRule = Schemas.ErrorResp | Schemas.FailedRuleErrorResp;
@@ -45,7 +48,7 @@ declare namespace Components {
         }
         export interface ActionWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -816,7 +819,7 @@ declare namespace Components {
         }
         export interface ContentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1140,7 +1143,7 @@ declare namespace Components {
         }
         export interface DocumentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1383,7 +1386,7 @@ declare namespace Components {
         export type EntitySlug = "contact" | "contract" | "file" | "order" | "opportunity" | "product" | "price" | "meter" | "meter_counter";
         export interface EntityWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1471,7 +1474,7 @@ declare namespace Components {
                 /**
                  * Type of the option.
                  */
-                type: "secret";
+                type: "text" | "secret";
                 /**
                  * Description of the option.
                  */
@@ -1520,6 +1523,12 @@ declare namespace Components {
                     en: string;
                 };
                 type: "seamless";
+                /**
+                 * Controls whether the link should be shown. Supports variable interpolation.
+                 * example:
+                 * {{Contact.customer_number | is_not_empty}}
+                 */
+                condition?: string;
                 auth?: {
                     /**
                      * HTTP method to use for authentication
@@ -1575,7 +1584,31 @@ declare namespace Components {
              *   - 404 if no contact is found or more than contact is found
              *
              */
-            ExtensionHookRegistrationIdentifiersCheck))[];
+            ExtensionHookRegistrationIdentifiersCheck | /**
+             * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
+             *   - 200 if found with either:
+             *     - contract_id array
+             *     - contact_id string
+             *   - 404 if no contract is found
+             * If `contact_id` is provided in the response, Contracts are retrieved from this Contact.
+             *
+             */
+            ExtensionHookContractIdentification | /**
+             * Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+             *   - 200 with the time series data
+             *
+             */
+            ExtensionHookPriceDataRetrieval | /**
+             * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+             *   - 200 with the time series data
+             *
+             */
+            ExtensionHookConsumptionDataRetrieval | /**
+             * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+             *   - 200 with the time series data
+             *
+             */
+            ExtensionHookCostDataRetrieval))[];
         }
         export interface ExtensionConfig {
             /**
@@ -1598,6 +1631,238 @@ declare namespace Components {
              * Identifier of the hook. Should not change between updates.
              */
             id?: string;
+        }
+        /**
+         * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+         *   - 200 with the time series data
+         *
+         */
+        export interface ExtensionHookConsumptionDataRetrieval {
+            type: "consumptionDataRetrieval";
+            auth?: {
+                /**
+                 * HTTP method to use for authentication
+                 */
+                method?: string;
+                /**
+                 * URL to use for authentication. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use for authentication. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * JSON body to use for authentication. Supports variable interpolation.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+            };
+        }
+        /**
+         * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
+         *   - 200 if found with either:
+         *     - contract_id array
+         *     - contact_id string
+         *   - 404 if no contract is found
+         * If `contact_id` is provided in the response, Contracts are retrieved from this Contact.
+         *
+         */
+        export interface ExtensionHookContractIdentification {
+            type: "contractIdentification";
+            auth?: {
+                /**
+                 * HTTP method to use for authentication
+                 */
+                method?: string;
+                /**
+                 * URL to use for authentication. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use for authentication. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * JSON body to use for authentication. Supports variable interpolation.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            call: {
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+            };
+        }
+        /**
+         * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+         *   - 200 with the time series data
+         *
+         */
+        export interface ExtensionHookCostDataRetrieval {
+            type: "costDataRetrieval";
+            auth?: {
+                /**
+                 * HTTP method to use for authentication
+                 */
+                method?: string;
+                /**
+                 * URL to use for authentication. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use for authentication. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * JSON body to use for authentication. Supports variable interpolation.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+            };
+        }
+        /**
+         * Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+         *   - 200 with the time series data
+         *
+         */
+        export interface ExtensionHookPriceDataRetrieval {
+            type: "priceDataRetrieval";
+            auth?: {
+                /**
+                 * HTTP method to use for authentication
+                 */
+                method?: string;
+                /**
+                 * URL to use for authentication. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use for authentication. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * JSON body to use for authentication. Supports variable interpolation.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+            };
         }
         /**
          * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
@@ -1653,7 +1918,7 @@ declare namespace Components {
                     [name: string]: string;
                 };
                 /**
-                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contactId}}`. Supports variable interpolation.
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation.
                  */
                 result: string;
             };
@@ -1684,6 +1949,12 @@ declare namespace Components {
                 en: string;
             };
             type: "seamless";
+            /**
+             * Controls whether the link should be shown. Supports variable interpolation.
+             * example:
+             * {{Contact.customer_number | is_not_empty}}
+             */
+            condition?: string;
             auth?: {
                 /**
                  * HTTP method to use for authentication
@@ -2124,7 +2395,7 @@ declare namespace Components {
         }
         export interface MeterChartWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2141,7 +2412,7 @@ declare namespace Components {
         }
         export interface MeterReadingWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2370,7 +2641,7 @@ declare namespace Components {
         export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
         export interface PaymentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -3010,7 +3281,7 @@ declare namespace Components {
         }
         export interface TeaserWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -3437,7 +3708,7 @@ declare namespace Components {
         }
         export interface WidgetBase {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -3543,7 +3814,7 @@ declare namespace Components {
 declare namespace Paths {
     namespace AddContractByIdentifiers {
         /**
-         * Identifier-value pairs per schema to identify a contract
+         * Identifier-value pairs per schema to identify the contract
          * example:
          * {
          *   "contract": {
@@ -3561,7 +3832,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                data?: Components.Schemas.EntityItem;
+                data?: Components.Schemas.EntityItem[];
                 hits: number;
             }
             export type $400 = Components.Responses.InvalidRequest;
@@ -3693,7 +3964,7 @@ declare namespace Paths {
                  * example:
                  * true
                  */
-                exists?: boolean;
+                confirmed: boolean;
             }
             export interface $301 {
             }
@@ -4437,6 +4708,38 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetConsumption {
+        namespace Parameters {
+            export type From = string; // date-time
+            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type To = string; // date-time
+        }
+        export interface QueryParameters {
+            from: Parameters.From /* date-time */;
+            to: Parameters.To /* date-time */;
+            interval: Parameters.Interval;
+        }
+        namespace Responses {
+            export type $200 = {
+                /**
+                 * ISO 8601 timestamp of the consumption record.
+                 */
+                timestamp: string; // date-time
+                /**
+                 * The consumption value.
+                 */
+                value: number;
+                /**
+                 * Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time).
+                 */
+                type?: string;
+            }[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetContact {
         namespace Responses {
             export interface $200 {
@@ -4533,6 +4836,60 @@ declare namespace Paths {
                 Components.Schemas.WorkflowExecution[];
                 journey_actions?: Components.Schemas.JourneyActions[];
             }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetCosts {
+        namespace Parameters {
+            export type From = string; // date-time
+            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type To = string; // date-time
+        }
+        export interface QueryParameters {
+            from: Parameters.From /* date-time */;
+            to: Parameters.To /* date-time */;
+            interval: Parameters.Interval;
+        }
+        namespace Responses {
+            export type $200 = {
+                /**
+                 * ISO 8601 timestamp of the cost record.
+                 */
+                timestamp: string; // date-time
+                /**
+                 * Cost in cents, e.g. 1234 for 12,34 €.
+                 * example:
+                 * 1234
+                 */
+                unit_amount: number;
+                /**
+                 * ISO 4217:2015 currency.
+                 * example:
+                 * EUR
+                 */
+                unit_amount_currency: string;
+                /**
+                 * Cost in decimal format, e.g. "12.34".
+                 * example:
+                 * 12.34
+                 */
+                unit_amount_decimal: string;
+                /**
+                 * Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.
+                 * example:
+                 * exclusive
+                 */
+                tax_behavior: "inclusive" | "exclusive";
+                /**
+                 * Tax rate in percent, e.g. 19 for 19%.
+                 * example:
+                 * 19
+                 */
+                tax_rate: number;
+            }[];
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -5332,6 +5689,125 @@ declare namespace Paths {
             export type $200 = Components.Schemas.UpsertPortalWidget;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPrices {
+        namespace Parameters {
+            export type From = string; // date-time
+            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type To = string; // date-time
+        }
+        export interface QueryParameters {
+            from: Parameters.From /* date-time */;
+            to: Parameters.To /* date-time */;
+            interval: Parameters.Interval;
+        }
+        namespace Responses {
+            export type $200 = {
+                /**
+                 * ISO 8601 timestamp of the price record.
+                 */
+                timestamp: string; // date-time
+                /**
+                 * Cost in cents, e.g. 1234 for 12,34 €.
+                 * example:
+                 * 1234
+                 */
+                unit_amount: number;
+                /**
+                 * ISO 4217:2015 currency.
+                 * example:
+                 * EUR
+                 */
+                unit_amount_currency: string;
+                /**
+                 * Cost in decimal format, e.g. "12.34".
+                 * example:
+                 * 12.34
+                 */
+                unit_amount_decimal: string;
+                /**
+                 * Optional price components.
+                 */
+                components?: {
+                    /**
+                     * Market price in cents, e.g. 1000 for 10,00 €.
+                     * example:
+                     * 1000
+                     */
+                    auction_price_amount?: number;
+                    /**
+                     * Market price in decimal format, e.g. "10.00".
+                     * example:
+                     * 10.00
+                     */
+                    auction_price_amount_decimal?: string;
+                    /**
+                     * Taxes/Levies other than tax specified on the price level in cents, e.g. 50 for 00,50 €.
+                     * example:
+                     * 50
+                     */
+                    taxes_levies_amount?: number;
+                    /**
+                     * Taxes/Levies other than tax specified on the price level in decimal format, e.g. "0.50".
+                     * example:
+                     * 0.50
+                     */
+                    taxes_levies_amount_decimal?: string;
+                    /**
+                     * Fee associated with the source, e.g. Green Energy Certificate fee in cents, e.g. 50 for 00,50 €.
+                     * example:
+                     * 50
+                     */
+                    source_fee_amount?: number;
+                    /**
+                     * Fee associated with the source, e.g. Green Energy Certificate fee in decimal format, e.g. "0.50".
+                     * example:
+                     * 0.50
+                     */
+                    source_fee_amount_decimal?: string;
+                    /**
+                     * Fee associated with the transmission/distribution in cents, e.g. 100 for 1,00 €.
+                     * example:
+                     * 100
+                     */
+                    grid_fee_amount?: number;
+                    /**
+                     * Fee associated with the transmission/distribution in decimal format, e.g. "1.00".
+                     * example:
+                     * 1.00
+                     */
+                    grid_fee_amount_decimal?: string;
+                    /**
+                     * Margin in cents, e.g. 34 for 0,34 €.
+                     * example:
+                     * 34
+                     */
+                    margin_amount?: number;
+                    /**
+                     * Margin in decimal format, e.g. "0.34".
+                     * example:
+                     * 0.34
+                     */
+                    margin_amount_decimal?: string;
+                };
+                /**
+                 * Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.
+                 * example:
+                 * exclusive
+                 */
+                tax_behavior: "inclusive" | "exclusive";
+                /**
+                 * Tax rate in percent, e.g. 19 for 19%.
+                 * example:
+                 * 19
+                 */
+                tax_rate: number;
+            }[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -6300,6 +6776,36 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPortalExtensions.Responses.$200>
   /**
+   * getConsumption - Get Consumption
+   * 
+   * Get energy consumption data between a given time period.
+   */
+  'getConsumption'(
+    parameters?: Parameters<Paths.GetConsumption.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetConsumption.Responses.$200>
+  /**
+   * getCosts - Get Costs
+   * 
+   * Get energy cost data between a given time period.
+   */
+  'getCosts'(
+    parameters?: Parameters<Paths.GetCosts.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCosts.Responses.$200>
+  /**
+   * getPrices - Get Prices
+   * 
+   * Get energy prices data between a given time period.
+   */
+  'getPrices'(
+    parameters?: Parameters<Paths.GetPrices.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPrices.Responses.$200>
+  /**
    * getExternalLinks - getExternalLinks
    * 
    * Retrieves the portal configuration external links.
@@ -6722,7 +7228,7 @@ export interface OperationMethods {
   /**
    * addContractByIdentifiers - addContractByIdentifiers
    * 
-   * Self-assign contract by pre-configured identifiers.
+   * Self-assign contract(s) by pre-configured identifiers.
    */
   'addContractByIdentifiers'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -7053,6 +7559,42 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPortalExtensions.Responses.$200>
+  }
+  ['/v2/portal/consumption']: {
+    /**
+     * getConsumption - Get Consumption
+     * 
+     * Get energy consumption data between a given time period.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetConsumption.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetConsumption.Responses.$200>
+  }
+  ['/v2/portal/costs']: {
+    /**
+     * getCosts - Get Costs
+     * 
+     * Get energy cost data between a given time period.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetCosts.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCosts.Responses.$200>
+  }
+  ['/v2/portal/prices']: {
+    /**
+     * getPrices - Get Prices
+     * 
+     * Get energy prices data between a given time period.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPrices.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPrices.Responses.$200>
   }
   ['/v2/portal/external-links']: {
     /**
@@ -7546,7 +8088,7 @@ export interface PathsDictionary {
     /**
      * addContractByIdentifiers - addContractByIdentifiers
      * 
-     * Self-assign contract by pre-configured identifiers.
+     * Self-assign contract(s) by pre-configured identifiers.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -7854,6 +8396,10 @@ export type Exists = Components.Schemas.Exists;
 export type Extension = Components.Schemas.Extension;
 export type ExtensionConfig = Components.Schemas.ExtensionConfig;
 export type ExtensionHook = Components.Schemas.ExtensionHook;
+export type ExtensionHookConsumptionDataRetrieval = Components.Schemas.ExtensionHookConsumptionDataRetrieval;
+export type ExtensionHookContractIdentification = Components.Schemas.ExtensionHookContractIdentification;
+export type ExtensionHookCostDataRetrieval = Components.Schemas.ExtensionHookCostDataRetrieval;
+export type ExtensionHookPriceDataRetrieval = Components.Schemas.ExtensionHookPriceDataRetrieval;
 export type ExtensionHookRegistrationIdentifiersCheck = Components.Schemas.ExtensionHookRegistrationIdentifiersCheck;
 export type ExtensionSeamlessLink = Components.Schemas.ExtensionSeamlessLink;
 export type ExternalLink = Components.Schemas.ExternalLink;
