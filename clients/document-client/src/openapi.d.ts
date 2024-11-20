@@ -434,10 +434,12 @@ declare namespace Paths {
         namespace Parameters {
             export type JobId = string;
             export type Mode = "partial_generation" | "full_generation";
+            export type PreviewMode = "open" | "download";
         }
         export interface QueryParameters {
             job_id?: Parameters.JobId;
             mode?: Parameters.Mode;
+            preview_mode?: Parameters.PreviewMode;
         }
         export type RequestBody = Components.Schemas.DocumentGenerationV2Request;
         namespace Responses {

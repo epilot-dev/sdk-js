@@ -98,6 +98,19 @@
               ],
               "default": "full_generation"
             }
+          },
+          {
+            "in": "query",
+            "name": "preview_mode",
+            "description": "Type of mode used for document generation preview:\n- open - preview_url provides a link to open the file in a browser\n- download - preview_url provides a link to download the file\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "download"
+              ],
+              "default": "open"
+            }
           }
         ],
         "tags": [
@@ -672,5 +685,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://document.sls.epilot.io"
+    }
+  ]
 }
