@@ -1276,7 +1276,7 @@
             "type": "string",
             "example": "2021-04-27T12:00:00.000Z"
           },
-          "dynamic_due_date": {
+          "due_date_config": {
             "$ref": "#/components/schemas/DueDateConfig"
           },
           "assigned_to": {
@@ -1439,7 +1439,7 @@
             "type": "string",
             "example": "2021-04-27T12:00:00.000Z"
           },
-          "dynamic_due_date": {
+          "due_date_config": {
             "$ref": "#/components/schemas/DueDateConfig"
           },
           "requirements": {
@@ -1494,7 +1494,7 @@
             "type": "string",
             "example": "2021-04-27T12:00:00.000Z"
           },
-          "dynamic_due_date": {
+          "due_date_config": {
             "$ref": "#/components/schemas/DueDateConfig"
           },
           "assigned_to": {

@@ -20,7 +20,7 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -89,7 +89,7 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -126,7 +126,7 @@ declare namespace Components {
         export interface DynamicDueDate {
             numberOfUnits: number;
             timePeriod: "minutes" | "hours" | "days" | "weeks" | "months";
-            actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSE";
+            actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSED";
             stepId?: string;
         }
         /**
@@ -193,7 +193,7 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             assigned_to?: string[];
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
@@ -229,7 +229,7 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -257,7 +257,7 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             assigned_to?: string[];
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
@@ -362,7 +362,7 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            dynamic_due_date?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
