@@ -3043,7 +3043,7 @@
       "post": {
         "operationId": "bulkDeleteClassifications",
         "summary": "bulkDeleteClassifications",
-        "description": "Permanently deletes taxonomy classifications. The classifications are deleted through a bulk \nasync operation which also deletes all references of the deleted classifications from the entities \nreferencing them.\n",
+        "description": "Permanently deletes taxonomy classifications. The classifications are deleted through a bulk\nasync operation which also deletes all references of the deleted classifications from the entities\nreferencing them.\n",
         "tags": [
           "Taxonomy"
         ],
@@ -3737,16 +3737,7 @@
           },
           "category": {
             "type": "string",
-            "example": "customer_relations",
-            "enum": [
-              "customer_relations",
-              "sales",
-              "product_hub",
-              "contracts",
-              "journeys",
-              "messaging",
-              "system"
-            ]
+            "example": "customer_relations"
           },
           "published": {
             "type": "boolean",
@@ -5146,6 +5137,38 @@
           }
         ]
       },
+      "DefaultAddressFields": {
+        "type": "array",
+        "description": "Default fields visible on addresses",
+        "items": {
+          "type": "string",
+          "enum": [
+            "postal_code",
+            "city",
+            "street",
+            "street_number",
+            "plot_area",
+            "plot_of_land",
+            "suburb",
+            "country",
+            "additional_info",
+            "coordinates",
+            "start_date",
+            "end_date",
+            "salutation",
+            "title",
+            "first_name",
+            "last_name",
+            "company_name"
+          ]
+        },
+        "default": [
+          "postal_code",
+          "city",
+          "street",
+          "street_number"
+        ]
+      },
       "AddressAttribute": {
         "allOf": [
           {
@@ -5162,36 +5185,7 @@
                 ]
               },
               "default_address_fields": {
-                "description": "Default fields visible on addresses",
-                "default": [
-                  "postal_code",
-                  "city",
-                  "street",
-                  "street_number"
-                ],
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "enum": [
-                    "postal_code",
-                    "city",
-                    "street",
-                    "street_number",
-                    "plot_area",
-                    "plot_of_land",
-                    "suburb",
-                    "country",
-                    "additional_info",
-                    "coordinates",
-                    "start_date",
-                    "end_date",
-                    "salutation",
-                    "title",
-                    "first_name",
-                    "last_name",
-                    "company_name"
-                  ]
-                }
+                "$ref": "#/components/schemas/DefaultAddressFields"
               }
             }
           }
@@ -5214,6 +5208,9 @@
               },
               "has_primary": {
                 "type": "boolean"
+              },
+              "default_address_fields": {
+                "$ref": "#/components/schemas/DefaultAddressFields"
               }
             }
           }

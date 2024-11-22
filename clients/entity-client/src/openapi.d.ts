@@ -374,10 +374,7 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             type?: "address";
-            /**
-             * Default fields visible on addresses
-             */
-            default_address_fields?: ("postal_code" | "city" | "street" | "street_number" | "plot_area" | "plot_of_land" | "suburb" | "country" | "additional_info" | "coordinates" | "start_date" | "end_date" | "salutation" | "title" | "first_name" | "last_name" | "company_name")[];
+            default_address_fields?: /* Default fields visible on addresses */ DefaultAddressFields;
         }
         /**
          * Reference to an address attribute of another entity
@@ -515,6 +512,7 @@ declare namespace Components {
             };
             type?: "relation_address";
             has_primary?: boolean;
+            default_address_fields?: /* Default fields visible on addresses */ DefaultAddressFields;
         }
         export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute;
         /**
@@ -1768,6 +1766,10 @@ declare namespace Components {
             };
             type?: "date" | "datetime";
         }
+        /**
+         * Default fields visible on addresses
+         */
+        export type DefaultAddressFields = ("postal_code" | "city" | "street" | "street_number" | "plot_area" | "plot_of_land" | "suburb" | "country" | "additional_info" | "coordinates" | "start_date" | "end_date" | "salutation" | "title" | "first_name" | "last_name" | "company_name")[];
         export interface ESClusterAssignment {
             /**
              * The organization for which the cluster assignment is returned
@@ -2636,7 +2638,7 @@ declare namespace Components {
              * example:
              * customer_relations
              */
-            category?: "customer_relations" | "sales" | "product_hub" | "contracts" | "journeys" | "messaging" | "system";
+            category?: string;
             /**
              * example:
              * false
@@ -3010,7 +3012,7 @@ declare namespace Components {
              * example:
              * customer_relations
              */
-            category?: "customer_relations" | "sales" | "product_hub" | "contracts" | "journeys" | "messaging" | "system";
+            category?: string;
             /**
              * example:
              * false
@@ -10989,8 +10991,8 @@ export interface OperationMethods {
   /**
    * bulkDeleteClassifications - bulkDeleteClassifications
    * 
-   * Permanently deletes taxonomy classifications. The classifications are deleted through a bulk 
-   * async operation which also deletes all references of the deleted classifications from the entities 
+   * Permanently deletes taxonomy classifications. The classifications are deleted through a bulk
+   * async operation which also deletes all references of the deleted classifications from the entities
    * referencing them.
    * 
    */
@@ -12077,8 +12079,8 @@ export interface PathsDictionary {
     /**
      * bulkDeleteClassifications - bulkDeleteClassifications
      * 
-     * Permanently deletes taxonomy classifications. The classifications are deleted through a bulk 
-     * async operation which also deletes all references of the deleted classifications from the entities 
+     * Permanently deletes taxonomy classifications. The classifications are deleted through a bulk
+     * async operation which also deletes all references of the deleted classifications from the entities
      * referencing them.
      * 
      */
@@ -12290,6 +12292,7 @@ export type ConsentAttribute = Components.Schemas.ConsentAttribute;
 export type CountryAttribute = Components.Schemas.CountryAttribute;
 export type CurrencyAttribute = Components.Schemas.CurrencyAttribute;
 export type DateAttribute = Components.Schemas.DateAttribute;
+export type DefaultAddressFields = Components.Schemas.DefaultAddressFields;
 export type ESClusterAssignment = Components.Schemas.ESClusterAssignment;
 export type Entity = Components.Schemas.Entity;
 export type EntityAcl = Components.Schemas.EntityAcl;
