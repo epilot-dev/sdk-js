@@ -506,7 +506,7 @@ export interface OperationMethods {
    * - .docx but limited to only text based variables
    * - .ics
    * 
-   * Uses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.
+   * Uses [Template Variable API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.
    * 
    */
   'generateDocumentV2'(
@@ -565,7 +565,7 @@ export interface PathsDictionary {
      * - .docx but limited to only text based variables
      * - .ics
      * 
-     * Uses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.
+     * Uses [Template Variable API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.
      * 
      */
     'post'(
