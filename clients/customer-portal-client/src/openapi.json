@@ -3756,73 +3756,6 @@
         }
       }
     },
-    "/v2/portal/entity/add-end-customer/{slug}/{id}": {
-      "put": {
-        "operationId": "addEndCustomerRelationToEntity",
-        "summary": "addEndCustomerRelationToEntity",
-        "description": "Add portal user relation to an entity",
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "schema": {
-              "$ref": "#/components/schemas/EntitySlug"
-            },
-            "required": true,
-            "description": "The slug of an entity"
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            },
-            "required": true,
-            "description": "The ID of the Entity"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Portal user is added as a relation to the requested entity successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "entity": {
-                      "$ref": "#/components/schemas/EntityItem"
-                    },
-                    "relations": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/EntityItem"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/v2/portal/entity/{slug}/{id}/activity": {
       "get": {
         "operationId": "getEntityActivityFeed",
@@ -5039,6 +4972,73 @@
           }
         }
       }
+    },
+    "/v2/portal/metering/reading": {
+      "post": {
+        "operationId": "createMeterReading",
+        "summary": "Create Meter Reading",
+        "description": "Inserts a new meter reading.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "override_plausibility",
+            "in": "query",
+            "required": false,
+            "description": "Override plausibility check",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Meter reading payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeterReading"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter reading created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MeterReading"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequestCreateMeterReading"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5170,6 +5170,37 @@
                   "required": [
                     "reason"
                   ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "InvalidRequestCreateMeterReading": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "contract_period",
+                        "no_counter",
+                        "no_direction",
+                        "timestamp_future",
+                        "less_than_previous",
+                        "greater_than_subsequent",
+                        "meter_decommissioned",
+                        "plausibility_check_failed"
+                      ]
+                    }
+                  }
                 }
               ]
             }
@@ -8145,6 +8176,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/ExtensionHookCostDataRetrieval"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ExtensionHookMeterReadingPlausibilityCheck"
                     }
                   ]
                 }
@@ -8377,7 +8411,7 @@
         ]
       },
       "ExtensionHookContractIdentification": {
-        "description": "Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:\n  - 200 if found with either:\n    - contract_id array\n    - contact_id string\n  - 404 if no contract is found\nIf `contact_id` is provided in the response, Contracts are retrieved from this Contact.\n",
+        "description": "Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:\n  - 200 if found with either:\n    - contract_id array\n    - contact_id string\n  - 404 if no contract is found\nIf `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.\n",
         "type": "object",
         "properties": {
           "type": {
@@ -8456,11 +8490,116 @@
               "headers",
               "result"
             ]
+          },
+          "contact_relation_attribute": {
+            "type": "string",
+            "description": "Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.",
+            "example": "represents_contact"
           }
         },
         "required": [
           "type",
           "call"
+        ]
+      },
+      "ExtensionHookMeterReadingPlausibilityCheck": {
+        "description": "Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:\n  - 200:\n    If meter reading is plausible, the response should contain:\n      - valid: true\n    If meter reading is not plausible, the response should contain:\n      - valid: false\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "meterReadingPlausibilityCheck"
+            ]
+          },
+          "auth": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for authentication",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to use for authentication. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ]
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to use for authentication. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url",
+              "headers",
+              "body",
+              "result"
+            ]
+          },
+          "resolved": {
+            "type": "object",
+            "description": "Response to the call",
+            "properties": {
+              "valid": {
+                "type": "string",
+                "description": "Indicate whether the meter reading is plausible",
+                "example": "{{CallResponse.data.valid}}"
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "call",
+          "resolved"
         ]
       },
       "ExtensionHookPriceDataRetrieval": {
@@ -8732,6 +8871,98 @@
           "type",
           "call"
         ]
+      },
+      "Direction": {
+        "type": "string",
+        "enum": [
+          "feed-in",
+          "feed-out"
+        ]
+      },
+      "TariffType": {
+        "type": "string",
+        "enum": [
+          "ht",
+          "nt"
+        ]
+      },
+      "Source": {
+        "type": "string",
+        "enum": [
+          "ECP",
+          "ERP",
+          "360",
+          "journey-submission"
+        ]
+      },
+      "Reason": {
+        "type": "string",
+        "nullable": true,
+        "example": "Storing the feed-in record",
+        "description": "The reason for recording the reading"
+      },
+      "ReadBy": {
+        "type": "string",
+        "nullable": true,
+        "example": "John Doe",
+        "description": "The person who recorded the reading"
+      },
+      "ReadingStatus": {
+        "type": "string",
+        "nullable": true,
+        "enum": [
+          "valid",
+          "in-validation",
+          "implausible",
+          null,
+          ""
+        ]
+      },
+      "MeterReading": {
+        "type": "object",
+        "required": [
+          "value",
+          "meter_id",
+          "source"
+        ],
+        "properties": {
+          "value": {
+            "type": "number",
+            "example": 240,
+            "description": "The reading value of the meter"
+          },
+          "read_by": {
+            "$ref": "#/components/schemas/ReadBy"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/Reason"
+          },
+          "meter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the associated meter"
+          },
+          "counter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the associated meter counter"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction",
+            "description": "The direction of the reading (feed-in or feed-out)"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "If the value is not provided, the system will be set with the time the request is processed.",
+            "example": "2022-10-10T00:00:00.000Z"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source",
+            "description": "The source of the reading"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReadingStatus",
+            "description": "The status of the reading"
+          }
+        }
       }
     }
   },

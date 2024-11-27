@@ -815,24 +815,6 @@
         "responses": {}
       }
     },
-    "/v2/portal/entity/add-end-customer/{slug}/{id}": {
-      "put": {
-        "operationId": "addEndCustomerRelationToEntity",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "required": true
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "responses": {}
-      }
-    },
     "/v2/portal/entity/{slug}/{id}/activity": {
       "get": {
         "operationId": "getEntityActivityFeed",
@@ -1155,6 +1137,25 @@
         ],
         "responses": {}
       }
+    },
+    "/v2/portal/metering/reading": {
+      "post": {
+        "operationId": "createMeterReading",
+        "parameters": [
+          {
+            "name": "override_plausibility",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -1200,6 +1201,11 @@
         }
       },
       "ConfirmUserInvalidRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestCreateMeterReading": {
         "content": {
           "application/json": {}
         }

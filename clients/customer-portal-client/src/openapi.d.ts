@@ -32,6 +32,13 @@ declare namespace Components {
         export type ForbiddenByRule = Schemas.ErrorResp | Schemas.FailedRuleErrorResp;
         export type InternalServerError = Schemas.ErrorResp;
         export type InvalidRequest = Schemas.ErrorResp;
+        export interface InvalidRequestCreateMeterReading {
+            /**
+             * Error message
+             */
+            message?: string;
+            reason?: "contract_period" | "no_counter" | "no_direction" | "timestamp_future" | "less_than_previous" | "greater_than_subsequent" | "meter_decommissioned" | "plausibility_check_failed";
+        }
         export type NotFound = Schemas.ErrorResp;
         export type Unauthorized = Schemas.ErrorResp;
     }
@@ -1141,6 +1148,7 @@ declare namespace Components {
                 EntityId /* uuid */[]
             ];
         }
+        export type Direction = "feed-in" | "feed-out";
         export interface DocumentWidget {
             id: string;
             type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
@@ -1590,7 +1598,7 @@ declare namespace Components {
              *     - contract_id array
              *     - contact_id string
              *   - 404 if no contract is found
-             * If `contact_id` is provided in the response, Contracts are retrieved from this Contact.
+             * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
              *
              */
             ExtensionHookContractIdentification | /**
@@ -1608,7 +1616,16 @@ declare namespace Components {
              *   - 200 with the time series data
              *
              */
-            ExtensionHookCostDataRetrieval))[];
+            ExtensionHookCostDataRetrieval | /**
+             * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
+             *   - 200:
+             *     If meter reading is plausible, the response should contain:
+             *       - valid: true
+             *     If meter reading is not plausible, the response should contain:
+             *       - valid: false
+             *
+             */
+            ExtensionHookMeterReadingPlausibilityCheck))[];
         }
         export interface ExtensionConfig {
             /**
@@ -1696,7 +1713,7 @@ declare namespace Components {
          *     - contract_id array
          *     - contact_id string
          *   - 404 if no contract is found
-         * If `contact_id` is provided in the response, Contracts are retrieved from this Contact.
+         * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
          *
          */
         export interface ExtensionHookContractIdentification {
@@ -1747,6 +1764,12 @@ declare namespace Components {
                     [name: string]: string;
                 };
             };
+            /**
+             * Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.
+             * example:
+             * represents_contact
+             */
+            contact_relation_attribute?: string;
         }
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -1804,6 +1827,75 @@ declare namespace Components {
                 headers?: {
                     [name: string]: string;
                 };
+            };
+        }
+        /**
+         * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
+         *   - 200:
+         *     If meter reading is plausible, the response should contain:
+         *       - valid: true
+         *     If meter reading is not plausible, the response should contain:
+         *       - valid: false
+         *
+         */
+        export interface ExtensionHookMeterReadingPlausibilityCheck {
+            type: "meterReadingPlausibilityCheck";
+            auth?: {
+                /**
+                 * HTTP method to use for authentication
+                 */
+                method?: string;
+                /**
+                 * URL to use for authentication. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use for authentication. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * JSON body to use for authentication. Supports variable interpolation.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            call: {
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * JSON body to use for authentication. Supports variable interpolation.
+                 */
+                body: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Response to the call
+             */
+            resolved: {
+                /**
+                 * Indicate whether the meter reading is plausible
+                 * example:
+                 * {{CallResponse.data.valid}}
+                 */
+                valid?: string;
             };
         }
         /**
@@ -2409,6 +2501,62 @@ declare namespace Components {
                 de?: string;
             };
             schema?: string;
+        }
+        export interface MeterReading {
+            /**
+             * The reading value of the meter
+             * example:
+             * 240
+             */
+            value: number;
+            read_by?: /**
+             * The person who recorded the reading
+             * example:
+             * John Doe
+             */
+            ReadBy;
+            reason?: /**
+             * The reason for recording the reading
+             * example:
+             * Storing the feed-in record
+             */
+            Reason;
+            /**
+             * The ID of the associated meter
+             */
+            meter_id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * The ID of the associated meter counter
+             */
+            counter_id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * The direction of the reading (feed-in or feed-out)
+             */
+            direction?: Direction;
+            /**
+             * If the value is not provided, the system will be set with the time the request is processed.
+             * example:
+             * 2022-10-10T00:00:00.000Z
+             */
+            timestamp?: string;
+            /**
+             * The source of the reading
+             */
+            source: Source;
+            /**
+             * The status of the reading
+             */
+            status?: ReadingStatus;
         }
         export interface MeterReadingWidget {
             id: string;
@@ -3080,6 +3228,19 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "product";
         }
+        /**
+         * The person who recorded the reading
+         * example:
+         * John Doe
+         */
+        export type ReadBy = string | null;
+        export type ReadingStatus = "valid" | "in-validation" | "implausible" | null | "";
+        /**
+         * The reason for recording the reading
+         * example:
+         * Storing the feed-in record
+         */
+        export type Reason = string | null;
         export interface RegistrationIdentifier {
             /**
              * Name of the identifier/attribute
@@ -3279,6 +3440,8 @@ declare namespace Components {
              */
             slug?: string;
         }
+        export type Source = "ECP" | "ERP" | "360" | "journey-submission";
+        export type TariffType = "ht" | "nt";
         export interface TeaserWidget {
             id: string;
             type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
@@ -3842,35 +4005,6 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace AddEndCustomerRelationToEntity {
-        namespace Parameters {
-            export type Id = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
-        }
-        namespace Responses {
-            export interface $200 {
-                entity?: Components.Schemas.EntityItem;
-                relations?: Components.Schemas.EntityItem[];
-            }
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
     namespace CanTriggerPortalFlow {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -4032,6 +4166,24 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $201 = Components.Schemas.ActivityItem;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreateMeterReading {
+        namespace Parameters {
+            export type OverridePlausibility = boolean;
+        }
+        export interface QueryParameters {
+            override_plausibility?: Parameters.OverridePlausibility;
+        }
+        export type RequestBody = Components.Schemas.MeterReading;
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.MeterReading;
+            }
+            export type $400 = Components.Responses.InvalidRequestCreateMeterReading;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -7246,16 +7398,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityIdentifiers.Responses.$200>
   /**
-   * addEndCustomerRelationToEntity - addEndCustomerRelationToEntity
-   * 
-   * Add portal user relation to an entity
-   */
-  'addEndCustomerRelationToEntity'(
-    parameters?: Parameters<Paths.AddEndCustomerRelationToEntity.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.AddEndCustomerRelationToEntity.Responses.$200>
-  /**
    * getEntityActivityFeed - getEntityActivityFeed
    * 
    * Get activity feed for an entity
@@ -7451,6 +7593,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
+  /**
+   * createMeterReading - Create Meter Reading
+   * 
+   * Inserts a new meter reading.
+   */
+  'createMeterReading'(
+    parameters?: Parameters<Paths.CreateMeterReading.QueryParameters> | null,
+    data?: Paths.CreateMeterReading.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -8108,18 +8260,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityIdentifiers.Responses.$200>
   }
-  ['/v2/portal/entity/add-end-customer/{slug}/{id}']: {
-    /**
-     * addEndCustomerRelationToEntity - addEndCustomerRelationToEntity
-     * 
-     * Add portal user relation to an entity
-     */
-    'put'(
-      parameters?: Parameters<Paths.AddEndCustomerRelationToEntity.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.AddEndCustomerRelationToEntity.Responses.$200>
-  }
   ['/v2/portal/entity/{slug}/{id}/activity']: {
     /**
      * getEntityActivityFeed - getEntityActivityFeed
@@ -8352,6 +8492,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   }
+  ['/v2/portal/metering/reading']: {
+    /**
+     * createMeterReading - Create Meter Reading
+     * 
+     * Inserts a new meter reading.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateMeterReading.QueryParameters> | null,
+      data?: Paths.CreateMeterReading.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -8381,6 +8533,7 @@ export type CreateSSOUserRequest = Components.Schemas.CreateSSOUserRequest;
 export type CreateUserRequest = Components.Schemas.CreateUserRequest;
 export type Currency = Components.Schemas.Currency;
 export type DeleteEntityFile = Components.Schemas.DeleteEntityFile;
+export type Direction = Components.Schemas.Direction;
 export type DocumentWidget = Components.Schemas.DocumentWidget;
 export type EmailTemplates = Components.Schemas.EmailTemplates;
 export type Entity = Components.Schemas.Entity;
@@ -8399,6 +8552,7 @@ export type ExtensionHook = Components.Schemas.ExtensionHook;
 export type ExtensionHookConsumptionDataRetrieval = Components.Schemas.ExtensionHookConsumptionDataRetrieval;
 export type ExtensionHookContractIdentification = Components.Schemas.ExtensionHookContractIdentification;
 export type ExtensionHookCostDataRetrieval = Components.Schemas.ExtensionHookCostDataRetrieval;
+export type ExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.ExtensionHookMeterReadingPlausibilityCheck;
 export type ExtensionHookPriceDataRetrieval = Components.Schemas.ExtensionHookPriceDataRetrieval;
 export type ExtensionHookRegistrationIdentifiersCheck = Components.Schemas.ExtensionHookRegistrationIdentifiersCheck;
 export type ExtensionSeamlessLink = Components.Schemas.ExtensionSeamlessLink;
@@ -8413,6 +8567,7 @@ export type InstallmentEvent = Components.Schemas.InstallmentEvent;
 export type JourneyActions = Components.Schemas.JourneyActions;
 export type Meter = Components.Schemas.Meter;
 export type MeterChartWidget = Components.Schemas.MeterChartWidget;
+export type MeterReading = Components.Schemas.MeterReading;
 export type MeterReadingWidget = Components.Schemas.MeterReadingWidget;
 export type Opportunity = Components.Schemas.Opportunity;
 export type Order = Components.Schemas.Order;
@@ -8423,12 +8578,17 @@ export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type Product = Components.Schemas.Product;
+export type ReadBy = Components.Schemas.ReadBy;
+export type ReadingStatus = Components.Schemas.ReadingStatus;
+export type Reason = Components.Schemas.Reason;
 export type RegistrationIdentifier = Components.Schemas.RegistrationIdentifier;
 export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;
 export type Rule = Components.Schemas.Rule;
 export type SaveEntityFile = Components.Schemas.SaveEntityFile;
 export type SavePortalFile = Components.Schemas.SavePortalFile;
 export type Schema = Components.Schemas.Schema;
+export type Source = Components.Schemas.Source;
+export type TariffType = Components.Schemas.TariffType;
 export type TeaserWidget = Components.Schemas.TeaserWidget;
 export type TriggerPortalFlow = Components.Schemas.TriggerPortalFlow;
 export type UpdateOnlyPortalConfigAttributes = Components.Schemas.UpdateOnlyPortalConfigAttributes;
