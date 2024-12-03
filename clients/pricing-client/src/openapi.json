@@ -2345,7 +2345,8 @@
             "enum": [
               "show_price",
               "show_as_starting_price",
-              "show_as_on_request"
+              "show_as_on_request",
+              "estimated_price"
             ]
           },
           "billing_duration_amount": {
@@ -4301,7 +4302,11 @@
             "type": "integer",
             "description": "The sum of all cashbacks for a specific cashback period"
           }
-        }
+        },
+        "required": [
+          "cashback_period",
+          "amount_total"
+        ]
       },
       "RecurrenceAmountWithTax": {
         "type": "object",
