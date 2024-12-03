@@ -1039,11 +1039,11 @@ declare namespace Components {
             /**
              * The cashback period, for now it's limited to either 0 months or 12 months
              */
-            cashback_period?: "0" | "12";
+            cashback_period: "0" | "12";
             /**
              * The sum of all cashbacks for a specific cashback period
              */
-            amount_total?: number;
+            amount_total: number;
         }
         /**
          * A catalog search payload
@@ -2881,7 +2881,7 @@ declare namespace Components {
             /**
              * Defines the way the price amount is display in epilot journeys.
              */
-            price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request";
+            price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request" | "estimated_price";
             /**
              * The billing period duration
              */
@@ -3722,7 +3722,7 @@ declare namespace Components {
                 /**
                  * Defines the way the price amount is display in epilot journeys.
                  */
-                price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request";
+                price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request" | "estimated_price";
                 /**
                  * The billing period duration
                  */
