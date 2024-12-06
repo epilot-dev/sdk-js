@@ -2962,15 +2962,15 @@
             ]
           },
           "consumption": {
-            "description": "The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)",
+            "description": "(DEPRECATED - use consumption_HT) The yearly consumption to compute the price in kWh",
             "type": "number"
           },
           "consumption_HT": {
-            "description": "The monthly HT consumption to compute the price in kWh",
+            "description": "The yearly HT consumption to compute the price in kWh",
             "type": "number"
           },
           "consumption_NT": {
-            "description": "The monthly NT consumption to compute the price in kWh",
+            "description": "The yearly NT consumption to compute the price in kWh",
             "type": "number"
           },
           "association_id": {
@@ -3071,6 +3071,14 @@
           "amount_decimal": {
             "description": "The computed price as decimal",
             "type": "string"
+          },
+          "unit_amount": {
+            "description": "The computed unit price",
+            "type": "number"
+          },
+          "unit_amount_decimal": {
+            "description": "The computed unit price as decimal",
+            "type": "string"
           }
         },
         "required": [
@@ -3153,12 +3161,28 @@
             "description": "The computed variable price, for the day period, as decimal",
             "type": "string"
           },
+          "unit_amount_variable_ht": {
+            "description": "The computed unit price, for the day period",
+            "type": "number"
+          },
+          "unit_amount_variable_decimal_ht": {
+            "description": "The computed unit price, for the day period, as decimal",
+            "type": "string"
+          },
           "amount_variable_nt": {
             "description": "The computed variable price, for the night period",
             "type": "number"
           },
           "amount_variable_decimal_nt": {
             "description": "The computed variable price, for the night period, as decimal",
+            "type": "string"
+          },
+          "unit_amount_variable_nt": {
+            "description": "The computed unit price, for the night period",
+            "type": "number"
+          },
+          "unit_amount_variable_decimal_nt": {
+            "description": "The computed unit price, for the night period, as decimal",
             "type": "string"
           },
           "currency": {

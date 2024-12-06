@@ -1792,15 +1792,15 @@ declare namespace Components {
              */
             consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
             /**
-             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
+             * (DEPRECATED - use consumption_HT) The yearly consumption to compute the price in kWh
              */
             consumption?: number;
             /**
-             * The monthly HT consumption to compute the price in kWh
+             * The yearly HT consumption to compute the price in kWh
              */
             consumption_HT?: number;
             /**
-             * The monthly NT consumption to compute the price in kWh
+             * The yearly NT consumption to compute the price in kWh
              */
             consumption_NT?: number;
             /**
@@ -1825,15 +1825,15 @@ declare namespace Components {
              */
             consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
             /**
-             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
+             * (DEPRECATED - use consumption_HT) The yearly consumption to compute the price in kWh
              */
             consumption?: number;
             /**
-             * The monthly HT consumption to compute the price in kWh
+             * The yearly HT consumption to compute the price in kWh
              */
             consumption_HT?: number;
             /**
-             * The monthly NT consumption to compute the price in kWh
+             * The yearly NT consumption to compute the price in kWh
              */
             consumption_NT?: number;
             /**
@@ -1863,15 +1863,15 @@ declare namespace Components {
              */
             consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
             /**
-             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
+             * (DEPRECATED - use consumption_HT) The yearly consumption to compute the price in kWh
              */
             consumption?: number;
             /**
-             * The monthly HT consumption to compute the price in kWh
+             * The yearly HT consumption to compute the price in kWh
              */
             consumption_HT?: number;
             /**
-             * The monthly NT consumption to compute the price in kWh
+             * The yearly NT consumption to compute the price in kWh
              */
             consumption_NT?: number;
             /**
@@ -1914,6 +1914,14 @@ declare namespace Components {
              */
             amount_variable_decimal_ht?: string;
             /**
+             * The computed unit price, for the day period
+             */
+            unit_amount_variable_ht?: number;
+            /**
+             * The computed unit price, for the day period, as decimal
+             */
+            unit_amount_variable_decimal_ht?: string;
+            /**
              * The computed variable price, for the night period
              */
             amount_variable_nt?: number;
@@ -1921,6 +1929,14 @@ declare namespace Components {
              * The computed variable price, for the night period, as decimal
              */
             amount_variable_decimal_nt?: string;
+            /**
+             * The computed unit price, for the night period
+             */
+            unit_amount_variable_nt?: number;
+            /**
+             * The computed unit price, for the night period, as decimal
+             */
+            unit_amount_variable_decimal_nt?: string;
             /**
              * The currency of the computed price (three-letter ISO currency code)
              */
@@ -1951,6 +1967,14 @@ declare namespace Components {
              * The computed price as decimal
              */
             amount_decimal: string;
+            /**
+             * The computed unit price
+             */
+            unit_amount?: number;
+            /**
+             * The computed unit price as decimal
+             */
+            unit_amount_decimal?: string;
         }
         /**
          * Price breakdown
@@ -2209,6 +2233,14 @@ declare namespace Components {
              */
             amount_variable_decimal_ht?: string;
             /**
+             * The computed unit price, for the day period
+             */
+            unit_amount_variable_ht?: number;
+            /**
+             * The computed unit price, for the day period, as decimal
+             */
+            unit_amount_variable_decimal_ht?: string;
+            /**
              * The computed variable price, for the night period
              */
             amount_variable_nt?: number;
@@ -2216,6 +2248,14 @@ declare namespace Components {
              * The computed variable price, for the night period, as decimal
              */
             amount_variable_decimal_nt?: string;
+            /**
+             * The computed unit price, for the night period
+             */
+            unit_amount_variable_nt?: number;
+            /**
+             * The computed unit price, for the night period, as decimal
+             */
+            unit_amount_variable_decimal_nt?: string;
             /**
              * The currency of the computed price (three-letter ISO currency code)
              */
