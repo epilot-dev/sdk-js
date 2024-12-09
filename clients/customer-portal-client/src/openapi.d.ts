@@ -3259,6 +3259,10 @@ declare namespace Components {
             };
         }
         export interface PublicDataRetrievalHookDetails {
+            /**
+             * Identifier of the hook.
+             */
+            id?: string;
             name?: {
                 [name: string]: string;
                 /**
@@ -3281,6 +3285,10 @@ declare namespace Components {
             };
         }
         export interface PublicExtensionDetails {
+            /**
+             * Identifier of the extension.
+             */
+            id?: string;
             name?: {
                 [name: string]: string;
                 /**

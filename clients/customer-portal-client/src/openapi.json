@@ -8193,6 +8193,10 @@
       "PublicExtensionDetails": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the extension."
+          },
           "name": {
             "type": "object",
             "properties": {
@@ -8214,6 +8218,10 @@
       "PublicDataRetrievalHookDetails": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the hook."
+          },
           "name": {
             "type": "object",
             "properties": {
