@@ -130,10 +130,38 @@
         "responses": {}
       }
     },
+    "/v2/portal/public/extensions": {
+      "get": {
+        "operationId": "getPublicPortalExtensionDetails",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/consumption": {
       "get": {
         "operationId": "getConsumption",
         "parameters": [
+          {
+            "in": "query",
+            "name": "extensionId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "required": true
+          },
           {
             "in": "query",
             "name": "from",
@@ -159,6 +187,16 @@
         "parameters": [
           {
             "in": "query",
+            "name": "extensionId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "required": true
+          },
+          {
+            "in": "query",
             "name": "from",
             "required": true
           },
@@ -180,6 +218,16 @@
       "get": {
         "operationId": "getPrices",
         "parameters": [
+          {
+            "in": "query",
+            "name": "extensionId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "required": true
+          },
           {
             "in": "query",
             "name": "from",

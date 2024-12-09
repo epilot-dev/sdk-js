@@ -1117,6 +1117,10 @@ declare namespace Components {
          * EUR
          */
         export type Currency = string;
+        export interface DataRetrievalItem {
+            extension?: PublicExtensionDetails;
+            hook?: PublicDataRetrievalHookDetails;
+        }
         export interface DeleteEntityFile {
             entity_id: /**
              * Entity ID
@@ -1770,6 +1774,18 @@ declare namespace Components {
              * represents_contact
              */
             contact_relation_attribute?: string;
+            /**
+             * Explanation of the hook.
+             */
+            explanation?: {
+                [name: string]: string;
+                /**
+                 * Explanation of the functionality shown to the end user.
+                 * example:
+                 * This process will give you access to all Contracts kept
+                 */
+                en: string;
+            };
         }
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -3228,6 +3244,51 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "product";
         }
+        export interface PublicContractIdentificationDetails {
+            /**
+             * Explanation of the hook.
+             */
+            explanation?: {
+                [name: string]: string;
+                /**
+                 * Explanation of the functionality shown to the end user.
+                 * example:
+                 * This process will give you access to all Contracts kept
+                 */
+                en: string;
+            };
+        }
+        export interface PublicDataRetrievalHookDetails {
+            name?: {
+                [name: string]: string;
+                /**
+                 * Name of the extension in English.
+                 */
+                en: string;
+            };
+            /**
+             * The intervals associated with the hook.
+             */
+            intervals?: string[];
+        }
+        export interface PublicExtensionCapabilities {
+            consumptionDataRetrieval?: DataRetrievalItem[];
+            priceDataRetrieval?: DataRetrievalItem[];
+            costDataRetrieval?: DataRetrievalItem[];
+            contractIdentification?: {
+                extension?: PublicExtensionDetails;
+                hook?: PublicContractIdentificationDetails;
+            };
+        }
+        export interface PublicExtensionDetails {
+            name?: {
+                [name: string]: string;
+                /**
+                 * Name of the extension in English.
+                 */
+                en: string;
+            };
+        }
         /**
          * The person who recorded the reading
          * example:
@@ -3479,6 +3540,15 @@ declare namespace Components {
                      * Indicate whether the file is shared with the end customer
                      */
                     shared_with_end_customer?: boolean;
+                    /**
+                     * Array of entity tags
+                     * example:
+                     * [
+                     *   "example",
+                     *   "mock"
+                     * ]
+                     */
+                    _tags?: string[];
                 };
             };
         }
@@ -4862,11 +4932,15 @@ declare namespace Paths {
     }
     namespace GetConsumption {
         namespace Parameters {
+            export type ExtensionId = string;
             export type From = string; // date-time
+            export type HookId = string;
             export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
             export type To = string; // date-time
         }
         export interface QueryParameters {
+            extensionId: Parameters.ExtensionId;
+            hookId: Parameters.HookId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
@@ -4996,11 +5070,15 @@ declare namespace Paths {
     }
     namespace GetCosts {
         namespace Parameters {
+            export type ExtensionId = string;
             export type From = string; // date-time
+            export type HookId = string;
             export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
             export type To = string; // date-time
         }
         export interface QueryParameters {
+            extensionId: Parameters.ExtensionId;
+            hookId: Parameters.HookId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
@@ -5846,11 +5924,15 @@ declare namespace Paths {
     }
     namespace GetPrices {
         namespace Parameters {
+            export type ExtensionId = string;
             export type From = string; // date-time
+            export type HookId = string;
             export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
             export type To = string; // date-time
         }
         export interface QueryParameters {
+            extensionId: Parameters.ExtensionId;
+            hookId: Parameters.HookId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
@@ -5984,6 +6066,32 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.PortalConfig;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPublicPortalExtensionDetails {
+        namespace Parameters {
+            /**
+             * Organization ID
+             * example:
+             * 12324
+             */
+            export type OrgId = string;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            org_id: /**
+             * Organization ID
+             * example:
+             * 12324
+             */
+            Parameters.OrgId;
+            origin: Parameters.Origin;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PublicExtensionCapabilities;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -6928,6 +7036,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPortalExtensions.Responses.$200>
   /**
+   * getPublicPortalExtensionDetails - getPublicPortalExtensionDetails
+   * 
+   * Get public extension details shown to end customers and configuring users.
+   */
+  'getPublicPortalExtensionDetails'(
+    parameters?: Parameters<Paths.GetPublicPortalExtensionDetails.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicPortalExtensionDetails.Responses.$200>
+  /**
    * getConsumption - Get Consumption
    * 
    * Get energy consumption data between a given time period.
@@ -7711,6 +7829,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPortalExtensions.Responses.$200>
+  }
+  ['/v2/portal/public/extensions']: {
+    /**
+     * getPublicPortalExtensionDetails - getPublicPortalExtensionDetails
+     * 
+     * Get public extension details shown to end customers and configuring users.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicPortalExtensionDetails.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicPortalExtensionDetails.Responses.$200>
   }
   ['/v2/portal/consumption']: {
     /**
@@ -8532,6 +8662,7 @@ export type ContractIdentifier = Components.Schemas.ContractIdentifier;
 export type CreateSSOUserRequest = Components.Schemas.CreateSSOUserRequest;
 export type CreateUserRequest = Components.Schemas.CreateUserRequest;
 export type Currency = Components.Schemas.Currency;
+export type DataRetrievalItem = Components.Schemas.DataRetrievalItem;
 export type DeleteEntityFile = Components.Schemas.DeleteEntityFile;
 export type Direction = Components.Schemas.Direction;
 export type DocumentWidget = Components.Schemas.DocumentWidget;
@@ -8578,6 +8709,10 @@ export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type Product = Components.Schemas.Product;
+export type PublicContractIdentificationDetails = Components.Schemas.PublicContractIdentificationDetails;
+export type PublicDataRetrievalHookDetails = Components.Schemas.PublicDataRetrievalHookDetails;
+export type PublicExtensionCapabilities = Components.Schemas.PublicExtensionCapabilities;
+export type PublicExtensionDetails = Components.Schemas.PublicExtensionDetails;
 export type ReadBy = Components.Schemas.ReadBy;
 export type ReadingStatus = Components.Schemas.ReadingStatus;
 export type Reason = Components.Schemas.Reason;

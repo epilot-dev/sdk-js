@@ -501,6 +501,59 @@
         }
       }
     },
+    "/v2/portal/public/extensions": {
+      "get": {
+        "operationId": "getPublicPortalExtensionDetails",
+        "summary": "getPublicPortalExtensionDetails",
+        "description": "Get public extension details shown to end customers and configuring users.",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": 12324,
+              "description": "Organization ID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public details of extensions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicExtensionCapabilities"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/consumption": {
       "get": {
         "operationId": "getConsumption",
@@ -515,6 +568,24 @@
           }
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "extensionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Extension ID for consumption data."
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Hook ID for consumption data."
+          },
           {
             "in": "query",
             "name": "from",
@@ -614,6 +685,24 @@
           }
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "extensionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Extension ID for cost data."
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Hook ID for cost data."
+          },
           {
             "in": "query",
             "name": "from",
@@ -737,6 +826,24 @@
           }
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "extensionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Extension ID for price data."
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Hook ID for price data."
+          },
           {
             "in": "query",
             "name": "from",
@@ -7990,6 +8097,17 @@
                   "shared_with_end_customer": {
                     "type": "boolean",
                     "description": "Indicate whether the file is shared with the end customer"
+                  },
+                  "_tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Array of entity tags",
+                    "example": [
+                      "example",
+                      "mock"
+                    ]
                   }
                 }
               }
@@ -8026,6 +8144,123 @@
           "id",
           "status"
         ]
+      },
+      "PublicExtensionCapabilities": {
+        "type": "object",
+        "properties": {
+          "consumptionDataRetrieval": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataRetrievalItem"
+            }
+          },
+          "priceDataRetrieval": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataRetrievalItem"
+            }
+          },
+          "costDataRetrieval": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataRetrievalItem"
+            }
+          },
+          "contractIdentification": {
+            "type": "object",
+            "properties": {
+              "extension": {
+                "$ref": "#/components/schemas/PublicExtensionDetails"
+              },
+              "hook": {
+                "$ref": "#/components/schemas/PublicContractIdentificationDetails"
+              }
+            }
+          }
+        }
+      },
+      "DataRetrievalItem": {
+        "type": "object",
+        "properties": {
+          "extension": {
+            "$ref": "#/components/schemas/PublicExtensionDetails"
+          },
+          "hook": {
+            "$ref": "#/components/schemas/PublicDataRetrievalHookDetails"
+          }
+        }
+      },
+      "PublicExtensionDetails": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Name of the extension in English."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Name of the extension in some other language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ]
+          }
+        }
+      },
+      "PublicDataRetrievalHookDetails": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Name of the extension in English."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Name of the extension in some other language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ]
+          },
+          "intervals": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The intervals associated with the hook."
+          }
+        }
+      },
+      "PublicContractIdentificationDetails": {
+        "type": "object",
+        "properties": {
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "This process will give you access to all Contracts kept"
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Explanation of the hook."
+          }
+        }
       },
       "Extension": {
         "type": "object",
@@ -8495,6 +8730,24 @@
             "type": "string",
             "description": "Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.",
             "example": "represents_contact"
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "This process will give you access to all Contracts kept"
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Explanation of the hook."
           }
         },
         "required": [
