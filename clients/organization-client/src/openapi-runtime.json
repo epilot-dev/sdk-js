@@ -14,7 +14,8 @@
             "name": "org_id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "patch": {
         "operationId": "updateOrganization",
@@ -29,7 +30,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/organization/{org_id}/settings": {
@@ -41,7 +43,8 @@
             "name": "org_id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v2/organization/{org_id}/settings/{key}": {
@@ -63,7 +66,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteSettingsValue",
@@ -78,7 +82,8 @@
             "name": "key",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     }
   },
