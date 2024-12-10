@@ -628,29 +628,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "timestamp": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "ISO 8601 timestamp of the consumption record."
-                      },
-                      "value": {
-                        "type": "number",
-                        "description": "The consumption value."
-                      },
-                      "type": {
-                        "type": "string",
-                        "description": "Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time)."
+                  "type": "object",
+                  "properties": {
+                    "consumption": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "timestamp": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 timestamp of the consumption record."
+                          },
+                          "value": {
+                            "type": "number",
+                            "description": "The consumption value."
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time)."
+                          }
+                        },
+                        "required": [
+                          "value",
+                          "unit",
+                          "timestamp"
+                        ]
                       }
-                    },
-                    "required": [
-                      "value",
-                      "unit",
-                      "timestamp"
-                    ]
+                    }
                   }
                 }
               }
@@ -745,53 +750,58 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "timestamp": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "ISO 8601 timestamp of the cost record."
-                      },
-                      "unit_amount": {
-                        "type": "integer",
-                        "description": "Cost in cents, e.g. 1234 for 12,34 €.",
-                        "example": 1234
-                      },
-                      "unit_amount_currency": {
-                        "type": "string",
-                        "description": "ISO 4217:2015 currency.",
-                        "example": "EUR"
-                      },
-                      "unit_amount_decimal": {
-                        "type": "string",
-                        "description": "Cost in decimal format, e.g. \"12.34\".",
-                        "example": "12.34"
-                      },
-                      "tax_behavior": {
-                        "type": "string",
-                        "description": "Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.",
-                        "enum": [
-                          "inclusive",
-                          "exclusive"
-                        ],
-                        "example": "exclusive"
-                      },
-                      "tax_rate": {
-                        "type": "integer",
-                        "description": "Tax rate in percent, e.g. 19 for 19%.",
-                        "example": 19
+                  "type": "object",
+                  "properties": {
+                    "costs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "timestamp": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 timestamp of the cost record."
+                          },
+                          "unit_amount": {
+                            "type": "integer",
+                            "description": "Cost in cents, e.g. 1234 for 12,34 €.",
+                            "example": 1234
+                          },
+                          "unit_amount_currency": {
+                            "type": "string",
+                            "description": "ISO 4217:2015 currency.",
+                            "example": "EUR"
+                          },
+                          "unit_amount_decimal": {
+                            "type": "string",
+                            "description": "Cost in decimal format, e.g. \"12.34\".",
+                            "example": "12.34"
+                          },
+                          "tax_behavior": {
+                            "type": "string",
+                            "description": "Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.",
+                            "enum": [
+                              "inclusive",
+                              "exclusive"
+                            ],
+                            "example": "exclusive"
+                          },
+                          "tax_rate": {
+                            "type": "integer",
+                            "description": "Tax rate in percent, e.g. 19 for 19%.",
+                            "example": 19
+                          }
+                        },
+                        "required": [
+                          "timestamp",
+                          "unit_amount",
+                          "unit_amount_currency",
+                          "unit_amount_decimal",
+                          "tax_behavior",
+                          "tax_rate"
+                        ]
                       }
-                    },
-                    "required": [
-                      "timestamp",
-                      "unit_amount",
-                      "unit_amount_currency",
-                      "unit_amount_decimal",
-                      "tax_behavior",
-                      "tax_rate"
-                    ]
+                    }
                   }
                 }
               }
@@ -886,109 +896,114 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "timestamp": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "ISO 8601 timestamp of the price record."
-                      },
-                      "unit_amount": {
-                        "type": "integer",
-                        "description": "Cost in cents, e.g. 1234 for 12,34 €.",
-                        "example": 1234
-                      },
-                      "unit_amount_currency": {
-                        "type": "string",
-                        "description": "ISO 4217:2015 currency.",
-                        "example": "EUR"
-                      },
-                      "unit_amount_decimal": {
-                        "type": "string",
-                        "description": "Cost in decimal format, e.g. \"12.34\".",
-                        "example": "12.34"
-                      },
-                      "components": {
+                  "type": "object",
+                  "properties": {
+                    "prices": {
+                      "type": "array",
+                      "items": {
                         "type": "object",
-                        "description": "Optional price components.",
                         "properties": {
-                          "auction_price_amount": {
-                            "type": "integer",
-                            "description": "Market price in cents, e.g. 1000 for 10,00 €.",
-                            "example": 1000
-                          },
-                          "auction_price_amount_decimal": {
+                          "timestamp": {
                             "type": "string",
-                            "description": "Market price in decimal format, e.g. \"10.00\".",
-                            "example": "10.00"
+                            "format": "date-time",
+                            "description": "ISO 8601 timestamp of the price record."
                           },
-                          "taxes_levies_amount": {
+                          "unit_amount": {
                             "type": "integer",
-                            "description": "Taxes/Levies other than tax specified on the price level in cents, e.g. 50 for 00,50 €.",
-                            "example": 50
+                            "description": "Cost in cents, e.g. 1234 for 12,34 €.",
+                            "example": 1234
                           },
-                          "taxes_levies_amount_decimal": {
+                          "unit_amount_currency": {
                             "type": "string",
-                            "description": "Taxes/Levies other than tax specified on the price level in decimal format, e.g. \"0.50\".",
-                            "example": "0.50"
+                            "description": "ISO 4217:2015 currency.",
+                            "example": "EUR"
                           },
-                          "source_fee_amount": {
+                          "unit_amount_decimal": {
+                            "type": "string",
+                            "description": "Cost in decimal format, e.g. \"12.34\".",
+                            "example": "12.34"
+                          },
+                          "components": {
+                            "type": "object",
+                            "description": "Optional price components.",
+                            "properties": {
+                              "auction_price_amount": {
+                                "type": "integer",
+                                "description": "Market price in cents, e.g. 1000 for 10,00 €.",
+                                "example": 1000
+                              },
+                              "auction_price_amount_decimal": {
+                                "type": "string",
+                                "description": "Market price in decimal format, e.g. \"10.00\".",
+                                "example": "10.00"
+                              },
+                              "taxes_levies_amount": {
+                                "type": "integer",
+                                "description": "Taxes/Levies other than tax specified on the price level in cents, e.g. 50 for 00,50 €.",
+                                "example": 50
+                              },
+                              "taxes_levies_amount_decimal": {
+                                "type": "string",
+                                "description": "Taxes/Levies other than tax specified on the price level in decimal format, e.g. \"0.50\".",
+                                "example": "0.50"
+                              },
+                              "source_fee_amount": {
+                                "type": "integer",
+                                "description": "Fee associated with the source, e.g. Green Energy Certificate fee in cents, e.g. 50 for 00,50 €.",
+                                "example": 50
+                              },
+                              "source_fee_amount_decimal": {
+                                "type": "string",
+                                "description": "Fee associated with the source, e.g. Green Energy Certificate fee in decimal format, e.g. \"0.50\".",
+                                "example": "0.50"
+                              },
+                              "grid_fee_amount": {
+                                "type": "integer",
+                                "description": "Fee associated with the transmission/distribution in cents, e.g. 100 for 1,00 €.",
+                                "example": 100
+                              },
+                              "grid_fee_amount_decimal": {
+                                "type": "string",
+                                "description": "Fee associated with the transmission/distribution in decimal format, e.g. \"1.00\".",
+                                "example": "1.00"
+                              },
+                              "margin_amount": {
+                                "type": "integer",
+                                "description": "Margin in cents, e.g. 34 for 0,34 €.",
+                                "example": 34
+                              },
+                              "margin_amount_decimal": {
+                                "type": "string",
+                                "description": "Margin in decimal format, e.g. \"0.34\".",
+                                "example": "0.34"
+                              }
+                            }
+                          },
+                          "tax_behavior": {
+                            "type": "string",
+                            "description": "Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.",
+                            "enum": [
+                              "inclusive",
+                              "exclusive"
+                            ],
+                            "example": "exclusive"
+                          },
+                          "tax_rate": {
                             "type": "integer",
-                            "description": "Fee associated with the source, e.g. Green Energy Certificate fee in cents, e.g. 50 for 00,50 €.",
-                            "example": 50
-                          },
-                          "source_fee_amount_decimal": {
-                            "type": "string",
-                            "description": "Fee associated with the source, e.g. Green Energy Certificate fee in decimal format, e.g. \"0.50\".",
-                            "example": "0.50"
-                          },
-                          "grid_fee_amount": {
-                            "type": "integer",
-                            "description": "Fee associated with the transmission/distribution in cents, e.g. 100 for 1,00 €.",
-                            "example": 100
-                          },
-                          "grid_fee_amount_decimal": {
-                            "type": "string",
-                            "description": "Fee associated with the transmission/distribution in decimal format, e.g. \"1.00\".",
-                            "example": "1.00"
-                          },
-                          "margin_amount": {
-                            "type": "integer",
-                            "description": "Margin in cents, e.g. 34 for 0,34 €.",
-                            "example": 34
-                          },
-                          "margin_amount_decimal": {
-                            "type": "string",
-                            "description": "Margin in decimal format, e.g. \"0.34\".",
-                            "example": "0.34"
+                            "description": "Tax rate in percent, e.g. 19 for 19%.",
+                            "example": 19
                           }
-                        }
-                      },
-                      "tax_behavior": {
-                        "type": "string",
-                        "description": "Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.",
-                        "enum": [
-                          "inclusive",
-                          "exclusive"
-                        ],
-                        "example": "exclusive"
-                      },
-                      "tax_rate": {
-                        "type": "integer",
-                        "description": "Tax rate in percent, e.g. 19 for 19%.",
-                        "example": 19
+                        },
+                        "required": [
+                          "timestamp",
+                          "unit_amount",
+                          "unit_amount_currency",
+                          "unit_amount_decimal",
+                          "tax_behavior",
+                          "tax_rate"
+                        ]
                       }
-                    },
-                    "required": [
-                      "timestamp",
-                      "unit_amount",
-                      "unit_amount_currency",
-                      "unit_amount_decimal",
-                      "tax_behavior",
-                      "tax_rate"
-                    ]
+                    }
                   }
                 }
               }

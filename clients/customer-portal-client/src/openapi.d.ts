@@ -4954,20 +4954,22 @@ declare namespace Paths {
             interval: Parameters.Interval;
         }
         namespace Responses {
-            export type $200 = {
-                /**
-                 * ISO 8601 timestamp of the consumption record.
-                 */
-                timestamp: string; // date-time
-                /**
-                 * The consumption value.
-                 */
-                value: number;
-                /**
-                 * Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time).
-                 */
-                type?: string;
-            }[];
+            export interface $200 {
+                consumption?: {
+                    /**
+                     * ISO 8601 timestamp of the consumption record.
+                     */
+                    timestamp: string; // date-time
+                    /**
+                     * The consumption value.
+                     */
+                    value: number;
+                    /**
+                     * Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time).
+                     */
+                    type?: string;
+                }[];
+            }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -5092,42 +5094,44 @@ declare namespace Paths {
             interval: Parameters.Interval;
         }
         namespace Responses {
-            export type $200 = {
-                /**
-                 * ISO 8601 timestamp of the cost record.
-                 */
-                timestamp: string; // date-time
-                /**
-                 * Cost in cents, e.g. 1234 for 12,34 €.
-                 * example:
-                 * 1234
-                 */
-                unit_amount: number;
-                /**
-                 * ISO 4217:2015 currency.
-                 * example:
-                 * EUR
-                 */
-                unit_amount_currency: string;
-                /**
-                 * Cost in decimal format, e.g. "12.34".
-                 * example:
-                 * 12.34
-                 */
-                unit_amount_decimal: string;
-                /**
-                 * Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.
-                 * example:
-                 * exclusive
-                 */
-                tax_behavior: "inclusive" | "exclusive";
-                /**
-                 * Tax rate in percent, e.g. 19 for 19%.
-                 * example:
-                 * 19
-                 */
-                tax_rate: number;
-            }[];
+            export interface $200 {
+                costs?: {
+                    /**
+                     * ISO 8601 timestamp of the cost record.
+                     */
+                    timestamp: string; // date-time
+                    /**
+                     * Cost in cents, e.g. 1234 for 12,34 €.
+                     * example:
+                     * 1234
+                     */
+                    unit_amount: number;
+                    /**
+                     * ISO 4217:2015 currency.
+                     * example:
+                     * EUR
+                     */
+                    unit_amount_currency: string;
+                    /**
+                     * Cost in decimal format, e.g. "12.34".
+                     * example:
+                     * 12.34
+                     */
+                    unit_amount_decimal: string;
+                    /**
+                     * Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.
+                     * example:
+                     * exclusive
+                     */
+                    tax_behavior: "inclusive" | "exclusive";
+                    /**
+                     * Tax rate in percent, e.g. 19 for 19%.
+                     * example:
+                     * 19
+                     */
+                    tax_rate: number;
+                }[];
+            }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -5946,107 +5950,109 @@ declare namespace Paths {
             interval: Parameters.Interval;
         }
         namespace Responses {
-            export type $200 = {
-                /**
-                 * ISO 8601 timestamp of the price record.
-                 */
-                timestamp: string; // date-time
-                /**
-                 * Cost in cents, e.g. 1234 for 12,34 €.
-                 * example:
-                 * 1234
-                 */
-                unit_amount: number;
-                /**
-                 * ISO 4217:2015 currency.
-                 * example:
-                 * EUR
-                 */
-                unit_amount_currency: string;
-                /**
-                 * Cost in decimal format, e.g. "12.34".
-                 * example:
-                 * 12.34
-                 */
-                unit_amount_decimal: string;
-                /**
-                 * Optional price components.
-                 */
-                components?: {
+            export interface $200 {
+                prices?: {
                     /**
-                     * Market price in cents, e.g. 1000 for 10,00 €.
-                     * example:
-                     * 1000
+                     * ISO 8601 timestamp of the price record.
                      */
-                    auction_price_amount?: number;
+                    timestamp: string; // date-time
                     /**
-                     * Market price in decimal format, e.g. "10.00".
+                     * Cost in cents, e.g. 1234 for 12,34 €.
                      * example:
-                     * 10.00
+                     * 1234
                      */
-                    auction_price_amount_decimal?: string;
+                    unit_amount: number;
                     /**
-                     * Taxes/Levies other than tax specified on the price level in cents, e.g. 50 for 00,50 €.
+                     * ISO 4217:2015 currency.
                      * example:
-                     * 50
+                     * EUR
                      */
-                    taxes_levies_amount?: number;
+                    unit_amount_currency: string;
                     /**
-                     * Taxes/Levies other than tax specified on the price level in decimal format, e.g. "0.50".
+                     * Cost in decimal format, e.g. "12.34".
                      * example:
-                     * 0.50
+                     * 12.34
                      */
-                    taxes_levies_amount_decimal?: string;
+                    unit_amount_decimal: string;
                     /**
-                     * Fee associated with the source, e.g. Green Energy Certificate fee in cents, e.g. 50 for 00,50 €.
-                     * example:
-                     * 50
+                     * Optional price components.
                      */
-                    source_fee_amount?: number;
+                    components?: {
+                        /**
+                         * Market price in cents, e.g. 1000 for 10,00 €.
+                         * example:
+                         * 1000
+                         */
+                        auction_price_amount?: number;
+                        /**
+                         * Market price in decimal format, e.g. "10.00".
+                         * example:
+                         * 10.00
+                         */
+                        auction_price_amount_decimal?: string;
+                        /**
+                         * Taxes/Levies other than tax specified on the price level in cents, e.g. 50 for 00,50 €.
+                         * example:
+                         * 50
+                         */
+                        taxes_levies_amount?: number;
+                        /**
+                         * Taxes/Levies other than tax specified on the price level in decimal format, e.g. "0.50".
+                         * example:
+                         * 0.50
+                         */
+                        taxes_levies_amount_decimal?: string;
+                        /**
+                         * Fee associated with the source, e.g. Green Energy Certificate fee in cents, e.g. 50 for 00,50 €.
+                         * example:
+                         * 50
+                         */
+                        source_fee_amount?: number;
+                        /**
+                         * Fee associated with the source, e.g. Green Energy Certificate fee in decimal format, e.g. "0.50".
+                         * example:
+                         * 0.50
+                         */
+                        source_fee_amount_decimal?: string;
+                        /**
+                         * Fee associated with the transmission/distribution in cents, e.g. 100 for 1,00 €.
+                         * example:
+                         * 100
+                         */
+                        grid_fee_amount?: number;
+                        /**
+                         * Fee associated with the transmission/distribution in decimal format, e.g. "1.00".
+                         * example:
+                         * 1.00
+                         */
+                        grid_fee_amount_decimal?: string;
+                        /**
+                         * Margin in cents, e.g. 34 for 0,34 €.
+                         * example:
+                         * 34
+                         */
+                        margin_amount?: number;
+                        /**
+                         * Margin in decimal format, e.g. "0.34".
+                         * example:
+                         * 0.34
+                         */
+                        margin_amount_decimal?: string;
+                    };
                     /**
-                     * Fee associated with the source, e.g. Green Energy Certificate fee in decimal format, e.g. "0.50".
+                     * Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.
                      * example:
-                     * 0.50
+                     * exclusive
                      */
-                    source_fee_amount_decimal?: string;
+                    tax_behavior: "inclusive" | "exclusive";
                     /**
-                     * Fee associated with the transmission/distribution in cents, e.g. 100 for 1,00 €.
+                     * Tax rate in percent, e.g. 19 for 19%.
                      * example:
-                     * 100
+                     * 19
                      */
-                    grid_fee_amount?: number;
-                    /**
-                     * Fee associated with the transmission/distribution in decimal format, e.g. "1.00".
-                     * example:
-                     * 1.00
-                     */
-                    grid_fee_amount_decimal?: string;
-                    /**
-                     * Margin in cents, e.g. 34 for 0,34 €.
-                     * example:
-                     * 34
-                     */
-                    margin_amount?: number;
-                    /**
-                     * Margin in decimal format, e.g. "0.34".
-                     * example:
-                     * 0.34
-                     */
-                    margin_amount_decimal?: string;
-                };
-                /**
-                 * Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.
-                 * example:
-                 * exclusive
-                 */
-                tax_behavior: "inclusive" | "exclusive";
-                /**
-                 * Tax rate in percent, e.g. 19 for 19%.
-                 * example:
-                 * 19
-                 */
-                tax_rate: number;
-            }[];
+                    tax_rate: number;
+                }[];
+            }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
