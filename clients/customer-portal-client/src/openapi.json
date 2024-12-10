@@ -630,7 +630,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "consumption": {
+                    "consumptions": {
                       "type": "array",
                       "items": {
                         "type": "object",

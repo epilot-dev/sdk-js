@@ -4955,7 +4955,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                consumption?: {
+                consumptions?: {
                     /**
                      * ISO 8601 timestamp of the consumption record.
                      */
