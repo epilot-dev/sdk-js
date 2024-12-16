@@ -501,6 +501,59 @@
         }
       }
     },
+    "/v2/portal/public/extensions": {
+      "get": {
+        "operationId": "getPublicPortalExtensionDetails",
+        "summary": "getPublicPortalExtensionDetails",
+        "description": "Get public extension details shown to end customers and configuring users.",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": 12324,
+              "description": "Organization ID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public details of extensions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicExtensionCapabilities"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/consumption": {
       "get": {
         "operationId": "getConsumption",
@@ -515,6 +568,33 @@
           }
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "extensionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Extension ID for consumption data."
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Hook ID for consumption data."
+          },
+          {
+            "in": "query",
+            "name": "meter_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Meter ID for consumption data."
+          },
           {
             "in": "query",
             "name": "from",
@@ -557,29 +637,34 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "timestamp": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "ISO 8601 timestamp of the consumption record."
-                      },
-                      "value": {
-                        "type": "number",
-                        "description": "The consumption value."
-                      },
-                      "type": {
-                        "type": "string",
-                        "description": "Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time)."
+                  "type": "object",
+                  "properties": {
+                    "consumptions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "timestamp": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 timestamp of the consumption record."
+                          },
+                          "value": {
+                            "type": "number",
+                            "description": "The consumption value."
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time)."
+                          }
+                        },
+                        "required": [
+                          "value",
+                          "unit",
+                          "timestamp"
+                        ]
                       }
-                    },
-                    "required": [
-                      "value",
-                      "unit",
-                      "timestamp"
-                    ]
+                    }
                   }
                 }
               }
@@ -614,6 +699,33 @@
           }
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "extensionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Extension ID for cost data."
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Hook ID for cost data."
+          },
+          {
+            "in": "query",
+            "name": "meter_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Meter ID for cost data."
+          },
           {
             "in": "query",
             "name": "from",
@@ -656,53 +768,58 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "timestamp": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "ISO 8601 timestamp of the cost record."
-                      },
-                      "unit_amount": {
-                        "type": "integer",
-                        "description": "Cost in cents, e.g. 1234 for 12,34 €.",
-                        "example": 1234
-                      },
-                      "unit_amount_currency": {
-                        "type": "string",
-                        "description": "ISO 4217:2015 currency.",
-                        "example": "EUR"
-                      },
-                      "unit_amount_decimal": {
-                        "type": "string",
-                        "description": "Cost in decimal format, e.g. \"12.34\".",
-                        "example": "12.34"
-                      },
-                      "tax_behavior": {
-                        "type": "string",
-                        "description": "Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.",
-                        "enum": [
-                          "inclusive",
-                          "exclusive"
-                        ],
-                        "example": "exclusive"
-                      },
-                      "tax_rate": {
-                        "type": "integer",
-                        "description": "Tax rate in percent, e.g. 19 for 19%.",
-                        "example": 19
+                  "type": "object",
+                  "properties": {
+                    "costs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "timestamp": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 timestamp of the cost record."
+                          },
+                          "unit_amount": {
+                            "type": "integer",
+                            "description": "Cost in cents, e.g. 1234 for 12,34 €.",
+                            "example": 1234
+                          },
+                          "unit_amount_currency": {
+                            "type": "string",
+                            "description": "ISO 4217:2015 currency.",
+                            "example": "EUR"
+                          },
+                          "unit_amount_decimal": {
+                            "type": "string",
+                            "description": "Cost in decimal format, e.g. \"12.34\".",
+                            "example": "12.34"
+                          },
+                          "tax_behavior": {
+                            "type": "string",
+                            "description": "Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.",
+                            "enum": [
+                              "inclusive",
+                              "exclusive"
+                            ],
+                            "example": "exclusive"
+                          },
+                          "tax_rate": {
+                            "type": "integer",
+                            "description": "Tax rate in percent, e.g. 19 for 19%.",
+                            "example": 19
+                          }
+                        },
+                        "required": [
+                          "timestamp",
+                          "unit_amount",
+                          "unit_amount_currency",
+                          "unit_amount_decimal",
+                          "tax_behavior",
+                          "tax_rate"
+                        ]
                       }
-                    },
-                    "required": [
-                      "timestamp",
-                      "unit_amount",
-                      "unit_amount_currency",
-                      "unit_amount_decimal",
-                      "tax_behavior",
-                      "tax_rate"
-                    ]
+                    }
                   }
                 }
               }
@@ -737,6 +854,33 @@
           }
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "extensionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Extension ID for price data."
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Hook ID for price data."
+          },
+          {
+            "in": "query",
+            "name": "meter_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Meter ID for price data."
+          },
           {
             "in": "query",
             "name": "from",
@@ -779,109 +923,114 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "timestamp": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "ISO 8601 timestamp of the price record."
-                      },
-                      "unit_amount": {
-                        "type": "integer",
-                        "description": "Cost in cents, e.g. 1234 for 12,34 €.",
-                        "example": 1234
-                      },
-                      "unit_amount_currency": {
-                        "type": "string",
-                        "description": "ISO 4217:2015 currency.",
-                        "example": "EUR"
-                      },
-                      "unit_amount_decimal": {
-                        "type": "string",
-                        "description": "Cost in decimal format, e.g. \"12.34\".",
-                        "example": "12.34"
-                      },
-                      "components": {
+                  "type": "object",
+                  "properties": {
+                    "prices": {
+                      "type": "array",
+                      "items": {
                         "type": "object",
-                        "description": "Optional price components.",
                         "properties": {
-                          "auction_price_amount": {
-                            "type": "integer",
-                            "description": "Market price in cents, e.g. 1000 for 10,00 €.",
-                            "example": 1000
-                          },
-                          "auction_price_amount_decimal": {
+                          "timestamp": {
                             "type": "string",
-                            "description": "Market price in decimal format, e.g. \"10.00\".",
-                            "example": "10.00"
+                            "format": "date-time",
+                            "description": "ISO 8601 timestamp of the price record."
                           },
-                          "taxes_levies_amount": {
+                          "unit_amount": {
                             "type": "integer",
-                            "description": "Taxes/Levies other than tax specified on the price level in cents, e.g. 50 for 00,50 €.",
-                            "example": 50
+                            "description": "Cost in cents, e.g. 1234 for 12,34 €.",
+                            "example": 1234
                           },
-                          "taxes_levies_amount_decimal": {
+                          "unit_amount_currency": {
                             "type": "string",
-                            "description": "Taxes/Levies other than tax specified on the price level in decimal format, e.g. \"0.50\".",
-                            "example": "0.50"
+                            "description": "ISO 4217:2015 currency.",
+                            "example": "EUR"
                           },
-                          "source_fee_amount": {
+                          "unit_amount_decimal": {
+                            "type": "string",
+                            "description": "Cost in decimal format, e.g. \"12.34\".",
+                            "example": "12.34"
+                          },
+                          "components": {
+                            "type": "object",
+                            "description": "Optional price components.",
+                            "properties": {
+                              "auction_price_amount": {
+                                "type": "integer",
+                                "description": "Market price in cents, e.g. 1000 for 10,00 €.",
+                                "example": 1000
+                              },
+                              "auction_price_amount_decimal": {
+                                "type": "string",
+                                "description": "Market price in decimal format, e.g. \"10.00\".",
+                                "example": "10.00"
+                              },
+                              "taxes_levies_amount": {
+                                "type": "integer",
+                                "description": "Taxes/Levies other than tax specified on the price level in cents, e.g. 50 for 00,50 €.",
+                                "example": 50
+                              },
+                              "taxes_levies_amount_decimal": {
+                                "type": "string",
+                                "description": "Taxes/Levies other than tax specified on the price level in decimal format, e.g. \"0.50\".",
+                                "example": "0.50"
+                              },
+                              "source_fee_amount": {
+                                "type": "integer",
+                                "description": "Fee associated with the source, e.g. Green Energy Certificate fee in cents, e.g. 50 for 00,50 €.",
+                                "example": 50
+                              },
+                              "source_fee_amount_decimal": {
+                                "type": "string",
+                                "description": "Fee associated with the source, e.g. Green Energy Certificate fee in decimal format, e.g. \"0.50\".",
+                                "example": "0.50"
+                              },
+                              "grid_fee_amount": {
+                                "type": "integer",
+                                "description": "Fee associated with the transmission/distribution in cents, e.g. 100 for 1,00 €.",
+                                "example": 100
+                              },
+                              "grid_fee_amount_decimal": {
+                                "type": "string",
+                                "description": "Fee associated with the transmission/distribution in decimal format, e.g. \"1.00\".",
+                                "example": "1.00"
+                              },
+                              "margin_amount": {
+                                "type": "integer",
+                                "description": "Margin in cents, e.g. 34 for 0,34 €.",
+                                "example": 34
+                              },
+                              "margin_amount_decimal": {
+                                "type": "string",
+                                "description": "Margin in decimal format, e.g. \"0.34\".",
+                                "example": "0.34"
+                              }
+                            }
+                          },
+                          "tax_behavior": {
+                            "type": "string",
+                            "description": "Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.",
+                            "enum": [
+                              "inclusive",
+                              "exclusive"
+                            ],
+                            "example": "exclusive"
+                          },
+                          "tax_rate": {
                             "type": "integer",
-                            "description": "Fee associated with the source, e.g. Green Energy Certificate fee in cents, e.g. 50 for 00,50 €.",
-                            "example": 50
-                          },
-                          "source_fee_amount_decimal": {
-                            "type": "string",
-                            "description": "Fee associated with the source, e.g. Green Energy Certificate fee in decimal format, e.g. \"0.50\".",
-                            "example": "0.50"
-                          },
-                          "grid_fee_amount": {
-                            "type": "integer",
-                            "description": "Fee associated with the transmission/distribution in cents, e.g. 100 for 1,00 €.",
-                            "example": 100
-                          },
-                          "grid_fee_amount_decimal": {
-                            "type": "string",
-                            "description": "Fee associated with the transmission/distribution in decimal format, e.g. \"1.00\".",
-                            "example": "1.00"
-                          },
-                          "margin_amount": {
-                            "type": "integer",
-                            "description": "Margin in cents, e.g. 34 for 0,34 €.",
-                            "example": 34
-                          },
-                          "margin_amount_decimal": {
-                            "type": "string",
-                            "description": "Margin in decimal format, e.g. \"0.34\".",
-                            "example": "0.34"
+                            "description": "Tax rate in percent, e.g. 19 for 19%.",
+                            "example": 19
                           }
-                        }
-                      },
-                      "tax_behavior": {
-                        "type": "string",
-                        "description": "Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.",
-                        "enum": [
-                          "inclusive",
-                          "exclusive"
-                        ],
-                        "example": "exclusive"
-                      },
-                      "tax_rate": {
-                        "type": "integer",
-                        "description": "Tax rate in percent, e.g. 19 for 19%.",
-                        "example": 19
+                        },
+                        "required": [
+                          "timestamp",
+                          "unit_amount",
+                          "unit_amount_currency",
+                          "unit_amount_decimal",
+                          "tax_behavior",
+                          "tax_rate"
+                        ]
                       }
-                    },
-                    "required": [
-                      "timestamp",
-                      "unit_amount",
-                      "unit_amount_currency",
-                      "unit_amount_decimal",
-                      "tax_behavior",
-                      "tax_rate"
-                    ]
+                    }
                   }
                 }
               }
@@ -5039,6 +5188,75 @@
           }
         }
       }
+    },
+    "/v2/portal/public/sso/login": {
+      "parameters": [
+        {
+          "in": "query",
+          "name": "origin",
+          "required": true,
+          "description": "Origin of the Portal",
+          "schema": {
+            "$ref": "#/components/schemas/Origin"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "ssoLogin",
+        "summary": "ssoLogin",
+        "description": "Initiate login using external SSO identity.\n\nVerifies the user with the issuer and matches the identity to an epilot user (or creates a new user).\n\nReturns parameters to be used with CUSTOM_AUTH flow against Cognito\n",
+        "security": [
+          {
+            "ExternalOIDCAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "description": "epilot organization id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": 123
+            }
+          }
+        ],
+        "tags": [
+          "Login"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "provider_slug": {
+                    "$ref": "#/components/schemas/ProviderSlug"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cognito login parameters to use with the CUSTOM_AUTH_FLOW",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "$ref": "#/components/schemas/SSOLoginToken"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5229,6 +5447,12 @@
         "in": "header",
         "name": "x-ivy-org-id",
         "description": "Set organization id as internal user"
+      },
+      "ExternalOIDCAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with id token from external OIDC provider",
+        "bearerFormat": "JWT"
       }
     },
     "schemas": {
@@ -6017,6 +6241,12 @@
                 "description": "Permissions granted to a portal user while accessing entities",
                 "items": {
                   "$ref": "#/components/schemas/Grant"
+                }
+              },
+              "identity_providers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProviderPublicConfig"
                 }
               }
             }
@@ -7990,6 +8220,17 @@
                   "shared_with_end_customer": {
                     "type": "boolean",
                     "description": "Indicate whether the file is shared with the end customer"
+                  },
+                  "_tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Array of entity tags",
+                    "example": [
+                      "example",
+                      "mock"
+                    ]
                   }
                 }
               }
@@ -8026,6 +8267,131 @@
           "id",
           "status"
         ]
+      },
+      "PublicExtensionCapabilities": {
+        "type": "object",
+        "properties": {
+          "consumptionDataRetrieval": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataRetrievalItem"
+            }
+          },
+          "priceDataRetrieval": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataRetrievalItem"
+            }
+          },
+          "costDataRetrieval": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataRetrievalItem"
+            }
+          },
+          "contractIdentification": {
+            "type": "object",
+            "properties": {
+              "extension": {
+                "$ref": "#/components/schemas/PublicExtensionDetails"
+              },
+              "hook": {
+                "$ref": "#/components/schemas/PublicContractIdentificationDetails"
+              }
+            }
+          }
+        }
+      },
+      "DataRetrievalItem": {
+        "type": "object",
+        "properties": {
+          "extension": {
+            "$ref": "#/components/schemas/PublicExtensionDetails"
+          },
+          "hook": {
+            "$ref": "#/components/schemas/PublicDataRetrievalHookDetails"
+          }
+        }
+      },
+      "PublicExtensionDetails": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the extension."
+          },
+          "name": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Name of the extension in English."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Name of the extension in some other language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ]
+          }
+        }
+      },
+      "PublicDataRetrievalHookDetails": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the hook."
+          },
+          "name": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Name of the extension in English."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Name of the extension in some other language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ]
+          },
+          "intervals": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The intervals associated with the hook."
+          }
+        }
+      },
+      "PublicContractIdentificationDetails": {
+        "type": "object",
+        "properties": {
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "This process will give you access to all Contracts kept"
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Explanation of the hook."
+          }
+        }
       },
       "Extension": {
         "type": "object",
@@ -8495,6 +8861,24 @@
             "type": "string",
             "description": "Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.",
             "example": "represents_contact"
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "This process will give you access to all Contracts kept"
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Explanation of the hook."
           }
         },
         "required": [
@@ -8685,6 +9069,15 @@
             "required": [
               "url"
             ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            }
           }
         },
         "required": [
@@ -8775,6 +9168,15 @@
             "required": [
               "url"
             ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            }
           }
         },
         "required": [
@@ -8865,6 +9267,15 @@
             "required": [
               "url"
             ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            }
           }
         },
         "required": [
@@ -8963,6 +9374,144 @@
             "description": "The status of the reading"
           }
         }
+      },
+      "SSOLoginToken": {
+        "type": "string"
+      },
+      "ProviderSlug": {
+        "type": "string",
+        "example": "office-365-login",
+        "description": "URL-friendly slug to use as organization-unique identifier for Provider",
+        "pattern": "[0-9a-z-]+"
+      },
+      "ProviderDisplayName": {
+        "type": "string",
+        "example": "Office 365 Login",
+        "description": "Human-readable display name for identity provider shown in login"
+      },
+      "ProviderConfig": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/ProviderSlug"
+          },
+          "display_name": {
+            "$ref": "#/components/schemas/ProviderDisplayName"
+          },
+          "provider_type": {
+            "type": "string",
+            "enum": [
+              "OIDC"
+            ]
+          },
+          "attribute_mappings": {
+            "$ref": "#/components/schemas/AttributeMappingConfig"
+          },
+          "oidc_config": {
+            "$ref": "#/components/schemas/OIDCProviderConfig"
+          }
+        },
+        "required": [
+          "display_name",
+          "provider_type"
+        ]
+      },
+      "ProviderPublicConfig": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/ProviderSlug"
+          },
+          "display_name": {
+            "$ref": "#/components/schemas/ProviderDisplayName"
+          },
+          "oidc_config": {
+            "$ref": "#/components/schemas/OIDCProviderConfig"
+          }
+        },
+        "required": [
+          "slug",
+          "display_name"
+        ]
+      },
+      "AttributeMappingConfig": {
+        "type": "object",
+        "description": "Dictionary of epilot user attributes to claims",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "email"
+          },
+          "display_name": {
+            "type": "string",
+            "example": "name"
+          },
+          "phone": {
+            "type": "string",
+            "example": "phone"
+          },
+          "preferred_language": {
+            "type": "string",
+            "example": "language"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "OIDCProviderConfig": {
+        "type": "object",
+        "properties": {
+          "oidc_issuer": {
+            "type": "string",
+            "description": "Issuing Authority URL",
+            "example": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0"
+          },
+          "client_id": {
+            "type": "string",
+            "example": "ab81daf8-8b1f-42d6-94ca-c51621054c75"
+          },
+          "client_secret": {
+            "type": "string",
+            "example": "7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Space-separated list of OAuth 2.0 scopes to request from OpenID Connect",
+            "example": "openid email"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/OIDCProviderMetadata"
+          }
+        },
+        "required": [
+          "oidc_issuer",
+          "client_id",
+          "scope"
+        ]
+      },
+      "OIDCProviderMetadata": {
+        "type": "object",
+        "properties": {
+          "authorization_endpoint": {
+            "type": "string",
+            "description": "URL of the authorization endpoint",
+            "example": "https://www.facebook.com/v12.0/dialog/oauth"
+          },
+          "token_endpoint": {
+            "type": "string",
+            "description": "URL of the token endpoint",
+            "example": "https://graph.facebook.com/v12.0/oauth/access_token"
+          },
+          "userinfo_endpoint": {
+            "type": "string",
+            "description": "URL of the userinfo endpoint",
+            "example": "https://graph.facebook.com/me"
+          }
+        }
+      },
+      "SAMLProviderConfig": {
+        "type": "object"
       }
     }
   },
