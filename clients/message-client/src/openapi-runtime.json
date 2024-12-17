@@ -170,6 +170,32 @@
         "responses": {}
       }
     },
+    "/v1/message/threads/{id}:markAsDone": {
+      "post": {
+        "operationId": "markThreadAsDone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}:markAsOpen": {
+      "post": {
+        "operationId": "markThreadAsOpen",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/message/threads/{id}/trash": {
       "post": {
         "operationId": "trashThread",

@@ -450,6 +450,7 @@ declare namespace Components {
             q: string;
             from?: number;
             size?: number;
+            hydrate?: boolean;
         }
         /**
          * Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.
@@ -469,6 +470,12 @@ declare namespace Components {
              * Organization ID of organization read the message.
              */
             org_read_message?: string[];
+            /**
+             * Whether the thread is marked as Done
+             * example:
+             * false
+             */
+            done?: boolean;
             /**
              * Latest message of thread
              */
@@ -510,6 +517,12 @@ declare namespace Paths {
              * 3f34ce73-089c-4d45-a5ee-c161234e41c3
              */
             entity_id?: string;
+            /**
+             * Organization ID
+             * example:
+             * 206801
+             */
+            org_id?: string;
             /**
              * To indicate this is main entity
              * example:
@@ -1073,6 +1086,34 @@ declare namespace Paths {
             }
         }
     }
+    namespace MarkThreadAsDone {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $400 {
+            }
+        }
+    }
+    namespace MarkThreadAsOpen {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $400 {
+            }
+        }
+    }
     namespace MarkUnreadMessage {
         namespace Parameters {
             export type Id = string;
@@ -1202,6 +1243,12 @@ declare namespace Paths {
                      * Organization ID of organization read the message.
                      */
                     org_read_message?: string[];
+                    /**
+                     * Whether the thread is marked as Done
+                     * example:
+                     * false
+                     */
+                    done?: boolean;
                     latest_message?: Components.Schemas.Message;
                     latest_trash_message?: Components.Schemas.Message;
                     /**
@@ -1646,6 +1693,12 @@ declare namespace Paths {
                  * Organization ID of organization read the message.
                  */
                 org_read_message?: string[];
+                /**
+                 * Whether the thread is marked as Done
+                 * example:
+                 * false
+                 */
+                done?: boolean;
                 latest_message?: Components.Schemas.Message;
                 latest_trash_message?: Components.Schemas.Message;
                 /**
@@ -1797,6 +1850,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteThread.Responses.$204>
+  /**
+   * markThreadAsDone - markThreadAsDone
+   * 
+   * Mark thread as done
+   */
+  'markThreadAsDone'(
+    parameters?: Parameters<Paths.MarkThreadAsDone.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MarkThreadAsDone.Responses.$204>
+  /**
+   * markThreadAsOpen - markThreadAsOpen
+   * 
+   * Mark thread as open
+   */
+  'markThreadAsOpen'(
+    parameters?: Parameters<Paths.MarkThreadAsOpen.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MarkThreadAsOpen.Responses.$204>
   /**
    * trashThread - trashThread
    * 
@@ -2088,6 +2161,30 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteThread.Responses.$204>
+  }
+  ['/v1/message/threads/{id}:markAsDone']: {
+    /**
+     * markThreadAsDone - markThreadAsDone
+     * 
+     * Mark thread as done
+     */
+    'post'(
+      parameters?: Parameters<Paths.MarkThreadAsDone.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MarkThreadAsDone.Responses.$204>
+  }
+  ['/v1/message/threads/{id}:markAsOpen']: {
+    /**
+     * markThreadAsOpen - markThreadAsOpen
+     * 
+     * Mark thread as open
+     */
+    'post'(
+      parameters?: Parameters<Paths.MarkThreadAsOpen.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MarkThreadAsOpen.Responses.$204>
   }
   ['/v1/message/threads/{id}/trash']: {
     /**
