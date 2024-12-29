@@ -588,6 +588,15 @@
           },
           {
             "in": "query",
+            "name": "meter_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Meter ID for consumption data."
+          },
+          {
+            "in": "query",
             "name": "from",
             "schema": {
               "type": "string",
@@ -707,6 +716,15 @@
             },
             "required": true,
             "description": "Hook ID for cost data."
+          },
+          {
+            "in": "query",
+            "name": "meter_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Meter ID for cost data."
           },
           {
             "in": "query",
@@ -853,6 +871,15 @@
             },
             "required": true,
             "description": "Hook ID for price data."
+          },
+          {
+            "in": "query",
+            "name": "meter_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Meter ID for price data."
           },
           {
             "in": "query",
@@ -2385,7 +2412,7 @@
         }
       }
     },
-    "/v2/porta/users/by-related-entity": {
+    "/v2/portal/users/by-related-entity": {
       "get": {
         "operationId": "fetchPortalUsersByRelatedEntity",
         "summary": "fetchPortalUsersByRelatedEntity",
@@ -8503,45 +8530,7 @@
             "example": "{{Contact.customer_number | is_not_empty}}"
           },
           "auth": {
-            "type": "object",
-            "properties": {
-              "method": {
-                "type": "string",
-                "description": "HTTP method to use for authentication",
-                "default": "GET"
-              },
-              "url": {
-                "type": "string",
-                "description": "URL to use for authentication. Supports variable interpolation."
-              },
-              "params": {
-                "type": "object",
-                "description": "Parameters to append to the URL. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "headers": {
-                "type": "object",
-                "description": "Headers to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "body": {
-                "type": "object",
-                "description": "JSON body to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              }
-            },
-            "required": [
-              "url"
-            ]
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
           },
           "redirect": {
             "type": "object",
@@ -8588,45 +8577,7 @@
             ]
           },
           "auth": {
-            "type": "object",
-            "properties": {
-              "method": {
-                "type": "string",
-                "description": "HTTP method to use for authentication",
-                "default": "GET"
-              },
-              "url": {
-                "type": "string",
-                "description": "URL to use for authentication. Supports variable interpolation."
-              },
-              "params": {
-                "type": "object",
-                "description": "Parameters to append to the URL. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "headers": {
-                "type": "object",
-                "description": "Headers to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "body": {
-                "type": "object",
-                "description": "JSON body to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              }
-            },
-            "required": [
-              "url"
-            ]
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
           },
           "call": {
             "type": "object",
@@ -8679,45 +8630,7 @@
             ]
           },
           "auth": {
-            "type": "object",
-            "properties": {
-              "method": {
-                "type": "string",
-                "description": "HTTP method to use for authentication",
-                "default": "GET"
-              },
-              "url": {
-                "type": "string",
-                "description": "URL to use for authentication. Supports variable interpolation."
-              },
-              "params": {
-                "type": "object",
-                "description": "Parameters to append to the URL. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "headers": {
-                "type": "object",
-                "description": "Headers to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "body": {
-                "type": "object",
-                "description": "JSON body to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              }
-            },
-            "required": [
-              "url"
-            ]
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
           },
           "call": {
             "type": "object",
@@ -8789,45 +8702,7 @@
             ]
           },
           "auth": {
-            "type": "object",
-            "properties": {
-              "method": {
-                "type": "string",
-                "description": "HTTP method to use for authentication",
-                "default": "POST"
-              },
-              "url": {
-                "type": "string",
-                "description": "URL to use for authentication. Supports variable interpolation."
-              },
-              "params": {
-                "type": "object",
-                "description": "Parameters to append to the URL. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "headers": {
-                "type": "object",
-                "description": "Headers to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "body": {
-                "type": "object",
-                "description": "JSON body to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              }
-            },
-            "required": [
-              "url"
-            ]
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
           },
           "call": {
             "type": "object",
@@ -8889,45 +8764,7 @@
             ]
           },
           "auth": {
-            "type": "object",
-            "properties": {
-              "method": {
-                "type": "string",
-                "description": "HTTP method to use for authentication",
-                "default": "GET"
-              },
-              "url": {
-                "type": "string",
-                "description": "URL to use for authentication. Supports variable interpolation."
-              },
-              "params": {
-                "type": "object",
-                "description": "Parameters to append to the URL. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "headers": {
-                "type": "object",
-                "description": "Headers to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "body": {
-                "type": "object",
-                "description": "JSON body to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              }
-            },
-            "required": [
-              "url"
-            ]
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
           },
           "call": {
             "type": "object",
@@ -8961,6 +8798,15 @@
             "required": [
               "url"
             ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            }
           }
         },
         "required": [
@@ -8979,45 +8825,7 @@
             ]
           },
           "auth": {
-            "type": "object",
-            "properties": {
-              "method": {
-                "type": "string",
-                "description": "HTTP method to use for authentication",
-                "default": "GET"
-              },
-              "url": {
-                "type": "string",
-                "description": "URL to use for authentication. Supports variable interpolation."
-              },
-              "params": {
-                "type": "object",
-                "description": "Parameters to append to the URL. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "headers": {
-                "type": "object",
-                "description": "Headers to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "body": {
-                "type": "object",
-                "description": "JSON body to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              }
-            },
-            "required": [
-              "url"
-            ]
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
           },
           "call": {
             "type": "object",
@@ -9051,6 +8859,15 @@
             "required": [
               "url"
             ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            }
           }
         },
         "required": [
@@ -9069,45 +8886,7 @@
             ]
           },
           "auth": {
-            "type": "object",
-            "properties": {
-              "method": {
-                "type": "string",
-                "description": "HTTP method to use for authentication",
-                "default": "GET"
-              },
-              "url": {
-                "type": "string",
-                "description": "URL to use for authentication. Supports variable interpolation."
-              },
-              "params": {
-                "type": "object",
-                "description": "Parameters to append to the URL. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "headers": {
-                "type": "object",
-                "description": "Headers to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              },
-              "body": {
-                "type": "object",
-                "description": "JSON body to use for authentication. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
-              }
-            },
-            "required": [
-              "url"
-            ]
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
           },
           "call": {
             "type": "object",
@@ -9141,11 +8920,80 @@
             "required": [
               "url"
             ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            }
           }
         },
         "required": [
           "type",
           "call"
+        ]
+      },
+      "ExtensionAuthBlock": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "HTTP method to use for authentication",
+            "default": "GET"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL to use for authentication. Supports variable interpolation."
+          },
+          "params": {
+            "type": "object",
+            "description": "Parameters to append to the URL. Supports variable interpolation.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {}
+          },
+          "headers": {
+            "type": "object",
+            "description": "Headers to use for authentication. Supports variable interpolation.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {}
+          },
+          "body": {
+            "type": "object",
+            "description": "JSON body to use for authentication. Supports variable interpolation.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {}
+          },
+          "cache": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "Key to use to identify the auth response. Supports interpolation.",
+                "example": "{{Options.api_key}}"
+              },
+              "ttl": {
+                "type": "string",
+                "description": "Time to live in seconds for the cache. Supports interpolation.",
+                "example": "{{AuthResponse.data.expires_in}}"
+              }
+            },
+            "required": [
+              "key",
+              "ttl"
+            ]
+          }
+        },
+        "required": [
+          "url"
         ]
       },
       "Direction": {

@@ -1541,34 +1541,7 @@ declare namespace Components {
                  * {{Contact.customer_number | is_not_empty}}
                  */
                 condition?: string;
-                auth?: {
-                    /**
-                     * HTTP method to use for authentication
-                     */
-                    method?: string;
-                    /**
-                     * URL to use for authentication. Supports variable interpolation.
-                     */
-                    url: string;
-                    /**
-                     * Parameters to append to the URL. Supports variable interpolation.
-                     */
-                    params?: {
-                        [name: string]: string;
-                    };
-                    /**
-                     * Headers to use for authentication. Supports variable interpolation.
-                     */
-                    headers?: {
-                        [name: string]: string;
-                    };
-                    /**
-                     * JSON body to use for authentication. Supports variable interpolation.
-                     */
-                    body?: {
-                        [name: string]: string;
-                    };
-                };
+                auth?: ExtensionAuthBlock;
                 redirect: {
                     /**
                      * URL to redirect to. Supports variable interpolation.
@@ -1631,6 +1604,48 @@ declare namespace Components {
              */
             ExtensionHookMeterReadingPlausibilityCheck))[];
         }
+        export interface ExtensionAuthBlock {
+            /**
+             * HTTP method to use for authentication
+             */
+            method?: string;
+            /**
+             * URL to use for authentication. Supports variable interpolation.
+             */
+            url: string;
+            /**
+             * Parameters to append to the URL. Supports variable interpolation.
+             */
+            params?: {
+                [name: string]: string;
+            };
+            /**
+             * Headers to use for authentication. Supports variable interpolation.
+             */
+            headers?: {
+                [name: string]: string;
+            };
+            /**
+             * JSON body to use for authentication. Supports variable interpolation.
+             */
+            body?: {
+                [name: string]: string;
+            };
+            cache?: {
+                /**
+                 * Key to use to identify the auth response. Supports interpolation.
+                 * example:
+                 * {{Options.api_key}}
+                 */
+                key: string;
+                /**
+                 * Time to live in seconds for the cache. Supports interpolation.
+                 * example:
+                 * {{AuthResponse.data.expires_in}}
+                 */
+                ttl: string;
+            };
+        }
         export interface ExtensionConfig {
             /**
              * Name of the extension
@@ -1660,34 +1675,7 @@ declare namespace Components {
          */
         export interface ExtensionHookConsumptionDataRetrieval {
             type: "consumptionDataRetrieval";
-            auth?: {
-                /**
-                 * HTTP method to use for authentication
-                 */
-                method?: string;
-                /**
-                 * URL to use for authentication. Supports variable interpolation.
-                 */
-                url: string;
-                /**
-                 * Parameters to append to the URL. Supports variable interpolation.
-                 */
-                params?: {
-                    [name: string]: string;
-                };
-                /**
-                 * Headers to use for authentication. Supports variable interpolation.
-                 */
-                headers?: {
-                    [name: string]: string;
-                };
-                /**
-                 * JSON body to use for authentication. Supports variable interpolation.
-                 */
-                body?: {
-                    [name: string]: string;
-                };
-            };
+            auth?: ExtensionAuthBlock;
             call: {
                 /**
                  * HTTP method to use for the call
@@ -1710,6 +1698,12 @@ declare namespace Components {
                     [name: string]: string;
                 };
             };
+            resolved?: {
+                /**
+                 * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
         }
         /**
          * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
@@ -1722,34 +1716,7 @@ declare namespace Components {
          */
         export interface ExtensionHookContractIdentification {
             type: "contractIdentification";
-            auth?: {
-                /**
-                 * HTTP method to use for authentication
-                 */
-                method?: string;
-                /**
-                 * URL to use for authentication. Supports variable interpolation.
-                 */
-                url: string;
-                /**
-                 * Parameters to append to the URL. Supports variable interpolation.
-                 */
-                params?: {
-                    [name: string]: string;
-                };
-                /**
-                 * Headers to use for authentication. Supports variable interpolation.
-                 */
-                headers?: {
-                    [name: string]: string;
-                };
-                /**
-                 * JSON body to use for authentication. Supports variable interpolation.
-                 */
-                body?: {
-                    [name: string]: string;
-                };
-            };
+            auth?: ExtensionAuthBlock;
             call: {
                 /**
                  * URL to call. Supports variable interpolation.
@@ -1794,34 +1761,7 @@ declare namespace Components {
          */
         export interface ExtensionHookCostDataRetrieval {
             type: "costDataRetrieval";
-            auth?: {
-                /**
-                 * HTTP method to use for authentication
-                 */
-                method?: string;
-                /**
-                 * URL to use for authentication. Supports variable interpolation.
-                 */
-                url: string;
-                /**
-                 * Parameters to append to the URL. Supports variable interpolation.
-                 */
-                params?: {
-                    [name: string]: string;
-                };
-                /**
-                 * Headers to use for authentication. Supports variable interpolation.
-                 */
-                headers?: {
-                    [name: string]: string;
-                };
-                /**
-                 * JSON body to use for authentication. Supports variable interpolation.
-                 */
-                body?: {
-                    [name: string]: string;
-                };
-            };
+            auth?: ExtensionAuthBlock;
             call: {
                 /**
                  * HTTP method to use for the call
@@ -1844,6 +1784,12 @@ declare namespace Components {
                     [name: string]: string;
                 };
             };
+            resolved?: {
+                /**
+                 * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
         }
         /**
          * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
@@ -1856,34 +1802,7 @@ declare namespace Components {
          */
         export interface ExtensionHookMeterReadingPlausibilityCheck {
             type: "meterReadingPlausibilityCheck";
-            auth?: {
-                /**
-                 * HTTP method to use for authentication
-                 */
-                method?: string;
-                /**
-                 * URL to use for authentication. Supports variable interpolation.
-                 */
-                url: string;
-                /**
-                 * Parameters to append to the URL. Supports variable interpolation.
-                 */
-                params?: {
-                    [name: string]: string;
-                };
-                /**
-                 * Headers to use for authentication. Supports variable interpolation.
-                 */
-                headers?: {
-                    [name: string]: string;
-                };
-                /**
-                 * JSON body to use for authentication. Supports variable interpolation.
-                 */
-                body?: {
-                    [name: string]: string;
-                };
-            };
+            auth?: ExtensionAuthBlock;
             call: {
                 /**
                  * URL to call. Supports variable interpolation.
@@ -1921,34 +1840,7 @@ declare namespace Components {
          */
         export interface ExtensionHookPriceDataRetrieval {
             type: "priceDataRetrieval";
-            auth?: {
-                /**
-                 * HTTP method to use for authentication
-                 */
-                method?: string;
-                /**
-                 * URL to use for authentication. Supports variable interpolation.
-                 */
-                url: string;
-                /**
-                 * Parameters to append to the URL. Supports variable interpolation.
-                 */
-                params?: {
-                    [name: string]: string;
-                };
-                /**
-                 * Headers to use for authentication. Supports variable interpolation.
-                 */
-                headers?: {
-                    [name: string]: string;
-                };
-                /**
-                 * JSON body to use for authentication. Supports variable interpolation.
-                 */
-                body?: {
-                    [name: string]: string;
-                };
-            };
+            auth?: ExtensionAuthBlock;
             call: {
                 /**
                  * HTTP method to use for the call
@@ -1971,6 +1863,12 @@ declare namespace Components {
                     [name: string]: string;
                 };
             };
+            resolved?: {
+                /**
+                 * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
         }
         /**
          * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
@@ -1980,34 +1878,7 @@ declare namespace Components {
          */
         export interface ExtensionHookRegistrationIdentifiersCheck {
             type: "registrationIdentifiersCheck";
-            auth?: {
-                /**
-                 * HTTP method to use for authentication
-                 */
-                method?: string;
-                /**
-                 * URL to use for authentication. Supports variable interpolation.
-                 */
-                url: string;
-                /**
-                 * Parameters to append to the URL. Supports variable interpolation.
-                 */
-                params?: {
-                    [name: string]: string;
-                };
-                /**
-                 * Headers to use for authentication. Supports variable interpolation.
-                 */
-                headers?: {
-                    [name: string]: string;
-                };
-                /**
-                 * JSON body to use for authentication. Supports variable interpolation.
-                 */
-                body?: {
-                    [name: string]: string;
-                };
-            };
+            auth?: ExtensionAuthBlock;
             call: {
                 /**
                  * URL to call. Supports variable interpolation.
@@ -2063,34 +1934,7 @@ declare namespace Components {
              * {{Contact.customer_number | is_not_empty}}
              */
             condition?: string;
-            auth?: {
-                /**
-                 * HTTP method to use for authentication
-                 */
-                method?: string;
-                /**
-                 * URL to use for authentication. Supports variable interpolation.
-                 */
-                url: string;
-                /**
-                 * Parameters to append to the URL. Supports variable interpolation.
-                 */
-                params?: {
-                    [name: string]: string;
-                };
-                /**
-                 * Headers to use for authentication. Supports variable interpolation.
-                 */
-                headers?: {
-                    [name: string]: string;
-                };
-                /**
-                 * JSON body to use for authentication. Supports variable interpolation.
-                 */
-                body?: {
-                    [name: string]: string;
-                };
-            };
+            auth?: ExtensionAuthBlock;
             redirect: {
                 /**
                  * URL to redirect to. Supports variable interpolation.
@@ -4944,11 +4788,13 @@ declare namespace Paths {
             export type From = string; // date-time
             export type HookId = string;
             export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type MeterId = string;
             export type To = string; // date-time
         }
         export interface QueryParameters {
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
+            meter_id: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
@@ -5084,11 +4930,13 @@ declare namespace Paths {
             export type From = string; // date-time
             export type HookId = string;
             export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type MeterId = string;
             export type To = string; // date-time
         }
         export interface QueryParameters {
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
+            meter_id: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
@@ -5940,11 +5788,13 @@ declare namespace Paths {
             export type From = string; // date-time
             export type HookId = string;
             export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type MeterId = string;
             export type To = string; // date-time
         }
         export interface QueryParameters {
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
+            meter_id: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
@@ -8170,7 +8020,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ResendConfirmationEmail.Responses.$200>
   }
-  ['/v2/porta/users/by-related-entity']: {
+  ['/v2/portal/users/by-related-entity']: {
     /**
      * fetchPortalUsersByRelatedEntity - fetchPortalUsersByRelatedEntity
      * 
@@ -8692,6 +8542,7 @@ export type EntityWidget = Components.Schemas.EntityWidget;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type Exists = Components.Schemas.Exists;
 export type Extension = Components.Schemas.Extension;
+export type ExtensionAuthBlock = Components.Schemas.ExtensionAuthBlock;
 export type ExtensionConfig = Components.Schemas.ExtensionConfig;
 export type ExtensionHook = Components.Schemas.ExtensionHook;
 export type ExtensionHookConsumptionDataRetrieval = Components.Schemas.ExtensionHookConsumptionDataRetrieval;
