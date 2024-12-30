@@ -10,6 +10,15 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        /**
+         * Configuration for automation execution to run
+         */
+        export interface AutomationConfig {
+            /**
+             * Id of the configured automation to run
+             */
+            flow_id: string;
+        }
         export interface AutomationTask {
             id: string;
             name: string;
@@ -34,12 +43,7 @@ declare namespace Components {
             taxonomies?: string[];
             phase_id?: string;
             task_type: TaskType;
-            automation_config: {
-                /**
-                 * Id of the configured automation to run
-                 */
-                flow_id: string;
-            };
+            automation_config: /* Configuration for automation execution to run */ AutomationConfig;
         }
         export interface ChangeReasonStatusReq {
             status: ClosingReasonsStatus;
@@ -208,6 +212,10 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            trigger?: {
+                id: string;
+                automation_config?: /* Configuration for automation execution to run */ AutomationConfig;
+            };
         }
         /**
          * Short unique id (length 8) to identify the Flow Template.
@@ -478,6 +486,28 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace DeleteClosingReason {
+        namespace Parameters {
+            /**
+             * example:
+             * x739cew
+             */
+            export type ReasonId = string;
+        }
+        export interface PathParameters {
+            reasonId: /**
+             * example:
+             * x739cew
+             */
+            Parameters.ReasonId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $403 = Components.Schemas.ErrorResp;
+            export type $404 = /* Closing reason could be not found */ Components.Schemas.ClosingReasonNotFoundResp;
+        }
+    }
     namespace DeleteDefinition {
         namespace Parameters {
             export type DefinitionId = string;
@@ -525,6 +555,28 @@ declare namespace Paths {
         }
     }
     namespace GetClosingReason {
+        namespace Parameters {
+            /**
+             * example:
+             * x739cew
+             */
+            export type ReasonId = string;
+        }
+        export interface PathParameters {
+            reasonId: /**
+             * example:
+             * x739cew
+             */
+            Parameters.ReasonId;
+        }
+        namespace Responses {
+            export type $200 = /* One Closing reason for a workflow */ Components.Schemas.ClosingReason;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $403 = Components.Schemas.ErrorResp;
+            export type $404 = /* Closing reason could be not found */ Components.Schemas.ClosingReasonNotFoundResp;
+        }
+    }
+    namespace GetClosingReasonV1 {
         namespace Parameters {
             export type ReasonId = string;
         }
@@ -614,6 +666,29 @@ declare namespace Paths {
         namespace Responses {
             export interface $201 {
             }
+        }
+    }
+    namespace UpdateClosingReason {
+        namespace Parameters {
+            /**
+             * example:
+             * x739cew
+             */
+            export type ReasonId = string;
+        }
+        export interface PathParameters {
+            reasonId: /**
+             * example:
+             * x739cew
+             */
+            Parameters.ReasonId;
+        }
+        export type RequestBody = /* One Closing reason for a workflow */ Components.Schemas.ClosingReason;
+        namespace Responses {
+            export type $200 = /* One Closing reason for a workflow */ Components.Schemas.ClosingReason;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $403 = Components.Schemas.ErrorResp;
+            export type $404 = /* Closing reason could be not found */ Components.Schemas.ClosingReasonNotFoundResp;
         }
     }
     namespace UpdateDefinition {
@@ -795,6 +870,36 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetClosingReason.Responses.$200>
   /**
+   * updateClosingReason - updateClosingReason
+   * 
+   * Update an existing closing reason
+   */
+  'updateClosingReason'(
+    parameters?: Parameters<Paths.UpdateClosingReason.PathParameters> | null,
+    data?: Paths.UpdateClosingReason.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateClosingReason.Responses.$200>
+  /**
+   * deleteClosingReason - deleteClosingReason
+   * 
+   * Permanently delete a closing reason (Using INACTIVE status is recommended instead)
+   */
+  'deleteClosingReason'(
+    parameters?: Parameters<Paths.DeleteClosingReason.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteClosingReason.Responses.$204>
+  /**
+   * getClosingReasonV1 - getClosingReasonV1
+   * 
+   * Get specific closing reason by id from the organisation.
+   */
+  'getClosingReasonV1'(
+    parameters?: Parameters<Paths.GetClosingReasonV1.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetClosingReasonV1.Responses.$200>
+  /**
    * changeReasonStatus - changeReasonStatus
    * 
    * Change the status of a Closing Reason (eg. ACTIVE to INACTIVE).
@@ -969,7 +1074,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateClosingReason.Responses.$201>
   }
-  ['/v1/workflows/closing-reasons/{reasonId}']: {
+  ['/v2/workflows/closing-reasons/{reasonId}']: {
     /**
      * getClosingReason - getClosingReason
      * 
@@ -980,6 +1085,38 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetClosingReason.Responses.$200>
+    /**
+     * updateClosingReason - updateClosingReason
+     * 
+     * Update an existing closing reason
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateClosingReason.PathParameters> | null,
+      data?: Paths.UpdateClosingReason.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateClosingReason.Responses.$200>
+    /**
+     * deleteClosingReason - deleteClosingReason
+     * 
+     * Permanently delete a closing reason (Using INACTIVE status is recommended instead)
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteClosingReason.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteClosingReason.Responses.$204>
+  }
+  ['/v1/workflows/closing-reasons/{reasonId}']: {
+    /**
+     * getClosingReasonV1 - getClosingReasonV1
+     * 
+     * Get specific closing reason by id from the organisation.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetClosingReasonV1.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetClosingReasonV1.Responses.$200>
     /**
      * changeReasonStatus - changeReasonStatus
      * 
@@ -1017,6 +1154,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type AutomationConfig = Components.Schemas.AutomationConfig;
 export type AutomationTask = Components.Schemas.AutomationTask;
 export type ChangeReasonStatusReq = Components.Schemas.ChangeReasonStatusReq;
 export type ClosingReason = Components.Schemas.ClosingReason;

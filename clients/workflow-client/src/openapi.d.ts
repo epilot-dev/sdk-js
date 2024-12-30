@@ -9,7 +9,21 @@ import type {
 } from 'openapi-client-axios';
 
 declare namespace Components {
+    namespace Parameters {
+        export type ExecutionIdParam = string;
+        export type SoftDeleteParam = boolean;
+    }
+    export interface PathParameters {
+        ExecutionIdParam?: Parameters.ExecutionIdParam;
+    }
+    export interface QueryParameters {
+        SoftDeleteParam?: Parameters.SoftDeleteParam;
+    }
     namespace Schemas {
+        /**
+         * The user ids
+         */
+        export type Assignees = string[];
         /**
          * Configuration for automation execution to run
          */
@@ -27,6 +41,67 @@ declare namespace Components {
              */
             executionStatus?: string;
         }
+        export interface AutomationTask {
+            id: TaskId;
+            template_id: string;
+            name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
+            status: StepStatus;
+            journey?: StepJourney;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            /**
+             * requirements that need to be fulfilled in order to enable the task while flow instances are running
+             */
+            requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            assigned_to?: /* The user ids */ Assignees;
+            analytics: {
+                started_at?: string; // date-time
+                completed_at?: string; // date-time
+                in_progress_by?: /* The user id */ UserId;
+                completed_by?: /* The user id */ UserId;
+                skipped_by?: /* The user id */ UserId;
+            };
+            /**
+             * Time when the task was created
+             */
+            created_at?: string; // date-time
+            /**
+             * Last Update timestamp
+             */
+            updated_at?: string; // date-time
+            /**
+             * Flag to indicate if the task was created manually
+             */
+            manually_created?: boolean;
+            /**
+             * enabled flag results from calculating the requirements
+             */
+            enabled: boolean;
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            phase_id?: string;
+            task_type: TaskType;
+            automation_config: {
+                /**
+                 * Id of the configured automation to run
+                 */
+                flow_id: string;
+                /**
+                 * Id of the automation execution which ran
+                 */
+                execution_id?: string;
+                execution_mode?: "MANUAL_TRIGGER_BY_USER_CLICK" | "AUTO_TRIGGER_BY_SYSTEM_ON_CURRENT_TASK";
+            };
+        }
         export interface ClosingReason {
             id: string;
             title: string;
@@ -34,6 +109,22 @@ declare namespace Components {
         export interface ClosingReasonResp {
             reasons?: ClosingReason[];
         }
+        export interface Condition {
+            id: /**
+             * A locally unique identifier for the condition
+             * example:
+             * abc123
+             */
+            ConditionId;
+            logical_operator: "AND" | "OR";
+            statements: Statement[];
+        }
+        /**
+         * A locally unique identifier for the condition
+         * example:
+         * abc123
+         */
+        export type ConditionId = string;
         export interface CreateStepReq {
             insertionIndex: number;
             name: string;
@@ -47,6 +138,66 @@ declare namespace Components {
              * Configuration for automated steps
              */
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
+        }
+        export interface DecisionTask {
+            id: TaskId;
+            template_id: string;
+            name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
+            status: StepStatus;
+            journey?: StepJourney;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            /**
+             * requirements that need to be fulfilled in order to enable the task while flow instances are running
+             */
+            requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            assigned_to?: /* The user ids */ Assignees;
+            analytics: {
+                started_at?: string; // date-time
+                completed_at?: string; // date-time
+                in_progress_by?: /* The user id */ UserId;
+                completed_by?: /* The user id */ UserId;
+                skipped_by?: /* The user id */ UserId;
+            };
+            /**
+             * Time when the task was created
+             */
+            created_at?: string; // date-time
+            /**
+             * Last Update timestamp
+             */
+            updated_at?: string; // date-time
+            /**
+             * Flag to indicate if the task was created manually
+             */
+            manually_created?: boolean;
+            /**
+             * enabled flag results from calculating the requirements
+             */
+            enabled: boolean;
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            phase_id?: string;
+            task_type: TaskType;
+            conditions: Condition[];
+        }
+        /**
+         * Set due date for the task based on a dynamic condition
+         */
+        export interface DueDateConfig {
+            duration: number;
+            unit: "minutes" | "hours" | "days" | "weeks" | "months";
+            type: "WORKFLOW_STARTED" | "TASK_FINISHED";
+            task_id?: string;
         }
         /**
          * set a Duedate for a step then a specific
@@ -64,8 +215,44 @@ declare namespace Components {
             label?: string;
             journey?: StepJourney;
         }
+        export interface Edge {
+            id: string;
+            task_id_from: TaskId;
+            task_id_to: TaskId;
+            condition_id?: /**
+             * A locally unique identifier for the condition
+             * example:
+             * abc123
+             */
+            ConditionId;
+        }
+        /**
+         * describe the requirement for a task to be enabled
+         */
+        export interface EnableRequirement {
+            task_id?: string;
+            phase_id?: string;
+            when: "TASK_FINISHED" | "PHASE_FINISHED";
+        }
+        export interface EntityRef {
+            entity_id?: string;
+            entity_schema?: string;
+        }
         export interface ErrorResp {
             message?: string;
+        }
+        export interface EvaluationSource {
+            /**
+             * The id of the action or trigger
+             */
+            id?: string;
+            origin?: "trigger" | "action";
+            origin_type?: "entity" | "workflow" | "journey_block";
+            schema?: string;
+            attribute?: string;
+            attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label";
+            attribute_repeatable?: boolean;
+            attribute_operation?: "all" | "updated" | "added" | "deleted";
         }
         export interface ExecutionPaginationDynamo {
             orgId?: string;
@@ -74,13 +261,118 @@ declare namespace Components {
         export interface Flow {
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
+        export type FlowContext = EntityRef;
+        export interface FlowExecution {
+            id: FlowExecutionId;
+            flow_template_id: FlowTemplateId;
+            org_id: string;
+            name: string;
+            /**
+             * Creation timestamp which will double as started time as well
+             */
+            created_at: string;
+            /**
+             * Last Update timestamp
+             */
+            updated_at: string;
+            /**
+             * Due date for finishing the workflow
+             */
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            status: WorkflowStatus;
+            assigned_to?: /* The user ids */ Assignees;
+            analytics: {
+                /**
+                 * Timestamp when the flow execution started
+                 */
+                started_at?: string;
+                /**
+                 * Timestamp when the flow execution was completed
+                 */
+                completed_at?: string;
+                /**
+                 * Timestamp when the flow execution was closed
+                 */
+                closed_at?: string;
+                /**
+                 * User who started the flow execution.
+                 */
+                started_by?: string;
+                /**
+                 * User who closed the flow execution
+                 */
+                closed_by?: string;
+            };
+            contexts: FlowContext[];
+            crt_task_id: TaskId;
+            phases?: Phase[];
+            tasks: Task[];
+            edges: Edge[];
+            closing_reason?: {
+                selected_reasons?: ClosingReason[];
+                configured_reasons?: ClosingReason[];
+                extra_description?: string;
+            };
+            /**
+             * Indicates whether this flow execution is available for End Customer Portal or not. By default it's not.
+             */
+            available_in_ecp?: boolean;
+            update_entity_attributes?: UpdateEntityAttributes[];
+            /**
+             * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            trigger: {
+                id?: string;
+                type?: TriggerType;
+                automation_config?: /* Configuration for automation execution to run */ AutomationConfig;
+            };
+        }
+        export type FlowExecutionId = string;
         export interface FlowSlim {
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
+        export type FlowTemplateId = string;
         export type ItemType = "STEP" | "SECTION";
         export interface LastEvaluatedKey {
             orgId?: string;
             creationTime?: string;
+        }
+        export type ManualTask = TaskBase;
+        export type Operator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+        export interface PatchFlowReq {
+            status?: WorkflowStatus;
+            assigned_to?: /* The user ids */ Assignees;
+            selected_closing_reasons?: ClosingReason[];
+            closing_reason_description?: string;
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            /**
+             * id of the user / partner user who is closing the workflow. For partner pass orgId_userId.
+             */
+            closed_by?: string;
+            contexts?: WorkflowContext[];
+            /**
+             * Timestamp when flow execution was completed
+             */
+            completed_at?: string; // date-time
+        }
+        export interface Phase {
+            id: string;
+            template_id: string;
+            name: string;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            assigned_to?: /* The user ids */ Assignees;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
         }
         export interface PhaseInEntity {
             phase_id?: string;
@@ -130,6 +422,10 @@ declare namespace Components {
              */
             WorkflowExecutionSlim[];
             lastEvaluatedKey?: LastEvaluatedKey;
+        }
+        export interface SearchFlowsReq {
+            entity_id: string;
+            entity_schema: string;
         }
         export interface SearchPagination {
             from?: number;
@@ -191,6 +487,10 @@ declare namespace Components {
                 manuallyCreated?: boolean;
                 automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
                 journey?: StepJourney;
+                /**
+                 * Taxonomy ids (purposes in this case) that are associated with this step/task and used for filtering
+                 */
+                taxonomies?: string[];
                 executionName: string;
                 executionStatus: WorkflowStatus;
                 contexts?: {
@@ -250,6 +550,21 @@ declare namespace Components {
             assignedTo?: string[];
         }
         export type SectionStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED";
+        export interface StartFlowReq {
+            flow_template_id: string;
+            trigger_type?: TriggerType;
+            contexts: FlowContext[];
+            /**
+             * An array of purposes to filter workflow phases.
+             */
+            purposes: string[];
+        }
+        export interface Statement {
+            id: string;
+            source: EvaluationSource;
+            operator: Operator;
+            values: string[];
+        }
         export interface Step {
             id: string;
             definitionId?: string;
@@ -289,6 +604,10 @@ declare namespace Components {
             manuallyCreated?: boolean;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
             journey?: StepJourney;
+            /**
+             * Taxonomy ids (purposes in this case) that are associated with this step/task and used for filtering
+             */
+            taxonomies?: string[];
         }
         /**
          * Longer information regarding Task
@@ -336,6 +655,10 @@ declare namespace Components {
             manuallyCreated?: boolean;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
             journey?: StepJourney;
+            /**
+             * Taxonomy ids (purposes in this case) that are associated with this step/task and used for filtering
+             */
+            taxonomies?: string[];
             executionName: string;
             executionStatus: WorkflowStatus;
             contexts?: {
@@ -389,6 +712,68 @@ declare namespace Components {
         }
         export type StepStatus = "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS";
         export type StepType = "MANUAL" | "AUTOMATION";
+        export type Task = ManualTask | AutomationTask | DecisionTask;
+        export interface TaskBase {
+            id: TaskId;
+            template_id: string;
+            name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
+            status: StepStatus;
+            journey?: StepJourney;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            /**
+             * requirements that need to be fulfilled in order to enable the task while flow instances are running
+             */
+            requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            assigned_to?: /* The user ids */ Assignees;
+            analytics: {
+                started_at?: string; // date-time
+                completed_at?: string; // date-time
+                /**
+                 * The user which moved the task to the IN_PROGRESS state.
+                 */
+                in_progress_by?: /* The user id */ UserId;
+                /**
+                 * The user which moved the task to the COMPLETED state.
+                 */
+                completed_by?: /* The user id */ UserId;
+                /**
+                 * The user which moved the task to the SKIPPED state.
+                 */
+                skipped_by?: /* The user id */ UserId;
+            };
+            /**
+             * Time when the task was created
+             */
+            created_at?: string; // date-time
+            /**
+             * Last Update timestamp
+             */
+            updated_at?: string; // date-time
+            /**
+             * Flag to indicate if the task was created manually
+             */
+            manually_created?: boolean;
+            /**
+             * enabled flag results from calculating the requirements
+             */
+            enabled: boolean;
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            phase_id?: string;
+            task_type: TaskType;
+        }
+        export type TaskId = string;
+        export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION";
         export type TriggerType = "MANUAL" | "AUTOMATIC";
         export interface UpdateEntityAttributes {
             source: "workflow_status" | "current_section" | "current_step";
@@ -468,7 +853,15 @@ declare namespace Components {
             manuallyCreated?: boolean;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
             journey?: StepJourney;
+            /**
+             * Taxonomy ids (purposes in this case) that are associated with this step/task and used for filtering
+             */
+            taxonomies?: string[];
         }
+        /**
+         * The user id
+         */
+        export type UserId = string;
         export interface WorkflowContext {
             id: string;
             title: string;
@@ -875,6 +1268,28 @@ declare namespace Paths {
             }
         }
     }
+    namespace DeleteFlowExecution {
+        namespace Parameters {
+            export type ExecutionId = string;
+            export type Soft = boolean;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+        }
+        export interface QueryParameters {
+            soft?: Parameters.Soft;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace DeleteStep {
         namespace Parameters {
             export type ExecutionId = string;
@@ -1008,6 +1423,42 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace GetFlowExecution {
+        namespace Parameters {
+            export type ExecutionId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FlowExecution;
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace PatchFlowExecution {
+        namespace Parameters {
+            export type ExecutionId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+        }
+        export type RequestBody = Components.Schemas.PatchFlowReq;
+        namespace Responses {
+            export type $200 = Components.Schemas.FlowExecution;
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace SearchExecutions {
         export type RequestBody = Components.Schemas.SearchExecutionsReq;
         namespace Responses {
@@ -1017,12 +1468,38 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace SearchFlowExecutions {
+        export type RequestBody = Components.Schemas.SearchFlowsReq;
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.FlowExecution[];
+            }
+            export type $400 = Components.Schemas.ErrorResp;
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace SearchSteps {
         export type RequestBody = Components.Schemas.SearchStepsReq;
         namespace Responses {
             export type $200 = Components.Schemas.SearchStepsResp;
             export type $400 = Components.Schemas.ErrorResp;
             export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
+    namespace StartFlowExecution {
+        export type RequestBody = Components.Schemas.StartFlowReq;
+        namespace Responses {
+            export type $201 = Components.Schemas.FlowExecution;
+            export type $400 = Components.Schemas.ErrorResp;
+            export interface $401 {
+            }
+            export interface $403 {
+            }
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -1173,6 +1650,56 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetClosingReasonExecution.Responses.$200>
+  /**
+   * startFlowExecution - startFlowExecution
+   * 
+   * Starts a new Flow Execution based on a flow template.
+   */
+  'startFlowExecution'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.StartFlowExecution.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.StartFlowExecution.Responses.$201>
+  /**
+   * getFlowExecution - getFlowExecution
+   * 
+   * Get a full flow execution, included tasks, phases, edges & analytics.
+   */
+  'getFlowExecution'(
+    parameters?: Parameters<Paths.GetFlowExecution.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFlowExecution.Responses.$200>
+  /**
+   * patchFlowExecution - patchFlowExecution
+   * 
+   * Patch flow execution with new assignees, status, analytics & other changes.
+   */
+  'patchFlowExecution'(
+    parameters?: Parameters<Paths.PatchFlowExecution.PathParameters> | null,
+    data?: Paths.PatchFlowExecution.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PatchFlowExecution.Responses.$200>
+  /**
+   * deleteFlowExecution - deleteFlowExecution
+   * 
+   * Deletes a specific execution of a flow, identified by id. Flow contexts will NOT be deleted.
+   */
+  'deleteFlowExecution'(
+    parameters?: Parameters<Paths.DeleteFlowExecution.QueryParameters & Paths.DeleteFlowExecution.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteFlowExecution.Responses.$204>
+  /**
+   * searchFlowExecutions - searchFlowExecutions
+   * 
+   * Search Flow Executions for a specific Entity.
+   */
+  'searchFlowExecutions'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchFlowExecutions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchFlowExecutions.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1303,25 +1830,100 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetClosingReasonExecution.Responses.$200>
   }
+  ['/v2/flows/executions']: {
+    /**
+     * startFlowExecution - startFlowExecution
+     * 
+     * Starts a new Flow Execution based on a flow template.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.StartFlowExecution.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.StartFlowExecution.Responses.$201>
+  }
+  ['/v2/flows/executions/{execution_id}']: {
+    /**
+     * getFlowExecution - getFlowExecution
+     * 
+     * Get a full flow execution, included tasks, phases, edges & analytics.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFlowExecution.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFlowExecution.Responses.$200>
+    /**
+     * patchFlowExecution - patchFlowExecution
+     * 
+     * Patch flow execution with new assignees, status, analytics & other changes.
+     */
+    'patch'(
+      parameters?: Parameters<Paths.PatchFlowExecution.PathParameters> | null,
+      data?: Paths.PatchFlowExecution.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PatchFlowExecution.Responses.$200>
+    /**
+     * deleteFlowExecution - deleteFlowExecution
+     * 
+     * Deletes a specific execution of a flow, identified by id. Flow contexts will NOT be deleted.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteFlowExecution.QueryParameters & Paths.DeleteFlowExecution.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteFlowExecution.Responses.$204>
+  }
+  ['/v2/flows/executions:search']: {
+    /**
+     * searchFlowExecutions - searchFlowExecutions
+     * 
+     * Search Flow Executions for a specific Entity.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchFlowExecutions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchFlowExecutions.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type Assignees = Components.Schemas.Assignees;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
+export type AutomationTask = Components.Schemas.AutomationTask;
 export type ClosingReason = Components.Schemas.ClosingReason;
 export type ClosingReasonResp = Components.Schemas.ClosingReasonResp;
+export type Condition = Components.Schemas.Condition;
+export type ConditionId = Components.Schemas.ConditionId;
 export type CreateStepReq = Components.Schemas.CreateStepReq;
+export type DecisionTask = Components.Schemas.DecisionTask;
+export type DueDateConfig = Components.Schemas.DueDateConfig;
 export type DynamicDueDate = Components.Schemas.DynamicDueDate;
 export type ECPDetails = Components.Schemas.ECPDetails;
+export type Edge = Components.Schemas.Edge;
+export type EnableRequirement = Components.Schemas.EnableRequirement;
+export type EntityRef = Components.Schemas.EntityRef;
 export type ErrorResp = Components.Schemas.ErrorResp;
+export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type ExecutionPaginationDynamo = Components.Schemas.ExecutionPaginationDynamo;
 export type Flow = Components.Schemas.Flow;
+export type FlowContext = Components.Schemas.FlowContext;
+export type FlowExecution = Components.Schemas.FlowExecution;
+export type FlowExecutionId = Components.Schemas.FlowExecutionId;
 export type FlowSlim = Components.Schemas.FlowSlim;
+export type FlowTemplateId = Components.Schemas.FlowTemplateId;
 export type ItemType = Components.Schemas.ItemType;
 export type LastEvaluatedKey = Components.Schemas.LastEvaluatedKey;
+export type ManualTask = Components.Schemas.ManualTask;
+export type Operator = Components.Schemas.Operator;
+export type PatchFlowReq = Components.Schemas.PatchFlowReq;
+export type Phase = Components.Schemas.Phase;
 export type PhaseInEntity = Components.Schemas.PhaseInEntity;
 export type SearchExecutionsReq = Components.Schemas.SearchExecutionsReq;
 export type SearchExecutionsResp = Components.Schemas.SearchExecutionsResp;
+export type SearchFlowsReq = Components.Schemas.SearchFlowsReq;
 export type SearchPagination = Components.Schemas.SearchPagination;
 export type SearchSorting = Components.Schemas.SearchSorting;
 export type SearchStepsReq = Components.Schemas.SearchStepsReq;
@@ -1329,6 +1931,8 @@ export type SearchStepsResp = Components.Schemas.SearchStepsResp;
 export type Section = Components.Schemas.Section;
 export type SectionSimplified = Components.Schemas.SectionSimplified;
 export type SectionStatus = Components.Schemas.SectionStatus;
+export type StartFlowReq = Components.Schemas.StartFlowReq;
+export type Statement = Components.Schemas.Statement;
 export type Step = Components.Schemas.Step;
 export type StepDescription = Components.Schemas.StepDescription;
 export type StepExtended = Components.Schemas.StepExtended;
@@ -1339,10 +1943,15 @@ export type StepRequirement = Components.Schemas.StepRequirement;
 export type StepSimplified = Components.Schemas.StepSimplified;
 export type StepStatus = Components.Schemas.StepStatus;
 export type StepType = Components.Schemas.StepType;
+export type Task = Components.Schemas.Task;
+export type TaskBase = Components.Schemas.TaskBase;
+export type TaskId = Components.Schemas.TaskId;
+export type TaskType = Components.Schemas.TaskType;
 export type TriggerType = Components.Schemas.TriggerType;
 export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
 export type UpdateStepReq = Components.Schemas.UpdateStepReq;
 export type UpdateStepResp = Components.Schemas.UpdateStepResp;
+export type UserId = Components.Schemas.UserId;
 export type WorkflowContext = Components.Schemas.WorkflowContext;
 export type WorkflowExecution = Components.Schemas.WorkflowExecution;
 export type WorkflowExecutionBase = Components.Schemas.WorkflowExecutionBase;

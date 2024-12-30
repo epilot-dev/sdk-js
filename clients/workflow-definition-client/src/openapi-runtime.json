@@ -153,9 +153,51 @@
         "responses": {}
       }
     },
-    "/v1/workflows/closing-reasons/{reasonId}": {
+    "/v2/workflows/closing-reasons/{reasonId}": {
       "get": {
         "operationId": "getClosingReason",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reasonId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateClosingReason",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reasonId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteClosingReason",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reasonId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/workflows/closing-reasons/{reasonId}": {
+      "get": {
+        "deprecated": true,
+        "operationId": "getClosingReasonV1",
         "parameters": [
           {
             "in": "path",

@@ -1031,10 +1031,193 @@
         }
       }
     },
-    "/v1/workflows/closing-reasons/{reasonId}": {
+    "/v2/workflows/closing-reasons/{reasonId}": {
       "get": {
         "operationId": "getClosingReason",
         "summary": "getClosingReason",
+        "description": "Get specific closing reason by id from the organisation.",
+        "tags": [
+          "Closing Reason"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reasonId",
+            "schema": {
+              "type": "string",
+              "example": "x739cew"
+            },
+            "required": true,
+            "description": "unique id to identify the closing reason."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the closing reason",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReason"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Closing reason not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonNotFoundResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateClosingReason",
+        "summary": "updateClosingReason",
+        "description": "Update an existing closing reason",
+        "tags": [
+          "Closing Reason"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reasonId",
+            "schema": {
+              "type": "string",
+              "example": "x739cew"
+            },
+            "required": true,
+            "description": "unique id to identify the closing reason."
+          }
+        ],
+        "requestBody": {
+          "description": "Updated closing reason fields",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClosingReason"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Closing reason updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReason"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Closing reason not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonNotFoundResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteClosingReason",
+        "summary": "deleteClosingReason",
+        "description": "Permanently delete a closing reason (Using INACTIVE status is recommended instead)",
+        "tags": [
+          "Closing Reason"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reasonId",
+            "schema": {
+              "type": "string",
+              "example": "x739cew"
+            },
+            "required": true,
+            "description": "unique id to identify the closing reason."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Closing reason deleted successfully"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Closing reason not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonNotFoundResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflows/closing-reasons/{reasonId}": {
+      "get": {
+        "deprecated": true,
+        "operationId": "getClosingReasonV1",
+        "summary": "getClosingReasonV1",
         "description": "Get specific closing reason by id from the organisation.",
         "tags": [
           "Closing Reason"
@@ -1247,6 +1430,11 @@
     "schemas": {
       "FlowTemplate": {
         "type": "object",
+        "required": [
+          "name",
+          "tasks",
+          "edges"
+        ],
         "properties": {
           "id": {
             "type": "string"
@@ -1325,13 +1513,22 @@
               "type": "string"
             },
             "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          },
+          "trigger": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "automation_config": {
+                "$ref": "#/components/schemas/AutomationConfig"
+              }
+            }
           }
-        },
-        "required": [
-          "name",
-          "tasks",
-          "edges"
-        ]
+        }
       },
       "FlowTemplatesList": {
         "type": "object",
@@ -1373,31 +1570,32 @@
         ]
       },
       "AutomationTask": {
+        "required": [
+          "automation_config"
+        ],
+        "properties": {
+          "automation_config": {
+            "$ref": "#/components/schemas/AutomationConfig"
+          }
+        },
         "allOf": [
           {
             "$ref": "#/components/schemas/TaskBase"
-          },
-          {
-            "type": "object",
-            "required": [
-              "automation_config"
-            ],
-            "properties": {
-              "automation_config": {
-                "type": "object",
-                "properties": {
-                  "flow_id": {
-                    "type": "string",
-                    "description": "Id of the configured automation to run"
-                  }
-                },
-                "required": [
-                  "flow_id"
-                ]
-              }
-            }
           }
         ]
+      },
+      "AutomationConfig": {
+        "type": "object",
+        "description": "Configuration for automation execution to run",
+        "required": [
+          "flow_id"
+        ],
+        "properties": {
+          "flow_id": {
+            "type": "string",
+            "description": "Id of the configured automation to run"
+          }
+        }
       },
       "DecisionTask": {
         "allOf": [
@@ -2083,7 +2281,8 @@
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "readOnly": true
           },
           "title": {
             "type": "string"
@@ -2092,10 +2291,12 @@
             "$ref": "#/components/schemas/ClosingReasonsStatus"
           },
           "lastUpdateTime": {
-            "type": "string"
+            "type": "string",
+            "readOnly": true
           },
           "creationTime": {
-            "type": "string"
+            "type": "string",
+            "readOnly": true
           }
         }
       },
