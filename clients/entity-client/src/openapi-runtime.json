@@ -841,6 +841,20 @@
         },
         "responses": {}
       },
+      "patch": {
+        "operationId": "patchSavedView",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
       "delete": {
         "operationId": "deleteSavedView",
         "parameters": [
@@ -1388,6 +1402,13 @@
       "ValidateEntityQueryParam": {
         "name": "validate",
         "in": "query"
+      }
+    },
+    "responses": {
+      "NotFoundError": {
+        "content": {
+          "application/json": {}
+        }
       }
     }
   },
