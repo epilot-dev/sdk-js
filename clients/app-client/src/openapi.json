@@ -1,0 +1,710 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "App API",
+    "description": "API for managing app publishing and installed app.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://app.sls.epilot.io"
+    },
+    {
+      "url": "https://app.sls.epilot.io"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v1/app:uploadManifest": {
+      "post": {
+        "operationId": "uploadManifest",
+        "summary": "uploadManifest",
+        "description": "Create pre-signed S3 URL to upload a manifest file.\n",
+        "tags": [
+          "Import"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFilePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pre-signed URL for POST / PUT upload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "s3ref": {
+                      "$ref": "#/components/schemas/S3Reference"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "url",
+                      "example": "https://epilot-dev-blueprints.s3.eu-central-1.amazonaws.com/templates/document.pdf"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app": {
+      "get": {
+        "summary": "listInstalledApps",
+        "description": "Retrieve a list of installed apps for the organization.",
+        "operationId": "listInstalledApps",
+        "parameters": [
+          {
+            "name": "componentType",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ComponentType"
+            },
+            "description": "Filter apps by specific component type",
+            "example": "CUSTOM_JOURNEY_BLOCK"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "apps": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/App"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "pageSize": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/{appId}": {
+      "get": {
+        "summary": "getInstalledApp",
+        "description": "Retrieve details of an installed app by its ID.",
+        "operationId": "getInstalledApp",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details about installed app.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/App"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App not found."
+          }
+        }
+      },
+      "put": {
+        "summary": "installApp",
+        "description": "Update assets of a specific installed app by its ID.",
+        "operationId": "installApp",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/InstallAppRequest"
+        },
+        "responses": {
+          "204": {
+            "description": "App installation updated successfully."
+          },
+          "404": {
+            "description": "App not found."
+          }
+        }
+      },
+      "delete": {
+        "summary": "uninstallApp",
+        "description": "Uninstall an app by its ID.",
+        "operationId": "uninstallApp",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "App deleted successfully."
+          },
+          "404": {
+            "description": "App not found."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "requestBodies": {
+      "InstallAppRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/App"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "ConfigurationOptions": {
+        "type": "object",
+        "description": "Options for the component configuration",
+        "required": [
+          "key",
+          "type"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Unique identifier for this configuration option"
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable label for the configuration option"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of what this configuration option does"
+          },
+          "value": {
+            "type": "string",
+            "description": "The configured value (only used in App installation)"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "secret"
+            ]
+          },
+          "required": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this configuration option must be set"
+          }
+        }
+      },
+      "UploadFilePayload": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "example": "example.manifest.zip"
+          }
+        },
+        "required": [
+          "filename"
+        ]
+      },
+      "S3Reference": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "description": "The name of the S3 bucket where the JSON file for import is stored.",
+            "example": "my-bucket"
+          },
+          "key": {
+            "type": "string",
+            "description": "The key or path to the JSON file within the S3 bucket.",
+            "example": "manifest.json"
+          }
+        },
+        "required": [
+          "bucket",
+          "key"
+        ]
+      },
+      "ComponentType": {
+        "type": "string",
+        "enum": [
+          "CUSTOM_JOURNEY_BLOCK",
+          "PORTAL_EXTENSION"
+        ],
+        "description": "Type of app component"
+      },
+      "Author": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the author"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the author"
+          },
+          "company": {
+            "type": "string",
+            "description": "Company of the author"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email of the author"
+          }
+        }
+      },
+      "BaseComponentCommon": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the component"
+          },
+          "config_options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigurationOptions"
+            },
+            "description": "List of required options for the app component"
+          }
+        }
+      },
+      "BaseComponent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseComponentCommon"
+          },
+          {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "component_type",
+                  "configuration"
+                ],
+                "properties": {
+                  "component_type": {
+                    "type": "string",
+                    "enum": [
+                      "CUSTOM_JOURNEY_BLOCK"
+                    ]
+                  },
+                  "configuration": {
+                    "$ref": "#/components/schemas/JourneyBlockConfig"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "configuration"
+                ],
+                "properties": {
+                  "component_type": {
+                    "type": "string",
+                    "enum": [
+                      "PORTAL_EXTENSION"
+                    ]
+                  },
+                  "configuration": {
+                    "$ref": "#/components/schemas/PortalExtensionConfig"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "discriminator": {
+          "propertyName": "componentType",
+          "mapping": {
+            "CUSTOM_JOURNEY_BLOCK": "#/components/schemas/JourneyBlockConfig",
+            "PORTAL_EXTENSION": "#/components/schemas/PortalExtensionConfig"
+          }
+        }
+      },
+      "PortalExtensionConfig": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "hooks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "interval": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "auth": {
+                  "$ref": "#/components/schemas/PortalAuth"
+                },
+                "call": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    },
+                    "headers": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "params": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "condition": {
+                  "type": "string"
+                },
+                "auth": {
+                  "$ref": "#/components/schemas/PortalAuth"
+                },
+                "redirect": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    },
+                    "params": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PortalAuth": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "JourneyBlockConfig": {
+        "type": "object",
+        "required": [
+          "bundleS3ref",
+          "componentTag"
+        ],
+        "properties": {
+          "bundle_s3Ref": {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          "component_tag": {
+            "type": "string",
+            "description": "Custom element tag for the component"
+          }
+        }
+      },
+      "App": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AppConfiguration"
+          }
+        ],
+        "description": "Information about the installed app",
+        "type": "object",
+        "properties": {
+          "installation_id": {
+            "type": "string",
+            "description": "Unique identifier for the app installation",
+            "readOnly": true
+          },
+          "organization_id": {
+            "type": "string",
+            "description": "Unique identifier for the organization the app is installed in",
+            "readOnly": true
+          },
+          "installed_at": {
+            "type": "string",
+            "description": "Timestamp of app creation",
+            "readOnly": true
+          },
+          "installed_by": {
+            "type": "string",
+            "description": "User ID of the user who installed the app",
+            "readOnly": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Flag to indicate if the app is enabled."
+          },
+          "config_values": {
+            "type": "object",
+            "properties": {
+              "component_id": {
+                "type": "string"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ConfigurationOptions"
+                }
+              }
+            },
+            "description": "Configuration values for the app components"
+          }
+        }
+      },
+      "AppConfiguration": {
+        "type": "object",
+        "description": "Configuration of the published app",
+        "properties": {
+          "app_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "icon_url": {
+            "type": "string",
+            "description": "URL of the app icon."
+          },
+          "documentation_url": {
+            "type": "string",
+            "description": "URL of the app documentation."
+          },
+          "description": {
+            "type": "string"
+          },
+          "app_s3ref": {
+            "description": "Link to the bundle (.zip) which contains all the app relevant assets",
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          "created_by": {
+            "type": "string",
+            "readOnly": true
+          },
+          "created_at": {
+            "type": "string",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "readOnly": true
+          },
+          "version": {
+            "type": "string",
+            "readOnly": true
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "published",
+              "pending"
+            ]
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BaseComponent"
+            }
+          },
+          "internal": {
+            "type": "boolean",
+            "default": false,
+            "description": "Flag to indicate if the app is built by epilot.",
+            "readOnly": true
+          },
+          "owner_org_id": {
+            "type": "string",
+            "description": "Organization ID of the app owner, required for private apps"
+          },
+          "access_level": {
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ],
+            "default": "public",
+            "description": "Access level of the app."
+          }
+        }
+      },
+      "CallerIdentity": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "a human readable name of the caller (e.g. user name, token name or email address)",
+            "example": "manifest@epilot.cloud"
+          },
+          "org_id": {
+            "description": "epilot organization id",
+            "type": "string",
+            "example": "911690"
+          },
+          "user_id": {
+            "description": "epilot user id, when called by a user",
+            "type": "string",
+            "example": "11001045"
+          },
+          "token_id": {
+            "description": "token id, when called by API token",
+            "type": "string",
+            "example": "api_5ZugdRXasLfWBypHi93Fk"
+          }
+        },
+        "required": [
+          "org_id"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://app.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/app:uploadManifest": {
+      "post": {
+        "operationId": "uploadManifest",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/app": {
+      "get": {
+        "operationId": "listInstalledApps",
+        "parameters": [
+          {
+            "name": "componentType",
+            "in": "query"
+          },
+          {
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/app/{appId}": {
+      "get": {
+        "operationId": "getInstalledApp",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "installApp",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/InstallAppRequest"
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "uninstallApp",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "requestBodies": {
+      "InstallAppRequest": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  }
+}
