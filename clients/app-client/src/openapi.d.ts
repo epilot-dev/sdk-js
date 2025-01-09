@@ -10,7 +10,12 @@ import type {
 
 declare namespace Components {
     namespace RequestBodies {
-        export type InstallAppRequest = /* Information about the installed app */ Schemas.App;
+        export interface InstallAppRequest {
+            /**
+             * Configuration values for the app components
+             */
+            config_values?: Schemas.ComponentConfigValues[];
+        }
     }
     namespace Schemas {
         /**
@@ -27,8 +32,10 @@ declare namespace Components {
              * URL of the app documentation.
              */
             documentation_url?: string;
+            /**
+             * Markdown description of the app.
+             */
             description?: string;
-            app_s3ref?: S3Reference;
             created_by?: string;
             created_at?: string;
             updated_at?: string;
@@ -71,10 +78,7 @@ declare namespace Components {
             /**
              * Configuration values for the app components
              */
-            config_values?: {
-                component_id?: string;
-                options?: /* Options for the component configuration */ ConfigurationOptions[];
-            };
+            config_values?: ComponentConfigValues[];
         }
         /**
          * Configuration of the published app
@@ -90,11 +94,10 @@ declare namespace Components {
              * URL of the app documentation.
              */
             documentation_url?: string;
-            description?: string;
             /**
-             * Link to the bundle (.zip) which contains all the app relevant assets
+             * Markdown description of the app.
              */
-            app_s3ref?: S3Reference;
+            description?: string;
             created_by?: string;
             created_at?: string;
             updated_at?: string;
@@ -192,6 +195,23 @@ declare namespace Components {
              */
             token_id?: string;
         }
+        export interface ComponentConfigValue {
+            /**
+             * Key matching a config_option from the component
+             */
+            key: string;
+            /**
+             * The configured value for this option
+             */
+            value: string;
+        }
+        export interface ComponentConfigValues {
+            /**
+             * ID of the component these values are for
+             */
+            component_id: string;
+            options: ComponentConfigValue[];
+        }
         /**
          * Type of app component
          */
@@ -212,18 +232,13 @@ declare namespace Components {
              * Detailed description of what this configuration option does
              */
             description?: string;
-            /**
-             * The configured value (only used in App installation)
-             */
-            value?: string;
             type: "string" | "number" | "boolean" | "secret";
-            /**
-             * Whether this configuration option must be set
-             */
-            required?: boolean;
         }
         export interface JourneyBlockConfig {
-            bundle_s3Ref?: S3Reference;
+            /**
+             * URL of the web component object
+             */
+            object_url: string;
             /**
              * Custom element tag for the component
              */
@@ -294,6 +309,13 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace GetAppConfiguration {
+        namespace Responses {
+            export type $200 = /* Configuration of the published app */ Components.Schemas.AppConfiguration;
+            export interface $404 {
+            }
+        }
+    }
     namespace GetInstalledApp {
         namespace Parameters {
             export type AppId = string;
@@ -358,33 +380,27 @@ declare namespace Paths {
             }
         }
     }
-    namespace UploadManifest {
-        export type RequestBody = Components.Schemas.UploadFilePayload;
-        namespace Responses {
-            export interface $201 {
-                s3ref?: Components.Schemas.S3Reference;
-                /**
-                 * example:
-                 * https://epilot-dev-blueprints.s3.eu-central-1.amazonaws.com/templates/document.pdf
-                 */
-                upload_url?: string; // url
-            }
+    namespace V1AppConfigurations$AppId {
+        namespace Parameters {
+            export type AppId = string;
+        }
+        export interface PathParameters {
+            appId: Parameters.AppId;
         }
     }
 }
 
 export interface OperationMethods {
   /**
-   * uploadManifest - uploadManifest
+   * getAppConfiguration - getAppConfiguration
    * 
-   * Create pre-signed S3 URL to upload a manifest file.
-   * 
+   * Retrieve a specific app configuration
    */
-  'uploadManifest'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.UploadManifest.RequestBody,
+  'getAppConfiguration'(
+    parameters?: Parameters<Paths.V1AppConfigurations$AppId.PathParameters> | null,
+    data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UploadManifest.Responses.$201>
+  ): OperationResponse<Paths.GetAppConfiguration.Responses.$200>
   /**
    * listInstalledApps - listInstalledApps
    * 
@@ -428,18 +444,17 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
-  ['/v1/app:uploadManifest']: {
+  ['/v1/app-configurations/{appId}']: {
     /**
-     * uploadManifest - uploadManifest
+     * getAppConfiguration - getAppConfiguration
      * 
-     * Create pre-signed S3 URL to upload a manifest file.
-     * 
+     * Retrieve a specific app configuration
      */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.UploadManifest.RequestBody,
+    'get'(
+      parameters?: Parameters<Paths.V1AppConfigurations$AppId.PathParameters> | null,
+      data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UploadManifest.Responses.$201>
+    ): OperationResponse<Paths.GetAppConfiguration.Responses.$200>
   }
   ['/v1/app']: {
     /**
@@ -495,6 +510,8 @@ export type Author = Components.Schemas.Author;
 export type BaseComponent = Components.Schemas.BaseComponent;
 export type BaseComponentCommon = Components.Schemas.BaseComponentCommon;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
+export type ComponentConfigValue = Components.Schemas.ComponentConfigValue;
+export type ComponentConfigValues = Components.Schemas.ComponentConfigValues;
 export type ComponentType = Components.Schemas.ComponentType;
 export type ConfigurationOptions = Components.Schemas.ConfigurationOptions;
 export type JourneyBlockConfig = Components.Schemas.JourneyBlockConfig;

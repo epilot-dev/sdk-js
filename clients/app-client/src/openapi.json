@@ -22,43 +22,35 @@
     }
   ],
   "paths": {
-    "/v1/app:uploadManifest": {
-      "post": {
-        "operationId": "uploadManifest",
-        "summary": "uploadManifest",
-        "description": "Create pre-signed S3 URL to upload a manifest file.\n",
-        "tags": [
-          "Import"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadFilePayload"
-              }
-            }
-          }
-        },
+    "/v1/app-configurations/{appId}": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the app configuration"
+        }
+      ],
+      "get": {
+        "summary": "getAppConfiguration",
+        "description": "Retrieve a specific app configuration",
+        "operationId": "getAppConfiguration",
         "responses": {
-          "201": {
-            "description": "Pre-signed URL for POST / PUT upload",
+          "200": {
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "s3ref": {
-                      "$ref": "#/components/schemas/S3Reference"
-                    },
-                    "upload_url": {
-                      "type": "string",
-                      "format": "url",
-                      "example": "https://epilot-dev-blueprints.s3.eu-central-1.amazonaws.com/templates/document.pdf"
-                    }
-                  }
+                  "$ref": "#/components/schemas/AppConfiguration"
                 }
               }
             }
+          },
+          "404": {
+            "description": "App configuration not found"
           }
         }
       }
@@ -221,7 +213,16 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/App"
+              "type": "object",
+              "properties": {
+                "config_values": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ComponentConfigValues"
+                  },
+                  "description": "Configuration values for the app components"
+                }
+              }
             }
           }
         }
@@ -262,10 +263,6 @@
             "type": "string",
             "description": "Detailed description of what this configuration option does"
           },
-          "value": {
-            "type": "string",
-            "description": "The configured value (only used in App installation)"
-          },
           "type": {
             "type": "string",
             "enum": [
@@ -274,11 +271,42 @@
               "boolean",
               "secret"
             ]
+          }
+        }
+      },
+      "ComponentConfigValue": {
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Key matching a config_option from the component"
           },
-          "required": {
-            "type": "boolean",
-            "default": false,
-            "description": "Whether this configuration option must be set"
+          "value": {
+            "type": "string",
+            "description": "The configured value for this option"
+          }
+        }
+      },
+      "ComponentConfigValues": {
+        "type": "object",
+        "required": [
+          "component_id",
+          "options"
+        ],
+        "properties": {
+          "component_id": {
+            "type": "string",
+            "description": "ID of the component these values are for"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ComponentConfigValue"
+            }
           }
         }
       },
@@ -536,12 +564,13 @@
       "JourneyBlockConfig": {
         "type": "object",
         "required": [
-          "bundleS3ref",
+          "object_url",
           "componentTag"
         ],
         "properties": {
-          "bundle_s3Ref": {
-            "$ref": "#/components/schemas/S3Reference"
+          "object_url": {
+            "type": "string",
+            "description": "URL of the web component object"
           },
           "component_tag": {
             "type": "string",
@@ -579,24 +608,17 @@
             "readOnly": true
           },
           "enabled": {
+            "readOnly": true,
             "type": "boolean",
             "default": true,
             "description": "Flag to indicate if the app is enabled."
           },
           "config_values": {
-            "type": "object",
-            "properties": {
-              "component_id": {
-                "type": "string"
-              },
-              "options": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ConfigurationOptions"
-                }
-              }
-            },
-            "description": "Configuration values for the app components"
+            "description": "Configuration values for the app components",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ComponentConfigValues"
+            }
           }
         }
       },
@@ -619,11 +641,8 @@
             "description": "URL of the app documentation."
           },
           "description": {
-            "type": "string"
-          },
-          "app_s3ref": {
-            "description": "Link to the bundle (.zip) which contains all the app relevant assets",
-            "$ref": "#/components/schemas/S3Reference"
+            "type": "string",
+            "description": "Markdown description of the app."
           },
           "created_by": {
             "type": "string",

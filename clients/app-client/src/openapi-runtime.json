@@ -10,14 +10,17 @@
     }
   ],
   "paths": {
-    "/v1/app:uploadManifest": {
-      "post": {
-        "operationId": "uploadManifest",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
+    "/v1/app-configurations/{appId}": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the app configuration"
+        }
+      ],
+      "get": {
+        "operationId": "getAppConfiguration",
         "responses": {}
       }
     },
