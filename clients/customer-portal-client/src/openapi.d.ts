@@ -1192,6 +1192,15 @@ declare namespace Components {
              */
             EntityId /* uuid */;
             /**
+             * ID of the email template for Journey Login OTP
+             */
+            journeyLoginOTP?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
              * ID of the email template for forgot password
              */
             forgotPassword?: /**

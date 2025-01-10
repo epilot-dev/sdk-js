@@ -5416,6 +5416,11 @@
             "nullable": true,
             "description": "ID of the advanced MFA with login link and login code"
           },
+          "journeyLoginOTP": {
+            "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
+            "description": "ID of the email template for Journey Login OTP"
+          },
           "forgotPassword": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the email template for forgot password"
