@@ -474,6 +474,14 @@ declare namespace Components {
              */
             tax_discount_amount_decimal?: string;
             /**
+             * The net discount amount applied
+             */
+            discount_amount_net?: number;
+            /**
+             * The net discount amount applied represented as a decimal string
+             */
+            discount_amount_net_decimal?: string;
+            /**
              * Total tax amount for this line item.
              */
             amount_tax?: number;
@@ -1498,6 +1506,14 @@ declare namespace Components {
              */
             tax_discount_amount_decimal?: string;
             /**
+             * The net discount amount applied
+             */
+            discount_amount_net?: number;
+            /**
+             * The net discount amount applied represented as a decimal string
+             */
+            discount_amount_net_decimal?: string;
+            /**
              * Total tax amount for this line item.
              */
             amount_tax?: number;
@@ -1769,6 +1785,12 @@ declare namespace Components {
              * The ids of the price components that should be selected for the price calculation.
              */
             selected_price_component_ids?: string[];
+            /**
+             * The map of coupon ids applicable to the price components
+             */
+            price_component_coupon_ids?: {
+                [name: string]: string[];
+            };
             _price?: /**
              * The price entity schema for dynamic pricing
              * example:
@@ -3341,6 +3363,14 @@ declare namespace Components {
              * The discount amount applied to the tax represented as a decimal string
              */
             tax_discount_amount_decimal?: string;
+            /**
+             * The net discount amount applied
+             */
+            discount_amount_net?: number;
+            /**
+             * The net discount amount applied represented as a decimal string
+             */
+            discount_amount_net_decimal?: string;
             /**
              * Total tax amount for this line item.
              */
