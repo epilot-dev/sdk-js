@@ -174,6 +174,7 @@ declare namespace Components {
         }
         export interface FlowTemplate {
             id?: string;
+            org_id?: string;
             name: string;
             description?: string;
             /**
