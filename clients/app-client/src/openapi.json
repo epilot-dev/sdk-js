@@ -158,7 +158,7 @@
       },
       "put": {
         "summary": "installApp",
-        "description": "Update assets of a specific installed app by its ID.",
+        "description": "Upsert app installation by its ID.",
         "operationId": "installApp",
         "parameters": [
           {
@@ -215,10 +215,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "config_values": {
+                "option_values": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ComponentConfigValues"
+                    "$ref": "#/components/schemas/OptionsRef"
                   },
                   "description": "Configuration values for the app components"
                 }
@@ -243,7 +243,7 @@
       }
     },
     "schemas": {
-      "ConfigurationOptions": {
+      "Options": {
         "type": "object",
         "description": "Options for the component configuration",
         "required": [
@@ -258,6 +258,10 @@
           "label": {
             "type": "string",
             "description": "Human-readable label for the configuration option"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Flag to indicate if this option is required"
           },
           "description": {
             "type": "string",
@@ -274,7 +278,7 @@
           }
         }
       },
-      "ComponentConfigValue": {
+      "Option": {
         "type": "object",
         "required": [
           "key",
@@ -291,7 +295,7 @@
           }
         }
       },
-      "ComponentConfigValues": {
+      "OptionsRef": {
         "type": "object",
         "required": [
           "component_id",
@@ -305,7 +309,7 @@
           "options": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ComponentConfigValue"
+              "$ref": "#/components/schemas/Option"
             }
           }
         }
@@ -384,12 +388,12 @@
             "type": "string",
             "description": "Unique identifier for the component"
           },
-          "config_options": {
+          "options": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ConfigurationOptions"
+              "$ref": "#/components/schemas/Options"
             },
-            "description": "List of required options for the app component"
+            "description": "List of options for the app component"
           }
         }
       },
@@ -429,6 +433,13 @@
                     "type": "string",
                     "enum": [
                       "PORTAL_EXTENSION"
+                    ]
+                  },
+                  "origin": {
+                    "type": "string",
+                    "enum": [
+                      "END_CUSTOMER_PORTAL",
+                      "INSTALLER_PORTAL"
                     ]
                   },
                   "configuration": {
@@ -564,11 +575,11 @@
       "JourneyBlockConfig": {
         "type": "object",
         "required": [
-          "object_url",
+          "component_url",
           "componentTag"
         ],
         "properties": {
-          "object_url": {
+          "component_url": {
             "type": "string",
             "description": "URL of the web component object"
           },
@@ -607,17 +618,27 @@
             "description": "User ID of the user who installed the app",
             "readOnly": true
           },
+          "updated_by": {
+            "type": "string",
+            "description": "User ID of the user who last updated the app",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Timestamp of the last update",
+            "readOnly": true
+          },
           "enabled": {
             "readOnly": true,
             "type": "boolean",
             "default": true,
             "description": "Flag to indicate if the app is enabled."
           },
-          "config_values": {
-            "description": "Configuration values for the app components",
+          "option_values": {
+            "description": "Configuration values for the app components options",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ComponentConfigValues"
+              "$ref": "#/components/schemas/OptionsRef"
             }
           }
         }
@@ -653,6 +674,10 @@
             "readOnly": true
           },
           "updated_at": {
+            "type": "string",
+            "readOnly": true
+          },
+          "updated_by": {
             "type": "string",
             "readOnly": true
           },

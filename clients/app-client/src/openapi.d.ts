@@ -14,7 +14,7 @@ declare namespace Components {
             /**
              * Configuration values for the app components
              */
-            config_values?: Schemas.ComponentConfigValues[];
+            option_values?: Schemas.OptionsRef[];
         }
     }
     namespace Schemas {
@@ -38,7 +38,14 @@ declare namespace Components {
             description?: string;
             created_by?: string;
             created_at?: string;
+            /**
+             * Timestamp of the last update
+             */
             updated_at?: string;
+            /**
+             * User ID of the user who last updated the app
+             */
+            updated_by?: string;
             version?: string;
             author?: Author;
             status?: "published" | "pending";
@@ -76,9 +83,9 @@ declare namespace Components {
              */
             enabled?: boolean;
             /**
-             * Configuration values for the app components
+             * Configuration values for the app components options
              */
-            config_values?: ComponentConfigValues[];
+            option_values?: OptionsRef[];
         }
         /**
          * Configuration of the published app
@@ -101,6 +108,7 @@ declare namespace Components {
             created_by?: string;
             created_at?: string;
             updated_at?: string;
+            updated_by?: string;
             version?: string;
             author?: Author;
             status?: "published" | "pending";
@@ -144,20 +152,21 @@ declare namespace Components {
              */
             id: string;
             /**
-             * List of required options for the app component
+             * List of options for the app component
              */
-            config_options?: /* Options for the component configuration */ ConfigurationOptions[];
+            options?: /* Options for the component configuration */ Options[];
         } | {
             component_type?: "PORTAL_EXTENSION";
+            origin?: "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
             configuration: PortalExtensionConfig;
             /**
              * Unique identifier for the component
              */
             id: string;
             /**
-             * List of required options for the app component
+             * List of options for the app component
              */
-            config_options?: /* Options for the component configuration */ ConfigurationOptions[];
+            options?: /* Options for the component configuration */ Options[];
         };
         export interface BaseComponentCommon {
             /**
@@ -165,9 +174,9 @@ declare namespace Components {
              */
             id: string;
             /**
-             * List of required options for the app component
+             * List of options for the app component
              */
-            config_options?: /* Options for the component configuration */ ConfigurationOptions[];
+            options?: /* Options for the component configuration */ Options[];
         }
         export interface CallerIdentity {
             /**
@@ -195,7 +204,21 @@ declare namespace Components {
              */
             token_id?: string;
         }
-        export interface ComponentConfigValue {
+        /**
+         * Type of app component
+         */
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION";
+        export interface JourneyBlockConfig {
+            /**
+             * URL of the web component object
+             */
+            component_url: string;
+            /**
+             * Custom element tag for the component
+             */
+            component_tag?: string;
+        }
+        export interface Option {
             /**
              * Key matching a config_option from the component
              */
@@ -205,21 +228,10 @@ declare namespace Components {
              */
             value: string;
         }
-        export interface ComponentConfigValues {
-            /**
-             * ID of the component these values are for
-             */
-            component_id: string;
-            options: ComponentConfigValue[];
-        }
-        /**
-         * Type of app component
-         */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION";
         /**
          * Options for the component configuration
          */
-        export interface ConfigurationOptions {
+        export interface Options {
             /**
              * Unique identifier for this configuration option
              */
@@ -229,20 +241,21 @@ declare namespace Components {
              */
             label?: string;
             /**
+             * Flag to indicate if this option is required
+             */
+            required?: boolean;
+            /**
              * Detailed description of what this configuration option does
              */
             description?: string;
             type: "string" | "number" | "boolean" | "secret";
         }
-        export interface JourneyBlockConfig {
+        export interface OptionsRef {
             /**
-             * URL of the web component object
+             * ID of the component these values are for
              */
-            object_url: string;
-            /**
-             * Custom element tag for the component
-             */
-            component_tag?: string;
+            component_id: string;
+            options: Option[];
         }
         export interface PortalAuth {
             type?: string;
@@ -424,7 +437,7 @@ export interface OperationMethods {
   /**
    * installApp - installApp
    * 
-   * Update assets of a specific installed app by its ID.
+   * Upsert app installation by its ID.
    */
   'installApp'(
     parameters?: Parameters<Paths.InstallApp.PathParameters> | null,
@@ -482,7 +495,7 @@ export interface PathsDictionary {
     /**
      * installApp - installApp
      * 
-     * Update assets of a specific installed app by its ID.
+     * Upsert app installation by its ID.
      */
     'put'(
       parameters?: Parameters<Paths.InstallApp.PathParameters> | null,
@@ -510,11 +523,11 @@ export type Author = Components.Schemas.Author;
 export type BaseComponent = Components.Schemas.BaseComponent;
 export type BaseComponentCommon = Components.Schemas.BaseComponentCommon;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
-export type ComponentConfigValue = Components.Schemas.ComponentConfigValue;
-export type ComponentConfigValues = Components.Schemas.ComponentConfigValues;
 export type ComponentType = Components.Schemas.ComponentType;
-export type ConfigurationOptions = Components.Schemas.ConfigurationOptions;
 export type JourneyBlockConfig = Components.Schemas.JourneyBlockConfig;
+export type Option = Components.Schemas.Option;
+export type Options = Components.Schemas.Options;
+export type OptionsRef = Components.Schemas.OptionsRef;
 export type PortalAuth = Components.Schemas.PortalAuth;
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
 export type S3Reference = Components.Schemas.S3Reference;
