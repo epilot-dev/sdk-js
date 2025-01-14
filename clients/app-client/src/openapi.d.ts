@@ -156,7 +156,7 @@ declare namespace Components {
              */
             options?: /* Options for the component configuration */ Options[];
         } | {
-            component_type?: "PORTAL_EXTENSION";
+            component_type: "PORTAL_EXTENSION";
             origin?: "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
             configuration: PortalExtensionConfig;
             /**

@@ -425,7 +425,7 @@
               {
                 "type": "object",
                 "required": [
-                  "type",
+                  "component_type",
                   "configuration"
                 ],
                 "properties": {
