@@ -388,6 +388,10 @@
             "type": "string",
             "description": "Unique identifier for the component"
           },
+          "name": {
+            "type": "string",
+            "description": "Name of the component"
+          },
           "options": {
             "type": "array",
             "items": {

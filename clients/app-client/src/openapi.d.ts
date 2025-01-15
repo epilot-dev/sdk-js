@@ -152,6 +152,10 @@ declare namespace Components {
              */
             id: string;
             /**
+             * Name of the component
+             */
+            name?: string;
+            /**
              * List of options for the app component
              */
             options?: /* Options for the component configuration */ Options[];
@@ -164,6 +168,10 @@ declare namespace Components {
              */
             id: string;
             /**
+             * Name of the component
+             */
+            name?: string;
+            /**
              * List of options for the app component
              */
             options?: /* Options for the component configuration */ Options[];
@@ -173,6 +181,10 @@ declare namespace Components {
              * Unique identifier for the component
              */
             id: string;
+            /**
+             * Name of the component
+             */
+            name?: string;
             /**
              * List of options for the app component
              */
