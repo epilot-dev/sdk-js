@@ -6089,6 +6089,10 @@
           },
           "allowed_file_extensions": {
             "$ref": "#/components/schemas/AllowedFileExtensions"
+          },
+          "prevent_search_engine_indexing": {
+            "type": "boolean",
+            "description": "Prevent indexing by search engines"
           }
         }
       },
@@ -6124,11 +6128,6 @@
                 "type": "string",
                 "example": 12345,
                 "description": "ID of the organization"
-              },
-              "org_name": {
-                "type": "string",
-                "description": "Name of the organization",
-                "example": "ABC Company"
               },
               "origin": {
                 "$ref": "#/components/schemas/Origin"
@@ -8324,6 +8323,10 @@
             "type": "string",
             "description": "Identifier of the extension. Should not change between updates."
           },
+          "app_id": {
+            "type": "string",
+            "description": "Identifier of the app from which the extension was installed. Should not change between updates."
+          },
           "name": {
             "type": "object",
             "properties": {
@@ -8477,9 +8480,8 @@
           }
         },
         "required": [
-          "name",
-          "version",
-          "description"
+          "id",
+          "name"
         ]
       },
       "ExtensionSeamlessLink": {

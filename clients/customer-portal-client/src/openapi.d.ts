@@ -738,6 +738,10 @@ declare namespace Components {
                 number_of_days_before_restriction?: number;
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
+            /**
+             * Prevent indexing by search engines
+             */
+            prevent_search_engine_indexing?: boolean;
         }
         /**
          * The mapped contact of the portal user
@@ -1449,7 +1453,11 @@ declare namespace Components {
             /**
              * Identifier of the extension. Should not change between updates.
              */
-            id?: string;
+            id: string;
+            /**
+             * Identifier of the app from which the extension was installed. Should not change between updates.
+             */
+            app_id?: string;
             /**
              * Name of the extension.
              */
@@ -1463,7 +1471,7 @@ declare namespace Components {
             /**
              * Name of the extension.
              */
-            description: {
+            description?: {
                 [name: string]: string;
                 /**
                  * Name of the extension in English.
@@ -1473,7 +1481,7 @@ declare namespace Components {
             /**
              * Version of the extension.
              */
-            version: string;
+            version?: string;
             /**
              * Options available to the extension configurable by the portal administrator.
              */
@@ -2952,6 +2960,10 @@ declare namespace Components {
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
+             * Prevent indexing by search engines
+             */
+            prevent_search_engine_indexing?: boolean;
+            /**
              * ID of the organization
              * example:
              * 12345
@@ -2963,12 +2975,6 @@ declare namespace Components {
              * 12345
              */
             organization_id?: string;
-            /**
-             * Name of the organization
-             * example:
-             * ABC Company
-             */
-            org_name?: string;
             origin?: /* Origin of the portal */ Origin;
             /**
              * Organization settings
@@ -3762,6 +3768,10 @@ declare namespace Components {
                 number_of_days_before_restriction?: number;
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
+            /**
+             * Prevent indexing by search engines
+             */
+            prevent_search_engine_indexing?: boolean;
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -5640,6 +5650,10 @@ declare namespace Paths {
                 }[];
                 allowed_file_extensions?: /* Allowed file extensions for upload */ Components.Schemas.AllowedFileExtensions;
                 /**
+                 * Prevent indexing by search engines
+                 */
+                prevent_search_engine_indexing?: boolean;
+                /**
                  * ID of the organization
                  * example:
                  * 12345
@@ -5651,12 +5665,6 @@ declare namespace Paths {
                  * 12345
                  */
                 organization_id?: string;
-                /**
-                 * Name of the organization
-                 * example:
-                 * ABC Company
-                 */
-                org_name?: string;
                 origin?: /* Origin of the portal */ Components.Schemas.Origin;
                 /**
                  * Organization settings
