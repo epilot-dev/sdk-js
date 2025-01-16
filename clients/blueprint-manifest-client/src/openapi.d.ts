@@ -21,6 +21,7 @@ declare namespace Components {
         JobID?: Parameters.JobID;
     }
     namespace Schemas {
+        export type BlueprintInstallStatus = "SUCCESS" | "PARTIAL" | "FAILED";
         export interface CallerIdentity {
             /**
              * a human readable name of the caller (e.g. user name, token name or email address)
@@ -91,7 +92,19 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
              */
             source_blueprint_file?: string;
+            /**
+             * Link to the blueprint documentation
+             * example:
+             * https://help.epilot.cloud
+             */
+            docs_link?: string;
             source_blueprint_file_ref?: S3Reference;
+            install_status?: BlueprintInstallStatus;
+            /**
+             * example:
+             * This blueprint installation resulted in a partial deployment; some resources were created successfully, but  failed to complete the full resource setup.
+             */
+            install_status_description?: string;
             /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
@@ -271,7 +284,19 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
              */
             source_blueprint_file?: string;
+            /**
+             * Link to the blueprint documentation
+             * example:
+             * https://help.epilot.cloud
+             */
+            docs_link?: string;
             source_blueprint_file_ref?: S3Reference;
+            install_status?: BlueprintInstallStatus;
+            /**
+             * example:
+             * This blueprint installation resulted in a partial deployment; some resources were created successfully, but  failed to complete the full resource setup.
+             */
+            install_status_description?: string;
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
             /**
@@ -333,7 +358,19 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
              */
             source_blueprint_file?: string;
+            /**
+             * Link to the blueprint documentation
+             * example:
+             * https://help.epilot.cloud
+             */
+            docs_link?: string;
             source_blueprint_file_ref?: S3Reference;
+            install_status?: BlueprintInstallStatus;
+            /**
+             * example:
+             * This blueprint installation resulted in a partial deployment; some resources were created successfully, but  failed to complete the full resource setup.
+             */
+            install_status_description?: string;
             /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
@@ -428,7 +465,19 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
              */
             source_blueprint_file?: string;
+            /**
+             * Link to the blueprint documentation
+             * example:
+             * https://help.epilot.cloud
+             */
+            docs_link?: string;
             source_blueprint_file_ref?: S3Reference;
+            install_status?: BlueprintInstallStatus;
+            /**
+             * example:
+             * This blueprint installation resulted in a partial deployment; some resources were created successfully, but  failed to complete the full resource setup.
+             */
+            install_status_description?: string;
             /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
@@ -743,6 +792,7 @@ declare namespace Paths {
              * Temporary flag to indicate if multiple resources are being exported
              */
             isExportingMultipleResources?: boolean;
+            generateAISummary?: boolean;
         }
         namespace Responses {
             export interface $200 {
@@ -1038,6 +1088,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type BlueprintInstallStatus = Components.Schemas.BlueprintInstallStatus;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type CommonImportFields = Components.Schemas.CommonImportFields;
 export type CommonManifestFields = Components.Schemas.CommonManifestFields;
