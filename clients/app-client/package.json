@@ -1,7 +1,7 @@
 {
-  "name": "@epilot/entity-client",
-  "version": "4.34.3",
-  "description": "JavaScript client library for the epilot Core Entity API",
+  "name": "@epilot/app-client",
+  "version": "0.0.5",
+  "description": "JavaScript client library for the epilot App API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "epilot GmbH",
@@ -9,27 +9,28 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git",
-    "directory": "clients/entity-client"
+    "directory": "clients/app-client"
   },
   "bugs": {
     "url": "https://github.com/epilot-dev/sdk-js/issues"
   },
-  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/entity-client#readme",
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/app-client#readme",
   "keywords": [
     "epilot",
     "sdk",
-    "entity"
+    "app"
   ],
   "scripts": {
     "test": "jest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/entity.yaml",
+    "openapi": "node ../../scripts/update-openapi.js ../../../backend/app-api/packages/functions/src/api/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
     "build:watch": "npm run build && tsc -w",
     "release-alpha": "npm version prerelease --preid alpha",
+    "prepublishOnly": "npm run typegen && npm run build",
     "lint": "../../node_modules/eslint/bin/eslint.js src"
   },
   "files": [

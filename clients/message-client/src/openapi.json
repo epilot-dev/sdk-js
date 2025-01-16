@@ -463,6 +463,58 @@
         }
       }
     },
+    "/v1/message/threads:searchIds": {
+      "post": {
+        "operationId": "searchIds",
+        "summary": "Search threads and return all id's",
+        "description": "Return all thread id's that match a criteria\n\nLucene syntax supported.\n",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchIDParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "hits",
+                    "results"
+                  ],
+                  "properties": {
+                    "hits": {
+                      "type": "number",
+                      "description": "Total of matched threads",
+                      "example": 14
+                    },
+                    "results": {
+                      "type": "array",
+                      "description": "Matched threads ids",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/message/threads": {
       "put": {
         "operationId": "updateThread",
@@ -582,6 +634,42 @@
         }
       }
     },
+    "/v1/message/threads/{id}/timeline": {
+      "get": {
+        "operationId": "getThreadTimeline",
+        "summary": "getThreadTimeline",
+        "description": "Get thread timeline",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThreadTimeline"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/message/threads/{id}/trash": {
       "post": {
         "operationId": "trashThread",
@@ -630,6 +718,174 @@
             }
           }
         ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/bulk:read": {
+      "post": {
+        "operationId": "threadBulkActionsRead",
+        "summary": "threadBulkActionsRead",
+        "description": "Perform a bulk action of marking an array of thread ids as read",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionsPayloadWithScopes"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/bulk:unread": {
+      "post": {
+        "operationId": "threadBulkActionsUnread",
+        "summary": "threadBulkActionsUnread",
+        "description": "Perform a bulk action of marking an array of thread ids as unread",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionsPayloadWithScopes"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/bulk:favorite": {
+      "post": {
+        "operationId": "threadBulkActionsFavorite",
+        "summary": "threadBulkActionsFavorite",
+        "description": "Perform a bulk action of marking an array of thread ids favorite",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/bulk:unfavorite": {
+      "post": {
+        "operationId": "threadBulkActionsUnfavorite",
+        "summary": "threadBulkActionsUnfavorite",
+        "description": "Perform a bulk action of marking an array of thread ids unfavorited",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/bulk:trash": {
+      "post": {
+        "operationId": "threadBulkActionsTrash",
+        "summary": "threadBulkActionsTrash",
+        "description": "Perform a bulk action of trashing an array of threads",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/bulk:untrash": {
+      "post": {
+        "operationId": "threadBulkActionsUntrash",
+        "summary": "threadBulkActionsUntrash",
+        "description": "Perform a bulk action of untrashing an array of threads",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionsPayload"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "Success"
@@ -1550,6 +1806,16 @@
           }
         }
       },
+      "SearchIDParams": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "description": "Lucene query syntax supported with ElasticSearch",
+            "type": "string",
+            "example": "subject:\"Request for solar panel price\" AND _tags:INBOX"
+          }
+        }
+      },
       "ReadMessagePayload": {
         "type": "object",
         "required": [
@@ -1580,6 +1846,148 @@
           "organization",
           "user"
         ]
+      },
+      "ThreadTimeline": {
+        "type": "object",
+        "required": [
+          "events"
+        ],
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineEvent"
+            }
+          }
+        }
+      },
+      "ThreadDoneEvent": {
+        "type": "object",
+        "required": [
+          "type",
+          "user_id",
+          "organization_id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "THREAD_DONE"
+            ]
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID of the user who marked the thread as done",
+            "example": 123
+          },
+          "organization_id": {
+            "type": "string",
+            "description": "Organization ID of the organization who marked the thread as done",
+            "example": 456
+          }
+        }
+      },
+      "ThreadOpenEvent": {
+        "type": "object",
+        "required": [
+          "type",
+          "user_id",
+          "organization_id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "THREAD_OPEN"
+            ]
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID of the user who marked the thread as open",
+            "example": 123
+          },
+          "organization_id": {
+            "type": "string",
+            "description": "Organization ID of the organization who marked the thread as open",
+            "example": 456
+          }
+        }
+      },
+      "TimelineEventData": {
+        "type": "object",
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ThreadDoneEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ThreadOpenEvent"
+          }
+        ]
+      },
+      "TimelineEvent": {
+        "type": "object",
+        "required": [
+          "timestamp",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TimelineEventData"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Timestamp of the event",
+            "example": "2024-01-01T00:00:00.000Z"
+          }
+        }
+      },
+      "BulkActionsPayloadWithScopes": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BulkActionsPayload"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "scopes": {
+                "description": "The scopes to be used when marking an item as read or unread. The read status will be synced for all provided scopes.",
+                "example": [
+                  "organization",
+                  "user"
+                ],
+                "type": "array",
+                "default": [
+                  "organization",
+                  "user"
+                ],
+                "items": {
+                  "$ref": "#/components/schemas/ReadingScope"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "BulkActionsPayload": {
+        "type": "object",
+        "required": [
+          "ids"
+        ],
+        "properties": {
+          "ids": {
+            "description": "Array of threads you wish to perform bulk actions on",
+            "example": [
+              "6b299eda-4018-4554-8965-c4b5598e6531"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       }
     }
   },

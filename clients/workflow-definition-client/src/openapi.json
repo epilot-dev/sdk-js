@@ -1439,6 +1439,9 @@
           "id": {
             "type": "string"
           },
+          "org_id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },

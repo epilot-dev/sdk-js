@@ -119,6 +119,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -1074,6 +1077,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1167,6 +1173,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -1508,6 +1517,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1548,6 +1560,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1639,6 +1654,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1731,6 +1749,9 @@
                 ]
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -1794,6 +1815,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -1850,6 +1874,9 @@
         "responses": {
           "204": {
             "description": "Relations deleted with success."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1916,6 +1943,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1976,6 +2006,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -2009,6 +2042,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -2087,6 +2123,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -2132,6 +2171,9 @@
         "responses": {
           "204": {
             "description": "Relation deleted with success."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -2347,6 +2389,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -2367,6 +2412,40 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SavedViewItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedViewItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchSavedView",
+        "summary": "patchSavedView",
+        "description": "Partially updates a saved view with the provided payload. If an updated_at is passed and the server contains a newer version of the view a `409` error is returned",
+        "tags": [
+          "Saved Views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedViewPartial"
               }
             }
           }
@@ -2529,6 +2608,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -2645,6 +2727,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -2674,7 +2759,7 @@
             }
           },
           "404": {
-            "description": "Taxonomy classification not found"
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -3153,6 +3238,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -3294,6 +3382,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -3435,6 +3526,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -3576,6 +3670,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -3833,6 +3930,19 @@
                     "type": "array",
                     "items": {
                       "$ref": "#/components/schemas/EntityAction"
+                    }
+                  },
+                  "ui_config": {
+                    "type": "object",
+                    "properties": {
+                      "content_direction": {
+                        "type": "string",
+                        "enum": [
+                          "row",
+                          "column"
+                        ],
+                        "description": "Show attributes in a row or column"
+                      }
                     }
                   }
                 }
@@ -4257,6 +4367,9 @@
           },
           {
             "$ref": "#/components/schemas/TagsAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/MessageEmailAddressAttribute"
           },
           {
             "$ref": "#/components/schemas/NumberAttribute"
@@ -5350,7 +5463,8 @@
                   "relation",
                   "payment",
                   "price_component",
-                  "date"
+                  "date",
+                  "message_email_address"
                 ]
               },
               "enable_relation_picker": {
@@ -5390,6 +5504,42 @@
                 }
               }
             }
+          }
+        ]
+      },
+      "MessageEmailAddressAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Message emil address",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "message_email_address"
+                ]
+              },
+              "address": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "send_status": {
+                "type": "string"
+              },
+              "email_type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "address",
+              "name"
+            ]
           }
         ]
       },
@@ -5543,6 +5693,36 @@
             "items": {
               "$ref": "#/components/schemas/SettingFlag"
             }
+          },
+          "display_mode": {
+            "type": "string",
+            "enum": [
+              "inline",
+              "block"
+            ],
+            "description": "Defines the display mode of the summary attribute.\nWhen set to `inline`, the label and value will be displayed in the same line.\nWhen set to `block`, the label and value will be displayed in separate lines.\n"
+          },
+          "content_line_cap": {
+            "type": "number",
+            "description": "Defines the line numbers of the content.\nFor instance, When set to 1, the content will be displayed in a single line.\n"
+          },
+          "content_wrap": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "nowrap",
+              "pre",
+              "pre-wrap"
+            ],
+            "description": "Defines white-space of the content.\n"
+          },
+          "hide_label": {
+            "type": "boolean",
+            "description": "When set to true, will hide the label of the field."
+          },
+          "highlight_container": {
+            "type": "boolean",
+            "description": "When set to true, will highlight the container of the field."
           }
         },
         "required": [
@@ -6483,6 +6663,10 @@
           "entity_id": {
             "$ref": "#/components/schemas/EntityId"
           },
+          "org_id": {
+            "type": "string",
+            "description": "Organization Id the entity belongs to"
+          },
           "attribute": {
             "type": "string"
           },
@@ -6533,9 +6717,7 @@
               "hydrate": {},
               "fields": {},
               "aggs": {},
-              "include_deleted": {
-                "$ref": "#/components/schemas/EntitySearchIncludeDeletedParam"
-              }
+              "include_deleted": {}
             },
             "additionalProperties": false,
             "required": [
@@ -6565,7 +6747,8 @@
               "size": {},
               "hydrate": {},
               "fields": {},
-              "aggs": {}
+              "aggs": {},
+              "include_deleted": {}
             },
             "additionalProperties": false,
             "required": [
@@ -7189,7 +7372,7 @@
           }
         ]
       },
-      "SavedView": {
+      "SavedViewPartial": {
         "description": "A saved entity view",
         "type": "object",
         "properties": {
@@ -7213,6 +7396,7 @@
             "example": "66"
           },
           "shared": {
+            "deprecated": true,
             "description": "boolean property for if a view is shared with organisation",
             "type": "boolean",
             "example": true
@@ -7270,13 +7454,32 @@
                 }
               }
             }
+          },
+          "shared_with": {
+            "type": "array",
+            "description": "List of users ('${userId}'), user groups ('group_${groupId}'), or partner users ('${partnerOrgId}_${partnerUserId}') that the view is shared with",
+            "items": {
+              "type": "string",
+              "example": "112233"
+            }
           }
-        },
-        "required": [
-          "slug",
-          "name",
-          "created_by",
-          "ui_config"
+        }
+      },
+      "SavedView": {
+        "description": "A saved entity view",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SavedViewPartial"
+          },
+          {
+            "type": "object",
+            "required": [
+              "slug",
+              "name",
+              "created_by",
+              "ui_config"
+            ]
+          }
         ]
       },
       "Taxonomy": {
@@ -7614,6 +7817,22 @@
           "enabled": {
             "type": "boolean",
             "description": "Whether the setting should be enabled or not"
+          }
+        }
+      },
+      "ErrorObject": {
+        "description": "A generic error returned by the API",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The HTTP status code of the error",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message",
+            "example": "Bad Request"
           }
         }
       }
@@ -8496,6 +8715,28 @@
               "$ref": "#/components/examples/EntityValidationError"
             }
           ]
+        }
+      }
+    },
+    "responses": {
+      "NotFoundError": {
+        "description": "The requested resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 404,
+                    "error": "Not Found"
+                  }
+                }
+              ]
+            }
+          }
         }
       }
     }

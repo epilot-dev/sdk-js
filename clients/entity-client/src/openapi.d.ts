@@ -92,6 +92,30 @@ declare namespace Components {
         FillActivityQueryParam?: Parameters.FillActivityQueryParam;
         ValidateEntityQueryParam?: Parameters.ValidateEntityQueryParam;
     }
+    namespace Responses {
+        /**
+         * A generic error returned by the API
+         * example:
+         * {
+         *   "status": 404,
+         *   "error": "Not Found"
+         * }
+         */
+        export interface NotFoundError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+        }
+    }
     namespace Schemas {
         export interface Activity {
             /**
@@ -514,7 +538,7 @@ declare namespace Components {
             has_primary?: boolean;
             default_address_fields?: /* Default fields visible on addresses */ DefaultAddressFields;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute;
         /**
          * a readonly computed ID for the attribute including schema slug and the attribute ID
          */
@@ -530,7 +554,7 @@ declare namespace Components {
              * contact
              */
             schema?: string;
-        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute);
+        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute);
         /**
          * Automation entity
          */
@@ -2710,6 +2734,12 @@ declare namespace Components {
                      */
                     SummaryAttribute | string)[];
                     quick_actions?: /* An entity action configured from the entity schema */ EntityAction[];
+                    ui_config?: {
+                        /**
+                         * Show attributes in a row or column
+                         */
+                        content_direction?: "row" | "column";
+                    };
                 };
                 sharing?: {
                     /**
@@ -3084,6 +3114,12 @@ declare namespace Components {
                      */
                     SummaryAttribute | string)[];
                     quick_actions?: /* An entity action configured from the entity schema */ EntityAction[];
+                    ui_config?: {
+                        /**
+                         * Show attributes in a row or column
+                         */
+                        content_direction?: "row" | "column";
+                    };
                 };
                 sharing?: {
                     /**
@@ -3580,6 +3616,23 @@ declare namespace Components {
         }
         export interface EntityViewDisabled {
             view_type?: "disabled";
+        }
+        /**
+         * A generic error returned by the API
+         */
+        export interface ErrorObject {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
         }
         /**
          * The unique identifier of the import job.
@@ -4645,6 +4698,145 @@ declare namespace Components {
              */
             hits?: number;
             results?: /* A saved entity view */ SavedViewItem[];
+        }
+        /**
+         * Message emil address
+         */
+        export interface MessageEmailAddressAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: any;
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
+            group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This attribute should only be active when one of the provided settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
+            type: "message_email_address";
+            address: string;
+            send_status?: string;
+            email_type?: string;
         }
         /**
          * Multi Choice Selection
@@ -6051,6 +6243,10 @@ declare namespace Components {
         }
         export interface RelationItem {
             entity_id: EntityId /* uuid */;
+            /**
+             * Organization Id the entity belongs to
+             */
+            org_id?: string;
             attribute: string;
             _tags?: string[];
             /**
@@ -6198,7 +6394,7 @@ declare namespace Components {
              * Weak repeatable attributes are kept when duplicating an entity. Strong repeatable attributes are discarded when duplicating an entity.
              */
             relation_affinity_mode?: "weak" | "strong";
-            type?: "string" | "phone" | "email" | "address" | "relation" | "payment" | "price_component" | "date";
+            type?: "string" | "phone" | "email" | "address" | "relation" | "payment" | "price_component" | "date" | "message_email_address";
             /**
              * when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link.
              */
@@ -6269,6 +6465,10 @@ declare namespace Components {
             ui_config: {
                 [name: string]: any;
             };
+            /**
+             * List of users ('${userId}'), user groups ('group_${groupId}'), or partner users ('${partnerOrgId}_${partnerUserId}') that the view is shared with
+             */
+            shared_with?: string[];
         }
         /**
          * Generated uuid for a saved view
@@ -6342,6 +6542,80 @@ declare namespace Components {
             ui_config: {
                 [name: string]: any;
             };
+            /**
+             * List of users ('${userId}'), user groups ('group_${groupId}'), or partner users ('${partnerOrgId}_${partnerUserId}') that the view is shared with
+             */
+            shared_with?: string[];
+        }
+        /**
+         * A saved entity view
+         */
+        export interface SavedViewPartial {
+            /**
+             * list of schemas a view can belong to
+             */
+            slug?: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug[];
+            /**
+             * User-friendly identifier for the saved view
+             * example:
+             * View listing German
+             */
+            name?: string;
+            /**
+             * Organisation ID a view belongs to
+             * example:
+             * 66
+             */
+            org?: string;
+            /**
+             * boolean property for if a view is shared with organisation
+             * example:
+             * true
+             */
+            shared?: boolean;
+            /**
+             * List of users (IDs) that have favorited the view
+             */
+            isFavoritedBy?: string[];
+            created_by?: {
+                /**
+                 * example:
+                 * 10598
+                 */
+                user_id?: string;
+            } | {
+                [name: string]: any;
+                source?: "SYSTEM" | "BLUEPRINT";
+            };
+            /**
+             * example:
+             * {
+             *   "filters": {
+             *     "customer_name": "suresh test",
+             *     "_tags": "360"
+             *   },
+             *   "table_layout": {
+             *     "opportunity": {
+             *       "page": 1,
+             *       "sort": "_created_at:desc",
+             *       "pageSize": 25,
+             *       "columnSettings": []
+             *     }
+             *   }
+             * }
+             */
+            ui_config?: {
+                [name: string]: any;
+            };
+            /**
+             * List of users ('${userId}'), user groups ('group_${groupId}'), or partner users ('${partnerOrgId}_${partnerUserId}') that the view is shared with
+             */
+            shared_with?: string[];
         }
         /**
          * Generated uuid for schema
@@ -7016,6 +7290,32 @@ declare namespace Components {
              * This summary attribute should only be visible when all the settings have the correct value
              */
             settings_flag?: SettingFlag[];
+            /**
+             * Defines the display mode of the summary attribute.
+             * When set to `inline`, the label and value will be displayed in the same line.
+             * When set to `block`, the label and value will be displayed in separate lines.
+             *
+             */
+            display_mode?: "inline" | "block";
+            /**
+             * Defines the line numbers of the content.
+             * For instance, When set to 1, the content will be displayed in a single line.
+             *
+             */
+            content_line_cap?: number;
+            /**
+             * Defines white-space of the content.
+             *
+             */
+            content_wrap?: "normal" | "nowrap" | "pre" | "pre-wrap";
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * When set to true, will highlight the container of the field.
+             */
+            highlight_container?: boolean;
         }
         /**
          * Summary Fields are displayed inside list view as a resume of the relation entity.
@@ -7640,6 +7940,15 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.RelationItem[];
         namespace Responses {
             export type $200 = Components.Schemas.RelationItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace AttachActivity {
@@ -7660,6 +7969,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.BaseActivityItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace Autocomplete {
@@ -7974,6 +8292,15 @@ declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace DeleteSavedView {
@@ -8150,6 +8477,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.ActivityItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetEntity {
@@ -8267,6 +8603,15 @@ declare namespace Paths {
                  */
                 Components.Schemas.EntityItem[];
             }
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetEntityActivityFeed {
@@ -8314,6 +8659,15 @@ declare namespace Paths {
                 total?: number;
                 results?: Components.Schemas.ActivityItem[];
             }
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetEntityV2 {
@@ -8401,6 +8755,15 @@ declare namespace Paths {
              * }
              */
             Components.Schemas.EntityItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetJsonSchema {
@@ -8744,6 +9107,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelatedEntitiesCount;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetRelations {
@@ -8786,6 +9158,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsResp;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetRelationsV2 {
@@ -8835,6 +9216,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsRespWithPagination;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetRelationsV3 {
@@ -8879,6 +9269,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsRespWithPagination;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetSavedView {
@@ -8890,6 +9289,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* A saved entity view */ Components.Schemas.SavedViewItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetSchema {
@@ -8910,6 +9318,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetSchemaAttribute {
@@ -8929,6 +9346,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetSchemaCapability {
@@ -8948,6 +9374,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetSchemaExample {
@@ -8984,6 +9419,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetSchemaGroupHeadline {
@@ -9003,6 +9447,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetSchemaVersions {
@@ -9061,6 +9514,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.Taxonomy;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetTaxonomyBulkActionJobById {
@@ -9120,8 +9582,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.TaxonomyClassification;
-            export interface $404 {
-            }
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace ImportEntities {
@@ -9375,6 +9844,18 @@ declare namespace Paths {
             export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationV2ResultError;
         }
     }
+    namespace PatchSavedView {
+        namespace Parameters {
+            export type Id = /* Generated uuid for a saved view */ Components.Schemas.SavedViewId /* uuid */;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = /* A saved entity view */ Components.Schemas.SavedViewPartial;
+        namespace Responses {
+            export type $200 = /* A saved entity view */ Components.Schemas.SavedViewItem;
+        }
+    }
     namespace PutSchema {
         namespace Parameters {
             export type Draft = boolean;
@@ -9505,6 +9986,15 @@ declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace RestoreEntity {
@@ -9670,6 +10160,15 @@ declare namespace Paths {
                     [key: string]: any;
                 };
             }
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace UpdateEntity {
@@ -9822,6 +10321,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.RelationItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace UpdateSavedView {
@@ -10811,6 +11319,16 @@ export interface OperationMethods {
     data?: Paths.UpdateSavedView.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateSavedView.Responses.$200>
+  /**
+   * patchSavedView - patchSavedView
+   * 
+   * Partially updates a saved view with the provided payload. If an updated_at is passed and the server contains a newer version of the view a `409` error is returned
+   */
+  'patchSavedView'(
+    parameters?: Parameters<Paths.PatchSavedView.PathParameters> | null,
+    data?: Paths.PatchSavedView.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PatchSavedView.Responses.$200>
   /**
    * deleteSavedView - deleteSavedView
    * 
@@ -11876,6 +12394,16 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateSavedView.Responses.$200>
     /**
+     * patchSavedView - patchSavedView
+     * 
+     * Partially updates a saved view with the provided payload. If an updated_at is passed and the server contains a newer version of the view a `409` error is returned
+     */
+    'patch'(
+      parameters?: Parameters<Paths.PatchSavedView.PathParameters> | null,
+      data?: Paths.PatchSavedView.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PatchSavedView.Responses.$200>
+    /**
      * deleteSavedView - deleteSavedView
      * 
      * Deletes a saved view
@@ -12328,6 +12856,7 @@ export type EntityValidationV2Result = Components.Schemas.EntityValidationV2Resu
 export type EntityValidationV2ResultError = Components.Schemas.EntityValidationV2ResultError;
 export type EntityValidationV2ResultSuccess = Components.Schemas.EntityValidationV2ResultSuccess;
 export type EntityViewDisabled = Components.Schemas.EntityViewDisabled;
+export type ErrorObject = Components.Schemas.ErrorObject;
 export type ExportJobId = Components.Schemas.ExportJobId;
 export type FieldsParam = Components.Schemas.FieldsParam;
 export type FileAttribute = Components.Schemas.FileAttribute;
@@ -12347,6 +12876,7 @@ export type IsTemplate = Components.Schemas.IsTemplate;
 export type Language = Components.Schemas.Language;
 export type LinkAttribute = Components.Schemas.LinkAttribute;
 export type ListSavedViewsResults = Components.Schemas.ListSavedViewsResults;
+export type MessageEmailAddressAttribute = Components.Schemas.MessageEmailAddressAttribute;
 export type MultiSelectAttribute = Components.Schemas.MultiSelectAttribute;
 export type NumberAttribute = Components.Schemas.NumberAttribute;
 export type OrderedListAttribute = Components.Schemas.OrderedListAttribute;
@@ -12362,6 +12892,7 @@ export type RepeatableAttribute = Components.Schemas.RepeatableAttribute;
 export type SavedView = Components.Schemas.SavedView;
 export type SavedViewId = Components.Schemas.SavedViewId;
 export type SavedViewItem = Components.Schemas.SavedViewItem;
+export type SavedViewPartial = Components.Schemas.SavedViewPartial;
 export type SchemaId = Components.Schemas.SchemaId;
 export type SearchFilter = Components.Schemas.SearchFilter;
 export type SearchFilterValue = Components.Schemas.SearchFilterValue;

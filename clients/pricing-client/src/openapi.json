@@ -3665,6 +3665,18 @@
               "description": "The id of the price component"
             }
           },
+          "price_component_coupon_ids": {
+            "type": "object",
+            "description": "The map of coupon ids applicable to the price components",
+            "readOnly": true,
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "The id of the coupon"
+              }
+            }
+          },
           "_price": {
             "$ref": "#/components/schemas/CompositePrice"
           }
@@ -4025,6 +4037,16 @@
           "tax_discount_amount_decimal": {
             "type": "string",
             "description": "The discount amount applied to the tax represented as a decimal string",
+            "readOnly": true
+          },
+          "discount_amount_net": {
+            "type": "integer",
+            "description": "The net discount amount applied",
+            "readOnly": true
+          },
+          "discount_amount_net_decimal": {
+            "type": "string",
+            "description": "The net discount amount applied represented as a decimal string",
             "readOnly": true
           },
           "amount_tax": {

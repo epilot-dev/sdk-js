@@ -95,6 +95,35 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
         }
+        export interface BulkActionsPayload {
+            /**
+             * Array of threads you wish to perform bulk actions on
+             * example:
+             * [
+             *   "6b299eda-4018-4554-8965-c4b5598e6531"
+             * ]
+             */
+            ids: string[];
+        }
+        export interface BulkActionsPayloadWithScopes {
+            /**
+             * Array of threads you wish to perform bulk actions on
+             * example:
+             * [
+             *   "6b299eda-4018-4554-8965-c4b5598e6531"
+             * ]
+             */
+            ids: string[];
+            /**
+             * The scopes to be used when marking an item as read or unread. The read status will be synced for all provided scopes.
+             * example:
+             * [
+             *   "organization",
+             *   "user"
+             * ]
+             */
+            scopes?: /* Who is marking an item as read or unread. */ ReadingScope[];
+        }
         export interface File {
             /**
              * File entity ID
@@ -441,6 +470,14 @@ declare namespace Components {
          * Who is marking an item as read or unread.
          */
         export type ReadingScope = "organization" | "user";
+        export interface SearchIDParams {
+            /**
+             * Lucene query syntax supported with ElasticSearch
+             * example:
+             * subject:"Request for solar panel price" AND _tags:INBOX
+             */
+            q?: string;
+        }
         export interface SearchParams {
             /**
              * Lucene query syntax supported with ElasticSearch
@@ -491,6 +528,49 @@ declare namespace Components {
              */
             latest_message_at?: string;
         }
+        export interface ThreadDoneEvent {
+            type: "THREAD_DONE";
+            /**
+             * User ID of the user who marked the thread as done
+             * example:
+             * 123
+             */
+            user_id: string;
+            /**
+             * Organization ID of the organization who marked the thread as done
+             * example:
+             * 456
+             */
+            organization_id: string;
+        }
+        export interface ThreadOpenEvent {
+            type: "THREAD_OPEN";
+            /**
+             * User ID of the user who marked the thread as open
+             * example:
+             * 123
+             */
+            user_id: string;
+            /**
+             * Organization ID of the organization who marked the thread as open
+             * example:
+             * 456
+             */
+            organization_id: string;
+        }
+        export interface ThreadTimeline {
+            events: TimelineEvent[];
+        }
+        export interface TimelineEvent {
+            data: TimelineEventData;
+            /**
+             * Timestamp of the event
+             * example:
+             * 2024-01-01T00:00:00.000Z
+             */
+            timestamp: string;
+        }
+        export type TimelineEventData = ThreadDoneEvent | ThreadOpenEvent;
     }
 }
 declare namespace Paths {
@@ -1028,6 +1108,19 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetThreadTimeline {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ThreadTimeline;
+            export interface $403 {
+            }
+        }
+    }
     namespace MarkReadMessage {
         namespace Parameters {
             export type Id = string;
@@ -1167,6 +1260,25 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.ReadMessagePayload;
         namespace Responses {
             export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace SearchIds {
+        export type RequestBody = Components.Schemas.SearchIDParams;
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Total of matched threads
+                 * example:
+                 * 14
+                 */
+                hits: number;
+                /**
+                 * Matched threads ids
+                 */
+                results: string[];
             }
             export interface $403 {
             }
@@ -1406,6 +1518,60 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.MessageRequestParams;
         namespace Responses {
             export type $201 = Components.Schemas.MessageRequestParams;
+            export interface $403 {
+            }
+        }
+    }
+    namespace ThreadBulkActionsFavorite {
+        export type RequestBody = Components.Schemas.BulkActionsPayload;
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace ThreadBulkActionsRead {
+        export type RequestBody = Components.Schemas.BulkActionsPayloadWithScopes;
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace ThreadBulkActionsTrash {
+        export type RequestBody = Components.Schemas.BulkActionsPayload;
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace ThreadBulkActionsUnfavorite {
+        export type RequestBody = Components.Schemas.BulkActionsPayload;
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace ThreadBulkActionsUnread {
+        export type RequestBody = Components.Schemas.BulkActionsPayloadWithScopes;
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace ThreadBulkActionsUntrash {
+        export type RequestBody = Components.Schemas.BulkActionsPayload;
+        namespace Responses {
+            export interface $204 {
+            }
             export interface $403 {
             }
         }
@@ -1831,6 +1997,19 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchThreads.Responses.$200>
   /**
+   * searchIds - Search threads and return all id's
+   * 
+   * Return all thread id's that match a criteria
+   * 
+   * Lucene syntax supported.
+   * 
+   */
+  'searchIds'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchIds.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchIds.Responses.$200>
+  /**
    * updateThread - updateThread
    * 
    * Modify thread metadata
@@ -1871,6 +2050,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MarkThreadAsOpen.Responses.$204>
   /**
+   * getThreadTimeline - getThreadTimeline
+   * 
+   * Get thread timeline
+   */
+  'getThreadTimeline'(
+    parameters?: Parameters<Paths.GetThreadTimeline.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetThreadTimeline.Responses.$200>
+  /**
    * trashThread - trashThread
    * 
    * Move a thread to trash
@@ -1890,6 +2079,66 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UntrashThread.Responses.$204>
+  /**
+   * threadBulkActionsRead - threadBulkActionsRead
+   * 
+   * Perform a bulk action of marking an array of thread ids as read
+   */
+  'threadBulkActionsRead'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ThreadBulkActionsRead.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ThreadBulkActionsRead.Responses.$204>
+  /**
+   * threadBulkActionsUnread - threadBulkActionsUnread
+   * 
+   * Perform a bulk action of marking an array of thread ids as unread
+   */
+  'threadBulkActionsUnread'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ThreadBulkActionsUnread.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ThreadBulkActionsUnread.Responses.$204>
+  /**
+   * threadBulkActionsFavorite - threadBulkActionsFavorite
+   * 
+   * Perform a bulk action of marking an array of thread ids favorite
+   */
+  'threadBulkActionsFavorite'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ThreadBulkActionsFavorite.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ThreadBulkActionsFavorite.Responses.$204>
+  /**
+   * threadBulkActionsUnfavorite - threadBulkActionsUnfavorite
+   * 
+   * Perform a bulk action of marking an array of thread ids unfavorited
+   */
+  'threadBulkActionsUnfavorite'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ThreadBulkActionsUnfavorite.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ThreadBulkActionsUnfavorite.Responses.$204>
+  /**
+   * threadBulkActionsTrash - threadBulkActionsTrash
+   * 
+   * Perform a bulk action of trashing an array of threads
+   */
+  'threadBulkActionsTrash'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ThreadBulkActionsTrash.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ThreadBulkActionsTrash.Responses.$204>
+  /**
+   * threadBulkActionsUntrash - threadBulkActionsUntrash
+   * 
+   * Perform a bulk action of untrashing an array of threads
+   */
+  'threadBulkActionsUntrash'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ThreadBulkActionsUntrash.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ThreadBulkActionsUntrash.Responses.$204>
   /**
    * markReadThread - markReadThread
    * 
@@ -2138,6 +2387,21 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchThreads.Responses.$200>
   }
+  ['/v1/message/threads:searchIds']: {
+    /**
+     * searchIds - Search threads and return all id's
+     * 
+     * Return all thread id's that match a criteria
+     * 
+     * Lucene syntax supported.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchIds.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchIds.Responses.$200>
+  }
   ['/v1/message/threads']: {
     /**
      * updateThread - updateThread
@@ -2186,6 +2450,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MarkThreadAsOpen.Responses.$204>
   }
+  ['/v1/message/threads/{id}/timeline']: {
+    /**
+     * getThreadTimeline - getThreadTimeline
+     * 
+     * Get thread timeline
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetThreadTimeline.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetThreadTimeline.Responses.$200>
+  }
   ['/v1/message/threads/{id}/trash']: {
     /**
      * trashThread - trashThread
@@ -2209,6 +2485,78 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UntrashThread.Responses.$204>
+  }
+  ['/v1/message/threads/bulk:read']: {
+    /**
+     * threadBulkActionsRead - threadBulkActionsRead
+     * 
+     * Perform a bulk action of marking an array of thread ids as read
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ThreadBulkActionsRead.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ThreadBulkActionsRead.Responses.$204>
+  }
+  ['/v1/message/threads/bulk:unread']: {
+    /**
+     * threadBulkActionsUnread - threadBulkActionsUnread
+     * 
+     * Perform a bulk action of marking an array of thread ids as unread
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ThreadBulkActionsUnread.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ThreadBulkActionsUnread.Responses.$204>
+  }
+  ['/v1/message/threads/bulk:favorite']: {
+    /**
+     * threadBulkActionsFavorite - threadBulkActionsFavorite
+     * 
+     * Perform a bulk action of marking an array of thread ids favorite
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ThreadBulkActionsFavorite.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ThreadBulkActionsFavorite.Responses.$204>
+  }
+  ['/v1/message/threads/bulk:unfavorite']: {
+    /**
+     * threadBulkActionsUnfavorite - threadBulkActionsUnfavorite
+     * 
+     * Perform a bulk action of marking an array of thread ids unfavorited
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ThreadBulkActionsUnfavorite.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ThreadBulkActionsUnfavorite.Responses.$204>
+  }
+  ['/v1/message/threads/bulk:trash']: {
+    /**
+     * threadBulkActionsTrash - threadBulkActionsTrash
+     * 
+     * Perform a bulk action of trashing an array of threads
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ThreadBulkActionsTrash.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ThreadBulkActionsTrash.Responses.$204>
+  }
+  ['/v1/message/threads/bulk:untrash']: {
+    /**
+     * threadBulkActionsUntrash - threadBulkActionsUntrash
+     * 
+     * Perform a bulk action of untrashing an array of threads
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ThreadBulkActionsUntrash.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ThreadBulkActionsUntrash.Responses.$204>
   }
   ['/v1/message/threads/{id}/read']: {
     /**
@@ -2349,11 +2697,19 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type Address = Components.Schemas.Address;
 export type AttachmentsRelation = Components.Schemas.AttachmentsRelation;
 export type BaseEntity = Components.Schemas.BaseEntity;
+export type BulkActionsPayload = Components.Schemas.BulkActionsPayload;
+export type BulkActionsPayloadWithScopes = Components.Schemas.BulkActionsPayloadWithScopes;
 export type File = Components.Schemas.File;
 export type Message = Components.Schemas.Message;
 export type MessageRequestParams = Components.Schemas.MessageRequestParams;
 export type MessageV2 = Components.Schemas.MessageV2;
 export type ReadMessagePayload = Components.Schemas.ReadMessagePayload;
 export type ReadingScope = Components.Schemas.ReadingScope;
+export type SearchIDParams = Components.Schemas.SearchIDParams;
 export type SearchParams = Components.Schemas.SearchParams;
 export type Thread = Components.Schemas.Thread;
+export type ThreadDoneEvent = Components.Schemas.ThreadDoneEvent;
+export type ThreadOpenEvent = Components.Schemas.ThreadOpenEvent;
+export type ThreadTimeline = Components.Schemas.ThreadTimeline;
+export type TimelineEvent = Components.Schemas.TimelineEvent;
+export type TimelineEventData = Components.Schemas.TimelineEventData;
