@@ -102,6 +102,11 @@
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "skip_validation",
+            "required": false
           }
         ],
         "requestBody": {
@@ -120,6 +125,11 @@
           {
             "in": "query",
             "name": "async",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "skip_validation",
             "required": false
           },
           {
