@@ -426,13 +426,33 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
              * The unit amount before any discount is applied
              */
             before_discount_unit_amount?: number;
             /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             * The unit amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
              */
-            unit_amount_decimal?: string;
+            before_discount_unit_amount_decimal?: string;
+            /**
+             * The unit gross amount before any discount is applied
+             */
+            before_discount_unit_amount_gross?: number;
+            /**
+             * The unit gross amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_gross_decimal?: string;
+            /**
+             * The unit net amount before any discount is applied
+             */
+            before_discount_unit_amount_net?: number;
+            /**
+             * The unit net amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_net_decimal?: string;
             /**
              * The discount amount applied for each unit
              */
@@ -1458,13 +1478,33 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
              * The unit amount before any discount is applied
              */
             before_discount_unit_amount?: number;
             /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             * The unit amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
              */
-            unit_amount_decimal?: string;
+            before_discount_unit_amount_decimal?: string;
+            /**
+             * The unit gross amount before any discount is applied
+             */
+            before_discount_unit_amount_gross?: number;
+            /**
+             * The unit gross amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_gross_decimal?: string;
+            /**
+             * The unit net amount before any discount is applied
+             */
+            before_discount_unit_amount_net?: number;
+            /**
+             * The unit net amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_net_decimal?: string;
             /**
              * The discount amount applied for each unit
              */
@@ -3316,13 +3356,33 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
              * The unit amount before any discount is applied
              */
             before_discount_unit_amount?: number;
             /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             * The unit amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
              */
-            unit_amount_decimal?: string;
+            before_discount_unit_amount_decimal?: string;
+            /**
+             * The unit gross amount before any discount is applied
+             */
+            before_discount_unit_amount_gross?: number;
+            /**
+             * The unit gross amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_gross_decimal?: string;
+            /**
+             * The unit net amount before any discount is applied
+             */
+            before_discount_unit_amount_net?: number;
+            /**
+             * The unit net amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_net_decimal?: string;
             /**
              * The discount amount applied for each unit
              */
