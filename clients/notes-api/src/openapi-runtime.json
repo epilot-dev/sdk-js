@@ -113,6 +113,19 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/note/{id}/context": {
+      "get": {
+        "operationId": "getNoteContexts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {}
