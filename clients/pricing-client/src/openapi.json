@@ -5426,6 +5426,18 @@
             "description": "The name of the journey.",
             "example": "journey name"
           },
+          "journey_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The tags of the journey."
+          },
+          "journey_url_params": {
+            "type": "object",
+            "description": "The URL parameters of the journey.",
+            "additionalProperties": true
+          },
           "current_step_name": {
             "description": "The name of the step where the products selection is happening.",
             "type": "string",
