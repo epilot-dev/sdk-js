@@ -2378,6 +2378,16 @@ declare namespace Components {
              */
             journey_name: string;
             /**
+             * The tags of the journey.
+             */
+            journey_tags?: string[];
+            /**
+             * The URL parameters of the journey.
+             */
+            journey_url_params?: {
+                [name: string]: any;
+            };
+            /**
              * The name of the step where the products selection is happening.
              * example:
              * step name
