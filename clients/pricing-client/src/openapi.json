@@ -4126,6 +4126,18 @@
               ]
             }
           },
+          "_coupons": {
+            "type": "array",
+            "description": "The coupons applicable to the price item",
+            "readOnly": true,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Coupon"
+                }
+              ]
+            }
+          },
           "on_request_approved": {
             "type": "boolean",
             "description": "When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'."
@@ -5413,18 +5425,6 @@
             "type": "string",
             "description": "The name of the journey.",
             "example": "journey name"
-          },
-          "journey_tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "The tags of the journey."
-          },
-          "journey_url_params": {
-            "type": "object",
-            "description": "The URL parameters of the journey.",
-            "additionalProperties": true
           },
           "current_step_name": {
             "description": "The name of the step where the products selection is happening.",
