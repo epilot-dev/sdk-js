@@ -504,6 +504,16 @@
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "skip_validation",
+            "description": "If true, the system will skip validating against the previous reading and create the reading.\nFor e.g: if the previous reading is 100 and the current reading is 50, the system will allowed to create the reading when skip_validation is true.\n",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "requestBody": {
@@ -581,6 +591,16 @@
             "schema": {
               "type": "boolean",
               "default": true
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip_validation",
+            "description": "If true, the system will skip validating against the previous reading and create the reading.\nFor e.g: if the previous reading is 100 and the current reading is 50, the system will allowed to create the reading when skip_validation is true.\n",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           },
           {

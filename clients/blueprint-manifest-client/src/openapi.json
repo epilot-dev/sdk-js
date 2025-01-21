@@ -157,6 +157,10 @@
                   "isExportingMultipleResources": {
                     "type": "boolean",
                     "description": "Temporary flag to indicate if multiple resources are being exported"
+                  },
+                  "generateAISummary": {
+                    "type": "boolean",
+                    "default": false
                   }
                 },
                 "required": [
@@ -864,8 +868,20 @@
             "description": "A URL to download the source blueprint file used to import the blueprint",
             "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip"
           },
+          "docs_link": {
+            "type": "string",
+            "description": "Link to the blueprint documentation",
+            "example": "https://help.epilot.cloud"
+          },
           "source_blueprint_file_ref": {
             "$ref": "#/components/schemas/S3Reference"
+          },
+          "install_status": {
+            "$ref": "#/components/schemas/BlueprintInstallStatus"
+          },
+          "install_status_description": {
+            "type": "string",
+            "example": "This blueprint installation resulted in a partial deployment; some resources were created successfully, but  failed to complete the full resource setup."
           },
           "is_verified": {
             "type": "boolean",
@@ -953,6 +969,14 @@
             }
           }
         }
+      },
+      "BlueprintInstallStatus": {
+        "type": "string",
+        "enum": [
+          "SUCCESS",
+          "PARTIAL",
+          "FAILED"
+        ]
       },
       "FormattedErrorCodes": {
         "type": "string",

@@ -3979,14 +3979,39 @@
             "description": "The unit amount value",
             "readOnly": true
           },
+          "unit_amount_decimal": {
+            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+            "type": "string",
+            "readOnly": true
+          },
           "before_discount_unit_amount": {
             "type": "integer",
             "description": "The unit amount before any discount is applied",
             "readOnly": true
           },
-          "unit_amount_decimal": {
-            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+          "before_discount_unit_amount_decimal": {
             "type": "string",
+            "description": "The unit amount before any discount is applied, represented as a decimal string with at most 12 decimal places.",
+            "readOnly": true
+          },
+          "before_discount_unit_amount_gross": {
+            "type": "integer",
+            "description": "The unit gross amount before any discount is applied",
+            "readOnly": true
+          },
+          "before_discount_unit_amount_gross_decimal": {
+            "type": "string",
+            "description": "The unit gross amount before any discount is applied, represented as a decimal string with at most 12 decimal places.",
+            "readOnly": true
+          },
+          "before_discount_unit_amount_net": {
+            "type": "integer",
+            "description": "The unit net amount before any discount is applied",
+            "readOnly": true
+          },
+          "before_discount_unit_amount_net_decimal": {
+            "type": "string",
+            "description": "The unit net amount before any discount is applied, represented as a decimal string with at most 12 decimal places.",
             "readOnly": true
           },
           "unit_discount_amount": {
@@ -4097,6 +4122,18 @@
               "oneOf": [
                 {
                   "$ref": "#/components/schemas/RecurrenceAmount"
+                }
+              ]
+            }
+          },
+          "_coupons": {
+            "type": "array",
+            "description": "The coupons applicable to the price item",
+            "readOnly": true,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Coupon"
                 }
               ]
             }
@@ -5388,6 +5425,18 @@
             "type": "string",
             "description": "The name of the journey.",
             "example": "journey name"
+          },
+          "journey_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The tags of the journey."
+          },
+          "journey_url_params": {
+            "type": "object",
+            "description": "The URL parameters of the journey.",
+            "additionalProperties": true
           },
           "current_step_name": {
             "description": "The name of the step where the products selection is happening.",

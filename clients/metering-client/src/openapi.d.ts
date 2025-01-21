@@ -626,9 +626,11 @@ declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type SkipValidation = boolean;
         }
         export interface QueryParameters {
             async?: Parameters.Async;
+            skip_validation?: Parameters.SkipValidation;
             activity_id?: Parameters.ActivityId;
         }
         export interface RequestBody {
@@ -726,10 +728,12 @@ declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type SkipValidation = boolean;
         }
         export interface QueryParameters {
             async?: Parameters.Async;
             activity_id?: Parameters.ActivityId;
+            skip_validation?: Parameters.SkipValidation;
         }
         export interface RequestBody {
             readings?: Components.Schemas.MeterReading[];
