@@ -6781,6 +6781,32 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ValidateCaaRecords {
+        namespace Parameters {
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            origin: Parameters.Origin;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether to retry the validation to continue the domain setup
+                 */
+                retry?: boolean;
+                /**
+                 * Message of the validation
+                 */
+                message?: string;
+                /**
+                 * Whether the DNS is configured from the customer side
+                 */
+                isDNSConfigured?: boolean;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ValidateCadenceEntityEditRules {
         namespace Parameters {
             export type Attribute = string;
@@ -7096,6 +7122,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExtraPermissionAttributes.Responses.$200>
+  /**
+   * validateCaaRecords - validateCaaRecords
+   * 
+   * Validates the CAA records of a portal
+   */
+  'validateCaaRecords'(
+    parameters?: Parameters<Paths.ValidateCaaRecords.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateCaaRecords.Responses.$200>
   /**
    * getContact - getContact
    * 
@@ -7922,6 +7958,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExtraPermissionAttributes.Responses.$200>
+  }
+  ['/v2/portal/validate/caa-records']: {
+    /**
+     * validateCaaRecords - validateCaaRecords
+     * 
+     * Validates the CAA records of a portal
+     */
+    'post'(
+      parameters?: Parameters<Paths.ValidateCaaRecords.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateCaaRecords.Responses.$200>
   }
   ['/v2/portal/contact']: {
     /**

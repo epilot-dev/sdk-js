@@ -447,6 +447,19 @@
         "responses": {}
       }
     },
+    "/v2/portal/validate/caa-records": {
+      "post": {
+        "operationId": "validateCaaRecords",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/contact": {
       "get": {
         "operationId": "getContact",
