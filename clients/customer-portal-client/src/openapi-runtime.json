@@ -61,25 +61,6 @@
         "responses": {}
       }
     },
-    "/v2/portal/sso/user": {
-      "post": {
-        "operationId": "createSSOUser",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
     "/v2/portal/public/config": {
       "get": {
         "operationId": "getPortalConfigByDomain",
@@ -1226,6 +1207,34 @@
         ],
         "requestBody": {
           "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/public/sso/login": {
+      "post": {
+        "operationId": "ssoLogin",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "contact_id",
+            "required": false
+          }
+        ],
+        "requestBody": {
           "content": {
             "application/json": {}
           }

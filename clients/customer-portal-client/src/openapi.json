@@ -264,69 +264,6 @@
         }
       }
     },
-    "/v2/portal/sso/user": {
-      "post": {
-        "operationId": "createSSOUser",
-        "summary": "createSSOUser",
-        "description": "Creates a portal user as an SSO user.",
-        "security": [
-          {
-            "EpilotAuth": []
-          }
-        ],
-        "tags": [
-          "ECP Admin"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Origin"
-            },
-            "description": "Origin of the portal"
-          }
-        ],
-        "requestBody": {
-          "description": "Portal user payload",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSSOUserRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "SSO User created successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/PortalUser"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/InvalidRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/v2/portal/public/config": {
       "get": {
         "operationId": "getPortalConfigByDomain",
@@ -5245,6 +5182,84 @@
           }
         }
       }
+    },
+    "/v2/portal/public/sso/login": {
+      "post": {
+        "operationId": "ssoLogin",
+        "summary": "ssoLogin",
+        "description": "Initiate login using external SSO identity.\n\nVerifies the user with the issuer and matches the identity to an epilot user (or creates a new user).\n\nReturns parameters to be used with CUSTOM_AUTH flow against Cognito\n",
+        "security": [
+          {
+            "ExternalOIDCAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true,
+            "description": "Origin of the Portal",
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            }
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "description": "epilot organization id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": 123
+            }
+          },
+          {
+            "in": "query",
+            "name": "contact_id",
+            "description": "contact id in the epilot system",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+            }
+          }
+        ],
+        "tags": [
+          "Login"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "provider_slug": {
+                    "$ref": "#/components/schemas/ProviderSlug"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cognito login parameters to use with the CUSTOM_AUTH_FLOW",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "$ref": "#/components/schemas/SSOLoginToken"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5407,6 +5422,40 @@
                       ]
                     }
                   }
+                },
+                {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "reason": {
+                          "enum": [
+                            "plausibility_check_failed"
+                          ]
+                        },
+                        "upper_limit": {
+                          "type": "number"
+                        },
+                        "lower_limit": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "upper_limit",
+                        "lower_limit"
+                      ]
+                    },
+                    {
+                      "not": {
+                        "properties": {
+                          "reason": {
+                            "enum": [
+                              "plausibility_check_failed"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -5435,6 +5484,12 @@
         "in": "header",
         "name": "x-ivy-org-id",
         "description": "Set organization id as internal user"
+      },
+      "ExternalOIDCAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with id token from external OIDC provider",
+        "bearerFormat": "JWT"
       }
     },
     "schemas": {
@@ -6228,6 +6283,12 @@
                 "items": {
                   "$ref": "#/components/schemas/Grant"
                 }
+              },
+              "identity_providers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProviderPublicConfig"
+                }
               }
             }
           }
@@ -6580,6 +6641,10 @@
             "type": "string",
             "example": "Doe",
             "description": "Last Name of the portal user"
+          },
+          "contactId": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the contact"
           }
         }
       },
@@ -6613,10 +6678,6 @@
                   "type": "string"
                 }
               },
-              "contactId": {
-                "$ref": "#/components/schemas/EntityId",
-                "description": "ID of the contact"
-              },
               "registration_identifiers": {
                 "type": "object",
                 "description": "Identifier-value pairs per schema to identify a contact of a portal user during the resgistration",
@@ -6636,16 +6697,6 @@
                 }
               }
             }
-          }
-        ]
-      },
-      "CreateSSOUserRequest": {
-        "required": [
-          "email"
-        ],
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/UserRequest"
           }
         ]
       },
@@ -8807,6 +8858,16 @@
                 "type": "string",
                 "description": "Indicate whether the meter reading is plausible",
                 "example": "{{CallResponse.data.valid}}"
+              },
+              "upper_limit": {
+                "type": "string",
+                "description": "Upper allowed limit of the meter reading",
+                "example": "{{CallResponse.data.upper_limit}}"
+              },
+              "lower_limit": {
+                "type": "string",
+                "description": "Lower allowed limit of the meter reading",
+                "example": "{{CallResponse.data.lower_limit}}"
               }
             }
           }
@@ -9151,6 +9212,144 @@
             "description": "The status of the reading"
           }
         }
+      },
+      "SSOLoginToken": {
+        "type": "string"
+      },
+      "ProviderSlug": {
+        "type": "string",
+        "example": "office-365-login",
+        "description": "URL-friendly slug to use as organization-unique identifier for Provider",
+        "pattern": "[0-9a-z-]+"
+      },
+      "ProviderDisplayName": {
+        "type": "string",
+        "example": "Office 365 Login",
+        "description": "Human-readable display name for identity provider shown in login"
+      },
+      "ProviderConfig": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/ProviderSlug"
+          },
+          "display_name": {
+            "$ref": "#/components/schemas/ProviderDisplayName"
+          },
+          "provider_type": {
+            "type": "string",
+            "enum": [
+              "OIDC"
+            ]
+          },
+          "attribute_mappings": {
+            "$ref": "#/components/schemas/AttributeMappingConfig"
+          },
+          "oidc_config": {
+            "$ref": "#/components/schemas/OIDCProviderConfig"
+          }
+        },
+        "required": [
+          "display_name",
+          "provider_type"
+        ]
+      },
+      "ProviderPublicConfig": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/ProviderSlug"
+          },
+          "display_name": {
+            "$ref": "#/components/schemas/ProviderDisplayName"
+          },
+          "oidc_config": {
+            "$ref": "#/components/schemas/OIDCProviderConfig"
+          }
+        },
+        "required": [
+          "slug",
+          "display_name"
+        ]
+      },
+      "AttributeMappingConfig": {
+        "type": "object",
+        "description": "Dictionary of epilot user attributes to claims",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "email"
+          },
+          "display_name": {
+            "type": "string",
+            "example": "name"
+          },
+          "phone": {
+            "type": "string",
+            "example": "phone"
+          },
+          "preferred_language": {
+            "type": "string",
+            "example": "language"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "OIDCProviderConfig": {
+        "type": "object",
+        "properties": {
+          "oidc_issuer": {
+            "type": "string",
+            "description": "Issuing Authority URL",
+            "example": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0"
+          },
+          "client_id": {
+            "type": "string",
+            "example": "ab81daf8-8b1f-42d6-94ca-c51621054c75"
+          },
+          "client_secret": {
+            "type": "string",
+            "example": "7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Space-separated list of OAuth 2.0 scopes to request from OpenID Connect",
+            "example": "openid email"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/OIDCProviderMetadata"
+          }
+        },
+        "required": [
+          "oidc_issuer",
+          "client_id",
+          "scope"
+        ]
+      },
+      "OIDCProviderMetadata": {
+        "type": "object",
+        "properties": {
+          "authorization_endpoint": {
+            "type": "string",
+            "description": "URL of the authorization endpoint",
+            "example": "https://www.facebook.com/v12.0/dialog/oauth"
+          },
+          "token_endpoint": {
+            "type": "string",
+            "description": "URL of the token endpoint",
+            "example": "https://graph.facebook.com/v12.0/oauth/access_token"
+          },
+          "userinfo_endpoint": {
+            "type": "string",
+            "description": "URL of the userinfo endpoint",
+            "example": "https://graph.facebook.com/me"
+          }
+        }
+      },
+      "SAMLProviderConfig": {
+        "type": "object"
       }
     }
   },

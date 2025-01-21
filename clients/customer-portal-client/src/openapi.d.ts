@@ -32,13 +32,15 @@ declare namespace Components {
         export type ForbiddenByRule = Schemas.ErrorResp | Schemas.FailedRuleErrorResp;
         export type InternalServerError = Schemas.ErrorResp;
         export type InvalidRequest = Schemas.ErrorResp;
-        export interface InvalidRequestCreateMeterReading {
+        export type InvalidRequestCreateMeterReading = {
+            reason?: "plausibility_check_failed" | "contract_period" | "no_counter" | "no_direction" | "timestamp_future" | "less_than_previous" | "greater_than_subsequent" | "meter_decommissioned" | "plausibility_check_failed";
+            upper_limit: number;
+            lower_limit: number;
             /**
              * Error message
              */
             message?: string;
-            reason?: "contract_period" | "no_counter" | "no_direction" | "timestamp_future" | "less_than_previous" | "greater_than_subsequent" | "meter_decommissioned" | "plausibility_check_failed";
-        }
+        } | void;
         export type NotFound = Schemas.ErrorResp;
         export type Unauthorized = Schemas.ErrorResp;
     }
@@ -273,6 +275,31 @@ declare namespace Components {
             cad?: string[];
             calendar?: string[];
             other?: string[];
+        }
+        /**
+         * Dictionary of epilot user attributes to claims
+         */
+        export interface AttributeMappingConfig {
+            /**
+             * example:
+             * email
+             */
+            email: string;
+            /**
+             * example:
+             * name
+             */
+            display_name?: string;
+            /**
+             * example:
+             * phone
+             */
+            phone?: string;
+            /**
+             * example:
+             * language
+             */
+            preferred_language?: string;
         }
         export interface AuthConfig {
             /**
@@ -1034,26 +1061,6 @@ declare namespace Components {
              */
             EntitySlug;
         }
-        export interface CreateSSOUserRequest {
-            /**
-             * User's email address
-             * example:
-             * testemail921@yopmail.com
-             */
-            email: string;
-            /**
-             * First Name of the portal user
-             * example:
-             * John
-             */
-            first_name?: string;
-            /**
-             * Last Name of the portal user
-             * example:
-             * Doe
-             */
-            last_name?: string;
-        }
         export interface CreateUserRequest {
             /**
              * User's email address
@@ -1073,6 +1080,12 @@ declare namespace Components {
              * Doe
              */
             last_name?: string;
+            contactId?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
             /**
              * ID of the organization
              * example:
@@ -1091,12 +1104,6 @@ declare namespace Components {
             contactIdentifiers?: {
                 [name: string]: string;
             };
-            contactId?: /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            EntityId /* uuid */;
             /**
              * Identifier-value pairs per schema to identify a contact of a portal user during the resgistration
              * example:
@@ -1848,6 +1855,18 @@ declare namespace Components {
                  * {{CallResponse.data.valid}}
                  */
                 valid?: string;
+                /**
+                 * Upper allowed limit of the meter reading
+                 * example:
+                 * {{CallResponse.data.upper_limit}}
+                 */
+                upper_limit?: string;
+                /**
+                 * Lower allowed limit of the meter reading
+                 * example:
+                 * {{CallResponse.data.lower_limit}}
+                 */
+                lower_limit?: string;
             };
         }
         /**
@@ -2452,6 +2471,51 @@ declare namespace Components {
             };
             schema?: string;
         }
+        export interface OIDCProviderConfig {
+            /**
+             * Issuing Authority URL
+             * example:
+             * https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0
+             */
+            oidc_issuer: string;
+            /**
+             * example:
+             * ab81daf8-8b1f-42d6-94ca-c51621054c75
+             */
+            client_id: string;
+            /**
+             * example:
+             * 7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B
+             */
+            client_secret?: string;
+            /**
+             * Space-separated list of OAuth 2.0 scopes to request from OpenID Connect
+             * example:
+             * openid email
+             */
+            scope: string;
+            metadata?: OIDCProviderMetadata;
+        }
+        export interface OIDCProviderMetadata {
+            /**
+             * URL of the authorization endpoint
+             * example:
+             * https://www.facebook.com/v12.0/dialog/oauth
+             */
+            authorization_endpoint?: string;
+            /**
+             * URL of the token endpoint
+             * example:
+             * https://graph.facebook.com/v12.0/oauth/access_token
+             */
+            token_endpoint?: string;
+            /**
+             * URL of the userinfo endpoint
+             * example:
+             * https://graph.facebook.com/me
+             */
+            userinfo_endpoint?: string;
+        }
         /**
          * The opportunity entity
          */
@@ -3009,6 +3073,7 @@ declare namespace Components {
              * Permissions granted to a portal user while accessing entities
              */
             grants?: Grant[];
+            identity_providers?: ProviderPublicConfig[];
         }
         /**
          * The portal user entity
@@ -3103,6 +3168,50 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "product";
         }
+        export interface ProviderConfig {
+            slug?: /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            ProviderSlug /* [0-9a-z-]+ */;
+            display_name: /**
+             * Human-readable display name for identity provider shown in login
+             * example:
+             * Office 365 Login
+             */
+            ProviderDisplayName;
+            provider_type: "OIDC";
+            attribute_mappings?: /* Dictionary of epilot user attributes to claims */ AttributeMappingConfig;
+            oidc_config?: OIDCProviderConfig;
+        }
+        /**
+         * Human-readable display name for identity provider shown in login
+         * example:
+         * Office 365 Login
+         */
+        export type ProviderDisplayName = string;
+        export interface ProviderPublicConfig {
+            slug: /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            ProviderSlug /* [0-9a-z-]+ */;
+            display_name: /**
+             * Human-readable display name for identity provider shown in login
+             * example:
+             * Office 365 Login
+             */
+            ProviderDisplayName;
+            oidc_config?: OIDCProviderConfig;
+        }
+        /**
+         * URL-friendly slug to use as organization-unique identifier for Provider
+         * example:
+         * office-365-login
+         */
+        export type ProviderSlug = string; // [0-9a-z-]+
         export interface PublicContractIdentificationDetails {
             /**
              * Explanation of the hook.
@@ -3279,6 +3388,9 @@ declare namespace Components {
             attribute?: string | null;
             attribute_value?: string | null;
         }
+        export interface SAMLProviderConfig {
+        }
+        export type SSOLoginToken = string;
         export interface SaveEntityFile {
             entity_id: /**
              * Entity ID
@@ -3795,6 +3907,15 @@ declare namespace Components {
              * Doe
              */
             last_name?: string;
+            /**
+             * ID of the contact
+             */
+            contactId?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
         }
         export interface WidgetAction {
             _id: string;
@@ -4127,23 +4248,6 @@ declare namespace Paths {
             export type $400 = Components.Responses.InvalidRequestCreateMeterReading;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace CreateSSOUser {
-        namespace Parameters {
-            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
-        }
-        export interface QueryParameters {
-            origin: Parameters.Origin;
-        }
-        export type RequestBody = Components.Schemas.CreateSSOUserRequest;
-        namespace Responses {
-            export interface $201 {
-                data?: /* The portal user entity */ Components.Schemas.PortalUser;
-            }
-            export type $400 = Components.Responses.InvalidRequest;
-            export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -5699,6 +5803,7 @@ declare namespace Paths {
                  * Permissions granted to a portal user while accessing entities
                  */
                 grants?: Components.Schemas.Grant[];
+                identity_providers?: Components.Schemas.ProviderPublicConfig[];
                 certificate_details?: {
                     /**
                      * Status of the certificate
@@ -6456,6 +6561,47 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SsoLogin {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type ContactId = string; // uuid
+            /**
+             * example:
+             * 123
+             */
+            export type OrgId = string;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            origin: Parameters.Origin;
+            org_id: /**
+             * example:
+             * 123
+             */
+            Parameters.OrgId;
+            contact_id?: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.ContactId /* uuid */;
+        }
+        export interface RequestBody {
+            provider_slug?: /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            Components.Schemas.ProviderSlug /* [0-9a-z-]+ */;
+        }
+        namespace Responses {
+            export interface $200 {
+                token?: Components.Schemas.SSOLoginToken;
+            }
+        }
+    }
     namespace TrackFileDownloaded {
         namespace Parameters {
             export type Id = /**
@@ -6892,16 +7038,6 @@ export interface OperationMethods {
     data?: Paths.RevokeToken.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RevokeToken.Responses.$200>
-  /**
-   * createSSOUser - createSSOUser
-   * 
-   * Creates a portal user as an SSO user.
-   */
-  'createSSOUser'(
-    parameters?: Parameters<Paths.CreateSSOUser.QueryParameters> | null,
-    data?: Paths.CreateSSOUser.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateSSOUser.Responses.$201>
   /**
    * getPortalConfigByDomain - getPortalConfigByDomain
    * 
@@ -7638,6 +7774,21 @@ export interface OperationMethods {
     data?: Paths.CreateMeterReading.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
+  /**
+   * ssoLogin - ssoLogin
+   * 
+   * Initiate login using external SSO identity.
+   * 
+   * Verifies the user with the issuer and matches the identity to an epilot user (or creates a new user).
+   * 
+   * Returns parameters to be used with CUSTOM_AUTH flow against Cognito
+   * 
+   */
+  'ssoLogin'(
+    parameters?: Parameters<Paths.SsoLogin.QueryParameters> | null,
+    data?: Paths.SsoLogin.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SsoLogin.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -7688,18 +7839,6 @@ export interface PathsDictionary {
       data?: Paths.RevokeToken.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RevokeToken.Responses.$200>
-  }
-  ['/v2/portal/sso/user']: {
-    /**
-     * createSSOUser - createSSOUser
-     * 
-     * Creates a portal user as an SSO user.
-     */
-    'post'(
-      parameters?: Parameters<Paths.CreateSSOUser.QueryParameters> | null,
-      data?: Paths.CreateSSOUser.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateSSOUser.Responses.$201>
   }
   ['/v2/portal/public/config']: {
     /**
@@ -8563,6 +8702,23 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   }
+  ['/v2/portal/public/sso/login']: {
+    /**
+     * ssoLogin - ssoLogin
+     * 
+     * Initiate login using external SSO identity.
+     * 
+     * Verifies the user with the issuer and matches the identity to an epilot user (or creates a new user).
+     * 
+     * Returns parameters to be used with CUSTOM_AUTH flow against Cognito
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.SsoLogin.QueryParameters> | null,
+      data?: Paths.SsoLogin.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SsoLogin.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -8576,6 +8732,7 @@ export type ActivityId = Components.Schemas.ActivityId;
 export type ActivityItem = Components.Schemas.ActivityItem;
 export type AdminUser = Components.Schemas.AdminUser;
 export type AllowedFileExtensions = Components.Schemas.AllowedFileExtensions;
+export type AttributeMappingConfig = Components.Schemas.AttributeMappingConfig;
 export type AuthConfig = Components.Schemas.AuthConfig;
 export type Balance = Components.Schemas.Balance;
 export type BaseBillingEvent = Components.Schemas.BaseBillingEvent;
@@ -8588,7 +8745,6 @@ export type ContactExistsRequest = Components.Schemas.ContactExistsRequest;
 export type ContentWidget = Components.Schemas.ContentWidget;
 export type Contract = Components.Schemas.Contract;
 export type ContractIdentifier = Components.Schemas.ContractIdentifier;
-export type CreateSSOUserRequest = Components.Schemas.CreateSSOUserRequest;
 export type CreateUserRequest = Components.Schemas.CreateUserRequest;
 export type Currency = Components.Schemas.Currency;
 export type DataRetrievalItem = Components.Schemas.DataRetrievalItem;
@@ -8630,6 +8786,8 @@ export type Meter = Components.Schemas.Meter;
 export type MeterChartWidget = Components.Schemas.MeterChartWidget;
 export type MeterReading = Components.Schemas.MeterReading;
 export type MeterReadingWidget = Components.Schemas.MeterReadingWidget;
+export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
+export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
 export type Opportunity = Components.Schemas.Opportunity;
 export type Order = Components.Schemas.Order;
 export type OrganizationSettings = Components.Schemas.OrganizationSettings;
@@ -8639,6 +8797,10 @@ export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type Product = Components.Schemas.Product;
+export type ProviderConfig = Components.Schemas.ProviderConfig;
+export type ProviderDisplayName = Components.Schemas.ProviderDisplayName;
+export type ProviderPublicConfig = Components.Schemas.ProviderPublicConfig;
+export type ProviderSlug = Components.Schemas.ProviderSlug;
 export type PublicContractIdentificationDetails = Components.Schemas.PublicContractIdentificationDetails;
 export type PublicDataRetrievalHookDetails = Components.Schemas.PublicDataRetrievalHookDetails;
 export type PublicExtensionCapabilities = Components.Schemas.PublicExtensionCapabilities;
@@ -8649,6 +8811,8 @@ export type Reason = Components.Schemas.Reason;
 export type RegistrationIdentifier = Components.Schemas.RegistrationIdentifier;
 export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;
 export type Rule = Components.Schemas.Rule;
+export type SAMLProviderConfig = Components.Schemas.SAMLProviderConfig;
+export type SSOLoginToken = Components.Schemas.SSOLoginToken;
 export type SaveEntityFile = Components.Schemas.SaveEntityFile;
 export type SavePortalFile = Components.Schemas.SavePortalFile;
 export type Schema = Components.Schemas.Schema;
