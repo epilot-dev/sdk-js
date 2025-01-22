@@ -76,34 +76,76 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "resourceType": {
-                    "$ref": "#/components/schemas/ResourceNodeType"
-                  },
-                  "resourceIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "resourceType": {
+                        "$ref": "#/components/schemas/ResourceNodeType"
+                      },
+                      "resourceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "minItems": 1,
+                        "maxItems": 25
+                      },
+                      "jobId": {
+                        "$ref": "#/components/schemas/JobID"
+                      },
+                      "isExportingMultipleResources": {
+                        "type": "boolean",
+                        "description": "Temporary flag to indicate if multiple resources are being exported"
+                      },
+                      "pipelineId": {
+                        "type": "string",
+                        "description": "Pipeline ID selected when doing the sandbox sync"
+                      }
                     },
-                    "minItems": 1,
-                    "maxItems": 25
+                    "required": [
+                      "resourceType",
+                      "resourceIds"
+                    ]
                   },
-                  "jobId": {
-                    "$ref": "#/components/schemas/JobID"
-                  },
-                  "isExportingMultipleResources": {
-                    "type": "boolean",
-                    "description": "Temporary flag to indicate if multiple resources are being exported"
-                  },
-                  "pipelineId": {
-                    "type": "string",
-                    "description": "Pipeline ID selected when doing the sandbox sync"
+                  {
+                    "type": "object",
+                    "properties": {
+                      "resources": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "$ref": "#/components/schemas/ResourceNodeType"
+                            },
+                            "id": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "id"
+                          ]
+                        },
+                        "minItems": 1
+                      },
+                      "jobId": {
+                        "$ref": "#/components/schemas/JobID"
+                      },
+                      "isExportingMultipleResources": {
+                        "type": "boolean",
+                        "description": "Temporary flag to indicate if multiple resources are being exported"
+                      },
+                      "pipelineId": {
+                        "type": "string",
+                        "description": "Pipeline ID selected when doing the sandbox sync"
+                      }
+                    },
+                    "required": [
+                      "resources"
+                    ]
                   }
-                },
-                "required": [
-                  "resourceType",
-                  "resourceIds"
                 ]
               }
             }

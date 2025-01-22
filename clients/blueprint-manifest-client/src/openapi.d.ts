@@ -681,7 +681,7 @@ declare namespace Paths {
         }
     }
     namespace CreateExport {
-        export interface RequestBody {
+        export type RequestBody = {
             resourceType: Components.Schemas.ResourceNodeType;
             resourceIds: [
                 string,
@@ -724,7 +724,32 @@ declare namespace Paths {
              * Pipeline ID selected when doing the sandbox sync
              */
             pipelineId?: string;
-        }
+        } | {
+            resources: [
+                {
+                    type: Components.Schemas.ResourceNodeType;
+                    id: string;
+                },
+                ...{
+                    type: Components.Schemas.ResourceNodeType;
+                    id: string;
+                }[]
+            ];
+            jobId?: /**
+             * ID of an import or export job (state machine)
+             * example:
+             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+             */
+            Components.Schemas.JobID;
+            /**
+             * Temporary flag to indicate if multiple resources are being exported
+             */
+            isExportingMultipleResources?: boolean;
+            /**
+             * Pipeline ID selected when doing the sandbox sync
+             */
+            pipelineId?: string;
+        };
         namespace Responses {
             export interface $200 {
                 jobId?: /**
