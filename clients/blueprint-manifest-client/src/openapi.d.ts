@@ -117,6 +117,12 @@ declare namespace Components {
              * 1.0.0
              */
             manifest_version?: string;
+            /**
+             * All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json
+             */
+            selected_resources_url?: string;
         }
         export interface CommonMarkdownFields {
             /**
@@ -305,6 +311,12 @@ declare namespace Components {
              * 1.0.0
              */
             manifest_version?: string;
+            /**
+             * All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json
+             */
+            selected_resources_url?: string;
         }
         /**
          * ID of an import or export job (state machine)
@@ -383,6 +395,12 @@ declare namespace Components {
              * 1.0.0
              */
             manifest_version?: string;
+            /**
+             * All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json
+             */
+            selected_resources_url?: string;
             /**
              * Markdown content part of a manifest file
              */
@@ -491,6 +509,12 @@ declare namespace Components {
              */
             manifest_version?: string;
             /**
+             * All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json
+             */
+            selected_resources_url?: string;
+            /**
              * When the manifest was first installed (applied)
              */
             created_at?: string; // date-time
@@ -583,6 +607,17 @@ declare namespace Components {
              * templates/main.tf
              */
             key: string;
+        }
+        export interface SelectedResources {
+            exported_root_resources: {
+                id: string;
+                type: ResourceNodeType;
+            }[];
+            selected_resources: string[];
+            /**
+             * Pipeline ID selected when doing the sandbox sync
+             */
+            pipeline_id?: string;
         }
         export interface UploadFilePayload {
             /**
@@ -685,6 +720,10 @@ declare namespace Paths {
              * Temporary flag to indicate if multiple resources are being exported
              */
             isExportingMultipleResources?: boolean;
+            /**
+             * Pipeline ID selected when doing the sandbox sync
+             */
+            pipelineId?: string;
         }
         namespace Responses {
             export interface $200 {
@@ -1110,5 +1149,6 @@ export type ResourceNode = Components.Schemas.ResourceNode;
 export type ResourceNodeType = Components.Schemas.ResourceNodeType;
 export type RootResourceNode = Components.Schemas.RootResourceNode;
 export type S3Reference = Components.Schemas.S3Reference;
+export type SelectedResources = Components.Schemas.SelectedResources;
 export type UploadFilePayload = Components.Schemas.UploadFilePayload;
 export type VirtualResourceNodeGroup = Components.Schemas.VirtualResourceNodeGroup;

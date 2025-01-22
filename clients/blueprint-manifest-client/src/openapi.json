@@ -95,6 +95,10 @@
                   "isExportingMultipleResources": {
                     "type": "boolean",
                     "description": "Temporary flag to indicate if multiple resources are being exported"
+                  },
+                  "pipelineId": {
+                    "type": "string",
+                    "description": "Pipeline ID selected when doing the sandbox sync"
                   }
                 },
                 "required": [
@@ -897,6 +901,11 @@
             "type": "string",
             "description": "Version of the manifest (semver)",
             "example": "1.0.0"
+          },
+          "selected_resources_url": {
+            "type": "string",
+            "description": "All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest",
+            "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json"
           }
         }
       },
@@ -1058,6 +1067,43 @@
         },
         "required": [
           "org_id"
+        ]
+      },
+      "SelectedResources": {
+        "type": "object",
+        "properties": {
+          "exported_root_resources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceNodeType"
+                }
+              },
+              "required": [
+                "id",
+                "type"
+              ]
+            }
+          },
+          "selected_resources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pipeline_id": {
+            "type": "string",
+            "description": "Pipeline ID selected when doing the sandbox sync"
+          }
+        },
+        "required": [
+          "exported_root_resources",
+          "selected_resources"
         ]
       }
     },
