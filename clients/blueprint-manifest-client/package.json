@@ -1,6 +1,6 @@
 {
   "name": "@epilot/blueprint-manifest-client",
-  "version": "2.6.6",
+  "version": "2.6.7",
   "description": "Client for epilot Terraform Blueprint Manifest API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
     "test": "jest",
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/blueprint-manifest.yaml",
-    "openapi:local": "node ../../scripts/update-openapi.js ../../../blueprints-api/lambda/TerraformHandlerFunction/openapi.yml",
+    "openapi:local": "node ../../scripts/update-openapi.js ../../../blueprint-manifest-api/lambda/TerraformHandlerFunction/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",

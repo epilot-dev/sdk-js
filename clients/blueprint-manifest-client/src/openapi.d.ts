@@ -668,6 +668,10 @@ declare namespace Paths {
              * example.tf
              */
             manifestFilePath?: string | null;
+            /**
+             * List of resources to ignore changes for
+             */
+            resourcesToIgnore?: string[];
         }
         namespace Responses {
             export interface $200 {
@@ -788,6 +792,10 @@ declare namespace Paths {
              * Source of the manifest
              */
             source?: "file" | "marketplace" | "sandbox";
+            /**
+             * List of resources to ignore changes for
+             */
+            resourcesToIgnore?: string[];
         } | {
             /**
              * Manifest s3 key uploaded via `uploadManifest`
@@ -803,6 +811,10 @@ declare namespace Paths {
              * Source of the manifest
              */
             source?: "file" | "marketplace" | "sandbox";
+            /**
+             * List of resources to ignore changes for
+             */
+            resourcesToIgnore?: string[];
         };
         namespace Responses {
             export interface $200 {

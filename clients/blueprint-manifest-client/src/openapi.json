@@ -322,6 +322,13 @@
                             "$ref": "#/components/schemas/ManifestSource"
                           }
                         ]
+                      },
+                      "resourcesToIgnore": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "List of resources to ignore changes for"
                       }
                     },
                     "required": [
@@ -356,6 +363,13 @@
                             "$ref": "#/components/schemas/ManifestSource"
                           }
                         ]
+                      },
+                      "resourcesToIgnore": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "List of resources to ignore changes for"
                       }
                     },
                     "required": [
@@ -412,6 +426,13 @@
                     "example": "example.tf",
                     "deprecated": true,
                     "nullable": true
+                  },
+                  "resourcesToIgnore": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "List of resources to ignore changes for"
                   }
                 }
               }
