@@ -61,25 +61,6 @@
         "responses": {}
       }
     },
-    "/v2/portal/sso/user": {
-      "post": {
-        "operationId": "createSSOUser",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
     "/v2/portal/public/config": {
       "get": {
         "operationId": "getPortalConfigByDomain",
@@ -130,10 +111,165 @@
         "responses": {}
       }
     },
+    "/v2/portal/public/extensions": {
+      "get": {
+        "operationId": "getPublicPortalExtensionDetails",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/consumption": {
+      "get": {
+        "operationId": "getConsumption",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "extensionId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "meter_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/costs": {
+      "get": {
+        "operationId": "getCosts",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "extensionId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "meter_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/prices": {
+      "get": {
+        "operationId": "getPrices",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "extensionId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "hookId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "meter_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/external-links": {
       "get": {
         "operationId": "getExternalLinks",
         "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "contactId",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/resolve:external-link/{id}": {
+      "get": {
+        "operationId": "getResolvedExternalLink",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
           {
             "in": "query",
             "name": "origin",
@@ -292,6 +428,19 @@
         "responses": {}
       }
     },
+    "/v2/portal/validate/caa-records": {
+      "post": {
+        "operationId": "validateCaaRecords",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/contact": {
       "get": {
         "operationId": "getContact",
@@ -389,7 +538,7 @@
         "responses": {}
       }
     },
-    "/v2/porta/users/by-related-entity": {
+    "/v2/portal/users/by-related-entity": {
       "get": {
         "operationId": "fetchPortalUsersByRelatedEntity",
         "parameters": [
@@ -415,6 +564,11 @@
             "in": "query",
             "name": "confirmation_link_token",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "use_redirect",
+            "required": false
           }
         ],
         "responses": {}
@@ -712,24 +866,6 @@
           {
             "in": "path",
             "name": "slug",
-            "required": true
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v2/portal/entity/add-end-customer/{slug}/{id}": {
-      "put": {
-        "operationId": "addEndCustomerRelationToEntity",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "required": true
-          },
-          {
-            "in": "path",
-            "name": "id",
             "required": true
           }
         ],
@@ -1058,6 +1194,53 @@
         ],
         "responses": {}
       }
+    },
+    "/v2/portal/metering/reading": {
+      "post": {
+        "operationId": "createMeterReading",
+        "parameters": [
+          {
+            "name": "override_plausibility",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/public/sso/login": {
+      "post": {
+        "operationId": "ssoLogin",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "origin",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "contact_id",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -1098,6 +1281,16 @@
         }
       },
       "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ConfirmUserInvalidRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestCreateMeterReading": {
         "content": {
           "application/json": {}
         }

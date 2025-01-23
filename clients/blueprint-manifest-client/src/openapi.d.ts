@@ -21,6 +21,7 @@ declare namespace Components {
         JobID?: Parameters.JobID;
     }
     namespace Schemas {
+        export type BlueprintInstallStatus = "SUCCESS" | "PARTIAL" | "FAILED";
         export interface CallerIdentity {
             /**
              * a human readable name of the caller (e.g. user name, token name or email address)
@@ -92,11 +93,36 @@ declare namespace Components {
              */
             source_blueprint_file?: string;
             /**
+             * Link to the blueprint documentation
+             * example:
+             * https://help.epilot.cloud
+             */
+            docs_link?: string;
+            source_blueprint_file_ref?: S3Reference;
+            install_status?: BlueprintInstallStatus;
+            /**
+             * example:
+             * This blueprint installation resulted in a partial deployment; some resources were created successfully, but  failed to complete the full resource setup.
+             */
+            install_status_description?: string;
+            /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
             is_verified?: boolean;
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            /**
+             * Version of the manifest (semver)
+             * example:
+             * 1.0.0
+             */
+            manifest_version?: string;
+            /**
+             * All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json
+             */
+            selected_resources_url?: string;
         }
         export interface CommonMarkdownFields {
             /**
@@ -264,8 +290,33 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip
              */
             source_blueprint_file?: string;
+            /**
+             * Link to the blueprint documentation
+             * example:
+             * https://help.epilot.cloud
+             */
+            docs_link?: string;
+            source_blueprint_file_ref?: S3Reference;
+            install_status?: BlueprintInstallStatus;
+            /**
+             * example:
+             * This blueprint installation resulted in a partial deployment; some resources were created successfully, but  failed to complete the full resource setup.
+             */
+            install_status_description?: string;
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            /**
+             * Version of the manifest (semver)
+             * example:
+             * 1.0.0
+             */
+            manifest_version?: string;
+            /**
+             * All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json
+             */
+            selected_resources_url?: string;
         }
         /**
          * ID of an import or export job (state machine)
@@ -281,6 +332,14 @@ declare namespace Components {
              * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
              */
             JobID;
+            /**
+             * List of job IDs that were used to install the manifest
+             */
+            previous_jobs_ids?: string[];
+            /**
+             * List of jobs that were used to install the manifest
+             */
+            previous_jobs?: Job[];
             manifest_id?: /**
              * ID of an imported / installed manifest
              * example:
@@ -312,11 +371,36 @@ declare namespace Components {
              */
             source_blueprint_file?: string;
             /**
+             * Link to the blueprint documentation
+             * example:
+             * https://help.epilot.cloud
+             */
+            docs_link?: string;
+            source_blueprint_file_ref?: S3Reference;
+            install_status?: BlueprintInstallStatus;
+            /**
+             * example:
+             * This blueprint installation resulted in a partial deployment; some resources were created successfully, but  failed to complete the full resource setup.
+             */
+            install_status_description?: string;
+            /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
             is_verified?: boolean;
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            /**
+             * Version of the manifest (semver)
+             * example:
+             * 1.0.0
+             */
+            manifest_version?: string;
+            /**
+             * All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json
+             */
+            selected_resources_url?: string;
             /**
              * Markdown content part of a manifest file
              */
@@ -400,11 +484,36 @@ declare namespace Components {
              */
             source_blueprint_file?: string;
             /**
+             * Link to the blueprint documentation
+             * example:
+             * https://help.epilot.cloud
+             */
+            docs_link?: string;
+            source_blueprint_file_ref?: S3Reference;
+            install_status?: BlueprintInstallStatus;
+            /**
+             * example:
+             * This blueprint installation resulted in a partial deployment; some resources were created successfully, but  failed to complete the full resource setup.
+             */
+            install_status_description?: string;
+            /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
             is_verified?: boolean;
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            /**
+             * Version of the manifest (semver)
+             * example:
+             * 1.0.0
+             */
+            manifest_version?: string;
+            /**
+             * All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json
+             */
+            selected_resources_url?: string;
             /**
              * When the manifest was first installed (applied)
              */
@@ -499,6 +608,17 @@ declare namespace Components {
              */
             key: string;
         }
+        export interface SelectedResources {
+            exported_root_resources: {
+                id: string;
+                type: ResourceNodeType;
+            }[];
+            selected_resources: string[];
+            /**
+             * Pipeline ID selected when doing the sandbox sync
+             */
+            pipeline_id?: string;
+        }
         export interface UploadFilePayload {
             /**
              * example:
@@ -561,7 +681,7 @@ declare namespace Paths {
         }
     }
     namespace CreateExport {
-        export interface RequestBody {
+        export type RequestBody = {
             resourceType: Components.Schemas.ResourceNodeType;
             resourceIds: [
                 string,
@@ -600,7 +720,36 @@ declare namespace Paths {
              * Temporary flag to indicate if multiple resources are being exported
              */
             isExportingMultipleResources?: boolean;
-        }
+            /**
+             * Pipeline ID selected when doing the sandbox sync
+             */
+            pipelineId?: string;
+        } | {
+            resources: [
+                {
+                    type: Components.Schemas.ResourceNodeType;
+                    id: string;
+                },
+                ...{
+                    type: Components.Schemas.ResourceNodeType;
+                    id: string;
+                }[]
+            ];
+            jobId?: /**
+             * ID of an import or export job (state machine)
+             * example:
+             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+             */
+            Components.Schemas.JobID;
+            /**
+             * Temporary flag to indicate if multiple resources are being exported
+             */
+            isExportingMultipleResources?: boolean;
+            /**
+             * Pipeline ID selected when doing the sandbox sync
+             */
+            pipelineId?: string;
+        };
         namespace Responses {
             export interface $200 {
                 jobId?: /**
@@ -707,6 +856,7 @@ declare namespace Paths {
              * Temporary flag to indicate if multiple resources are being exported
              */
             isExportingMultipleResources?: boolean;
+            generateAISummary?: boolean;
         }
         namespace Responses {
             export interface $200 {
@@ -1002,6 +1152,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type BlueprintInstallStatus = Components.Schemas.BlueprintInstallStatus;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type CommonImportFields = Components.Schemas.CommonImportFields;
 export type CommonManifestFields = Components.Schemas.CommonManifestFields;
@@ -1023,5 +1174,6 @@ export type ResourceNode = Components.Schemas.ResourceNode;
 export type ResourceNodeType = Components.Schemas.ResourceNodeType;
 export type RootResourceNode = Components.Schemas.RootResourceNode;
 export type S3Reference = Components.Schemas.S3Reference;
+export type SelectedResources = Components.Schemas.SelectedResources;
 export type UploadFilePayload = Components.Schemas.UploadFilePayload;
 export type VirtualResourceNodeGroup = Components.Schemas.VirtualResourceNodeGroup;

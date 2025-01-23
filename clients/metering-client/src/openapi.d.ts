@@ -252,6 +252,10 @@ declare namespace Components {
              */
             ma_lo_id?: string;
             /**
+             * The status of the meter
+             */
+            status?: "active" | "decommissioned";
+            /**
              * The type of the meter
              */
             meter_type?: "three-phase-meter" | "bellow-gas-meter" | "rotary-piston-meter" | "smart-meter" | "performance-meter" | "maximum-meter" | "turbine-gas-meter" | "ultrasonic-gas-meter" | "alternating-current-meter" | "modern-metering-system" | "intelligent-measuring-system" | "electronic-meter";
@@ -622,9 +626,11 @@ declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type SkipValidation = boolean;
         }
         export interface QueryParameters {
             async?: Parameters.Async;
+            skip_validation?: Parameters.SkipValidation;
             activity_id?: Parameters.ActivityId;
         }
         export interface RequestBody {
@@ -722,10 +728,12 @@ declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type SkipValidation = boolean;
         }
         export interface QueryParameters {
             async?: Parameters.Async;
             activity_id?: Parameters.ActivityId;
+            skip_validation?: Parameters.SkipValidation;
         }
         export interface RequestBody {
             readings?: Components.Schemas.MeterReading[];
@@ -896,6 +904,10 @@ declare namespace Paths {
                      */
                     ma_lo_id?: string;
                     /**
+                     * The status of the meter
+                     */
+                    status?: "active" | "decommissioned";
+                    /**
                      * The type of the meter
                      */
                     meter_type?: "three-phase-meter" | "bellow-gas-meter" | "rotary-piston-meter" | "smart-meter" | "performance-meter" | "maximum-meter" | "turbine-gas-meter" | "ultrasonic-gas-meter" | "alternating-current-meter" | "modern-metering-system" | "intelligent-measuring-system" | "electronic-meter";
@@ -967,6 +979,12 @@ declare namespace Paths {
                         $relation?: Components.Schemas.EntityRelation[];
                     };
                     journey_actions?: Components.Schemas.JourneyActions;
+                    /**
+                     * The timestamp of the last reading
+                     * example:
+                     * 2022-10-10T00:00:00.000Z
+                     */
+                    last_reading?: string;
                 }[];
             }
             export type $400 = Components.Responses.InvalidRequest;

@@ -67,7 +67,13 @@
           },
           "415": {
             "description": "Unsupported media type",
-            "content": null
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOutput"
+                }
+              }
+            }
           }
         }
       }
@@ -76,7 +82,7 @@
       "post": {
         "operationId": "generateDocumentV2",
         "summary": "generateDocumentV2",
-        "description": "Builds document generated from input document with variables.\n\nSupported input document types:\n- .docx\n\nSupported output document types:\n- .pdf\n- .docx but limited to only text based variables\n\nUses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the document.\n",
+        "description": "Generates documents from templates with variables.\n\nSupported document types as input:\n- .docx\n- .ics\n\nSupported document types as output:\n- .pdf\n- .docx but limited to only text based variables\n- .ics\n\nUses [Template Variable API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.\n",
         "parameters": [
           {
             "in": "query",
@@ -97,6 +103,19 @@
                 "full_generation"
               ],
               "default": "full_generation"
+            }
+          },
+          {
+            "in": "query",
+            "name": "preview_mode",
+            "description": "Type of mode used for document generation preview:\n- open - preview_url provides a link to open the file in a browser\n- download - preview_url provides a link to download the file\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "download"
+              ],
+              "default": "open"
             }
           }
         ],
@@ -545,6 +564,30 @@
             "description": "A message explaining the progress",
             "type": "string"
           },
+          "ics_output": {
+            "type": "object",
+            "properties": {
+              "output_document": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "description": "Generated document filename for ICS",
+                    "type": "string",
+                    "example": "my-appointment-OR-001.ics"
+                  },
+                  "s3ref": {
+                    "$ref": "#/components/schemas/S3Reference"
+                  }
+                },
+                "example": {
+                  "s3ref": {
+                    "bucket": "document-api-preview-prod",
+                    "key": "preview/my-appointment.ics"
+                  }
+                }
+              }
+            }
+          },
           "pdf_output": {
             "type": "object",
             "properties": {
@@ -672,5 +715,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://document.sls.epilot.io"
+    }
+  ]
 }

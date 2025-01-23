@@ -589,8 +589,29 @@
           },
           "enabled": {
             "type": "boolean",
-            "description": "Whether the automation is enabled or not",
-            "default": true
+            "description": "Whether the automation is enabled or not"
+          },
+          "disable_details": {
+            "type": "object",
+            "properties": {
+              "disabled_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the flow was disabled"
+              },
+              "disabled_by": {
+                "type": "string",
+                "enum": [
+                  "system",
+                  "user"
+                ],
+                "description": "Who disabled the flow (system or user)"
+              }
+            },
+            "required": [
+              "disabled_at",
+              "disabled_by"
+            ]
           },
           "triggers": {
             "type": "array",
@@ -670,6 +691,16 @@
             "type": "number",
             "description": "Version of the flow",
             "example": 2
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Source blueprint/manifest ID used when automation is created via blueprints.",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            },
+            "nullable": true
           }
         },
         "required": [
@@ -2399,7 +2430,8 @@
           "failed",
           "cancelled",
           "skipped",
-          "scheduled"
+          "scheduled",
+          "hot"
         ]
       },
       "GetExecutionsResp": {

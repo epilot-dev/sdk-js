@@ -10,7 +10,7 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
-        export type ContextType = "workflow_execution" | "workflow_task";
+        export type ContextType = "workflow_execution" | "workflow_task" | "entity";
         /**
          * Base Entity schema
          */
@@ -400,6 +400,15 @@ declare namespace Components {
              */
             results: /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ NoteEntity[];
         }
+        /**
+         * Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data
+         */
+        export interface WorkflowExecution {
+            id: string;
+            definitionId: string;
+            orgId: string;
+            name: string;
+        }
     }
 }
 declare namespace Paths {
@@ -443,6 +452,23 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* Base Entity schema */ Components.Schemas.NoteGetRequestResponse;
+        }
+    }
+    namespace GetNoteContexts {
+        namespace Parameters {
+            /**
+             * The Entity ID of the Note entry to get contexts for
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /* The Entity ID of the Note entry to get contexts for */ Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = {
+                type: Components.Schemas.ContextType;
+                context: /* Base Entity schema */ Components.Schemas.Entity | /* Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data */ Components.Schemas.WorkflowExecution;
+            }[];
         }
     }
     namespace GetNotesByContext {
@@ -594,6 +620,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PinNote.Responses.$200>
+  /**
+   * getNoteContexts - getNoteContexts
+   * 
+   * Gets all the Entity and non-Entity records the Note is contextually attached to
+   */
+  'getNoteContexts'(
+    parameters?: Parameters<Paths.GetNoteContexts.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetNoteContexts.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -675,6 +711,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PinNote.Responses.$200>
   }
+  ['/v1/note/{id}/context']: {
+    /**
+     * getNoteContexts - getNoteContexts
+     * 
+     * Gets all the Entity and non-Entity records the Note is contextually attached to
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetNoteContexts.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetNoteContexts.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -690,3 +738,4 @@ export type NotePatchRequestBody = Components.Schemas.NotePatchRequestBody;
 export type NotePostRequestBody = Components.Schemas.NotePostRequestBody;
 export type NotePutRequestBody = Components.Schemas.NotePutRequestBody;
 export type NotesGetRequestResponse = Components.Schemas.NotesGetRequestResponse;
+export type WorkflowExecution = Components.Schemas.WorkflowExecution;

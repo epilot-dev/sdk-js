@@ -119,6 +119,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -307,7 +310,8 @@
                         "enum": [
                           "Dr.",
                           "Prof.",
-                          "Prof. Dr."
+                          "Prof. Dr.",
+                          null
                         ]
                       },
                       "salutation": {
@@ -323,7 +327,8 @@
                           "Family",
                           "Ownership",
                           "Assembly",
-                          "Other"
+                          "Other",
+                          null
                         ]
                       },
                       "first_name": {
@@ -400,7 +405,8 @@
                               "enum": [
                                 "DE",
                                 "AT",
-                                "CH"
+                                "CH",
+                                null
                               ]
                             },
                             "additional_info": {
@@ -1071,6 +1077,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1164,6 +1173,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -1315,9 +1327,9 @@
             "in": "query",
             "name": "purge",
             "description": "Permanently deletes the entity when set to `true`",
-            "default": false,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -1505,6 +1517,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1545,6 +1560,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1636,6 +1654,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1728,6 +1749,9 @@
                 ]
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -1791,6 +1815,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -1847,6 +1874,9 @@
         "responses": {
           "204": {
             "description": "Relations deleted with success."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1913,6 +1943,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1973,6 +2006,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -2006,6 +2042,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -2084,6 +2123,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -2129,6 +2171,9 @@
         "responses": {
           "204": {
             "description": "Relation deleted with success."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -2344,6 +2389,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -2364,6 +2412,40 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SavedViewItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedViewItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchSavedView",
+        "summary": "patchSavedView",
+        "description": "Partially updates a saved view with the provided payload. If an updated_at is passed and the server contains a newer version of the view a `409` error is returned",
+        "tags": [
+          "Saved Views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedViewPartial"
               }
             }
           }
@@ -2526,6 +2608,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -2642,6 +2727,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -2671,7 +2759,7 @@
             }
           },
           "404": {
-            "description": "Taxonomy classification not found"
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -2809,6 +2897,15 @@
               "type": "string",
               "example": "sales"
             }
+          },
+          {
+            "in": "query",
+            "name": "archived",
+            "description": "Filter by archived status",
+            "schema": {
+              "type": "boolean",
+              "example": false
+            }
           }
         ],
         "requestBody": {
@@ -2902,11 +2999,11 @@
         }
       }
     },
-    "/v1/entity/taxonomies/jobs": {
+    "/v1/entity/taxonomies/bulk-jobs": {
       "get": {
-        "operationId": "getJobs",
-        "summary": "getJobs",
-        "description": "Gets bulk jobs by job status",
+        "operationId": "getTaxonomyBulkActionJobs",
+        "summary": "getTaxonomyBulkActionJobs",
+        "description": "Gets bulk actions jobs by job status:\n- <undefined> = all active jobs\n- PENDING = all active jobs\n- FAILED = all failed jobs\n- COMPLETED = all completed jobs\n",
         "tags": [
           "Taxonomy"
         ],
@@ -2936,6 +3033,41 @@
         }
       }
     },
+    "/v1/entity/taxonomies/bulk-jobs/{job_id}": {
+      "get": {
+        "operationId": "getTaxonomyBulkActionJobById",
+        "summary": "getTaxonomyBulkActionJobById",
+        "description": "Gets a bulk action job by job id",
+        "tags": [
+          "Taxonomy"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the job matching the given job id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TaxonomyBulkJob"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/entity/taxonomies/classifications:move": {
       "post": {
         "operationId": "bulkMoveClassifications",
@@ -2944,22 +3076,20 @@
         "tags": [
           "Taxonomy"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "target_taxonomy",
-            "description": "The target taxonomy to which the classifications will be moved",
-            "schema": {
-              "$ref": "#/components/schemas/TaxonomySlug"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
+                  "job_id": {
+                    "description": "Job ID for tracking the status of a bulk operation request",
+                    "type": "string"
+                  },
+                  "target_taxonomy": {
+                    "description": "The target taxonomy to which the classifications will be moved",
+                    "$ref": "#/components/schemas/TaxonomySlug"
+                  },
                   "classification_ids": {
                     "type": "array",
                     "items": {
@@ -2998,20 +3128,9 @@
       "post": {
         "operationId": "bulkDeleteClassifications",
         "summary": "bulkDeleteClassifications",
-        "description": "Archives or permanently deletes taxonomy classifications. When permanent is true, the classifications are deleted through a bulk \nasync operation which also deletes all references of the deleted classifications from the entities referencing them.\n",
+        "description": "Permanently deletes taxonomy classifications. The classifications are deleted through a bulk\nasync operation which also deletes all references of the deleted classifications from the entities\nreferencing them.\n",
         "tags": [
           "Taxonomy"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "permanent",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            },
-            "description": "Whether to permanently delete the classifications or just archive them"
-          }
         ],
         "requestBody": {
           "content": {
@@ -3019,6 +3138,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "job_id": {
+                    "description": "Job ID for tracking the status of a bulk operation request",
+                    "type": "string"
+                  },
                   "classification_ids": {
                     "type": "array",
                     "items": {
@@ -3115,6 +3238,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -3256,6 +3382,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -3397,6 +3526,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -3538,6 +3670,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -3697,6 +3832,10 @@
             "format": "uri",
             "example": "https://docs.epilot.io/docs/pricing/entities"
           },
+          "category": {
+            "type": "string",
+            "example": "customer_relations"
+          },
           "published": {
             "type": "boolean",
             "example": false
@@ -3791,6 +3930,19 @@
                     "type": "array",
                     "items": {
                       "$ref": "#/components/schemas/EntityAction"
+                    }
+                  },
+                  "ui_config": {
+                    "type": "object",
+                    "properties": {
+                      "content_direction": {
+                        "type": "string",
+                        "enum": [
+                          "row",
+                          "column"
+                        ],
+                        "description": "Show attributes in a row or column"
+                      }
                     }
                   }
                 }
@@ -4199,6 +4351,9 @@
             "$ref": "#/components/schemas/UserRelationAttribute"
           },
           {
+            "$ref": "#/components/schemas/AddressAttribute"
+          },
+          {
             "$ref": "#/components/schemas/AddressRelationAttribute"
           },
           {
@@ -4212,6 +4367,9 @@
           },
           {
             "$ref": "#/components/schemas/TagsAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/MessageEmailAddressAttribute"
           },
           {
             "$ref": "#/components/schemas/NumberAttribute"
@@ -5092,6 +5250,60 @@
           }
         ]
       },
+      "DefaultAddressFields": {
+        "type": "array",
+        "description": "Default fields visible on addresses",
+        "items": {
+          "type": "string",
+          "enum": [
+            "postal_code",
+            "city",
+            "street",
+            "street_number",
+            "plot_area",
+            "plot_of_land",
+            "suburb",
+            "country",
+            "additional_info",
+            "coordinates",
+            "start_date",
+            "end_date",
+            "salutation",
+            "title",
+            "first_name",
+            "last_name",
+            "company_name"
+          ]
+        },
+        "default": [
+          "postal_code",
+          "city",
+          "street",
+          "street_number"
+        ]
+      },
+      "AddressAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Address attribute",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "address"
+                ]
+              },
+              "default_address_fields": {
+                "$ref": "#/components/schemas/DefaultAddressFields"
+              }
+            }
+          }
+        ]
+      },
       "AddressRelationAttribute": {
         "allOf": [
           {
@@ -5109,6 +5321,9 @@
               },
               "has_primary": {
                 "type": "boolean"
+              },
+              "default_address_fields": {
+                "$ref": "#/components/schemas/DefaultAddressFields"
               }
             }
           }
@@ -5248,7 +5463,8 @@
                   "relation",
                   "payment",
                   "price_component",
-                  "date"
+                  "date",
+                  "message_email_address"
                 ]
               },
               "enable_relation_picker": {
@@ -5288,6 +5504,42 @@
                 }
               }
             }
+          }
+        ]
+      },
+      "MessageEmailAddressAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Message emil address",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "message_email_address"
+                ]
+              },
+              "address": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "send_status": {
+                "type": "string"
+              },
+              "email_type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "address",
+              "name"
+            ]
           }
         ]
       },
@@ -5441,6 +5693,36 @@
             "items": {
               "$ref": "#/components/schemas/SettingFlag"
             }
+          },
+          "display_mode": {
+            "type": "string",
+            "enum": [
+              "inline",
+              "block"
+            ],
+            "description": "Defines the display mode of the summary attribute.\nWhen set to `inline`, the label and value will be displayed in the same line.\nWhen set to `block`, the label and value will be displayed in separate lines.\n"
+          },
+          "content_line_cap": {
+            "type": "number",
+            "description": "Defines the line numbers of the content.\nFor instance, When set to 1, the content will be displayed in a single line.\n"
+          },
+          "content_wrap": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "nowrap",
+              "pre",
+              "pre-wrap"
+            ],
+            "description": "Defines white-space of the content.\n"
+          },
+          "hide_label": {
+            "type": "boolean",
+            "description": "When set to true, will hide the label of the field."
+          },
+          "highlight_container": {
+            "type": "boolean",
+            "description": "When set to true, will highlight the container of the field."
           }
         },
         "required": [
@@ -5914,6 +6196,12 @@
             "nullable": true,
             "readOnly": true
           },
+          "_deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true
+          },
           "_acl": {
             "readOnly": true,
             "$ref": "#/components/schemas/EntityAcl"
@@ -6375,6 +6663,10 @@
           "entity_id": {
             "$ref": "#/components/schemas/EntityId"
           },
+          "org_id": {
+            "type": "string",
+            "description": "Organization Id the entity belongs to"
+          },
           "attribute": {
             "type": "string"
           },
@@ -6425,9 +6717,7 @@
               "hydrate": {},
               "fields": {},
               "aggs": {},
-              "include_deleted": {
-                "$ref": "#/components/schemas/EntitySearchIncludeDeletedParam"
-              }
+              "include_deleted": {}
             },
             "additionalProperties": false,
             "required": [
@@ -6457,7 +6747,8 @@
               "size": {},
               "hydrate": {},
               "fields": {},
-              "aggs": {}
+              "aggs": {},
+              "include_deleted": {}
             },
             "additionalProperties": false,
             "required": [
@@ -7081,7 +7372,7 @@
           }
         ]
       },
-      "SavedView": {
+      "SavedViewPartial": {
         "description": "A saved entity view",
         "type": "object",
         "properties": {
@@ -7105,6 +7396,7 @@
             "example": "66"
           },
           "shared": {
+            "deprecated": true,
             "description": "boolean property for if a view is shared with organisation",
             "type": "boolean",
             "example": true
@@ -7162,13 +7454,32 @@
                 }
               }
             }
+          },
+          "shared_with": {
+            "type": "array",
+            "description": "List of users ('${userId}'), user groups ('group_${groupId}'), or partner users ('${partnerOrgId}_${partnerUserId}') that the view is shared with",
+            "items": {
+              "type": "string",
+              "example": "112233"
+            }
           }
-        },
-        "required": [
-          "slug",
-          "name",
-          "created_by",
-          "ui_config"
+        }
+      },
+      "SavedView": {
+        "description": "A saved entity view",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SavedViewPartial"
+          },
+          {
+            "type": "object",
+            "required": [
+              "slug",
+              "name",
+              "created_by",
+              "ui_config"
+            ]
+          }
         ]
       },
       "Taxonomy": {
@@ -7293,6 +7604,11 @@
               "$ref": "#/components/schemas/ClassificationId"
             }
           },
+          "color": {
+            "type": "string",
+            "description": "Color of the classification",
+            "example": "#FF5733"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time"
@@ -7300,6 +7616,11 @@
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "Archived classification are not visible in the UI",
+            "default": false
           },
           "_manifest": {
             "type": "array",
@@ -7379,14 +7700,15 @@
         "enum": [
           "PENDING",
           "FAILED",
-          "COMPLETED"
+          "COMPLETED",
+          "CANCELLED"
         ]
       },
-      "TaxonomyBulkJobType": {
+      "TaxonomyBulkJobActionType": {
         "type": "string",
         "enum": [
-          "MOVE_LABELS",
-          "DELETE_LABELS"
+          "MOVE_CLASSIFICATIONS",
+          "DELETE_CLASSIFICATIONS"
         ]
       },
       "TaxonomyBulkJob": {
@@ -7396,12 +7718,80 @@
             "type": "string",
             "format": "uuid"
           },
-          "status": {
+          "job_status": {
             "$ref": "#/components/schemas/TaxonomyBulkJobStatus"
           },
-          "type": {
-            "$ref": "#/components/schemas/TaxonomyBulkJobType"
+          "action_type": {
+            "$ref": "#/components/schemas/TaxonomyBulkJobActionType"
+          },
+          "request": {
+            "type": "object",
+            "properties": {
+              "target_taxonomy": {
+                "$ref": "#/components/schemas/TaxonomySlug"
+              },
+              "classification_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ClassificationId"
+                }
+              }
+            }
+          },
+          "output": {
+            "type": "object",
+            "properties": {
+              "target_entities": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityId"
+                }
+              },
+              "affected_entities": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityId"
+                }
+              },
+              "failures_count": {
+                "type": "number"
+              },
+              "failed_entities": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityId"
+                }
+              }
+            }
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "org": {
+            "type": "string"
+          },
+          "progress": {
+            "description": "Progress of the job on a scale of 0 to 1",
+            "type": "number"
           }
+        },
+        "example": {
+          "job_id": "123e4567-e89b-12d3-a456-426614174000",
+          "status": "PENDING",
+          "action_type": "MOVE_LABELS",
+          "created_by": 10598,
+          "created_at": "2024-01-01T00:00:00.000Z",
+          "updated_at": "2024-01-01T00:00:00.000Z",
+          "org": 66,
+          "progress": 0.5
         }
       },
       "ESClusterAssignment": {
@@ -7427,6 +7817,22 @@
           "enabled": {
             "type": "boolean",
             "description": "Whether the setting should be enabled or not"
+          }
+        }
+      },
+      "ErrorObject": {
+        "description": "A generic error returned by the API",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The HTTP status code of the error",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message",
+            "example": "Bad Request"
           }
         }
       }
@@ -7542,7 +7948,8 @@
               "type": "string",
               "nullable": true,
               "enum": [
-                ""
+                "",
+                null
               ]
             }
           ]
@@ -8310,12 +8717,31 @@
           ]
         }
       }
+    },
+    "responses": {
+      "NotFoundError": {
+        "description": "The requested resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 404,
+                    "error": "Not Found"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }

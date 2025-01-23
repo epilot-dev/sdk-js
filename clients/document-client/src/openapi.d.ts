@@ -94,6 +94,26 @@ declare namespace Components {
              * A message explaining the progress
              */
             message?: string;
+            ics_output?: {
+                /**
+                 * example:
+                 * {
+                 *   "s3ref": {
+                 *     "bucket": "document-api-preview-prod",
+                 *     "key": "preview/my-appointment.ics"
+                 *   }
+                 * }
+                 */
+                output_document?: {
+                    /**
+                     * Generated document filename for ICS
+                     * example:
+                     * my-appointment-OR-001.ics
+                     */
+                    filename?: string;
+                    s3ref?: S3Reference;
+                };
+            };
             pdf_output?: {
                 /**
                  * Pre-signed S3 GET URL for PDF preview
@@ -434,10 +454,12 @@ declare namespace Paths {
         namespace Parameters {
             export type JobId = string;
             export type Mode = "partial_generation" | "full_generation";
+            export type PreviewMode = "open" | "download";
         }
         export interface QueryParameters {
             job_id?: Parameters.JobId;
             mode?: Parameters.Mode;
+            preview_mode?: Parameters.PreviewMode;
         }
         export type RequestBody = Components.Schemas.DocumentGenerationV2Request;
         namespace Responses {
@@ -450,6 +472,7 @@ declare namespace Paths {
             export type $200 = Components.Schemas.DocumentMetaResponse;
             export type $400 = Components.Schemas.ErrorOutput;
             export type $403 = Components.Schemas.ErrorOutput;
+            export type $415 = Components.Schemas.ErrorOutput;
         }
     }
 }
@@ -472,16 +495,18 @@ export interface OperationMethods {
   /**
    * generateDocumentV2 - generateDocumentV2
    * 
-   * Builds document generated from input document with variables.
+   * Generates documents from templates with variables.
    * 
-   * Supported input document types:
+   * Supported document types as input:
    * - .docx
+   * - .ics
    * 
-   * Supported output document types:
+   * Supported document types as output:
    * - .pdf
    * - .docx but limited to only text based variables
+   * - .ics
    * 
-   * Uses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the document.
+   * Uses [Template Variable API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.
    * 
    */
   'generateDocumentV2'(
@@ -529,16 +554,18 @@ export interface PathsDictionary {
     /**
      * generateDocumentV2 - generateDocumentV2
      * 
-     * Builds document generated from input document with variables.
+     * Generates documents from templates with variables.
      * 
-     * Supported input document types:
+     * Supported document types as input:
      * - .docx
+     * - .ics
      * 
-     * Supported output document types:
+     * Supported document types as output:
      * - .pdf
      * - .docx but limited to only text based variables
+     * - .ics
      * 
-     * Uses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the document.
+     * Uses [Template Variable API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.
      * 
      */
     'post'(

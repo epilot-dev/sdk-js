@@ -10,70 +10,138 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
-        export interface Organization {
+        export interface CreateOrganizationRequest {
+            /**
+             * Organization detail
+             */
+            organization_detail?: {
+                /**
+                 * Organization name
+                 * example:
+                 * epilot
+                 */
+                name: string;
+                /**
+                 * Organization email address
+                 * example:
+                 * epilot@epilot.cloud
+                 */
+                email_address?: string;
+                /**
+                 * type
+                 * example:
+                 * Vendor
+                 */
+                type: string;
+                organization_use?: "Production" | "Sandbox";
+                /**
+                 * Pricing tier ID
+                 * example:
+                 * 01GEKHZHSN19KK10ZS92Y3WY9B
+                 */
+                pricing_tier_id: string;
+            };
+            /**
+             * Owner user will receive invitation
+             */
+            owner_user?: {
+                /**
+                 * example:
+                 * Ny Huynh
+                 */
+                full_name?: string;
+                /**
+                 * example:
+                 * ny.huynhthi@axonactive.com
+                 */
+                email_address: string;
+            };
+        }
+        export interface DataPoint {
+            /**
+             * Organization id
+             * example:
+             * 206801
+             */
+            id?: number;
+            /**
+             * Max customer data points last month
+             * example:
+             * 10
+             */
+            max_customer?: number;
+            /**
+             * Actual customer data points
+             * example:
+             * 10
+             */
+            actual_customer?: number;
+        }
+        export type DataPointsResponse = DataPoint[];
+        export interface InternalOrganization {
             id?: /**
              * example:
              * 739224
              */
             OrganizationId;
-            type?: "Vendor" | "Partner";
             /**
+             * Organization name
              * example:
              * Epilot
              */
             name?: string | null;
             /**
-             * example:
-             * <p>Thanks</p>
-             */
-            signature?: string | null;
-            /**
-             * example:
-             * EPI
-             */
-            symbol?: string | null;
-            /**
-             * example:
-             * professional
-             */
-            pricing_tier?: string | null;
-            /**
+             * Organization contact email
              * example:
              * someone@epilot.cloud
              */
             email?: string | null;
             /**
-             * example:
-             * 50
-             */
-            free_user_limit?: number | null;
-            /**
+             * Organization contact phone
              * example:
              * 49123123123
              */
             phone?: string | null;
             /**
+             * Organization website
              * example:
              * https://epilot.cloud
              */
             website?: string | null;
+            /**
+             * Organization postal address
+             */
             address?: {
+                [name: string]: any;
                 country?: string | null;
                 city?: string | null;
                 postal_code?: string | null;
                 street?: string | null;
                 street_number?: string | null;
             };
+            organization_use?: "Production" | "Sandbox";
             /**
+             * Organization created date
+             */
+            created_date?: string; // date-time
+            /**
+             * Organization logo URL
              * example:
              * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
              */
             logo_url?: string | null;
             /**
+             * Organization logo thumbnail URL
              * example:
              * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
              */
             logo_thumbnail_url?: string | null;
+            /**
+             * Default email signature of organization
+             * example:
+             * <p>Thanks</p>
+             */
+            signature?: string | null;
             /**
              * example:
              * false
@@ -85,12 +153,194 @@ declare namespace Components {
             style?: {
                 [name: string]: any;
             } | null;
+            type?: "Vendor" | "Partner";
+            /**
+             * example:
+             * EPI
+             */
+            symbol?: string | null;
+            /**
+             * Deprecated - Please use pricing tier api
+             * example:
+             * professional
+             */
+            pricing_tier?: string | null;
+            /**
+             * example:
+             * 50
+             */
+            free_user_limit?: number | null;
+        }
+        export interface Organization {
+            id?: /**
+             * example:
+             * 739224
+             */
+            OrganizationId;
+            /**
+             * Organization name
+             * example:
+             * Epilot
+             */
+            name?: string | null;
+            /**
+             * Organization contact email
+             * example:
+             * someone@epilot.cloud
+             */
+            email?: string | null;
+            /**
+             * Organization contact phone
+             * example:
+             * 49123123123
+             */
+            phone?: string | null;
+            /**
+             * Organization website
+             * example:
+             * https://epilot.cloud
+             */
+            website?: string | null;
+            /**
+             * Organization postal address
+             */
+            address?: {
+                [name: string]: any;
+                country?: string | null;
+                city?: string | null;
+                postal_code?: string | null;
+                street?: string | null;
+                street_number?: string | null;
+            };
+            organization_use?: "Production" | "Sandbox";
+            /**
+             * Organization created date
+             */
+            created_date?: string; // date-time
+            /**
+             * Organization logo URL
+             * example:
+             * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
+             */
+            logo_url?: string | null;
+            /**
+             * Organization logo thumbnail URL
+             * example:
+             * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
+             */
+            logo_thumbnail_url?: string | null;
+            /**
+             * Default email signature of organization
+             * example:
+             * <p>Thanks</p>
+             */
+            signature?: string | null;
+            /**
+             * example:
+             * false
+             */
+            is_unlicensed_org?: boolean | null;
+            /**
+             * Organization style setting (e.g. font setting)
+             */
+            style?: {
+                [name: string]: any;
+            } | null;
+            type?: "Vendor" | "Partner";
+            /**
+             * example:
+             * EPI
+             */
+            symbol?: string | null;
+            /**
+             * Deprecated - Please use pricing tier api
+             * example:
+             * professional
+             */
+            pricing_tier?: string | null;
+            /**
+             * example:
+             * 50
+             */
+            free_user_limit?: number | null;
+        }
+        export interface OrganizationCleanupStatus {
+            org_id: /**
+             * example:
+             * 739224
+             */
+            OrganizationId;
+            /**
+             * example:
+             * organization-api
+             */
+            service_name: string;
+            /**
+             * example:
+             * [
+             *   {
+             *     "action": "Delete",
+             *     "resource": "OrgTable",
+             *     "extra_info": [
+             *       "pk: ORG#739224"
+             *     ]
+             *   },
+             *   {
+             *     "action": "Archive",
+             *     "resource": "s3://my-bucket",
+             *     "extra_info": [
+             *       "my-bucket/my-key.txt",
+             *       "my-bucket/my-key2.txt"
+             *     ]
+             *   }
+             * ]
+             */
+            operations?: {
+                [name: string]: any;
+                /**
+                 * example:
+                 * Delete
+                 */
+                action?: string;
+                /**
+                 * example:
+                 * OrgTable
+                 */
+                resource?: string;
+                extra_info?: string | number | boolean | {
+                    [name: string]: any;
+                }[] | {
+                    [name: string]: any;
+                };
+            }[];
         }
         /**
          * example:
          * 739224
          */
         export type OrganizationId = string;
+        export interface OrganizationToCleanup {
+            org_id: /**
+             * example:
+             * 739224
+             */
+            OrganizationId;
+            /**
+             * example:
+             * 2021-06-01T00:00:00Z
+             */
+            deleted_at: string; // date-time
+            /**
+             * example:
+             * 123456
+             */
+            deleted_by: string;
+        }
+        /**
+         * example:
+         * double_opt_in
+         */
+        export type SettingKey = string;
         /**
          * example:
          * {
@@ -266,7 +516,7 @@ export interface OperationMethods {
   /**
    * deleteSettingsValue - deleteSettingsValue
    * 
-   * Updates an organizatio nsetting
+   * Updates an organization nsetting
    */
   'deleteSettingsValue'(
     parameters?: Parameters<Paths.DeleteSettingsValue.PathParameters> | null,
@@ -320,7 +570,7 @@ export interface PathsDictionary {
     /**
      * deleteSettingsValue - deleteSettingsValue
      * 
-     * Updates an organizatio nsetting
+     * Updates an organization nsetting
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteSettingsValue.PathParameters> | null,
@@ -332,7 +582,14 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type CreateOrganizationRequest = Components.Schemas.CreateOrganizationRequest;
+export type DataPoint = Components.Schemas.DataPoint;
+export type DataPointsResponse = Components.Schemas.DataPointsResponse;
+export type InternalOrganization = Components.Schemas.InternalOrganization;
 export type Organization = Components.Schemas.Organization;
+export type OrganizationCleanupStatus = Components.Schemas.OrganizationCleanupStatus;
 export type OrganizationId = Components.Schemas.OrganizationId;
+export type OrganizationToCleanup = Components.Schemas.OrganizationToCleanup;
+export type SettingKey = Components.Schemas.SettingKey;
 export type Settings = Components.Schemas.Settings;
 export type SettingsValue = Components.Schemas.SettingsValue;

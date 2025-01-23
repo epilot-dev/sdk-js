@@ -65,6 +65,11 @@
       "name": "dynamic_price_schema",
       "x-displayName": "Composite Price",
       "description": "<SchemaDefinition schemaRef=\"#/components/schemas/CompositePrice\" exampleRef=\"#/components/examples/composite-price\" />\n"
+    },
+    {
+      "name": "coupon_schema",
+      "x-displayName": "Coupon",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Coupon\" />\n"
     }
   ],
   "x-tagGroups": [
@@ -80,7 +85,8 @@
       "tags": [
         "product_schema",
         "simple_price_schema",
-        "dynamic_price_schema"
+        "dynamic_price_schema",
+        "coupon_schema"
       ]
     },
     {
@@ -1723,28 +1729,48 @@
             }
           },
           "product_images": {
-            "type": "object",
             "description": "Stores references to a set of file images of the product",
-            "properties": {
-              "$relation": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                }
+              },
+              {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/EntityRelation"
+                  "$ref": "#/components/schemas/File"
                 }
               }
-            }
+            ]
           },
           "product_downloads": {
-            "type": "object",
             "description": "Stores references to a set of files downloadable from the product.\ne.g: tech specifications, quality control sheets, privacy policy agreements\n",
-            "properties": {
-              "$relation": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                }
+              },
+              {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/EntityRelation"
+                  "$ref": "#/components/schemas/File"
                 }
               }
-            }
+            ]
           },
           "price_options": {
             "type": "object",
@@ -2319,7 +2345,8 @@
             "enum": [
               "show_price",
               "show_as_starting_price",
-              "show_as_on_request"
+              "show_as_on_request",
+              "estimated_price"
             ]
           },
           "billing_duration_amount": {
@@ -2935,15 +2962,15 @@
             ]
           },
           "consumption": {
-            "description": "The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)",
+            "description": "(DEPRECATED - use consumption_HT) The yearly consumption to compute the price in kWh",
             "type": "number"
           },
           "consumption_HT": {
-            "description": "The monthly HT consumption to compute the price in kWh",
+            "description": "The yearly HT consumption to compute the price in kWh",
             "type": "number"
           },
           "consumption_NT": {
-            "description": "The monthly NT consumption to compute the price in kWh",
+            "description": "The yearly NT consumption to compute the price in kWh",
             "type": "number"
           },
           "association_id": {
@@ -3044,6 +3071,14 @@
           "amount_decimal": {
             "description": "The computed price as decimal",
             "type": "string"
+          },
+          "unit_amount": {
+            "description": "The computed unit price",
+            "type": "number"
+          },
+          "unit_amount_decimal": {
+            "description": "The computed unit price as decimal",
+            "type": "string"
           }
         },
         "required": [
@@ -3126,12 +3161,28 @@
             "description": "The computed variable price, for the day period, as decimal",
             "type": "string"
           },
+          "unit_amount_variable_ht": {
+            "description": "The computed unit price, for the day period",
+            "type": "number"
+          },
+          "unit_amount_variable_decimal_ht": {
+            "description": "The computed unit price, for the day period, as decimal",
+            "type": "string"
+          },
           "amount_variable_nt": {
             "description": "The computed variable price, for the night period",
             "type": "number"
           },
           "amount_variable_decimal_nt": {
             "description": "The computed variable price, for the night period, as decimal",
+            "type": "string"
+          },
+          "unit_amount_variable_nt": {
+            "description": "The computed unit price, for the night period",
+            "type": "number"
+          },
+          "unit_amount_variable_decimal_nt": {
+            "description": "The computed unit price, for the night period, as decimal",
             "type": "string"
           },
           "currency": {
@@ -3614,6 +3665,18 @@
               "description": "The id of the price component"
             }
           },
+          "price_component_coupon_ids": {
+            "type": "object",
+            "description": "The map of coupon ids applicable to the price components",
+            "readOnly": true,
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "The id of the coupon"
+              }
+            }
+          },
           "_price": {
             "$ref": "#/components/schemas/CompositePrice"
           }
@@ -3916,14 +3979,39 @@
             "description": "The unit amount value",
             "readOnly": true
           },
+          "unit_amount_decimal": {
+            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+            "type": "string",
+            "readOnly": true
+          },
           "before_discount_unit_amount": {
             "type": "integer",
             "description": "The unit amount before any discount is applied",
             "readOnly": true
           },
-          "unit_amount_decimal": {
-            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+          "before_discount_unit_amount_decimal": {
             "type": "string",
+            "description": "The unit amount before any discount is applied, represented as a decimal string with at most 12 decimal places.",
+            "readOnly": true
+          },
+          "before_discount_unit_amount_gross": {
+            "type": "integer",
+            "description": "The unit gross amount before any discount is applied",
+            "readOnly": true
+          },
+          "before_discount_unit_amount_gross_decimal": {
+            "type": "string",
+            "description": "The unit gross amount before any discount is applied, represented as a decimal string with at most 12 decimal places.",
+            "readOnly": true
+          },
+          "before_discount_unit_amount_net": {
+            "type": "integer",
+            "description": "The unit net amount before any discount is applied",
+            "readOnly": true
+          },
+          "before_discount_unit_amount_net_decimal": {
+            "type": "string",
+            "description": "The unit net amount before any discount is applied, represented as a decimal string with at most 12 decimal places.",
             "readOnly": true
           },
           "unit_discount_amount": {
@@ -3974,6 +4062,16 @@
           "tax_discount_amount_decimal": {
             "type": "string",
             "description": "The discount amount applied to the tax represented as a decimal string",
+            "readOnly": true
+          },
+          "discount_amount_net": {
+            "type": "integer",
+            "description": "The net discount amount applied",
+            "readOnly": true
+          },
+          "discount_amount_net_decimal": {
+            "type": "string",
+            "description": "The net discount amount applied represented as a decimal string",
             "readOnly": true
           },
           "amount_tax": {
@@ -4028,6 +4126,18 @@
               ]
             }
           },
+          "_coupons": {
+            "type": "array",
+            "description": "The coupons applicable to the price item",
+            "readOnly": true,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Coupon"
+                }
+              ]
+            }
+          },
           "on_request_approved": {
             "type": "boolean",
             "description": "When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'."
@@ -4071,6 +4181,24 @@
           "cashback_amount_decimal": {
             "type": "string",
             "description": "The cashback amount as a string with all the decimal places.",
+            "readOnly": true
+          },
+          "cashback_period": {
+            "type": "string",
+            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
+            "enum": [
+              "0",
+              "12"
+            ]
+          },
+          "after_cashback_amount_total": {
+            "type": "integer",
+            "description": "Total amount after cashback is applied.",
+            "readOnly": true
+          },
+          "after_cashback_amount_total_decimal": {
+            "type": "string",
+            "description": "Total amount after cashback is applied as a string with all the decimal places.",
             "readOnly": true
           },
           "discount_percentage": {
@@ -4241,6 +4369,28 @@
           "amount_total_decimal"
         ]
       },
+      "CashbackAmount": {
+        "type": "object",
+        "description": "An amount associated with a specific cashback period.",
+        "properties": {
+          "cashback_period": {
+            "type": "string",
+            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
+            "enum": [
+              "0",
+              "12"
+            ]
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "The sum of all cashbacks for a specific cashback period"
+          }
+        },
+        "required": [
+          "cashback_period",
+          "amount_total"
+        ]
+      },
       "RecurrenceAmountWithTax": {
         "type": "object",
         "description": "An amount associated with a specific recurrence.",
@@ -4328,6 +4478,17 @@
                   ]
                 }
               },
+              "cashbacks": {
+                "type": "array",
+                "description": "The list of cashback sums for each cashback period.",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CashbackAmount"
+                    }
+                  ]
+                }
+              },
               "recurrencesByTax": {
                 "type": "array",
                 "description": "The aggregated price items recurrences by tax rate",
@@ -4350,7 +4511,7 @@
           "items": {
             "type": "array",
             "items": {
-              "oneOf": [
+              "anyOf": [
                 {
                   "$ref": "#/components/schemas/PriceItem"
                 },
@@ -4960,6 +5121,14 @@
               }
             ]
           },
+          "cashback_period": {
+            "type": "string",
+            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
+            "enum": [
+              "0",
+              "12"
+            ]
+          },
           "active": {
             "type": "boolean"
           },
@@ -5257,6 +5426,18 @@
             "description": "The name of the journey.",
             "example": "journey name"
           },
+          "journey_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The tags of the journey."
+          },
+          "journey_url_params": {
+            "type": "object",
+            "description": "The URL parameters of the journey.",
+            "additionalProperties": true
+          },
           "current_step_name": {
             "description": "The name of the step where the products selection is happening.",
             "type": "string",
@@ -5323,7 +5504,7 @@
           "results": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ExternalProduct"
+              "$ref": "#/components/schemas/ExternalCatalogItem"
             }
           }
         },
@@ -5332,435 +5513,20 @@
           "hits"
         ]
       },
-      "ExternalProduct": {
+      "ExternalCatalogItem": {
         "type": "object",
         "description": "An external product & price information (already computed) from an external catalog.",
         "properties": {
-          "id": {
-            "type": "string",
-            "description": "The ID of the product in the external catalog."
+          "pricing_details": {
+            "$ref": "#/components/schemas/PricingDetails"
           },
-          "name": {
-            "type": "string",
-            "description": "The name of the product."
-          },
-          "description": {
-            "type": "string",
-            "description": "A description of the product."
-          },
-          "features": {
-            "type": "array",
-            "description": "A list of features of the product.",
-            "items": {
-              "type": "string"
-            }
-          },
-          "product_image_urls": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "A list of image URLs of the product. RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.\n"
-          },
-          "product_downloads_urls": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "A list of file/attachment URLs of the product RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.\n"
-          },
-          "legal_footnotes": {
-            "type": "string",
-            "description": "Legal footnotes for the product."
-          },
-          "additional_notes": {
-            "type": "array",
-            "description": "Additional notes for the product.",
-            "items": {
-              "type": "string"
-            }
-          },
-          "recommendation_settings": {
-            "type": "object",
-            "description": "Recommendation settings for the product.",
-            "properties": {
-              "is_recommended": {
-                "type": "boolean",
-                "description": "Flag to enable or disable the recommendation for this product."
-              },
-              "recommended_label": {
-                "type": "string",
-                "description": "Label to display when the product is recommended."
-              },
-              "recommended_color": {
-                "type": "string",
-                "description": "Color to display when the product is recommended."
-              },
-              "recommended_label_color": {
-                "type": "string",
-                "description": "Color of the recommended label."
-              }
-            },
-            "example": {
-              "is_recommended": true,
-              "recommended_label": "Best Value",
-              "recommended_color": "#00FF00",
-              "recommended_label_color": "#FFFFFF"
-            }
-          },
-          "price": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ExternalSimplePrice"
-              },
-              {
-                "$ref": "#/components/schemas/ExternalCompositePrice"
-              }
-            ]
+          "_meta": {
+            "$ref": "#/components/schemas/SignatureMeta"
           }
         },
         "required": [
-          "price",
-          "name",
-          "id"
-        ]
-      },
-      "ExternalPriceFees": {
-        "type": "object",
-        "properties": {
-          "fees": {
-            "type": "object",
-            "description": "Fees structure with static and variable amounts",
-            "properties": {
-              "billing_period": {
-                "$ref": "#/components/schemas/BillingPeriod",
-                "description": "The billing period of the fee values (e.g. monthly)."
-              },
-              "amount_total_decimal": {
-                "type": "string",
-                "example": "1.00"
-              },
-              "amount_static_decimal": {
-                "type": "string",
-                "example": "1.00"
-              },
-              "amount_variable_decimal": {
-                "type": "string",
-                "example": "1.00"
-              },
-              "breakdown": {
-                "type": "object",
-                "description": "Breakdown of the fee values",
-                "properties": {
-                  "static": {
-                    "type": "object",
-                    "description": "Static breakdown of fees",
-                    "additionalProperties": {
-                      "type": "object",
-                      "properties": {
-                        "amount_decimal": {
-                          "type": "string",
-                          "description": "The amount of the fee, as a string with all the decimal places.",
-                          "example": "1.00"
-                        }
-                      }
-                    },
-                    "required": [
-                      "amount_decimal"
-                    ]
-                  },
-                  "variable": {
-                    "type": "object",
-                    "description": "Variable breakdown of fees",
-                    "additionalProperties": {
-                      "type": "object",
-                      "properties": {
-                        "amount_decimal": {
-                          "type": "string",
-                          "example": "1.00"
-                        },
-                        "unit": {
-                          "type": "string",
-                          "description": "The unit of the fee (e.g. kWh) if applicable."
-                        }
-                      },
-                      "required": [
-                        "amount_decimal"
-                      ]
-                    }
-                  }
-                }
-              }
-            },
-            "required": [
-              "billing_period",
-              "amount_total_decimal",
-              "amount_static_decimal",
-              "amount_variable_decimal",
-              "breakdown"
-            ]
-          }
-        }
-      },
-      "ExternalSimplePrice": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ExternalPriceFees"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "is_composite_price": {
-                "type": "boolean",
-                "enum": [
-                  false
-                ]
-              },
-              "variable_price": {
-                "type": "boolean",
-                "description": "A flag to indicate if the price is variable.\n"
-              },
-              "name": {
-                "type": "string",
-                "description": "The name of the price."
-              },
-              "unit": {
-                "description": "The unit of measurement used for display purposes and possibly for calculations when the price is variable.",
-                "type": "string",
-                "example": "kWh"
-              },
-              "currency": {
-                "type": "string",
-                "description": "The currency of the price. ISO 4217 currency code. E.g. EUR.",
-                "default": "EUR",
-                "example": "EUR"
-              },
-              "type": {
-                "type": "string",
-                "description": "The price type.",
-                "enum": [
-                  "one_time",
-                  "recurring"
-                ]
-              },
-              "billing_period": {
-                "$ref": "#/components/schemas/BillingPeriod",
-                "description": "The billing period of the price."
-              },
-              "billing_duration_amount": {
-                "description": "The billing period duration",
-                "type": "number"
-              },
-              "billing_duration_unit": {
-                "description": "The billing period duration unit",
-                "type": "string",
-                "enum": [
-                  "weeks",
-                  "months",
-                  "years"
-                ]
-              },
-              "notice_time_amount": {
-                "description": "The notice period duration",
-                "type": "number"
-              },
-              "notice_time_unit": {
-                "description": "The notice period duration unit",
-                "type": "string",
-                "enum": [
-                  "weeks",
-                  "months",
-                  "years"
-                ]
-              },
-              "termination_time_amount": {
-                "description": "The termination period duration",
-                "type": "number"
-              },
-              "termination_time_unit": {
-                "description": "The termination period duration unit",
-                "type": "string",
-                "enum": [
-                  "weeks",
-                  "months",
-                  "years"
-                ]
-              },
-              "renewal_duration_amount": {
-                "description": "The renewal period duration",
-                "type": "number"
-              },
-              "renewal_duration_unit": {
-                "description": "The renewal period duration unit",
-                "type": "string",
-                "enum": [
-                  "weeks",
-                  "months",
-                  "years"
-                ]
-              },
-              "unit_amount_gross_decimal": {
-                "type": "string",
-                "example": "1.19",
-                "description": "The unit gross amount value, as a string with all the decimal places."
-              },
-              "unit_amount_net_decimal": {
-                "type": "string",
-                "description": "The unit net amount value, as a string with all the decimal places.",
-                "example": "1.00"
-              },
-              "amount_subtotal_decimal": {
-                "type": "string",
-                "description": "Total of all items before discounts or taxes, as a string with all the decimal places.",
-                "example": "1.00"
-              },
-              "amount_total_decimal": {
-                "type": "string",
-                "description": "Total of all items after discounts and taxes, as a string with all the decimal places.",
-                "example": "1.19"
-              },
-              "tax": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "The tax name.",
-                    "example": "VAT"
-                  },
-                  "description": {
-                    "type": "string",
-                    "description": "The tax description.",
-                    "example": "Value Added Tax"
-                  },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "VAT",
-                      "GST",
-                      "Custom"
-                    ],
-                    "description": "The type of the tax.",
-                    "example": "VAT"
-                  },
-                  "rate": {
-                    "type": "number",
-                    "description": "The tax rate applied.",
-                    "example": 19
-                  },
-                  "region": {
-                    "type": "string",
-                    "description": "The region code of the tax.",
-                    "example": "DE"
-                  },
-                  "region_label": {
-                    "type": "string",
-                    "description": "The region label of the tax.",
-                    "example": "Germany"
-                  }
-                },
-                "required": [
-                  "rate"
-                ]
-              }
-            },
-            "required": [
-              "is_composite_price",
-              "type",
-              "unit_amount_decimal",
-              "unit_amount_gross_decimal",
-              "unit_amount_net_decimal",
-              "amount_subtotal_decimal",
-              "amount_total_decimal"
-            ]
-          }
-        ]
-      },
-      "ExternalCompositePrice": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ExternalPriceFees"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "The name of the composite price."
-              },
-              "is_composite_price": {
-                "type": "boolean",
-                "enum": [
-                  true
-                ]
-              },
-              "price_components": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ExternalSimplePrice"
-                }
-              },
-              "total_details": {
-                "$ref": "#/components/schemas/ExternalPriceTotalDetails"
-              }
-            },
-            "required": [
-              "is_composite_price",
-              "price_components",
-              "total_details"
-            ]
-          }
-        ]
-      },
-      "ExternalPriceTotalDetails": {
-        "type": "object",
-        "description": "Details of the total price including shipping and tax amounts.",
-        "properties": {
-          "breakdown": {
-            "type": "object",
-            "description": "A breakdown of the recurrences of amounts.",
-            "properties": {
-              "recurrences": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "description": "Recurrence details including subtotal, total, and tax amounts.",
-                  "properties": {
-                    "amount_subtotal_decimal": {
-                      "type": "string",
-                      "description": "Total of all items before discounts or taxes, as a string with all the decimal places.",
-                      "example": "1.00"
-                    },
-                    "amount_total_decimal": {
-                      "type": "string",
-                      "description": "Total of all items after discounts and taxes, as a string with all the decimal places.",
-                      "example": "1.19"
-                    },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "one_time",
-                        "recurring"
-                      ],
-                      "description": "The price type.",
-                      "example": "one_time"
-                    },
-                    "billing_period": {
-                      "$ref": "#/components/schemas/BillingPeriod",
-                      "description": "The billing period of the price."
-                    }
-                  },
-                  "required": [
-                    "amount_subtotal_decimal",
-                    "amount_total_decimal",
-                    "type"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "required": [
-          "breakdown"
+          "pricing_details",
+          "_meta"
         ]
       }
     },
@@ -6873,7 +6639,7 @@
                     "_schema": "tax",
                     "_title": "Tax Without Behaviour",
                     "description": "Without Behaviour",
-                    "rate": 6,
+                    "rate": "6",
                     "_org": "739224",
                     "_created_at": "2022-02-07T14:49:08.831Z",
                     "_updated_at": "2022-02-07T14:49:08.831Z"
@@ -7272,108 +7038,92 @@
         }
       },
       "external-catalog-sample-1": {
-        "value": [
-          {
-            "id": "12312414",
-            "name": "Home Energy Package",
-            "description": "Composite home energy solution with solar panels and battery",
-            "features": [
-              "4kW solar system",
-              "10kWh battery storage",
-              "Smart energy management"
-            ],
-            "product_image_urls": [
-              "https://example.com/images/home-energy-package.jpg"
-            ],
-            "legal_footnotes": "Installation and permitting fees may vary by location.",
-            "price": {
-              "name": "Home Energy Package",
-              "is_composite_price": true,
-              "price_components": [
-                {
-                  "name": "Working Price",
-                  "type": "recurring",
-                  "billing_period": "monthly",
-                  "variable_price": true,
-                  "unit": "kWh",
-                  "amount_subtotal_decimal": "11.244355742297",
-                  "amount_total_decimal": "13.380783333333",
-                  "unit_amount_net_decimal": "11.24",
-                  "unit_amount_gross_decimal": "13.38",
-                  "currency": "EUR",
-                  "tax": {
-                    "name": "tax",
-                    "type": "VAT",
-                    "rate": 19,
-                    "region": "DE"
+        "value": {
+          "hits": 1,
+          "results": [
+            {
+              "pricing_details": {
+                "items": [
+                  {
+                    "_id": "price-12312414",
+                    "price_id": "price-12312414",
+                    "is_composite_price": true,
+                    "description": "Home Energy Package Composite",
+                    "item_components": [
+                      {
+                        "_id": "price-12312414-component-0",
+                        "price_id": "price-12312414-component-0",
+                        "description": "Working Price",
+                        "is_tax_inclusive": true,
+                        "amount_total_decimal": "100",
+                        "amount_total": 10000,
+                        "amount_subtotal_decimal": "100",
+                        "amount_subtotal": 10000,
+                        "unit_amount": 10,
+                        "unit_amount_gross": 10,
+                        "unit_amount_gross_decimal": "0.10",
+                        "unit_amount_net": 10,
+                        "unit_amount_net_decimal": "0.10",
+                        "billing_period": "monthly",
+                        "type": "recurring",
+                        "taxes": [],
+                        "pricing_model": "per_unit",
+                        "quantity": 1,
+                        "_price": {
+                          "_id": "price-12312414-component-0",
+                          "unit_amount_currency": "EUR",
+                          "description": "Working Price",
+                          "is_tax_inclusive": true,
+                          "unit_amount": 10,
+                          "unit_amount_decimal": "0.10",
+                          "unit": "kWh",
+                          "billing_period": "monthly",
+                          "type": "recurring",
+                          "billing_duration_amount": 24,
+                          "billing_duration_unit": "months",
+                          "notice_time_amount": 3,
+                          "notice_time_unit": "months",
+                          "termination_time_amount": 3,
+                          "termination_time_unit": "months",
+                          "renewal_duration_amount": 12,
+                          "renewal_duration_unit": "months",
+                          "active": true,
+                          "is_composite_price": false,
+                          "variable_price": true,
+                          "pricing_model": "per_unit",
+                          "price_display_in_journeys": "show_price"
+                        }
+                      }
+                    ]
                   }
-                },
-                {
-                  "name": "Base Price",
-                  "type": "one_time",
-                  "unit_amount_net_decimal": "99",
-                  "unit_amount_gross_decimal": "99",
-                  "amount_subtotal_decimal": "99",
-                  "amount_total_decimal": "99",
-                  "currency": "EUR"
-                }
-              ],
-              "fees": {
-                "amount_total_decimal": "410.84",
-                "amount_variable_decimal": "356.58",
-                "billing_period": "yearly",
-                "breakdown": {
-                  "static": {
-                    "basic_fee": {
-                      "amount_decimal": "19.21"
-                    },
-                    "maintenance_fee": {
-                      "amount_decimal": "35.05"
-                    }
-                  },
-                  "variable": {
-                    "offshore_liability_fee": {
-                      "amount_decimal": "2.4",
-                      "unit": "kWh"
-                    },
-                    "interruptible_load": {
-                      "amount_decimal": "0"
-                    },
-                    "extra_charge": {
-                      "amount_decimal": "22.68"
-                    },
-                    "chp": {
-                      "amount_decimal": "26.7"
-                    },
-                    "power_kwh": {
-                      "amount_decimal": "161.4"
-                    },
-                    "concession": {
-                      "amount_decimal": "143.4"
-                    }
+                ],
+                "currency": "EUR",
+                "amount_subtotal": 10000,
+                "amount_total": 10000,
+                "amount_tax": 0,
+                "total_details": {
+                  "amount_tax": 0,
+                  "breakdown": {
+                    "taxes": [],
+                    "recurrences": [
+                      {
+                        "type": "recurring",
+                        "billing_period": "monthly",
+                        "amount_subtotal": 10000,
+                        "amount_total": 10000,
+                        "amount_tax": 0
+                      }
+                    ]
                   }
                 }
               },
-              "total_details": {
-                "breakdown": {
-                  "recurrences": [
-                    {
-                      "type": "recurring",
-                      "billing_period": "monthly",
-                      "amount_subtotal_decimal": "419.110616246297",
-                      "amount_total_decimal": "498.741633333333"
-                    },
-                    {
-                      "type": "one_time",
-                      "amount_subtotal_decimal": "99",
-                      "amount_total_decimal": "99"
-                    }
-                  ]
-                }
+              "_meta": {
+                "signature": "abc123",
+                "timestamp": "2024-01-15T10:00:00Z"
               }
             }
-          }
-        ]
+          ]
+        }
       }
     }
   }

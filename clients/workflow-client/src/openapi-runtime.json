@@ -140,6 +140,7 @@
     },
     "/v1/workflows/executions/search": {
       "post": {
+        "deprecated": true,
         "operationId": "searchExecutions",
         "requestBody": {
           "required": true,
@@ -175,7 +176,82 @@
         ],
         "responses": {}
       }
+    },
+    "/v2/flows/executions": {
+      "post": {
+        "operationId": "startFlowExecution",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}": {
+      "get": {
+        "operationId": "getFlowExecution",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchFlowExecution",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteFlowExecution",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/SoftDeleteParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions:search": {
+      "post": {
+        "operationId": "searchFlowExecutions",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
-  "components": {}
+  "components": {
+    "parameters": {
+      "ExecutionIdParam": {
+        "in": "path",
+        "name": "execution_id",
+        "required": true
+      },
+      "SoftDeleteParam": {
+        "in": "query",
+        "name": "soft",
+        "required": false
+      }
+    }
+  }
 }

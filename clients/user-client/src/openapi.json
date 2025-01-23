@@ -34,7 +34,7 @@
           {
             "name": "token",
             "in": "query",
-            "description": "Invitation partner token",
+            "description": "Partner invitation token",
             "required": false,
             "schema": {
               "$ref": "#/components/schemas/PartnerInvitationToken"
@@ -264,7 +264,7 @@
       "post": {
         "operationId": "inviteUser",
         "summary": "inviteUser",
-        "description": "Creates a new user in the caller's organization and sends an invite email to activate",
+        "description": "Creates a new user in the caller's organization and sends an invite email to activate the user\n",
         "tags": [
           "User V2"
         ],
@@ -666,7 +666,75 @@
             "description": "Verified successfully"
           },
           "404": {
-            "description": "Token not found for the user"
+            "description": "Token not found"
+          }
+        }
+      }
+    },
+    "/v2/users/public/checkToken": {
+      "get": {
+        "operationId": "checkInviteToken",
+        "summary": "checkInviteToken",
+        "description": "Check an invite token",
+        "security": [],
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "$ref": "#/components/schemas/InviteToken"
+            },
+            "required": true,
+            "description": "Invite Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invite token found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "invitation_org_id": {
+                      "type": "string",
+                      "description": "Organization ID of the organization that invited the user"
+                    },
+                    "invitation_org_name": {
+                      "type": "string",
+                      "description": "Name of the organization that invited the user"
+                    },
+                    "invitation_org_logo_url": {
+                      "type": "string",
+                      "description": "Logo URL of the organization that invited the user"
+                    },
+                    "invitation_org_logo_thumbnail_url": {
+                      "type": "string",
+                      "description": "Logo Thumbnail URL of the organization that invited the user"
+                    },
+                    "invitee_user_id": {
+                      "type": "string",
+                      "description": "User ID of the invited user"
+                    },
+                    "invitee_primary_org_id": {
+                      "type": "string",
+                      "description": "Organization ID of the primary organization of the user (when inviting an existing epilot user)"
+                    }
+                  },
+                  "required": [
+                    "invitee_user_id",
+                    "invitation_org_id",
+                    "invitation_org_name"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Token not found"
           }
         }
       }
@@ -704,6 +772,52 @@
           "200": {
             "description": "Activated successfully"
           },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "404": {
+            "description": "Token not found for the user"
+          }
+        }
+      }
+    },
+    "/v2/users/public/reject": {
+      "delete": {
+        "operationId": "rejectInvite",
+        "summary": "rejectInvite",
+        "description": "Reject an invite",
+        "security": [],
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "$ref": "#/components/schemas/InviteToken"
+            },
+            "required": true,
+            "description": "Invite Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rejected invite successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
           "404": {
             "description": "Token not found for the user"
           }
@@ -714,7 +828,7 @@
       "get": {
         "operationId": "getUserLoginParametersV2",
         "summary": "getUserLoginParametersV2",
-        "description": "Get user organization login parameters by username",
+        "description": "Get user organization login parameters by username\n\nThe first item in the list corresponds to the user's primary organization and must be used for initial login.\n",
         "security": [],
         "parameters": [
           {
@@ -745,6 +859,54 @@
                       }
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/switchOrganization": {
+      "post": {
+        "operationId": "switchOrganization",
+        "summary": "switchOrganization",
+        "description": "Switch to another organization the user is part of",
+        "tags": [
+          "User V2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "org_id": {
+                    "$ref": "#/components/schemas/OrganizationId"
+                  }
+                },
+                "required": [
+                  "org_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A login token for the new organization to be used with CUSTOM_AUTH flow",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "login_token": {
+                      "type": "string",
+                      "description": "A login token for the new organization to be used with CUSTOM_AUTH flow against login parameters"
+                    }
+                  },
+                  "required": [
+                    "login_token"
+                  ]
                 }
               }
             }
@@ -1034,7 +1196,11 @@
           },
           "created_at": {
             "type": "string",
-            "example": "2022-02-08T04:44:32.246Z"
+            "format": "date-time"
+          },
+          "activated_at": {
+            "type": "string",
+            "format": "date-time"
           },
           "display_name": {
             "type": "string",
@@ -1165,6 +1331,24 @@
                 "order": "628aee91-7c2f-4047-ab0d-433582a19c49"
               },
               "dashboard": "751ff121-9ac2-4511-a2e6-851f11287380"
+            }
+          },
+          "email_notification_setting": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "added_participant_opportunity": true,
+              "assigned_opportunity": true,
+              "assigned_task": true,
+              "comment_opportunity": true,
+              "deleted_task": true,
+              "escalated_task": true,
+              "message_receive_opportunity": true,
+              "message_send_opportunity": true,
+              "created_task": true,
+              "created_opportunity_manual": true,
+              "created_opportunity_auto": true,
+              "deleted_opportunity": true
             }
           },
           "properties": {

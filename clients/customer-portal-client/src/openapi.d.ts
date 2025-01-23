@@ -10,18 +10,37 @@ import type {
 
 declare namespace Components {
     namespace Responses {
+        export interface ConfirmUserInvalidRequest {
+            /**
+             * Error message
+             */
+            message?: string;
+            reason: "invalid_token";
+        }
         export type Conflict = Schemas.ErrorResp;
         export interface ContractAssignmentConflict {
             /**
              * Error message
              */
             message?: string;
-            reason: "DRAFT";
+            /**
+             * Reason why the contract is not assignable. If the reason is "MULTIPLE", the contract is not assignable because multiple contracts were found and the business logic does not allow it.
+             */
+            reason: "DRAFT" | "MULTIPLE";
         }
         export type Forbidden = Schemas.ErrorResp;
         export type ForbiddenByRule = Schemas.ErrorResp | Schemas.FailedRuleErrorResp;
         export type InternalServerError = Schemas.ErrorResp;
         export type InvalidRequest = Schemas.ErrorResp;
+        export type InvalidRequestCreateMeterReading = {
+            reason?: "plausibility_check_failed" | "contract_period" | "no_counter" | "no_direction" | "timestamp_future" | "less_than_previous" | "greater_than_subsequent" | "meter_decommissioned" | "plausibility_check_failed";
+            upper_limit: number;
+            lower_limit: number;
+            /**
+             * Error message
+             */
+            message?: string;
+        } | void;
         export type NotFound = Schemas.ErrorResp;
         export type Unauthorized = Schemas.ErrorResp;
     }
@@ -38,7 +57,7 @@ declare namespace Components {
         }
         export interface ActionWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -256,6 +275,31 @@ declare namespace Components {
             cad?: string[];
             calendar?: string[];
             other?: string[];
+        }
+        /**
+         * Dictionary of epilot user attributes to claims
+         */
+        export interface AttributeMappingConfig {
+            /**
+             * example:
+             * email
+             */
+            email: string;
+            /**
+             * example:
+             * name
+             */
+            display_name?: string;
+            /**
+             * example:
+             * phone
+             */
+            phone?: string;
+            /**
+             * example:
+             * language
+             */
+            preferred_language?: string;
         }
         export interface AuthConfig {
             /**
@@ -486,6 +530,10 @@ declare namespace Components {
                  * Change due date feature flag
                  */
                 change_due_date?: boolean;
+                /**
+                 * Enable or disable the new design for the portal
+                 */
+                new_design?: boolean;
             };
             /**
              * Access token for the portal
@@ -584,10 +632,6 @@ declare namespace Components {
                 [name: string]: string[];
             };
             email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
-            /**
-             * Permissions granted to a portal user while accessing entities
-             */
-            grants?: Grant[];
             /**
              * Teaser & Banner Image web links
              */
@@ -722,9 +766,9 @@ declare namespace Components {
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
-             * Configured Portal extensions
+             * Prevent indexing by search engines
              */
-            extensions?: ExtensionConfig[];
+            prevent_search_engine_indexing?: boolean;
         }
         /**
          * The mapped contact of the portal user
@@ -813,7 +857,7 @@ declare namespace Components {
         }
         export interface ContentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1017,26 +1061,6 @@ declare namespace Components {
              */
             EntitySlug;
         }
-        export interface CreateSSOUserRequest {
-            /**
-             * User's email address
-             * example:
-             * testemail921@yopmail.com
-             */
-            email: string;
-            /**
-             * First Name of the portal user
-             * example:
-             * John
-             */
-            first_name?: string;
-            /**
-             * Last Name of the portal user
-             * example:
-             * Doe
-             */
-            last_name?: string;
-        }
         export interface CreateUserRequest {
             /**
              * User's email address
@@ -1056,6 +1080,12 @@ declare namespace Components {
              * Doe
              */
             last_name?: string;
+            contactId?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
             /**
              * ID of the organization
              * example:
@@ -1074,12 +1104,6 @@ declare namespace Components {
             contactIdentifiers?: {
                 [name: string]: string;
             };
-            contactId?: /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            EntityId /* uuid */;
             /**
              * Identifier-value pairs per schema to identify a contact of a portal user during the resgistration
              * example:
@@ -1104,6 +1128,10 @@ declare namespace Components {
          * EUR
          */
         export type Currency = string;
+        export interface DataRetrievalItem {
+            extension?: PublicExtensionDetails;
+            hook?: PublicDataRetrievalHookDetails;
+        }
         export interface DeleteEntityFile {
             entity_id: /**
              * Entity ID
@@ -1135,9 +1163,10 @@ declare namespace Components {
                 EntityId /* uuid */[]
             ];
         }
+        export type Direction = "feed-in" | "feed-out";
         export interface DocumentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1168,6 +1197,15 @@ declare namespace Components {
              * ID of the advanced MFA with login link and login code
              */
             advancedMFA?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * ID of the email template for Journey Login OTP
+             */
+            journeyLoginOTP?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -1228,7 +1266,7 @@ declare namespace Components {
              */
             EntityId /* uuid */;
             /**
-             * ID of the email template for email update confirmation
+             * ID of the email template for setting password while updating email
              */
             confirmEmailUpdate?: /**
              * Entity ID
@@ -1380,7 +1418,7 @@ declare namespace Components {
         export type EntitySlug = "contact" | "contract" | "file" | "order" | "opportunity" | "product" | "price" | "meter" | "meter_counter";
         export interface EntityWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1422,7 +1460,11 @@ declare namespace Components {
             /**
              * Identifier of the extension. Should not change between updates.
              */
-            id?: string;
+            id: string;
+            /**
+             * Identifier of the app from which the extension was installed. Should not change between updates.
+             */
+            app_id?: string;
             /**
              * Name of the extension.
              */
@@ -1434,79 +1476,109 @@ declare namespace Components {
                 en: string;
             };
             /**
+             * Name of the extension.
+             */
+            description?: {
+                [name: string]: string;
+                /**
+                 * Name of the extension in English.
+                 */
+                en: string;
+            };
+            /**
              * Version of the extension.
              */
-            version: string;
+            version?: string;
             /**
-             * Variables available to the extension configurable by the portal administrator.
+             * Options available to the extension configurable by the portal administrator.
              */
-            variables?: {
+            options?: {
                 /**
-                 * Identifier of the variable. Should not change between updates.
+                 * Identifier of the option. Should not change between updates.
                  */
                 id: string;
                 /**
-                 * Name of the variable.
+                 * Name of the option.
                  */
                 name: {
                     [name: string]: string;
                     /**
-                     * Name of the variable in English.
+                     * Name of the option in English.
                      */
                     en: string;
                 };
                 /**
-                 * Type of the variable.
+                 * Type of the option.
                  */
-                type: "secret";
+                type: "text" | "secret";
                 /**
-                 * Description of the variable.
+                 * Description of the option.
                  */
                 description?: {
                     [name: string]: string;
                     /**
-                     * Description of the variable in English.
+                     * Description of the option in English.
                      */
                     en: string;
                 };
                 /**
-                 * Default value of the variable.
+                 * Default value of the option.
                  */
                 default?: string;
                 /**
-                 * Indicate whether the variable is required.
+                 * Indicate whether the option is required.
                  */
                 required?: boolean;
             }[];
             /**
-             * Widgets that can be used by portal administrator.
+             * External links added to the portal.
              */
-            widgets?: ({
+            links?: {
                 /**
-                 * Identifier of the widget. Should not change between updates.
+                 * Identifier of the link. Should not change between updates.
                  */
-                id?: string;
+                id: string;
                 /**
-                 * Name of the widget.
+                 * Name of the extension.
                  */
-                name?: {
+                name: {
                     [name: string]: string;
                     /**
-                     * Name of the widget in English.
+                     * Name of the extension in English.
                      */
                     en: string;
                 };
                 /**
-                 * Description of the widget.
+                 * Name of the extension.
                  */
                 description?: {
                     [name: string]: string;
                     /**
-                     * Description of the widget in English.
+                     * Name of the extension in English.
                      */
                     en: string;
                 };
-            } & (ExtensionWidgetSeamlessLink))[];
+                type: "seamless";
+                /**
+                 * Controls whether the link should be shown. Supports variable interpolation.
+                 * example:
+                 * {{Contact.customer_number | is_not_empty}}
+                 */
+                condition?: string;
+                auth?: ExtensionAuthBlock;
+                redirect: {
+                    /**
+                     * URL to redirect to. Supports variable interpolation.
+                     */
+                    url?: string;
+                    /**
+                     * Parameters to append to the URL. Supports variable interpolation.
+                     */
+                    params?: {
+                        [name: string]: string;
+                    };
+                };
+            }[];
             /**
              * Hooks that influence the behavior of Portal.
              */
@@ -1516,12 +1588,87 @@ declare namespace Components {
                  */
                 id?: string;
             } & (/**
-             * Hook that replaces the built-in registration identifiers check. This hook makes the specified call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
-             *   - 200 with body `{ "contactId": "uuid" }` if exactly one contact is found
+             * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
+             *   - 200 with contact id if exactly one contact is found
              *   - 404 if no contact is found or more than contact is found
              *
              */
-            ExtensionHookRegistrationIdentifiersCheck))[];
+            ExtensionHookRegistrationIdentifiersCheck | /**
+             * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
+             *   - 200 if found with either:
+             *     - contract_id array
+             *     - contact_id string
+             *   - 404 if no contract is found
+             * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
+             *
+             */
+            ExtensionHookContractIdentification | /**
+             * Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+             *   - 200 with the time series data
+             *
+             */
+            ExtensionHookPriceDataRetrieval | /**
+             * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+             *   - 200 with the time series data
+             *
+             */
+            ExtensionHookConsumptionDataRetrieval | /**
+             * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+             *   - 200 with the time series data
+             *
+             */
+            ExtensionHookCostDataRetrieval | /**
+             * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
+             *   - 200:
+             *     If meter reading is plausible, the response should contain:
+             *       - valid: true
+             *     If meter reading is not plausible, the response should contain:
+             *       - valid: false
+             *
+             */
+            ExtensionHookMeterReadingPlausibilityCheck))[];
+        }
+        export interface ExtensionAuthBlock {
+            /**
+             * HTTP method to use for authentication
+             */
+            method?: string;
+            /**
+             * URL to use for authentication. Supports variable interpolation.
+             */
+            url: string;
+            /**
+             * Parameters to append to the URL. Supports variable interpolation.
+             */
+            params?: {
+                [name: string]: string;
+            };
+            /**
+             * Headers to use for authentication. Supports variable interpolation.
+             */
+            headers?: {
+                [name: string]: string;
+            };
+            /**
+             * JSON body to use for authentication. Supports variable interpolation.
+             */
+            body?: {
+                [name: string]: string;
+            };
+            cache?: {
+                /**
+                 * Key to use to identify the auth response. Supports interpolation.
+                 * example:
+                 * {{Options.api_key}}
+                 */
+                key: string;
+                /**
+                 * Time to live in seconds for the cache. Supports interpolation.
+                 * example:
+                 * {{AuthResponse.data.expires_in}}
+                 */
+                ttl: string;
+            };
         }
         export interface ExtensionConfig {
             /**
@@ -1546,20 +1693,61 @@ declare namespace Components {
             id?: string;
         }
         /**
-         * Hook that replaces the built-in registration identifiers check. This hook makes the specified call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
-         *   - 200 with body `{ "contactId": "uuid" }` if exactly one contact is found
-         *   - 404 if no contact is found or more than contact is found
+         * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+         *   - 200 with the time series data
          *
          */
-        export interface ExtensionHookRegistrationIdentifiersCheck {
-            type: "registrationIdentifiersCheck";
+        export interface ExtensionHookConsumptionDataRetrieval {
+            type: "consumptionDataRetrieval";
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
+        }
+        /**
+         * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
+         *   - 200 if found with either:
+         *     - contract_id array
+         *     - contact_id string
+         *   - 404 if no contract is found
+         * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
+         *
+         */
+        export interface ExtensionHookContractIdentification {
+            type: "contractIdentification";
+            auth?: ExtensionAuthBlock;
             call: {
                 /**
                  * URL to call. Supports variable interpolation.
                  */
                 url: string;
                 /**
-                 * Parameters to append to the URL.
+                 * Parameters to append to the URL. Supports variable interpolation.
                  */
                 params?: {
                     [name: string]: string;
@@ -1571,76 +1759,280 @@ declare namespace Components {
                     [name: string]: string;
                 };
             };
-        }
-        export interface ExtensionWidget {
             /**
-             * Identifier of the widget. Should not change between updates.
+             * Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.
+             * example:
+             * represents_contact
              */
-            id?: string;
+            contact_relation_attribute?: string;
             /**
-             * Name of the widget.
+             * Explanation of the hook.
              */
-            name?: {
+            explanation?: {
                 [name: string]: string;
                 /**
-                 * Name of the widget in English.
-                 */
-                en: string;
-            };
-            /**
-             * Description of the widget.
-             */
-            description?: {
-                [name: string]: string;
-                /**
-                 * Description of the widget in English.
+                 * Explanation of the functionality shown to the end user.
+                 * example:
+                 * This process will give you access to all Contracts kept
                  */
                 en: string;
             };
         }
-        export interface ExtensionWidgetSeamlessLink {
-            type?: "seamlessLink";
-            authentication?: {
-                type?: "token";
+        /**
+         * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+         *   - 200 with the time series data
+         *
+         */
+        export interface ExtensionHookCostDataRetrieval {
+            type: "costDataRetrieval";
+            auth?: ExtensionAuthBlock;
+            call: {
                 /**
-                 * HTTP method to use for authentication
+                 * HTTP method to use for the call
                  */
                 method?: string;
                 /**
-                 * URL to use for authentication
+                 * URL to call. Supports variable interpolation.
                  */
-                url?: string;
+                url: string;
                 /**
-                 * Parameters to append to the URL.
+                 * Parameters to append to the URL. Supports variable interpolation.
                  */
                 params?: {
                     [name: string]: string;
                 };
                 /**
-                 * Headers to use for authentication
+                 * Headers to use. Supports variable interpolation.
                  */
                 headers?: {
                     [name: string]: string;
                 };
+            };
+            resolved?: {
                 /**
-                 * JSON body to use for authentication
+                 * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
-                body?: {
+                dataPath?: string;
+            };
+        }
+        /**
+         * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
+         *   - 200:
+         *     If meter reading is plausible, the response should contain:
+         *       - valid: true
+         *     If meter reading is not plausible, the response should contain:
+         *       - valid: false
+         *
+         */
+        export interface ExtensionHookMeterReadingPlausibilityCheck {
+            type: "meterReadingPlausibilityCheck";
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * JSON body to use for authentication. Supports variable interpolation.
+                 */
+                body: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
                     [name: string]: string;
                 };
             };
-            redirect?: {
+            /**
+             * Response to the call
+             */
+            resolved: {
                 /**
-                 * URL to redirect to.
+                 * Indicate whether the meter reading is plausible
+                 * example:
+                 * {{CallResponse.data.valid}}
+                 */
+                valid?: string;
+                /**
+                 * Upper allowed limit of the meter reading
+                 * example:
+                 * {{CallResponse.data.upper_limit}}
+                 */
+                upper_limit?: string;
+                /**
+                 * Lower allowed limit of the meter reading
+                 * example:
+                 * {{CallResponse.data.lower_limit}}
+                 */
+                lower_limit?: string;
+            };
+        }
+        /**
+         * Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+         *   - 200 with the time series data
+         *
+         */
+        export interface ExtensionHookPriceDataRetrieval {
+            type: "priceDataRetrieval";
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
+        }
+        /**
+         * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
+         *   - 200 with contact id if exactly one contact is found
+         *   - 404 if no contact is found or more than contact is found
+         *
+         */
+        export interface ExtensionHookRegistrationIdentifiersCheck {
+            type: "registrationIdentifiersCheck";
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+                /**
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation.
+                 */
+                result: string;
+            };
+        }
+        export interface ExtensionSeamlessLink {
+            /**
+             * Identifier of the link. Should not change between updates.
+             */
+            id: string;
+            /**
+             * Name of the extension.
+             */
+            name: {
+                [name: string]: string;
+                /**
+                 * Name of the extension in English.
+                 */
+                en: string;
+            };
+            /**
+             * Name of the extension.
+             */
+            description?: {
+                [name: string]: string;
+                /**
+                 * Name of the extension in English.
+                 */
+                en: string;
+            };
+            type: "seamless";
+            /**
+             * Controls whether the link should be shown. Supports variable interpolation.
+             * example:
+             * {{Contact.customer_number | is_not_empty}}
+             */
+            condition?: string;
+            auth?: ExtensionAuthBlock;
+            redirect: {
+                /**
+                 * URL to redirect to. Supports variable interpolation.
                  */
                 url?: string;
                 /**
-                 * Parameters to append to the URL.
+                 * Parameters to append to the URL. Supports variable interpolation.
                  */
                 params?: {
                     [name: string]: string;
                 };
             };
+        }
+        export interface ExternalLink {
+            /**
+             * Unique identifier for the external link
+             */
+            id: string;
+            label: {
+                [name: string]: string;
+            };
+            type: "link" | "journey" | "seamless";
+            /**
+             * The URL of the external link
+             */
+            link: string;
+            rules?: {
+                [key: string]: any;
+            }[];
+            /**
+             * Attribute associated with the link
+             */
+            attribute?: string;
+            /**
+             * Entity associated with the link
+             */
+            entity?: string;
+            /**
+             * Attribute value for the link
+             */
+            attribute_value?: string;
+            /**
+             * Configuration of the icon for the external link
+             */
+            icon?: {
+                /**
+                 * The name of the icon
+                 */
+                name?: string;
+                /**
+                 * The color of the icon
+                 */
+                color?: string;
+                /**
+                 * Size of the icon in pixels
+                 */
+                size?: number;
+            };
+            /**
+             * Seamless link identifier in a form of [extensionId, linkId]
+             */
+            extension_link_id?: string[];
         }
         export type ExtraSchemaAttributes = {
             /**
@@ -1989,6 +2381,141 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "meter";
         }
+        export interface MeterChartWidget {
+            id: string;
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
+            /**
+             * Index of the widget in the list, used for ordering (left or right)
+             */
+            listIndex: number;
+            headline?: {
+                en?: string;
+                de?: string;
+            };
+            subHeadline?: {
+                en?: string;
+                de?: string;
+            };
+            schema?: string;
+        }
+        export interface MeterReading {
+            /**
+             * The reading value of the meter
+             * example:
+             * 240
+             */
+            value: number;
+            read_by?: /**
+             * The person who recorded the reading
+             * example:
+             * John Doe
+             */
+            ReadBy;
+            reason?: /**
+             * The reason for recording the reading
+             * example:
+             * Storing the feed-in record
+             */
+            Reason;
+            /**
+             * The ID of the associated meter
+             */
+            meter_id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * The ID of the associated meter counter
+             */
+            counter_id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * The direction of the reading (feed-in or feed-out)
+             */
+            direction?: Direction;
+            /**
+             * If the value is not provided, the system will be set with the time the request is processed.
+             * example:
+             * 2022-10-10T00:00:00.000Z
+             */
+            timestamp?: string;
+            /**
+             * The source of the reading
+             */
+            source: Source;
+            /**
+             * The status of the reading
+             */
+            status?: ReadingStatus;
+        }
+        export interface MeterReadingWidget {
+            id: string;
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
+            /**
+             * Index of the widget in the list, used for ordering (left or right)
+             */
+            listIndex: number;
+            headline?: {
+                en?: string;
+                de?: string;
+            };
+            subHeadline?: {
+                en?: string;
+                de?: string;
+            };
+            schema?: string;
+        }
+        export interface OIDCProviderConfig {
+            /**
+             * Issuing Authority URL
+             * example:
+             * https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0
+             */
+            oidc_issuer: string;
+            /**
+             * example:
+             * ab81daf8-8b1f-42d6-94ca-c51621054c75
+             */
+            client_id: string;
+            /**
+             * example:
+             * 7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B
+             */
+            client_secret?: string;
+            /**
+             * Space-separated list of OAuth 2.0 scopes to request from OpenID Connect
+             * example:
+             * openid email
+             */
+            scope: string;
+            metadata?: OIDCProviderMetadata;
+        }
+        export interface OIDCProviderMetadata {
+            /**
+             * URL of the authorization endpoint
+             * example:
+             * https://www.facebook.com/v12.0/dialog/oauth
+             */
+            authorization_endpoint?: string;
+            /**
+             * URL of the token endpoint
+             * example:
+             * https://graph.facebook.com/v12.0/oauth/access_token
+             */
+            token_endpoint?: string;
+            /**
+             * URL of the userinfo endpoint
+             * example:
+             * https://graph.facebook.com/me
+             */
+            userinfo_endpoint?: string;
+        }
         /**
          * The opportunity entity
          */
@@ -2203,7 +2730,7 @@ declare namespace Components {
         export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
         export interface PaymentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2261,6 +2788,10 @@ declare namespace Components {
                  * Change due date feature flag
                  */
                 change_due_date?: boolean;
+                /**
+                 * Enable or disable the new design for the portal
+                 */
+                new_design?: boolean;
             };
             /**
              * Access token for the portal
@@ -2359,10 +2890,6 @@ declare namespace Components {
                 [name: string]: string[];
             };
             email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
-            /**
-             * Permissions granted to a portal user while accessing entities
-             */
-            grants?: Grant[];
             /**
              * Teaser & Banner Image web links
              */
@@ -2497,9 +3024,9 @@ declare namespace Components {
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
-             * Configured Portal extensions
+             * Prevent indexing by search engines
              */
-            extensions?: ExtensionConfig[];
+            prevent_search_engine_indexing?: boolean;
             /**
              * ID of the organization
              * example:
@@ -2512,12 +3039,6 @@ declare namespace Components {
              * 12345
              */
             organization_id?: string;
-            /**
-             * Name of the organization
-             * example:
-             * ABC Company
-             */
-            org_name?: string;
             origin?: /* Origin of the portal */ Origin;
             /**
              * Organization settings
@@ -2548,6 +3069,11 @@ declare namespace Components {
             feature_flags?: {
                 [name: string]: boolean;
             };
+            /**
+             * Permissions granted to a portal user while accessing entities
+             */
+            grants?: Grant[];
+            identity_providers?: ProviderPublicConfig[];
         }
         /**
          * The portal user entity
@@ -2595,7 +3121,7 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "portal_user";
         }
-        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget;
+        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget;
         /**
          * The product entity
          */
@@ -2642,6 +3168,116 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "product";
         }
+        export interface ProviderConfig {
+            slug?: /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            ProviderSlug /* [0-9a-z-]+ */;
+            display_name: /**
+             * Human-readable display name for identity provider shown in login
+             * example:
+             * Office 365 Login
+             */
+            ProviderDisplayName;
+            provider_type: "OIDC";
+            attribute_mappings?: /* Dictionary of epilot user attributes to claims */ AttributeMappingConfig;
+            oidc_config?: OIDCProviderConfig;
+        }
+        /**
+         * Human-readable display name for identity provider shown in login
+         * example:
+         * Office 365 Login
+         */
+        export type ProviderDisplayName = string;
+        export interface ProviderPublicConfig {
+            slug: /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            ProviderSlug /* [0-9a-z-]+ */;
+            display_name: /**
+             * Human-readable display name for identity provider shown in login
+             * example:
+             * Office 365 Login
+             */
+            ProviderDisplayName;
+            oidc_config?: OIDCProviderConfig;
+        }
+        /**
+         * URL-friendly slug to use as organization-unique identifier for Provider
+         * example:
+         * office-365-login
+         */
+        export type ProviderSlug = string; // [0-9a-z-]+
+        export interface PublicContractIdentificationDetails {
+            /**
+             * Explanation of the hook.
+             */
+            explanation?: {
+                [name: string]: string;
+                /**
+                 * Explanation of the functionality shown to the end user.
+                 * example:
+                 * This process will give you access to all Contracts kept
+                 */
+                en: string;
+            };
+        }
+        export interface PublicDataRetrievalHookDetails {
+            /**
+             * Identifier of the hook.
+             */
+            id?: string;
+            name?: {
+                [name: string]: string;
+                /**
+                 * Name of the extension in English.
+                 */
+                en: string;
+            };
+            /**
+             * The intervals associated with the hook.
+             */
+            intervals?: string[];
+        }
+        export interface PublicExtensionCapabilities {
+            consumptionDataRetrieval?: DataRetrievalItem[];
+            priceDataRetrieval?: DataRetrievalItem[];
+            costDataRetrieval?: DataRetrievalItem[];
+            contractIdentification?: {
+                extension?: PublicExtensionDetails;
+                hook?: PublicContractIdentificationDetails;
+            };
+        }
+        export interface PublicExtensionDetails {
+            /**
+             * Identifier of the extension.
+             */
+            id?: string;
+            name?: {
+                [name: string]: string;
+                /**
+                 * Name of the extension in English.
+                 */
+                en: string;
+            };
+        }
+        /**
+         * The person who recorded the reading
+         * example:
+         * John Doe
+         */
+        export type ReadBy = string | null;
+        export type ReadingStatus = "valid" | "in-validation" | "implausible" | null | "";
+        /**
+         * The reason for recording the reading
+         * example:
+         * Storing the feed-in record
+         */
+        export type Reason = string | null;
         export interface RegistrationIdentifier {
             /**
              * Name of the identifier/attribute
@@ -2752,6 +3388,9 @@ declare namespace Components {
             attribute?: string | null;
             attribute_value?: string | null;
         }
+        export interface SAMLProviderConfig {
+        }
+        export type SSOLoginToken = string;
         export interface SaveEntityFile {
             entity_id: /**
              * Entity ID
@@ -2841,9 +3480,11 @@ declare namespace Components {
              */
             slug?: string;
         }
+        export type Source = "ECP" | "ERP" | "360" | "journey-submission";
+        export type TariffType = "ht" | "nt";
         export interface TeaserWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2878,6 +3519,15 @@ declare namespace Components {
                      * Indicate whether the file is shared with the end customer
                      */
                     shared_with_end_customer?: boolean;
+                    /**
+                     * Array of entity tags
+                     * example:
+                     * [
+                     *   "example",
+                     *   "mock"
+                     * ]
+                     */
+                    _tags?: string[];
                 };
             };
         }
@@ -2903,6 +3553,10 @@ declare namespace Components {
                     de?: string;
                 };
             }[];
+            /**
+             * Configured Portal extensions
+             */
+            extensions?: ExtensionConfig[];
             /**
              * Default 360 user to notify upon an internal notification
              */
@@ -2935,6 +3589,10 @@ declare namespace Components {
                     de?: string;
                 };
             }[];
+            /**
+             * Configured Portal extensions
+             */
+            extensions?: ExtensionConfig[];
             /**
              * Default 360 user to notify upon an internal notification
              */
@@ -2987,6 +3645,10 @@ declare namespace Components {
                  * Change due date feature flag
                  */
                 change_due_date?: boolean;
+                /**
+                 * Enable or disable the new design for the portal
+                 */
+                new_design?: boolean;
             };
             /**
              * Access token for the portal
@@ -3085,10 +3747,6 @@ declare namespace Components {
                 [name: string]: string[];
             };
             email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
-            /**
-             * Permissions granted to a portal user while accessing entities
-             */
-            grants?: Grant[];
             /**
              * Teaser & Banner Image web links
              */
@@ -3223,9 +3881,9 @@ declare namespace Components {
             }[];
             allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
             /**
-             * Configured Portal extensions
+             * Prevent indexing by search engines
              */
-            extensions?: ExtensionConfig[];
+            prevent_search_engine_indexing?: boolean;
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -3249,6 +3907,15 @@ declare namespace Components {
              * Doe
              */
             last_name?: string;
+            /**
+             * ID of the contact
+             */
+            contactId?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
         }
         export interface WidgetAction {
             _id: string;
@@ -3266,7 +3933,7 @@ declare namespace Components {
         }
         export interface WidgetBase {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -3372,7 +4039,7 @@ declare namespace Components {
 declare namespace Paths {
     namespace AddContractByIdentifiers {
         /**
-         * Identifier-value pairs per schema to identify a contract
+         * Identifier-value pairs per schema to identify the contract
          * example:
          * {
          *   "contract": {
@@ -3390,42 +4057,13 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                data?: Components.Schemas.EntityItem;
+                data?: Components.Schemas.EntityItem[];
                 hits: number;
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $409 = Components.Responses.ContractAssignmentConflict;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace AddEndCustomerRelationToEntity {
-        namespace Parameters {
-            export type Id = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */;
-            export type Slug = /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            Components.Schemas.EntitySlug;
-        }
-        export interface PathParameters {
-            slug: Parameters.Slug;
-            id: Parameters.Id;
-        }
-        namespace Responses {
-            export interface $200 {
-                entity?: Components.Schemas.EntityItem;
-                relations?: Components.Schemas.EntityItem[];
-            }
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -3464,6 +4102,15 @@ declare namespace Paths {
                  * true
                  */
                 exists?: boolean;
+                /**
+                 * ID of the contact if exists
+                 */
+                contactId?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
@@ -3497,13 +4144,27 @@ declare namespace Paths {
              * Confirmation link token
              */
             export type ConfirmationLinkToken = string;
+            /**
+             * Should the operation result in a 301 redirect
+             */
+            export type UseRedirect = boolean;
         }
         export interface QueryParameters {
             confirmation_link_token: /* Confirmation link token */ Parameters.ConfirmationLinkToken;
+            use_redirect?: /* Should the operation result in a 301 redirect */ Parameters.UseRedirect;
         }
         namespace Responses {
+            export interface $200 {
+                /**
+                 * Is the user confirmed
+                 * example:
+                 * true
+                 */
+                confirmed: boolean;
+            }
             export interface $301 {
             }
+            export type $400 = Components.Responses.ConfirmUserInvalidRequest;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -3572,20 +4233,21 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace CreateSSOUser {
+    namespace CreateMeterReading {
         namespace Parameters {
-            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+            export type OverridePlausibility = boolean;
         }
         export interface QueryParameters {
-            origin: Parameters.Origin;
+            override_plausibility?: Parameters.OverridePlausibility;
         }
-        export type RequestBody = Components.Schemas.CreateSSOUserRequest;
+        export type RequestBody = Components.Schemas.MeterReading;
         namespace Responses {
-            export interface $201 {
-                data?: /* The portal user entity */ Components.Schemas.PortalUser;
+            export interface $200 {
+                data?: Components.Schemas.MeterReading;
             }
-            export type $400 = Components.Responses.InvalidRequest;
+            export type $400 = Components.Responses.InvalidRequestCreateMeterReading;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -4243,6 +4905,46 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetConsumption {
+        namespace Parameters {
+            export type ExtensionId = string;
+            export type From = string; // date-time
+            export type HookId = string;
+            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type MeterId = string;
+            export type To = string; // date-time
+        }
+        export interface QueryParameters {
+            extensionId: Parameters.ExtensionId;
+            hookId: Parameters.HookId;
+            meter_id: Parameters.MeterId;
+            from: Parameters.From /* date-time */;
+            to: Parameters.To /* date-time */;
+            interval: Parameters.Interval;
+        }
+        namespace Responses {
+            export interface $200 {
+                consumptions?: {
+                    /**
+                     * ISO 8601 timestamp of the consumption record.
+                     */
+                    timestamp: string; // date-time
+                    /**
+                     * The consumption value.
+                     */
+                    value: number;
+                    /**
+                     * Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time).
+                     */
+                    type?: string;
+                }[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetContact {
         namespace Responses {
             export interface $200 {
@@ -4338,6 +5040,68 @@ declare namespace Paths {
                  */
                 Components.Schemas.WorkflowExecution[];
                 journey_actions?: Components.Schemas.JourneyActions[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetCosts {
+        namespace Parameters {
+            export type ExtensionId = string;
+            export type From = string; // date-time
+            export type HookId = string;
+            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type MeterId = string;
+            export type To = string; // date-time
+        }
+        export interface QueryParameters {
+            extensionId: Parameters.ExtensionId;
+            hookId: Parameters.HookId;
+            meter_id: Parameters.MeterId;
+            from: Parameters.From /* date-time */;
+            to: Parameters.To /* date-time */;
+            interval: Parameters.Interval;
+        }
+        namespace Responses {
+            export interface $200 {
+                costs?: {
+                    /**
+                     * ISO 8601 timestamp of the cost record.
+                     */
+                    timestamp: string; // date-time
+                    /**
+                     * Cost in cents, e.g. 1234 for 12,34 €.
+                     * example:
+                     * 1234
+                     */
+                    unit_amount: number;
+                    /**
+                     * ISO 4217:2015 currency.
+                     * example:
+                     * EUR
+                     */
+                    unit_amount_currency: string;
+                    /**
+                     * Cost in decimal format, e.g. "12.34".
+                     * example:
+                     * 12.34
+                     */
+                    unit_amount_decimal: string;
+                    /**
+                     * Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.
+                     * example:
+                     * exclusive
+                     */
+                    tax_behavior: "inclusive" | "exclusive";
+                    /**
+                     * Tax rate in percent, e.g. 19 for 19%.
+                     * example:
+                     * 19
+                     */
+                    tax_rate: number;
+                }[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -4487,7 +5251,7 @@ declare namespace Paths {
             contactId?: Parameters.ContactId;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.JourneyActions[];
+            export type $200 = Components.Schemas.ExternalLink[];
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -4754,6 +5518,10 @@ declare namespace Paths {
                      * Change due date feature flag
                      */
                     change_due_date?: boolean;
+                    /**
+                     * Enable or disable the new design for the portal
+                     */
+                    new_design?: boolean;
                 };
                 /**
                  * Access token for the portal
@@ -4852,10 +5620,6 @@ declare namespace Paths {
                     [name: string]: string[];
                 };
                 email_templates?: /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
-                /**
-                 * Permissions granted to a portal user while accessing entities
-                 */
-                grants?: Components.Schemas.Grant[];
                 /**
                  * Teaser & Banner Image web links
                  */
@@ -4990,9 +5754,9 @@ declare namespace Paths {
                 }[];
                 allowed_file_extensions?: /* Allowed file extensions for upload */ Components.Schemas.AllowedFileExtensions;
                 /**
-                 * Configured Portal extensions
+                 * Prevent indexing by search engines
                  */
-                extensions?: Components.Schemas.ExtensionConfig[];
+                prevent_search_engine_indexing?: boolean;
                 /**
                  * ID of the organization
                  * example:
@@ -5005,12 +5769,6 @@ declare namespace Paths {
                  * 12345
                  */
                 organization_id?: string;
-                /**
-                 * Name of the organization
-                 * example:
-                 * ABC Company
-                 */
-                org_name?: string;
                 origin?: /* Origin of the portal */ Components.Schemas.Origin;
                 /**
                  * Organization settings
@@ -5041,6 +5799,11 @@ declare namespace Paths {
                 feature_flags?: {
                     [name: string]: boolean;
                 };
+                /**
+                 * Permissions granted to a portal user while accessing entities
+                 */
+                grants?: Components.Schemas.Grant[];
+                identity_providers?: Components.Schemas.ProviderPublicConfig[];
                 certificate_details?: {
                     /**
                      * Status of the certificate
@@ -5141,6 +5904,133 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetPrices {
+        namespace Parameters {
+            export type ExtensionId = string;
+            export type From = string; // date-time
+            export type HookId = string;
+            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type MeterId = string;
+            export type To = string; // date-time
+        }
+        export interface QueryParameters {
+            extensionId: Parameters.ExtensionId;
+            hookId: Parameters.HookId;
+            meter_id: Parameters.MeterId;
+            from: Parameters.From /* date-time */;
+            to: Parameters.To /* date-time */;
+            interval: Parameters.Interval;
+        }
+        namespace Responses {
+            export interface $200 {
+                prices?: {
+                    /**
+                     * ISO 8601 timestamp of the price record.
+                     */
+                    timestamp: string; // date-time
+                    /**
+                     * Cost in cents, e.g. 1234 for 12,34 €.
+                     * example:
+                     * 1234
+                     */
+                    unit_amount: number;
+                    /**
+                     * ISO 4217:2015 currency.
+                     * example:
+                     * EUR
+                     */
+                    unit_amount_currency: string;
+                    /**
+                     * Cost in decimal format, e.g. "12.34".
+                     * example:
+                     * 12.34
+                     */
+                    unit_amount_decimal: string;
+                    /**
+                     * Optional price components.
+                     */
+                    components?: {
+                        /**
+                         * Market price in cents, e.g. 1000 for 10,00 €.
+                         * example:
+                         * 1000
+                         */
+                        auction_price_amount?: number;
+                        /**
+                         * Market price in decimal format, e.g. "10.00".
+                         * example:
+                         * 10.00
+                         */
+                        auction_price_amount_decimal?: string;
+                        /**
+                         * Taxes/Levies other than tax specified on the price level in cents, e.g. 50 for 00,50 €.
+                         * example:
+                         * 50
+                         */
+                        taxes_levies_amount?: number;
+                        /**
+                         * Taxes/Levies other than tax specified on the price level in decimal format, e.g. "0.50".
+                         * example:
+                         * 0.50
+                         */
+                        taxes_levies_amount_decimal?: string;
+                        /**
+                         * Fee associated with the source, e.g. Green Energy Certificate fee in cents, e.g. 50 for 00,50 €.
+                         * example:
+                         * 50
+                         */
+                        source_fee_amount?: number;
+                        /**
+                         * Fee associated with the source, e.g. Green Energy Certificate fee in decimal format, e.g. "0.50".
+                         * example:
+                         * 0.50
+                         */
+                        source_fee_amount_decimal?: string;
+                        /**
+                         * Fee associated with the transmission/distribution in cents, e.g. 100 for 1,00 €.
+                         * example:
+                         * 100
+                         */
+                        grid_fee_amount?: number;
+                        /**
+                         * Fee associated with the transmission/distribution in decimal format, e.g. "1.00".
+                         * example:
+                         * 1.00
+                         */
+                        grid_fee_amount_decimal?: string;
+                        /**
+                         * Margin in cents, e.g. 34 for 0,34 €.
+                         * example:
+                         * 34
+                         */
+                        margin_amount?: number;
+                        /**
+                         * Margin in decimal format, e.g. "0.34".
+                         * example:
+                         * 0.34
+                         */
+                        margin_amount_decimal?: string;
+                    };
+                    /**
+                     * Is the tax (typically Value Added Tax) included in the amounts. Typically should NOT be included - exclusive of tax.
+                     * example:
+                     * exclusive
+                     */
+                    tax_behavior: "inclusive" | "exclusive";
+                    /**
+                     * Tax rate in percent, e.g. 19 for 19%.
+                     * example:
+                     * 19
+                     */
+                    tax_rate: number;
+                }[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetPublicPortalConfig {
         namespace Parameters {
             /**
@@ -5162,6 +6052,32 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.PortalConfig;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPublicPortalExtensionDetails {
+        namespace Parameters {
+            /**
+             * Organization ID
+             * example:
+             * 12324
+             */
+            export type OrgId = string;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            org_id: /**
+             * Organization ID
+             * example:
+             * 12324
+             */
+            Parameters.OrgId;
+            origin: Parameters.Origin;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PublicExtensionCapabilities;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -5267,6 +6183,36 @@ declare namespace Paths {
                     [name: string]: Components.Schemas.IdentifierAttribute[];
                 };
             }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetResolvedExternalLink {
+        namespace Parameters {
+            export type ContactId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            origin?: Parameters.Origin;
+            contactId?: Parameters.ContactId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ExternalLink;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -5615,6 +6561,47 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SsoLogin {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type ContactId = string; // uuid
+            /**
+             * example:
+             * 123
+             */
+            export type OrgId = string;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            origin: Parameters.Origin;
+            org_id: /**
+             * example:
+             * 123
+             */
+            Parameters.OrgId;
+            contact_id?: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.ContactId /* uuid */;
+        }
+        export interface RequestBody {
+            provider_slug?: /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            Components.Schemas.ProviderSlug /* [0-9a-z-]+ */;
+        }
+        namespace Responses {
+            export interface $200 {
+                token?: Components.Schemas.SSOLoginToken;
+            }
+        }
+    }
     namespace TrackFileDownloaded {
         namespace Parameters {
             export type Id = /**
@@ -5940,6 +6927,32 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ValidateCaaRecords {
+        namespace Parameters {
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+        }
+        export interface QueryParameters {
+            origin: Parameters.Origin;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether to retry the validation to continue the domain setup
+                 */
+                retry?: boolean;
+                /**
+                 * Message of the validation
+                 */
+                message?: string;
+                /**
+                 * Whether the DNS is configured from the customer side
+                 */
+                isDNSConfigured?: boolean;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ValidateCadenceEntityEditRules {
         namespace Parameters {
             export type Attribute = string;
@@ -6026,16 +7039,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RevokeToken.Responses.$200>
   /**
-   * createSSOUser - createSSOUser
-   * 
-   * Creates a portal user as an SSO user.
-   */
-  'createSSOUser'(
-    parameters?: Parameters<Paths.CreateSSOUser.QueryParameters> | null,
-    data?: Paths.CreateSSOUser.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateSSOUser.Responses.$201>
-  /**
    * getPortalConfigByDomain - getPortalConfigByDomain
    * 
    * Retrieves the portal configuration by domain.
@@ -6076,6 +7079,46 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPortalExtensions.Responses.$200>
   /**
+   * getPublicPortalExtensionDetails - getPublicPortalExtensionDetails
+   * 
+   * Get public extension details shown to end customers and configuring users.
+   */
+  'getPublicPortalExtensionDetails'(
+    parameters?: Parameters<Paths.GetPublicPortalExtensionDetails.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicPortalExtensionDetails.Responses.$200>
+  /**
+   * getConsumption - Get Consumption
+   * 
+   * Get energy consumption data between a given time period.
+   */
+  'getConsumption'(
+    parameters?: Parameters<Paths.GetConsumption.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetConsumption.Responses.$200>
+  /**
+   * getCosts - Get Costs
+   * 
+   * Get energy cost data between a given time period.
+   */
+  'getCosts'(
+    parameters?: Parameters<Paths.GetCosts.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCosts.Responses.$200>
+  /**
+   * getPrices - Get Prices
+   * 
+   * Get energy prices data between a given time period.
+   */
+  'getPrices'(
+    parameters?: Parameters<Paths.GetPrices.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPrices.Responses.$200>
+  /**
    * getExternalLinks - getExternalLinks
    * 
    * Retrieves the portal configuration external links.
@@ -6085,6 +7128,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
+  /**
+   * getResolvedExternalLink - getResolvedExternalLink
+   * 
+   * Retrieves a resolved portal external link.
+   */
+  'getResolvedExternalLink'(
+    parameters?: Parameters<Paths.GetResolvedExternalLink.QueryParameters & Paths.GetResolvedExternalLink.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetResolvedExternalLink.Responses.$200>
   /**
    * getPublicPortalConfig - getPublicPortalConfig
    * 
@@ -6206,6 +7259,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExtraPermissionAttributes.Responses.$200>
   /**
+   * validateCaaRecords - validateCaaRecords
+   * 
+   * Validates the CAA records of a portal
+   */
+  'validateCaaRecords'(
+    parameters?: Parameters<Paths.ValidateCaaRecords.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateCaaRecords.Responses.$200>
+  /**
    * getContact - getContact
    * 
    * Retrieves the contact of the logged in user.
@@ -6324,7 +7387,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.ConfirmUser.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.ConfirmUser.Responses.$200>
   /**
    * confirmUserWithUserId - confirmUserWithUserId
    * 
@@ -6488,7 +7551,7 @@ export interface OperationMethods {
   /**
    * addContractByIdentifiers - addContractByIdentifiers
    * 
-   * Self-assign contract by pre-configured identifiers.
+   * Self-assign contract(s) by pre-configured identifiers.
    */
   'addContractByIdentifiers'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -6505,16 +7568,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityIdentifiers.Responses.$200>
-  /**
-   * addEndCustomerRelationToEntity - addEndCustomerRelationToEntity
-   * 
-   * Add portal user relation to an entity
-   */
-  'addEndCustomerRelationToEntity'(
-    parameters?: Parameters<Paths.AddEndCustomerRelationToEntity.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.AddEndCustomerRelationToEntity.Responses.$200>
   /**
    * getEntityActivityFeed - getEntityActivityFeed
    * 
@@ -6711,6 +7764,31 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
+  /**
+   * createMeterReading - Create Meter Reading
+   * 
+   * Inserts a new meter reading.
+   */
+  'createMeterReading'(
+    parameters?: Parameters<Paths.CreateMeterReading.QueryParameters> | null,
+    data?: Paths.CreateMeterReading.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
+  /**
+   * ssoLogin - ssoLogin
+   * 
+   * Initiate login using external SSO identity.
+   * 
+   * Verifies the user with the issuer and matches the identity to an epilot user (or creates a new user).
+   * 
+   * Returns parameters to be used with CUSTOM_AUTH flow against Cognito
+   * 
+   */
+  'ssoLogin'(
+    parameters?: Parameters<Paths.SsoLogin.QueryParameters> | null,
+    data?: Paths.SsoLogin.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SsoLogin.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -6762,18 +7840,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RevokeToken.Responses.$200>
   }
-  ['/v2/portal/sso/user']: {
-    /**
-     * createSSOUser - createSSOUser
-     * 
-     * Creates a portal user as an SSO user.
-     */
-    'post'(
-      parameters?: Parameters<Paths.CreateSSOUser.QueryParameters> | null,
-      data?: Paths.CreateSSOUser.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateSSOUser.Responses.$201>
-  }
   ['/v2/portal/public/config']: {
     /**
      * getPortalConfigByDomain - getPortalConfigByDomain
@@ -6820,6 +7886,54 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPortalExtensions.Responses.$200>
   }
+  ['/v2/portal/public/extensions']: {
+    /**
+     * getPublicPortalExtensionDetails - getPublicPortalExtensionDetails
+     * 
+     * Get public extension details shown to end customers and configuring users.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicPortalExtensionDetails.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicPortalExtensionDetails.Responses.$200>
+  }
+  ['/v2/portal/consumption']: {
+    /**
+     * getConsumption - Get Consumption
+     * 
+     * Get energy consumption data between a given time period.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetConsumption.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetConsumption.Responses.$200>
+  }
+  ['/v2/portal/costs']: {
+    /**
+     * getCosts - Get Costs
+     * 
+     * Get energy cost data between a given time period.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetCosts.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCosts.Responses.$200>
+  }
+  ['/v2/portal/prices']: {
+    /**
+     * getPrices - Get Prices
+     * 
+     * Get energy prices data between a given time period.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPrices.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPrices.Responses.$200>
+  }
   ['/v2/portal/external-links']: {
     /**
      * getExternalLinks - getExternalLinks
@@ -6831,6 +7945,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetExternalLinks.Responses.$200>
+  }
+  ['/v2/portal/resolve:external-link/{id}']: {
+    /**
+     * getResolvedExternalLink - getResolvedExternalLink
+     * 
+     * Retrieves a resolved portal external link.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetResolvedExternalLink.QueryParameters & Paths.GetResolvedExternalLink.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetResolvedExternalLink.Responses.$200>
   }
   ['/v2/portal/public/portal/config']: {
     /**
@@ -6972,6 +8098,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExtraPermissionAttributes.Responses.$200>
   }
+  ['/v2/portal/validate/caa-records']: {
+    /**
+     * validateCaaRecords - validateCaaRecords
+     * 
+     * Validates the CAA records of a portal
+     */
+    'post'(
+      parameters?: Parameters<Paths.ValidateCaaRecords.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateCaaRecords.Responses.$200>
+  }
   ['/v2/portal/contact']: {
     /**
      * getContact - getContact
@@ -7086,7 +8224,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ResendConfirmationEmail.Responses.$200>
   }
-  ['/v2/porta/users/by-related-entity']: {
+  ['/v2/portal/users/by-related-entity']: {
     /**
      * fetchPortalUsersByRelatedEntity - fetchPortalUsersByRelatedEntity
      * 
@@ -7108,7 +8246,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.ConfirmUser.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.ConfirmUser.Responses.$200>
   }
   ['/v2/portal/user/confirm/{id}']: {
     /**
@@ -7300,7 +8438,7 @@ export interface PathsDictionary {
     /**
      * addContractByIdentifiers - addContractByIdentifiers
      * 
-     * Self-assign contract by pre-configured identifiers.
+     * Self-assign contract(s) by pre-configured identifiers.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -7319,18 +8457,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityIdentifiers.Responses.$200>
-  }
-  ['/v2/portal/entity/add-end-customer/{slug}/{id}']: {
-    /**
-     * addEndCustomerRelationToEntity - addEndCustomerRelationToEntity
-     * 
-     * Add portal user relation to an entity
-     */
-    'put'(
-      parameters?: Parameters<Paths.AddEndCustomerRelationToEntity.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.AddEndCustomerRelationToEntity.Responses.$200>
   }
   ['/v2/portal/entity/{slug}/{id}/activity']: {
     /**
@@ -7564,6 +8690,35 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   }
+  ['/v2/portal/metering/reading']: {
+    /**
+     * createMeterReading - Create Meter Reading
+     * 
+     * Inserts a new meter reading.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateMeterReading.QueryParameters> | null,
+      data?: Paths.CreateMeterReading.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
+  }
+  ['/v2/portal/public/sso/login']: {
+    /**
+     * ssoLogin - ssoLogin
+     * 
+     * Initiate login using external SSO identity.
+     * 
+     * Verifies the user with the issuer and matches the identity to an epilot user (or creates a new user).
+     * 
+     * Returns parameters to be used with CUSTOM_AUTH flow against Cognito
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.SsoLogin.QueryParameters> | null,
+      data?: Paths.SsoLogin.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SsoLogin.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -7577,6 +8732,7 @@ export type ActivityId = Components.Schemas.ActivityId;
 export type ActivityItem = Components.Schemas.ActivityItem;
 export type AdminUser = Components.Schemas.AdminUser;
 export type AllowedFileExtensions = Components.Schemas.AllowedFileExtensions;
+export type AttributeMappingConfig = Components.Schemas.AttributeMappingConfig;
 export type AuthConfig = Components.Schemas.AuthConfig;
 export type Balance = Components.Schemas.Balance;
 export type BaseBillingEvent = Components.Schemas.BaseBillingEvent;
@@ -7589,10 +8745,11 @@ export type ContactExistsRequest = Components.Schemas.ContactExistsRequest;
 export type ContentWidget = Components.Schemas.ContentWidget;
 export type Contract = Components.Schemas.Contract;
 export type ContractIdentifier = Components.Schemas.ContractIdentifier;
-export type CreateSSOUserRequest = Components.Schemas.CreateSSOUserRequest;
 export type CreateUserRequest = Components.Schemas.CreateUserRequest;
 export type Currency = Components.Schemas.Currency;
+export type DataRetrievalItem = Components.Schemas.DataRetrievalItem;
 export type DeleteEntityFile = Components.Schemas.DeleteEntityFile;
+export type Direction = Components.Schemas.Direction;
 export type DocumentWidget = Components.Schemas.DocumentWidget;
 export type EmailTemplates = Components.Schemas.EmailTemplates;
 export type Entity = Components.Schemas.Entity;
@@ -7606,11 +8763,17 @@ export type EntityWidget = Components.Schemas.EntityWidget;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type Exists = Components.Schemas.Exists;
 export type Extension = Components.Schemas.Extension;
+export type ExtensionAuthBlock = Components.Schemas.ExtensionAuthBlock;
 export type ExtensionConfig = Components.Schemas.ExtensionConfig;
 export type ExtensionHook = Components.Schemas.ExtensionHook;
+export type ExtensionHookConsumptionDataRetrieval = Components.Schemas.ExtensionHookConsumptionDataRetrieval;
+export type ExtensionHookContractIdentification = Components.Schemas.ExtensionHookContractIdentification;
+export type ExtensionHookCostDataRetrieval = Components.Schemas.ExtensionHookCostDataRetrieval;
+export type ExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.ExtensionHookMeterReadingPlausibilityCheck;
+export type ExtensionHookPriceDataRetrieval = Components.Schemas.ExtensionHookPriceDataRetrieval;
 export type ExtensionHookRegistrationIdentifiersCheck = Components.Schemas.ExtensionHookRegistrationIdentifiersCheck;
-export type ExtensionWidget = Components.Schemas.ExtensionWidget;
-export type ExtensionWidgetSeamlessLink = Components.Schemas.ExtensionWidgetSeamlessLink;
+export type ExtensionSeamlessLink = Components.Schemas.ExtensionSeamlessLink;
+export type ExternalLink = Components.Schemas.ExternalLink;
 export type ExtraSchemaAttributes = Components.Schemas.ExtraSchemaAttributes;
 export type FailedRuleErrorResp = Components.Schemas.FailedRuleErrorResp;
 export type File = Components.Schemas.File;
@@ -7620,6 +8783,11 @@ export type IdentifierAttribute = Components.Schemas.IdentifierAttribute;
 export type InstallmentEvent = Components.Schemas.InstallmentEvent;
 export type JourneyActions = Components.Schemas.JourneyActions;
 export type Meter = Components.Schemas.Meter;
+export type MeterChartWidget = Components.Schemas.MeterChartWidget;
+export type MeterReading = Components.Schemas.MeterReading;
+export type MeterReadingWidget = Components.Schemas.MeterReadingWidget;
+export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
+export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
 export type Opportunity = Components.Schemas.Opportunity;
 export type Order = Components.Schemas.Order;
 export type OrganizationSettings = Components.Schemas.OrganizationSettings;
@@ -7629,12 +8797,27 @@ export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type Product = Components.Schemas.Product;
+export type ProviderConfig = Components.Schemas.ProviderConfig;
+export type ProviderDisplayName = Components.Schemas.ProviderDisplayName;
+export type ProviderPublicConfig = Components.Schemas.ProviderPublicConfig;
+export type ProviderSlug = Components.Schemas.ProviderSlug;
+export type PublicContractIdentificationDetails = Components.Schemas.PublicContractIdentificationDetails;
+export type PublicDataRetrievalHookDetails = Components.Schemas.PublicDataRetrievalHookDetails;
+export type PublicExtensionCapabilities = Components.Schemas.PublicExtensionCapabilities;
+export type PublicExtensionDetails = Components.Schemas.PublicExtensionDetails;
+export type ReadBy = Components.Schemas.ReadBy;
+export type ReadingStatus = Components.Schemas.ReadingStatus;
+export type Reason = Components.Schemas.Reason;
 export type RegistrationIdentifier = Components.Schemas.RegistrationIdentifier;
 export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;
 export type Rule = Components.Schemas.Rule;
+export type SAMLProviderConfig = Components.Schemas.SAMLProviderConfig;
+export type SSOLoginToken = Components.Schemas.SSOLoginToken;
 export type SaveEntityFile = Components.Schemas.SaveEntityFile;
 export type SavePortalFile = Components.Schemas.SavePortalFile;
 export type Schema = Components.Schemas.Schema;
+export type Source = Components.Schemas.Source;
+export type TariffType = Components.Schemas.TariffType;
 export type TeaserWidget = Components.Schemas.TeaserWidget;
 export type TriggerPortalFlow = Components.Schemas.TriggerPortalFlow;
 export type UpdateOnlyPortalConfigAttributes = Components.Schemas.UpdateOnlyPortalConfigAttributes;

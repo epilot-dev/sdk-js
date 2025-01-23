@@ -302,6 +302,62 @@
           }
         }
       }
+    },
+    "/v1/note/{id}/context": {
+      "get": {
+        "operationId": "getNoteContexts",
+        "summary": "getNoteContexts",
+        "description": "Gets all the Entity and non-Entity records the Note is contextually attached to",
+        "tags": [
+          "Notes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to get contexts for",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to get contexts for"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the contexts for the Note Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "$ref": "#/components/schemas/ContextType"
+                      },
+                      "context": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/Entity"
+                          },
+                          {
+                            "$ref": "#/components/schemas/WorkflowExecution"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "context"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -393,7 +449,8 @@
         "type": "string",
         "enum": [
           "workflow_execution",
-          "workflow_task"
+          "workflow_task",
+          "entity"
         ]
       },
       "NoteEntity": {
@@ -958,6 +1015,30 @@
         "required": [
           "results"
         ]
+      },
+      "WorkflowExecution": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "definitionId": {
+            "type": "string"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "definitionId",
+          "orgId",
+          "name"
+        ],
+        "description": "Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data"
       }
     }
   }

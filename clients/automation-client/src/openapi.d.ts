@@ -744,6 +744,16 @@ declare namespace Components {
              * Whether the automation is enabled or not
              */
             enabled?: boolean;
+            disable_details?: {
+                /**
+                 * When the flow was disabled
+                 */
+                disabled_at: string; // date-time
+                /**
+                 * Who disabled the flow (system or user)
+                 */
+                disabled_by: "system" | "user";
+            };
             triggers: AnyTrigger[];
             trigger_conditions?: /**
              * example:
@@ -801,6 +811,10 @@ declare namespace Components {
              * 2
              */
             version?: number;
+            /**
+             * Source blueprint/manifest ID used when automation is created via blueprints.
+             */
+            _manifest?: string /* uuid */[] | null;
         }
         /**
          * example:
@@ -1508,7 +1522,7 @@ declare namespace Components {
              */
             error?: string;
         }
-        export type ExecutionStatus = "pending" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled";
+        export type ExecutionStatus = "pending" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot";
         export interface ExistsCondition {
             exists?: boolean;
         }

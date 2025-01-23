@@ -151,6 +151,17 @@
         "responses": {}
       }
     },
+    "/v1/message/threads:searchIds": {
+      "post": {
+        "operationId": "searchIds",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/message/threads": {
       "put": {
         "operationId": "updateThread",
@@ -160,6 +171,45 @@
     "/v1/message/threads/{id}": {
       "delete": {
         "operationId": "deleteThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}:markAsDone": {
+      "post": {
+        "operationId": "markThreadAsDone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}:markAsOpen": {
+      "post": {
+        "operationId": "markThreadAsOpen",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/timeline": {
+      "get": {
+        "operationId": "getThreadTimeline",
         "parameters": [
           {
             "name": "id",
@@ -193,6 +243,78 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:read": {
+      "post": {
+        "operationId": "threadBulkActionsRead",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:unread": {
+      "post": {
+        "operationId": "threadBulkActionsUnread",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:favorite": {
+      "post": {
+        "operationId": "threadBulkActionsFavorite",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:unfavorite": {
+      "post": {
+        "operationId": "threadBulkActionsUnfavorite",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:trash": {
+      "post": {
+        "operationId": "threadBulkActionsTrash",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:untrash": {
+      "post": {
+        "operationId": "threadBulkActionsUntrash",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

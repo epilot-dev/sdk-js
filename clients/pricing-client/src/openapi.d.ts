@@ -98,6 +98,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -245,6 +257,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -344,17 +368,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -397,13 +426,33 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
              * The unit amount before any discount is applied
              */
             before_discount_unit_amount?: number;
             /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             * The unit amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
              */
-            unit_amount_decimal?: string;
+            before_discount_unit_amount_decimal?: string;
+            /**
+             * The unit gross amount before any discount is applied
+             */
+            before_discount_unit_amount_gross?: number;
+            /**
+             * The unit gross amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_gross_decimal?: string;
+            /**
+             * The unit net amount before any discount is applied
+             */
+            before_discount_unit_amount_net?: number;
+            /**
+             * The unit net amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_net_decimal?: string;
             /**
              * The discount amount applied for each unit
              */
@@ -444,6 +493,14 @@ declare namespace Components {
              * The discount amount applied to the tax represented as a decimal string
              */
             tax_discount_amount_decimal?: string;
+            /**
+             * The net discount amount applied
+             */
+            discount_amount_net?: number;
+            /**
+             * The net discount amount applied represented as a decimal string
+             */
+            discount_amount_net_decimal?: string;
             /**
              * Total tax amount for this line item.
              */
@@ -490,6 +547,40 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            /**
+             * The coupons applicable to the price item
+             */
+            _coupons?: (/**
+             * The coupon configuration
+             * example:
+             * {
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            Coupon)[];
             /**
              * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
@@ -590,17 +681,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -727,17 +823,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -893,6 +994,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -980,6 +1093,19 @@ declare namespace Components {
             consents?: {
                 [name: string]: any;
             };
+        }
+        /**
+         * An amount associated with a specific cashback period.
+         */
+        export interface CashbackAmount {
+            /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period: "0" | "12";
+            /**
+             * The sum of all cashbacks for a specific cashback period
+             */
+            amount_total: number;
         }
         /**
          * A catalog search payload
@@ -1217,6 +1343,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -1316,17 +1454,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -1369,13 +1512,33 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
              * The unit amount before any discount is applied
              */
             before_discount_unit_amount?: number;
             /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             * The unit amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
              */
-            unit_amount_decimal?: string;
+            before_discount_unit_amount_decimal?: string;
+            /**
+             * The unit gross amount before any discount is applied
+             */
+            before_discount_unit_amount_gross?: number;
+            /**
+             * The unit gross amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_gross_decimal?: string;
+            /**
+             * The unit net amount before any discount is applied
+             */
+            before_discount_unit_amount_net?: number;
+            /**
+             * The unit net amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_net_decimal?: string;
             /**
              * The discount amount applied for each unit
              */
@@ -1416,6 +1579,14 @@ declare namespace Components {
              * The discount amount applied to the tax represented as a decimal string
              */
             tax_discount_amount_decimal?: string;
+            /**
+             * The net discount amount applied
+             */
+            discount_amount_net?: number;
+            /**
+             * The net discount amount applied represented as a decimal string
+             */
+            discount_amount_net_decimal?: string;
             /**
              * Total tax amount for this line item.
              */
@@ -1462,6 +1633,40 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            /**
+             * The coupons applicable to the price item
+             */
+            _coupons?: (/**
+             * The coupon configuration
+             * example:
+             * {
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            Coupon)[];
             /**
              * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
@@ -1571,17 +1776,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -1683,6 +1893,12 @@ declare namespace Components {
              * The ids of the price components that should be selected for the price calculation.
              */
             selected_price_component_ids?: string[];
+            /**
+             * The map of coupon ids applicable to the price components
+             */
+            price_component_coupon_ids?: {
+                [name: string]: string[];
+            };
             _price?: /**
              * The price entity schema for dynamic pricing
              * example:
@@ -1706,15 +1922,15 @@ declare namespace Components {
              */
             consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
             /**
-             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
+             * (DEPRECATED - use consumption_HT) The yearly consumption to compute the price in kWh
              */
             consumption?: number;
             /**
-             * The monthly HT consumption to compute the price in kWh
+             * The yearly HT consumption to compute the price in kWh
              */
             consumption_HT?: number;
             /**
-             * The monthly NT consumption to compute the price in kWh
+             * The yearly NT consumption to compute the price in kWh
              */
             consumption_NT?: number;
             /**
@@ -1739,15 +1955,15 @@ declare namespace Components {
              */
             consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
             /**
-             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
+             * (DEPRECATED - use consumption_HT) The yearly consumption to compute the price in kWh
              */
             consumption?: number;
             /**
-             * The monthly HT consumption to compute the price in kWh
+             * The yearly HT consumption to compute the price in kWh
              */
             consumption_HT?: number;
             /**
-             * The monthly NT consumption to compute the price in kWh
+             * The yearly NT consumption to compute the price in kWh
              */
             consumption_NT?: number;
             /**
@@ -1777,15 +1993,15 @@ declare namespace Components {
              */
             consumption_type?: "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
             /**
-             * The monthly consumption to compute the price in kWh (to be deprecated in favor of consumption_HT)
+             * (DEPRECATED - use consumption_HT) The yearly consumption to compute the price in kWh
              */
             consumption?: number;
             /**
-             * The monthly HT consumption to compute the price in kWh
+             * The yearly HT consumption to compute the price in kWh
              */
             consumption_HT?: number;
             /**
-             * The monthly NT consumption to compute the price in kWh
+             * The yearly NT consumption to compute the price in kWh
              */
             consumption_NT?: number;
             /**
@@ -1828,6 +2044,14 @@ declare namespace Components {
              */
             amount_variable_decimal_ht?: string;
             /**
+             * The computed unit price, for the day period
+             */
+            unit_amount_variable_ht?: number;
+            /**
+             * The computed unit price, for the day period, as decimal
+             */
+            unit_amount_variable_decimal_ht?: string;
+            /**
              * The computed variable price, for the night period
              */
             amount_variable_nt?: number;
@@ -1835,6 +2059,14 @@ declare namespace Components {
              * The computed variable price, for the night period, as decimal
              */
             amount_variable_decimal_nt?: string;
+            /**
+             * The computed unit price, for the night period
+             */
+            unit_amount_variable_nt?: number;
+            /**
+             * The computed unit price, for the night period, as decimal
+             */
+            unit_amount_variable_decimal_nt?: string;
             /**
              * The currency of the computed price (three-letter ISO currency code)
              */
@@ -1865,6 +2097,14 @@ declare namespace Components {
              * The computed price as decimal
              */
             amount_decimal: string;
+            /**
+             * The computed unit price
+             */
+            unit_amount?: number;
+            /**
+             * The computed unit price as decimal
+             */
+            unit_amount_decimal?: string;
         }
         /**
          * Price breakdown
@@ -1967,6 +2207,10 @@ declare namespace Components {
              * EUR
              */
             Currency;
+            /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
             active?: boolean;
             /**
              * The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.
@@ -2050,69 +2294,12 @@ declare namespace Components {
              */
             cause?: string;
         }
-        export interface ExternalCompositePrice {
-            /**
-             * Fees structure with static and variable amounts
-             */
-            fees?: {
-                billing_period: BillingPeriod;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_total_decimal: string;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_static_decimal: string;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_variable_decimal: string;
-                /**
-                 * Breakdown of the fee values
-                 */
-                breakdown: {
-                    /**
-                     * Static breakdown of fees
-                     */
-                    static?: {
-                        [name: string]: {
-                            /**
-                             * The amount of the fee, as a string with all the decimal places.
-                             * example:
-                             * 1.00
-                             */
-                            amount_decimal?: string;
-                        };
-                    };
-                    /**
-                     * Variable breakdown of fees
-                     */
-                    variable?: {
-                        [name: string]: {
-                            /**
-                             * example:
-                             * 1.00
-                             */
-                            amount_decimal: string;
-                            /**
-                             * The unit of the fee (e.g. kWh) if applicable.
-                             */
-                            unit?: string;
-                        };
-                    };
-                };
-            };
-            /**
-             * The name of the composite price.
-             */
-            name?: string;
-            is_composite_price: true;
-            price_components: ExternalSimplePrice[];
-            total_details: /* Details of the total price including shipping and tax amounts. */ ExternalPriceTotalDetails;
+        /**
+         * An external product & price information (already computed) from an external catalog.
+         */
+        export interface ExternalCatalogItem {
+            pricing_details: /* The result from the calculation of a set of price items. */ PricingDetails;
+            _meta: /* Signature meta data payload */ SignatureMeta;
         }
         /**
          * example:
@@ -2176,6 +2363,14 @@ declare namespace Components {
              */
             amount_variable_decimal_ht?: string;
             /**
+             * The computed unit price, for the day period
+             */
+            unit_amount_variable_ht?: number;
+            /**
+             * The computed unit price, for the day period, as decimal
+             */
+            unit_amount_variable_decimal_ht?: string;
+            /**
              * The computed variable price, for the night period
              */
             amount_variable_nt?: number;
@@ -2183,6 +2378,14 @@ declare namespace Components {
              * The computed variable price, for the night period, as decimal
              */
             amount_variable_decimal_nt?: string;
+            /**
+             * The computed unit price, for the night period
+             */
+            unit_amount_variable_nt?: number;
+            /**
+             * The computed unit price, for the night period, as decimal
+             */
+            unit_amount_variable_decimal_nt?: string;
             /**
              * The currency of the computed price (three-letter ISO currency code)
              */
@@ -2202,346 +2405,6 @@ declare namespace Components {
             _meta?: /* Signature meta data payload */ SignatureMeta;
             inputs?: {
                 [name: string]: any;
-            };
-        }
-        export interface ExternalPriceFees {
-            /**
-             * Fees structure with static and variable amounts
-             */
-            fees?: {
-                /**
-                 * The billing period of the fee values (e.g. monthly).
-                 */
-                billing_period: BillingPeriod;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_total_decimal: string;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_static_decimal: string;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_variable_decimal: string;
-                /**
-                 * Breakdown of the fee values
-                 */
-                breakdown: {
-                    /**
-                     * Static breakdown of fees
-                     */
-                    static?: {
-                        [name: string]: {
-                            /**
-                             * The amount of the fee, as a string with all the decimal places.
-                             * example:
-                             * 1.00
-                             */
-                            amount_decimal?: string;
-                        };
-                    };
-                    /**
-                     * Variable breakdown of fees
-                     */
-                    variable?: {
-                        [name: string]: {
-                            /**
-                             * example:
-                             * 1.00
-                             */
-                            amount_decimal: string;
-                            /**
-                             * The unit of the fee (e.g. kWh) if applicable.
-                             */
-                            unit?: string;
-                        };
-                    };
-                };
-            };
-        }
-        /**
-         * Details of the total price including shipping and tax amounts.
-         */
-        export interface ExternalPriceTotalDetails {
-            /**
-             * A breakdown of the recurrences of amounts.
-             */
-            breakdown: {
-                recurrences?: {
-                    /**
-                     * Total of all items before discounts or taxes, as a string with all the decimal places.
-                     * example:
-                     * 1.00
-                     */
-                    amount_subtotal_decimal: string;
-                    /**
-                     * Total of all items after discounts and taxes, as a string with all the decimal places.
-                     * example:
-                     * 1.19
-                     */
-                    amount_total_decimal: string;
-                    /**
-                     * The price type.
-                     * example:
-                     * one_time
-                     */
-                    type: "one_time" | "recurring";
-                    /**
-                     * The billing period of the price.
-                     */
-                    billing_period?: BillingPeriod;
-                }[];
-            };
-        }
-        /**
-         * An external product & price information (already computed) from an external catalog.
-         */
-        export interface ExternalProduct {
-            /**
-             * The ID of the product in the external catalog.
-             */
-            id: string;
-            /**
-             * The name of the product.
-             */
-            name: string;
-            /**
-             * A description of the product.
-             */
-            description?: string;
-            /**
-             * A list of features of the product.
-             */
-            features?: string[];
-            /**
-             * A list of image URLs of the product. RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.
-             *
-             */
-            product_image_urls?: string[];
-            /**
-             * A list of file/attachment URLs of the product RECOMMENDED: Store files in Epilot for advantages such as resizing, versioning, easy access, and maintenance.
-             *
-             */
-            product_downloads_urls?: string[];
-            /**
-             * Legal footnotes for the product.
-             */
-            legal_footnotes?: string;
-            /**
-             * Additional notes for the product.
-             */
-            additional_notes?: string[];
-            /**
-             * Recommendation settings for the product.
-             * example:
-             * {
-             *   "is_recommended": true,
-             *   "recommended_label": "Best Value",
-             *   "recommended_color": "#00FF00",
-             *   "recommended_label_color": "#FFFFFF"
-             * }
-             */
-            recommendation_settings?: {
-                /**
-                 * Flag to enable or disable the recommendation for this product.
-                 */
-                is_recommended?: boolean;
-                /**
-                 * Label to display when the product is recommended.
-                 */
-                recommended_label?: string;
-                /**
-                 * Color to display when the product is recommended.
-                 */
-                recommended_color?: string;
-                /**
-                 * Color of the recommended label.
-                 */
-                recommended_label_color?: string;
-            };
-            price: ExternalSimplePrice | ExternalCompositePrice;
-        }
-        export interface ExternalSimplePrice {
-            /**
-             * Fees structure with static and variable amounts
-             */
-            fees?: {
-                billing_period: BillingPeriod;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_total_decimal: string;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_static_decimal: string;
-                /**
-                 * example:
-                 * 1.00
-                 */
-                amount_variable_decimal: string;
-                /**
-                 * Breakdown of the fee values
-                 */
-                breakdown: {
-                    /**
-                     * Static breakdown of fees
-                     */
-                    static?: {
-                        [name: string]: {
-                            /**
-                             * The amount of the fee, as a string with all the decimal places.
-                             * example:
-                             * 1.00
-                             */
-                            amount_decimal?: string;
-                        };
-                    };
-                    /**
-                     * Variable breakdown of fees
-                     */
-                    variable?: {
-                        [name: string]: {
-                            /**
-                             * example:
-                             * 1.00
-                             */
-                            amount_decimal: string;
-                            /**
-                             * The unit of the fee (e.g. kWh) if applicable.
-                             */
-                            unit?: string;
-                        };
-                    };
-                };
-            };
-            is_composite_price: false;
-            /**
-             * A flag to indicate if the price is variable.
-             *
-             */
-            variable_price?: boolean;
-            /**
-             * The name of the price.
-             */
-            name?: string;
-            /**
-             * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
-             * example:
-             * kWh
-             */
-            unit?: string;
-            /**
-             * The currency of the price. ISO 4217 currency code. E.g. EUR.
-             * example:
-             * EUR
-             */
-            currency?: string;
-            /**
-             * The price type.
-             */
-            type: "one_time" | "recurring";
-            billing_period?: BillingPeriod;
-            /**
-             * The billing period duration
-             */
-            billing_duration_amount?: number;
-            /**
-             * The billing period duration unit
-             */
-            billing_duration_unit?: "weeks" | "months" | "years";
-            /**
-             * The notice period duration
-             */
-            notice_time_amount?: number;
-            /**
-             * The notice period duration unit
-             */
-            notice_time_unit?: "weeks" | "months" | "years";
-            /**
-             * The termination period duration
-             */
-            termination_time_amount?: number;
-            /**
-             * The termination period duration unit
-             */
-            termination_time_unit?: "weeks" | "months" | "years";
-            /**
-             * The renewal period duration
-             */
-            renewal_duration_amount?: number;
-            /**
-             * The renewal period duration unit
-             */
-            renewal_duration_unit?: "weeks" | "months" | "years";
-            /**
-             * The unit gross amount value, as a string with all the decimal places.
-             * example:
-             * 1.19
-             */
-            unit_amount_gross_decimal: string;
-            /**
-             * The unit net amount value, as a string with all the decimal places.
-             * example:
-             * 1.00
-             */
-            unit_amount_net_decimal: string;
-            /**
-             * Total of all items before discounts or taxes, as a string with all the decimal places.
-             * example:
-             * 1.00
-             */
-            amount_subtotal_decimal: string;
-            /**
-             * Total of all items after discounts and taxes, as a string with all the decimal places.
-             * example:
-             * 1.19
-             */
-            amount_total_decimal: string;
-            tax?: {
-                /**
-                 * The tax name.
-                 * example:
-                 * VAT
-                 */
-                name?: string;
-                /**
-                 * The tax description.
-                 * example:
-                 * Value Added Tax
-                 */
-                description?: string;
-                /**
-                 * The type of the tax.
-                 * example:
-                 * VAT
-                 */
-                type?: "VAT" | "GST" | "Custom";
-                /**
-                 * The tax rate applied.
-                 * example:
-                 * 19
-                 */
-                rate: number;
-                /**
-                 * The region code of the tax.
-                 * example:
-                 * DE
-                 */
-                region?: string;
-                /**
-                 * The region label of the tax.
-                 * example:
-                 * Germany
-                 */
-                region_label?: string;
             };
         }
         export interface File {
@@ -2582,6 +2445,16 @@ declare namespace Components {
              * journey name
              */
             journey_name: string;
+            /**
+             * The tags of the journey.
+             */
+            journey_tags?: string[];
+            /**
+             * The URL parameters of the journey.
+             */
+            journey_url_params?: {
+                [name: string]: any;
+            };
             /**
              * The name of the step where the products selection is happening.
              * example:
@@ -3188,7 +3061,7 @@ declare namespace Components {
             /**
              * Defines the way the price amount is display in epilot journeys.
              */
-            price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request";
+            price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request" | "estimated_price";
             /**
              * The billing period duration
              */
@@ -3392,6 +3265,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -3491,17 +3376,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -3544,13 +3434,33 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
+             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             */
+            unit_amount_decimal?: string;
+            /**
              * The unit amount before any discount is applied
              */
             before_discount_unit_amount?: number;
             /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             * The unit amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
              */
-            unit_amount_decimal?: string;
+            before_discount_unit_amount_decimal?: string;
+            /**
+             * The unit gross amount before any discount is applied
+             */
+            before_discount_unit_amount_gross?: number;
+            /**
+             * The unit gross amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_gross_decimal?: string;
+            /**
+             * The unit net amount before any discount is applied
+             */
+            before_discount_unit_amount_net?: number;
+            /**
+             * The unit net amount before any discount is applied, represented as a decimal string with at most 12 decimal places.
+             */
+            before_discount_unit_amount_net_decimal?: string;
             /**
              * The discount amount applied for each unit
              */
@@ -3591,6 +3501,14 @@ declare namespace Components {
              * The discount amount applied to the tax represented as a decimal string
              */
             tax_discount_amount_decimal?: string;
+            /**
+             * The net discount amount applied
+             */
+            discount_amount_net?: number;
+            /**
+             * The net discount amount applied represented as a decimal string
+             */
+            discount_amount_net_decimal?: string;
             /**
              * Total tax amount for this line item.
              */
@@ -3637,6 +3555,40 @@ declare namespace Components {
              * The sum of amounts of the price items by recurrence.
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+            /**
+             * The coupons applicable to the price item
+             */
+            _coupons?: (/**
+             * The coupon configuration
+             * example:
+             * {
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            Coupon)[];
             /**
              * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
@@ -3754,17 +3706,22 @@ declare namespace Components {
                 /**
                  * Stores references to a set of file images of the product
                  */
-                product_images?: {
+                product_images?: /* Stores references to a set of file images of the product */ {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * Stores references to a set of files downloadable from the product.
                  * e.g: tech specifications, quality control sheets, privacy policy agreements
                  *
                  */
-                product_downloads?: {
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
                     $relation?: EntityRelation[];
-                };
+                } | File[];
                 /**
                  * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
                  */
@@ -4007,7 +3964,7 @@ declare namespace Components {
                 /**
                  * Defines the way the price amount is display in epilot journeys.
                  */
-                price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request";
+                price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request" | "estimated_price";
                 /**
                  * The billing period duration
                  */
@@ -4273,17 +4230,22 @@ declare namespace Components {
             /**
              * Stores references to a set of file images of the product
              */
-            product_images?: {
+            product_images?: /* Stores references to a set of file images of the product */ {
                 $relation?: EntityRelation[];
-            };
+            } | File[];
             /**
              * Stores references to a set of files downloadable from the product.
              * e.g: tech specifications, quality control sheets, privacy policy agreements
              *
              */
-            product_downloads?: {
+            product_downloads?: /**
+             * Stores references to a set of files downloadable from the product.
+             * e.g: tech specifications, quality control sheets, privacy policy agreements
+             *
+             */
+            {
                 $relation?: EntityRelation[];
-            };
+            } | File[];
             /**
              * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
              */
@@ -4368,6 +4330,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -4445,6 +4419,18 @@ declare namespace Components {
              */
             cashback_amount_decimal?: string;
             /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+            /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
             discount_percentage?: number;
@@ -4518,7 +4504,7 @@ declare namespace Components {
              * The number os results returned.
              */
             hits: number;
-            results: /* An external product & price information (already computed) from an external catalog. */ ExternalProduct[];
+            results: /* An external product & price information (already computed) from an external catalog. */ ExternalCatalogItem[];
         }
         /**
          * A search providers payload
@@ -4765,6 +4751,10 @@ declare namespace Components {
                  * The aggregated price items tax amount per rate.
                  */
                 recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
+                /**
+                 * The list of cashback sums for each cashback period.
+                 */
+                cashbacks?: (/* An amount associated with a specific cashback period. */ CashbackAmount)[];
                 /**
                  * The aggregated price items recurrences by tax rate
                  */
@@ -5492,6 +5482,7 @@ export type BasicAuthCredentials = Components.Schemas.BasicAuthCredentials;
 export type BillingPeriod = Components.Schemas.BillingPeriod;
 export type Cart = Components.Schemas.Cart;
 export type CartDto = Components.Schemas.CartDto;
+export type CashbackAmount = Components.Schemas.CashbackAmount;
 export type CatalogSearch = Components.Schemas.CatalogSearch;
 export type CatalogSearchResult = Components.Schemas.CatalogSearchResult;
 export type CheckoutCart = Components.Schemas.CheckoutCart;
@@ -5516,14 +5507,10 @@ export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
 export type EntityRelation = Components.Schemas.EntityRelation;
 export type Error = Components.Schemas.Error;
-export type ExternalCompositePrice = Components.Schemas.ExternalCompositePrice;
+export type ExternalCatalogItem = Components.Schemas.ExternalCatalogItem;
 export type ExternalFeeMapping = Components.Schemas.ExternalFeeMapping;
 export type ExternalFeeMappings = Components.Schemas.ExternalFeeMappings;
 export type ExternalFeeMetadata = Components.Schemas.ExternalFeeMetadata;
-export type ExternalPriceFees = Components.Schemas.ExternalPriceFees;
-export type ExternalPriceTotalDetails = Components.Schemas.ExternalPriceTotalDetails;
-export type ExternalProduct = Components.Schemas.ExternalProduct;
-export type ExternalSimplePrice = Components.Schemas.ExternalSimplePrice;
 export type File = Components.Schemas.File;
 export type GasConcessionType = Components.Schemas.GasConcessionType;
 export type IntegrationCredentialsResult = Components.Schemas.IntegrationCredentialsResult;

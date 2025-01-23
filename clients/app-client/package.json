@@ -1,7 +1,7 @@
 {
-  "name": "@epilot/pricing-client",
-  "version": "3.36.7",
-  "description": "Client for epilot Pricing APIs",
+  "name": "@epilot/app-client",
+  "version": "0.0.5",
+  "description": "JavaScript client library for the epilot App API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "epilot GmbH",
@@ -9,35 +9,36 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git",
-    "directory": "clients/pricing-client"
+    "directory": "clients/app-client"
   },
   "bugs": {
     "url": "https://github.com/epilot-dev/sdk-js/issues"
   },
-  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/pricing-client#readme",
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/app-client#readme",
   "keywords": [
-    "order",
-    "cart",
-    "pricing"
+    "epilot",
+    "sdk",
+    "app"
   ],
   "scripts": {
     "test": "jest",
+    "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/pricing-api.yaml",
-    "openapi:local": "npx openapicmd read --json ../../../pricing-api/lambda/ApiHandlerFunction/openapi.yml > ./src/openapi.json",
+    "openapi": "node ../../scripts/update-openapi.js ../../../backend/app-api/packages/functions/src/api/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
     "build:watch": "npm run build && tsc -w",
+    "release-alpha": "npm version prerelease --preid alpha",
     "prepublishOnly": "npm run typegen && npm run build",
     "lint": "../../node_modules/eslint/bin/eslint.js src"
   },
   "files": [
     "*.js",
     "*.d.ts",
+    "**/*.json",
     "**/*.js",
     "**/*.d.ts",
-    "**/*.json",
     "!*.test.*",
     "!**/*.test.*",
     "!node_modules",

@@ -27,6 +27,10 @@
           {
             "in": "query",
             "name": "mode"
+          },
+          {
+            "in": "query",
+            "name": "preview_mode"
           }
         ],
         "requestBody": {
@@ -49,5 +53,10 @@
       }
     }
   },
-  "components": {}
+  "components": {},
+  "servers": [
+    {
+      "url": "https://document.sls.epilot.io"
+    }
+  ]
 }

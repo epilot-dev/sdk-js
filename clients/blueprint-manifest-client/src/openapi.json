@@ -76,30 +76,76 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "resourceType": {
-                    "$ref": "#/components/schemas/ResourceNodeType"
-                  },
-                  "resourceIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "resourceType": {
+                        "$ref": "#/components/schemas/ResourceNodeType"
+                      },
+                      "resourceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "minItems": 1,
+                        "maxItems": 25
+                      },
+                      "jobId": {
+                        "$ref": "#/components/schemas/JobID"
+                      },
+                      "isExportingMultipleResources": {
+                        "type": "boolean",
+                        "description": "Temporary flag to indicate if multiple resources are being exported"
+                      },
+                      "pipelineId": {
+                        "type": "string",
+                        "description": "Pipeline ID selected when doing the sandbox sync"
+                      }
                     },
-                    "minItems": 1,
-                    "maxItems": 25
+                    "required": [
+                      "resourceType",
+                      "resourceIds"
+                    ]
                   },
-                  "jobId": {
-                    "$ref": "#/components/schemas/JobID"
-                  },
-                  "isExportingMultipleResources": {
-                    "type": "boolean",
-                    "description": "Temporary flag to indicate if multiple resources are being exported"
+                  {
+                    "type": "object",
+                    "properties": {
+                      "resources": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "$ref": "#/components/schemas/ResourceNodeType"
+                            },
+                            "id": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "id"
+                          ]
+                        },
+                        "minItems": 1
+                      },
+                      "jobId": {
+                        "$ref": "#/components/schemas/JobID"
+                      },
+                      "isExportingMultipleResources": {
+                        "type": "boolean",
+                        "description": "Temporary flag to indicate if multiple resources are being exported"
+                      },
+                      "pipelineId": {
+                        "type": "string",
+                        "description": "Pipeline ID selected when doing the sandbox sync"
+                      }
+                    },
+                    "required": [
+                      "resources"
+                    ]
                   }
-                },
-                "required": [
-                  "resourceType",
-                  "resourceIds"
                 ]
               }
             }
@@ -157,6 +203,10 @@
                   "isExportingMultipleResources": {
                     "type": "boolean",
                     "description": "Temporary flag to indicate if multiple resources are being exported"
+                  },
+                  "generateAISummary": {
+                    "type": "boolean",
+                    "default": false
                   }
                 },
                 "required": [
@@ -511,6 +561,20 @@
             "properties": {
               "import_job_id": {
                 "$ref": "#/components/schemas/JobID"
+              },
+              "previous_jobs_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of job IDs that were used to install the manifest"
+              },
+              "previous_jobs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Job"
+                },
+                "description": "List of jobs that were used to install the manifest"
               }
             }
           },
@@ -846,8 +910,24 @@
           },
           "source_blueprint_file": {
             "type": "string",
+            "deprecated": true,
             "description": "A URL to download the source blueprint file used to import the blueprint",
             "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip"
+          },
+          "docs_link": {
+            "type": "string",
+            "description": "Link to the blueprint documentation",
+            "example": "https://help.epilot.cloud"
+          },
+          "source_blueprint_file_ref": {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          "install_status": {
+            "$ref": "#/components/schemas/BlueprintInstallStatus"
+          },
+          "install_status_description": {
+            "type": "string",
+            "example": "This blueprint installation resulted in a partial deployment; some resources were created successfully, but  failed to complete the full resource setup."
           },
           "is_verified": {
             "type": "boolean",
@@ -858,6 +938,16 @@
           },
           "updated_by": {
             "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "manifest_version": {
+            "type": "string",
+            "description": "Version of the manifest (semver)",
+            "example": "1.0.0"
+          },
+          "selected_resources_url": {
+            "type": "string",
+            "description": "All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest",
+            "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json"
           }
         }
       },
@@ -930,6 +1020,14 @@
             }
           }
         }
+      },
+      "BlueprintInstallStatus": {
+        "type": "string",
+        "enum": [
+          "SUCCESS",
+          "PARTIAL",
+          "FAILED"
+        ]
       },
       "FormattedErrorCodes": {
         "type": "string",
@@ -1011,6 +1109,43 @@
         },
         "required": [
           "org_id"
+        ]
+      },
+      "SelectedResources": {
+        "type": "object",
+        "properties": {
+          "exported_root_resources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceNodeType"
+                }
+              },
+              "required": [
+                "id",
+                "type"
+              ]
+            }
+          },
+          "selected_resources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pipeline_id": {
+            "type": "string",
+            "description": "Pipeline ID selected when doing the sandbox sync"
+          }
+        },
+        "required": [
+          "exported_root_resources",
+          "selected_resources"
         ]
       }
     },
