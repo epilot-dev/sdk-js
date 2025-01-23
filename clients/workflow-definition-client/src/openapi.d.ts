@@ -126,7 +126,7 @@ declare namespace Components {
         export interface DynamicDueDate {
             numberOfUnits: number;
             timePeriod: "minutes" | "hours" | "days" | "weeks" | "months";
-            actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSE";
+            actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSED";
             stepId?: string;
         }
         /**

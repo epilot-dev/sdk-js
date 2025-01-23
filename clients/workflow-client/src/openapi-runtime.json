@@ -24,7 +24,8 @@
             "name": "schema",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
       },
       "post": {
         "operationId": "createExecution",
@@ -33,7 +34,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/workflows/executions/{executionId}": {
@@ -45,7 +47,8 @@
             "name": "executionId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "patch": {
         "operationId": "updateExecution",
@@ -61,7 +64,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteExecution",
@@ -71,7 +75,8 @@
             "name": "executionId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/workflows/executions/{executionId}/steps": {
@@ -89,7 +94,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/workflows/executions/{executionId}/steps/{stepId}": {
@@ -112,7 +118,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteStep",
@@ -127,7 +134,8 @@
             "name": "stepId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/workflows/executions/search": {
@@ -138,7 +146,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/workflows/executions/steps/search": {
@@ -150,7 +159,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/workflows/executions/{executionId}/closing-reasons": {
@@ -162,7 +172,8 @@
             "name": "executionId",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     }
   },

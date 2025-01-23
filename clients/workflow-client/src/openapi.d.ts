@@ -53,7 +53,7 @@ declare namespace Components {
          */
         export interface DynamicDueDate {
             numberOfUnits: number;
-            timePeriod: "minutes" | "hours" | "days" | "weeks" | "months";
+            timePeriod: "days" | "weeks" | "months";
             actionTypeCondition?: "WORKFLOW_STARTED" | "STEP_CLOSED";
             stepId?: string;
         }
@@ -217,21 +217,11 @@ declare namespace Components {
              */
             userIds?: number[];
             assignedTo?: string[];
-            /**
-             * example:
-             * 2021-04-27T12:00:00.000Z
-             */
-            dueDate?: string;
-            dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             startedTime?: string;
             completedTime?: string;
             status?: SectionStatus;
             type: ItemType;
             steps: Step[];
-            /**
-             * Taxonomy ids (purposes in this case) that are associated with this section and used for filtering
-             */
-            taxonomies?: string[];
         }
         /**
          * A group of Steps that define the progress of the Workflow
@@ -247,7 +237,6 @@ declare namespace Components {
             name: string;
             type: ItemType;
             steps: StepSimplified[];
-            assignedTo?: string[];
         }
         export type SectionStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED";
         export interface Step {
@@ -565,10 +554,6 @@ declare namespace Components {
              * Version of the workflow execution
              */
             version?: number;
-            /**
-             * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
-             */
-            taxonomies?: string[];
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export interface WorkflowExecutionBase {
@@ -614,16 +599,13 @@ declare namespace Components {
              * Version of the workflow execution
              */
             version?: number;
-            /**
-             * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
-             */
-            taxonomies?: string[];
         }
         /**
          * example:
          * {
          *   "workflowId": "j3f23fh23uif98",
          *   "trigger": "AUTOMATIC",
+         *   "dueDate": "2021-04-27T12:01:13.000Z",
          *   "contexts": [
          *     {
          *       "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
@@ -641,10 +623,6 @@ declare namespace Components {
             trigger?: TriggerType;
             assignedTo?: string[];
             contexts?: WorkflowContext[];
-            /**
-             * An array of purposes to filter workflow phases.
-             */
-            purposes?: string[];
         }
         /**
          * example:
@@ -721,10 +699,6 @@ declare namespace Components {
              * Version of the workflow execution
              */
             version?: number;
-            /**
-             * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
-             */
-            taxonomies?: string[];
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export interface WorkflowExecutionUpdateReq {
@@ -750,13 +724,13 @@ declare namespace Components {
             name?: string;
             status?: WorkflowStatus;
             assignees?: string[];
-            duedate?: string; // date-time
-            last_update_time?: string; // date-time
+            duedate?: string;
+            last_update_time?: string;
             progress?: number;
             task_id?: string;
             task_name?: string;
             task_assignees?: string[];
-            task_duedate?: string; // date-time
+            task_duedate?: string;
             task_execution_type?: StepType;
             task_status?: StepStatus;
             phase_id?: string;
@@ -777,6 +751,7 @@ declare namespace Paths {
          * {
          *   "workflowId": "j3f23fh23uif98",
          *   "trigger": "AUTOMATIC",
+         *   "dueDate": "2021-04-27T12:01:13.000Z",
          *   "contexts": [
          *     {
          *       "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
