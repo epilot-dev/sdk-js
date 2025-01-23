@@ -3010,9 +3010,19 @@
         "parameters": [
           {
             "in": "query",
+            "description": "The status of the jobs to return",
             "name": "status",
             "schema": {
               "$ref": "#/components/schemas/TaxonomyBulkJobStatus"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "The maximum number of jobs to return (defaults to 20)",
+              "type": "number",
+              "default": 20
             }
           }
         ],
@@ -7396,7 +7406,6 @@
             "example": "66"
           },
           "shared": {
-            "deprecated": true,
             "description": "boolean property for if a view is shared with organisation",
             "type": "boolean",
             "example": true
