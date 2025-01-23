@@ -238,6 +238,26 @@
         },
         "responses": {}
       }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}": {
+      "patch": {
+        "operationId": "patchTask",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -245,6 +265,11 @@
       "ExecutionIdParam": {
         "in": "path",
         "name": "execution_id",
+        "required": true
+      },
+      "TaskIdParam": {
+        "in": "path",
+        "name": "task_id",
         "required": true
       },
       "SoftDeleteParam": {

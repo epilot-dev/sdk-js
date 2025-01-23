@@ -12,9 +12,11 @@ declare namespace Components {
     namespace Parameters {
         export type ExecutionIdParam = string;
         export type SoftDeleteParam = boolean;
+        export type TaskIdParam = string;
     }
     export interface PathParameters {
         ExecutionIdParam?: Parameters.ExecutionIdParam;
+        TaskIdParam?: Parameters.TaskIdParam;
     }
     export interface QueryParameters {
         SoftDeleteParam?: Parameters.SoftDeleteParam;
@@ -40,6 +42,21 @@ declare namespace Components {
              * Status of Automation Execution. Types can be found in Automation API
              */
             executionStatus?: string;
+        }
+        export interface AutomationInfo {
+            /**
+             * Id of the automation that should be run by this task
+             */
+            flow_id: string;
+            /**
+             * Id of the automation execution, when it already ran
+             */
+            execution_id?: string;
+            /**
+             * Status of the automation execution, when it already ran
+             */
+            execution_status?: string;
+            execution_mode?: "MANUAL_TRIGGER_BY_USER_CLICK" | "AUTO_TRIGGER_BY_SYSTEM_ON_CURRENT_TASK";
         }
         export interface AutomationTask {
             id: TaskId;
@@ -90,17 +107,7 @@ declare namespace Components {
             taxonomies?: string[];
             phase_id?: string;
             task_type: TaskType;
-            automation_config: {
-                /**
-                 * Id of the configured automation to run
-                 */
-                flow_id: string;
-                /**
-                 * Id of the automation execution which ran
-                 */
-                execution_id?: string;
-                execution_mode?: "MANUAL_TRIGGER_BY_USER_CLICK" | "AUTO_TRIGGER_BY_SYSTEM_ON_CURRENT_TASK";
-            };
+            automation_config: AutomationInfo;
         }
         export interface ClosingReason {
             id: string;
@@ -118,6 +125,14 @@ declare namespace Components {
             ConditionId;
             logical_operator: "AND" | "OR";
             statements: Statement[];
+            /**
+             * Time when the condition was evaluated
+             */
+            evaluated_at?: string; // date-time
+            /**
+             * The result of evaluating this condition - true / false
+             */
+            is_met?: boolean;
         }
         /**
          * A locally unique identifier for the condition
@@ -217,8 +232,8 @@ declare namespace Components {
         }
         export interface Edge {
             id: string;
-            task_id_from: TaskId;
-            task_id_to: TaskId;
+            from_id: TaskId;
+            to_id: TaskId;
             condition_id?: /**
              * A locally unique identifier for the condition
              * example:
@@ -305,7 +320,9 @@ declare namespace Components {
                 closed_by?: string;
             };
             contexts: FlowContext[];
-            crt_task_id: TaskId;
+            crt_tasks: {
+                id?: TaskId;
+            }[];
             phases?: Phase[];
             tasks: Task[];
             edges: Edge[];
@@ -326,7 +343,7 @@ declare namespace Components {
             trigger: {
                 id?: string;
                 type?: TriggerType;
-                automation_config?: /* Configuration for automation execution to run */ AutomationConfig;
+                automation_config?: AutomationInfo;
             };
         }
         export type FlowExecutionId = string;
@@ -358,10 +375,31 @@ declare namespace Components {
              */
             completed_at?: string; // date-time
         }
+        export interface PatchTaskReq {
+            name?: string;
+            status?: StepStatus;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            assigned_to?: /* The user ids */ Assignees;
+            /**
+             * flag for controlling enabled/disabled state of the task
+             */
+            enabled?: boolean;
+            automation_config?: AutomationInfo;
+        }
         export interface Phase {
             id: string;
             template_id: string;
             name: string;
+            status?: SectionStatus;
+            /**
+             * Last Update timestamp
+             */
+            updated_at?: string;
             /**
              * example:
              * 2021-04-27T12:00:00.000Z
@@ -557,7 +595,7 @@ declare namespace Components {
             /**
              * An array of purposes to filter workflow phases.
              */
-            purposes: string[];
+            purposes?: string[];
         }
         export interface Statement {
             id: string;
@@ -1459,6 +1497,23 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace PatchTask {
+        namespace Parameters {
+            export type ExecutionId = string;
+            export type TaskId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+            task_id: Parameters.TaskId;
+        }
+        export type RequestBody = Components.Schemas.PatchTaskReq;
+        namespace Responses {
+            export type $200 = Components.Schemas.Task;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace SearchExecutions {
         export type RequestBody = Components.Schemas.SearchExecutionsReq;
         namespace Responses {
@@ -1700,6 +1755,16 @@ export interface OperationMethods {
     data?: Paths.SearchFlowExecutions.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchFlowExecutions.Responses.$200>
+  /**
+   * patchTask - patchTask
+   * 
+   * Changes various attributes of a flow task, like assignees, status, due date, etc.
+   */
+  'patchTask'(
+    parameters?: Parameters<Paths.PatchTask.PathParameters> | null,
+    data?: Paths.PatchTask.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PatchTask.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1886,12 +1951,25 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchFlowExecutions.Responses.$200>
   }
+  ['/v2/flows/executions/{execution_id}/tasks/{task_id}']: {
+    /**
+     * patchTask - patchTask
+     * 
+     * Changes various attributes of a flow task, like assignees, status, due date, etc.
+     */
+    'patch'(
+      parameters?: Parameters<Paths.PatchTask.PathParameters> | null,
+      data?: Paths.PatchTask.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PatchTask.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type Assignees = Components.Schemas.Assignees;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
+export type AutomationInfo = Components.Schemas.AutomationInfo;
 export type AutomationTask = Components.Schemas.AutomationTask;
 export type ClosingReason = Components.Schemas.ClosingReason;
 export type ClosingReasonResp = Components.Schemas.ClosingReasonResp;
@@ -1919,6 +1997,7 @@ export type LastEvaluatedKey = Components.Schemas.LastEvaluatedKey;
 export type ManualTask = Components.Schemas.ManualTask;
 export type Operator = Components.Schemas.Operator;
 export type PatchFlowReq = Components.Schemas.PatchFlowReq;
+export type PatchTaskReq = Components.Schemas.PatchTaskReq;
 export type Phase = Components.Schemas.Phase;
 export type PhaseInEntity = Components.Schemas.PhaseInEntity;
 export type SearchExecutionsReq = Components.Schemas.SearchExecutionsReq;

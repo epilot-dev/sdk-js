@@ -926,6 +926,77 @@
           }
         }
       }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}": {
+      "patch": {
+        "operationId": "patchTask",
+        "summary": "patchTask",
+        "description": "Changes various attributes of a flow task, like assignees, status, due date, etc.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "requestBody": {
+          "description": "Patch Task Payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchTaskReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - when task has been successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -946,6 +1017,16 @@
         "required": true,
         "description": "Id of the execution",
         "example": "wd561"
+      },
+      "TaskIdParam": {
+        "in": "path",
+        "name": "task_id",
+        "schema": {
+          "type": "string"
+        },
+        "required": true,
+        "description": "Id of the task",
+        "example": "7hj28a"
       },
       "SoftDeleteParam": {
         "in": "query",
@@ -2166,8 +2247,7 @@
         "required": [
           "flow_template_id",
           "trigger",
-          "contexts",
-          "purposes"
+          "contexts"
         ],
         "properties": {
           "flow_template_id": {
@@ -2260,7 +2340,7 @@
           "status",
           "trigger",
           "contexts",
-          "crt_task_id",
+          "crt_tasks",
           "tasks",
           "edges"
         ],
@@ -2329,8 +2409,16 @@
               "$ref": "#/components/schemas/FlowContext"
             }
           },
-          "crt_task_id": {
-            "$ref": "#/components/schemas/TaskId"
+          "crt_tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/components/schemas/TaskId"
+                }
+              }
+            }
           },
           "phases": {
             "type": "array",
@@ -2397,7 +2485,7 @@
                 "$ref": "#/components/schemas/TriggerType"
               },
               "automation_config": {
-                "$ref": "#/components/schemas/AutomationConfig"
+                "$ref": "#/components/schemas/AutomationInfo"
               }
             }
           }
@@ -2460,27 +2548,7 @@
             ],
             "properties": {
               "automation_config": {
-                "type": "object",
-                "properties": {
-                  "flow_id": {
-                    "type": "string",
-                    "description": "Id of the configured automation to run"
-                  },
-                  "execution_id": {
-                    "type": "string",
-                    "description": "Id of the automation execution which ran"
-                  },
-                  "execution_mode": {
-                    "type": "string",
-                    "enum": [
-                      "MANUAL_TRIGGER_BY_USER_CLICK",
-                      "AUTO_TRIGGER_BY_SYSTEM_ON_CURRENT_TASK"
-                    ]
-                  }
-                },
-                "required": [
-                  "flow_id"
-                ]
+                "$ref": "#/components/schemas/AutomationInfo"
               }
             }
           }
@@ -2630,6 +2698,13 @@
           "name": {
             "type": "string"
           },
+          "status": {
+            "$ref": "#/components/schemas/SectionStatus"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Last Update timestamp"
+          },
           "due_date": {
             "type": "string",
             "example": "2021-04-27T12:00:00.000Z"
@@ -2660,10 +2735,10 @@
           "id": {
             "type": "string"
           },
-          "task_id_from": {
+          "from_id": {
             "$ref": "#/components/schemas/TaskId"
           },
-          "task_id_to": {
+          "to_id": {
             "$ref": "#/components/schemas/TaskId"
           },
           "condition_id": {
@@ -2672,8 +2747,35 @@
         },
         "required": [
           "id",
-          "task_id_from",
-          "task_id_to"
+          "from_id",
+          "to_id"
+        ]
+      },
+      "AutomationInfo": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "type": "string",
+            "description": "Id of the automation that should be run by this task"
+          },
+          "execution_id": {
+            "type": "string",
+            "description": "Id of the automation execution, when it already ran"
+          },
+          "execution_status": {
+            "type": "string",
+            "description": "Status of the automation execution, when it already ran"
+          },
+          "execution_mode": {
+            "type": "string",
+            "enum": [
+              "MANUAL_TRIGGER_BY_USER_CLICK",
+              "AUTO_TRIGGER_BY_SYSTEM_ON_CURRENT_TASK"
+            ]
+          }
+        },
+        "required": [
+          "flow_id"
         ]
       },
       "ConditionId": {
@@ -2699,6 +2801,15 @@
             "items": {
               "$ref": "#/components/schemas/Statement"
             }
+          },
+          "evaluated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the condition was evaluated"
+          },
+          "is_met": {
+            "type": "boolean",
+            "description": "The result of evaluating this condition - true / false"
           }
         },
         "required": [
@@ -2890,6 +3001,34 @@
           "type": "string"
         },
         "description": "The user ids"
+      },
+      "PatchTaskReq": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StepStatus"
+          },
+          "due_date": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "due_date_config": {
+            "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "assigned_to": {
+            "$ref": "#/components/schemas/Assignees"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "flag for controlling enabled/disabled state of the task"
+          },
+          "automation_config": {
+            "$ref": "#/components/schemas/AutomationInfo"
+          }
+        }
       }
     }
   }
