@@ -1055,7 +1055,7 @@
           },
           {
             "in": "query",
-            "name": "limit"
+            "name": "size"
           }
         ],
         "responses": {}

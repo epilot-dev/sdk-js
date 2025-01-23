@@ -9554,12 +9554,12 @@ declare namespace Paths {
             /**
              * The maximum number of jobs to return (defaults to 20)
              */
-            export type Limit = number;
+            export type Size = number;
             export type Status = /* The status of the bulk job */ Components.Schemas.TaxonomyBulkJobStatus;
         }
         export interface QueryParameters {
             status?: Parameters.Status;
-            limit?: /* The maximum number of jobs to return (defaults to 20) */ Parameters.Limit;
+            size?: /* The maximum number of jobs to return (defaults to 20) */ Parameters.Size;
         }
         namespace Responses {
             export type $200 = /**

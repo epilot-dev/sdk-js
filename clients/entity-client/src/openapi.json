@@ -3018,7 +3018,7 @@
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "size",
             "schema": {
               "description": "The maximum number of jobs to return (defaults to 20)",
               "type": "number",
