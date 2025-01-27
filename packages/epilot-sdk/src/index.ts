@@ -1,5 +1,4 @@
 import { authenticate, authorizeWithToken, UsernamePasswordAuthParams } from '@epilot/auth';
-import { AxiosInstance } from 'axios';
 
 import {
   default as addressSuggestionsClient,
@@ -126,27 +125,27 @@ export class EpilotClient {
   public async login(credentials: UsernamePasswordAuthParams) {
     const authorizer = await authenticate(credentials);
 
-    authorizer.configureClient((this.entity as unknown) as AxiosInstance);
-    authorizer.configureClient((this.pricing as unknown) as AxiosInstance);
-    authorizer.configureClient((this.user as unknown) as AxiosInstance);
-    authorizer.configureClient((this.file as unknown) as AxiosInstance);
-    authorizer.configureClient((this.organization as unknown) as AxiosInstance);
-    authorizer.configureClient((this.submission as unknown) as AxiosInstance);
-    authorizer.configureClient((this.workflow as unknown) as AxiosInstance);
-    authorizer.configureClient((this.permissions as unknown) as AxiosInstance);
-    authorizer.configureClient((this.automation as unknown) as AxiosInstance);
-    authorizer.configureClient((this.message as unknown) as AxiosInstance);
-    authorizer.configureClient((this.emailSettings as unknown) as AxiosInstance);
-    authorizer.configureClient((this.discussion as unknown) as AxiosInstance);
-    authorizer.configureClient((this.notification as unknown) as AxiosInstance);
-    authorizer.configureClient((this.emailTemplate as unknown) as AxiosInstance);
-    authorizer.configureClient((this.templateVariables as unknown) as AxiosInstance);
-    authorizer.configureClient((this.partner as unknown) as AxiosInstance);
-    authorizer.configureClient((this.addressSuggestions as unknown) as AxiosInstance);
-    authorizer.configureClient((this.blueprintManifest as unknown) as AxiosInstance);
-    authorizer.configureClient((this.sandbox as unknown) as AxiosInstance);
-    authorizer.configureClient((this.design as unknown) as AxiosInstance);
-    authorizer.configureClient((this.auditLogs as unknown) as AxiosInstance);
+    authorizer.configureClient(this.entity);
+    authorizer.configureClient(this.pricing);
+    authorizer.configureClient(this.user);
+    authorizer.configureClient(this.file);
+    authorizer.configureClient(this.organization);
+    authorizer.configureClient(this.submission);
+    authorizer.configureClient(this.workflow);
+    authorizer.configureClient(this.permissions);
+    authorizer.configureClient(this.automation);
+    authorizer.configureClient(this.message);
+    authorizer.configureClient(this.emailSettings);
+    authorizer.configureClient(this.discussion);
+    authorizer.configureClient(this.notification);
+    authorizer.configureClient(this.emailTemplate);
+    authorizer.configureClient(this.templateVariables);
+    authorizer.configureClient(this.partner);
+    authorizer.configureClient(this.addressSuggestions);
+    authorizer.configureClient(this.blueprintManifest);
+    authorizer.configureClient(this.sandbox);
+    authorizer.configureClient(this.design);
+    authorizer.configureClient(this.auditLogs);
 
     return this;
   }
