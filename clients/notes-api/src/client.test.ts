@@ -1,14 +1,14 @@
-import { getClient } from "./client";
+import { getClient } from './client';
 
-describe("client", () => {
-  describe("getClient", () => {
-    it("should inititalise and return client", async () => {
+describe('client', () => {
+  describe('getClient', () => {
+    it('should inititalise and return client', async () => {
       const client = getClient();
 
       expect(client.api.initialized).toBe(true);
     });
 
-    it("should have operations", async () => {
+    it('should have operations', async () => {
       const client = getClient();
 
       const operations = client.api.getOperations();
