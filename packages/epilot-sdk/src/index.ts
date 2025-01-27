@@ -125,47 +125,26 @@ export class EpilotClient {
   public async login(credentials: UsernamePasswordAuthParams) {
     const authorizer = await authenticate(credentials);
 
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.entity);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.pricing);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.user);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.file);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.organization);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.submission);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.workflow);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.permissions);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.automation);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.message);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.emailSettings);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.discussion);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.notification);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.emailTemplate);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.templateVariables);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.partner);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.addressSuggestions);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.blueprintManifest);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.sandbox);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.design);
-    // @ts-ignore error shows up only in CI
     authorizer.configureClient(this.auditLogs);
 
     return this;
