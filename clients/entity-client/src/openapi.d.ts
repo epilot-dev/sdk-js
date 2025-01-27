@@ -3370,6 +3370,7 @@ declare namespace Components {
              *
              */
             EntitySearchIncludeDeletedParam;
+            highlight?: any;
         }
         export interface EntitySearchResults {
             /**

@@ -6727,7 +6727,8 @@
               "hydrate": {},
               "fields": {},
               "aggs": {},
-              "include_deleted": {}
+              "include_deleted": {},
+              "highlight": {}
             },
             "additionalProperties": false,
             "required": [
