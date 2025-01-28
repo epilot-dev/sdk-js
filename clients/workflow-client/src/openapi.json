@@ -1062,13 +1062,6 @@
             "items": {
               "$ref": "#/components/schemas/WorkflowContext"
             }
-          },
-          "purposes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "An array of purposes to filter workflow phases."
           }
         },
         "required": [
@@ -1077,6 +1070,7 @@
         "example": {
           "workflowId": "j3f23fh23uif98",
           "trigger": "AUTOMATIC",
+          "dueDate": "2021-04-27T12:01:13.000Z",
           "contexts": [
             {
               "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
@@ -1253,13 +1247,6 @@
           "version": {
             "type": "integer",
             "description": "Version of the workflow execution"
-          },
-          "taxonomies": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering"
           }
         }
       },
@@ -1430,12 +1417,6 @@
             "items": {
               "$ref": "#/components/schemas/StepSimplified"
             }
-          },
-          "assignedTo": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         },
         "required": [
@@ -1474,13 +1455,6 @@
               "type": "string"
             }
           },
-          "dueDate": {
-            "type": "string",
-            "example": "2021-04-27T12:00:00.000Z"
-          },
-          "dynamicDueDate": {
-            "$ref": "#/components/schemas/DynamicDueDate"
-          },
           "startedTime": {
             "type": "string"
           },
@@ -1498,13 +1472,6 @@
             "items": {
               "$ref": "#/components/schemas/Step"
             }
-          },
-          "taxonomies": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Taxonomy ids (purposes in this case) that are associated with this section and used for filtering"
           }
         },
         "required": [
@@ -2087,12 +2054,10 @@
             }
           },
           "duedate": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           },
           "last_update_time": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           },
           "progress": {
             "type": "number"
@@ -2110,8 +2075,7 @@
             }
           },
           "task_duedate": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           },
           "task_execution_type": {
             "$ref": "#/components/schemas/StepType"
@@ -2195,8 +2159,6 @@
           "timePeriod": {
             "type": "string",
             "enum": [
-              "minutes",
-              "hours",
               "days",
               "weeks",
               "months"
