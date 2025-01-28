@@ -2245,6 +2245,14 @@ declare namespace Components {
             email?: string;
             phone?: string;
         }
+        /**
+         * The interval of the tariff if a spot market price is used as base.
+         */
+        export type DynamicTariffInterval = "hourly" | "monthly_average";
+        /**
+         * The mode of the dynamic tariff. `day_ahead_market` uses the Day-Ahead spot market price as base.
+         */
+        export type DynamicTariffMode = "day_ahead_market" | "manual";
         export type EntityId = string; // uuid
         /**
          * example:
@@ -2973,10 +2981,11 @@ declare namespace Components {
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+             *  - `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.
              * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag";
             /**
              * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
              *
@@ -3103,6 +3112,7 @@ declare namespace Components {
              */
             unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
             get_ag?: PriceGetAg;
+            dynamic_tariff?: PriceDynamicTariff;
             /**
              * The price creation date
              */
@@ -3143,6 +3153,14 @@ declare namespace Components {
              * An arbitrary set of tags attached to the composite price - component relation
              */
             _tags?: string[];
+        }
+        export interface PriceDynamicTariff {
+            mode: /* The mode of the dynamic tariff. `day_ahead_market` uses the Day-Ahead spot market price as base. */ DynamicTariffMode;
+            interval?: /* The interval of the tariff if a spot market price is used as base. */ DynamicTariffInterval;
+            average_price: number;
+            average_price_decimal: string;
+            markup: number;
+            markup_decimal: string;
         }
         export interface PriceGetAg {
             category: ProductCategory;
@@ -3607,12 +3625,14 @@ declare namespace Components {
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+             * - `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.
              * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
             PricingModel;
             tiers_details?: TierDetails[];
             get_ag?: PriceGetAg;
+            dynamic_tariff?: PriceDynamicTariff;
         }
         /**
          * Represents a price input to the pricing library.
@@ -3849,10 +3869,11 @@ declare namespace Components {
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
              * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
              * - `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+             * - `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.
              * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
+            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag";
             /**
              * The snapshot of the price linked to the price item.
              * example:
@@ -3876,10 +3897,11 @@ declare namespace Components {
                  * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
                  * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
                  * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+                 *  - `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.
                  * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
                  *
                  */
-                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
+                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag";
                 /**
                  * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
                  *
@@ -4006,6 +4028,7 @@ declare namespace Components {
                  */
                 unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
                 get_ag?: PriceGetAg;
+                dynamic_tariff?: PriceDynamicTariff;
                 /**
                  * The price creation date
                  */
@@ -4179,10 +4202,11 @@ declare namespace Components {
          * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
          * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
          * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+         * - `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.
          * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
          *
          */
-        export type PricingModel = "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "external_getag";
+        export type PricingModel = "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag";
         /**
          * The product entity
          * example:
@@ -5503,6 +5527,8 @@ export type ConsumptionTypeGetAg = Components.Schemas.ConsumptionTypeGetAg;
 export type Coupon = Components.Schemas.Coupon;
 export type Currency = Components.Schemas.Currency;
 export type Customer = Components.Schemas.Customer;
+export type DynamicTariffInterval = Components.Schemas.DynamicTariffInterval;
+export type DynamicTariffMode = Components.Schemas.DynamicTariffMode;
 export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
 export type EntityRelation = Components.Schemas.EntityRelation;
@@ -5529,6 +5555,7 @@ export type PaymentMethod = Components.Schemas.PaymentMethod;
 export type PowerMeterType = Components.Schemas.PowerMeterType;
 export type Price = Components.Schemas.Price;
 export type PriceComponentRelation = Components.Schemas.PriceComponentRelation;
+export type PriceDynamicTariff = Components.Schemas.PriceDynamicTariff;
 export type PriceGetAg = Components.Schemas.PriceGetAg;
 export type PriceInputMapping = Components.Schemas.PriceInputMapping;
 export type PriceInputMappings = Components.Schemas.PriceInputMappings;
