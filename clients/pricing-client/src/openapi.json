@@ -114,6 +114,12 @@
   "servers": [
     {
       "url": "https://pricing-api.sls.epilot.io"
+    },
+    {
+      "url": "https://pricing-api.sls.epilot.io"
+    },
+    {
+      "url": "https://pricing-api.sls.epilot.io"
     }
   ],
   "paths": {
@@ -2248,12 +2254,13 @@
           },
           "pricing_model": {
             "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
+            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n - `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
             "enum": [
               "per_unit",
               "tiered_graduated",
               "tiered_volume",
               "tiered_flatfee",
+              "dynamic_tariff",
               "external_getag"
             ]
           },
@@ -2435,6 +2442,9 @@
           },
           "get_ag": {
             "$ref": "#/components/schemas/PriceGetAg"
+          },
+          "dynamic_tariff": {
+            "$ref": "#/components/schemas/PriceDynamicTariff"
           },
           "_created_at": {
             "description": "The price creation date",
@@ -3114,6 +3124,22 @@
           "digital"
         ]
       },
+      "DynamicTariffMode": {
+        "description": "The mode of the dynamic tariff. `day_ahead_market` uses the Day-Ahead spot market price as base.",
+        "type": "string",
+        "enum": [
+          "day_ahead_market",
+          "manual"
+        ]
+      },
+      "DynamicTariffInterval": {
+        "description": "The interval of the tariff if a spot market price is used as base.",
+        "type": "string",
+        "enum": [
+          "hourly",
+          "monthly_average"
+        ]
+      },
       "ComputedPriceBreakdown": {
         "type": "object",
         "description": "Price breakdown",
@@ -3619,12 +3645,13 @@
           },
           "pricing_model": {
             "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
+            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
             "enum": [
               "per_unit",
               "tiered_graduated",
               "tiered_volume",
               "tiered_flatfee",
+              "dynamic_tariff",
               "external_getag"
             ]
           },
@@ -4260,6 +4287,9 @@
           },
           "get_ag": {
             "$ref": "#/components/schemas/PriceGetAg"
+          },
+          "dynamic_tariff": {
+            "$ref": "#/components/schemas/PriceDynamicTariff"
           }
         },
         "required": [
@@ -5237,12 +5267,13 @@
       },
       "PricingModel": {
         "type": "string",
-        "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
+        "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.\n- `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
         "enum": [
           "per_unit",
           "tiered_graduated",
           "tiered_volume",
           "tiered_flatfee",
+          "dynamic_tariff",
           "external_getag"
         ]
       },
@@ -5355,6 +5386,36 @@
           "markup_amount_decimal",
           "unit_amount_gross",
           "unit_amount_net"
+        ]
+      },
+      "PriceDynamicTariff": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/DynamicTariffMode"
+          },
+          "interval": {
+            "$ref": "#/components/schemas/DynamicTariffInterval"
+          },
+          "average_price": {
+            "type": "number"
+          },
+          "average_price_decimal": {
+            "type": "string"
+          },
+          "markup": {
+            "type": "number"
+          },
+          "markup_decimal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode",
+          "markup",
+          "markup_decimal",
+          "average_price",
+          "average_price_decimal"
         ]
       },
       "TierDetails": {
