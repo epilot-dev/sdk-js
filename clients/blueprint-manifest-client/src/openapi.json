@@ -207,6 +207,13 @@
                   "generateAISummary": {
                     "type": "boolean",
                     "default": false
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "de"
+                    ]
                   }
                 },
                 "required": [

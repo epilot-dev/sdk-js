@@ -869,6 +869,7 @@ declare namespace Paths {
              */
             isExportingMultipleResources?: boolean;
             generateAISummary?: boolean;
+            language?: "en" | "de";
         }
         namespace Responses {
             export interface $200 {
