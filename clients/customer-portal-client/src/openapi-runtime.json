@@ -1241,6 +1241,37 @@
         },
         "responses": {}
       }
+    },
+    "/v2/portal/public/sso/redirect": {
+      "post": {
+        "operationId": "ssoRedirect",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "web_uri",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/public/sso/callback": {
+      "post": {
+        "operationId": "ssoCallback",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {

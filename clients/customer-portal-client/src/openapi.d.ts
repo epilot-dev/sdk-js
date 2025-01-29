@@ -1692,6 +1692,16 @@ declare namespace Components {
              */
             id?: string;
         }
+        export type ExtensionHookConfig = {
+            /**
+             * The ID of the hook that is being configured.
+             */
+            hook_id?: string;
+            /**
+             * The ID of the app that is being hooked into.
+             */
+            app_id?: string;
+        } | null;
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
          *   - 200 with the time series data
@@ -2478,6 +2488,12 @@ declare namespace Components {
              * https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0
              */
             oidc_issuer: string;
+            /**
+             * Redirect URI for the OIDC flow
+             * example:
+             * https://customer-portal.com/login
+             */
+            redirect_uri?: string;
             /**
              * example:
              * ab81daf8-8b1f-42d6-94ca-c51621054c75
@@ -3390,6 +3406,82 @@ declare namespace Components {
         }
         export interface SAMLProviderConfig {
         }
+        export interface SSOCallbackRequest {
+            /**
+             * URL of the authorization endpoint
+             * example:
+             * https://www.facebook.com/v12.0/dialog/oauth
+             */
+            token_endpoint: string;
+            /**
+             * The grant type
+             * example:
+             * authorization_code
+             */
+            grant_type: string;
+            /**
+             * The code received from the external SSO provider
+             * example:
+             * 123456
+             */
+            code: string;
+            /**
+             * The redirect uri
+             * example:
+             * https://customer-portal.com/login
+             */
+            redirect_uri: string;
+            /**
+             * The client id
+             * example:
+             * 123456
+             */
+            client_id: string;
+            /**
+             * The client secret
+             * example:
+             * 123456
+             */
+            client_secret: string;
+            /**
+             * The code verifier
+             * example:
+             * 123456
+             */
+            code_verifier: string;
+        }
+        export interface SSOCallbackResponse {
+            /**
+             * The access token
+             * example:
+             * 123456
+             */
+            access_token: string;
+            /**
+             * The token type
+             * example:
+             * Bearer
+             */
+            token_type: string;
+            /**
+             * The expires in
+             * example:
+             * 3600
+             */
+            expires_in: number;
+            /**
+             * The refresh token
+             * example:
+             * 123456
+             */
+            refresh_token: string;
+            /**
+             * The id token
+             * example:
+             * 123456
+             */
+            id_token: string;
+        }
         export type SSOLoginToken = string;
         export interface SaveEntityFile {
             entity_id: /**
@@ -3558,6 +3650,12 @@ declare namespace Components {
              */
             extensions?: ExtensionConfig[];
             /**
+             * Configured Portal extensions hooks
+             */
+            extension_hooks?: {
+                [name: string]: ExtensionHookConfig;
+            };
+            /**
              * Default 360 user to notify upon an internal notification
              */
             default_user_to_notify?: {
@@ -3593,6 +3691,12 @@ declare namespace Components {
              * Configured Portal extensions
              */
             extensions?: ExtensionConfig[];
+            /**
+             * Configured Portal extensions hooks
+             */
+            extension_hooks?: {
+                [name: string]: ExtensionHookConfig;
+            };
             /**
              * Default 360 user to notify upon an internal notification
              */
@@ -6561,6 +6665,13 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SsoCallback {
+        export type RequestBody = Components.Schemas.SSOCallbackRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.SSOCallbackResponse;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace SsoLogin {
         namespace Parameters {
             /**
@@ -6600,6 +6711,42 @@ declare namespace Paths {
             export interface $200 {
                 token?: Components.Schemas.SSOLoginToken;
             }
+        }
+    }
+    namespace SsoRedirect {
+        namespace Parameters {
+            /**
+             * example:
+             * https://customer-portal.com
+             */
+            export type WebUri = string;
+        }
+        export interface QueryParameters {
+            web_uri: /**
+             * example:
+             * https://customer-portal.com
+             */
+            Parameters.WebUri;
+        }
+        export interface RequestBody {
+            /**
+             * The code received from the external SSO provider
+             * example:
+             * 123456
+             */
+            code?: string;
+            /**
+             * The state received from the external SSO provider
+             * example:
+             * 123456
+             */
+            state?: string;
+        }
+        namespace Responses {
+            export interface $301 {
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace TrackFileDownloaded {
@@ -7789,6 +7936,30 @@ export interface OperationMethods {
     data?: Paths.SsoLogin.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SsoLogin.Responses.$200>
+  /**
+   * ssoRedirect - ssoRedirect
+   * 
+   * Handles the redirect from the external SSO provider. Validates the authorization `code` and `state` received from the provider.
+   * Redirects the user to the provided `web_uri` with the validated credentials.
+   * 
+   */
+  'ssoRedirect'(
+    parameters?: Parameters<Paths.SsoRedirect.QueryParameters> | null,
+    data?: Paths.SsoRedirect.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
+   * ssoCallback - ssoCallback
+   * 
+   * Handles the callback from the external SSO provider, validates the authorization `code`
+   * and generates a external provider token to be used with the CUSTOM_AUTH flow against Cognito.
+   * 
+   */
+  'ssoCallback'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SsoCallback.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SsoCallback.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -8719,6 +8890,34 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SsoLogin.Responses.$200>
   }
+  ['/v2/portal/public/sso/redirect']: {
+    /**
+     * ssoRedirect - ssoRedirect
+     * 
+     * Handles the redirect from the external SSO provider. Validates the authorization `code` and `state` received from the provider.
+     * Redirects the user to the provided `web_uri` with the validated credentials.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.SsoRedirect.QueryParameters> | null,
+      data?: Paths.SsoRedirect.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
+  }
+  ['/v2/portal/public/sso/callback']: {
+    /**
+     * ssoCallback - ssoCallback
+     * 
+     * Handles the callback from the external SSO provider, validates the authorization `code`
+     * and generates a external provider token to be used with the CUSTOM_AUTH flow against Cognito.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SsoCallback.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SsoCallback.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -8766,6 +8965,7 @@ export type Extension = Components.Schemas.Extension;
 export type ExtensionAuthBlock = Components.Schemas.ExtensionAuthBlock;
 export type ExtensionConfig = Components.Schemas.ExtensionConfig;
 export type ExtensionHook = Components.Schemas.ExtensionHook;
+export type ExtensionHookConfig = Components.Schemas.ExtensionHookConfig;
 export type ExtensionHookConsumptionDataRetrieval = Components.Schemas.ExtensionHookConsumptionDataRetrieval;
 export type ExtensionHookContractIdentification = Components.Schemas.ExtensionHookContractIdentification;
 export type ExtensionHookCostDataRetrieval = Components.Schemas.ExtensionHookCostDataRetrieval;
@@ -8812,6 +9012,8 @@ export type RegistrationIdentifier = Components.Schemas.RegistrationIdentifier;
 export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;
 export type Rule = Components.Schemas.Rule;
 export type SAMLProviderConfig = Components.Schemas.SAMLProviderConfig;
+export type SSOCallbackRequest = Components.Schemas.SSOCallbackRequest;
+export type SSOCallbackResponse = Components.Schemas.SSOCallbackResponse;
 export type SSOLoginToken = Components.Schemas.SSOLoginToken;
 export type SaveEntityFile = Components.Schemas.SaveEntityFile;
 export type SavePortalFile = Components.Schemas.SavePortalFile;
