@@ -1041,5 +1041,13 @@
         "description": "Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data"
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://notes.sls.epilot.io"
+    },
+    {
+      "url": "https://notes.sls.epilot.io"
+    }
+  ]
 }
