@@ -2213,6 +2213,20 @@ declare namespace Components {
             cashback_period?: "0" | "12";
             active?: boolean;
             /**
+             * Whether the coupon requires a promo code to be applied
+             */
+            requires_promo_code?: boolean;
+            /**
+             * The promo codes associated with the coupon
+             */
+            promo_codes?: PromoCode[];
+            /**
+             * Map of ids of promo codes with their usage count
+             */
+            promo_code_usage?: {
+                [name: string]: number;
+            };
+            /**
              * The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.
              */
             prices?: /* The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise. */ {
@@ -4304,6 +4318,24 @@ declare namespace Components {
             _updated_at?: string;
         }
         export type ProductCategory = "power" | "gas";
+        export interface PromoCode {
+            /**
+             * The id of the promo code
+             */
+            id: string;
+            /**
+             * The code of the promo code
+             */
+            code: string;
+            /**
+             * Whether the promo code has a usage limit
+             */
+            has_usage_limit?: boolean;
+            /**
+             * The usage limit of the promo code
+             */
+            usage_limit?: number | null;
+        }
         /**
          * The provider entity
          */
@@ -5571,6 +5603,7 @@ export type PricingDetailsResponse = Components.Schemas.PricingDetailsResponse;
 export type PricingModel = Components.Schemas.PricingModel;
 export type Product = Components.Schemas.Product;
 export type ProductCategory = Components.Schemas.ProductCategory;
+export type PromoCode = Components.Schemas.PromoCode;
 export type Provider = Components.Schemas.Provider;
 export type RecurrenceAmount = Components.Schemas.RecurrenceAmount;
 export type RecurrenceAmountDto = Components.Schemas.RecurrenceAmountDto;

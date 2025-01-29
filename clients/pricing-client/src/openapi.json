@@ -114,12 +114,6 @@
   "servers": [
     {
       "url": "https://pricing-api.sls.epilot.io"
-    },
-    {
-      "url": "https://pricing-api.sls.epilot.io"
-    },
-    {
-      "url": "https://pricing-api.sls.epilot.io"
     }
   ],
   "paths": {
@@ -5162,6 +5156,24 @@
           "active": {
             "type": "boolean"
           },
+          "requires_promo_code": {
+            "type": "boolean",
+            "description": "Whether the coupon requires a promo code to be applied"
+          },
+          "promo_codes": {
+            "type": "array",
+            "description": "The promo codes associated with the coupon",
+            "items": {
+              "$ref": "#/components/schemas/PromoCode"
+            }
+          },
+          "promo_code_usage": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Map of ids of promo codes with their usage count"
+          },
           "prices": {
             "description": "The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.",
             "oneOf": [
@@ -5209,6 +5221,32 @@
                 "_schema": "price"
               }
             ]
+          }
+        }
+      },
+      "PromoCode": {
+        "type": "object",
+        "required": [
+          "id",
+          "code"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the promo code"
+          },
+          "code": {
+            "type": "string",
+            "description": "The code of the promo code"
+          },
+          "has_usage_limit": {
+            "type": "boolean",
+            "description": "Whether the promo code has a usage limit"
+          },
+          "usage_limit": {
+            "type": "number",
+            "nullable": true,
+            "description": "The usage limit of the promo code"
           }
         }
       },
