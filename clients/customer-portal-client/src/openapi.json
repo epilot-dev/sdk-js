@@ -5260,6 +5260,106 @@
           }
         }
       }
+    },
+    "/v2/portal/public/sso/redirect": {
+      "post": {
+        "operationId": "ssoRedirect",
+        "summary": "ssoRedirect",
+        "description": "Handles the redirect from the external SSO provider. Validates the authorization `code` and `state` received from the provider.\nRedirects the user to the provided `web_uri` with the validated credentials.\n",
+        "security": [],
+        "tags": [
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "web_uri",
+            "required": true,
+            "description": "The URI to redirect to after the SSO login",
+            "schema": {
+              "type": "string",
+              "example": "https://customer-portal.com"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "The code received from the external SSO provider",
+                    "example": "123456"
+                  },
+                  "state": {
+                    "type": "string",
+                    "description": "The state received from the external SSO provider",
+                    "example": "123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "301": {
+            "description": "Redirect to the login page with the code",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "example": "https://customer-portal.com/login?code=123456&state=123456"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/sso/callback": {
+      "post": {
+        "operationId": "ssoCallback",
+        "summary": "ssoCallback",
+        "description": "Handles the callback from the external SSO provider, validates the authorization `code`\nand generates a external provider token to be used with the CUSTOM_AUTH flow against Cognito.\n",
+        "security": [],
+        "tags": [
+          "Public"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SSOCallbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The token to be used with the CUSTOM_AUTH flow against Cognito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SSOCallbackResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5859,6 +5959,13 @@
             "description": "Configured Portal extensions",
             "items": {
               "$ref": "#/components/schemas/ExtensionConfig"
+            }
+          },
+          "extension_hooks": {
+            "type": "object",
+            "description": "Configured Portal extensions hooks",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ExtensionHookConfig"
             }
           },
           "default_user_to_notify": {
@@ -8299,6 +8406,20 @@
           "status"
         ]
       },
+      "ExtensionHookConfig": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "hook_id": {
+            "type": "string",
+            "description": "The ID of the hook that is being configured."
+          },
+          "app_id": {
+            "type": "string",
+            "description": "The ID of the app that is being hooked into."
+          }
+        }
+      },
       "PublicExtensionCapabilities": {
         "type": "object",
         "properties": {
@@ -9305,6 +9426,11 @@
             "description": "Issuing Authority URL",
             "example": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0"
           },
+          "redirect_uri": {
+            "type": "string",
+            "description": "Redirect URI for the OIDC flow",
+            "example": "https://customer-portal.com/login"
+          },
           "client_id": {
             "type": "string",
             "example": "ab81daf8-8b1f-42d6-94ca-c51621054c75"
@@ -9350,6 +9476,92 @@
       },
       "SAMLProviderConfig": {
         "type": "object"
+      },
+      "SSOCallbackRequest": {
+        "type": "object",
+        "required": [
+          "token_endpoint",
+          "grant_type",
+          "code",
+          "redirect_uri",
+          "client_id",
+          "client_secret",
+          "code_verifier"
+        ],
+        "properties": {
+          "token_endpoint": {
+            "type": "string",
+            "description": "URL of the authorization endpoint",
+            "example": "https://www.facebook.com/v12.0/dialog/oauth"
+          },
+          "grant_type": {
+            "type": "string",
+            "description": "The grant type",
+            "example": "authorization_code"
+          },
+          "code": {
+            "type": "string",
+            "description": "The code received from the external SSO provider",
+            "example": "123456"
+          },
+          "redirect_uri": {
+            "type": "string",
+            "description": "The redirect uri",
+            "example": "https://customer-portal.com/login"
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The client id",
+            "example": "123456"
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "The client secret",
+            "example": "123456"
+          },
+          "code_verifier": {
+            "type": "string",
+            "description": "The code verifier",
+            "example": "123456"
+          }
+        }
+      },
+      "SSOCallbackResponse": {
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in",
+          "refresh_token",
+          "id_token"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "The access token",
+            "example": "123456"
+          },
+          "token_type": {
+            "type": "string",
+            "description": "The token type",
+            "example": "Bearer"
+          },
+          "expires_in": {
+            "type": "number",
+            "description": "The expires in",
+            "example": 3600
+          },
+          "refresh_token": {
+            "type": "string",
+            "description": "The refresh token",
+            "example": "123456"
+          },
+          "id_token": {
+            "type": "string",
+            "description": "The id token",
+            "example": "123456"
+          }
+        }
       }
     }
   },
