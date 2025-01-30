@@ -25,6 +25,10 @@
       "description": "Provides a way to query the entire catalog of products and prices.\n"
     },
     {
+      "name": "Promo Codes API",
+      "description": "This API enables the validation of promo codes within journeys, their uniqueness and availability\n"
+    },
+    {
       "name": "Availability API",
       "description": "Provides endpoints for querying products availability by a set of predefined dimensions.\n"
     },
@@ -850,6 +854,105 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CatalogSearchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/validate-promo-codes": {
+      "post": {
+        "description": "Validate a list of promo codes against a list of coupons",
+        "summary": "validatePromoCodes",
+        "operationId": "$validatePromoCodes",
+        "tags": [
+          "Promo Codes API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "coupon_ids": {
+                    "type": "array",
+                    "description": "The list of coupon ids to unlock with promo codes",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "promo_codes": {
+                    "type": "array",
+                    "description": "The list of promo codes to validate against the coupons",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "Find coupons matching codes": {
+                  "value": {
+                    "coupon_ids": [
+                      "81b8e841-5926-4a73-ac77-6607c1037b65",
+                      "45964a30-1a42-4e59-9362-7d954baf4ea1"
+                    ],
+                    "promo_codes": [
+                      "ABC",
+                      "DEF"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pricing details result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoCodeValidationResponse"
+                },
+                "example": {
+                  "matched_coupons": [
+                    {
+                      "name": "Coupon with promo-codes",
+                      "type": "fixed",
+                      "percentage_value": null,
+                      "fixed_value": 10,
+                      "fixed_value_currency": "EUR",
+                      "fixed_value_decimal": "10.00",
+                      "category": "discount",
+                      "cashback_period": null,
+                      "active": true,
+                      "_schema": "coupon",
+                      "requires_promo_code": true,
+                      "_id": "81b8e841-5926-4a73-ac77-6607c1037b65",
+                      "_org": "739224",
+                      "_owners": [
+                        {
+                          "org_id": "739224",
+                          "user_id": "11000622"
+                        }
+                      ],
+                      "_created_at": "2025-01-29T15:46:41.014Z",
+                      "_updated_at": "2025-01-29T15:46:41.014Z",
+                      "_title": "Coupon with promo-codes"
+                    }
+                  ]
                 }
               }
             }
@@ -4573,6 +4676,18 @@
           }
         }
       },
+      "PromoCodeValidationResponse": {
+        "type": "object",
+        "description": "The result from the validation of a set of promo codes.",
+        "properties": {
+          "matched_coupons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BaseCoupon"
+            }
+          }
+        }
+      },
       "PricingDetailsResponse": {
         "type": "object",
         "description": "The result from the calculation of a set of price items.",
@@ -5051,7 +5166,7 @@
           }
         }
       },
-      "Coupon": {
+      "BaseCoupon": {
         "type": "object",
         "description": "The coupon configuration",
         "additionalProperties": true,
@@ -5160,20 +5275,6 @@
             "type": "boolean",
             "description": "Whether the coupon requires a promo code to be applied"
           },
-          "promo_codes": {
-            "type": "array",
-            "description": "The promo codes associated with the coupon",
-            "items": {
-              "$ref": "#/components/schemas/PromoCode"
-            }
-          },
-          "promo_code_usage": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "number"
-            },
-            "description": "Map of ids of promo codes with their usage count"
-          },
           "prices": {
             "description": "The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.",
             "oneOf": [
@@ -5224,6 +5325,36 @@
           }
         }
       },
+      "Coupon": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCoupon"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "promo_codes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromoCode"
+            }
+          },
+          "promo_code_usage": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Map of ids of promo codes with their usage count"
+          }
+        }
+      },
+      "CouponWithoutPromoCodes": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCoupon"
+          }
+        ]
+      },
       "PromoCode": {
         "type": "object",
         "required": [
@@ -5248,6 +5379,12 @@
             "nullable": true,
             "description": "The usage limit of the promo code"
           }
+        },
+        "example": {
+          "id": "123e4567-e89b-12d3-a456-426614174000",
+          "code": "123456",
+          "has_usage_limit": true,
+          "usage_limit": 10
         }
       },
       "PriceTier": {

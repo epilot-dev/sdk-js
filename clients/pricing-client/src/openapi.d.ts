@@ -217,6 +217,110 @@ declare namespace Components {
             }[];
         }
         /**
+         * The coupon configuration
+         * example:
+         * {
+         *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+         *   "_schema": "coupon",
+         *   "_org": "org_12345",
+         *   "_created_at": "2024-01-15T10:00:00.000Z",
+         *   "_updated_at": "2024-01-20T12:00:00.000Z",
+         *   "_title": "Sample Coupon",
+         *   "name": "Sample Coupon",
+         *   "type": "fixed",
+         *   "fixed_value": 555,
+         *   "fixed_value_currency": "USD",
+         *   "fixed_value_decimal": "5.55",
+         *   "active": true,
+         *   "prices": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+         *         "_tags": [
+         *           "discount",
+         *           "special"
+         *         ],
+         *         "_schema": "price"
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        export interface BaseCoupon {
+            [name: string]: any;
+            _id: EntityId /* uuid */;
+            /**
+             * The auto-generated title for the title
+             */
+            _title: string;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org: string;
+            /**
+             * The schema of the entity, for coupons it is always `coupon`
+             */
+            _schema: "coupon";
+            _tags?: string[];
+            /**
+             * The creation date for the opportunity
+             */
+            _created_at: string; // date-time
+            /**
+             * The date the coupon was last updated
+             */
+            _updated_at: string; // date-time
+            name: string;
+            description?: string;
+            type?: "fixed" | "percentage";
+            category?: "discount" | "cashback";
+            /**
+             * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
+             */
+            percentage_value?: string;
+            /**
+             * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
+             */
+            fixed_value?: number;
+            /**
+             * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
+             */
+            fixed_value_decimal?: string;
+            /**
+             * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
+             */
+            fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            active?: boolean;
+            /**
+             * Whether the coupon requires a promo code to be applied
+             */
+            requires_promo_code?: boolean;
+            /**
+             * The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.
+             */
+            prices?: /* The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise. */ {
+                $relation?: EntityRelation[];
+            } | /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price[];
+        }
+        /**
          * Represents a price item
          * example:
          * {
@@ -2217,15 +2321,125 @@ declare namespace Components {
              */
             requires_promo_code?: boolean;
             /**
-             * The promo codes associated with the coupon
+             * The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.
              */
-            promo_codes?: PromoCode[];
+            prices?: /* The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise. */ {
+                $relation?: EntityRelation[];
+            } | /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price[];
+            promo_codes?: /**
+             * example:
+             * {
+             *   "id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "code": "123456",
+             *   "has_usage_limit": true,
+             *   "usage_limit": 10
+             * }
+             */
+            PromoCode[];
             /**
              * Map of ids of promo codes with their usage count
              */
             promo_code_usage?: {
                 [name: string]: number;
             };
+        }
+        /**
+         * The coupon configuration
+         * example:
+         * {
+         *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+         *   "_schema": "coupon",
+         *   "_org": "org_12345",
+         *   "_created_at": "2024-01-15T10:00:00.000Z",
+         *   "_updated_at": "2024-01-20T12:00:00.000Z",
+         *   "_title": "Sample Coupon",
+         *   "name": "Sample Coupon",
+         *   "type": "fixed",
+         *   "fixed_value": 555,
+         *   "fixed_value_currency": "USD",
+         *   "fixed_value_decimal": "5.55",
+         *   "active": true,
+         *   "prices": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+         *         "_tags": [
+         *           "discount",
+         *           "special"
+         *         ],
+         *         "_schema": "price"
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        export interface CouponWithoutPromoCodes {
+            [name: string]: any;
+            _id: EntityId /* uuid */;
+            /**
+             * The auto-generated title for the title
+             */
+            _title: string;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org: string;
+            /**
+             * The schema of the entity, for coupons it is always `coupon`
+             */
+            _schema: "coupon";
+            _tags?: string[];
+            /**
+             * The creation date for the opportunity
+             */
+            _created_at: string; // date-time
+            /**
+             * The date the coupon was last updated
+             */
+            _updated_at: string; // date-time
+            name: string;
+            description?: string;
+            type?: "fixed" | "percentage";
+            category?: "discount" | "cashback";
+            /**
+             * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
+             */
+            percentage_value?: string;
+            /**
+             * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
+             */
+            fixed_value?: number;
+            /**
+             * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
+             */
+            fixed_value_decimal?: string;
+            /**
+             * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
+             */
+            fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            active?: boolean;
+            /**
+             * Whether the coupon requires a promo code to be applied
+             */
+            requires_promo_code?: boolean;
             /**
              * The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.
              */
@@ -4318,6 +4532,15 @@ declare namespace Components {
             _updated_at?: string;
         }
         export type ProductCategory = "power" | "gas";
+        /**
+         * example:
+         * {
+         *   "id": "123e4567-e89b-12d3-a456-426614174000",
+         *   "code": "123456",
+         *   "has_usage_limit": true,
+         *   "usage_limit": 10
+         * }
+         */
         export interface PromoCode {
             /**
              * The id of the promo code
@@ -4335,6 +4558,42 @@ declare namespace Components {
              * The usage limit of the promo code
              */
             usage_limit?: number | null;
+        }
+        /**
+         * The result from the validation of a set of promo codes.
+         */
+        export interface PromoCodeValidationResponse {
+            matched_coupons?: /**
+             * The coupon configuration
+             * example:
+             * {
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            BaseCoupon[];
         }
         /**
          * The provider entity
@@ -5128,6 +5387,22 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $ValidatePromoCodes {
+        export interface RequestBody {
+            /**
+             * The list of coupon ids to unlock with promo codes
+             */
+            coupon_ids?: string[];
+            /**
+             * The list of promo codes to validate against the coupons
+             */
+            promo_codes?: string[];
+        }
+        namespace Responses {
+            export type $200 = /* The result from the validation of a set of promo codes. */ Components.Schemas.PromoCodeValidationResponse;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace CreateOrder {
         export type RequestBody = /* Order Entity Payload */ Components.Schemas.OrderPayload;
         namespace Responses {
@@ -5236,6 +5511,16 @@ export interface OperationMethods {
     data?: Paths.$PrivateSearchCatalog.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$PrivateSearchCatalog.Responses.$200>
+  /**
+   * $validatePromoCodes - validatePromoCodes
+   * 
+   * Validate a list of promo codes against a list of coupons
+   */
+  '$validatePromoCodes'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$ValidatePromoCodes.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ValidatePromoCodes.Responses.$200>
   /**
    * $availabilityCheck - availabilityCheck
    * 
@@ -5412,6 +5697,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$PrivateSearchCatalog.Responses.$200>
   }
+  ['/v1/validate-promo-codes']: {
+    /**
+     * $validatePromoCodes - validatePromoCodes
+     * 
+     * Validate a list of promo codes against a list of coupons
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$ValidatePromoCodes.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ValidatePromoCodes.Responses.$200>
+  }
   ['/v1/public/availability:check']: {
     /**
      * $availabilityCheck - availabilityCheck
@@ -5531,6 +5828,7 @@ export type AvailabilityDate = Components.Schemas.AvailabilityDate;
 export type AvailabilityFilters = Components.Schemas.AvailabilityFilters;
 export type AvailabilityLocation = Components.Schemas.AvailabilityLocation;
 export type AvailabilityResult = Components.Schemas.AvailabilityResult;
+export type BaseCoupon = Components.Schemas.BaseCoupon;
 export type BasePriceItem = Components.Schemas.BasePriceItem;
 export type BasePriceItemCommon = Components.Schemas.BasePriceItemCommon;
 export type BasePriceItemDto = Components.Schemas.BasePriceItemDto;
@@ -5557,6 +5855,7 @@ export type ComputedPriceBreakdown = Components.Schemas.ComputedPriceBreakdown;
 export type ComputedPriceComponents = Components.Schemas.ComputedPriceComponents;
 export type ConsumptionTypeGetAg = Components.Schemas.ConsumptionTypeGetAg;
 export type Coupon = Components.Schemas.Coupon;
+export type CouponWithoutPromoCodes = Components.Schemas.CouponWithoutPromoCodes;
 export type Currency = Components.Schemas.Currency;
 export type Customer = Components.Schemas.Customer;
 export type DynamicTariffInterval = Components.Schemas.DynamicTariffInterval;
@@ -5604,6 +5903,7 @@ export type PricingModel = Components.Schemas.PricingModel;
 export type Product = Components.Schemas.Product;
 export type ProductCategory = Components.Schemas.ProductCategory;
 export type PromoCode = Components.Schemas.PromoCode;
+export type PromoCodeValidationResponse = Components.Schemas.PromoCodeValidationResponse;
 export type Provider = Components.Schemas.Provider;
 export type RecurrenceAmount = Components.Schemas.RecurrenceAmount;
 export type RecurrenceAmountDto = Components.Schemas.RecurrenceAmountDto;
