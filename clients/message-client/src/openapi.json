@@ -463,6 +463,65 @@
         }
       }
     },
+    "/v2/message/threads:search": {
+      "post": {
+        "operationId": "searchThreadsV2",
+        "summary": "searchThreadsV2",
+        "description": "Search for threads of email messages.\n\nMessages with no replies yet are treated as threads with single message.\n\nLucene syntax supported.\n",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchParamsV2"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "hits",
+                    "results"
+                  ],
+                  "properties": {
+                    "hits": {
+                      "type": "number",
+                      "description": "Total of matched threads",
+                      "example": 14
+                    },
+                    "results": {
+                      "type": "array",
+                      "description": "Matched threads",
+                      "items": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/BaseEntity"
+                          },
+                          {
+                            "$ref": "#/components/schemas/Thread"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/message/threads:searchIds": {
       "post": {
         "operationId": "searchIds",
@@ -690,7 +749,7 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -719,7 +778,7 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -747,7 +806,7 @@
           }
         },
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -775,7 +834,7 @@
           }
         },
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -803,7 +862,7 @@
           }
         },
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -831,7 +890,7 @@
           }
         },
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -859,7 +918,7 @@
           }
         },
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -887,7 +946,91 @@
           }
         },
         "responses": {
-          "204": {
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/bulk:delete": {
+      "post": {
+        "operationId": "threadBulkActionsDelete",
+        "summary": "threadBulkActionsDelete",
+        "description": "Performs a bulk permanent delete for all threads",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/bulk:done": {
+      "post": {
+        "operationId": "threadBulkActionsDone",
+        "summary": "threadBulkActionsDone",
+        "description": "Perform a bulk action of marking an array of threads as done",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/bulk:open": {
+      "post": {
+        "operationId": "threadBulkActionsOpen",
+        "summary": "threadBulkActionsOpen",
+        "description": "Perform a bulk action of marking an array of threads as open",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -916,7 +1059,7 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -955,7 +1098,7 @@
           }
         },
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -984,7 +1127,7 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -1023,7 +1166,7 @@
           }
         },
         "responses": {
-          "204": {
+          "200": {
             "description": "Success"
           },
           "403": {
@@ -1779,6 +1922,41 @@
           }
         }
       },
+      "SearchParamsV2": {
+        "type": "object",
+        "required": [
+          "q"
+        ],
+        "properties": {
+          "q": {
+            "description": "Lucene query syntax supported with ElasticSearch",
+            "type": "string",
+            "example": "subject:\"Request for solar panel price\" AND _tags:INBOX"
+          },
+          "from": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 10
+          },
+          "hydrate": {
+            "type": "boolean",
+            "default": false
+          },
+          "include_scores": {
+            "type": "boolean",
+            "default": false
+          },
+          "sort": {
+            "type": "string"
+          },
+          "highlight": {}
+        }
+      },
       "SearchParams": {
         "type": "object",
         "required": [
@@ -1992,9 +2170,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://message.sls.epilot.io"
-    },
     {
       "url": "https://message.sls.epilot.io"
     }

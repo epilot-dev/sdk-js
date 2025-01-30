@@ -151,6 +151,17 @@
         "responses": {}
       }
     },
+    "/v2/message/threads:search": {
+      "post": {
+        "operationId": "searchThreadsV2",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/message/threads:searchIds": {
       "post": {
         "operationId": "searchIds",
@@ -309,6 +320,42 @@
     "/v1/message/threads/bulk:untrash": {
       "post": {
         "operationId": "threadBulkActionsUntrash",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:delete": {
+      "post": {
+        "operationId": "threadBulkActionsDelete",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:done": {
+      "post": {
+        "operationId": "threadBulkActionsDone",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:open": {
+      "post": {
+        "operationId": "threadBulkActionsOpen",
         "requestBody": {
           "required": true,
           "content": {
