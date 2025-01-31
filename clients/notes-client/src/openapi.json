@@ -380,6 +380,10 @@
             },
             "description": "Tags associated with this Note"
           },
+          "type": {
+            "type": "string",
+            "description": "Entity ID of the Note entry"
+          },
           "entity_id": {
             "type": "string",
             "description": "The Entity ID of the Entity this Note will be related to"
@@ -596,6 +600,10 @@
                 "user_id"
               ]
             }
+          },
+          "type": {
+            "type": "string",
+            "description": "Entity ID of the Note entry"
           }
         },
         "required": [
@@ -673,6 +681,10 @@
               "type": "string"
             },
             "description": "Tags associated with this Note"
+          },
+          "type": {
+            "type": "string",
+            "description": "Entity ID of the Note entry"
           },
           "attachments": {
             "type": "object",
@@ -923,6 +935,10 @@
               ]
             }
           },
+          "type": {
+            "type": "string",
+            "description": "Entity ID of the Note entry"
+          },
           "context_entities": {
             "type": "object",
             "properties": {
@@ -1043,9 +1059,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://notes.sls.epilot.io"
-    },
     {
       "url": "https://notes.sls.epilot.io"
     }

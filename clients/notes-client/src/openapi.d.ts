@@ -57,6 +57,10 @@ declare namespace Components {
                 org_id: string;
                 user_id: string;
             }[];
+            /**
+             * Entity ID of the Note entry
+             */
+            type?: string;
         }
         export type EntitySlug = "account" | "billing_event" | "contact" | "contract" | "coupon" | "email_template" | "file" | "journey" | "meter" | "meter_counter" | "opportunity";
         /**
@@ -105,6 +109,10 @@ declare namespace Components {
                 org_id: string;
                 user_id: string;
             }[];
+            /**
+             * Entity ID of the Note entry
+             */
+            type?: string;
             context_entities: {
                 $relation: {
                     entity_id: string;
@@ -179,6 +187,10 @@ declare namespace Components {
                 org_id: string;
                 user_id: string;
             }[];
+            /**
+             * Entity ID of the Note entry
+             */
+            type?: string;
             context_entities?: /* Base Entity schema */ Entity[];
             parent?: /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ NoteEntity[];
             attachments?: /* Base Entity schema */ Entity[];
@@ -250,6 +262,10 @@ declare namespace Components {
                 org_id: string;
                 user_id: string;
             }[];
+            /**
+             * Entity ID of the Note entry
+             */
+            type?: string;
             context_entities?: /* Base Entity schema */ Entity[];
             parent?: /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ NoteEntity[];
             attachments?: /* Base Entity schema */ Entity[];
@@ -272,6 +288,10 @@ declare namespace Components {
              * Tags associated with this Note
              */
             _tags?: string[];
+            /**
+             * Entity ID of the Note entry
+             */
+            type?: string;
             /**
              * The Note's parent Note
              */
@@ -299,6 +319,10 @@ declare namespace Components {
              * Tags associated with this Note
              */
             _tags?: string[];
+            /**
+             * Entity ID of the Note entry
+             */
+            type?: string;
             /**
              * The Entity ID of the Entity this Note will be related to
              */
@@ -363,6 +387,10 @@ declare namespace Components {
                 org_id: string;
                 user_id: string;
             }[];
+            /**
+             * Entity ID of the Note entry
+             */
+            type?: string;
             context_entities?: {
                 $relation: {
                     entity_id: string;
