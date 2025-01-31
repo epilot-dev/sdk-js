@@ -16,6 +16,12 @@ declare namespace Components {
              */
             option_values?: Schemas.OptionsRef[];
         }
+        export interface PublishAppRequest {
+            s3_reference: Schemas.S3Reference;
+            metadata?: {
+                access_level?: "public" | "private";
+            };
+        }
     }
     namespace Schemas {
         /**
@@ -23,7 +29,7 @@ declare namespace Components {
          */
         export interface App {
             app_id?: string;
-            name?: string;
+            name?: TranslatedString;
             /**
              * URL of the app icon.
              */
@@ -32,10 +38,7 @@ declare namespace Components {
              * URL of the app documentation.
              */
             documentation_url?: string;
-            /**
-             * Markdown description of the app.
-             */
-            description?: string;
+            description?: TranslatedString;
             created_by?: string;
             created_at?: string;
             /**
@@ -92,7 +95,7 @@ declare namespace Components {
          */
         export interface AppConfiguration {
             app_id?: string;
-            name?: string;
+            name?: TranslatedString;
             /**
              * URL of the app icon.
              */
@@ -104,7 +107,7 @@ declare namespace Components {
             /**
              * Markdown description of the app.
              */
-            description?: string;
+            description?: TranslatedString;
             created_by?: string;
             created_at?: string;
             updated_at?: string;
@@ -128,54 +131,29 @@ declare namespace Components {
         }
         export interface Author {
             /**
-             * Unique identifier for the author
-             */
-            id: string;
-            /**
              * Name of the author
              */
-            name: string;
+            name?: string;
             /**
              * Company of the author
              */
-            company?: string;
+            company: string;
             /**
              * Email of the author
              */
             email?: string;
         }
         export type BaseComponent = {
-            component_type: "CUSTOM_JOURNEY_BLOCK";
-            configuration: JourneyBlockConfig;
             /**
              * Unique identifier for the component
              */
             id: string;
-            /**
-             * Name of the component
-             */
-            name?: string;
+            name?: TranslatedString;
             /**
              * List of options for the app component
              */
             options?: /* Options for the component configuration */ Options[];
-        } | {
-            component_type: "PORTAL_EXTENSION";
-            origin?: "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
-            configuration: PortalExtensionConfig;
-            /**
-             * Unique identifier for the component
-             */
-            id: string;
-            /**
-             * Name of the component
-             */
-            name?: string;
-            /**
-             * List of options for the app component
-             */
-            options?: /* Options for the component configuration */ Options[];
-        };
+        } & (JourneyBlockComponent | PortalExtensionComponent);
         export interface BaseComponentCommon {
             /**
              * Unique identifier for the component
@@ -184,7 +162,7 @@ declare namespace Components {
             /**
              * Name of the component
              */
-            name?: string;
+            name?: TranslatedString;
             /**
              * List of options for the app component
              */
@@ -220,15 +198,21 @@ declare namespace Components {
          * Type of app component
          */
         export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION";
+        export interface JourneyBlockComponent {
+            component_type: "CUSTOM_JOURNEY_BLOCK";
+            configuration: JourneyBlockConfig;
+        }
         export interface JourneyBlockConfig {
             /**
              * URL of the web component object
+             * example:
+             * https://cdn.apps.com/123/v1.0.0/bundle.js
              */
             component_url: string;
             /**
              * Custom element tag for the component
              */
-            component_tag?: string;
+            component_tag: string;
         }
         export interface Option {
             /**
@@ -260,7 +244,11 @@ declare namespace Components {
              * Detailed description of what this configuration option does
              */
             description?: string;
-            type: "string" | "number" | "boolean" | "secret";
+            /**
+             * The configured value for this option. Is only present when the component is installed.
+             */
+            value?: string;
+            type: "text" | "number" | "boolean" | "secret";
         }
         export interface OptionsRef {
             /**
@@ -277,12 +265,17 @@ declare namespace Components {
                 [name: string]: string;
             };
         }
+        export interface PortalExtensionComponent {
+            component_type: "PORTAL_EXTENSION";
+            origin?: "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
+            configuration: PortalExtensionConfig;
+        }
         export interface PortalExtensionConfig {
             id?: string;
             hooks?: {
                 id?: string;
                 type?: string;
-                name?: string;
+                name?: TranslatedString;
                 interval?: string[];
                 auth?: PortalAuth;
                 call?: {
@@ -298,8 +291,8 @@ declare namespace Components {
             links?: {
                 id?: string;
                 type?: string;
-                name?: string;
-                description?: string;
+                name?: TranslatedString;
+                description?: TranslatedString;
                 condition?: string;
                 auth?: PortalAuth;
                 redirect?: {
@@ -324,12 +317,21 @@ declare namespace Components {
              */
             key: string;
         }
+        export interface TranslatedString {
+            /**
+             * English translation
+             */
+            en?: string;
+            /**
+             * German translation
+             */
+            de?: string;
+        }
         export interface UploadFilePayload {
             /**
-             * example:
-             * example.manifest.zip
+             * ID of the app configuration. Required for app updates.
              */
-            filename: string;
+            app_id?: string;
         }
     }
 }
@@ -354,6 +356,26 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetUploadUrl {
+        export type RequestBody = Components.Schemas.UploadFilePayload;
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * ID of the app configuration
+                 */
+                app_id?: string;
+                /**
+                 * Presigned S3 URL for uploading the file
+                 */
+                upload_url: string;
+                s3_reference: Components.Schemas.S3Reference;
+                /**
+                 * Timestamp when the upload URL expires
+                 */
+                expires_at?: string; // date-time
+            }
+        }
+    }
     namespace InstallApp {
         namespace Parameters {
             export type AppId = string;
@@ -372,11 +394,13 @@ declare namespace Paths {
     namespace ListInstalledApps {
         namespace Parameters {
             export type ComponentType = /* Type of app component */ Components.Schemas.ComponentType;
+            export type Enabled = boolean;
             export type Page = number;
             export type PageSize = number;
         }
         export interface QueryParameters {
             componentType?: Parameters.ComponentType;
+            enabled?: Parameters.Enabled;
             page?: Parameters.Page;
             pageSize?: Parameters.PageSize;
         }
@@ -388,6 +412,19 @@ declare namespace Paths {
                     page?: number;
                     pageSize?: number;
                 };
+            }
+        }
+    }
+    namespace PublishApp {
+        export type RequestBody = Components.RequestBodies.PublishAppRequest;
+        namespace Responses {
+            export interface $202 {
+                app_id: string;
+                status: "pending" | "published";
+                /**
+                 * Step Function execution ARN for status tracking
+                 */
+                execution_arn?: string;
             }
         }
     }
@@ -416,6 +453,26 @@ declare namespace Paths {
 }
 
 export interface OperationMethods {
+  /**
+   * getUploadUrl - getUploadUrl
+   * 
+   * Generate a presigned URL for uploading app package zip file
+   */
+  'getUploadUrl'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetUploadUrl.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetUploadUrl.Responses.$200>
+  /**
+   * publishApp - publishApp
+   * 
+   * Publish a new app configuration from uploaded zip file
+   */
+  'publishApp'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PublishApp.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublishApp.Responses.$202>
   /**
    * getAppConfiguration - getAppConfiguration
    * 
@@ -469,6 +526,30 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
+  ['/v1/app-configurations/upload-url']: {
+    /**
+     * getUploadUrl - getUploadUrl
+     * 
+     * Generate a presigned URL for uploading app package zip file
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetUploadUrl.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetUploadUrl.Responses.$200>
+  }
+  ['/v1/app-configurations']: {
+    /**
+     * publishApp - publishApp
+     * 
+     * Publish a new app configuration from uploaded zip file
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PublishApp.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublishApp.Responses.$202>
+  }
   ['/v1/app-configurations/{appId}']: {
     /**
      * getAppConfiguration - getAppConfiguration
@@ -536,11 +617,14 @@ export type BaseComponent = Components.Schemas.BaseComponent;
 export type BaseComponentCommon = Components.Schemas.BaseComponentCommon;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type ComponentType = Components.Schemas.ComponentType;
+export type JourneyBlockComponent = Components.Schemas.JourneyBlockComponent;
 export type JourneyBlockConfig = Components.Schemas.JourneyBlockConfig;
 export type Option = Components.Schemas.Option;
 export type Options = Components.Schemas.Options;
 export type OptionsRef = Components.Schemas.OptionsRef;
 export type PortalAuth = Components.Schemas.PortalAuth;
+export type PortalExtensionComponent = Components.Schemas.PortalExtensionComponent;
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
 export type S3Reference = Components.Schemas.S3Reference;
+export type TranslatedString = Components.Schemas.TranslatedString;
 export type UploadFilePayload = Components.Schemas.UploadFilePayload;

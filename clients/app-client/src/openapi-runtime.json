@@ -10,6 +10,27 @@
     }
   ],
   "paths": {
+    "/v1/app-configurations/upload-url": {
+      "post": {
+        "operationId": "getUploadUrl",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/app-configurations": {
+      "post": {
+        "operationId": "publishApp",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PublishAppRequest"
+        },
+        "responses": {}
+      }
+    },
     "/v1/app-configurations/{appId}": {
       "parameters": [
         {
@@ -30,6 +51,10 @@
         "parameters": [
           {
             "name": "componentType",
+            "in": "query"
+          },
+          {
+            "name": "enabled",
             "in": "query"
           },
           {
@@ -85,6 +110,12 @@
   },
   "components": {
     "requestBodies": {
+      "PublishAppRequest": {
+        "required": true,
+        "content": {
+          "application/json": {}
+        }
+      },
       "InstallAppRequest": {
         "content": {
           "application/json": {}

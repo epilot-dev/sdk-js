@@ -22,6 +22,99 @@
     }
   ],
   "paths": {
+    "/v1/app-configurations/upload-url": {
+      "post": {
+        "summary": "getUploadUrl",
+        "description": "Generate a presigned URL for uploading app package zip file",
+        "operationId": "getUploadUrl",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFilePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upload URL generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "upload_url",
+                    "s3_reference"
+                  ],
+                  "properties": {
+                    "app_id": {
+                      "type": "string",
+                      "description": "ID of the app configuration"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "description": "Presigned S3 URL for uploading the file"
+                    },
+                    "s3_reference": {
+                      "$ref": "#/components/schemas/S3Reference"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the upload URL expires"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app-configurations": {
+      "post": {
+        "summary": "publishApp",
+        "description": "Publish a new app configuration from uploaded zip file",
+        "operationId": "publishApp",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PublishAppRequest"
+        },
+        "responses": {
+          "202": {
+            "description": "App publication process started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "app_id",
+                    "status"
+                  ],
+                  "properties": {
+                    "app_id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "published"
+                      ]
+                    },
+                    "execution_arn": {
+                      "type": "string",
+                      "description": "Step Function execution ARN for status tracking"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/app-configurations/{appId}": {
       "parameters": [
         {
@@ -69,6 +162,14 @@
             },
             "description": "Filter apps by specific component type",
             "example": "CUSTOM_JOURNEY_BLOCK"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter apps by enabled status"
           },
           {
             "name": "page",
@@ -209,6 +310,36 @@
   },
   "components": {
     "requestBodies": {
+      "PublishAppRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "s3_reference"
+              ],
+              "properties": {
+                "s3_reference": {
+                  "$ref": "#/components/schemas/S3Reference"
+                },
+                "metadata": {
+                  "type": "object",
+                  "properties": {
+                    "access_level": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "InstallAppRequest": {
         "content": {
           "application/json": {
@@ -267,10 +398,14 @@
             "type": "string",
             "description": "Detailed description of what this configuration option does"
           },
+          "value": {
+            "type": "string",
+            "description": "The configured value for this option. Is only present when the component is installed."
+          },
           "type": {
             "type": "string",
             "enum": [
-              "string",
+              "text",
               "number",
               "boolean",
               "secret"
@@ -317,14 +452,11 @@
       "UploadFilePayload": {
         "type": "object",
         "properties": {
-          "filename": {
+          "app_id": {
             "type": "string",
-            "example": "example.manifest.zip"
+            "description": "ID of the app configuration. Required for app updates."
           }
-        },
-        "required": [
-          "filename"
-        ]
+        }
       },
       "S3Reference": {
         "type": "object",
@@ -356,14 +488,9 @@
       "Author": {
         "type": "object",
         "required": [
-          "id",
-          "name"
+          "company"
         ],
         "properties": {
-          "id": {
-            "type": "string",
-            "description": "Unique identifier for the author"
-          },
           "name": {
             "type": "string",
             "description": "Name of the author"
@@ -389,7 +516,7 @@
             "description": "Unique identifier for the component"
           },
           "name": {
-            "type": "string",
+            "$ref": "#/components/schemas/TranslatedString",
             "description": "Name of the component"
           },
           "options": {
@@ -407,58 +534,65 @@
             "$ref": "#/components/schemas/BaseComponentCommon"
           },
           {
+            "type": "object",
+            "discriminator": {
+              "propertyName": "component_type",
+              "mapping": {
+                "CUSTOM_JOURNEY_BLOCK": "#/components/schemas/JourneyBlockComponent",
+                "PORTAL_EXTENSION": "#/components/schemas/PortalExtensionComponent"
+              }
+            },
             "oneOf": [
               {
-                "type": "object",
-                "required": [
-                  "component_type",
-                  "configuration"
-                ],
-                "properties": {
-                  "component_type": {
-                    "type": "string",
-                    "enum": [
-                      "CUSTOM_JOURNEY_BLOCK"
-                    ]
-                  },
-                  "configuration": {
-                    "$ref": "#/components/schemas/JourneyBlockConfig"
-                  }
-                }
+                "$ref": "#/components/schemas/JourneyBlockComponent"
               },
               {
-                "type": "object",
-                "required": [
-                  "component_type",
-                  "configuration"
-                ],
-                "properties": {
-                  "component_type": {
-                    "type": "string",
-                    "enum": [
-                      "PORTAL_EXTENSION"
-                    ]
-                  },
-                  "origin": {
-                    "type": "string",
-                    "enum": [
-                      "END_CUSTOMER_PORTAL",
-                      "INSTALLER_PORTAL"
-                    ]
-                  },
-                  "configuration": {
-                    "$ref": "#/components/schemas/PortalExtensionConfig"
-                  }
-                }
+                "$ref": "#/components/schemas/PortalExtensionComponent"
               }
             ]
           }
+        ]
+      },
+      "JourneyBlockComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
         ],
-        "discriminator": {
-          "propertyName": "componentType",
-          "mapping": {
-            "CUSTOM_JOURNEY_BLOCK": "#/components/schemas/JourneyBlockConfig",
-            "PORTAL_EXTENSION": "#/components/schemas/PortalExtensionConfig"
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "CUSTOM_JOURNEY_BLOCK"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/JourneyBlockConfig"
+          }
+        }
+      },
+      "PortalExtensionComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "PORTAL_EXTENSION"
+            ]
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "END_CUSTOMER_PORTAL",
+              "INSTALLER_PORTAL"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/PortalExtensionConfig"
           }
         }
       },
@@ -480,7 +614,7 @@
                   "type": "string"
                 },
                 "name": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/TranslatedString"
                 },
                 "interval": {
                   "type": "array",
@@ -526,10 +660,10 @@
                   "type": "string"
                 },
                 "name": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/TranslatedString"
                 },
                 "description": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/TranslatedString"
                 },
                 "condition": {
                   "type": "string"
@@ -580,12 +714,13 @@
         "type": "object",
         "required": [
           "component_url",
-          "componentTag"
+          "component_tag"
         ],
         "properties": {
           "component_url": {
             "type": "string",
-            "description": "URL of the web component object"
+            "description": "URL of the web component object",
+            "example": "https://cdn.apps.com/123/v1.0.0/bundle.js"
           },
           "component_tag": {
             "type": "string",
@@ -655,7 +790,7 @@
             "type": "string"
           },
           "name": {
-            "type": "string"
+            "$ref": "#/components/schemas/TranslatedString"
           },
           "icon_url": {
             "type": "string",
@@ -666,7 +801,7 @@
             "description": "URL of the app documentation."
           },
           "description": {
-            "type": "string",
+            "$ref": "#/components/schemas/TranslatedString",
             "description": "Markdown description of the app."
           },
           "created_by": {
@@ -723,6 +858,19 @@
             ],
             "default": "public",
             "description": "Access level of the app."
+          }
+        }
+      },
+      "TranslatedString": {
+        "type": "object",
+        "properties": {
+          "en": {
+            "type": "string",
+            "description": "English translation"
+          },
+          "de": {
+            "type": "string",
+            "description": "German translation"
           }
         }
       },
