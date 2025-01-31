@@ -53,7 +53,7 @@
     "@epilot/billing-client": "^0.4.1",
     "@epilot/blueprint-manifest-client": "^2.5.7",
     "@epilot/customer-portal-client": "^0.17.3",
-    "@epilot/design-client": "^0.1.0",
+    "@epilot/design-client": "^0.2.0",
     "@epilot/discussion-client": "^1.9.1",
     "@epilot/document-client": "^0.16.1",
     "@epilot/email-settings-client": "^0.5.1",

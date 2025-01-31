@@ -33,8 +33,12 @@ declare namespace Components {
                     shape?: ShapeData;
                     consumer: ConsumerData;
                 };
+                is_default?: boolean;
                 custom_theme?: string;
                 use_custom_theme?: boolean;
+                coupon?: string;
+                cashback?: string;
+                custom_css?: string;
             };
         }
         export interface AddDesignRes {
@@ -65,8 +69,12 @@ declare namespace Components {
                     shape?: ShapeData;
                     consumer: ConsumerData;
                 };
+                is_default?: boolean;
                 custom_theme?: string;
                 use_custom_theme?: boolean;
+                coupon?: string;
+                cashback?: string;
+                custom_css?: string;
             };
         }
         export interface BrandItem {
@@ -109,6 +117,7 @@ declare namespace Components {
                 shape?: ShapeData;
                 consumer: ConsumerData;
             };
+            is_default?: boolean;
         }
         export interface ErrorResp {
             message?: string;
@@ -161,8 +170,12 @@ declare namespace Components {
                     shape?: ShapeData;
                     consumer: ConsumerData;
                 };
+                is_default?: boolean;
                 custom_theme?: string;
                 use_custom_theme?: boolean;
+                coupon?: string;
+                cashback?: string;
+                custom_css?: string;
             }[];
         }
         export interface GetBrandsRes {
@@ -206,8 +219,12 @@ declare namespace Components {
                     shape?: ShapeData;
                     consumer: ConsumerData;
                 };
+                is_default?: boolean;
                 custom_theme?: string;
                 use_custom_theme?: boolean;
+                coupon?: string;
+                cashback?: string;
+                custom_css?: string;
             };
         }
         export type GetFilesRes = {
@@ -228,6 +245,11 @@ declare namespace Components {
             created_by?: string;
             edited?: boolean;
             last_modified_at?: string; // date-time
+        }
+        export interface JourneyDesignTokens {
+            coupon?: string;
+            cashback?: string;
+            custom_css?: string;
         }
         export interface LogoData {
             main?: FileData;
@@ -267,8 +289,12 @@ declare namespace Components {
                     shape?: ShapeData;
                     consumer: ConsumerData;
                 };
+                is_default?: boolean;
                 custom_theme?: string;
                 use_custom_theme?: boolean;
+                coupon?: string;
+                cashback?: string;
+                custom_css?: string;
             };
         }
         export interface UploadFileReq {
@@ -782,6 +808,7 @@ export type GetBrandsRes = Components.Schemas.GetBrandsRes;
 export type GetDesignRes = Components.Schemas.GetDesignRes;
 export type GetFilesRes = Components.Schemas.GetFilesRes;
 export type ItemMetada = Components.Schemas.ItemMetada;
+export type Journey_Design_Tokens = Components.Schemas.JourneyDesignTokens;
 export type LogoData = Components.Schemas.LogoData;
 export type PaletteData = Components.Schemas.PaletteData;
 export type ShapeData = Components.Schemas.ShapeData;

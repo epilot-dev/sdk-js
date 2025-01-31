@@ -913,6 +913,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Custom_Style"
+                },
+                {
+                  "$ref": "#/components/schemas/Journey_Design_Tokens"
                 }
               ]
             }
@@ -944,6 +947,9 @@
               },
               {
                 "$ref": "#/components/schemas/Custom_Style"
+              },
+              {
+                "$ref": "#/components/schemas/Journey_Design_Tokens"
               }
             ]
           }
@@ -965,6 +971,9 @@
               },
               {
                 "$ref": "#/components/schemas/Custom_Style"
+              },
+              {
+                "$ref": "#/components/schemas/Journey_Design_Tokens"
               }
             ]
           }
@@ -983,6 +992,9 @@
               },
               {
                 "$ref": "#/components/schemas/Custom_Style"
+              },
+              {
+                "$ref": "#/components/schemas/Journey_Design_Tokens"
               }
             ]
           }
@@ -998,6 +1010,9 @@
               },
               {
                 "$ref": "#/components/schemas/Custom_Style"
+              },
+              {
+                "$ref": "#/components/schemas/Journey_Design_Tokens"
               }
             ]
           }
@@ -1106,6 +1121,9 @@
               "typography",
               "consumer"
             ]
+          },
+          "is_default": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -1159,6 +1177,20 @@
           },
           "use_custom_theme": {
             "type": "boolean"
+          }
+        }
+      },
+      "Journey_Design_Tokens": {
+        "type": "object",
+        "properties": {
+          "coupon": {
+            "type": "string"
+          },
+          "cashback": {
+            "type": "string"
+          },
+          "custom_css": {
+            "type": "string"
           }
         }
       },
