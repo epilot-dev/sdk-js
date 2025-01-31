@@ -12,20 +12,7 @@
   ],
   "servers": [
     {
-      "url": "https://design-builder-api.{environment}.epilot.io"
-    },
-    {
-      "url": "https://design-builder-api.{environment}.epilot.io",
-      "variables": {
-        "environment": {
-          "default": "sls",
-          "enum": [
-            "sls",
-            "dev.sls",
-            "staging.sls"
-          ]
-        }
-      }
+      "url": "https://design-builder-api.epilot.io"
     }
   ],
   "security": [
