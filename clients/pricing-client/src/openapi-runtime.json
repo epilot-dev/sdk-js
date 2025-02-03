@@ -106,6 +106,18 @@
         "responses": {}
       }
     },
+    "/v1/validate-promo-codes": {
+      "post": {
+        "operationId": "$validatePromoCodes",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/public/availability:check": {
       "post": {
         "operationId": "$availabilityCheck",
