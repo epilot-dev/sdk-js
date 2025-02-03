@@ -663,7 +663,8 @@
           "closing_reason",
           "taxonomy_classification",
           "webhook",
-          "custom_variable"
+          "custom_variable",
+          "coupon"
         ]
       },
       "PlanChanges": {
