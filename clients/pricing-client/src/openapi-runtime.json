@@ -106,9 +106,16 @@
         "responses": {}
       }
     },
-    "/v1/validate-promo-codes": {
+    "/v1/public/validate-promo-codes": {
       "post": {
         "operationId": "$validatePromoCodes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "required": true
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
