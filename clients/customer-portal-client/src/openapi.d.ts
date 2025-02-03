@@ -1203,7 +1203,25 @@ declare namespace Components {
              */
             EntityId /* uuid */;
             /**
-             * ID of the email template for Journey Login OTP
+             * ID of the email template for signing up from Journeys
+             */
+            journeySignUp?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * ID of the email template for OTP to sign in from Journeys
+             */
+            journeySignInOneTimePassword?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * ID of the email template for OTP to sign in from Journeys
              */
             journeyLoginOTP?: /**
              * Entity ID
@@ -2452,7 +2470,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string;
             /**

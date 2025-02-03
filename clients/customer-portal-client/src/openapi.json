@@ -5628,10 +5628,21 @@
             "nullable": true,
             "description": "ID of the advanced MFA with login link and login code"
           },
+          "journeySignUp": {
+            "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
+            "description": "ID of the email template for signing up from Journeys"
+          },
+          "journeySignInOneTimePassword": {
+            "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
+            "description": "ID of the email template for OTP to sign in from Journeys"
+          },
           "journeyLoginOTP": {
             "$ref": "#/components/schemas/EntityId",
             "nullable": true,
-            "description": "ID of the email template for Journey Login OTP"
+            "description": "ID of the email template for OTP to sign in from Journeys",
+            "deprecated": true
           },
           "forgotPassword": {
             "$ref": "#/components/schemas/EntityId",
@@ -9322,7 +9333,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z"
+            "example": "2022-10-10"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
