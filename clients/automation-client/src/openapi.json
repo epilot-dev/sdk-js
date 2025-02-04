@@ -111,6 +111,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
           }
         }
       }
@@ -144,6 +147,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -185,6 +194,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
           }
         }
       },
@@ -208,14 +220,13 @@
         ],
         "responses": {
           "200": {
-            "description": "The deleted automation flow",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AutomationFlow"
-                }
-              }
-            }
+            "description": "Flow deleted successfully"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -265,6 +276,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
           }
         }
       },
@@ -295,6 +309,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
           }
         }
       }
@@ -334,6 +351,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
           }
         }
       }
@@ -366,6 +386,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -409,6 +435,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -441,6 +473,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       },
@@ -471,6 +509,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -517,6 +561,12 @@
         "responses": {
           "200": {
             "description": "action re-triggered with success"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -553,6 +603,12 @@
           },
           "400": {
             "description": "execution could not be resumed"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -1674,6 +1730,26 @@
             "required": [
               "email_template_id"
             ]
+          },
+          "conditions": {
+            "type": "array",
+            "description": "Conditions necessary to send out email. Otherwise it will be skipped",
+            "items": {
+              "$ref": "#/components/schemas/SendEmailCondition"
+            }
+          }
+        }
+      },
+      "SendEmailCondition": {
+        "type": "object",
+        "properties": {
+          "_exists": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string"
+              }
+            }
           }
         }
       },
@@ -2137,9 +2213,7 @@
         },
         "required": [
           "id",
-          "origin",
-          "schema",
-          "attribute"
+          "origin"
         ]
       },
       "ActionSchedule": {
@@ -3306,10 +3380,69 @@
           "execution",
           "resumedAction"
         ]
+      },
+      "ErrorObject": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The HTTP status code of the error",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message"
+          }
+        }
+      }
+    },
+    "responses": {
+      "NotFoundError": {
+        "description": "The requested resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 404,
+                    "error": "Not Found"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "ForbiddenError": {
+        "description": "The requested resource is forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 403,
+                    "error": "Forbidden"
+                  }
+                }
+              ]
+            }
+          }
+        }
       }
     }
   },
   "servers": [
+    {
+      "url": "https://automation.sls.epilot.io"
+    },
     {
       "url": "https://automation.sls.epilot.io"
     }
