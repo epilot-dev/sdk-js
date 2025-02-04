@@ -19,7 +19,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/mappings/{id}": {
@@ -31,7 +32,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteConfig",
@@ -41,7 +43,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/mappings/{id}/versions": {
@@ -53,7 +56,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "post": {
         "operationId": "storeNewVersion",
@@ -68,7 +72,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/mappings/{id}/versions/{version}": {
@@ -85,7 +90,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/mappings:execute": {
@@ -102,7 +108,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/mappings:search": {
@@ -112,7 +119,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/mappings/history": {
@@ -137,7 +145,8 @@
             "in": "query",
             "name": "sourceEntityId"
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/relations:execute": {
@@ -147,7 +156,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/mappings/{id}": {
@@ -159,7 +169,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "put": {
         "operationId": "putMappingConfig",
@@ -174,7 +185,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     }
   },

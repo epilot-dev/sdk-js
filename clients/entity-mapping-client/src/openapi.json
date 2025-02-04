@@ -1599,12 +1599,16 @@
           "email",
           "phone",
           "select",
-          "multiselect"
+          "multiselect",
+          "payment"
         ]
       }
     }
   },
   "servers": [
+    {
+      "url": "https://entity-mapping.sls.epilot.io"
+    },
     {
       "url": "https://entity-mapping.sls.epilot.io"
     }
