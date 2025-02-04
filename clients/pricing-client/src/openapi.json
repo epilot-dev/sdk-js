@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Pricing API",
-    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### External Integrations API\nProvides endpoints for external integrations.\n",
+    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations.\n",
     "version": "1.0.0",
     "termsOfService": "https://epilot.cloud/agb",
     "contact": {
@@ -31,6 +31,10 @@
     {
       "name": "Availability API",
       "description": "Provides endpoints for querying products availability by a set of predefined dimensions.\n"
+    },
+    {
+      "name": "Spot Market API",
+      "description": "Proviodes endpoints to fetch (historic) spot market data.\n"
     },
     {
       "name": "External Integrations API",
@@ -116,6 +120,12 @@
     }
   ],
   "servers": [
+    {
+      "url": "https://pricing-api.sls.epilot.io"
+    },
+    {
+      "url": "https://pricing-api.sls.epilot.io"
+    },
     {
       "url": "https://pricing-api.sls.epilot.io"
     }
@@ -871,13 +881,29 @@
         }
       }
     },
-    "/v1/validate-promo-codes": {
+    "/v1/public/validate-promo-codes": {
       "post": {
         "description": "Validate a list of promo codes against a list of coupons",
         "summary": "validatePromoCodes",
         "operationId": "$validatePromoCodes",
         "tags": [
           "Promo Codes API"
+        ],
+        "security": [
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
         ],
         "requestBody": {
           "required": true,
@@ -1151,6 +1177,235 @@
                       "errors": [
                         "File must be UTF-8 encoded",
                         "Line 3 - Postal code is missing or invalid"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/historicMarketPrices": {
+      "get": {
+        "description": "BETA: Get historic energy prices in a given time period\n",
+        "operationId": "$historicMarketPrices",
+        "summary": "historicMarketPrices",
+        "tags": [
+          "Spot Market API"
+        ],
+        "security": [
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "market",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "day_ahead"
+              ]
+            },
+            "required": true,
+            "description": "Market to use. For now, only day ahead prices are supported."
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "required": true,
+            "description": "Start date for price data (YYYY-MM-DDD)."
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "required": true,
+            "description": "End date for price data (YYYY-MM-DDD)."
+          },
+          {
+            "in": "query",
+            "name": "frequency",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "hourly",
+                "daily",
+                "monthly"
+              ]
+            },
+            "required": true,
+            "description": "Frequency of the price data points"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Price data returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "market": {
+                      "type": "string",
+                      "enum": [
+                        "day_ahead"
+                      ]
+                    },
+                    "frequency": {
+                      "type": "string",
+                      "enum": [
+                        "hourly",
+                        "daily",
+                        "monthly"
+                      ]
+                    },
+                    "prices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "timestamp": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "ISO 8601 timestamp of the price record in UTC."
+                          },
+                          "unit_amount": {
+                            "type": "integer",
+                            "description": "Cost in tenth of cents, e.g. 123 for 12,3 Cents = 0.123€.",
+                            "example": 123
+                          }
+                        },
+                        "required": [
+                          "timestamp",
+                          "unit_amount"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/averageMarketPrice": {
+      "get": {
+        "description": "BETA: Get average energy prices in a given time period\n",
+        "operationId": "$averageMarketPrice",
+        "summary": "averageMarketPrice",
+        "tags": [
+          "Spot Market API"
+        ],
+        "security": [
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "market",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "day_ahead"
+              ]
+            },
+            "required": true,
+            "description": "Market to use. For now, only day ahead prices are supported."
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "previous_week",
+                "previous_month",
+                "previous_year"
+              ]
+            },
+            "required": true,
+            "description": "Interval for the average."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Price data returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "market": {
+                      "type": "string",
+                      "enum": [
+                        "day_ahead"
+                      ]
+                    },
+                    "interval": {
+                      "type": "string",
+                      "enum": [
+                        "previous_week",
+                        "previous_month",
+                        "previous_year"
+                      ]
+                    },
+                    "price": {
+                      "type": "object",
+                      "properties": {
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "ISO 8601 timestamp of the price record in UTC."
+                        },
+                        "unit_amount": {
+                          "type": "integer",
+                          "description": "Cost in tenth of cents, e.g. 123 for 12,3 Cents = 0.123€.",
+                          "example": 123
+                        },
+                        "unit_amount_decimal": {
+                          "type": "string",
+                          "description": "Cost in decimal format, e.g. 0.123€.",
+                          "example": "0.123"
+                        }
+                      },
+                      "required": [
+                        "timestamp",
+                        "unit_amount",
+                        "unit_amount_decimal"
                       ]
                     }
                   }
@@ -3246,7 +3501,15 @@
             "$ref": "#/components/schemas/ComputedPriceComponents"
           },
           "variable": {
-            "description": "The variable price breakdown",
+            "description": "The variable price breakdown (day and night)",
+            "$ref": "#/components/schemas/ComputedPriceComponents"
+          },
+          "variable_ht": {
+            "description": "The variable price breakdown for the day period",
+            "$ref": "#/components/schemas/ComputedPriceComponents"
+          },
+          "variable_nt": {
+            "description": "The variable price breakdown for the night period",
             "$ref": "#/components/schemas/ComputedPriceComponents"
           }
         }

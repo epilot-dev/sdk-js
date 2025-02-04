@@ -162,6 +162,52 @@
         "responses": {}
       }
     },
+    "/v1/public/historicMarketPrices": {
+      "get": {
+        "operationId": "$historicMarketPrices",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "market",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "frequency",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/public/averageMarketPrice": {
+      "get": {
+        "operationId": "$averageMarketPrice",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "market",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/public/integration/{integrationId}/external-catalog": {
       "post": {
         "operationId": "$searchExternalCatalog",

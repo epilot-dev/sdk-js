@@ -2219,9 +2219,17 @@ declare namespace Components {
              */
             static?: /* The computed price components */ ComputedPriceComponents;
             /**
-             * The variable price breakdown
+             * The variable price breakdown (day and night)
              */
             variable?: /* The computed price components */ ComputedPriceComponents;
+            /**
+             * The variable price breakdown for the day period
+             */
+            variable_ht?: /* The computed price components */ ComputedPriceComponents;
+            /**
+             * The variable price breakdown for the night period
+             */
+            variable_nt?: /* The computed price components */ ComputedPriceComponents;
         }
         /**
          * The computed price components
@@ -5153,6 +5161,41 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $AverageMarketPrice {
+        namespace Parameters {
+            export type Interval = "previous_week" | "previous_month" | "previous_year";
+            export type Market = "day_ahead";
+        }
+        export interface QueryParameters {
+            market: Parameters.Market;
+            interval: Parameters.Interval;
+        }
+        namespace Responses {
+            export interface $200 {
+                market?: "day_ahead";
+                interval?: "previous_week" | "previous_month" | "previous_year";
+                price?: {
+                    /**
+                     * ISO 8601 timestamp of the price record in UTC.
+                     */
+                    timestamp: string; // date-time
+                    /**
+                     * Cost in tenth of cents, e.g. 123 for 12,3 Cents = 0.123€.
+                     * example:
+                     * 123
+                     */
+                    unit_amount: number;
+                    /**
+                     * Cost in decimal format, e.g. 0.123€.
+                     * example:
+                     * 0.123
+                     */
+                    unit_amount_decimal: string;
+                };
+            }
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace $CalculatePricingDetails {
         export interface RequestBody {
             line_items?: /* A valid set of product prices, quantities, (discounts) and taxes from a client. */ Components.Schemas.PriceItemsDto;
@@ -5217,6 +5260,39 @@ declare namespace Paths {
             export type $200 = Components.Schemas.IntegrationCredentialsResult;
             export type $400 = Components.Schemas.Error;
             export type $404 = Components.Schemas.Error;
+        }
+    }
+    namespace $HistoricMarketPrices {
+        namespace Parameters {
+            export type Frequency = "hourly" | "daily" | "monthly";
+            export type From = string; // date
+            export type Market = "day_ahead";
+            export type To = string; // date
+        }
+        export interface QueryParameters {
+            market: Parameters.Market;
+            from: Parameters.From /* date */;
+            to: Parameters.To /* date */;
+            frequency: Parameters.Frequency;
+        }
+        namespace Responses {
+            export interface $200 {
+                market?: "day_ahead";
+                frequency?: "hourly" | "daily" | "monthly";
+                prices?: {
+                    /**
+                     * ISO 8601 timestamp of the price record in UTC.
+                     */
+                    timestamp: string; // date-time
+                    /**
+                     * Cost in tenth of cents, e.g. 123 for 12,3 Cents = 0.123€.
+                     * example:
+                     * 123
+                     */
+                    unit_amount: number;
+                }[];
+            }
+            export type $400 = Components.Schemas.Error;
         }
     }
     namespace $PrivateSearchCatalog {
@@ -5388,6 +5464,12 @@ declare namespace Paths {
         }
     }
     namespace $ValidatePromoCodes {
+        export interface HeaderParameters {
+            "X-Ivy-Org-ID": Parameters.XIvyOrgID;
+        }
+        namespace Parameters {
+            export type XIvyOrgID = string;
+        }
         export interface RequestBody {
             /**
              * The list of coupon ids to unlock with promo codes
@@ -5517,7 +5599,7 @@ export interface OperationMethods {
    * Validate a list of promo codes against a list of coupons
    */
   '$validatePromoCodes'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.$ValidatePromoCodes.HeaderParameters> | null,
     data?: Paths.$ValidatePromoCodes.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ValidatePromoCodes.Responses.$200>
@@ -5541,6 +5623,28 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
+  /**
+   * $historicMarketPrices - historicMarketPrices
+   * 
+   * BETA: Get historic energy prices in a given time period
+   * 
+   */
+  '$historicMarketPrices'(
+    parameters?: Parameters<Paths.$HistoricMarketPrices.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$HistoricMarketPrices.Responses.$200>
+  /**
+   * $averageMarketPrice - averageMarketPrice
+   * 
+   * BETA: Get average energy prices in a given time period
+   * 
+   */
+  '$averageMarketPrice'(
+    parameters?: Parameters<Paths.$AverageMarketPrice.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$AverageMarketPrice.Responses.$200>
   /**
    * $searchExternalCatalog - searchExternalCatalog
    * 
@@ -5697,14 +5801,14 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$PrivateSearchCatalog.Responses.$200>
   }
-  ['/v1/validate-promo-codes']: {
+  ['/v1/public/validate-promo-codes']: {
     /**
      * $validatePromoCodes - validatePromoCodes
      * 
      * Validate a list of promo codes against a list of coupons
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.$ValidatePromoCodes.HeaderParameters> | null,
       data?: Paths.$ValidatePromoCodes.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$ValidatePromoCodes.Responses.$200>
@@ -5732,6 +5836,32 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
+  }
+  ['/v1/public/historicMarketPrices']: {
+    /**
+     * $historicMarketPrices - historicMarketPrices
+     * 
+     * BETA: Get historic energy prices in a given time period
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.$HistoricMarketPrices.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$HistoricMarketPrices.Responses.$200>
+  }
+  ['/v1/public/averageMarketPrice']: {
+    /**
+     * $averageMarketPrice - averageMarketPrice
+     * 
+     * BETA: Get average energy prices in a given time period
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.$AverageMarketPrice.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$AverageMarketPrice.Responses.$200>
   }
   ['/v1/public/integration/{integrationId}/external-catalog']: {
     /**
