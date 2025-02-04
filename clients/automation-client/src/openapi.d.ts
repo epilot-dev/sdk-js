@@ -9,6 +9,46 @@ import type {
 } from 'openapi-client-axios';
 
 declare namespace Components {
+    namespace Responses {
+        /**
+         * example:
+         * {
+         *   "status": 403,
+         *   "error": "Forbidden"
+         * }
+         */
+        export interface ForbiddenError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             */
+            error?: string;
+        }
+        /**
+         * example:
+         * {
+         *   "status": 404,
+         *   "error": "Not Found"
+         * }
+         */
+        export interface NotFoundError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             */
+            error?: string;
+        }
+    }
     namespace Schemas {
         export interface ActionCondition {
             id?: string;
@@ -62,8 +102,8 @@ declare namespace Components {
              */
             id: string;
             origin: "trigger" | "action" | "action_task" | "automation";
-            schema: string;
-            attribute: string;
+            schema?: string;
+            attribute?: string;
         }
         /**
          * example:
@@ -1493,6 +1533,18 @@ declare namespace Components {
             context?: string;
             id?: string;
         }
+        export interface ErrorObject {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             */
+            error?: string;
+        }
         export interface ErrorOutput {
             error_code: ErrorCode;
             error_reason: string;
@@ -2133,6 +2185,11 @@ declare namespace Components {
              */
             schedule_id?: string;
         }
+        export interface SendEmailCondition {
+            _exists?: {
+                source?: string;
+            };
+        }
         export interface SendEmailConfig {
             email_template_id?: string;
             language_code?: "de" | "en";
@@ -2199,6 +2256,10 @@ declare namespace Components {
                     self?: boolean;
                 };
             }[];
+            /**
+             * Conditions necessary to send out email. Otherwise it will be skipped
+             */
+            conditions?: SendEmailCondition[];
         }
         export interface SetValueMapper {
             mode: /**
@@ -2633,6 +2694,14 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.BulkTriggerRequest;
         namespace Responses {
             export type $202 = Components.Schemas.BulkTriggerJob;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
         }
     }
     namespace CancelExecution {
@@ -2648,12 +2717,36 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.AutomationExecution;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace CreateFlow {
         export type RequestBody = Components.Schemas.AutomationFlow;
         namespace Responses {
             export type $201 = Components.Schemas.AutomationFlow;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
         }
     }
     namespace DeleteFlow {
@@ -2668,7 +2761,24 @@ declare namespace Paths {
             flow_id: Parameters.FlowId;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.AutomationFlow;
+            export interface $200 {
+            }
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetBulkJob {
@@ -2685,6 +2795,22 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.BulkTriggerJob;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetExecution {
@@ -2700,6 +2826,22 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.AutomationExecution;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace GetExecutions {
@@ -2719,6 +2861,14 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetExecutionsResp;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
         }
     }
     namespace GetFlow {
@@ -2734,6 +2884,22 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.AutomationFlow;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace PatchBulkJob {
@@ -2751,6 +2917,22 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.PatchBulkJobRequest;
         namespace Responses {
             export type $200 = Components.Schemas.BulkTriggerJob;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace PutFlow {
@@ -2767,6 +2949,14 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.AutomationFlow;
         namespace Responses {
             export type $200 = Components.Schemas.AutomationFlow;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
         }
     }
     namespace ResumeExecutionWithToken {
@@ -2775,6 +2965,22 @@ declare namespace Paths {
             export type $200 = Components.Schemas.ResumeResp;
             export interface $400 {
             }
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace RetriggerAction {
@@ -2798,6 +3004,22 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
             }
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace SearchFlows {
@@ -2837,6 +3059,14 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.StartExecutionRequest;
         namespace Responses {
             export type $201 = Components.Schemas.AutomationExecution;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
         }
     }
 }
@@ -3200,6 +3430,7 @@ export type EntityRef = Components.Schemas.EntityRef;
 export type EqualsIgnoreCaseCondition = Components.Schemas.EqualsIgnoreCaseCondition;
 export type ErrorCode = Components.Schemas.ErrorCode;
 export type ErrorDetail = Components.Schemas.ErrorDetail;
+export type ErrorObject = Components.Schemas.ErrorObject;
 export type ErrorOutput = Components.Schemas.ErrorOutput;
 export type ExecItem = Components.Schemas.ExecItem;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
@@ -3235,6 +3466,7 @@ export type RetryStrategy = Components.Schemas.RetryStrategy;
 export type SearchAutomationsResp = Components.Schemas.SearchAutomationsResp;
 export type SendEmailAction = Components.Schemas.SendEmailAction;
 export type SendEmailActionConfig = Components.Schemas.SendEmailActionConfig;
+export type SendEmailCondition = Components.Schemas.SendEmailCondition;
 export type SendEmailConfig = Components.Schemas.SendEmailConfig;
 export type SetValueMapper = Components.Schemas.SetValueMapper;
 export type StartExecutionRequest = Components.Schemas.StartExecutionRequest;
