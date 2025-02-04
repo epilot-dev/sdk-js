@@ -25,7 +25,8 @@
             "name": "trigger_source_id",
             "in": "query"
           }
-        ]
+        ],
+        "responses": {}
       },
       "post": {
         "operationId": "createFlow",
@@ -33,7 +34,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/automation/flows/{flow_id}": {
@@ -45,7 +47,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "put": {
         "operationId": "putFlow",
@@ -60,7 +63,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteFlow",
@@ -70,7 +74,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/automation/executions": {
@@ -89,7 +94,8 @@
             "name": "from",
             "in": "query"
           }
-        ]
+        ],
+        "responses": {}
       },
       "post": {
         "operationId": "startExecution",
@@ -97,7 +103,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/automation/executions/bulk-jobs": {
@@ -107,7 +114,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/automation/executions/bulk-jobs/{job_id}": {
@@ -119,7 +127,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "patch": {
         "operationId": "patchBulkJob",
@@ -134,7 +143,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/automation/executions/{execution_id}": {
@@ -146,7 +156,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "delete": {
         "operationId": "cancelExecution",
@@ -156,7 +167,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/automation/executions/{execution_id}/{action_id}/retrigger": {
@@ -179,7 +191,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/automation/public/executions:resume": {
@@ -189,7 +202,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     }
   },

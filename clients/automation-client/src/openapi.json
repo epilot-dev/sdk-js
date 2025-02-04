@@ -1743,10 +1743,13 @@
       "SendEmailCondition": {
         "type": "object",
         "properties": {
-          "_exists": {
+          "_equals": {
             "type": "object",
             "properties": {
               "source": {
+                "type": "string"
+              },
+              "value": {
                 "type": "string"
               }
             }
@@ -3440,9 +3443,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://automation.sls.epilot.io"
-    },
     {
       "url": "https://automation.sls.epilot.io"
     }

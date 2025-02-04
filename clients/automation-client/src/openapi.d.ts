@@ -2186,8 +2186,9 @@ declare namespace Components {
             schedule_id?: string;
         }
         export interface SendEmailCondition {
-            _exists?: {
+            _equals?: {
                 source?: string;
+                value?: string;
             };
         }
         export interface SendEmailConfig {
