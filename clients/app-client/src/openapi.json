@@ -505,6 +505,36 @@
           }
         }
       },
+      "NotificationConfig": {
+        "type": "object",
+        "required": [
+          "email",
+          "events"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address to receive notifications",
+            "example": "developer@example.com"
+          },
+          "events": {
+            "type": "array",
+            "description": "List of events to subscribe to",
+            "items": {
+              "$ref": "#/components/schemas/NotificationEvent"
+            },
+            "minItems": 1
+          }
+        }
+      },
+      "NotificationEvent": {
+        "type": "string",
+        "enum": [
+          "app.installed",
+          "app.uninstalled"
+        ]
+      },
       "BaseComponentCommon": {
         "type": "object",
         "required": [
@@ -725,6 +755,47 @@
           "component_tag": {
             "type": "string",
             "description": "Custom element tag for the component"
+          },
+          "component_args": {
+            "type": "array",
+            "description": "Arguments to pass to the component",
+            "items": {
+              "$ref": "#/components/schemas/JourneyBlockComponentArgs"
+            }
+          }
+        }
+      },
+      "JourneyBlockComponentArgs": {
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Key matching a config_option from the component"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Flag to indicate if this option is required",
+            "default": false
+          },
+          "description": {
+            "description": "Description of what this component arg does",
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "label": {
+            "description": "Human-readable label for the component arg",
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "number",
+              "boolean"
+            ],
+            "default": "text"
           }
         }
       },
@@ -803,6 +874,10 @@
           "description": {
             "$ref": "#/components/schemas/TranslatedString",
             "description": "Markdown description of the app."
+          },
+          "notifications": {
+            "$ref": "#/components/schemas/NotificationConfig",
+            "description": "Configuration for developer notifications"
           },
           "created_by": {
             "type": "string",

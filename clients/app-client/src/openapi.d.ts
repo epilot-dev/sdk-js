@@ -39,6 +39,7 @@ declare namespace Components {
              */
             documentation_url?: string;
             description?: TranslatedString;
+            notifications?: NotificationConfig;
             created_by?: string;
             created_at?: string;
             /**
@@ -108,6 +109,10 @@ declare namespace Components {
              * Markdown description of the app.
              */
             description?: TranslatedString;
+            /**
+             * Configuration for developer notifications
+             */
+            notifications?: NotificationConfig;
             created_by?: string;
             created_at?: string;
             updated_at?: string;
@@ -202,6 +207,25 @@ declare namespace Components {
             component_type: "CUSTOM_JOURNEY_BLOCK";
             configuration: JourneyBlockConfig;
         }
+        export interface JourneyBlockComponentArgs {
+            /**
+             * Key matching a config_option from the component
+             */
+            key: string;
+            /**
+             * Flag to indicate if this option is required
+             */
+            required?: boolean;
+            /**
+             * Description of what this component arg does
+             */
+            description?: TranslatedString;
+            /**
+             * Human-readable label for the component arg
+             */
+            label?: TranslatedString;
+            type?: "text" | "number" | "boolean";
+        }
         export interface JourneyBlockConfig {
             /**
              * URL of the web component object
@@ -213,7 +237,27 @@ declare namespace Components {
              * Custom element tag for the component
              */
             component_tag: string;
+            /**
+             * Arguments to pass to the component
+             */
+            component_args?: JourneyBlockComponentArgs[];
         }
+        export interface NotificationConfig {
+            /**
+             * Email address to receive notifications
+             * example:
+             * developer@example.com
+             */
+            email: string; // email
+            /**
+             * List of events to subscribe to
+             */
+            events: [
+                NotificationEvent,
+                ...NotificationEvent[]
+            ];
+        }
+        export type NotificationEvent = "app.installed" | "app.uninstalled";
         export interface Option {
             /**
              * Key matching a config_option from the component
@@ -618,7 +662,10 @@ export type BaseComponentCommon = Components.Schemas.BaseComponentCommon;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type ComponentType = Components.Schemas.ComponentType;
 export type JourneyBlockComponent = Components.Schemas.JourneyBlockComponent;
+export type JourneyBlockComponentArgs = Components.Schemas.JourneyBlockComponentArgs;
 export type JourneyBlockConfig = Components.Schemas.JourneyBlockConfig;
+export type NotificationConfig = Components.Schemas.NotificationConfig;
+export type NotificationEvent = Components.Schemas.NotificationEvent;
 export type Option = Components.Schemas.Option;
 export type Options = Components.Schemas.Options;
 export type OptionsRef = Components.Schemas.OptionsRef;
