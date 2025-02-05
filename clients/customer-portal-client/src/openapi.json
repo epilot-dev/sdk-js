@@ -9482,6 +9482,11 @@
             "type": "string",
             "description": "URL of the userinfo endpoint",
             "example": "https://graph.facebook.com/me"
+          },
+          "mobile_redirect_uri": {
+            "type": "string",
+            "description": "URL of the mobile redirect URI",
+            "example": "msauth.io.epilot.ecp://auth"
           }
         }
       },
@@ -9577,6 +9582,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://customer-portal-api.sls.epilot.io"
+    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }

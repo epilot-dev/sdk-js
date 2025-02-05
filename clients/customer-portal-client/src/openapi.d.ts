@@ -2549,6 +2549,12 @@ declare namespace Components {
              * https://graph.facebook.com/me
              */
             userinfo_endpoint?: string;
+            /**
+             * URL of the mobile redirect URI
+             * example:
+             * msauth.io.epilot.ecp://auth
+             */
+            mobile_redirect_uri?: string;
         }
         /**
          * The opportunity entity
