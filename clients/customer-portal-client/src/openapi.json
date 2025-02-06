@@ -5183,6 +5183,61 @@
         }
       }
     },
+    "/v2/portal/metering/reading/photo": {
+      "post": {
+        "operationId": "saveMeterReadingPhoto",
+        "summary": "Save Meter Reading Photo",
+        "description": "Saves a Meter Reading photo and - if enabled - gives back data extracted from the photo.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Save Meter reading photo payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeterReadingPhoto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter reading photo saved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MeterReadingPhotoData"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/public/sso/login": {
       "post": {
         "operationId": "ssoLogin",
@@ -9333,7 +9388,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10"
+            "example": "2022-10-10T00:00:00.000Z"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
@@ -9342,6 +9397,87 @@
           "status": {
             "$ref": "#/components/schemas/ReadingStatus",
             "description": "The status of the reading"
+          }
+        }
+      },
+      "MeterReadingPhoto": {
+        "type": "object",
+        "required": [
+          "filename",
+          "s3ref",
+          "meter_id"
+        ],
+        "properties": {
+          "filename": {
+            "type": "string",
+            "example": "Reading 10.01.2025.jpg"
+          },
+          "s3ref": {
+            "type": "object",
+            "required": [
+              "bucket",
+              "key"
+            ],
+            "properties": {
+              "bucket": {
+                "type": "string",
+                "example": "meter-readings",
+                "description": "S3 bucket name"
+              },
+              "key": {
+                "type": "string",
+                "example": "uuid/reading-10.01.2025.jpg",
+                "description": "S3 key"
+              }
+            }
+          },
+          "meter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the associated Meter"
+          }
+        }
+      },
+      "MeterReadingPhotoData": {
+        "type": "object",
+        "required": [
+          "filename",
+          "s3ref"
+        ],
+        "properties": {
+          "filename": {
+            "type": "string",
+            "example": "Reading 10.01.2025.jpg"
+          },
+          "s3ref": {
+            "type": "object",
+            "required": [
+              "bucket",
+              "key"
+            ],
+            "properties": {
+              "bucket": {
+                "type": "string",
+                "example": "meter-readings",
+                "description": "S3 bucket name"
+              },
+              "key": {
+                "type": "string",
+                "example": "uuid/reading-10.01.2025.jpg",
+                "description": "S3 key"
+              }
+            }
+          },
+          "reading": {
+            "type": "string",
+            "example": "000123.45"
+          },
+          "meter_type": {
+            "type": "string",
+            "example": "water"
+          },
+          "meter_number": {
+            "type": "string",
+            "example": "00123456"
           }
         }
       },
@@ -9582,9 +9718,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://customer-portal-api.sls.epilot.io"
-    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }

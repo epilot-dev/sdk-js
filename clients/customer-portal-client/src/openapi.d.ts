@@ -2470,7 +2470,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string;
             /**
@@ -2481,6 +2481,72 @@ declare namespace Components {
              * The status of the reading
              */
             status?: ReadingStatus;
+        }
+        export interface MeterReadingPhoto {
+            /**
+             * example:
+             * Reading 10.01.2025.jpg
+             */
+            filename: string;
+            s3ref: {
+                /**
+                 * S3 bucket name
+                 * example:
+                 * meter-readings
+                 */
+                bucket: string;
+                /**
+                 * S3 key
+                 * example:
+                 * uuid/reading-10.01.2025.jpg
+                 */
+                key: string;
+            };
+            /**
+             * The ID of the associated Meter
+             */
+            meter_id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+        }
+        export interface MeterReadingPhotoData {
+            /**
+             * example:
+             * Reading 10.01.2025.jpg
+             */
+            filename: string;
+            s3ref: {
+                /**
+                 * S3 bucket name
+                 * example:
+                 * meter-readings
+                 */
+                bucket: string;
+                /**
+                 * S3 key
+                 * example:
+                 * uuid/reading-10.01.2025.jpg
+                 */
+                key: string;
+            };
+            /**
+             * example:
+             * 000123.45
+             */
+            reading?: string;
+            /**
+             * example:
+             * water
+             */
+            meter_type?: string;
+            /**
+             * example:
+             * 00123456
+             */
+            meter_number?: string;
         }
         export interface MeterReadingWidget {
             id: string;
@@ -6634,6 +6700,18 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SaveMeterReadingPhoto {
+        export type RequestBody = Components.Schemas.MeterReadingPhoto;
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.MeterReadingPhotoData;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace SavePortalFiles {
         export type RequestBody = Components.Schemas.SavePortalFile;
         namespace Responses {
@@ -7946,6 +8024,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   /**
+   * saveMeterReadingPhoto - Save Meter Reading Photo
+   * 
+   * Saves a Meter Reading photo and - if enabled - gives back data extracted from the photo.
+   */
+  'saveMeterReadingPhoto'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SaveMeterReadingPhoto.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SaveMeterReadingPhoto.Responses.$200>
+  /**
    * ssoLogin - ssoLogin
    * 
    * Initiate login using external SSO identity.
@@ -8897,6 +8985,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   }
+  ['/v2/portal/metering/reading/photo']: {
+    /**
+     * saveMeterReadingPhoto - Save Meter Reading Photo
+     * 
+     * Saves a Meter Reading photo and - if enabled - gives back data extracted from the photo.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SaveMeterReadingPhoto.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SaveMeterReadingPhoto.Responses.$200>
+  }
   ['/v2/portal/public/sso/login']: {
     /**
      * ssoLogin - ssoLogin
@@ -9009,6 +9109,8 @@ export type JourneyActions = Components.Schemas.JourneyActions;
 export type Meter = Components.Schemas.Meter;
 export type MeterChartWidget = Components.Schemas.MeterChartWidget;
 export type MeterReading = Components.Schemas.MeterReading;
+export type MeterReadingPhoto = Components.Schemas.MeterReadingPhoto;
+export type MeterReadingPhotoData = Components.Schemas.MeterReadingPhotoData;
 export type MeterReadingWidget = Components.Schemas.MeterReadingWidget;
 export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
 export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;

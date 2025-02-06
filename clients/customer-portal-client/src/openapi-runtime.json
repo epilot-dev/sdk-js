@@ -1214,6 +1214,18 @@
         "responses": {}
       }
     },
+    "/v2/portal/metering/reading/photo": {
+      "post": {
+        "operationId": "saveMeterReadingPhoto",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/public/sso/login": {
       "post": {
         "operationId": "ssoLogin",
