@@ -5116,6 +5116,61 @@
         }
       }
     },
+    "/v2/portal/metering/reading/photo": {
+      "post": {
+        "operationId": "uploadMeterReadingPhoto",
+        "summary": "Upload Meter Reading Photo",
+        "description": "Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Upload Meter reading photo payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeterReadingPhoto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter reading photo saved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MeterReadingPhotoData"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/metering/reading": {
       "post": {
         "operationId": "createMeterReading",
@@ -5170,61 +5225,6 @@
           },
           "400": {
             "$ref": "#/components/responses/InvalidRequestCreateMeterReading"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/metering/reading/photo": {
-      "post": {
-        "operationId": "uploadMeterReadingPhoto",
-        "summary": "Upload Meter Reading Photo",
-        "description": "Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.",
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "requestBody": {
-          "description": "Upload Meter reading photo payload.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MeterReadingPhoto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Meter reading photo saved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/MeterReadingPhotoData"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/InvalidRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -9462,7 +9462,7 @@
             "type": "string",
             "example": "000123.45"
           },
-          "meter_type": {
+          "sector": {
             "type": "string",
             "example": "water"
           },

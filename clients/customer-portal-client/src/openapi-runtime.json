@@ -1195,6 +1195,18 @@
         "responses": {}
       }
     },
+    "/v2/portal/metering/reading/photo": {
+      "post": {
+        "operationId": "uploadMeterReadingPhoto",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/metering/reading": {
       "post": {
         "operationId": "createMeterReading",
@@ -1205,18 +1217,6 @@
             "required": false
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v2/portal/metering/reading/photo": {
-      "post": {
-        "operationId": "uploadMeterReadingPhoto",
         "requestBody": {
           "required": true,
           "content": {

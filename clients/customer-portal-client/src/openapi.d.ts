@@ -2538,7 +2538,7 @@ declare namespace Components {
              * example:
              * water
              */
-            meter_type?: string;
+            sector?: string;
             /**
              * example:
              * 00123456
@@ -8011,16 +8011,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   /**
-   * createMeterReading - Create Meter Reading
-   * 
-   * Inserts a new meter reading.
-   */
-  'createMeterReading'(
-    parameters?: Parameters<Paths.CreateMeterReading.QueryParameters> | null,
-    data?: Paths.CreateMeterReading.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
-  /**
    * uploadMeterReadingPhoto - Upload Meter Reading Photo
    * 
    * Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.
@@ -8030,6 +8020,16 @@ export interface OperationMethods {
     data?: Paths.UploadMeterReadingPhoto.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UploadMeterReadingPhoto.Responses.$200>
+  /**
+   * createMeterReading - Create Meter Reading
+   * 
+   * Inserts a new meter reading.
+   */
+  'createMeterReading'(
+    parameters?: Parameters<Paths.CreateMeterReading.QueryParameters> | null,
+    data?: Paths.CreateMeterReading.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   /**
    * ssoLogin - ssoLogin
    * 
@@ -8970,18 +8970,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   }
-  ['/v2/portal/metering/reading']: {
-    /**
-     * createMeterReading - Create Meter Reading
-     * 
-     * Inserts a new meter reading.
-     */
-    'post'(
-      parameters?: Parameters<Paths.CreateMeterReading.QueryParameters> | null,
-      data?: Paths.CreateMeterReading.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
-  }
   ['/v2/portal/metering/reading/photo']: {
     /**
      * uploadMeterReadingPhoto - Upload Meter Reading Photo
@@ -8993,6 +8981,18 @@ export interface PathsDictionary {
       data?: Paths.UploadMeterReadingPhoto.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UploadMeterReadingPhoto.Responses.$200>
+  }
+  ['/v2/portal/metering/reading']: {
+    /**
+     * createMeterReading - Create Meter Reading
+     * 
+     * Inserts a new meter reading.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateMeterReading.QueryParameters> | null,
+      data?: Paths.CreateMeterReading.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   }
   ['/v2/portal/public/sso/login']: {
     /**
