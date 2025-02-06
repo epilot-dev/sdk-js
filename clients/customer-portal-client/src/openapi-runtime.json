@@ -1216,7 +1216,7 @@
     },
     "/v2/portal/metering/reading/photo": {
       "post": {
-        "operationId": "saveMeterReadingPhoto",
+        "operationId": "uploadMeterReadingPhoto",
         "requestBody": {
           "required": true,
           "content": {

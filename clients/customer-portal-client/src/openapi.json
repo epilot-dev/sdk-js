@@ -5185,9 +5185,9 @@
     },
     "/v2/portal/metering/reading/photo": {
       "post": {
-        "operationId": "saveMeterReadingPhoto",
-        "summary": "Save Meter Reading Photo",
-        "description": "Saves a Meter Reading photo and - if enabled - gives back data extracted from the photo.",
+        "operationId": "uploadMeterReadingPhoto",
+        "summary": "Upload Meter Reading Photo",
+        "description": "Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.",
         "tags": [
           "ECP"
         ],
@@ -5197,7 +5197,7 @@
           }
         ],
         "requestBody": {
-          "description": "Save Meter reading photo payload.",
+          "description": "Upload Meter reading photo payload.",
           "required": true,
           "content": {
             "application/json": {
@@ -9404,7 +9404,8 @@
         "type": "object",
         "required": [
           "filename",
-          "s3ref",
+          "mime_type",
+          "contents",
           "meter_id"
         ],
         "properties": {
@@ -9412,24 +9413,14 @@
             "type": "string",
             "example": "Reading 10.01.2025.jpg"
           },
-          "s3ref": {
-            "type": "object",
-            "required": [
-              "bucket",
-              "key"
-            ],
-            "properties": {
-              "bucket": {
-                "type": "string",
-                "example": "meter-readings",
-                "description": "S3 bucket name"
-              },
-              "key": {
-                "type": "string",
-                "example": "uuid/reading-10.01.2025.jpg",
-                "description": "S3 key"
-              }
-            }
+          "mime_type": {
+            "type": "string",
+            "example": "image/jpeg"
+          },
+          "contents": {
+            "type": "string",
+            "description": "Base64 encoded image",
+            "example": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxMTEhUTExMWFhUXGBgYGBgYGBgYGBgYGBgYFxgYFxgYHSggGBolHRgXITEhJSkrLi4uFx8zODMtNygtLisBCgoKDg0OGhAQGy0lHyUt"
           },
           "meter_id": {
             "$ref": "#/components/schemas/EntityId",

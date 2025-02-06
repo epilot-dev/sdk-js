@@ -2488,20 +2488,17 @@ declare namespace Components {
              * Reading 10.01.2025.jpg
              */
             filename: string;
-            s3ref: {
-                /**
-                 * S3 bucket name
-                 * example:
-                 * meter-readings
-                 */
-                bucket: string;
-                /**
-                 * S3 key
-                 * example:
-                 * uuid/reading-10.01.2025.jpg
-                 */
-                key: string;
-            };
+            /**
+             * example:
+             * image/jpeg
+             */
+            mime_type: string;
+            /**
+             * Base64 encoded image
+             * example:
+             * data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxMTEhUTExMWFhUXGBgYGBgYGBgYGBgYGBgYFxgYFxgYHSggGBolHRgXITEhJSkrLi4uFx8zODMtNygtLisBCgoKDg0OGhAQGy0lHyUt
+             */
+            contents: string;
             /**
              * The ID of the associated Meter
              */
@@ -6700,18 +6697,6 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace SaveMeterReadingPhoto {
-        export type RequestBody = Components.Schemas.MeterReadingPhoto;
-        namespace Responses {
-            export interface $200 {
-                data?: Components.Schemas.MeterReadingPhotoData;
-            }
-            export type $400 = Components.Responses.InvalidRequest;
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
     namespace SavePortalFiles {
         export type RequestBody = Components.Schemas.SavePortalFile;
         namespace Responses {
@@ -7081,6 +7066,18 @@ declare namespace Paths {
              * }
              */
             Components.Schemas.WorkflowStep;
+        }
+    }
+    namespace UploadMeterReadingPhoto {
+        export type RequestBody = Components.Schemas.MeterReadingPhoto;
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.MeterReadingPhotoData;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace UpsertEmailTemplates {
@@ -8024,15 +8021,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   /**
-   * saveMeterReadingPhoto - Save Meter Reading Photo
+   * uploadMeterReadingPhoto - Upload Meter Reading Photo
    * 
-   * Saves a Meter Reading photo and - if enabled - gives back data extracted from the photo.
+   * Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.
    */
-  'saveMeterReadingPhoto'(
+  'uploadMeterReadingPhoto'(
     parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.SaveMeterReadingPhoto.RequestBody,
+    data?: Paths.UploadMeterReadingPhoto.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.SaveMeterReadingPhoto.Responses.$200>
+  ): OperationResponse<Paths.UploadMeterReadingPhoto.Responses.$200>
   /**
    * ssoLogin - ssoLogin
    * 
@@ -8987,15 +8984,15 @@ export interface PathsDictionary {
   }
   ['/v2/portal/metering/reading/photo']: {
     /**
-     * saveMeterReadingPhoto - Save Meter Reading Photo
+     * uploadMeterReadingPhoto - Upload Meter Reading Photo
      * 
-     * Saves a Meter Reading photo and - if enabled - gives back data extracted from the photo.
+     * Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.SaveMeterReadingPhoto.RequestBody,
+      data?: Paths.UploadMeterReadingPhoto.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.SaveMeterReadingPhoto.Responses.$200>
+    ): OperationResponse<Paths.UploadMeterReadingPhoto.Responses.$200>
   }
   ['/v2/portal/public/sso/login']: {
     /**
