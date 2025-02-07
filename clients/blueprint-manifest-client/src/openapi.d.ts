@@ -568,6 +568,16 @@ declare namespace Components {
             changes?: PlanChanges;
         }
         export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "custom_variable" | "coupon";
+        export interface ResourceReplacement {
+            /**
+             * Original resource ID to be replaced
+             */
+            originalAddress: string;
+            /**
+             * ID of the resource that will replace the original
+             */
+            replacementId: string;
+        }
         export interface RootResourceNode {
             /**
              * ID of the resource
@@ -672,6 +682,10 @@ declare namespace Paths {
              * List of resources to ignore changes for
              */
             resourcesToIgnore?: string[];
+            /**
+             * List of resource replacements to apply during import
+             */
+            resourceReplacements?: Components.Schemas.ResourceReplacement[];
         }
         namespace Responses {
             export interface $200 {
@@ -796,6 +810,10 @@ declare namespace Paths {
              * List of resources to ignore changes for
              */
             resourcesToIgnore?: string[];
+            /**
+             * List of resource replacements to apply during import
+             */
+            resourceReplacements?: Components.Schemas.ResourceReplacement[];
         } | {
             /**
              * Manifest s3 key uploaded via `uploadManifest`
@@ -815,6 +833,10 @@ declare namespace Paths {
              * List of resources to ignore changes for
              */
             resourcesToIgnore?: string[];
+            /**
+             * List of resource replacements to apply during import
+             */
+            resourceReplacements?: Components.Schemas.ResourceReplacement[];
         };
         namespace Responses {
             export interface $200 {
@@ -1185,6 +1207,7 @@ export type ManifestTimestampFields = Components.Schemas.ManifestTimestampFields
 export type PlanChanges = Components.Schemas.PlanChanges;
 export type ResourceNode = Components.Schemas.ResourceNode;
 export type ResourceNodeType = Components.Schemas.ResourceNodeType;
+export type ResourceReplacement = Components.Schemas.ResourceReplacement;
 export type RootResourceNode = Components.Schemas.RootResourceNode;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SelectedResources = Components.Schemas.SelectedResources;

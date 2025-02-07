@@ -336,6 +336,13 @@
                           "type": "string"
                         },
                         "description": "List of resources to ignore changes for"
+                      },
+                      "resourceReplacements": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/ResourceReplacement"
+                        },
+                        "description": "List of resource replacements to apply during import"
                       }
                     },
                     "required": [
@@ -377,6 +384,13 @@
                           "type": "string"
                         },
                         "description": "List of resources to ignore changes for"
+                      },
+                      "resourceReplacements": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/ResourceReplacement"
+                        },
+                        "description": "List of resource replacements to apply during import"
                       }
                     },
                     "required": [
@@ -440,6 +454,13 @@
                       "type": "string"
                     },
                     "description": "List of resources to ignore changes for"
+                  },
+                  "resourceReplacements": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ResourceReplacement"
+                    },
+                    "description": "List of resource replacements to apply during import"
                   }
                 }
               }
@@ -1175,6 +1196,23 @@
         "required": [
           "exported_root_resources",
           "selected_resources"
+        ]
+      },
+      "ResourceReplacement": {
+        "type": "object",
+        "properties": {
+          "originalAddress": {
+            "type": "string",
+            "description": "Original resource ID to be replaced"
+          },
+          "replacementId": {
+            "type": "string",
+            "description": "ID of the resource that will replace the original"
+          }
+        },
+        "required": [
+          "originalAddress",
+          "replacementId"
         ]
       }
     },
