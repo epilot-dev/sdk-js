@@ -915,7 +915,7 @@
                   "$ref": "#/components/schemas/Custom_Style"
                 },
                 {
-                  "$ref": "#/components/schemas/Journey_Design_Tokens"
+                  "$ref": "#/components/schemas/Journey"
                 }
               ]
             }
@@ -949,7 +949,7 @@
                 "$ref": "#/components/schemas/Custom_Style"
               },
               {
-                "$ref": "#/components/schemas/Journey_Design_Tokens"
+                "$ref": "#/components/schemas/Journey"
               }
             ]
           }
@@ -973,7 +973,7 @@
                 "$ref": "#/components/schemas/Custom_Style"
               },
               {
-                "$ref": "#/components/schemas/Journey_Design_Tokens"
+                "$ref": "#/components/schemas/Journey"
               }
             ]
           }
@@ -994,7 +994,7 @@
                 "$ref": "#/components/schemas/Custom_Style"
               },
               {
-                "$ref": "#/components/schemas/Journey_Design_Tokens"
+                "$ref": "#/components/schemas/Journey"
               }
             ]
           }
@@ -1012,7 +1012,7 @@
                 "$ref": "#/components/schemas/Custom_Style"
               },
               {
-                "$ref": "#/components/schemas/Journey_Design_Tokens"
+                "$ref": "#/components/schemas/Journey"
               }
             ]
           }
@@ -1029,8 +1029,7 @@
           },
           "created_at": {
             "type": "string",
-            "format": "date-time",
-            "description": "Creation date and time using ISO 8601 full-time format",
+            "description": "Creation date and time",
             "example": "2021-01-30T08:30:00Z"
           },
           "created_by": {
@@ -1040,8 +1039,7 @@
             "type": "boolean"
           },
           "last_modified_at": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           }
         }
       },
@@ -1180,17 +1178,16 @@
           }
         }
       },
-      "Journey_Design_Tokens": {
+      "Journey": {
         "type": "object",
         "properties": {
-          "coupon": {
-            "type": "string"
-          },
-          "cashback": {
-            "type": "string"
-          },
-          "custom_css": {
-            "type": "string"
+          "design_tokens": {
+            "type": "object",
+            "properties": {
+              "custom_css": {
+                "type": "string"
+              }
+            }
           }
         }
       },
@@ -1268,6 +1265,14 @@
             "type": "string"
           },
           "portal_login_background": {
+            "type": "string"
+          },
+          "coupon_cashback": {
+            "description": "Background color for cashback coupon badge",
+            "type": "string"
+          },
+          "coupon_discount": {
+            "description": "Background color for discount coupon badge",
             "type": "string"
           }
         },

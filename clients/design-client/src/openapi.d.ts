@@ -36,23 +36,23 @@ declare namespace Components {
                 is_default?: boolean;
                 custom_theme?: string;
                 use_custom_theme?: boolean;
-                coupon?: string;
-                cashback?: string;
-                custom_css?: string;
+                design_tokens?: {
+                    custom_css?: string;
+                };
             };
         }
         export interface AddDesignRes {
             design?: {
                 id?: string;
                 /**
-                 * Creation date and time using ISO 8601 full-time format
+                 * Creation date and time
                  * example:
                  * 2021-01-30T08:30:00Z
                  */
-                created_at?: string; // date-time
+                created_at?: string;
                 created_by?: string;
                 edited: boolean;
-                last_modified_at?: string; // date-time
+                last_modified_at?: string;
                 brand_id?: string;
                 brand_name?: string;
                 user?: {
@@ -72,9 +72,9 @@ declare namespace Components {
                 is_default?: boolean;
                 custom_theme?: string;
                 use_custom_theme?: boolean;
-                coupon?: string;
-                cashback?: string;
-                custom_css?: string;
+                design_tokens?: {
+                    custom_css?: string;
+                };
             };
         }
         export interface BrandItem {
@@ -146,14 +146,14 @@ declare namespace Components {
             designs?: {
                 id?: string;
                 /**
-                 * Creation date and time using ISO 8601 full-time format
+                 * Creation date and time
                  * example:
                  * 2021-01-30T08:30:00Z
                  */
-                created_at?: string; // date-time
+                created_at?: string;
                 created_by?: string;
                 edited: boolean;
-                last_modified_at?: string; // date-time
+                last_modified_at?: string;
                 brand_id?: string;
                 brand_name?: string;
                 user?: {
@@ -173,9 +173,9 @@ declare namespace Components {
                 is_default?: boolean;
                 custom_theme?: string;
                 use_custom_theme?: boolean;
-                coupon?: string;
-                cashback?: string;
-                custom_css?: string;
+                design_tokens?: {
+                    custom_css?: string;
+                };
             }[];
         }
         export interface GetBrandsRes {
@@ -195,14 +195,14 @@ declare namespace Components {
             design?: {
                 id?: string;
                 /**
-                 * Creation date and time using ISO 8601 full-time format
+                 * Creation date and time
                  * example:
                  * 2021-01-30T08:30:00Z
                  */
-                created_at?: string; // date-time
+                created_at?: string;
                 created_by?: string;
                 edited: boolean;
-                last_modified_at?: string; // date-time
+                last_modified_at?: string;
                 brand_id?: string;
                 brand_name?: string;
                 user?: {
@@ -222,9 +222,9 @@ declare namespace Components {
                 is_default?: boolean;
                 custom_theme?: string;
                 use_custom_theme?: boolean;
-                coupon?: string;
-                cashback?: string;
-                custom_css?: string;
+                design_tokens?: {
+                    custom_css?: string;
+                };
             };
         }
         export type GetFilesRes = {
@@ -237,19 +237,19 @@ declare namespace Components {
         export interface ItemMetada {
             id?: string;
             /**
-             * Creation date and time using ISO 8601 full-time format
+             * Creation date and time
              * example:
              * 2021-01-30T08:30:00Z
              */
-            created_at?: string; // date-time
+            created_at?: string;
             created_by?: string;
             edited?: boolean;
-            last_modified_at?: string; // date-time
+            last_modified_at?: string;
         }
-        export interface JourneyDesignTokens {
-            coupon?: string;
-            cashback?: string;
-            custom_css?: string;
+        export interface Journey {
+            design_tokens?: {
+                custom_css?: string;
+            };
         }
         export interface LogoData {
             main?: FileData;
@@ -262,6 +262,14 @@ declare namespace Components {
             paper: string;
             navbar: string;
             portal_login_background?: string;
+            /**
+             * Background color for cashback coupon badge
+             */
+            coupon_cashback?: string;
+            /**
+             * Background color for discount coupon badge
+             */
+            coupon_discount?: string;
         }
         export interface ShapeData {
             border_radius?: number;
@@ -292,9 +300,9 @@ declare namespace Components {
                 is_default?: boolean;
                 custom_theme?: string;
                 use_custom_theme?: boolean;
-                coupon?: string;
-                cashback?: string;
-                custom_css?: string;
+                design_tokens?: {
+                    custom_css?: string;
+                };
             };
         }
         export interface UploadFileReq {
@@ -808,7 +816,7 @@ export type GetBrandsRes = Components.Schemas.GetBrandsRes;
 export type GetDesignRes = Components.Schemas.GetDesignRes;
 export type GetFilesRes = Components.Schemas.GetFilesRes;
 export type ItemMetada = Components.Schemas.ItemMetada;
-export type Journey_Design_Tokens = Components.Schemas.JourneyDesignTokens;
+export type Journey = Components.Schemas.Journey;
 export type LogoData = Components.Schemas.LogoData;
 export type PaletteData = Components.Schemas.PaletteData;
 export type ShapeData = Components.Schemas.ShapeData;
