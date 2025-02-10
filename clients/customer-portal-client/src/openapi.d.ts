@@ -2562,6 +2562,20 @@ declare namespace Components {
             };
             schema?: string;
         }
+        export interface MoblieOIDCConfig {
+            /**
+             * Client ID for the mobile app
+             * example:
+             * 123456
+             */
+            client_id?: string;
+            /**
+             * Client Secret for the mobile app
+             * example:
+             * 123456
+             */
+            client_secret?: string;
+        }
         export interface OIDCProviderConfig {
             /**
              * Issuing Authority URL
@@ -3287,6 +3301,7 @@ declare namespace Components {
             provider_type: "OIDC";
             attribute_mappings?: /* Dictionary of epilot user attributes to claims */ AttributeMappingConfig;
             oidc_config?: OIDCProviderConfig;
+            mobile_oidc_config?: MoblieOIDCConfig;
         }
         /**
          * Human-readable display name for identity provider shown in login
@@ -9109,6 +9124,7 @@ export type MeterReading = Components.Schemas.MeterReading;
 export type MeterReadingPhoto = Components.Schemas.MeterReadingPhoto;
 export type MeterReadingPhotoData = Components.Schemas.MeterReadingPhotoData;
 export type MeterReadingWidget = Components.Schemas.MeterReadingWidget;
+export type MoblieOIDCConfig = Components.Schemas.MoblieOIDCConfig;
 export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
 export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
 export type Opportunity = Components.Schemas.Opportunity;

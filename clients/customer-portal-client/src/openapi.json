@@ -9506,6 +9506,9 @@
           },
           "oidc_config": {
             "$ref": "#/components/schemas/OIDCProviderConfig"
+          },
+          "mobile_oidc_config": {
+            "$ref": "#/components/schemas/MoblieOIDCConfig"
           }
         },
         "required": [
@@ -9591,6 +9594,21 @@
           "client_id",
           "scope"
         ]
+      },
+      "MoblieOIDCConfig": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Client ID for the mobile app",
+            "example": 123456
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "Client Secret for the mobile app",
+            "example": 123456
+          }
+        }
       },
       "OIDCProviderMetadata": {
         "type": "object",
