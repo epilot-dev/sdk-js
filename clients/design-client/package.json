@@ -24,7 +24,7 @@
     "test": "jest",
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/design-builder-api.yaml",
-    "openapi:local": "node ../../scripts/update-openapi.js ../../../design-builder-api/lambda/TerraformHandlerFunction/openapi.yml",
+    "openapi:local": "node ../../scripts/update-openapi.js ../../../design-api/lambda/TerraformHandlerFunction/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
