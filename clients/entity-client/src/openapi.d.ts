@@ -397,6 +397,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "address";
             default_address_fields?: /* Default fields visible on addresses */ DefaultAddressFields;
         }
@@ -534,11 +539,15 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "relation_address";
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
             has_primary?: boolean;
+            type?: "relation_address";
             default_address_fields?: /* Default fields visible on addresses */ DefaultAddressFields;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute;
         /**
          * a readonly computed ID for the attribute including schema slug and the attribute ID
          */
@@ -554,7 +563,7 @@ declare namespace Components {
              * contact
              */
             schema?: string;
-        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Repeatable (add N number of fields) */ RepeatableAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute);
+        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute);
         /**
          * Automation entity
          */
@@ -689,6 +698,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "automation";
         }
         export interface BaseActivityItem {
@@ -867,6 +881,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
         }
         /**
          * example:
@@ -1076,7 +1095,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "boolean";
+            display_type?: "switch" | "checkbox";
         }
         /**
          * example:
@@ -1190,7 +1215,17 @@ declare namespace Components {
              * This attribute should only be active when one of the provided settings have the correct value
              */
             settings_flag?: SettingFlag[];
-            value_formatter?: string;
+            /**
+             * Variable template used to format the computed value
+             * example:
+             * {{formatCurrencyAttribute entity attribute locale}}
+             */
+            value_formatter: string;
+            /**
+             * Variable template used to format a preview for the computed value
+             * example:
+             * {{formatCurrencyAttribute entity attribute locale}}
+             */
             preview_value_formatter?: string;
             /**
              * Setting to `true` disables editing the attribute on the entity builder UI
@@ -1232,7 +1267,21 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "computed";
+            computed?: boolean;
+            /**
+             * A source amount field that is used to compute the value of the attribute
+             */
+            amount_field?: string;
+            /**
+             * A currency field used to format a computed currency value
+             */
+            currency_field?: string;
         }
         /**
          * Consent Management
@@ -1368,6 +1417,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type: "consent";
             topic: string;
             identifiers?: string[];
@@ -1506,6 +1560,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "country";
         }
         /**
@@ -1642,6 +1701,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type: "currency";
             currency_selector_only?: boolean;
             /**
@@ -1788,6 +1852,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "date" | "datetime";
         }
         /**
@@ -1803,6 +1872,147 @@ declare namespace Components {
              * Name of the elastic cluster the organization is assigned to
              */
             cluster?: string;
+        }
+        /**
+         * Email address
+         */
+        export interface EmailAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: any;
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
+            group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This attribute should only be active when one of the provided settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
+            type?: "email";
         }
         /**
          * example:
@@ -3793,6 +4003,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type: "image" | "file";
             multiple?: boolean;
             /**
@@ -4274,6 +4489,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "internal";
         }
         /**
@@ -4410,6 +4630,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "internal_user";
         }
         /**
@@ -4546,6 +4771,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "invitation_email";
         }
         /**
@@ -4690,6 +4920,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "link";
         }
         export interface ListSavedViewsResults {
@@ -4834,8 +5069,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type: "message_email_address";
-            address: string;
+            address?: string;
             send_status?: string;
             email_type?: string;
         }
@@ -4973,6 +5213,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "multiselect" | "checkbox";
             /**
              * controls if the matching of values against the options is case sensitive or not
@@ -5125,6 +5370,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "number";
             format?: string;
             /**
@@ -5266,6 +5516,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "ordered_list";
         }
         /**
@@ -5402,6 +5657,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "partner_organisation";
         }
         /**
@@ -5538,7 +5798,153 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "partner_status";
+        }
+        /**
+         * Payment method
+         */
+        export interface PaymentAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: any;
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
+            group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This attribute should only be active when one of the provided settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
+            type?: "payment";
         }
         /**
          * Reference to a payment method attribute of another entity
@@ -5674,8 +6080,294 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
-            type?: "relation_payment_method";
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
             has_primary?: boolean;
+            type?: "relation_payment_method";
+        }
+        /**
+         * Phone number
+         */
+        export interface PhoneAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: any;
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
+            group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This attribute should only be active when one of the provided settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
+            type?: "phone";
+        }
+        /**
+         * Price component
+         */
+        export interface PriceComponentAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: any;
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
+            group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This attribute should only be active when one of the provided settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
+            type?: "price_component";
         }
         /**
          * Entity Taxonomy
@@ -5819,6 +6511,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             /**
              * URL-friendly identifier for the classification
              * example:
@@ -5993,6 +6690,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * Relations are always repeatables
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "relation";
             relation_type?: "has_many" | "has_one";
             /**
@@ -6019,6 +6721,16 @@ declare namespace Components {
              * Enables the preview, edition, and creation of relation items on a Master-Details view mode.
              */
             details_view_mode_enabled?: boolean;
+            /**
+             * Additional entity search filter for relation picker
+             */
+            relation_picker_filter?: {
+                /**
+                 * example:
+                 * AND is_composite_price:true
+                 */
+                q: string;
+            };
             /**
              * example:
              * {
@@ -6068,90 +6780,18 @@ declare namespace Components {
                  */
                 settings_flag?: SettingFlag[];
                 /**
+                 * Default field values for new entity to create
                  * example:
                  * {
-                 *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                 *   "_org": "123",
-                 *   "_owners": [
-                 *     {
-                 *       "org_id": "123",
-                 *       "user_id": "123"
-                 *     },
-                 *     {
-                 *       "org_id": "123",
-                 *       "user_id": "123"
-                 *     }
-                 *   ],
-                 *   "_schema": "contact",
-                 *   "_tags": [
-                 *     "example",
-                 *     "mock",
-                 *     "example",
-                 *     "mock"
-                 *   ],
-                 *   "_created_at": "2021-02-09T12:41:43.662Z",
-                 *   "_updated_at": "2021-02-09T12:41:43.662Z",
-                 *   "_acl": {
-                 *     "view": [
-                 *       "org:456",
-                 *       "org:789",
-                 *       "org:456",
-                 *       "org:789"
-                 *     ],
-                 *     "edit": [
-                 *       "org:456",
-                 *       "org:456"
-                 *     ],
-                 *     "delete": [
-                 *       "org:456",
-                 *       "org:456"
-                 *     ]
-                 *   },
-                 *   "_manifest": [
-                 *     "123e4567-e89b-12d3-a456-426614174000",
-                 *     "123e4567-e89b-12d3-a456-426614174000"
-                 *   ]
+                 *   "_schema": "order"
                  * }
                  */
                 new_entity_item?: {
                     [name: string]: any;
-                    _id: EntityId /* uuid */;
-                    /**
-                     * Organization Id the entity belongs to
-                     */
-                    _org: string;
-                    _owners?: /**
-                     * The user / organization owning this entity.
-                     *
-                     * Note: Owner implicitly has access to the entity regardless of ACLs.
-                     *
-                     */
-                    EntityOwner[];
-                    _schema: /**
-                     * URL-friendly identifier for the entity schema
-                     * example:
-                     * contact
-                     */
-                    EntitySlug;
-                    /**
-                     * Title of entity
-                     */
-                    _title: string | null;
-                    _tags?: string[] | null;
-                    _created_at: string | null; // date-time
-                    _updated_at: string | null; // date-time
-                    _deleted_at?: string | null; // date-time
-                    _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
-                    _purpose?: string[] | null;
-                    /**
-                     * Manifest ID used to create/update the entity
-                     */
-                    _manifest?: string /* uuid */[] | null;
-                };
+                } | null;
             }[];
             drawer_size?: "small" | "medium" | "large";
             summary_fields?: (string | /* Summary Fields are displayed inside list view as a resume of the relation entity. */ SummaryField)[];
-            has_primary?: boolean;
             allowedSchemas?: /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -6389,17 +7029,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
             repeatable?: boolean;
             has_primary?: boolean;
-            /**
-             * Weak repeatable attributes are kept when duplicating an entity. Strong repeatable attributes are discarded when duplicating an entity.
-             */
-            relation_affinity_mode?: "weak" | "strong";
-            type?: "string" | "phone" | "email" | "address" | "relation" | "payment" | "price_component" | "date" | "message_email_address";
-            /**
-             * when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link.
-             */
-            enable_relation_picker?: boolean;
         }
         /**
          * A saved entity view
@@ -6936,6 +7570,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "select" | "radio";
             options?: ({
                 value: string;
@@ -7080,6 +7719,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "sequence";
             /**
              * Prefix added before the sequence number
@@ -7233,6 +7877,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "status";
             options?: ((string | null) | {
                 /**
@@ -7465,6 +8114,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "tags";
             options?: string[];
             suggestions?: string[];
@@ -7551,6 +8205,7 @@ declare namespace Components {
         export interface TaxonomyBulkJob {
             job_id?: string; // uuid
             job_status?: /* The status of the bulk job */ TaxonomyBulkJobStatus;
+            failure_reason?: string;
             action_type?: TaxonomyBulkJobActionType;
             request?: {
                 target_taxonomy?: /**
@@ -7559,6 +8214,11 @@ declare namespace Components {
                  * purpose
                  */
                 TaxonomySlug;
+                target_classification?: /**
+                 * example:
+                 * taxonomy-slug:classification-slug
+                 */
+                ClassificationId;
                 classification_ids?: /**
                  * example:
                  * taxonomy-slug:classification-slug
@@ -7580,7 +8240,7 @@ declare namespace Components {
              */
             progress?: number;
         }
-        export type TaxonomyBulkJobActionType = "MOVE_CLASSIFICATIONS" | "DELETE_CLASSIFICATIONS";
+        export type TaxonomyBulkJobActionType = "MOVE_CLASSIFICATIONS" | "MERGE_CLASSIFICATIONS" | "DELETE_CLASSIFICATIONS";
         /**
          * The status of the bulk job
          */
@@ -7769,9 +8429,25 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "string";
             multiline?: boolean;
             rich_text?: boolean;
+            /**
+             * Number of rows for rich_text textarea
+             * example:
+             * 3
+             */
+            rows?: /**
+             * Number of rows for rich_text textarea
+             * example:
+             * 3
+             */
+            number | string;
         }
         /**
          * User Relationship
@@ -7907,6 +8583,11 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
             type?: "relation_user";
             multiple?: boolean;
         }
@@ -8032,6 +8713,31 @@ declare namespace Paths {
              * Job ID for tracking the status of a bulk operation request
              */
             job_id?: string;
+            classification_ids?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            Components.Schemas.ClassificationId[];
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.TaxonomyBulkJobTriggerResponse;
+        }
+    }
+    namespace BulkMergeClassifications {
+        export interface RequestBody {
+            /**
+             * Job ID for tracking the status of a bulk operation request
+             */
+            job_id?: string;
+            /**
+             * The target classification id to which the classifications will be merged into
+             */
+            target_classification?: /**
+             * URL-friendly name for taxonomy
+             * example:
+             * purpose
+             */
+            Components.Schemas.TaxonomySlug;
             classification_ids?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -11513,6 +12219,18 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.BulkMoveClassifications.Responses.$200>
   /**
+   * bulkMergeClassifications - bulkMergeClassifications
+   * 
+   * Merges classifications from one taxonomy into one individual classification, through a bulk async operation which
+   * also updates all references from the old Classifications to the new one.
+   * 
+   */
+  'bulkMergeClassifications'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.BulkMergeClassifications.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkMergeClassifications.Responses.$200>
+  /**
    * bulkDeleteClassifications - bulkDeleteClassifications
    * 
    * Permanently deletes taxonomy classifications. The classifications are deleted through a bulk
@@ -12609,6 +13327,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.BulkMoveClassifications.Responses.$200>
   }
+  ['/v1/entity/taxonomies/classifications:merge']: {
+    /**
+     * bulkMergeClassifications - bulkMergeClassifications
+     * 
+     * Merges classifications from one taxonomy into one individual classification, through a bulk async operation which
+     * also updates all references from the old Classifications to the new one.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.BulkMergeClassifications.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkMergeClassifications.Responses.$200>
+  }
   ['/v1/entity/taxonomies/classifications:delete']: {
     /**
      * bulkDeleteClassifications - bulkDeleteClassifications
@@ -12828,6 +13560,7 @@ export type CurrencyAttribute = Components.Schemas.CurrencyAttribute;
 export type DateAttribute = Components.Schemas.DateAttribute;
 export type DefaultAddressFields = Components.Schemas.DefaultAddressFields;
 export type ESClusterAssignment = Components.Schemas.ESClusterAssignment;
+export type EmailAttribute = Components.Schemas.EmailAttribute;
 export type Entity = Components.Schemas.Entity;
 export type EntityAcl = Components.Schemas.EntityAcl;
 export type EntityAction = Components.Schemas.EntityAction;
@@ -12888,7 +13621,10 @@ export type NumberAttribute = Components.Schemas.NumberAttribute;
 export type OrderedListAttribute = Components.Schemas.OrderedListAttribute;
 export type PartnerOrganisationAttribute = Components.Schemas.PartnerOrganisationAttribute;
 export type PartnerStatusAttribute = Components.Schemas.PartnerStatusAttribute;
+export type PaymentAttribute = Components.Schemas.PaymentAttribute;
 export type PaymentMethodRelationAttribute = Components.Schemas.PaymentMethodRelationAttribute;
+export type PhoneAttribute = Components.Schemas.PhoneAttribute;
+export type PriceComponentAttribute = Components.Schemas.PriceComponentAttribute;
 export type PurposeAttribute = Components.Schemas.PurposeAttribute;
 export type RedirectEntityView = Components.Schemas.RedirectEntityView;
 export type RelationAttribute = Components.Schemas.RelationAttribute;

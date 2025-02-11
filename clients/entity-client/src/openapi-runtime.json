@@ -1085,6 +1085,17 @@
         "responses": {}
       }
     },
+    "/v1/entity/taxonomies/classifications:merge": {
+      "post": {
+        "operationId": "bulkMergeClassifications",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/entity/taxonomies/classifications:delete": {
       "post": {
         "operationId": "bulkDeleteClassifications",

@@ -3134,6 +3134,62 @@
         }
       }
     },
+    "/v1/entity/taxonomies/classifications:merge": {
+      "post": {
+        "operationId": "bulkMergeClassifications",
+        "summary": "bulkMergeClassifications",
+        "description": "Merges classifications from one taxonomy into one individual classification, through a bulk async operation which\nalso updates all references from the old Classifications to the new one.\n",
+        "tags": [
+          "Taxonomy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "job_id": {
+                    "description": "Job ID for tracking the status of a bulk operation request",
+                    "type": "string"
+                  },
+                  "target_classification": {
+                    "description": "The target classification id to which the classifications will be merged into",
+                    "$ref": "#/components/schemas/TaxonomySlug"
+                  },
+                  "classification_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ClassificationId"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "classification_ids": [
+                  "taxonomy-slug:classification-slug"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the job id for the async job and current status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxonomyBulkJobTriggerResponse"
+                },
+                "example": {
+                  "job_id": "123",
+                  "status": "PENDING"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/entity/taxonomies/classifications:delete": {
       "post": {
         "operationId": "bulkDeleteClassifications",
@@ -4373,9 +4429,6 @@
             "$ref": "#/components/schemas/CurrencyAttribute"
           },
           {
-            "$ref": "#/components/schemas/RepeatableAttribute"
-          },
-          {
             "$ref": "#/components/schemas/TagsAttribute"
           },
           {
@@ -4416,6 +4469,18 @@
           },
           {
             "$ref": "#/components/schemas/PartnerOrganisationAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/PhoneAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/EmailAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/PaymentAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/PriceComponentAttribute"
           }
         ]
       },
@@ -4583,6 +4648,13 @@
                 "example": "top"
               }
             }
+          },
+          "repeatable": {
+            "description": "The attribute is a repeatable",
+            "type": "boolean"
+          },
+          "has_primary": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -4610,6 +4682,18 @@
               },
               "rich_text": {
                 "type": "boolean"
+              },
+              "rows": {
+                "description": "Number of rows for rich_text textarea",
+                "oneOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "example": 3
               }
             }
           }
@@ -4667,6 +4751,14 @@
                 "enum": [
                   "boolean"
                 ]
+              },
+              "display_type": {
+                "type": "string",
+                "enum": [
+                  "switch",
+                  "checkbox"
+                ],
+                "default": "switch"
               }
             }
           }
@@ -5106,6 +5198,19 @@
                 "default": false,
                 "description": "Enables the preview, edition, and creation of relation items on a Master-Details view mode."
               },
+              "relation_picker_filter": {
+                "description": "Additional entity search filter for relation picker",
+                "type": "object",
+                "properties": {
+                  "q": {
+                    "type": "string",
+                    "example": "AND is_composite_price:true"
+                  }
+                },
+                "required": [
+                  "q"
+                ]
+              },
               "actions": {
                 "type": "array",
                 "items": {
@@ -5140,12 +5245,13 @@
                       }
                     },
                     "new_entity_item": {
+                      "description": "Default field values for new entity to create",
+                      "nullable": true,
                       "type": "object",
-                      "allOf": [
-                        {
-                          "$ref": "#/components/schemas/EntityItem"
-                        }
-                      ]
+                      "additionalProperties": true,
+                      "example": {
+                        "_schema": "order"
+                      }
                     }
                   }
                 },
@@ -5213,6 +5319,11 @@
               "search_placeholder": {
                 "type": "string",
                 "description": "Optional placeholder text for the relation search input. The translated value for search_placeholder is used, if found else the string is used as is."
+              },
+              "repeatable": {
+                "description": "Relations are always repeatables",
+                "type": "boolean",
+                "default": true
               }
             }
           }
@@ -5454,33 +5565,6 @@
               },
               "has_primary": {
                 "type": "boolean"
-              },
-              "relation_affinity_mode": {
-                "description": "Weak repeatable attributes are kept when duplicating an entity. Strong repeatable attributes are discarded when duplicating an entity.",
-                "type": "string",
-                "enum": [
-                  "weak",
-                  "strong"
-                ]
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "string",
-                  "phone",
-                  "email",
-                  "address",
-                  "relation",
-                  "payment",
-                  "price_component",
-                  "date",
-                  "message_email_address"
-                ]
-              },
-              "enable_relation_picker": {
-                "type": "boolean",
-                "default": true,
-                "description": "when enable_relation_picker is set to true the user will be able to pick existing relations as values. Otherwise, the user will need to create new relation to link."
               }
             }
           }
@@ -5547,7 +5631,6 @@
             },
             "required": [
               "type",
-              "address",
               "name"
             ]
           }
@@ -5631,6 +5714,82 @@
           }
         ]
       },
+      "EmailAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Email address",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "email"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "PhoneAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Phone number",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "phone"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "PaymentAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Payment method",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "payment"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "PriceComponentAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Price component",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "price_component"
+                ]
+              }
+            }
+          }
+        ]
+      },
       "ComputedAttribute": {
         "allOf": [
           {
@@ -5645,8 +5804,33 @@
                 "enum": [
                   "computed"
                 ]
+              },
+              "computed": {
+                "type": "boolean",
+                "default": true
+              },
+              "value_formatter": {
+                "type": "string",
+                "description": "Variable template used to format the computed value",
+                "example": "{{formatCurrencyAttribute entity attribute locale}}"
+              },
+              "preview_value_formatter": {
+                "type": "string",
+                "description": "Variable template used to format a preview for the computed value",
+                "example": "{{formatCurrencyAttribute entity attribute locale}}"
+              },
+              "amount_field": {
+                "type": "string",
+                "description": "A source amount field that is used to compute the value of the attribute"
+              },
+              "currency_field": {
+                "type": "string",
+                "description": "A currency field used to format a computed currency value"
               }
-            }
+            },
+            "required": [
+              "value_formatter"
+            ]
           }
         ]
       },
@@ -7718,6 +7902,7 @@
         "type": "string",
         "enum": [
           "MOVE_CLASSIFICATIONS",
+          "MERGE_CLASSIFICATIONS",
           "DELETE_CLASSIFICATIONS"
         ]
       },
@@ -7731,6 +7916,9 @@
           "job_status": {
             "$ref": "#/components/schemas/TaxonomyBulkJobStatus"
           },
+          "failure_reason": {
+            "type": "string"
+          },
           "action_type": {
             "$ref": "#/components/schemas/TaxonomyBulkJobActionType"
           },
@@ -7739,6 +7927,9 @@
             "properties": {
               "target_taxonomy": {
                 "$ref": "#/components/schemas/TaxonomySlug"
+              },
+              "target_classification": {
+                "$ref": "#/components/schemas/ClassificationId"
               },
               "classification_ids": {
                 "type": "array",
