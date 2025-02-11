@@ -8290,6 +8290,16 @@ declare namespace Components {
         }
         export type TaxonomyLocationId = "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment";
         /**
+         * Whether to include archived labels in the search results
+         * - `true`: include archived labels
+         * - `false`: exclude archived labels
+         * - `only`: include only archived labels
+         *
+         * By default, no archived labels are included in the search results.
+         *
+         */
+        export type TaxonomySearchIncludeArchivedParam = "true" | "false" | "only";
+        /**
          * URL-friendly name for taxonomy
          * example:
          * purpose
@@ -10804,6 +10814,16 @@ declare namespace Paths {
              * false
              */
             export type Archived = boolean;
+            export type IncludeArchived = /**
+             * Whether to include archived labels in the search results
+             * - `true`: include archived labels
+             * - `false`: exclude archived labels
+             * - `only`: include only archived labels
+             *
+             * By default, no archived labels are included in the search results.
+             *
+             */
+            Components.Schemas.TaxonomySearchIncludeArchivedParam;
             /**
              * example:
              * sales
@@ -10823,6 +10843,7 @@ declare namespace Paths {
              * false
              */
             Parameters.Archived;
+            include_archived?: Parameters.IncludeArchived;
         }
         export interface RequestBody {
             classificationIds?: /**
@@ -13653,6 +13674,7 @@ export type TaxonomyBulkJobStatus = Components.Schemas.TaxonomyBulkJobStatus;
 export type TaxonomyBulkJobTriggerResponse = Components.Schemas.TaxonomyBulkJobTriggerResponse;
 export type TaxonomyClassification = Components.Schemas.TaxonomyClassification;
 export type TaxonomyLocationId = Components.Schemas.TaxonomyLocationId;
+export type TaxonomySearchIncludeArchivedParam = Components.Schemas.TaxonomySearchIncludeArchivedParam;
 export type TaxonomySlug = Components.Schemas.TaxonomySlug;
 export type TextAttribute = Components.Schemas.TextAttribute;
 export type UserRelationAttribute = Components.Schemas.UserRelationAttribute;

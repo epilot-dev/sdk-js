@@ -2901,10 +2901,18 @@
           {
             "in": "query",
             "name": "archived",
-            "description": "Filter by archived status",
+            "description": "Filter by archived status. Deprecated. Use `include_archived` instead.",
+            "deprecated": true,
             "schema": {
               "type": "boolean",
               "example": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_archived",
+            "schema": {
+              "$ref": "#/components/schemas/TaxonomySearchIncludeArchivedParam"
             }
           }
         ],
@@ -7776,6 +7784,16 @@
           "request",
           "comment"
         ]
+      },
+      "TaxonomySearchIncludeArchivedParam": {
+        "type": "string",
+        "enum": [
+          "true",
+          "false",
+          "only"
+        ],
+        "description": "Whether to include archived labels in the search results\n- `true`: include archived labels\n- `false`: exclude archived labels\n- `only`: include only archived labels\n\nBy default, no archived labels are included in the search results.\n",
+        "default": "false"
       },
       "TaxonomyClassification": {
         "type": "object",

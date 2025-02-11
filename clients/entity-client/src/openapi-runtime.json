@@ -1012,7 +1012,12 @@
           },
           {
             "in": "query",
-            "name": "archived"
+            "name": "archived",
+            "deprecated": true
+          },
+          {
+            "in": "query",
+            "name": "include_archived"
           }
         ],
         "requestBody": {
