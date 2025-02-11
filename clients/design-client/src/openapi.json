@@ -1184,6 +1184,12 @@
           "design_tokens": {
             "type": "object",
             "properties": {
+              "coupon": {
+                "type": "string"
+              },
+              "cashback": {
+                "type": "string"
+              },
               "custom_css": {
                 "type": "string"
               }
@@ -1265,14 +1271,6 @@
             "type": "string"
           },
           "portal_login_background": {
-            "type": "string"
-          },
-          "coupon_cashback": {
-            "description": "Background color for cashback coupon badge",
-            "type": "string"
-          },
-          "coupon_discount": {
-            "description": "Background color for discount coupon badge",
             "type": "string"
           }
         },

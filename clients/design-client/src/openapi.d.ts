@@ -37,6 +37,8 @@ declare namespace Components {
                 custom_theme?: string;
                 use_custom_theme?: boolean;
                 design_tokens?: {
+                    coupon?: string;
+                    cashback?: string;
                     custom_css?: string;
                 };
             };
@@ -73,6 +75,8 @@ declare namespace Components {
                 custom_theme?: string;
                 use_custom_theme?: boolean;
                 design_tokens?: {
+                    coupon?: string;
+                    cashback?: string;
                     custom_css?: string;
                 };
             };
@@ -174,6 +178,8 @@ declare namespace Components {
                 custom_theme?: string;
                 use_custom_theme?: boolean;
                 design_tokens?: {
+                    coupon?: string;
+                    cashback?: string;
                     custom_css?: string;
                 };
             }[];
@@ -223,6 +229,8 @@ declare namespace Components {
                 custom_theme?: string;
                 use_custom_theme?: boolean;
                 design_tokens?: {
+                    coupon?: string;
+                    cashback?: string;
                     custom_css?: string;
                 };
             };
@@ -248,6 +256,8 @@ declare namespace Components {
         }
         export interface Journey {
             design_tokens?: {
+                coupon?: string;
+                cashback?: string;
                 custom_css?: string;
             };
         }
@@ -262,14 +272,6 @@ declare namespace Components {
             paper: string;
             navbar: string;
             portal_login_background?: string;
-            /**
-             * Background color for cashback coupon badge
-             */
-            coupon_cashback?: string;
-            /**
-             * Background color for discount coupon badge
-             */
-            coupon_discount?: string;
         }
         export interface ShapeData {
             border_radius?: number;
@@ -301,6 +303,8 @@ declare namespace Components {
                 custom_theme?: string;
                 use_custom_theme?: boolean;
                 design_tokens?: {
+                    coupon?: string;
+                    cashback?: string;
                     custom_css?: string;
                 };
             };
