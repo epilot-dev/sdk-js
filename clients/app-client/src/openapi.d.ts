@@ -173,6 +173,9 @@ declare namespace Components {
              */
             options?: /* Options for the component configuration */ Options[];
         }
+        export interface BooleanArg {
+            type?: "boolean";
+        }
         export interface CallerIdentity {
             /**
              * a human readable name of the caller (e.g. user name, token name or email address)
@@ -203,29 +206,55 @@ declare namespace Components {
          * Type of app component
          */
         export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION";
+        export interface EnumArg {
+            type?: "enum";
+            /**
+             * If true, allows selection of multiple values
+             */
+            isMulti?: boolean;
+            /**
+             * List of options for enum type
+             */
+            options: [
+                {
+                    /**
+                     * Unique identifier for the option
+                     */
+                    id: string;
+                    /**
+                     * Display label for the option
+                     */
+                    label: TranslatedString;
+                },
+                ...{
+                    /**
+                     * Unique identifier for the option
+                     */
+                    id: string;
+                    /**
+                     * Display label for the option
+                     */
+                    label: TranslatedString;
+                }[]
+            ];
+        }
         export interface JourneyBlockComponent {
             component_type: "CUSTOM_JOURNEY_BLOCK";
             configuration: JourneyBlockConfig;
         }
-        export interface JourneyBlockComponentArgs {
+        export type JourneyBlockComponentArgs = {
             /**
-             * Key matching a config_option from the component
+             * Unique identifier for this component arg
              */
             key: string;
+            type: "text" | "boolean" | "enum";
             /**
              * Flag to indicate if this option is required
              */
             required?: boolean;
-            /**
-             * Description of what this component arg does
-             */
             description?: TranslatedString;
-            /**
-             * Human-readable label for the component arg
-             */
-            label?: TranslatedString;
-            type?: "text" | "number" | "boolean";
-        }
+            label: TranslatedString;
+        } & (TextArg | BooleanArg | EnumArg);
         export interface JourneyBlockConfig {
             /**
              * URL of the web component object
@@ -241,6 +270,12 @@ declare namespace Components {
              * Arguments to pass to the component
              */
             component_args?: JourneyBlockComponentArgs[];
+            /**
+             * Define data which is mapped to entity mapping ui blocks
+             */
+            component_mapping?: {
+                [name: string]: "string" | "boolean" | "date" | "datetime";
+            };
         }
         export interface NotificationConfig {
             /**
@@ -361,6 +396,9 @@ declare namespace Components {
              */
             key: string;
         }
+        export interface TextArg {
+            type?: "text";
+        }
         export interface TranslatedString {
             /**
              * English translation
@@ -397,26 +435,6 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = /* Information about the installed app */ Components.Schemas.App;
             export interface $404 {
-            }
-        }
-    }
-    namespace GetUploadUrl {
-        export type RequestBody = Components.Schemas.UploadFilePayload;
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * ID of the app configuration
-                 */
-                app_id?: string;
-                /**
-                 * Presigned S3 URL for uploading the file
-                 */
-                upload_url: string;
-                s3_reference: Components.Schemas.S3Reference;
-                /**
-                 * Timestamp when the upload URL expires
-                 */
-                expires_at?: string; // date-time
             }
         }
     }
@@ -459,19 +477,6 @@ declare namespace Paths {
             }
         }
     }
-    namespace PublishApp {
-        export type RequestBody = Components.RequestBodies.PublishAppRequest;
-        namespace Responses {
-            export interface $202 {
-                app_id: string;
-                status: "pending" | "published";
-                /**
-                 * Step Function execution ARN for status tracking
-                 */
-                execution_arn?: string;
-            }
-        }
-    }
     namespace UninstallApp {
         namespace Parameters {
             export type AppId = string;
@@ -497,26 +502,6 @@ declare namespace Paths {
 }
 
 export interface OperationMethods {
-  /**
-   * getUploadUrl - getUploadUrl
-   * 
-   * Generate a presigned URL for uploading app package zip file
-   */
-  'getUploadUrl'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.GetUploadUrl.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetUploadUrl.Responses.$200>
-  /**
-   * publishApp - publishApp
-   * 
-   * Publish a new app configuration from uploaded zip file
-   */
-  'publishApp'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.PublishApp.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.PublishApp.Responses.$202>
   /**
    * getAppConfiguration - getAppConfiguration
    * 
@@ -570,30 +555,6 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
-  ['/v1/app-configurations/upload-url']: {
-    /**
-     * getUploadUrl - getUploadUrl
-     * 
-     * Generate a presigned URL for uploading app package zip file
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.GetUploadUrl.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetUploadUrl.Responses.$200>
-  }
-  ['/v1/app-configurations']: {
-    /**
-     * publishApp - publishApp
-     * 
-     * Publish a new app configuration from uploaded zip file
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.PublishApp.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.PublishApp.Responses.$202>
-  }
   ['/v1/app-configurations/{appId}']: {
     /**
      * getAppConfiguration - getAppConfiguration
@@ -659,8 +620,10 @@ export type AppConfiguration = Components.Schemas.AppConfiguration;
 export type Author = Components.Schemas.Author;
 export type BaseComponent = Components.Schemas.BaseComponent;
 export type BaseComponentCommon = Components.Schemas.BaseComponentCommon;
+export type BooleanArg = Components.Schemas.BooleanArg;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type ComponentType = Components.Schemas.ComponentType;
+export type EnumArg = Components.Schemas.EnumArg;
 export type JourneyBlockComponent = Components.Schemas.JourneyBlockComponent;
 export type JourneyBlockComponentArgs = Components.Schemas.JourneyBlockComponentArgs;
 export type JourneyBlockConfig = Components.Schemas.JourneyBlockConfig;
@@ -673,5 +636,6 @@ export type PortalAuth = Components.Schemas.PortalAuth;
 export type PortalExtensionComponent = Components.Schemas.PortalExtensionComponent;
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
 export type S3Reference = Components.Schemas.S3Reference;
+export type TextArg = Components.Schemas.TextArg;
 export type TranslatedString = Components.Schemas.TranslatedString;
 export type UploadFilePayload = Components.Schemas.UploadFilePayload;

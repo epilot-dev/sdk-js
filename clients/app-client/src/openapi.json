@@ -22,99 +22,6 @@
     }
   ],
   "paths": {
-    "/v1/app-configurations/upload-url": {
-      "post": {
-        "summary": "getUploadUrl",
-        "description": "Generate a presigned URL for uploading app package zip file",
-        "operationId": "getUploadUrl",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadFilePayload"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Upload URL generated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "upload_url",
-                    "s3_reference"
-                  ],
-                  "properties": {
-                    "app_id": {
-                      "type": "string",
-                      "description": "ID of the app configuration"
-                    },
-                    "upload_url": {
-                      "type": "string",
-                      "description": "Presigned S3 URL for uploading the file"
-                    },
-                    "s3_reference": {
-                      "$ref": "#/components/schemas/S3Reference"
-                    },
-                    "expires_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "Timestamp when the upload URL expires"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/app-configurations": {
-      "post": {
-        "summary": "publishApp",
-        "description": "Publish a new app configuration from uploaded zip file",
-        "operationId": "publishApp",
-        "requestBody": {
-          "$ref": "#/components/requestBodies/PublishAppRequest"
-        },
-        "responses": {
-          "202": {
-            "description": "App publication process started",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "app_id",
-                    "status"
-                  ],
-                  "properties": {
-                    "app_id": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "pending",
-                        "published"
-                      ]
-                    },
-                    "execution_arn": {
-                      "type": "string",
-                      "description": "Step Function execution ARN for status tracking"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/app-configurations/{appId}": {
       "parameters": [
         {
@@ -762,40 +669,143 @@
             "items": {
               "$ref": "#/components/schemas/JourneyBlockComponentArgs"
             }
+          },
+          "component_mapping": {
+            "description": "Define data which is mapped to entity mapping ui blocks",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "string",
+                "boolean",
+                "date",
+                "datetime"
+              ]
+            }
           }
         }
       },
       "JourneyBlockComponentArgs": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "key",
+              "label",
+              "type"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "Unique identifier for this component arg"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "text",
+                  "boolean",
+                  "enum"
+                ]
+              },
+              "required": {
+                "type": "boolean",
+                "description": "Flag to indicate if this option is required",
+                "default": false
+              },
+              "description": {
+                "description": "Description of what this component arg does",
+                "$ref": "#/components/schemas/TranslatedString"
+              },
+              "label": {
+                "description": "Human-readable label for the component arg",
+                "$ref": "#/components/schemas/TranslatedString"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "text": "#/components/schemas/TextArg",
+                "boolean": "#/components/schemas/BooleanArg",
+                "enum": "#/components/schemas/EnumArg"
+              }
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TextArg"
+              },
+              {
+                "$ref": "#/components/schemas/BooleanArg"
+              },
+              {
+                "$ref": "#/components/schemas/EnumArg"
+              }
+            ]
+          }
+        ]
+      },
+      "TextArg": {
         "type": "object",
-        "required": [
-          "key"
-        ],
         "properties": {
-          "key": {
-            "type": "string",
-            "description": "Key matching a config_option from the component"
-          },
-          "required": {
-            "type": "boolean",
-            "description": "Flag to indicate if this option is required",
-            "default": false
-          },
-          "description": {
-            "description": "Description of what this component arg does",
-            "$ref": "#/components/schemas/TranslatedString"
-          },
-          "label": {
-            "description": "Human-readable label for the component arg",
-            "$ref": "#/components/schemas/TranslatedString"
-          },
           "type": {
             "type": "string",
             "enum": [
-              "text",
-              "number",
+              "text"
+            ]
+          }
+        }
+      },
+      "BooleanArg": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
               "boolean"
-            ],
-            "default": "text"
+            ]
+          }
+        }
+      },
+      "EnumArg": {
+        "type": "object",
+        "required": [
+          "options"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "enum"
+            ]
+          },
+          "isMulti": {
+            "type": "boolean",
+            "description": "If true, allows selection of multiple values",
+            "default": false
+          },
+          "options": {
+            "type": "array",
+            "description": "List of options for enum type",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "label"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier for the option"
+                },
+                "label": {
+                  "$ref": "#/components/schemas/TranslatedString",
+                  "description": "Display label for the option"
+                }
+              }
+            }
           }
         }
       },
