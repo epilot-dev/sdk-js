@@ -3133,6 +3133,7 @@ declare namespace Components {
              *
              */
             PaymentMethod[];
+            redeemed_promos?: RedeemedPromo[];
             _tags?: string[];
         }
         /**
@@ -4817,6 +4818,46 @@ declare namespace Components {
                 [key: string]: any;
             };
         }
+        export interface RedeemedPromo {
+            /**
+             * The promocode inserted by the customer to redeem the promotion
+             */
+            code?: string;
+            /**
+             * The coupons that got redeemed with received the code
+             */
+            coupons?: /**
+             * The coupon configuration
+             * example:
+             * {
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            CouponWithoutPromoCodes[];
+        }
         export type SalesTax = "nontaxable" | "reduced" | "standard";
         export type SaveIntegrationCredentialsParams = /* The basic auth credentials */ BasicAuthCredentials;
         export interface SearchExternalCatalogParams {
@@ -5180,7 +5221,7 @@ declare namespace Paths {
                      */
                     timestamp: string; // date-time
                     /**
-                     * Cost in tenth of cents, e.g. 123 for 12,3 Cents = 0.123€.
+                     * Cost in Cents, e.g. 123 for 12,3 Cents = 0.123€.
                      * example:
                      * 123
                      */
@@ -5285,11 +5326,17 @@ declare namespace Paths {
                      */
                     timestamp: string; // date-time
                     /**
-                     * Cost in tenth of cents, e.g. 123 for 12,3 Cents = 0.123€.
+                     * Cost in cents, e.g. 123 for 12,3 Cents = 0.123€.
                      * example:
                      * 123
                      */
                     unit_amount: number;
+                    /**
+                     * Cost in decimal format, e.g. 0.123€.
+                     * example:
+                     * 0.123
+                     */
+                    unit_amount_decimal?: string;
                 }[];
             }
             export type $400 = Components.Schemas.Error;
@@ -6038,6 +6085,7 @@ export type Provider = Components.Schemas.Provider;
 export type RecurrenceAmount = Components.Schemas.RecurrenceAmount;
 export type RecurrenceAmountDto = Components.Schemas.RecurrenceAmountDto;
 export type RecurrenceAmountWithTax = Components.Schemas.RecurrenceAmountWithTax;
+export type RedeemedPromo = Components.Schemas.RedeemedPromo;
 export type SalesTax = Components.Schemas.SalesTax;
 export type SaveIntegrationCredentialsParams = Components.Schemas.SaveIntegrationCredentialsParams;
 export type SearchExternalCatalogParams = Components.Schemas.SearchExternalCatalogParams;

@@ -122,12 +122,6 @@
   "servers": [
     {
       "url": "https://pricing-api.sls.epilot.io"
-    },
-    {
-      "url": "https://pricing-api.sls.epilot.io"
-    },
-    {
-      "url": "https://pricing-api.sls.epilot.io"
     }
   ],
   "paths": {
@@ -1292,8 +1286,13 @@
                           },
                           "unit_amount": {
                             "type": "integer",
-                            "description": "Cost in tenth of cents, e.g. 123 for 12,3 Cents = 0.123€.",
+                            "description": "Cost in cents, e.g. 123 for 12,3 Cents = 0.123€.",
                             "example": 123
+                          },
+                          "unit_amount_decimal": {
+                            "type": "string",
+                            "description": "Cost in decimal format, e.g. 0.123€.",
+                            "example": "0.123"
                           }
                         },
                         "required": [
@@ -1393,7 +1392,7 @@
                         },
                         "unit_amount": {
                           "type": "integer",
-                          "description": "Cost in tenth of cents, e.g. 123 for 12,3 Cents = 0.123€.",
+                          "description": "Cost in Cents, e.g. 123 for 12,3 Cents = 0.123€.",
                           "example": 123
                         },
                         "unit_amount_decimal": {
@@ -4298,6 +4297,12 @@
               "$ref": "#/components/schemas/PaymentMethod"
             }
           },
+          "redeemed_promos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedeemedPromo"
+            }
+          },
           "_tags": {
             "type": "array",
             "items": {
@@ -5648,6 +5653,22 @@
           "code": "123456",
           "has_usage_limit": true,
           "usage_limit": 10
+        }
+      },
+      "RedeemedPromo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "description": "The promocode inserted by the customer to redeem the promotion",
+            "type": "string"
+          },
+          "coupons": {
+            "description": "The coupons that got redeemed with received the code",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CouponWithoutPromoCodes"
+            }
+          }
         }
       },
       "PriceTier": {
