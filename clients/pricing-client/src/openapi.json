@@ -5657,6 +5657,10 @@
       },
       "RedeemedPromo": {
         "type": "object",
+        "required": [
+          "code",
+          "coupons"
+        ],
         "properties": {
           "code": {
             "description": "The promocode inserted by the customer to redeem the promotion",
@@ -5862,11 +5866,45 @@
           "average_price_decimal": {
             "type": "string"
           },
-          "markup": {
-            "type": "number"
+          "markup_amount": {
+            "type": "number",
+            "description": "The markup amount, configured in Epilot, in cents."
           },
-          "markup_decimal": {
-            "type": "string"
+          "markup_amount_decimal": {
+            "type": "string",
+            "description": "The markup amount, configured in Epilot, as a string with full precision."
+          },
+          "markup_amount_net": {
+            "type": "number",
+            "description": "The markup amount net, configured in Epilot, in cents."
+          },
+          "markup_amount_net_decimal": {
+            "type": "string",
+            "description": "The markup amount net, configured in Epilot, as a string with full precision."
+          },
+          "markup_amount_gross": {
+            "type": "number",
+            "description": "The markup amount gross, configured in Epilot, in cents."
+          },
+          "markup_amount_gross_decimal": {
+            "type": "string",
+            "description": "The markup amount gross, configured in Epilot, as a string with full precision."
+          },
+          "unit_amount_net": {
+            "type": "number",
+            "description": "The unit amount net for the energy price in cents, it's provided by an external provider."
+          },
+          "unit_amount_net_decimal": {
+            "type": "string",
+            "description": "The unit amount net for the energy price as a string with full precision, it's provided by an external provider."
+          },
+          "unit_amount_gross": {
+            "type": "number",
+            "description": "The unit amount gross for the energy price in cents, it's provided by an external provider."
+          },
+          "unit_amount_gross_decimal": {
+            "type": "string",
+            "description": "The unit amount gross for the energy price as a string with full precision, it's provided by an external provider."
           }
         },
         "required": [

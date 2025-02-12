@@ -3396,8 +3396,46 @@ declare namespace Components {
             interval?: /* The interval of the tariff if a spot market price is used as base. */ DynamicTariffInterval;
             average_price: number;
             average_price_decimal: string;
-            markup: number;
-            markup_decimal: string;
+            /**
+             * The markup amount, configured in Epilot, in cents.
+             */
+            markup_amount?: number;
+            /**
+             * The markup amount, configured in Epilot, as a string with full precision.
+             */
+            markup_amount_decimal?: string;
+            /**
+             * The markup amount net, configured in Epilot, in cents.
+             */
+            markup_amount_net?: number;
+            /**
+             * The markup amount net, configured in Epilot, as a string with full precision.
+             */
+            markup_amount_net_decimal?: string;
+            /**
+             * The markup amount gross, configured in Epilot, in cents.
+             */
+            markup_amount_gross?: number;
+            /**
+             * The markup amount gross, configured in Epilot, as a string with full precision.
+             */
+            markup_amount_gross_decimal?: string;
+            /**
+             * The unit amount net for the energy price in cents, it's provided by an external provider.
+             */
+            unit_amount_net?: number;
+            /**
+             * The unit amount net for the energy price as a string with full precision, it's provided by an external provider.
+             */
+            unit_amount_net_decimal?: string;
+            /**
+             * The unit amount gross for the energy price in cents, it's provided by an external provider.
+             */
+            unit_amount_gross?: number;
+            /**
+             * The unit amount gross for the energy price as a string with full precision, it's provided by an external provider.
+             */
+            unit_amount_gross_decimal?: string;
         }
         export interface PriceGetAg {
             category: ProductCategory;
@@ -4822,11 +4860,11 @@ declare namespace Components {
             /**
              * The promocode inserted by the customer to redeem the promotion
              */
-            code?: string;
+            code: string;
             /**
              * The coupons that got redeemed with received the code
              */
-            coupons?: /**
+            coupons: /**
              * The coupon configuration
              * example:
              * {
