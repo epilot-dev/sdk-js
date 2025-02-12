@@ -1579,6 +1579,9 @@
         "properties": {
           "automation_config": {
             "$ref": "#/components/schemas/AutomationConfig"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/ActionSchedule"
           }
         },
         "allOf": [
@@ -1599,6 +1602,109 @@
             "description": "Id of the configured automation to run"
           }
         }
+      },
+      "ActionSchedule": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ImmediateSchedule"
+          },
+          {
+            "$ref": "#/components/schemas/DelayedSchedule"
+          },
+          {
+            "$ref": "#/components/schemas/RelativeSchedule"
+          }
+        ]
+      },
+      "ImmediateSchedule": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": [
+              "immediate"
+            ]
+          }
+        }
+      },
+      "DelayedSchedule": {
+        "type": "object",
+        "required": [
+          "mode",
+          "duration",
+          "unit"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "delayed"
+            ]
+          },
+          "duration": {
+            "type": "number"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/TimeUnit"
+          }
+        }
+      },
+      "RelativeSchedule": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": [
+              "relative"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "before",
+              "after"
+            ]
+          },
+          "duration": {
+            "type": "number"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/TimeUnit"
+          },
+          "reference": {
+            "type": "object",
+            "required": [
+              "id",
+              "origin"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The id of the entity / workflow / task, based on the origin of the schedule"
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "flow_started",
+                  "task_completed",
+                  "trigger_entity_attribute"
+                ]
+              },
+              "schema": {
+                "type": "string",
+                "description": "The schema of the entity"
+              },
+              "attribute": {
+                "type": "string",
+                "description": "An entity attribute that identifies a date / datetime"
+              }
+            }
+          }
+        },
+        "required": [
+          "mode",
+          "direction",
+          "duration",
+          "unit",
+          "reference"
+        ]
       },
       "DecisionTask": {
         "allOf": [
@@ -1892,23 +1998,20 @@
             "type": "number"
           },
           "unit": {
-            "type": "string",
-            "enum": [
-              "minutes",
-              "hours",
-              "days",
-              "weeks",
-              "months"
-            ]
+            "$ref": "#/components/schemas/TimeUnit"
           },
           "type": {
             "type": "string",
             "enum": [
               "WORKFLOW_STARTED",
-              "TASK_FINISHED"
+              "TASK_FINISHED",
+              "PHASE_FINISHED"
             ]
           },
           "task_id": {
+            "type": "string"
+          },
+          "phase_id": {
             "type": "string"
           }
         },
@@ -1916,6 +2019,16 @@
           "duration",
           "unit",
           "type"
+        ]
+      },
+      "TimeUnit": {
+        "type": "string",
+        "enum": [
+          "minutes",
+          "hours",
+          "days",
+          "weeks",
+          "months"
         ]
       },
       "EnableRequirement": {
@@ -2386,23 +2499,20 @@
             "type": "number"
           },
           "timePeriod": {
-            "type": "string",
-            "enum": [
-              "minutes",
-              "hours",
-              "days",
-              "weeks",
-              "months"
-            ]
+            "$ref": "#/components/schemas/TimeUnit"
           },
           "actionTypeCondition": {
             "type": "string",
             "enum": [
               "WORKFLOW_STARTED",
-              "STEP_CLOSED"
+              "STEP_CLOSED",
+              "PHASE_FINISHED"
             ]
           },
           "stepId": {
+            "type": "string"
+          },
+          "phaseId": {
             "type": "string"
           }
         },
