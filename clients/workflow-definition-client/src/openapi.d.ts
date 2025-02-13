@@ -45,6 +45,7 @@ declare namespace Components {
             phase_id?: string;
             task_type: TaskType;
             automation_config: /* Configuration for automation execution to run */ AutomationConfig;
+            trigger_mode?: TriggerMode;
             schedule?: ActionSchedule;
         }
         export interface ChangeReasonStatusReq {
@@ -421,6 +422,7 @@ declare namespace Components {
         }
         export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION";
         export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months";
+        export type TriggerMode = "manual" | "automatic";
         export interface UpdateEntityAttributes {
             source: "workflow_status" | "current_section" | "current_step";
             target: {
@@ -1231,5 +1233,6 @@ export type Task = Components.Schemas.Task;
 export type TaskBase = Components.Schemas.TaskBase;
 export type TaskType = Components.Schemas.TaskType;
 export type TimeUnit = Components.Schemas.TimeUnit;
+export type TriggerMode = Components.Schemas.TriggerMode;
 export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
 export type WorkflowDefinition = Components.Schemas.WorkflowDefinition;
