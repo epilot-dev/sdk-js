@@ -11,17 +11,36 @@ import type {
 declare namespace Components {
     namespace Parameters {
         export type ExecutionIdParam = string;
+        export type PhaseIdParam = string;
         export type SoftDeleteParam = boolean;
         export type TaskIdParam = string;
     }
     export interface PathParameters {
         ExecutionIdParam?: Parameters.ExecutionIdParam;
         TaskIdParam?: Parameters.TaskIdParam;
+        PhaseIdParam?: Parameters.PhaseIdParam;
     }
     export interface QueryParameters {
         SoftDeleteParam?: Parameters.SoftDeleteParam;
     }
     namespace Schemas {
+        export interface AnalyticsInfo {
+            started_at?: string; // date-time
+            in_progress_at?: string; // date-time
+            completed_at?: string; // date-time
+            /**
+             * The user which moved the task/phase to IN_PROGRESS state.
+             */
+            in_progress_by?: /* The user id */ UserId;
+            /**
+             * The user which moved the task/phase to COMPLETED state.
+             */
+            completed_by?: /* The user id */ UserId;
+            /**
+             * The user which moved the task/phase to SKIPPED state.
+             */
+            skipped_by?: /* The user id */ UserId;
+        }
         /**
          * The user ids
          */
@@ -76,13 +95,7 @@ declare namespace Components {
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
             assigned_to?: /* The user ids */ Assignees;
-            analytics: {
-                started_at?: string; // date-time
-                completed_at?: string; // date-time
-                in_progress_by?: /* The user id */ UserId;
-                completed_by?: /* The user id */ UserId;
-                skipped_by?: /* The user id */ UserId;
-            };
+            analytics: AnalyticsInfo;
             /**
              * Time when the task was created
              */
@@ -172,13 +185,7 @@ declare namespace Components {
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
             assigned_to?: /* The user ids */ Assignees;
-            analytics: {
-                started_at?: string; // date-time
-                completed_at?: string; // date-time
-                in_progress_by?: /* The user id */ UserId;
-                completed_by?: /* The user id */ UserId;
-                skipped_by?: /* The user id */ UserId;
-            };
+            analytics: AnalyticsInfo;
             /**
              * Time when the task was created
              */
@@ -211,8 +218,9 @@ declare namespace Components {
         export interface DueDateConfig {
             duration: number;
             unit: "minutes" | "hours" | "days" | "weeks" | "months";
-            type: "WORKFLOW_STARTED" | "TASK_FINISHED";
+            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED";
             task_id?: string;
+            phase_id?: string;
         }
         /**
          * set a Duedate for a step then a specific
@@ -220,8 +228,9 @@ declare namespace Components {
         export interface DynamicDueDate {
             numberOfUnits: number;
             timePeriod: "minutes" | "hours" | "days" | "weeks" | "months";
-            actionTypeCondition?: "WORKFLOW_STARTED" | "STEP_CLOSED";
+            actionTypeCondition?: "WORKFLOW_STARTED" | "STEP_CLOSED" | "PHASE_FINISHED";
             stepId?: string;
+            phaseId?: string;
         }
         /**
          * Details regarding ECP for the workflow step
@@ -240,6 +249,10 @@ declare namespace Components {
              * abc123
              */
             ConditionId;
+            /**
+             * Temporary MVP flag to indicate the negated condition of a binary decision task
+             */
+            not_met?: boolean;
         }
         /**
          * describe the requirement for a task to be enabled
@@ -252,6 +265,10 @@ declare namespace Components {
         export interface EntityRef {
             entity_id?: string;
             entity_schema?: string;
+            /**
+             * Flag to indicate if the entity is primary and should be used for evaluating the conditions of the tasks
+             */
+            is_primary?: boolean;
         }
         export interface ErrorResp {
             message?: string;
@@ -365,15 +382,17 @@ declare namespace Components {
             closing_reason_description?: string;
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            contexts?: FlowContext[];
+        }
+        export interface PatchPhaseReq {
+            name?: string;
             /**
-             * id of the user / partner user who is closing the workflow. For partner pass orgId_userId.
+             * example:
+             * 2021-04-27T12:00:00.000Z
              */
-            closed_by?: string;
-            contexts?: WorkflowContext[];
-            /**
-             * Timestamp when flow execution was completed
-             */
-            completed_at?: string; // date-time
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            assigned_to?: /* The user ids */ Assignees;
         }
         export interface PatchTaskReq {
             name?: string;
@@ -392,7 +411,7 @@ declare namespace Components {
             automation_config?: AutomationInfo;
         }
         export interface Phase {
-            id: string;
+            id: PhaseId;
             template_id: string;
             name: string;
             status?: SectionStatus;
@@ -407,11 +426,13 @@ declare namespace Components {
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             assigned_to?: /* The user ids */ Assignees;
+            analytics?: AnalyticsInfo;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
         }
+        export type PhaseId = string;
         export interface PhaseInEntity {
             phase_id?: string;
             phase_name?: string;
@@ -769,22 +790,7 @@ declare namespace Components {
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
             assigned_to?: /* The user ids */ Assignees;
-            analytics: {
-                started_at?: string; // date-time
-                completed_at?: string; // date-time
-                /**
-                 * The user which moved the task to the IN_PROGRESS state.
-                 */
-                in_progress_by?: /* The user id */ UserId;
-                /**
-                 * The user which moved the task to the COMPLETED state.
-                 */
-                completed_by?: /* The user id */ UserId;
-                /**
-                 * The user which moved the task to the SKIPPED state.
-                 */
-                skipped_by?: /* The user id */ UserId;
-            };
+            analytics: AnalyticsInfo;
             /**
              * Time when the task was created
              */
@@ -1497,6 +1503,23 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace PatchPhase {
+        namespace Parameters {
+            export type ExecutionId = string;
+            export type PhaseId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+            phase_id: Parameters.PhaseId;
+        }
+        export type RequestBody = Components.Schemas.PatchPhaseReq;
+        namespace Responses {
+            export type $200 = Components.Schemas.Phase;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace PatchTask {
         namespace Parameters {
             export type ExecutionId = string;
@@ -1765,6 +1788,16 @@ export interface OperationMethods {
     data?: Paths.PatchTask.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PatchTask.Responses.$200>
+  /**
+   * patchPhase - patchPhase
+   * 
+   * Apply updates to a phase within flow execution
+   */
+  'patchPhase'(
+    parameters?: Parameters<Paths.PatchPhase.PathParameters> | null,
+    data?: Paths.PatchPhase.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PatchPhase.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1963,10 +1996,23 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchTask.Responses.$200>
   }
+  ['/v2/flows/executions/{execution_id}/phases/{phase_id}']: {
+    /**
+     * patchPhase - patchPhase
+     * 
+     * Apply updates to a phase within flow execution
+     */
+    'patch'(
+      parameters?: Parameters<Paths.PatchPhase.PathParameters> | null,
+      data?: Paths.PatchPhase.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PatchPhase.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type AnalyticsInfo = Components.Schemas.AnalyticsInfo;
 export type Assignees = Components.Schemas.Assignees;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
 export type AutomationInfo = Components.Schemas.AutomationInfo;
@@ -1997,8 +2043,10 @@ export type LastEvaluatedKey = Components.Schemas.LastEvaluatedKey;
 export type ManualTask = Components.Schemas.ManualTask;
 export type Operator = Components.Schemas.Operator;
 export type PatchFlowReq = Components.Schemas.PatchFlowReq;
+export type PatchPhaseReq = Components.Schemas.PatchPhaseReq;
 export type PatchTaskReq = Components.Schemas.PatchTaskReq;
 export type Phase = Components.Schemas.Phase;
+export type PhaseId = Components.Schemas.PhaseId;
 export type PhaseInEntity = Components.Schemas.PhaseInEntity;
 export type SearchExecutionsReq = Components.Schemas.SearchExecutionsReq;
 export type SearchExecutionsResp = Components.Schemas.SearchExecutionsResp;

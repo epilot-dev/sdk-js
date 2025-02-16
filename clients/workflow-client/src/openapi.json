@@ -997,6 +997,77 @@
           }
         }
       }
+    },
+    "/v2/flows/executions/{execution_id}/phases/{phase_id}": {
+      "patch": {
+        "operationId": "patchPhase",
+        "summary": "patchPhase",
+        "description": "Apply updates to a phase within flow execution",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/PhaseIdParam"
+          }
+        ],
+        "requestBody": {
+          "description": "Patch Phase Payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchPhaseReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - when phase has been successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Phase"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1027,6 +1098,16 @@
         "required": true,
         "description": "Id of the task",
         "example": "7hj28a"
+      },
+      "PhaseIdParam": {
+        "in": "path",
+        "name": "phase_id",
+        "schema": {
+          "type": "string"
+        },
+        "required": true,
+        "description": "Id of the phase",
+        "example": "9gjs2952j"
       },
       "SoftDeleteParam": {
         "in": "query",
@@ -2206,10 +2287,14 @@
             "type": "string",
             "enum": [
               "WORKFLOW_STARTED",
-              "STEP_CLOSED"
+              "STEP_CLOSED",
+              "PHASE_FINISHED"
             ]
           },
           "stepId": {
+            "type": "string"
+          },
+          "phaseId": {
             "type": "string"
           }
         },
@@ -2310,20 +2395,11 @@
           "due_date_config": {
             "$ref": "#/components/schemas/DueDateConfig"
           },
-          "closed_by": {
-            "type": "string",
-            "description": "id of the user / partner user who is closing the workflow. For partner pass orgId_userId."
-          },
           "contexts": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/WorkflowContext"
+              "$ref": "#/components/schemas/FlowContext"
             }
-          },
-          "completed_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Timestamp when flow execution was completed"
           }
         }
       },
@@ -2506,8 +2582,16 @@
           },
           "entity_schema": {
             "type": "string"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "description": "Flag to indicate if the entity is primary and should be used for evaluating the conditions of the tasks",
+            "default": false
           }
         }
+      },
+      "PhaseId": {
+        "type": "string"
       },
       "TaskId": {
         "type": "string"
@@ -2614,29 +2698,7 @@
             "$ref": "#/components/schemas/Assignees"
           },
           "analytics": {
-            "type": "object",
-            "properties": {
-              "started_at": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "completed_at": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "in_progress_by": {
-                "$ref": "#/components/schemas/UserId",
-                "description": "The user which moved the task to the IN_PROGRESS state."
-              },
-              "completed_by": {
-                "$ref": "#/components/schemas/UserId",
-                "description": "The user which moved the task to the COMPLETED state."
-              },
-              "skipped_by": {
-                "$ref": "#/components/schemas/UserId",
-                "description": "The user which moved the task to the SKIPPED state."
-              }
-            }
+            "$ref": "#/components/schemas/AnalyticsInfo"
           },
           "created_at": {
             "type": "string",
@@ -2690,7 +2752,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "$ref": "#/components/schemas/PhaseId"
           },
           "template_id": {
             "type": "string"
@@ -2714,6 +2776,9 @@
           },
           "assigned_to": {
             "$ref": "#/components/schemas/Assignees"
+          },
+          "analytics": {
+            "$ref": "#/components/schemas/AnalyticsInfo"
           },
           "taxonomies": {
             "type": "array",
@@ -2743,6 +2808,10 @@
           },
           "condition_id": {
             "$ref": "#/components/schemas/ConditionId"
+          },
+          "not_met": {
+            "type": "boolean",
+            "description": "Temporary MVP flag to indicate the negated condition of a binary decision task"
           }
         },
         "required": [
@@ -2777,6 +2846,35 @@
         "required": [
           "flow_id"
         ]
+      },
+      "AnalyticsInfo": {
+        "type": "object",
+        "properties": {
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "in_progress_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "in_progress_by": {
+            "$ref": "#/components/schemas/UserId",
+            "description": "The user which moved the task/phase to IN_PROGRESS state."
+          },
+          "completed_by": {
+            "$ref": "#/components/schemas/UserId",
+            "description": "The user which moved the task/phase to COMPLETED state."
+          },
+          "skipped_by": {
+            "$ref": "#/components/schemas/UserId",
+            "description": "The user which moved the task/phase to SKIPPED state."
+          }
+        }
       },
       "ConditionId": {
         "description": "A locally unique identifier for the condition",
@@ -2950,10 +3048,14 @@
             "type": "string",
             "enum": [
               "WORKFLOW_STARTED",
-              "TASK_FINISHED"
+              "TASK_FINISHED",
+              "PHASE_FINISHED"
             ]
           },
           "task_id": {
+            "type": "string"
+          },
+          "phase_id": {
             "type": "string"
           }
         },
@@ -3027,6 +3129,24 @@
           },
           "automation_config": {
             "$ref": "#/components/schemas/AutomationInfo"
+          }
+        }
+      },
+      "PatchPhaseReq": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "due_date": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "due_date_config": {
+            "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "assigned_to": {
+            "$ref": "#/components/schemas/Assignees"
           }
         }
       }
