@@ -5501,13 +5501,11 @@
           },
           "fixed_value": {
             "description": "Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.",
-            "type": "number",
-            "nullable": true
+            "type": "number"
           },
           "fixed_value_decimal": {
             "description": "Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.",
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "fixed_value_currency": {
             "description": "Use if type is set to fixed. Three-letter ISO currency code, in lowercase.",
@@ -5515,8 +5513,7 @@
               {
                 "$ref": "#/components/schemas/Currency"
               }
-            ],
-            "nullable": true
+            ]
           },
           "cashback_period": {
             "type": "string",

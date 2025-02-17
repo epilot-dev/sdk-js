@@ -281,22 +281,22 @@ declare namespace Components {
             /**
              * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
              */
-            fixed_value?: number | null;
+            fixed_value?: number;
             /**
              * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
              */
-            fixed_value_decimal?: string | null;
+            fixed_value_decimal?: string;
             /**
              * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
              */
-            fixed_value_currency?: null & (/* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+            fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
              *
              * example:
              * EUR
              */
-            Currency);
+            Currency;
             /**
              * The cashback period, for now it's limited to either 0 months or 12 months
              */
@@ -2304,22 +2304,22 @@ declare namespace Components {
             /**
              * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
              */
-            fixed_value?: number | null;
+            fixed_value?: number;
             /**
              * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
              */
-            fixed_value_decimal?: string | null;
+            fixed_value_decimal?: string;
             /**
              * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
              */
-            fixed_value_currency?: null & (/* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+            fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
              *
              * example:
              * EUR
              */
-            Currency);
+            Currency;
             /**
              * The cashback period, for now it's limited to either 0 months or 12 months
              */
@@ -2424,22 +2424,22 @@ declare namespace Components {
             /**
              * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
              */
-            fixed_value?: number | null;
+            fixed_value?: number;
             /**
              * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
              */
-            fixed_value_decimal?: string | null;
+            fixed_value_decimal?: string;
             /**
              * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
              */
-            fixed_value_currency?: null & (/* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+            fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
              *
              * example:
              * EUR
              */
-            Currency);
+            Currency;
             /**
              * The cashback period, for now it's limited to either 0 months or 12 months
              */
