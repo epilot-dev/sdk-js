@@ -141,6 +141,12 @@
                 "properties": {
                   "line_items": {
                     "$ref": "#/components/schemas/PriceItemsDto"
+                  },
+                  "redeemed_promos": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/RedeemedPromo"
+                    }
                   }
                 }
               },
@@ -3798,6 +3804,12 @@
               }
             ]
           },
+          "redeemed_promos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedeemedPromo"
+            }
+          },
           "mode": {
             "$ref": "#/components/schemas/CheckoutMode"
           }
@@ -4581,7 +4593,8 @@
             "enum": [
               "0",
               "12"
-            ]
+            ],
+            "nullable": true
           },
           "after_cashback_amount_total": {
             "type": "integer",
@@ -4774,7 +4787,8 @@
             "enum": [
               "0",
               "12"
-            ]
+            ],
+            "nullable": true
           },
           "amount_total": {
             "type": "integer",
@@ -4941,6 +4955,12 @@
           },
           "currency": {
             "$ref": "#/components/schemas/Currency"
+          },
+          "redeemed_promos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedeemedPromo"
+            }
           }
         }
       },
@@ -4959,47 +4979,11 @@
       "PricingDetailsResponse": {
         "type": "object",
         "description": "The result from the calculation of a set of price items.",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/PriceItem"
-                },
-                {
-                  "$ref": "#/components/schemas/CompositePriceItem"
-                }
-              ]
-            }
-          },
-          "amount_subtotal": {
-            "type": "integer",
-            "description": "Total of all items before (discounts or) taxes are applied."
-          },
-          "amount_total": {
-            "type": "integer",
-            "description": "Total of all items after (discounts and) taxes are applied."
-          },
-          "unit_amount_gross": {
-            "type": "integer",
-            "description": "The unit gross amount value."
-          },
-          "unit_amount_net": {
-            "type": "integer",
-            "description": "The unit net amount value."
-          },
-          "amount_tax": {
-            "type": "integer",
-            "description": "This is the sum of all the price item tax amounts."
-          },
-          "total_details": {
-            "$ref": "#/components/schemas/TotalDetails"
-          },
-          "currency": {
-            "$ref": "#/components/schemas/Currency"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PricingDetails"
           }
-        }
+        ]
       },
       "BillingPeriod": {
         "type": "string",
@@ -5489,10 +5473,12 @@
             "description": "The date the coupon was last updated"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "type": {
             "type": "string",
@@ -5510,15 +5496,18 @@
           },
           "percentage_value": {
             "type": "string",
-            "description": "Use if type is set to percentage. The percentage to be discounted, represented as a whole integer."
+            "description": "Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.",
+            "nullable": true
           },
           "fixed_value": {
             "description": "Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.",
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "fixed_value_decimal": {
             "description": "Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.",
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "fixed_value_currency": {
             "description": "Use if type is set to fixed. Three-letter ISO currency code, in lowercase.",
@@ -5526,7 +5515,8 @@
               {
                 "$ref": "#/components/schemas/Currency"
               }
-            ]
+            ],
+            "nullable": true
           },
           "cashback_period": {
             "type": "string",
@@ -5534,7 +5524,8 @@
             "enum": [
               "0",
               "12"
-            ]
+            ],
+            "nullable": true
           },
           "active": {
             "type": "boolean"

@@ -270,33 +270,33 @@ declare namespace Components {
              * The date the coupon was last updated
              */
             _updated_at: string; // date-time
-            name: string;
-            description?: string;
+            name: string | null;
+            description?: string | null;
             type?: "fixed" | "percentage";
             category?: "discount" | "cashback";
             /**
              * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
              */
-            percentage_value?: string;
+            percentage_value?: string | null;
             /**
              * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
              */
-            fixed_value?: number;
+            fixed_value?: number | null;
             /**
              * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
              */
-            fixed_value_decimal?: string;
+            fixed_value_decimal?: string | null;
             /**
              * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
              */
-            fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+            fixed_value_currency?: null & (/* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
              *
              * example:
              * EUR
              */
-            Currency;
+            Currency);
             /**
              * The cashback period, for now it's limited to either 0 months or 12 months
              */
@@ -1317,6 +1317,7 @@ declare namespace Components {
          */
         export interface CheckoutCart {
             cart?: string | /* A valid cart payload from a client. */ CartDto;
+            redeemed_promos?: RedeemedPromo[];
             mode?: /* The checkout mode for the cart checkout. */ CheckoutMode;
         }
         /**
@@ -2292,33 +2293,33 @@ declare namespace Components {
              * The date the coupon was last updated
              */
             _updated_at: string; // date-time
-            name: string;
-            description?: string;
+            name: string | null;
+            description?: string | null;
             type?: "fixed" | "percentage";
             category?: "discount" | "cashback";
             /**
              * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
              */
-            percentage_value?: string;
+            percentage_value?: string | null;
             /**
              * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
              */
-            fixed_value?: number;
+            fixed_value?: number | null;
             /**
              * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
              */
-            fixed_value_decimal?: string;
+            fixed_value_decimal?: string | null;
             /**
              * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
              */
-            fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+            fixed_value_currency?: null & (/* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
              *
              * example:
              * EUR
              */
-            Currency;
+            Currency);
             /**
              * The cashback period, for now it's limited to either 0 months or 12 months
              */
@@ -2412,33 +2413,33 @@ declare namespace Components {
              * The date the coupon was last updated
              */
             _updated_at: string; // date-time
-            name: string;
-            description?: string;
+            name: string | null;
+            description?: string | null;
             type?: "fixed" | "percentage";
             category?: "discount" | "cashback";
             /**
              * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
              */
-            percentage_value?: string;
+            percentage_value?: string | null;
             /**
              * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
              */
-            fixed_value?: number;
+            fixed_value?: number | null;
             /**
              * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
              */
-            fixed_value_decimal?: string;
+            fixed_value_decimal?: string | null;
             /**
              * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
              */
-            fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+            fixed_value_currency?: null & (/* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
              *
              * example:
              * EUR
              */
-            Currency;
+            Currency);
             /**
              * The cashback period, for now it's limited to either 0 months or 12 months
              */
@@ -4421,6 +4422,7 @@ declare namespace Components {
              * EUR
              */
             Currency;
+            redeemed_promos?: RedeemedPromo[];
         }
         /**
          * The result from the calculation of a set of price items.
@@ -4470,6 +4472,7 @@ declare namespace Components {
              * EUR
              */
             Currency;
+            redeemed_promos?: RedeemedPromo[];
         }
         /**
          * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
@@ -5278,6 +5281,7 @@ declare namespace Paths {
     namespace $CalculatePricingDetails {
         export interface RequestBody {
             line_items?: /* A valid set of product prices, quantities, (discounts) and taxes from a client. */ Components.Schemas.PriceItemsDto;
+            redeemed_promos?: Components.Schemas.RedeemedPromo[];
         }
         namespace Responses {
             export type $200 = /* The result from the calculation of a set of price items. */ Components.Schemas.PricingDetailsResponse;
