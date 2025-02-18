@@ -5,6 +5,11 @@
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
+  "servers": [
+    {
+      "url": "https://notes.sls.epilot.io"
+    }
+  ],
   "tags": [
     {
       "name": "Notes"
@@ -331,26 +336,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "type": {
-                        "$ref": "#/components/schemas/ContextType"
-                      },
-                      "context": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/Entity"
-                          },
-                          {
-                            "$ref": "#/components/schemas/WorkflowExecution"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "type",
-                      "context"
-                    ]
+                    "$ref": "#/components/schemas/NoteContexts"
                   }
                 }
               }
@@ -1032,6 +1018,29 @@
           "results"
         ]
       },
+      "NoteContexts": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ContextType"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Entity"
+              },
+              {
+                "$ref": "#/components/schemas/WorkflowExecution"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "context"
+        ],
+        "description": "List of resolved Entity and non-Entity contexts attached to a given Note."
+      },
       "WorkflowExecution": {
         "type": "object",
         "properties": {
@@ -1057,10 +1066,5 @@
         "description": "Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data"
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://notes.sls.epilot.io"
-    }
-  ]
+  }
 }

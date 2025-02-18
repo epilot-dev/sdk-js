@@ -142,6 +142,13 @@ declare namespace Components {
             pinned_at?: string; // date-time
         }
         /**
+         * List of resolved Entity and non-Entity contexts attached to a given Note.
+         */
+        export interface NoteContexts {
+            type: ContextType;
+            context: /* Base Entity schema */ Entity | /* Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data */ WorkflowExecution;
+        }
+        /**
          * A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place.
          */
         export interface NoteEntity {
@@ -493,10 +500,7 @@ declare namespace Paths {
             id: /* The Entity ID of the Note entry to get contexts for */ Parameters.Id;
         }
         namespace Responses {
-            export type $200 = {
-                type: Components.Schemas.ContextType;
-                context: /* Base Entity schema */ Components.Schemas.Entity | /* Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data */ Components.Schemas.WorkflowExecution;
-            }[];
+            export type $200 = /* List of resolved Entity and non-Entity contexts attached to a given Note. */ Components.Schemas.NoteContexts[];
         }
     }
     namespace GetNotesByContext {
@@ -759,6 +763,7 @@ export type ContextType = Components.Schemas.ContextType;
 export type Entity = Components.Schemas.Entity;
 export type EntitySlug = Components.Schemas.EntitySlug;
 export type NonHydratedNoteEntity = Components.Schemas.NonHydratedNoteEntity;
+export type NoteContexts = Components.Schemas.NoteContexts;
 export type NoteEntity = Components.Schemas.NoteEntity;
 export type NoteEntityParent = Components.Schemas.NoteEntityParent;
 export type NoteGetRequestResponse = Components.Schemas.NoteGetRequestResponse;
