@@ -535,6 +535,16 @@ declare namespace Components {
             updated_at?: string; // date-time
         }
         export type PlanChanges = ("create" | "update" | "no-op" | "delete")[];
+        export interface PutManifestPayload {
+            /**
+             * Name of the source blueprint
+             */
+            source_blueprint_name: string;
+            /**
+             * Markdown content of the manifest
+             */
+            markdown?: string;
+        }
         export interface ResourceNode {
             /**
              * ID of the resource
@@ -964,7 +974,7 @@ declare namespace Paths {
         export interface PathParameters {
             manifest_id: Parameters.ManifestId;
         }
-        export type RequestBody = Components.Schemas.Manifest;
+        export type RequestBody = Components.Schemas.PutManifestPayload;
         namespace Responses {
             export type $200 = Components.Schemas.Manifest;
         }
@@ -1248,6 +1258,7 @@ export type ManifestItem = Components.Schemas.ManifestItem;
 export type ManifestSource = Components.Schemas.ManifestSource;
 export type ManifestTimestampFields = Components.Schemas.ManifestTimestampFields;
 export type PlanChanges = Components.Schemas.PlanChanges;
+export type PutManifestPayload = Components.Schemas.PutManifestPayload;
 export type ResourceNode = Components.Schemas.ResourceNode;
 export type ResourceNodeType = Components.Schemas.ResourceNodeType;
 export type ResourceReplacement = Components.Schemas.ResourceReplacement;

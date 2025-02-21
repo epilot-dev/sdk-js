@@ -572,7 +572,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Manifest"
+                "$ref": "#/components/schemas/PutManifestPayload"
               }
             }
           }
@@ -1256,6 +1256,22 @@
         "required": [
           "originalAddress",
           "replacementId"
+        ]
+      },
+      "PutManifestPayload": {
+        "type": "object",
+        "properties": {
+          "source_blueprint_name": {
+            "type": "string",
+            "description": "Name of the source blueprint"
+          },
+          "markdown": {
+            "type": "string",
+            "description": "Markdown content of the manifest"
+          }
+        },
+        "required": [
+          "source_blueprint_name"
         ]
       }
     },
