@@ -104,6 +104,22 @@
         ],
         "responses": {}
       },
+      "put": {
+        "operationId": "updateManifest",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
       "delete": {
         "operationId": "deleteManifest",
         "parameters": [

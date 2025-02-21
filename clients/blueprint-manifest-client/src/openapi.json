@@ -551,6 +551,45 @@
           }
         }
       },
+      "put": {
+        "operationId": "updateManifest",
+        "summary": "updateManifest",
+        "description": "Update an installed manifest\n",
+        "tags": [
+          "Manifests"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id",
+            "schema": {
+              "$ref": "#/components/schemas/ManifestID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Manifest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated Manifest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Manifest"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "operationId": "deleteManifest",
         "summary": "deleteManifest",
@@ -1208,6 +1247,10 @@
           "replacementId": {
             "type": "string",
             "description": "ID of the resource that will replace the original"
+          },
+          "replacementName": {
+            "type": "string",
+            "description": "Name of the resource that will replace the original"
           }
         },
         "required": [

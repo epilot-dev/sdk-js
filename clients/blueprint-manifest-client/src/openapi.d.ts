@@ -577,6 +577,10 @@ declare namespace Components {
              * ID of the resource that will replace the original
              */
             replacementId: string;
+            /**
+             * Name of the resource that will replace the original
+             */
+            replacementName?: string;
         }
         export interface RootResourceNode {
             /**
@@ -948,6 +952,23 @@ declare namespace Paths {
             }
         }
     }
+    namespace UpdateManifest {
+        namespace Parameters {
+            export type ManifestId = /**
+             * ID of an imported / installed manifest
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.ManifestID;
+        }
+        export interface PathParameters {
+            manifest_id: Parameters.ManifestId;
+        }
+        export type RequestBody = Components.Schemas.Manifest;
+        namespace Responses {
+            export type $200 = Components.Schemas.Manifest;
+        }
+    }
     namespace UploadManifest {
         export type RequestBody = Components.Schemas.UploadFilePayload;
         namespace Responses {
@@ -1051,6 +1072,17 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetManifest.Responses.$200>
+  /**
+   * updateManifest - updateManifest
+   * 
+   * Update an installed manifest
+   * 
+   */
+  'updateManifest'(
+    parameters?: Parameters<Paths.UpdateManifest.PathParameters> | null,
+    data?: Paths.UpdateManifest.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateManifest.Responses.$200>
   /**
    * deleteManifest - deleteManifest
    * 
@@ -1169,6 +1201,17 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetManifest.Responses.$200>
+    /**
+     * updateManifest - updateManifest
+     * 
+     * Update an installed manifest
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateManifest.PathParameters> | null,
+      data?: Paths.UpdateManifest.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateManifest.Responses.$200>
     /**
      * deleteManifest - deleteManifest
      * 
