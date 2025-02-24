@@ -10,6 +10,7 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export type ActionSchedule = ImmediateSchedule | DelayedSchedule | RelativeSchedule;
         /**
          * Configuration for automation execution to run
          */
@@ -44,6 +45,8 @@ declare namespace Components {
             phase_id?: string;
             task_type: TaskType;
             automation_config: /* Configuration for automation execution to run */ AutomationConfig;
+            trigger_mode?: TriggerMode;
+            schedule?: ActionSchedule;
         }
         export interface ChangeReasonStatusReq {
             status: ClosingReasonsStatus;
@@ -161,12 +164,17 @@ declare namespace Components {
         export interface DefinitionNotFoundResp {
             message?: string;
         }
+        export interface DelayedSchedule {
+            mode: "delayed";
+            duration: number;
+            unit: TimeUnit;
+        }
         /**
          * Set due date for the task based on a dynamic condition
          */
         export interface DueDateConfig {
             duration: number;
-            unit: "minutes" | "hours" | "days" | "weeks" | "months";
+            unit: TimeUnit;
             type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED";
             task_id?: string;
             phase_id?: string;
@@ -176,7 +184,7 @@ declare namespace Components {
          */
         export interface DynamicDueDate {
             numberOfUnits: number;
-            timePeriod: "minutes" | "hours" | "days" | "weeks" | "months";
+            timePeriod: TimeUnit;
             actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSED" | "PHASE_FINISHED";
             stepId?: string;
             phaseId?: string;
@@ -279,6 +287,9 @@ declare namespace Components {
         export interface FlowTemplatesList {
             results: FlowTemplate[];
         }
+        export interface ImmediateSchedule {
+            mode?: "immediate";
+        }
         export type ItemType = "STEP" | "SECTION";
         export interface ManualTask {
             id: string;
@@ -324,6 +335,27 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+        }
+        export interface RelativeSchedule {
+            mode: "relative";
+            direction: "before" | "after";
+            duration: number;
+            unit: TimeUnit;
+            reference: {
+                /**
+                 * The id of the entity / workflow / task, based on the origin of the schedule
+                 */
+                id: string;
+                origin: "flow_started" | "task_completed" | "trigger_entity_attribute";
+                /**
+                 * The schema of the entity
+                 */
+                schema?: string;
+                /**
+                 * An entity attribute that identifies a date / datetime
+                 */
+                attribute?: string;
+            };
         }
         /**
          * A group of Steps that define the progress of the Workflow
@@ -439,6 +471,8 @@ declare namespace Components {
             task_type: TaskType;
         }
         export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION";
+        export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months";
+        export type TriggerMode = "manual" | "automatic";
         export interface UpdateEntityAttributes {
             source: "workflow_status" | "current_section" | "current_step";
             target: {
@@ -1207,6 +1241,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
 export type AutomationTask = Components.Schemas.AutomationTask;
 export type ChangeReasonStatusReq = Components.Schemas.ChangeReasonStatusReq;
@@ -1220,6 +1255,7 @@ export type Condition = Components.Schemas.Condition;
 export type CreateFlowTemplate = Components.Schemas.CreateFlowTemplate;
 export type DecisionTask = Components.Schemas.DecisionTask;
 export type DefinitionNotFoundResp = Components.Schemas.DefinitionNotFoundResp;
+export type DelayedSchedule = Components.Schemas.DelayedSchedule;
 export type DueDateConfig = Components.Schemas.DueDateConfig;
 export type DynamicDueDate = Components.Schemas.DynamicDueDate;
 export type ECPDetails = Components.Schemas.ECPDetails;
@@ -1230,11 +1266,13 @@ export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type FlowTemplate = Components.Schemas.FlowTemplate;
 export type FlowTemplateId = Components.Schemas.FlowTemplateId;
 export type FlowTemplatesList = Components.Schemas.FlowTemplatesList;
+export type ImmediateSchedule = Components.Schemas.ImmediateSchedule;
 export type ItemType = Components.Schemas.ItemType;
 export type ManualTask = Components.Schemas.ManualTask;
 export type MaxAllowedLimit = Components.Schemas.MaxAllowedLimit;
 export type Operator = Components.Schemas.Operator;
 export type Phase = Components.Schemas.Phase;
+export type RelativeSchedule = Components.Schemas.RelativeSchedule;
 export type Section = Components.Schemas.Section;
 export type Statement = Components.Schemas.Statement;
 export type Step = Components.Schemas.Step;
@@ -1245,5 +1283,7 @@ export type StepType = Components.Schemas.StepType;
 export type Task = Components.Schemas.Task;
 export type TaskBase = Components.Schemas.TaskBase;
 export type TaskType = Components.Schemas.TaskType;
+export type TimeUnit = Components.Schemas.TimeUnit;
+export type TriggerMode = Components.Schemas.TriggerMode;
 export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
 export type WorkflowDefinition = Components.Schemas.WorkflowDefinition;
