@@ -34,7 +34,7 @@
     },
     {
       "name": "Spot Market API",
-      "description": "Proviodes endpoints to fetch (historic) spot market data.\n"
+      "description": "Provides endpoints to fetch (historic) spot market data.\n"
     },
     {
       "name": "External Integrations API",
@@ -1199,7 +1199,7 @@
     },
     "/v1/public/historicMarketPrices": {
       "get": {
-        "description": "BETA: Get historic energy prices in a given time period\n",
+        "description": "Get a series of historic energy prices for a given time period, market and bidding zone.",
         "operationId": "$historicMarketPrices",
         "summary": "historicMarketPrices",
         "tags": [
@@ -1215,13 +1215,28 @@
             "in": "query",
             "name": "market",
             "schema": {
-              "type": "string",
-              "enum": [
-                "day_ahead"
-              ]
+              "$ref": "#/components/schemas/SpotMarketType"
             },
             "required": true,
             "description": "Market to use. For now, only day ahead prices are supported."
+          },
+          {
+            "in": "query",
+            "name": "bidding_zone",
+            "schema": {
+              "$ref": "#/components/schemas/SpotMarketBiddingZone"
+            },
+            "required": true,
+            "description": "Bidding zone to use. For now, only AT and DE-LU are supported."
+          },
+          {
+            "in": "query",
+            "name": "frequency",
+            "schema": {
+              "$ref": "#/components/schemas/SpotMarketDataFrequency"
+            },
+            "required": true,
+            "description": "Frequency of the price data points in ISO 8601 format."
           },
           {
             "in": "query",
@@ -1231,7 +1246,7 @@
               "format": "date"
             },
             "required": true,
-            "description": "Start date for price data (YYYY-MM-DDD)."
+            "description": "Start of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DDD) the timzone of the bidding zone is used.\n"
           },
           {
             "in": "query",
@@ -1241,21 +1256,7 @@
               "format": "date"
             },
             "required": true,
-            "description": "End date for price data (YYYY-MM-DDD)."
-          },
-          {
-            "in": "query",
-            "name": "frequency",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "hourly",
-                "daily",
-                "monthly"
-              ]
-            },
-            "required": true,
-            "description": "Frequency of the price data points"
+            "description": "End of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DDD) the timzone of the bidding zone is used.\n"
           }
         ],
         "responses": {
@@ -1264,50 +1265,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "market": {
-                      "type": "string",
-                      "enum": [
-                        "day_ahead"
-                      ]
-                    },
-                    "frequency": {
-                      "type": "string",
-                      "enum": [
-                        "hourly",
-                        "daily",
-                        "monthly"
-                      ]
-                    },
-                    "prices": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "timestamp": {
-                            "type": "string",
-                            "format": "date-time",
-                            "description": "ISO 8601 timestamp of the price record in UTC."
-                          },
-                          "unit_amount": {
-                            "type": "integer",
-                            "description": "Cost in cents, e.g. 123 for 12,3 Cents = 0.123€.",
-                            "example": 123
-                          },
-                          "unit_amount_decimal": {
-                            "type": "string",
-                            "description": "Cost in decimal format, e.g. 0.123€.",
-                            "example": "0.123"
-                          }
-                        },
-                        "required": [
-                          "timestamp",
-                          "unit_amount"
-                        ]
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/HistoricMarketPricesResult"
                 }
               }
             }
@@ -1327,7 +1285,7 @@
     },
     "/v1/public/averageMarketPrice": {
       "get": {
-        "description": "BETA: Get average energy prices in a given time period\n",
+        "description": "Get the average energy prices for a given time period, market and bidding zone.",
         "operationId": "$averageMarketPrice",
         "summary": "averageMarketPrice",
         "tags": [
@@ -1343,27 +1301,39 @@
             "in": "query",
             "name": "market",
             "schema": {
-              "type": "string",
-              "enum": [
-                "day_ahead"
-              ]
+              "$ref": "#/components/schemas/SpotMarketType"
             },
             "required": true,
             "description": "Market to use. For now, only day ahead prices are supported."
           },
           {
             "in": "query",
-            "name": "interval",
+            "name": "bidding_zone",
             "schema": {
-              "type": "string",
-              "enum": [
-                "previous_week",
-                "previous_month",
-                "previous_year"
-              ]
+              "$ref": "#/components/schemas/SpotMarketBiddingZone"
             },
             "required": true,
-            "description": "Interval for the average."
+            "description": "Bidding zone to use. For now, only AT and DE-LU are supported."
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "required": true,
+            "description": "Start of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DDD) the timzone of the bidding zone is used.\n"
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "required": true,
+            "description": "End of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DDD) the timzone of the bidding zone is used.\n"
           }
         ],
         "responses": {
@@ -1372,48 +1342,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "market": {
-                      "type": "string",
-                      "enum": [
-                        "day_ahead"
-                      ]
-                    },
-                    "interval": {
-                      "type": "string",
-                      "enum": [
-                        "previous_week",
-                        "previous_month",
-                        "previous_year"
-                      ]
-                    },
-                    "price": {
-                      "type": "object",
-                      "properties": {
-                        "timestamp": {
-                          "type": "string",
-                          "format": "date-time",
-                          "description": "ISO 8601 timestamp of the price record in UTC."
-                        },
-                        "unit_amount": {
-                          "type": "integer",
-                          "description": "Cost in Cents, e.g. 123 for 12,3 Cents = 0.123€.",
-                          "example": 123
-                        },
-                        "unit_amount_decimal": {
-                          "type": "string",
-                          "description": "Cost in decimal format, e.g. 0.123€.",
-                          "example": "0.123"
-                        }
-                      },
-                      "required": [
-                        "timestamp",
-                        "unit_amount",
-                        "unit_amount_decimal"
-                      ]
-                    }
-                  }
+                  "$ref": "#/components/schemas/AverageMarketPriceResult"
                 }
               }
             }
@@ -2060,6 +1989,13 @@
           "name": {
             "type": "string",
             "description": "The product main name"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The product categories"
           },
           "feature": {
             "type": "array",
@@ -3030,6 +2966,20 @@
           }
         }
       },
+      "ExternalPriceMetadata": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AverageMarketPriceResult"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "inputs": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
       "ExternalFeeMappings": {
         "type": "array",
         "items": {
@@ -3611,6 +3561,105 @@
           "breakdown"
         ]
       },
+      "SpotMarketBiddingZone": {
+        "description": "The bidding zone for a spot market price.",
+        "type": "string",
+        "enum": [
+          "AT",
+          "DE-LU"
+        ]
+      },
+      "SpotMarketType": {
+        "description": "The market for a spot market price.",
+        "type": "string",
+        "enum": [
+          "day_ahead"
+        ]
+      },
+      "SpotMarketDataFrequency": {
+        "description": "The aggregation frequency for a series of spot market price data.",
+        "type": "string",
+        "enum": [
+          "PT15M",
+          "PT1H",
+          "P1D",
+          "P1M"
+        ]
+      },
+      "HistoricMarketPricesResult": {
+        "type": "object",
+        "properties": {
+          "market": {
+            "$ref": "#/components/schemas/SpotMarketType"
+          },
+          "bidding_zone": {
+            "$ref": "#/components/schemas/SpotMarketBiddingZone"
+          },
+          "prices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketPriceRecord"
+            }
+          }
+        },
+        "required": [
+          "market",
+          "bidding_zone",
+          "prices"
+        ]
+      },
+      "AverageMarketPriceResult": {
+        "type": "object",
+        "properties": {
+          "market": {
+            "$ref": "#/components/schemas/SpotMarketType"
+          },
+          "bidding_zone": {
+            "$ref": "#/components/schemas/SpotMarketBiddingZone"
+          },
+          "price": {
+            "$ref": "#/components/schemas/MarketPriceRecord"
+          },
+          "_meta": {
+            "$ref": "#/components/schemas/SignatureMeta"
+          }
+        },
+        "required": [
+          "market",
+          "bidding_zone",
+          "price"
+        ]
+      },
+      "MarketPriceRecord": {
+        "description": "A market price at a given point in time.",
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the price record in UTC."
+          },
+          "unit_amount": {
+            "type": "integer",
+            "description": "Cost in Cents, e.g. 123 for 12,3 Cents = 0.123€.",
+            "example": 12.3
+          },
+          "unit_amount_decimal": {
+            "type": "string",
+            "description": "Cost in decimal format, e.g. 0.123€.",
+            "example": "0.123"
+          },
+          "unit_amount_currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        },
+        "required": [
+          "timestamp",
+          "unit_amount",
+          "unit_amount_decimal",
+          "unit_amount_currency"
+        ]
+      },
       "BasicAuthCredentials": {
         "description": "The basic auth credentials",
         "type": "object",
@@ -3919,6 +3968,10 @@
           "external_fees_metadata": {
             "description": "External fees metadata information required to compute totals, for some pricing models",
             "$ref": "#/components/schemas/ExternalFeeMetadata"
+          },
+          "external_price_metadata": {
+            "description": "External price metadata information required to compute totals, for some pricing models",
+            "$ref": "#/components/schemas/ExternalPriceMetadata"
           },
           "_immutable_pricing_details": {
             "description": "Immutable pricing details for external products/prices",

@@ -216,6 +216,12 @@ declare namespace Components {
                 };
             }[];
         }
+        export interface AverageMarketPriceResult {
+            market: /* The market for a spot market price. */ SpotMarketType;
+            bidding_zone: /* The bidding zone for a spot market price. */ SpotMarketBiddingZone;
+            price: /* A market price at a given point in time. */ MarketPriceRecord;
+            _meta?: /* Signature meta data payload */ SignatureMeta;
+        }
         /**
          * The coupon configuration
          * example:
@@ -456,6 +462,10 @@ declare namespace Components {
                  * The product main name
                  */
                 name?: string;
+                /**
+                 * The product categories
+                 */
+                categories?: string[];
                 feature?: {
                     /**
                      * An arbitrary set of tags attached to a feature
@@ -769,6 +779,10 @@ declare namespace Components {
                  * The product main name
                  */
                 name?: string;
+                /**
+                 * The product categories
+                 */
+                categories?: string[];
                 feature?: {
                     /**
                      * An arbitrary set of tags attached to a feature
@@ -911,6 +925,10 @@ declare namespace Components {
                  * The product main name
                  */
                 name?: string;
+                /**
+                 * The product categories
+                 */
+                categories?: string[];
                 feature?: {
                     /**
                      * An arbitrary set of tags attached to a feature
@@ -989,6 +1007,7 @@ declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            external_price_metadata?: ExternalPriceMetadata;
             _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
              * The ids of the coupons applicable to the price item
@@ -1543,6 +1562,10 @@ declare namespace Components {
                  * The product main name
                  */
                 name?: string;
+                /**
+                 * The product categories
+                 */
+                categories?: string[];
                 feature?: {
                     /**
                      * An arbitrary set of tags attached to a feature
@@ -1865,6 +1888,10 @@ declare namespace Components {
                  * The product main name
                  */
                 name?: string;
+                /**
+                 * The product categories
+                 */
+                categories?: string[];
                 feature?: {
                     /**
                      * An arbitrary set of tags attached to a feature
@@ -1943,6 +1970,7 @@ declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            external_price_metadata?: ExternalPriceMetadata;
             _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
              * The ids of the coupons applicable to the price item
@@ -2652,6 +2680,15 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
+        export interface ExternalPriceMetadata {
+            market: /* The market for a spot market price. */ SpotMarketType;
+            bidding_zone: /* The bidding zone for a spot market price. */ SpotMarketBiddingZone;
+            price: /* A market price at a given point in time. */ MarketPriceRecord;
+            _meta?: /* Signature meta data payload */ SignatureMeta;
+            inputs?: {
+                [name: string]: any;
+            };
+        }
         export interface File {
             [name: string]: any;
             _id: string;
@@ -2675,6 +2712,11 @@ declare namespace Components {
          * The concession type for gas
          */
         export type GasConcessionType = "standard" | "special";
+        export interface HistoricMarketPricesResult {
+            market: /* The market for a spot market price. */ SpotMarketType;
+            bidding_zone: /* The bidding zone for a spot market price. */ SpotMarketBiddingZone;
+            prices: /* A market price at a given point in time. */ MarketPriceRecord[];
+        }
         export type IntegrationCredentialsResult = /* The basic auth credentials */ BasicAuthCredentials;
         export type IntegrationId = "getag" | "ikom";
         export interface JourneyContext {
@@ -2741,6 +2783,35 @@ declare namespace Components {
                     [name: string]: any;
                 };
             }[];
+        }
+        /**
+         * A market price at a given point in time.
+         */
+        export interface MarketPriceRecord {
+            /**
+             * ISO 8601 timestamp of the price record in UTC.
+             */
+            timestamp: string; // date-time
+            /**
+             * Cost in Cents, e.g. 123 for 12,3 Cents = 0.123€.
+             * example:
+             * 12.3
+             */
+            unit_amount: number;
+            /**
+             * Cost in decimal format, e.g. 0.123€.
+             * example:
+             * 0.123
+             */
+            unit_amount_decimal: string;
+            unit_amount_currency: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
         }
         /**
          * Describes how to compute the markup per period. Either `per_unit`, `tiered_volume` or `tiered_flatfee`.
@@ -3654,6 +3725,10 @@ declare namespace Components {
                  * The product main name
                  */
                 name?: string;
+                /**
+                 * The product categories
+                 */
+                categories?: string[];
                 feature?: {
                     /**
                      * An arbitrary set of tags attached to a feature
@@ -3986,6 +4061,10 @@ declare namespace Components {
                  * The product main name
                  */
                 name?: string;
+                /**
+                 * The product categories
+                 */
+                categories?: string[];
                 feature?: {
                     /**
                      * An arbitrary set of tags attached to a feature
@@ -4064,6 +4143,7 @@ declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            external_price_metadata?: ExternalPriceMetadata;
             _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
              * The ids of the coupons applicable to the price item
@@ -4516,6 +4596,10 @@ declare namespace Components {
              * The product main name
              */
             name?: string;
+            /**
+             * The product categories
+             */
+            categories?: string[];
             feature?: {
                 /**
                  * An arbitrary set of tags attached to a feature
@@ -4971,6 +5055,18 @@ declare namespace Components {
             timestamp: number;
         }
         /**
+         * The bidding zone for a spot market price.
+         */
+        export type SpotMarketBiddingZone = "AT" | "DE-LU";
+        /**
+         * The aggregation frequency for a series of spot market price data.
+         */
+        export type SpotMarketDataFrequency = "PT15M" | "PT1H" | "P1D" | "P1M";
+        /**
+         * The market for a spot market price.
+         */
+        export type SpotMarketType = "day_ahead";
+        /**
          * The street entity
          */
         export interface Street {
@@ -5245,36 +5341,19 @@ declare namespace Paths {
     }
     namespace $AverageMarketPrice {
         namespace Parameters {
-            export type Interval = "previous_week" | "previous_month" | "previous_year";
-            export type Market = "day_ahead";
+            export type BiddingZone = /* The bidding zone for a spot market price. */ Components.Schemas.SpotMarketBiddingZone;
+            export type From = string; // date
+            export type Market = /* The market for a spot market price. */ Components.Schemas.SpotMarketType;
+            export type To = string; // date
         }
         export interface QueryParameters {
             market: Parameters.Market;
-            interval: Parameters.Interval;
+            bidding_zone: Parameters.BiddingZone;
+            from: Parameters.From /* date */;
+            to: Parameters.To /* date */;
         }
         namespace Responses {
-            export interface $200 {
-                market?: "day_ahead";
-                interval?: "previous_week" | "previous_month" | "previous_year";
-                price?: {
-                    /**
-                     * ISO 8601 timestamp of the price record in UTC.
-                     */
-                    timestamp: string; // date-time
-                    /**
-                     * Cost in Cents, e.g. 123 for 12,3 Cents = 0.123€.
-                     * example:
-                     * 123
-                     */
-                    unit_amount: number;
-                    /**
-                     * Cost in decimal format, e.g. 0.123€.
-                     * example:
-                     * 0.123
-                     */
-                    unit_amount_decimal: string;
-                };
-            }
+            export type $200 = Components.Schemas.AverageMarketPriceResult;
             export type $400 = Components.Schemas.Error;
         }
     }
@@ -5347,40 +5426,21 @@ declare namespace Paths {
     }
     namespace $HistoricMarketPrices {
         namespace Parameters {
-            export type Frequency = "hourly" | "daily" | "monthly";
+            export type BiddingZone = /* The bidding zone for a spot market price. */ Components.Schemas.SpotMarketBiddingZone;
+            export type Frequency = /* The aggregation frequency for a series of spot market price data. */ Components.Schemas.SpotMarketDataFrequency;
             export type From = string; // date
-            export type Market = "day_ahead";
+            export type Market = /* The market for a spot market price. */ Components.Schemas.SpotMarketType;
             export type To = string; // date
         }
         export interface QueryParameters {
             market: Parameters.Market;
+            bidding_zone: Parameters.BiddingZone;
+            frequency: Parameters.Frequency;
             from: Parameters.From /* date */;
             to: Parameters.To /* date */;
-            frequency: Parameters.Frequency;
         }
         namespace Responses {
-            export interface $200 {
-                market?: "day_ahead";
-                frequency?: "hourly" | "daily" | "monthly";
-                prices?: {
-                    /**
-                     * ISO 8601 timestamp of the price record in UTC.
-                     */
-                    timestamp: string; // date-time
-                    /**
-                     * Cost in cents, e.g. 123 for 12,3 Cents = 0.123€.
-                     * example:
-                     * 123
-                     */
-                    unit_amount: number;
-                    /**
-                     * Cost in decimal format, e.g. 0.123€.
-                     * example:
-                     * 0.123
-                     */
-                    unit_amount_decimal?: string;
-                }[];
-            }
+            export type $200 = Components.Schemas.HistoricMarketPricesResult;
             export type $400 = Components.Schemas.Error;
         }
     }
@@ -5715,8 +5775,7 @@ export interface OperationMethods {
   /**
    * $historicMarketPrices - historicMarketPrices
    * 
-   * BETA: Get historic energy prices in a given time period
-   * 
+   * Get a series of historic energy prices for a given time period, market and bidding zone.
    */
   '$historicMarketPrices'(
     parameters?: Parameters<Paths.$HistoricMarketPrices.QueryParameters> | null,
@@ -5726,8 +5785,7 @@ export interface OperationMethods {
   /**
    * $averageMarketPrice - averageMarketPrice
    * 
-   * BETA: Get average energy prices in a given time period
-   * 
+   * Get the average energy prices for a given time period, market and bidding zone.
    */
   '$averageMarketPrice'(
     parameters?: Parameters<Paths.$AverageMarketPrice.QueryParameters> | null,
@@ -5930,8 +5988,7 @@ export interface PathsDictionary {
     /**
      * $historicMarketPrices - historicMarketPrices
      * 
-     * BETA: Get historic energy prices in a given time period
-     * 
+     * Get a series of historic energy prices for a given time period, market and bidding zone.
      */
     'get'(
       parameters?: Parameters<Paths.$HistoricMarketPrices.QueryParameters> | null,
@@ -5943,8 +6000,7 @@ export interface PathsDictionary {
     /**
      * $averageMarketPrice - averageMarketPrice
      * 
-     * BETA: Get average energy prices in a given time period
-     * 
+     * Get the average energy prices for a given time period, market and bidding zone.
      */
     'get'(
       parameters?: Parameters<Paths.$AverageMarketPrice.QueryParameters> | null,
@@ -6047,6 +6103,7 @@ export type AvailabilityDate = Components.Schemas.AvailabilityDate;
 export type AvailabilityFilters = Components.Schemas.AvailabilityFilters;
 export type AvailabilityLocation = Components.Schemas.AvailabilityLocation;
 export type AvailabilityResult = Components.Schemas.AvailabilityResult;
+export type AverageMarketPriceResult = Components.Schemas.AverageMarketPriceResult;
 export type BaseCoupon = Components.Schemas.BaseCoupon;
 export type BasePriceItem = Components.Schemas.BasePriceItem;
 export type BasePriceItemCommon = Components.Schemas.BasePriceItemCommon;
@@ -6087,11 +6144,14 @@ export type ExternalCatalogItem = Components.Schemas.ExternalCatalogItem;
 export type ExternalFeeMapping = Components.Schemas.ExternalFeeMapping;
 export type ExternalFeeMappings = Components.Schemas.ExternalFeeMappings;
 export type ExternalFeeMetadata = Components.Schemas.ExternalFeeMetadata;
+export type ExternalPriceMetadata = Components.Schemas.ExternalPriceMetadata;
 export type File = Components.Schemas.File;
 export type GasConcessionType = Components.Schemas.GasConcessionType;
+export type HistoricMarketPricesResult = Components.Schemas.HistoricMarketPricesResult;
 export type IntegrationCredentialsResult = Components.Schemas.IntegrationCredentialsResult;
 export type IntegrationId = Components.Schemas.IntegrationId;
 export type JourneyContext = Components.Schemas.JourneyContext;
+export type MarketPriceRecord = Components.Schemas.MarketPriceRecord;
 export type MarkupPricingModel = Components.Schemas.MarkupPricingModel;
 export type MetaData = Components.Schemas.MetaData;
 export type Opportunity = Components.Schemas.Opportunity;
@@ -6137,6 +6197,9 @@ export type SearchProvidersResult = Components.Schemas.SearchProvidersResult;
 export type SearchStreetsParams = Components.Schemas.SearchStreetsParams;
 export type SearchStreetsResult = Components.Schemas.SearchStreetsResult;
 export type SignatureMeta = Components.Schemas.SignatureMeta;
+export type SpotMarketBiddingZone = Components.Schemas.SpotMarketBiddingZone;
+export type SpotMarketDataFrequency = Components.Schemas.SpotMarketDataFrequency;
+export type SpotMarketType = Components.Schemas.SpotMarketType;
 export type Street = Components.Schemas.Street;
 export type TariffTypeGetAg = Components.Schemas.TariffTypeGetAg;
 export type Tax = Components.Schemas.Tax;
