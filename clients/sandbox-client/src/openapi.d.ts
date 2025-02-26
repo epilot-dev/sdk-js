@@ -119,6 +119,64 @@ declare namespace Components {
          * eyJhbGciOiJIUzI1NiIs...
          */
         export type PipelineToken = string;
+        export interface SandboxRequest {
+            /**
+             * Unique identifier for the request
+             * example:
+             * 12345
+             */
+            id?: string;
+            /**
+             * The user who made the request
+             * example:
+             * John Doe
+             */
+            fullname: string;
+            /**
+             * The company name of the user who made the request
+             * example:
+             * Company Name
+             */
+            company_name: string;
+            /**
+             * The position of the user who made the request
+             * example:
+             * Software Engineer
+             */
+            position: string;
+            /**
+             * The email of the user who made the request
+             * example:
+             * user@example.com
+             */
+            email: string; // email
+            /**
+             * The usecase for the request
+             * example:
+             * Build a payment integration
+             */
+            sandbox_usecase: string;
+            /**
+             * The status of the request
+             * example:
+             * pending
+             */
+            status?: "pending" | "created" | "rejected";
+            /**
+             * Whether the user is in contact with an existing epilot customer
+             */
+            connected_to_existing_epilot_customer: boolean;
+            /**
+             * The time the request was made
+             * example:
+             * 2022-01-01T00:00:00Z
+             */
+            requested_at?: string; // date-time
+            /**
+             * The category of the sandbox requested
+             */
+            sandbox_request_category?: "APP_DEVELOPER_ACCOUNT" | "BLUEPRINT_SANDBOX" | "OTHER";
+        }
         /**
          * An API token generated from the sandbox org
          * example:
@@ -210,6 +268,24 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListSandboxRequests {
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.SandboxRequest[];
+                /**
+                 * example:
+                 * 1
+                 */
+                total?: number;
+            }
+        }
+    }
+    namespace RequestSandbox {
+        export type RequestBody = Components.Schemas.SandboxRequest;
+        namespace Responses {
+            export type $201 = Components.Schemas.SandboxRequest;
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -266,6 +342,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GeneratePipelineToken.Responses.$200>
+  /**
+   * requestSandbox - requestSandbox
+   * 
+   * Request a sandbox account for a user
+   */
+  'requestSandbox'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.RequestSandbox.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RequestSandbox.Responses.$201>
+  /**
+   * listSandboxRequests - listSandboxRequests
+   * 
+   * List sandbox requests from users
+   */
+  'listSandboxRequests'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSandboxRequests.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -328,6 +424,30 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GeneratePipelineToken.Responses.$200>
   }
+  ['/v1/sandbox:request']: {
+    /**
+     * requestSandbox - requestSandbox
+     * 
+     * Request a sandbox account for a user
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.RequestSandbox.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RequestSandbox.Responses.$201>
+  }
+  ['/v1/sandbox/requests']: {
+    /**
+     * listSandboxRequests - listSandboxRequests
+     * 
+     * List sandbox requests from users
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSandboxRequests.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -340,4 +460,5 @@ export type PipelineId = Components.Schemas.PipelineId;
 export type PipelineItem = Components.Schemas.PipelineItem;
 export type PipelineRole = Components.Schemas.PipelineRole;
 export type PipelineToken = Components.Schemas.PipelineToken;
+export type SandboxRequest = Components.Schemas.SandboxRequest;
 export type SandboxToken = Components.Schemas.SandboxToken;

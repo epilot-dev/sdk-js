@@ -178,6 +178,77 @@
           }
         }
       }
+    },
+    "/v1/sandbox:request": {
+      "post": {
+        "operationId": "requestSandbox",
+        "summary": "requestSandbox",
+        "description": "Request a sandbox account for a user",
+        "tags": [
+          "Sandbox Requests"
+        ],
+        "security": [
+          {},
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SandboxRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created sandbox request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SandboxRequest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sandbox/requests": {
+      "get": {
+        "operationId": "listSandboxRequests",
+        "summary": "listSandboxRequests",
+        "description": "List sandbox requests from users",
+        "tags": [
+          "Sandbox Requests"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sandbox requests made by users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SandboxRequest"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -294,6 +365,82 @@
           {
             "description": "A temporary access token"
           }
+        ]
+      },
+      "SandboxRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the request",
+            "example": 12345,
+            "readOnly": true
+          },
+          "fullname": {
+            "type": "string",
+            "description": "The user who made the request",
+            "example": "John Doe"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "The company name of the user who made the request",
+            "example": "Company Name"
+          },
+          "position": {
+            "type": "string",
+            "description": "The position of the user who made the request",
+            "example": "Software Engineer"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The email of the user who made the request",
+            "example": "user@example.com"
+          },
+          "sandbox_usecase": {
+            "type": "string",
+            "description": "The usecase for the request",
+            "example": "Build a payment integration"
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the request",
+            "example": "pending",
+            "enum": [
+              "pending",
+              "created",
+              "rejected"
+            ],
+            "readOnly": true
+          },
+          "connected_to_existing_epilot_customer": {
+            "type": "boolean",
+            "description": "Whether the user is in contact with an existing epilot customer"
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time the request was made",
+            "example": "2022-01-01T00:00:00Z",
+            "readOnly": true
+          },
+          "sandbox_request_category": {
+            "type": "string",
+            "description": "The category of the sandbox requested",
+            "enum": [
+              "APP_DEVELOPER_ACCOUNT",
+              "BLUEPRINT_SANDBOX",
+              "OTHER"
+            ]
+          }
+        },
+        "required": [
+          "fullname",
+          "company_name",
+          "position",
+          "email",
+          "sandbox_usecase",
+          "connected_to_existing_epilot_customer"
         ]
       }
     }

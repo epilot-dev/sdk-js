@@ -56,6 +56,23 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/sandbox:request": {
+      "post": {
+        "operationId": "requestSandbox",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/sandbox/requests": {
+      "get": {
+        "operationId": "listSandboxRequests",
+        "responses": {}
+      }
     }
   },
   "components": {},
