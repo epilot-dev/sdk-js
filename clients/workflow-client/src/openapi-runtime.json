@@ -259,6 +259,26 @@
         "responses": {}
       }
     },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/automation:run": {
+      "post": {
+        "operationId": "runTaskAutomation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/flows/executions/{execution_id}/phases/{phase_id}": {
       "patch": {
         "operationId": "patchPhase",
