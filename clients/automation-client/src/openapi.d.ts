@@ -821,6 +821,23 @@ declare namespace Components {
              * 7
              */
             runs?: number;
+            /**
+             * Customized execution hot flow rate limit. Takes precedence over the default hot flow rate limit if specified.
+             */
+            max_executions?: {
+                /**
+                 * Maximum number of executions per time window
+                 * example:
+                 * 100
+                 */
+                count?: number;
+                /**
+                 * ISO 8601 duration time window for the threshold
+                 * example:
+                 * PT1M
+                 */
+                window?: string;
+            };
             created_at?: string; // date-time
             updated_at?: string; // date-time
             /**

@@ -711,6 +711,23 @@
             "example": 7,
             "description": "Number of automation executions that ran"
           },
+          "max_executions": {
+            "type": "object",
+            "description": "Customized execution hot flow rate limit. Takes precedence over the default hot flow rate limit if specified.",
+            "properties": {
+              "count": {
+                "type": "number",
+                "description": "Maximum number of executions per time window",
+                "minimum": 1,
+                "example": 100
+              },
+              "window": {
+                "type": "string",
+                "description": "ISO 8601 duration time window for the threshold",
+                "example": "PT1M"
+              }
+            }
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -3443,9 +3460,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://automation.sls.epilot.io"
-    },
     {
       "url": "https://automation.sls.epilot.io"
     }
