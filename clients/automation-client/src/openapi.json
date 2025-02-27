@@ -3445,6 +3445,9 @@
   "servers": [
     {
       "url": "https://automation.sls.epilot.io"
+    },
+    {
+      "url": "https://automation.sls.epilot.io"
     }
   ]
 }
