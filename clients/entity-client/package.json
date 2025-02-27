@@ -1,6 +1,6 @@
 {
   "name": "@epilot/entity-client",
-  "version": "4.38.0",
+  "version": "4.39.0",
   "description": "JavaScript client library for the epilot Core Entity API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -46,7 +46,7 @@
     "!*.config.js"
   ],
   "peerDependencies": {
-    "axios": "^1.6.2"
+    "axios": "^1.8.1"
   },
   "dependencies": {
     "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
