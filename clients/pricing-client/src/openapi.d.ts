@@ -216,10 +216,41 @@ declare namespace Components {
                 };
             }[];
         }
+        /**
+         * An average market price over a given period in time.
+         */
+        export interface AverageMarketPriceRecord {
+            /**
+             * Cost in Cents, e.g. 12.3 for 12,3 Cents = 0.123€.
+             * example:
+             * 12.3
+             */
+            unit_amount: number;
+            /**
+             * Cost in decimal format, e.g. 0.123€.
+             * example:
+             * 0.123
+             */
+            unit_amount_decimal: string;
+            unit_amount_currency: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * An ISO 8601 interval in the format 'start/end'.
+             * example:
+             * 2025-01-01T00:00:00Z/2025-01-31T23:59:59Z
+             */
+            timestamp: string;
+        }
         export interface AverageMarketPriceResult {
             market: /* The market for a spot market price. */ SpotMarketType;
             bidding_zone: /* The bidding zone for a spot market price. */ SpotMarketBiddingZone;
-            price: /* A market price at a given point in time. */ MarketPriceRecord;
+            price: /* An average market price over a given period in time. */ AverageMarketPriceRecord;
             _meta?: /* Signature meta data payload */ SignatureMeta;
         }
         /**
@@ -325,6 +356,28 @@ declare namespace Components {
              * }
              */
             Price[];
+        }
+        export interface BaseMarketPriceRecord {
+            /**
+             * Cost in Cents, e.g. 12.3 for 12,3 Cents = 0.123€.
+             * example:
+             * 12.3
+             */
+            unit_amount: number;
+            /**
+             * Cost in decimal format, e.g. 0.123€.
+             * example:
+             * 0.123
+             */
+            unit_amount_decimal: string;
+            unit_amount_currency: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
         }
         /**
          * Represents a price item
@@ -1365,6 +1418,38 @@ declare namespace Components {
          */
         export interface CompositePrice {
             [name: string]: any;
+            /**
+             * The billing period duration
+             */
+            billing_duration_amount?: number;
+            /**
+             * The billing period duration unit
+             */
+            billing_duration_unit?: "weeks" | "months" | "years";
+            /**
+             * The notice period duration
+             */
+            notice_time_amount?: number;
+            /**
+             * The notice period duration unit
+             */
+            notice_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The termination period duration
+             */
+            termination_time_amount?: number;
+            /**
+             * The termination period duration unit
+             */
+            termination_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The renewal period duration
+             */
+            renewal_duration_amount?: number;
+            /**
+             * The renewal period duration unit
+             */
+            renewal_duration_unit?: "weeks" | "months" | "years";
             /**
              * Whether the price can be used for new purchases.
              */
@@ -2683,7 +2768,7 @@ declare namespace Components {
         export interface ExternalPriceMetadata {
             market: /* The market for a spot market price. */ SpotMarketType;
             bidding_zone: /* The bidding zone for a spot market price. */ SpotMarketBiddingZone;
-            price: /* A market price at a given point in time. */ MarketPriceRecord;
+            price: /* An average market price over a given period in time. */ AverageMarketPriceRecord;
             _meta?: /* Signature meta data payload */ SignatureMeta;
             inputs?: {
                 [name: string]: any;
@@ -2712,10 +2797,39 @@ declare namespace Components {
          * The concession type for gas
          */
         export type GasConcessionType = "standard" | "special";
+        /**
+         * A market price at a given point in time.
+         */
+        export interface HistoricMarketPriceRecord {
+            /**
+             * Cost in Cents, e.g. 12.3 for 12,3 Cents = 0.123€.
+             * example:
+             * 12.3
+             */
+            unit_amount: number;
+            /**
+             * Cost in decimal format, e.g. 0.123€.
+             * example:
+             * 0.123
+             */
+            unit_amount_decimal: string;
+            unit_amount_currency: /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * ISO 8601 timestamp of the price record in UTC.
+             */
+            timestamp: string; // date-time
+        }
         export interface HistoricMarketPricesResult {
             market: /* The market for a spot market price. */ SpotMarketType;
             bidding_zone: /* The bidding zone for a spot market price. */ SpotMarketBiddingZone;
-            prices: /* A market price at a given point in time. */ MarketPriceRecord[];
+            prices: /* A market price at a given point in time. */ HistoricMarketPriceRecord[];
         }
         export type IntegrationCredentialsResult = /* The basic auth credentials */ BasicAuthCredentials;
         export type IntegrationId = "getag" | "ikom";
@@ -2783,35 +2897,6 @@ declare namespace Components {
                     [name: string]: any;
                 };
             }[];
-        }
-        /**
-         * A market price at a given point in time.
-         */
-        export interface MarketPriceRecord {
-            /**
-             * ISO 8601 timestamp of the price record in UTC.
-             */
-            timestamp: string; // date-time
-            /**
-             * Cost in Cents, e.g. 123 for 12,3 Cents = 0.123€.
-             * example:
-             * 12.3
-             */
-            unit_amount: number;
-            /**
-             * Cost in decimal format, e.g. 0.123€.
-             * example:
-             * 0.123
-             */
-            unit_amount_decimal: string;
-            unit_amount_currency: /**
-             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
-             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
-             *
-             * example:
-             * EUR
-             */
-            Currency;
         }
         /**
          * Describes how to compute the markup per period. Either `per_unit`, `tiered_volume` or `tiered_flatfee`.
@@ -3277,6 +3362,38 @@ declare namespace Components {
         export interface Price {
             [name: string]: any;
             /**
+             * The billing period duration
+             */
+            billing_duration_amount?: number;
+            /**
+             * The billing period duration unit
+             */
+            billing_duration_unit?: "weeks" | "months" | "years";
+            /**
+             * The notice period duration
+             */
+            notice_time_amount?: number;
+            /**
+             * The notice period duration unit
+             */
+            notice_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The termination period duration
+             */
+            termination_time_amount?: number;
+            /**
+             * The termination period duration unit
+             */
+            termination_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The renewal period duration
+             */
+            renewal_duration_amount?: number;
+            /**
+             * The renewal period duration unit
+             */
+            renewal_duration_unit?: "weeks" | "months" | "years";
+            /**
              * Whether the price can be used for new purchases.
              */
             active?: boolean;
@@ -3381,38 +3498,6 @@ declare namespace Components {
              */
             price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request" | "estimated_price";
             /**
-             * The billing period duration
-             */
-            billing_duration_amount?: number;
-            /**
-             * The billing period duration unit
-             */
-            billing_duration_unit?: "weeks" | "months" | "years";
-            /**
-             * The notice period duration
-             */
-            notice_time_amount?: number;
-            /**
-             * The notice period duration unit
-             */
-            notice_time_unit?: "weeks" | "months" | "years";
-            /**
-             * The termination period duration
-             */
-            termination_time_amount?: number;
-            /**
-             * The termination period duration unit
-             */
-            termination_time_unit?: "weeks" | "months" | "years";
-            /**
-             * The renewal period duration
-             */
-            renewal_duration_amount?: number;
-            /**
-             * The renewal period duration unit
-             */
-            renewal_duration_unit?: "weeks" | "months" | "years";
-            /**
              * The flag for prices that can be influenced by external variables such as user input.
              */
             variable_price?: boolean;
@@ -3462,6 +3547,40 @@ declare namespace Components {
              * An arbitrary set of tags attached to the composite price - component relation
              */
             _tags?: string[];
+        }
+        export interface PriceConditions {
+            /**
+             * The billing period duration
+             */
+            billing_duration_amount?: number;
+            /**
+             * The billing period duration unit
+             */
+            billing_duration_unit?: "weeks" | "months" | "years";
+            /**
+             * The notice period duration
+             */
+            notice_time_amount?: number;
+            /**
+             * The notice period duration unit
+             */
+            notice_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The termination period duration
+             */
+            termination_time_amount?: number;
+            /**
+             * The termination period duration unit
+             */
+            termination_time_unit?: "weeks" | "months" | "years";
+            /**
+             * The renewal period duration
+             */
+            renewal_duration_amount?: number;
+            /**
+             * The renewal period duration unit
+             */
+            renewal_duration_unit?: "weeks" | "months" | "years";
         }
         export interface PriceDynamicTariff {
             mode: /* The mode of the dynamic tariff. `day_ahead_market` uses the Day-Ahead spot market price as base. */ DynamicTariffMode;
@@ -4240,6 +4359,38 @@ declare namespace Components {
             _price?: {
                 [name: string]: any;
                 /**
+                 * The billing period duration
+                 */
+                billing_duration_amount?: number;
+                /**
+                 * The billing period duration unit
+                 */
+                billing_duration_unit?: "weeks" | "months" | "years";
+                /**
+                 * The notice period duration
+                 */
+                notice_time_amount?: number;
+                /**
+                 * The notice period duration unit
+                 */
+                notice_time_unit?: "weeks" | "months" | "years";
+                /**
+                 * The termination period duration
+                 */
+                termination_time_amount?: number;
+                /**
+                 * The termination period duration unit
+                 */
+                termination_time_unit?: "weeks" | "months" | "years";
+                /**
+                 * The renewal period duration
+                 */
+                renewal_duration_amount?: number;
+                /**
+                 * The renewal period duration unit
+                 */
+                renewal_duration_unit?: "weeks" | "months" | "years";
+                /**
                  * Whether the price can be used for new purchases.
                  */
                 active?: boolean;
@@ -4343,38 +4494,6 @@ declare namespace Components {
                  * Defines the way the price amount is display in epilot journeys.
                  */
                 price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request" | "estimated_price";
-                /**
-                 * The billing period duration
-                 */
-                billing_duration_amount?: number;
-                /**
-                 * The billing period duration unit
-                 */
-                billing_duration_unit?: "weeks" | "months" | "years";
-                /**
-                 * The notice period duration
-                 */
-                notice_time_amount?: number;
-                /**
-                 * The notice period duration unit
-                 */
-                notice_time_unit?: "weeks" | "months" | "years";
-                /**
-                 * The termination period duration
-                 */
-                termination_time_amount?: number;
-                /**
-                 * The termination period duration unit
-                 */
-                termination_time_unit?: "weeks" | "months" | "years";
-                /**
-                 * The renewal period duration
-                 */
-                renewal_duration_amount?: number;
-                /**
-                 * The renewal period duration unit
-                 */
-                renewal_duration_unit?: "weeks" | "months" | "years";
                 /**
                  * The flag for prices that can be influenced by external variables such as user input.
                  */
@@ -5342,15 +5461,15 @@ declare namespace Paths {
     namespace $AverageMarketPrice {
         namespace Parameters {
             export type BiddingZone = /* The bidding zone for a spot market price. */ Components.Schemas.SpotMarketBiddingZone;
-            export type From = string; // date
+            export type From = string /* date */ | string /* date-time */;
             export type Market = /* The market for a spot market price. */ Components.Schemas.SpotMarketType;
-            export type To = string; // date
+            export type To = string /* date */ | string /* date-time */;
         }
         export interface QueryParameters {
             market: Parameters.Market;
             bidding_zone: Parameters.BiddingZone;
-            from: Parameters.From /* date */;
-            to: Parameters.To /* date */;
+            from: Parameters.From;
+            to: Parameters.To;
         }
         namespace Responses {
             export type $200 = Components.Schemas.AverageMarketPriceResult;
@@ -5428,16 +5547,16 @@ declare namespace Paths {
         namespace Parameters {
             export type BiddingZone = /* The bidding zone for a spot market price. */ Components.Schemas.SpotMarketBiddingZone;
             export type Frequency = /* The aggregation frequency for a series of spot market price data. */ Components.Schemas.SpotMarketDataFrequency;
-            export type From = string; // date
+            export type From = string /* date */ | string /* date-time */;
             export type Market = /* The market for a spot market price. */ Components.Schemas.SpotMarketType;
-            export type To = string; // date
+            export type To = string /* date */ | string /* date-time */;
         }
         export interface QueryParameters {
             market: Parameters.Market;
             bidding_zone: Parameters.BiddingZone;
             frequency: Parameters.Frequency;
-            from: Parameters.From /* date */;
-            to: Parameters.To /* date */;
+            from: Parameters.From;
+            to: Parameters.To;
         }
         namespace Responses {
             export type $200 = Components.Schemas.HistoricMarketPricesResult;
@@ -6103,8 +6222,10 @@ export type AvailabilityDate = Components.Schemas.AvailabilityDate;
 export type AvailabilityFilters = Components.Schemas.AvailabilityFilters;
 export type AvailabilityLocation = Components.Schemas.AvailabilityLocation;
 export type AvailabilityResult = Components.Schemas.AvailabilityResult;
+export type AverageMarketPriceRecord = Components.Schemas.AverageMarketPriceRecord;
 export type AverageMarketPriceResult = Components.Schemas.AverageMarketPriceResult;
 export type BaseCoupon = Components.Schemas.BaseCoupon;
+export type BaseMarketPriceRecord = Components.Schemas.BaseMarketPriceRecord;
 export type BasePriceItem = Components.Schemas.BasePriceItem;
 export type BasePriceItemCommon = Components.Schemas.BasePriceItemCommon;
 export type BasePriceItemDto = Components.Schemas.BasePriceItemDto;
@@ -6147,11 +6268,11 @@ export type ExternalFeeMetadata = Components.Schemas.ExternalFeeMetadata;
 export type ExternalPriceMetadata = Components.Schemas.ExternalPriceMetadata;
 export type File = Components.Schemas.File;
 export type GasConcessionType = Components.Schemas.GasConcessionType;
+export type HistoricMarketPriceRecord = Components.Schemas.HistoricMarketPriceRecord;
 export type HistoricMarketPricesResult = Components.Schemas.HistoricMarketPricesResult;
 export type IntegrationCredentialsResult = Components.Schemas.IntegrationCredentialsResult;
 export type IntegrationId = Components.Schemas.IntegrationId;
 export type JourneyContext = Components.Schemas.JourneyContext;
-export type MarketPriceRecord = Components.Schemas.MarketPriceRecord;
 export type MarkupPricingModel = Components.Schemas.MarkupPricingModel;
 export type MetaData = Components.Schemas.MetaData;
 export type Opportunity = Components.Schemas.Opportunity;
@@ -6165,6 +6286,7 @@ export type PaymentMethod = Components.Schemas.PaymentMethod;
 export type PowerMeterType = Components.Schemas.PowerMeterType;
 export type Price = Components.Schemas.Price;
 export type PriceComponentRelation = Components.Schemas.PriceComponentRelation;
+export type PriceConditions = Components.Schemas.PriceConditions;
 export type PriceDynamicTariff = Components.Schemas.PriceDynamicTariff;
 export type PriceGetAg = Components.Schemas.PriceGetAg;
 export type PriceInputMapping = Components.Schemas.PriceInputMapping;
