@@ -1243,20 +1243,34 @@
             "name": "from",
             "schema": {
               "type": "string",
-              "format": "date"
+              "anyOf": [
+                {
+                  "format": "date"
+                },
+                {
+                  "format": "date-time"
+                }
+              ]
             },
             "required": true,
-            "description": "Start of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DDD) the timzone of the bidding zone is used.\n"
+            "description": "Start of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DD) the timzone of the bidding zone is used.\n"
           },
           {
             "in": "query",
             "name": "to",
             "schema": {
               "type": "string",
-              "format": "date"
+              "anyOf": [
+                {
+                  "format": "date"
+                },
+                {
+                  "format": "date-time"
+                }
+              ]
             },
             "required": true,
-            "description": "End of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DDD) the timzone of the bidding zone is used.\n"
+            "description": "End of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DD) the timzone of the bidding zone is used.\n"
           }
         ],
         "responses": {
@@ -1320,20 +1334,34 @@
             "name": "from",
             "schema": {
               "type": "string",
-              "format": "date"
+              "anyOf": [
+                {
+                  "format": "date"
+                },
+                {
+                  "format": "date-time"
+                }
+              ]
             },
             "required": true,
-            "description": "Start of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DDD) the timzone of the bidding zone is used.\n"
+            "description": "Start of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DD) the timzone of the bidding zone is used.\n"
           },
           {
             "in": "query",
             "name": "to",
             "schema": {
               "type": "string",
-              "format": "date"
+              "anyOf": [
+                {
+                  "format": "date"
+                },
+                {
+                  "format": "date-time"
+                }
+              ]
             },
             "required": true,
-            "description": "End of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DDD) the timzone of the bidding zone is used.\n"
+            "description": "End of price data in ISO 8601 format.\nIf only a date is provided (YYYY-MM-DD) the timzone of the bidding zone is used.\n"
           }
         ],
         "responses": {
@@ -2529,6 +2557,11 @@
         }
       },
       "Price": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PriceConditions"
+          }
+        ],
         "type": "object",
         "description": "The price entity schema for simple pricing",
         "example": {
@@ -2649,58 +2682,6 @@
               "estimated_price"
             ]
           },
-          "billing_duration_amount": {
-            "description": "The billing period duration",
-            "type": "number"
-          },
-          "billing_duration_unit": {
-            "description": "The billing period duration unit",
-            "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
-          },
-          "notice_time_amount": {
-            "description": "The notice period duration",
-            "type": "number"
-          },
-          "notice_time_unit": {
-            "description": "The notice period duration unit",
-            "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
-          },
-          "termination_time_amount": {
-            "description": "The termination period duration",
-            "type": "number"
-          },
-          "termination_time_unit": {
-            "description": "The termination period duration unit",
-            "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
-          },
-          "renewal_duration_amount": {
-            "description": "The renewal period duration",
-            "type": "number"
-          },
-          "renewal_duration_unit": {
-            "description": "The renewal period duration unit",
-            "type": "string",
-            "enum": [
-              "weeks",
-              "months",
-              "years"
-            ]
-          },
           "variable_price": {
             "description": "The flag for prices that can be influenced by external variables such as user input.",
             "type": "boolean"
@@ -2772,6 +2753,11 @@
         ]
       },
       "CompositePrice": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PriceConditions"
+          }
+        ],
         "type": "object",
         "description": "The price entity schema for dynamic pricing",
         "example": {
@@ -2949,6 +2935,63 @@
           "metadata": {
             "journey_title": "energy journey",
             "step_name": "avg consumption picker"
+          }
+        }
+      },
+      "PriceConditions": {
+        "type": "object",
+        "properties": {
+          "billing_duration_amount": {
+            "description": "The billing period duration",
+            "type": "number"
+          },
+          "billing_duration_unit": {
+            "description": "The billing period duration unit",
+            "type": "string",
+            "enum": [
+              "weeks",
+              "months",
+              "years"
+            ]
+          },
+          "notice_time_amount": {
+            "description": "The notice period duration",
+            "type": "number"
+          },
+          "notice_time_unit": {
+            "description": "The notice period duration unit",
+            "type": "string",
+            "enum": [
+              "weeks",
+              "months",
+              "years"
+            ]
+          },
+          "termination_time_amount": {
+            "description": "The termination period duration",
+            "type": "number"
+          },
+          "termination_time_unit": {
+            "description": "The termination period duration unit",
+            "type": "string",
+            "enum": [
+              "weeks",
+              "months",
+              "years"
+            ]
+          },
+          "renewal_duration_amount": {
+            "description": "The renewal period duration",
+            "type": "number"
+          },
+          "renewal_duration_unit": {
+            "description": "The renewal period duration unit",
+            "type": "string",
+            "enum": [
+              "weeks",
+              "months",
+              "years"
+            ]
           }
         }
       },
@@ -3598,7 +3641,7 @@
           "prices": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MarketPriceRecord"
+              "$ref": "#/components/schemas/HistoricMarketPriceRecord"
             }
           }
         },
@@ -3618,7 +3661,7 @@
             "$ref": "#/components/schemas/SpotMarketBiddingZone"
           },
           "price": {
-            "$ref": "#/components/schemas/MarketPriceRecord"
+            "$ref": "#/components/schemas/AverageMarketPriceRecord"
           },
           "_meta": {
             "$ref": "#/components/schemas/SignatureMeta"
@@ -3630,18 +3673,48 @@
           "price"
         ]
       },
-      "MarketPriceRecord": {
+      "AverageMarketPriceRecord": {
+        "description": "An average market price over a given period in time.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseMarketPriceRecord"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "description": "An ISO 8601 interval in the format 'start/end'.",
+                "example": "2025-01-01T00:00:00Z/2025-01-31T23:59:59Z"
+              }
+            }
+          }
+        ]
+      },
+      "HistoricMarketPriceRecord": {
         "description": "A market price at a given point in time.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseMarketPriceRecord"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "ISO 8601 timestamp of the price record in UTC."
+              }
+            }
+          }
+        ]
+      },
+      "BaseMarketPriceRecord": {
         "type": "object",
         "properties": {
-          "timestamp": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO 8601 timestamp of the price record in UTC."
-          },
           "unit_amount": {
-            "type": "integer",
-            "description": "Cost in Cents, e.g. 123 for 12,3 Cents = 0.123€.",
+            "type": "number",
+            "description": "Cost in Cents, e.g. 12.3 for 12,3 Cents = 0.123€.",
             "example": 12.3
           },
           "unit_amount_decimal": {
