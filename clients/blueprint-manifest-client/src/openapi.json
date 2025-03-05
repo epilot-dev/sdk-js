@@ -724,7 +724,8 @@
           "taxonomy_classification",
           "webhook",
           "custom_variable",
-          "coupon"
+          "coupon",
+          "usergroup"
         ]
       },
       "PlanChanges": {
@@ -921,6 +922,12 @@
               "large_resources_to_import_url": {
                 "type": "string",
                 "description": "An URL to download the resources to import when the resources are too large to be included in the response"
+              },
+              "resource_replacements": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceReplacement"
+                }
               },
               "is_verified": {
                 "type": "boolean",

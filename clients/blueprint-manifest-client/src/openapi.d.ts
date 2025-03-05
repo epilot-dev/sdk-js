@@ -219,6 +219,7 @@ declare namespace Components {
              * An URL to download the resources to import when the resources are too large to be included in the response
              */
             large_resources_to_import_url?: string;
+            resource_replacements?: ResourceReplacement[];
             /**
              * Whether the manifest comes from a trusted source and is signed by epilot
              */
@@ -577,7 +578,7 @@ declare namespace Components {
             }[];
             changes?: PlanChanges;
         }
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "custom_variable" | "coupon";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "custom_variable" | "coupon" | "usergroup";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
