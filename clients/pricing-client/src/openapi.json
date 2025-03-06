@@ -4892,7 +4892,7 @@
             "description": "Total of all items taxes, with same recurrence."
           },
           "amount_tax_decimal": {
-            "type": "integer",
+            "type": "string",
             "description": "Total of all items taxes, with same recurrence, as a string with all the decimal places."
           },
           "currency": {
