@@ -22,6 +22,128 @@
     }
   ],
   "paths": {
+    "/v1/app-configurations": {
+      "get": {
+        "summary": "listConfigurations",
+        "description": "List all app configuration metadata owned by an organization. To get full app configuration details, use the /v1/app-configurations/{appId} endpoint.",
+        "operationId": "listConfigurations",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of app configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "configurations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ConfigurationMetadata"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "pageSize": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "createConfiguration",
+        "description": "Create a new private app configuration. To make it public a verification process needs to be triggered",
+        "operationId": "createConfiguration",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateConfigRequest"
+        },
+        "responses": {
+          "201": {
+            "description": "App configuration created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "app_id"
+                  ],
+                  "properties": {
+                    "app_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/public/{appId}": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the app configuration to install"
+        }
+      ],
+      "get": {
+        "summary": "getPublicConfiguration",
+        "description": "Retrieve the public configuration of an app to install in your tenant",
+        "operationId": "getPublicConfiguration",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicConfiguration"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      }
+    },
     "/v1/app-configurations/{appId}": {
       "parameters": [
         {
@@ -35,16 +157,103 @@
         }
       ],
       "get": {
-        "summary": "getAppConfiguration",
+        "summary": "getConfiguration",
         "description": "Retrieve a specific app configuration",
-        "operationId": "getAppConfiguration",
+        "operationId": "getConfiguration",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version of the app configuration to retrieve"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AppConfiguration"
+                  "$ref": "#/components/schemas/Configuration"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      },
+      "patch": {
+        "summary": "patchMetadata",
+        "description": "Patch non-versioned configuration metadata of a given app configuration.",
+        "operationId": "patchMetadata",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PatchConfigMetadataRequest"
+        },
+        "responses": {
+          "204": {
+            "description": "Configuration patched successfully"
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/bundle": {
+      "post": {
+        "summary": "createBundleUploadUrl",
+        "description": "Generate a presigned URL for uploading app bundle to /<app-id>/bundle.zip path",
+        "operationId": "createBundleUploadUrl",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateBundlePresignedRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "Upload URL generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "upload_url"
+                  ],
+                  "properties": {
+                    "component_id": {
+                      "type": "string",
+                      "description": "ID of the journye block component"
+                    },
+                    "component_url": {
+                      "type": "string",
+                      "description": "URL of the web component object"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "description": "Presigned S3 URL for uploading the bundle"
+                    },
+                    "s3ref": {
+                      "$ref": "#/components/schemas/S3Reference"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the upload URL expires"
+                    }
+                  }
                 }
               }
             }
@@ -55,11 +264,430 @@
         }
       }
     },
+    "/v1/app-configurations/{appId}/logo": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the app configuration"
+        }
+      ],
+      "post": {
+        "summary": "createLogoUploadUrl",
+        "description": "Generate a presigned URL for uploading app logo to /<app-id>/logo.png path",
+        "operationId": "createLogoUploadUrl",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateLogoPresignedRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "Upload URL generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "upload_url"
+                  ],
+                  "properties": {
+                    "upload_url": {
+                      "type": "string",
+                      "description": "Presigned S3 URL for uploading the logo"
+                    },
+                    "s3ref": {
+                      "$ref": "#/components/schemas/S3Reference"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the upload URL expires"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "deleteLogo",
+        "description": "Delete the app logo from /<app-id>/logo.png path",
+        "operationId": "deleteLogo",
+        "responses": {
+          "204": {
+            "description": "Logo deleted successfully"
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/versions": {
+      "get": {
+        "summary": "listVersions",
+        "description": "Retrieve a list of versions for an app configuration",
+        "operationId": "listVersions",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of app versions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "versions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ConfigurationVersion"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "pageSize": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{version}": {
+      "get": {
+        "summary": "getVersion",
+        "description": "Retrieve a specific version of an app configuration",
+        "operationId": "getVersion",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version of the app configuration to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App configuration for specific version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Configuration"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App configuration or version not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "deleteVersion",
+        "description": "Delete a specific version of an app configuration",
+        "operationId": "deleteVersion",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Version deleted successfully"
+          },
+          "400": {
+            "description": "Cannot delete the only remaining version"
+          },
+          "404": {
+            "description": "Version not found"
+          },
+          "409": {
+            "description": "Version is in use by installations"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{version}/components": {
+      "post": {
+        "summary": "createComponent",
+        "description": "Patch an existing app version to create/add a component",
+        "operationId": "createComponent",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to update"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UpsertComponentRequest"
+        },
+        "responses": {
+          "204": {
+            "description": "Component created successfully"
+          },
+          "400": {
+            "description": "Invalid version format"
+          },
+          "404": {
+            "description": "Version not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{version}/components/{componentId}": {
+      "patch": {
+        "summary": "patchComponent",
+        "description": "Patch an existing app version to update its components",
+        "operationId": "patchComponent",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to update"
+          },
+          {
+            "name": "componentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the component to update"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UpsertComponentRequest"
+        },
+        "responses": {
+          "204": {
+            "description": "Component patched successfully"
+          },
+          "400": {
+            "description": "Invalid version format"
+          },
+          "404": {
+            "description": "Version or component not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "deleteComponent",
+        "description": "Delete a specific component from an app version",
+        "operationId": "deleteComponent",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to update"
+          },
+          {
+            "name": "componentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the component to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Component deleted successfully"
+          },
+          "404": {
+            "description": "Version or component not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{sourceVersion}/clone-to/{targetVersion}": {
+      "post": {
+        "summary": "cloneVersion",
+        "description": "Clone an existing app version to create a new version",
+        "operationId": "cloneVersion",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "sourceVersion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Source version to clone from"
+          },
+          {
+            "name": "targetVersion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Target version to create"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "New version created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "app_id": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "published"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid version format or target version already exists"
+          },
+          "404": {
+            "description": "Source version not found"
+          }
+        }
+      }
+    },
     "/v1/app": {
       "get": {
-        "summary": "listInstalledApps",
+        "summary": "listInstallations",
         "description": "Retrieve a list of installed apps for the organization.",
-        "operationId": "listInstalledApps",
+        "operationId": "listInstallations",
         "parameters": [
           {
             "name": "componentType",
@@ -108,7 +736,7 @@
                     "apps": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/App"
+                        "$ref": "#/components/schemas/Installation"
                       }
                     },
                     "pagination": {
@@ -135,9 +763,9 @@
     },
     "/v1/app/{appId}": {
       "get": {
-        "summary": "getInstalledApp",
+        "summary": "getInstallation",
         "description": "Retrieve details of an installed app by its ID.",
-        "operationId": "getInstalledApp",
+        "operationId": "getInstallation",
         "parameters": [
           {
             "name": "appId",
@@ -150,24 +778,24 @@
         ],
         "responses": {
           "200": {
-            "description": "Details about installed app.",
+            "description": "Details about an app installation.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/App"
+                  "$ref": "#/components/schemas/Installation"
                 }
               }
             }
           },
           "404": {
-            "description": "App not found."
+            "description": "Installation not found."
           }
         }
       },
-      "put": {
-        "summary": "installApp",
+      "post": {
+        "summary": "install",
         "description": "Upsert app installation by its ID.",
-        "operationId": "installApp",
+        "operationId": "install",
         "parameters": [
           {
             "name": "appId",
@@ -179,11 +807,37 @@
           }
         ],
         "requestBody": {
-          "$ref": "#/components/requestBodies/InstallAppRequest"
+          "$ref": "#/components/requestBodies/InstallRequest"
         },
         "responses": {
           "204": {
-            "description": "App installation updated successfully."
+            "description": "App successfully installed."
+          },
+          "404": {
+            "description": "App not found."
+          }
+        }
+      },
+      "patch": {
+        "summary": "patchInstallation",
+        "description": "Patch an installed app by its ID.",
+        "operationId": "patchInstallation",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/InstallRequest"
+        },
+        "responses": {
+          "204": {
+            "description": "App installation patched successfully."
           },
           "404": {
             "description": "App not found."
@@ -191,9 +845,9 @@
         }
       },
       "delete": {
-        "summary": "uninstallApp",
+        "summary": "uninstall",
         "description": "Uninstall an app by its ID.",
-        "operationId": "uninstallApp",
+        "operationId": "uninstall",
         "parameters": [
           {
             "name": "appId",
@@ -213,41 +867,187 @@
           }
         }
       }
+    },
+    "/v1/app/{appId}/promote-to/{version}": {
+      "post": {
+        "summary": "promoteVersion",
+        "description": "Update an installed app to a new version",
+        "operationId": "promoteVersion",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App successfully promoted to new version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Installation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid version or version not available"
+          },
+          "404": {
+            "description": "App installation not found"
+          }
+        }
+      }
     }
   },
   "components": {
     "requestBodies": {
-      "PublishAppRequest": {
+      "CreateLogoPresignedRequest": {
         "required": true,
         "content": {
           "application/json": {
             "schema": {
               "type": "object",
               "required": [
-                "s3_reference"
+                "filename",
+                "mime_type"
               ],
               "properties": {
-                "s3_reference": {
-                  "$ref": "#/components/schemas/S3Reference"
+                "filename": {
+                  "type": "string",
+                  "description": "Original filename of the logo",
+                  "example": "company-logo.png"
                 },
-                "metadata": {
-                  "type": "object",
-                  "properties": {
-                    "access_level": {
-                      "type": "string",
-                      "enum": [
-                        "public",
-                        "private"
-                      ]
-                    }
-                  }
+                "mime_type": {
+                  "type": "string",
+                  "description": "MIME type of the logo file",
+                  "enum": [
+                    "image/png",
+                    "image/jpeg",
+                    "image/jpg"
+                  ],
+                  "example": "image/png"
                 }
               }
             }
           }
         }
       },
-      "InstallAppRequest": {
+      "CreateBundlePresignedRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "version"
+              ],
+              "properties": {
+                "version": {
+                  "type": "string",
+                  "description": "Version of the app"
+                },
+                "component_id": {
+                  "type": "string",
+                  "description": "ID of the journye block component"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PatchConfigMetadataRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the app"
+                },
+                "description": {
+                  "$ref": "#/components/schemas/TranslatedString"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "documentation_url": {
+                  "type": "string"
+                },
+                "notifications": {
+                  "$ref": "#/components/schemas/NotificationConfig"
+                },
+                "pricing": {
+                  "$ref": "#/components/schemas/Pricing"
+                },
+                "logo_url_key": {
+                  "type": "string",
+                  "description": "S3 key of the logo file"
+                },
+                "support_email": {
+                  "type": "string",
+                  "description": "Email address for support requests"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UpsertComponentRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BaseComponent"
+            }
+          }
+        }
+      },
+      "CreateConfigRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "description"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the app"
+                },
+                "description": {
+                  "$ref": "#/components/schemas/TranslatedString"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "logo_url_key": {
+                  "type": "string",
+                  "description": "S3 key of the logo file"
+                }
+              }
+            }
+          }
+        }
+      },
+      "InstallRequest": {
         "content": {
           "application/json": {
             "schema": {
@@ -400,24 +1200,23 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Name of the author"
+            "description": "Name of the author",
+            "maxLength": 50
           },
           "company": {
             "type": "string",
-            "description": "Company of the author"
+            "description": "Company of the author",
+            "maxLength": 30
           },
           "email": {
             "type": "string",
-            "description": "Email of the author"
+            "description": "Email of the author",
+            "maxLength": 30
           }
         }
       },
       "NotificationConfig": {
         "type": "object",
-        "required": [
-          "email",
-          "events"
-        ],
         "properties": {
           "email": {
             "type": "string",
@@ -431,7 +1230,7 @@
             "items": {
               "$ref": "#/components/schemas/NotificationEvent"
             },
-            "minItems": 1
+            "minItems": 0
           }
         }
       },
@@ -455,6 +1254,10 @@
           "name": {
             "$ref": "#/components/schemas/TranslatedString",
             "description": "Name of the component"
+          },
+          "description": {
+            "$ref": "#/components/schemas/TranslatedString",
+            "description": "Description of the component"
           },
           "options": {
             "type": "array",
@@ -657,7 +1460,8 @@
           "component_url": {
             "type": "string",
             "description": "URL of the web component object",
-            "example": "https://cdn.apps.com/123/v1.0.0/bundle.js"
+            "example": "https://cdn.apps.com/123/v1.0.0/bundle.js",
+            "readOnly": true
           },
           "component_tag": {
             "type": "string",
@@ -669,6 +1473,11 @@
             "items": {
               "$ref": "#/components/schemas/JourneyBlockComponentArgs"
             }
+          },
+          "component_size": {
+            "type": "number",
+            "description": "Size of the bundle in bytes",
+            "readOnly": true
           },
           "component_mapping": {
             "description": "Define data which is mapped to entity mapping ui blocks",
@@ -809,38 +1618,46 @@
           }
         }
       },
-      "App": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AppConfiguration"
-          }
+      "BillingFrequency": {
+        "type": "string",
+        "enum": [
+          "MONTHLY",
+          "QUARTERLY",
+          "YEARLY",
+          "CUSTOM"
         ],
-        "description": "Information about the installed app",
+        "description": "How often the subscription is billed"
+      },
+      "Pricing": {
         "type": "object",
         "properties": {
-          "installation_id": {
+          "pricing_type": {
             "type": "string",
-            "description": "Unique identifier for the app installation",
+            "enum": [
+              "FREE",
+              "SUBSCRIPTION",
+              "USAGE_BASED",
+              "ONE_TIME",
+              "CUSTOM",
+              "UNKNOWN"
+            ]
+          },
+          "billing_frequency": {
+            "$ref": "#/components/schemas/BillingFrequency"
+          }
+        }
+      },
+      "Audit": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "description": "Timestamp of the creation",
             "readOnly": true
           },
-          "organization_id": {
+          "created_by": {
             "type": "string",
-            "description": "Unique identifier for the organization the app is installed in",
-            "readOnly": true
-          },
-          "installed_at": {
-            "type": "string",
-            "description": "Timestamp of app creation",
-            "readOnly": true
-          },
-          "installed_by": {
-            "type": "string",
-            "description": "User ID of the user who installed the app",
-            "readOnly": true
-          },
-          "updated_by": {
-            "type": "string",
-            "description": "User ID of the user who last updated the app",
+            "description": "User ID of the creator",
             "readOnly": true
           },
           "updated_at": {
@@ -848,30 +1665,64 @@
             "description": "Timestamp of the last update",
             "readOnly": true
           },
-          "enabled": {
-            "readOnly": true,
-            "type": "boolean",
-            "default": true,
-            "description": "Flag to indicate if the app is enabled."
-          },
-          "option_values": {
-            "description": "Configuration values for the app components options",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OptionsRef"
-            }
+          "updated_by": {
+            "type": "string",
+            "description": "User ID of the last updater",
+            "readOnly": true
           }
         }
       },
-      "AppConfiguration": {
+      "ConfigurationMetadata": {
+        "description": "Basic metadata about your app configuration which does not get versioned",
         "type": "object",
-        "description": "Configuration of the published app",
+        "required": [
+          "name",
+          "description",
+          "latest_version",
+          "owner_org_id",
+          "app_id",
+          "versions"
+        ],
         "properties": {
           "app_id": {
-            "type": "string"
+            "type": "string",
+            "readOnly": true
           },
           "name": {
-            "$ref": "#/components/schemas/TranslatedString"
+            "type": "string",
+            "description": "Name of the app"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of available versions of the app",
+            "readOnly": true
+          },
+          "public_versions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of available public versions of the app",
+            "readOnly": true
+          },
+          "support_email": {
+            "type": "string",
+            "description": "Email address for support requests"
+          },
+          "latest_version": {
+            "type": "string",
+            "description": "Latest version of the app",
+            "readOnly": true
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the app."
           },
           "icon_url": {
             "type": "string",
@@ -889,41 +1740,10 @@
             "$ref": "#/components/schemas/NotificationConfig",
             "description": "Configuration for developer notifications"
           },
-          "created_by": {
+          "owner_org_id": {
             "type": "string",
+            "description": "Organization ID of the app owner, required for private apps or sandbox accounts",
             "readOnly": true
-          },
-          "created_at": {
-            "type": "string",
-            "readOnly": true
-          },
-          "updated_at": {
-            "type": "string",
-            "readOnly": true
-          },
-          "updated_by": {
-            "type": "string",
-            "readOnly": true
-          },
-          "version": {
-            "type": "string",
-            "readOnly": true
-          },
-          "author": {
-            "$ref": "#/components/schemas/Author"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "published",
-              "pending"
-            ]
-          },
-          "components": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BaseComponent"
-            }
           },
           "internal": {
             "type": "boolean",
@@ -931,26 +1751,252 @@
             "description": "Flag to indicate if the app is built by epilot.",
             "readOnly": true
           },
-          "owner_org_id": {
-            "type": "string",
-            "description": "Organization ID of the app owner, required for private apps"
+          "pricing": {
+            "$ref": "#/components/schemas/Pricing",
+            "description": "Pricing information for the app"
           },
-          "access_level": {
-            "type": "string",
-            "enum": [
-              "public",
-              "private"
-            ],
-            "default": "public",
-            "description": "Access level of the app."
+          "configuration_audit": {
+            "$ref": "#/components/schemas/Audit",
+            "description": "Audit information for the app",
+            "readOnly": true
           }
         }
       },
+      "ConfigurationVersion": {
+        "description": "Configuration data about your app which is versionable",
+        "type": "object",
+        "required": [
+          "version",
+          "components",
+          "app_id",
+          "version_audit",
+          "owner_org_id"
+        ],
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "owner_org_id": {
+            "type": "string",
+            "description": "Organization ID of the app owner",
+            "readOnly": true
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BaseComponent"
+            },
+            "minItems": 0
+          },
+          "public": {
+            "type": "boolean",
+            "default": true,
+            "description": "Flag to indicate if the app is public.",
+            "readOnly": true
+          },
+          "pending": {
+            "type": "boolean",
+            "default": false,
+            "description": "Flag to indicate if the app is pending for verification",
+            "readOnly": true
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the app that is installed",
+            "readOnly": true,
+            "maxLength": 10
+          },
+          "is_beta": {
+            "type": "boolean",
+            "description": "Flag to indicate if the app is in beta.",
+            "readOnly": true
+          },
+          "deprecated_at": {
+            "type": "string",
+            "description": "Timestamp when the app version is deprecated"
+          },
+          "changelog": {
+            "type": "string",
+            "description": "Changelog for the app version",
+            "maxLength": 250
+          },
+          "review_status": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "pending"
+            ],
+            "description": "Status of the review process"
+          },
+          "version_audit": {
+            "readOnly": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Audit"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "versioned_at": {
+                    "type": "string",
+                    "description": "Timestamp of the last version update",
+                    "readOnly": true
+                  },
+                  "versioned_by": {
+                    "type": "string",
+                    "description": "User ID of the user who last updated the app",
+                    "readOnly": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "Installation": {
+        "description": "Information about the installed app. Has configuration data of the installed version",
+        "type": "object",
+        "required": [
+          "app_id",
+          "installer_org_id",
+          "enabled",
+          "name",
+          "components",
+          "installed_version"
+        ],
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "description": "ID of the app configuration",
+            "readOnly": true
+          },
+          "installer_org_id": {
+            "type": "string",
+            "description": "Unique identifier for the organization the app is installed in",
+            "readOnly": true
+          },
+          "enabled": {
+            "readOnly": true,
+            "type": "boolean",
+            "default": true,
+            "description": "Flag to indicate if the app is enabled. Enabled is set to true when required option values are set."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the app",
+            "readOnly": true
+          },
+          "option_values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OptionsRef"
+            },
+            "description": "Configuration values for the app components"
+          },
+          "components": {
+            "description": "List of component configurations for the installed version",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BaseComponent"
+            },
+            "minLength": 0,
+            "readOnly": true
+          },
+          "installed_version": {
+            "type": "string",
+            "description": "Version of the app that is installed",
+            "readOnly": true
+          },
+          "installation_audit": {
+            "$ref": "#/components/schemas/Audit",
+            "readOnly": true
+          }
+        }
+      },
+      "PublicConfiguration": {
+        "description": "Public configuration of the published app",
+        "type": "object",
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "description": "ID of the app configuration"
+          },
+          "owner_org_id": {
+            "type": "string",
+            "description": "Organization ID of the app owner"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the app"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the app."
+          },
+          "icon_url": {
+            "type": "string",
+            "description": "URL of the app icon."
+          },
+          "documentation_url": {
+            "type": "string",
+            "description": "URL of the app documentation."
+          },
+          "description": {
+            "$ref": "#/components/schemas/TranslatedString",
+            "description": "Markdown description of the app."
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/Pricing",
+            "description": "Pricing information for the app"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BaseComponent"
+            },
+            "minItems": 0
+          },
+          "is_beta": {
+            "type": "boolean",
+            "description": "Flag to indicate if the app is in beta.",
+            "readOnly": true
+          },
+          "deprecated_at": {
+            "type": "string",
+            "description": "Timestamp when the app version is deprecated"
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the app that is installed",
+            "readOnly": true
+          }
+        }
+      },
+      "Configuration": {
+        "description": "Configuration of the published app",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ConfigurationMetadata"
+          },
+          {
+            "$ref": "#/components/schemas/ConfigurationVersion"
+          }
+        ]
+      },
       "TranslatedString": {
         "type": "object",
+        "required": [
+          "de"
+        ],
         "properties": {
           "en": {
             "type": "string",
+            "nullable": true,
             "description": "English translation"
           },
           "de": {

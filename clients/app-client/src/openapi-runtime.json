@@ -10,6 +10,43 @@
     }
   ],
   "paths": {
+    "/v1/app-configurations": {
+      "get": {
+        "operationId": "listConfigurations",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createConfiguration",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateConfigRequest"
+        },
+        "responses": {}
+      }
+    },
+    "/v1/app-configurations/public/{appId}": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the app configuration to install"
+        }
+      ],
+      "get": {
+        "operationId": "getPublicConfiguration",
+        "responses": {}
+      }
+    },
     "/v1/app-configurations/{appId}": {
       "parameters": [
         {
@@ -20,13 +57,209 @@
         }
       ],
       "get": {
-        "operationId": "getAppConfiguration",
+        "operationId": "getConfiguration",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchMetadata",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PatchConfigMetadataRequest"
+        },
+        "responses": {}
+      }
+    },
+    "/v1/app-configurations/{appId}/bundle": {
+      "post": {
+        "operationId": "createBundleUploadUrl",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateBundlePresignedRequest"
+        },
+        "responses": {}
+      }
+    },
+    "/v1/app-configurations/{appId}/logo": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the app configuration"
+        }
+      ],
+      "post": {
+        "operationId": "createLogoUploadUrl",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateLogoPresignedRequest"
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteLogo",
+        "responses": {}
+      }
+    },
+    "/v1/app-configurations/{appId}/versions": {
+      "get": {
+        "operationId": "listVersions",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{version}": {
+      "get": {
+        "operationId": "getVersion",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteVersion",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{version}/components": {
+      "post": {
+        "operationId": "createComponent",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UpsertComponentRequest"
+        },
+        "responses": {}
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{version}/components/{componentId}": {
+      "patch": {
+        "operationId": "patchComponent",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "componentId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UpsertComponentRequest"
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteComponent",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "componentId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{sourceVersion}/clone-to/{targetVersion}": {
+      "post": {
+        "operationId": "cloneVersion",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "sourceVersion",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "targetVersion",
+            "in": "path",
+            "required": true
+          }
+        ],
         "responses": {}
       }
     },
     "/v1/app": {
       "get": {
-        "operationId": "listInstalledApps",
+        "operationId": "listInstallations",
         "parameters": [
           {
             "name": "componentType",
@@ -50,7 +283,7 @@
     },
     "/v1/app/{appId}": {
       "get": {
-        "operationId": "getInstalledApp",
+        "operationId": "getInstallation",
         "parameters": [
           {
             "name": "appId",
@@ -60,8 +293,8 @@
         ],
         "responses": {}
       },
-      "put": {
-        "operationId": "installApp",
+      "post": {
+        "operationId": "install",
         "parameters": [
           {
             "name": "appId",
@@ -70,15 +303,47 @@
           }
         ],
         "requestBody": {
-          "$ref": "#/components/requestBodies/InstallAppRequest"
+          "$ref": "#/components/requestBodies/InstallRequest"
+        },
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchInstallation",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/InstallRequest"
         },
         "responses": {}
       },
       "delete": {
-        "operationId": "uninstallApp",
+        "operationId": "uninstall",
         "parameters": [
           {
             "name": "appId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/app/{appId}/promote-to/{version}": {
+      "post": {
+        "operationId": "promoteVersion",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
             "in": "path",
             "required": true
           }
@@ -89,13 +354,37 @@
   },
   "components": {
     "requestBodies": {
-      "PublishAppRequest": {
+      "CreateLogoPresignedRequest": {
         "required": true,
         "content": {
           "application/json": {}
         }
       },
-      "InstallAppRequest": {
+      "CreateBundlePresignedRequest": {
+        "required": true,
+        "content": {
+          "application/json": {}
+        }
+      },
+      "PatchConfigMetadataRequest": {
+        "required": true,
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UpsertComponentRequest": {
+        "required": true,
+        "content": {
+          "application/json": {}
+        }
+      },
+      "CreateConfigRequest": {
+        "required": true,
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InstallRequest": {
         "content": {
           "application/json": {}
         }
