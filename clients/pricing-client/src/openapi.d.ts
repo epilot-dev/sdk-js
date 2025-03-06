@@ -4941,6 +4941,10 @@ declare namespace Components {
              * Total of all items taxes, with same recurrence.
              */
             amount_tax?: number;
+            /**
+             * Total of all items taxes, with same recurrence, as a string with all the decimal places.
+             */
+            amount_tax_decimal?: number;
             currency?: /**
              * Three-letter ISO currency code, in lowercase. Must be a supported currency.
              * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
