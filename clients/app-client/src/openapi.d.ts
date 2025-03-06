@@ -631,6 +631,10 @@ declare namespace Components {
              */
             app_id?: string;
             /**
+             * Email address for support requests
+             */
+            support_email?: string;
+            /**
              * Organization ID of the app owner
              */
             owner_org_id?: string;

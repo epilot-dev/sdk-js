@@ -1923,6 +1923,10 @@
             "type": "string",
             "description": "ID of the app configuration"
           },
+          "support_email": {
+            "type": "string",
+            "description": "Email address for support requests"
+          },
           "owner_org_id": {
             "type": "string",
             "description": "Organization ID of the app owner"
