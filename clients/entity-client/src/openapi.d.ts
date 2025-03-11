@@ -402,7 +402,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "address";
+            type: "address";
             default_address_fields?: /* Default fields visible on addresses */ DefaultAddressFields;
         }
         /**
@@ -544,7 +544,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "relation_address";
+            type: "relation_address";
             default_address_fields?: /* Default fields visible on addresses */ DefaultAddressFields;
         }
         export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute;
@@ -703,7 +703,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "automation";
+            type: "automation";
         }
         export interface BaseActivityItem {
             _id?: /**
@@ -1100,7 +1100,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "boolean";
+            type: "boolean";
             display_type?: "switch" | "checkbox";
         }
         /**
@@ -1272,7 +1272,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "computed";
+            type: "computed";
             computed?: boolean;
             /**
              * A source amount field that is used to compute the value of the attribute
@@ -1565,7 +1565,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "country";
+            type: "country";
         }
         /**
          * Currency input
@@ -1857,7 +1857,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "date" | "datetime";
+            type: "date" | "datetime";
         }
         /**
          * Default fields visible on addresses
@@ -2012,7 +2012,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "email";
+            type: "email";
         }
         /**
          * example:
@@ -4494,7 +4494,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "internal";
+            type: "internal";
         }
         /**
          * Epilot internal user info
@@ -4635,7 +4635,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "internal_user";
+            type: "internal_user";
         }
         /**
          * Email address for send invitation
@@ -4776,7 +4776,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "invitation_email";
+            type: "invitation_email";
         }
         /**
          * Pass 'true' to generate import template
@@ -4925,7 +4925,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "link";
+            type: "link";
         }
         export interface ListSavedViewsResults {
             /**
@@ -5218,7 +5218,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "multiselect" | "checkbox";
+            type: "multiselect" | "checkbox";
             /**
              * controls if the matching of values against the options is case sensitive or not
              */
@@ -5375,7 +5375,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "number";
+            type: "number";
             format?: string;
             /**
              * Whether or not to show a thousands separator
@@ -5521,7 +5521,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "ordered_list";
+            type: "ordered_list";
         }
         /**
          * Shared Partner Organisations
@@ -5662,7 +5662,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "partner_organisation";
+            type: "partner_organisation";
         }
         /**
          * Partner Status
@@ -5803,7 +5803,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "partner_status";
+            type: "partner_status";
         }
         /**
          * Payment method
@@ -5944,7 +5944,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "payment";
+            type: "payment";
         }
         /**
          * Reference to a payment method attribute of another entity
@@ -6085,7 +6085,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "relation_payment_method";
+            type: "relation_payment_method";
         }
         /**
          * Phone number
@@ -6226,7 +6226,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "phone";
+            type: "phone";
         }
         /**
          * Price component
@@ -6367,7 +6367,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "price_component";
+            type: "price_component";
         }
         /**
          * Entity Taxonomy
@@ -6539,7 +6539,7 @@ declare namespace Components {
              * Archived classification are not visible in the UI
              */
             archived?: boolean;
-            type?: "purpose";
+            type: "purpose";
         }
         /**
          * example:
@@ -6695,7 +6695,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "relation";
+            type: "relation";
             relation_type?: "has_many" | "has_one";
             /**
              * Map of schema slug to target relation attribute
@@ -7575,7 +7575,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "select" | "radio";
+            type: "select" | "radio";
             options?: ({
                 value: string;
                 title?: string;
@@ -7724,7 +7724,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "sequence";
+            type: "sequence";
             /**
              * Prefix added before the sequence number
              * example:
@@ -7882,7 +7882,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "status";
+            type: "status";
             options?: ((string | null) | {
                 /**
                  * The stored value of the option
@@ -8119,7 +8119,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "tags";
+            type: "tags";
             options?: string[];
             suggestions?: string[];
         }
@@ -8187,7 +8187,7 @@ declare namespace Components {
             /**
              * List of locations where the taxonomy is enabled to be used. If empty, it's enabled for all locations.
              */
-            enabled_locations?: TaxonomyLocationId[];
+            enabled_locations?: (TaxonomyLocationId | string)[];
         }
         /**
          * example:
@@ -8444,7 +8444,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "string";
+            type: "string";
             multiline?: boolean;
             rich_text?: boolean;
             /**
@@ -8598,7 +8598,7 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            type?: "relation_user";
+            type: "relation_user";
             multiple?: boolean;
         }
     }
@@ -9952,6 +9952,24 @@ declare namespace Paths {
              * contact
              */
             Components.Schemas.EntitySlug[];
+            export type Fields = /**
+             * List of entity fields to include or exclude in the response
+             *
+             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+             *
+             * Globbing and globstart (**) is supported for nested fields.
+             *
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
+             * ]
+             */
+            Components.Schemas.FieldsParam;
             export type From = number;
             export type Hydrate = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
@@ -9983,6 +10001,7 @@ declare namespace Paths {
             include_schemas?: Parameters.IncludeSchemas;
             exclude_schemas?: Parameters.ExcludeSchemas;
             mode?: Parameters.Mode;
+            fields?: Parameters.Fields;
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsRespWithPagination;
