@@ -1994,6 +1994,14 @@
           },
           {
             "$ref": "#/components/parameters/EntityRelationsModeQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "description": "List of entity fields to include in results",
+            "schema": {
+              "$ref": "#/components/schemas/FieldsParam"
+            }
           }
         ],
         "responses": {
@@ -4667,7 +4675,8 @@
         },
         "required": [
           "name",
-          "label"
+          "label",
+          "type"
         ]
       },
       "TextAttribute": {
@@ -7756,7 +7765,14 @@
             "description": "List of locations where the taxonomy is enabled to be used. If empty, it's enabled for all locations.",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/TaxonomyLocationId"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TaxonomyLocationId"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           }
         }

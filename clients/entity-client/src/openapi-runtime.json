@@ -646,6 +646,10 @@
           },
           {
             "$ref": "#/components/parameters/EntityRelationsModeQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "fields"
           }
         ],
         "responses": {}
