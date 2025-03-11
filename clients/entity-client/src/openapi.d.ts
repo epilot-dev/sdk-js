@@ -9952,24 +9952,6 @@ declare namespace Paths {
              * contact
              */
             Components.Schemas.EntitySlug[];
-            export type Fields = /**
-             * List of entity fields to include or exclude in the response
-             *
-             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
-             *
-             * Globbing and globstart (**) is supported for nested fields.
-             *
-             * example:
-             * [
-             *   "_id",
-             *   "_title",
-             *   "first_name",
-             *   "account",
-             *   "!account.*._files",
-             *   "**._product"
-             * ]
-             */
-            Components.Schemas.FieldsParam;
             export type From = number;
             export type Hydrate = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
@@ -10001,7 +9983,6 @@ declare namespace Paths {
             include_schemas?: Parameters.IncludeSchemas;
             exclude_schemas?: Parameters.ExcludeSchemas;
             mode?: Parameters.Mode;
-            fields?: Parameters.Fields;
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsRespWithPagination;
@@ -10848,7 +10829,7 @@ declare namespace Paths {
              * sales
              */
             export type Query = string;
-            export type TaxonomySlug = string;
+            export type TaxonomySlug = string | string[];
         }
         export interface QueryParameters {
             taxonomySlug?: Parameters.TaxonomySlug;

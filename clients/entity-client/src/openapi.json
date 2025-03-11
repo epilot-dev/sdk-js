@@ -1994,14 +1994,6 @@
           },
           {
             "$ref": "#/components/parameters/EntityRelationsModeQueryParam"
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "description": "List of entity fields to include in results",
-            "schema": {
-              "$ref": "#/components/schemas/FieldsParam"
-            }
           }
         ],
         "responses": {
@@ -2895,12 +2887,27 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomySlugQueryParamOptional"
+            "in": "query",
+            "name": "taxonomySlug",
+            "description": "The taxonomy slug(s) to search within. When provided with multiple taxonomy slugs, the search will be performed across all the provided taxonomies.\n",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
           },
           {
             "in": "query",
             "name": "query",
-            "description": "Input to search",
+            "description": "The label names to search for (lowercase insensitive)",
             "schema": {
               "type": "string",
               "example": "sales"
