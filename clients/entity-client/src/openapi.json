@@ -1994,6 +1994,14 @@
           },
           {
             "$ref": "#/components/parameters/EntityRelationsModeQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "description": "List of entity fields to include in results",
+            "schema": {
+              "$ref": "#/components/schemas/FieldsParam"
+            }
           }
         ],
         "responses": {
