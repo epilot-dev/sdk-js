@@ -646,10 +646,6 @@
           },
           {
             "$ref": "#/components/parameters/EntityRelationsModeQueryParam"
-          },
-          {
-            "in": "query",
-            "name": "fields"
           }
         ],
         "responses": {}
@@ -1008,7 +1004,8 @@
         "operationId": "taxonomiesClassificationsSearch",
         "parameters": [
           {
-            "$ref": "#/components/parameters/TaxonomySlugQueryParamOptional"
+            "in": "query",
+            "name": "taxonomySlug"
           },
           {
             "in": "query",
