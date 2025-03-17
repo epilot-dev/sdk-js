@@ -83,6 +83,12 @@ declare namespace Components {
         export type ClosingReasonsStatus = "ACTIVE" | "INACTIVE";
         export interface Condition {
             id: string;
+            /**
+             * The name of the branch
+             * example:
+             * Branch 1
+             */
+            branch_name: string;
             logical_operator: "AND" | "OR";
             statements: Statement[];
         }

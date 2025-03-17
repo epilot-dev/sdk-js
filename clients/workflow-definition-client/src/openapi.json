@@ -1891,6 +1891,12 @@
           "id": {
             "type": "string"
           },
+          "branch_name": {
+            "type": "string",
+            "description": "The name of the branch",
+            "maxLength": 255,
+            "example": "Branch 1"
+          },
           "logical_operator": {
             "type": "string",
             "enum": [
@@ -1907,6 +1913,7 @@
         },
         "required": [
           "id",
+          "branch_name",
           "logical_operator",
           "statements"
         ]
