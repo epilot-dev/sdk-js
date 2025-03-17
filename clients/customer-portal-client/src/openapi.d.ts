@@ -769,6 +769,14 @@ declare namespace Components {
              * Prevent indexing by search engines
              */
             prevent_search_engine_indexing?: boolean;
+            /**
+             * Grace period in days for meter readings
+             */
+            meter_reading_grace_period?: number;
+            /**
+             * Number of years to look back for showing inactive contracts in the portal
+             */
+            inactive_contract_cutoff_years?: number;
         }
         /**
          * The mapped contact of the portal user
@@ -3145,6 +3153,14 @@ declare namespace Components {
              */
             prevent_search_engine_indexing?: boolean;
             /**
+             * Grace period in days for meter readings
+             */
+            meter_reading_grace_period?: number;
+            /**
+             * Number of years to look back for showing inactive contracts in the portal
+             */
+            inactive_contract_cutoff_years?: number;
+            /**
              * ID of the organization
              * example:
              * 12345
@@ -4090,6 +4106,14 @@ declare namespace Components {
              * Prevent indexing by search engines
              */
             prevent_search_engine_indexing?: boolean;
+            /**
+             * Grace period in days for meter readings
+             */
+            meter_reading_grace_period?: number;
+            /**
+             * Number of years to look back for showing inactive contracts in the portal
+             */
+            inactive_contract_cutoff_years?: number;
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -5020,6 +5044,53 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetAllRequests {
+        namespace Parameters {
+            /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            export type From = number;
+            /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            from?: /**
+             * Initial offset to set for the search results
+             * example:
+             * 0
+             */
+            Parameters.From;
+            size?: /**
+             * Size of the search results
+             * example:
+             * 100
+             */
+            Parameters.Size;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Total number of hits
+                 * example:
+                 * 1
+                 */
+                hits?: number;
+                results?: ({
+                    journey_actions?: Components.Schemas.JourneyActions;
+                } & (/* The opportunity entity */ Components.Schemas.Opportunity | /* The order entity */ Components.Schemas.Order))[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -5963,6 +6034,14 @@ declare namespace Paths {
                  * Prevent indexing by search engines
                  */
                 prevent_search_engine_indexing?: boolean;
+                /**
+                 * Grace period in days for meter readings
+                 */
+                meter_reading_grace_period?: number;
+                /**
+                 * Number of years to look back for showing inactive contracts in the portal
+                 */
+                inactive_contract_cutoff_years?: number;
                 /**
                  * ID of the organization
                  * example:
@@ -7780,6 +7859,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateOpportunity.Responses.$200>
   /**
+   * getAllRequests - getAllRequests
+   * 
+   * Get all opportunities & orders of a portal user
+   */
+  'getAllRequests'(
+    parameters?: Parameters<Paths.GetAllRequests.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAllRequests.Responses.$200>
+  /**
    * getAllContracts - getAllContracts
    * 
    * Get all contracts for a portal user
@@ -8694,6 +8783,18 @@ export interface PathsDictionary {
       data?: Paths.UpdateOpportunity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateOpportunity.Responses.$200>
+  }
+  ['/v2/portal/request']: {
+    /**
+     * getAllRequests - getAllRequests
+     * 
+     * Get all opportunities & orders of a portal user
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAllRequests.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAllRequests.Responses.$200>
   }
   ['/v2/portal/contract']: {
     /**

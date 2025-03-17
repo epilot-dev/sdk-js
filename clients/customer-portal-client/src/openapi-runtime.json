@@ -799,6 +799,24 @@
         "responses": {}
       }
     },
+    "/v2/portal/request": {
+      "get": {
+        "operationId": "getAllRequests",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/contract": {
       "get": {
         "operationId": "getAllContracts",

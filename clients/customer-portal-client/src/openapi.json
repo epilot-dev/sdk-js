@@ -3510,6 +3510,102 @@
         }
       }
     },
+    "/v2/portal/request": {
+      "get": {
+        "operationId": "getAllRequests",
+        "summary": "getAllRequests",
+        "description": "Get all opportunities & orders of a portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Initial offset to set for the search results",
+              "example": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Size of the search results",
+              "example": 100,
+              "default": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The opportunities is retrieved successfully for the portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "type": "number",
+                      "description": "Total number of hits",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "allOf": [
+                          {
+                            "type": "object",
+                            "oneOf": [
+                              {
+                                "$ref": "#/components/schemas/Opportunity"
+                              },
+                              {
+                                "$ref": "#/components/schemas/Order"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "journey_actions": {
+                                "$ref": "#/components/schemas/JourneyActions"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/contract": {
       "get": {
         "operationId": "getAllContracts",
@@ -6378,6 +6474,14 @@
           "prevent_search_engine_indexing": {
             "type": "boolean",
             "description": "Prevent indexing by search engines"
+          },
+          "meter_reading_grace_period": {
+            "type": "number",
+            "description": "Grace period in days for meter readings"
+          },
+          "inactive_contract_cutoff_years": {
+            "type": "number",
+            "description": "Number of years to look back for showing inactive contracts in the portal"
           }
         }
       },
