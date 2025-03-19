@@ -127,6 +127,16 @@
         "summary": "getPublicConfiguration",
         "description": "Retrieve the public configuration of an app to install in your tenant",
         "operationId": "getPublicConfiguration",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version of the app configuration to retrieve"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",
@@ -1488,7 +1498,8 @@
                 "string",
                 "boolean",
                 "date",
-                "datetime"
+                "datetime",
+                "link"
               ]
             }
           }
@@ -1918,6 +1929,13 @@
       "PublicConfiguration": {
         "description": "Public configuration of the published app",
         "type": "object",
+        "required": [
+          "version",
+          "components",
+          "owner_org_id",
+          "app_id",
+          "name"
+        ],
         "properties": {
           "app_id": {
             "type": "string",

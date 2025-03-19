@@ -1,6 +1,6 @@
 {
   "name": "@epilot/entity-mapping-client",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "JavaScript client library for the ePilot Entity Mapping API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

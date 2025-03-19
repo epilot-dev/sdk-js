@@ -338,7 +338,7 @@ declare namespace Components {
              */
             raw?: boolean;
         }
-        export type MappingSourceTargetType = "string" | "date" | "datetime" | "boolean" | "number" | "image" | "file" | "address" | "email" | "phone" | "select" | "multiselect" | "payment";
+        export type MappingSourceTargetType = "string" | "date" | "datetime" | "boolean" | "number" | "image" | "file" | "address" | "email" | "phone" | "select" | "multiselect" | "payment" | "link";
         export interface MappingWarning {
             explanation: string;
             context?: string;

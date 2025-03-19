@@ -44,6 +44,12 @@
       ],
       "get": {
         "operationId": "getPublicConfiguration",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "query"
+          }
+        ],
         "responses": {}
       }
     },

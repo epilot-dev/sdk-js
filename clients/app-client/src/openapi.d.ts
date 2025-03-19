@@ -513,7 +513,7 @@ declare namespace Components {
              * Define data which is mapped to entity mapping ui blocks
              */
             component_mapping?: {
-                [name: string]: "string" | "boolean" | "date" | "datetime";
+                [name: string]: "string" | "boolean" | "date" | "datetime" | "link";
             };
         }
         export interface NotificationConfig {
@@ -629,7 +629,7 @@ declare namespace Components {
             /**
              * ID of the app configuration
              */
-            app_id?: string;
+            app_id: string;
             /**
              * Email address for support requests
              */
@@ -637,11 +637,11 @@ declare namespace Components {
             /**
              * Organization ID of the app owner
              */
-            owner_org_id?: string;
+            owner_org_id: string;
             /**
              * Name of the app
              */
-            name?: string;
+            name: string;
             author?: Author;
             /**
              * Category of the app.
@@ -663,7 +663,7 @@ declare namespace Components {
              * Pricing information for the app
              */
             pricing?: Pricing;
-            components?: BaseComponent[];
+            components: BaseComponent[];
             /**
              * Flag to indicate if the app is in beta.
              */
@@ -675,7 +675,7 @@ declare namespace Components {
             /**
              * Version of the app that is installed
              */
-            version?: string;
+            version: string;
         }
         export interface S3Reference {
             /**
@@ -886,6 +886,12 @@ declare namespace Paths {
         }
     }
     namespace GetPublicConfiguration {
+        namespace Parameters {
+            export type Version = string;
+        }
+        export interface QueryParameters {
+            version?: Parameters.Version;
+        }
         namespace Responses {
             export type $200 = /* Public configuration of the published app */ Components.Schemas.PublicConfiguration;
             export interface $404 {
@@ -1119,7 +1125,7 @@ export interface OperationMethods {
    * Retrieve the public configuration of an app to install in your tenant
    */
   'getPublicConfiguration'(
-    parameters?: Parameters<Paths.V1AppConfigurationsPublic$AppId.PathParameters> | null,
+    parameters?: Parameters<Paths.GetPublicConfiguration.QueryParameters & Paths.V1AppConfigurationsPublic$AppId.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPublicConfiguration.Responses.$200>
@@ -1335,7 +1341,7 @@ export interface PathsDictionary {
      * Retrieve the public configuration of an app to install in your tenant
      */
     'get'(
-      parameters?: Parameters<Paths.V1AppConfigurationsPublic$AppId.PathParameters> | null,
+      parameters?: Parameters<Paths.GetPublicConfiguration.QueryParameters & Paths.V1AppConfigurationsPublic$AppId.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPublicConfiguration.Responses.$200>

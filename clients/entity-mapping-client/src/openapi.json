@@ -1600,7 +1600,8 @@
           "phone",
           "select",
           "multiselect",
-          "payment"
+          "payment",
+          "link"
         ]
       }
     }
