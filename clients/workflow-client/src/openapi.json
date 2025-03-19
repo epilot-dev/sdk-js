@@ -1849,8 +1849,12 @@
           "ASSIGNED",
           "COMPLETED",
           "SKIPPED",
-          "IN_PROGRESS"
-        ]
+          "IN_PROGRESS",
+          "SCHEDULED",
+          "PENDING",
+          "CONDITION_PENDING"
+        ],
+        "description": "Note: \"UNASSIGNED\" and \"ASSIGNED\" are deprecated and will be removed in a future version. Please use \"PENDING\" instead.\n"
       },
       "SectionStatus": {
         "type": "string",
@@ -2722,9 +2726,140 @@
             "properties": {
               "automation_config": {
                 "$ref": "#/components/schemas/AutomationInfo"
+              },
+              "automation_execution_id": {
+                "type": "string",
+                "description": "ID of the automation execution, used for tracking status updates."
+              },
+              "trigger_mode": {
+                "$ref": "#/components/schemas/TriggerMode"
+              },
+              "schedule": {
+                "$ref": "#/components/schemas/ActionSchedule"
               }
             }
           }
+        ]
+      },
+      "TriggerMode": {
+        "type": "string",
+        "enum": [
+          "manual",
+          "automatic"
+        ]
+      },
+      "ActionSchedule": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ImmediateSchedule"
+          },
+          {
+            "$ref": "#/components/schemas/DelayedSchedule"
+          },
+          {
+            "$ref": "#/components/schemas/RelativeSchedule"
+          }
+        ]
+      },
+      "ImmediateSchedule": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": [
+              "immediate"
+            ]
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "DelayedSchedule": {
+        "type": "object",
+        "required": [
+          "mode",
+          "duration",
+          "unit"
+        ],
+        "properties": {
+          "mode": {
+            "enum": [
+              "delayed"
+            ]
+          },
+          "duration": {
+            "type": "number"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/TimeUnit"
+          },
+          "schedule_id": {
+            "type": "string",
+            "description": "The id of the created schedule"
+          }
+        }
+      },
+      "RelativeSchedule": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": [
+              "relative"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "before",
+              "after"
+            ]
+          },
+          "duration": {
+            "type": "number"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/TimeUnit"
+          },
+          "reference": {
+            "type": "object",
+            "required": [
+              "id",
+              "origin"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The id of the entity / workflow / task, based on the origin of the schedule"
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "flow_started",
+                  "task_completed",
+                  "trigger_entity_attribute"
+                ]
+              },
+              "schema": {
+                "type": "string",
+                "description": "The schema of the entity"
+              },
+              "attribute": {
+                "type": "string",
+                "description": "An entity attribute that identifies a date / datetime"
+              }
+            }
+          },
+          "schedule_id": {
+            "type": "string",
+            "description": "The id of the created schedule"
+          }
+        },
+        "required": [
+          "mode",
+          "direction",
+          "duration",
+          "unit",
+          "reference"
         ]
       },
       "DecisionTask": {
@@ -2898,9 +3033,9 @@
           "condition_id": {
             "$ref": "#/components/schemas/ConditionId"
           },
-          "not_met": {
+          "none_met": {
             "type": "boolean",
-            "description": "Temporary MVP flag to indicate the negated condition of a binary decision task"
+            "description": "Indicates a default case for a decision task. Only decision task edges can have this field and the flow advances using this edge if no conditions are met."
           }
         },
         "required": [
@@ -2924,12 +3059,8 @@
             "type": "string",
             "description": "Status of the automation execution, when it already ran"
           },
-          "execution_mode": {
-            "type": "string",
-            "enum": [
-              "MANUAL_TRIGGER_BY_USER_CLICK",
-              "AUTO_TRIGGER_BY_SYSTEM_ON_CURRENT_TASK"
-            ]
+          "error_reason": {
+            "type": "string"
           }
         },
         "required": [
@@ -2976,6 +3107,12 @@
           "id": {
             "$ref": "#/components/schemas/ConditionId"
           },
+          "branch_name": {
+            "type": "string",
+            "description": "The name of the branch",
+            "maxLength": 255,
+            "example": "Branch 1"
+          },
           "logical_operator": {
             "type": "string",
             "enum": [
@@ -3001,6 +3138,7 @@
         },
         "required": [
           "id",
+          "branch_name",
           "logical_operator",
           "statements"
         ]
@@ -3124,14 +3262,7 @@
             "type": "number"
           },
           "unit": {
-            "type": "string",
-            "enum": [
-              "minutes",
-              "hours",
-              "days",
-              "weeks",
-              "months"
-            ]
+            "$ref": "#/components/schemas/TimeUnit"
           },
           "type": {
             "type": "string",
@@ -3152,6 +3283,16 @@
           "duration",
           "unit",
           "type"
+        ]
+      },
+      "TimeUnit": {
+        "type": "string",
+        "enum": [
+          "minutes",
+          "hours",
+          "days",
+          "weeks",
+          "months"
         ]
       },
       "EnableRequirement": {

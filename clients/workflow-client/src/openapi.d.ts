@@ -24,6 +24,7 @@ declare namespace Components {
         SoftDeleteParam?: Parameters.SoftDeleteParam;
     }
     namespace Schemas {
+        export type ActionSchedule = ImmediateSchedule | DelayedSchedule | RelativeSchedule;
         export interface AnalyticsInfo {
             started_at?: string; // date-time
             in_progress_at?: string; // date-time
@@ -75,14 +76,18 @@ declare namespace Components {
              * Status of the automation execution, when it already ran
              */
             execution_status?: string;
-            execution_mode?: "MANUAL_TRIGGER_BY_USER_CLICK" | "AUTO_TRIGGER_BY_SYSTEM_ON_CURRENT_TASK";
+            error_reason?: string;
         }
         export interface AutomationTask {
             id: TaskId;
             template_id: string;
             name: string;
             description?: /* Longer information regarding Task */ StepDescription;
-            status: StepStatus;
+            status: /**
+             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             *
+             */
+            StepStatus;
             journey?: StepJourney;
             /**
              * example:
@@ -121,6 +126,12 @@ declare namespace Components {
             phase_id?: string;
             task_type: TaskType;
             automation_config: AutomationInfo;
+            /**
+             * ID of the automation execution, used for tracking status updates.
+             */
+            automation_execution_id?: string;
+            trigger_mode?: TriggerMode;
+            schedule?: ActionSchedule;
         }
         export interface ClosingReason {
             id: string;
@@ -136,6 +147,12 @@ declare namespace Components {
              * abc123
              */
             ConditionId;
+            /**
+             * The name of the branch
+             * example:
+             * Branch 1
+             */
+            branch_name: string;
             logical_operator: "AND" | "OR";
             statements: Statement[];
             /**
@@ -156,7 +173,11 @@ declare namespace Components {
         export interface CreateStepReq {
             insertionIndex: number;
             name: string;
-            status?: StepStatus;
+            status?: /**
+             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             *
+             */
+            StepStatus;
             sectionId?: string;
             /**
              * Manual / Automation step
@@ -172,7 +193,11 @@ declare namespace Components {
             template_id: string;
             name: string;
             description?: /* Longer information regarding Task */ StepDescription;
-            status: StepStatus;
+            status: /**
+             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             *
+             */
+            StepStatus;
             journey?: StepJourney;
             /**
              * example:
@@ -212,12 +237,21 @@ declare namespace Components {
             task_type: TaskType;
             conditions: Condition[];
         }
+        export interface DelayedSchedule {
+            mode: "delayed";
+            duration: number;
+            unit: TimeUnit;
+            /**
+             * The id of the created schedule
+             */
+            schedule_id?: string;
+        }
         /**
          * Set due date for the task based on a dynamic condition
          */
         export interface DueDateConfig {
             duration: number;
-            unit: "minutes" | "hours" | "days" | "weeks" | "months";
+            unit: TimeUnit;
             type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED";
             task_id?: string;
             phase_id?: string;
@@ -250,9 +284,9 @@ declare namespace Components {
              */
             ConditionId;
             /**
-             * Temporary MVP flag to indicate the negated condition of a binary decision task
+             * Indicates a default case for a decision task. Only decision task edges can have this field and the flow advances using this edge if no conditions are met.
              */
-            not_met?: boolean;
+            none_met?: boolean;
         }
         /**
          * describe the requirement for a task to be enabled
@@ -368,6 +402,9 @@ declare namespace Components {
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export type FlowTemplateId = string;
+        export interface ImmediateSchedule {
+            mode: "immediate";
+        }
         export type ItemType = "STEP" | "SECTION";
         export interface LastEvaluatedKey {
             orgId?: string;
@@ -396,7 +433,11 @@ declare namespace Components {
         }
         export interface PatchTaskReq {
             name?: string;
-            status?: StepStatus;
+            status?: /**
+             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             *
+             */
+            StepStatus;
             /**
              * example:
              * 2021-04-27T12:00:00.000Z
@@ -437,6 +478,31 @@ declare namespace Components {
             phase_id?: string;
             phase_name?: string;
             phase_progress?: number;
+        }
+        export interface RelativeSchedule {
+            mode: "relative";
+            direction: "before" | "after";
+            duration: number;
+            unit: TimeUnit;
+            reference: {
+                /**
+                 * The id of the entity / workflow / task, based on the origin of the schedule
+                 */
+                id: string;
+                origin: "flow_started" | "task_completed" | "trigger_entity_attribute";
+                /**
+                 * The schema of the entity
+                 */
+                schema?: string;
+                /**
+                 * An entity attribute that identifies a date / datetime
+                 */
+                attribute?: string;
+            };
+            /**
+             * The id of the created schedule
+             */
+            schedule_id?: string;
         }
         export interface RunTaskAutomationReq {
             entity_id: string; // uuid
@@ -539,7 +605,11 @@ declare namespace Components {
                  * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
                  */
                 assignedToInProgress?: string;
-                status?: StepStatus;
+                status?: /**
+                 * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+                 *
+                 */
+                StepStatus;
                 created?: string;
                 lastUpdated?: string;
                 startedTime?: string;
@@ -656,7 +726,11 @@ declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
-            status?: StepStatus;
+            status?: /**
+             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             *
+             */
+            StepStatus;
             created?: string;
             lastUpdated?: string;
             startedTime?: string;
@@ -707,7 +781,11 @@ declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
-            status?: StepStatus;
+            status?: /**
+             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             *
+             */
+            StepStatus;
             created?: string;
             lastUpdated?: string;
             startedTime?: string;
@@ -772,7 +850,11 @@ declare namespace Components {
              */
             executionType?: StepType;
         }
-        export type StepStatus = "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS";
+        /**
+         * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+         *
+         */
+        export type StepStatus = "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING";
         export type StepType = "MANUAL" | "AUTOMATION";
         export type Task = ManualTask | AutomationTask | DecisionTask;
         export interface TaskBase {
@@ -780,7 +862,11 @@ declare namespace Components {
             template_id: string;
             name: string;
             description?: /* Longer information regarding Task */ StepDescription;
-            status: StepStatus;
+            status: /**
+             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             *
+             */
+            StepStatus;
             journey?: StepJourney;
             /**
              * example:
@@ -821,6 +907,8 @@ declare namespace Components {
         }
         export type TaskId = string;
         export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION";
+        export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months";
+        export type TriggerMode = "manual" | "automatic";
         export type TriggerType = "MANUAL" | "AUTOMATIC";
         export interface UpdateEntityAttributes {
             source: "workflow_status" | "current_section" | "current_step";
@@ -852,7 +940,11 @@ declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
-            status?: StepStatus;
+            status?: /**
+             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             *
+             */
+            StepStatus;
             dueDate?: string;
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             name?: string;
@@ -890,7 +982,11 @@ declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
-            status?: StepStatus;
+            status?: /**
+             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             *
+             */
+            StepStatus;
             created?: string;
             lastUpdated?: string;
             startedTime?: string;
@@ -1199,7 +1295,11 @@ declare namespace Components {
             task_assignees?: string[];
             task_duedate?: string; // date-time
             task_execution_type?: StepType;
-            task_status?: StepStatus;
+            task_status?: /**
+             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             *
+             */
+            StepStatus;
             phase_id?: string;
             phase_name?: string;
             phase_assignees?: string[];
@@ -2055,6 +2155,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type AnalyticsInfo = Components.Schemas.AnalyticsInfo;
 export type Assignees = Components.Schemas.Assignees;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
@@ -2066,6 +2167,7 @@ export type Condition = Components.Schemas.Condition;
 export type ConditionId = Components.Schemas.ConditionId;
 export type CreateStepReq = Components.Schemas.CreateStepReq;
 export type DecisionTask = Components.Schemas.DecisionTask;
+export type DelayedSchedule = Components.Schemas.DelayedSchedule;
 export type DueDateConfig = Components.Schemas.DueDateConfig;
 export type DynamicDueDate = Components.Schemas.DynamicDueDate;
 export type ECPDetails = Components.Schemas.ECPDetails;
@@ -2081,6 +2183,7 @@ export type FlowExecution = Components.Schemas.FlowExecution;
 export type FlowExecutionId = Components.Schemas.FlowExecutionId;
 export type FlowSlim = Components.Schemas.FlowSlim;
 export type FlowTemplateId = Components.Schemas.FlowTemplateId;
+export type ImmediateSchedule = Components.Schemas.ImmediateSchedule;
 export type ItemType = Components.Schemas.ItemType;
 export type LastEvaluatedKey = Components.Schemas.LastEvaluatedKey;
 export type ManualTask = Components.Schemas.ManualTask;
@@ -2091,6 +2194,7 @@ export type PatchTaskReq = Components.Schemas.PatchTaskReq;
 export type Phase = Components.Schemas.Phase;
 export type PhaseId = Components.Schemas.PhaseId;
 export type PhaseInEntity = Components.Schemas.PhaseInEntity;
+export type RelativeSchedule = Components.Schemas.RelativeSchedule;
 export type RunTaskAutomationReq = Components.Schemas.RunTaskAutomationReq;
 export type SearchExecutionsReq = Components.Schemas.SearchExecutionsReq;
 export type SearchExecutionsResp = Components.Schemas.SearchExecutionsResp;
@@ -2118,6 +2222,8 @@ export type Task = Components.Schemas.Task;
 export type TaskBase = Components.Schemas.TaskBase;
 export type TaskId = Components.Schemas.TaskId;
 export type TaskType = Components.Schemas.TaskType;
+export type TimeUnit = Components.Schemas.TimeUnit;
+export type TriggerMode = Components.Schemas.TriggerMode;
 export type TriggerType = Components.Schemas.TriggerType;
 export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
 export type UpdateStepReq = Components.Schemas.UpdateStepReq;
