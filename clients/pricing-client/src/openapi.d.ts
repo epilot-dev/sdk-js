@@ -1109,9 +1109,6 @@ declare namespace Components {
              */
             Coupon)[];
         }
-        /**
-         * The basic auth credentials
-         */
         export interface BasicAuthCredentials {
             /**
              * The username
@@ -1125,6 +1122,21 @@ declare namespace Components {
              * 123456
              */
             password: string;
+        }
+        export interface BasicAuthIntegration {
+            /**
+             * The username
+             * example:
+             * username
+             */
+            username: string;
+            /**
+             * The password
+             * example:
+             * 123456
+             */
+            password: string;
+            auth_type?: "basic_auth";
             /**
              * The base URL
              * example:
@@ -2831,7 +2843,11 @@ declare namespace Components {
             bidding_zone: /* The bidding zone for a spot market price. */ SpotMarketBiddingZone;
             prices: /* A market price at a given point in time. */ HistoricMarketPriceRecord[];
         }
-        export type IntegrationCredentialsResult = /* The basic auth credentials */ BasicAuthCredentials;
+        /**
+         * The auth credentials for external integrations
+         */
+        export type IntegrationAuthCredentials = /* The auth credentials for external integrations */ BasicAuthIntegration | OAuthIntegration;
+        export type IntegrationCredentialsResult = /* The auth credentials for external integrations */ IntegrationAuthCredentials;
         export type IntegrationId = "getag" | "ikom";
         export interface JourneyContext {
             /**
@@ -2919,6 +2935,64 @@ declare namespace Components {
              */
             value?: string;
         })[];
+        export interface OAuthCredentials {
+            /**
+             * The OAuth client ID
+             * example:
+             * client_id_123
+             */
+            client_id: string;
+            /**
+             * The OAuth client secret
+             * example:
+             * client_secret_456
+             */
+            client_secret: string;
+            /**
+             * The URL to obtain OAuth tokens
+             * example:
+             * https://api.example.com/oauth/token
+             */
+            authorization_url: string;
+            /**
+             * The OAuth grant type
+             */
+            grant_type: "client_credentials";
+            /**
+             * The OAuth scope
+             * example:
+             * read:user write:user
+             */
+            scope?: string;
+            /**
+             * The OAuth access token
+             * example:
+             * access_token_789
+             */
+            access_token?: string;
+            /**
+             * The expiration time of the OAuth access token in seconds
+             * example:
+             * 3600
+             */
+            access_token_expires_in?: number;
+            /**
+             * The expiration time of the OAuth access token
+             * example:
+             * 1715731200
+             */
+            access_token_expires_at?: number;
+        }
+        export interface OAuthIntegration {
+            auth_type: "oauth";
+            oauth: OAuthCredentials;
+            /**
+             * The base URL
+             * example:
+             * https://api.example.com
+             */
+            base_url?: string;
+        }
         /**
          * The opportunity entity
          * example:
@@ -5107,7 +5181,7 @@ declare namespace Components {
             CouponWithoutPromoCodes[];
         }
         export type SalesTax = "nontaxable" | "reduced" | "standard";
-        export type SaveIntegrationCredentialsParams = /* The basic auth credentials */ BasicAuthCredentials;
+        export type SaveIntegrationCredentialsParams = /* The auth credentials for external integrations */ IntegrationAuthCredentials;
         export interface SearchExternalCatalogParams {
             context: JourneyContext;
         }
@@ -6234,6 +6308,7 @@ export type BasePriceItem = Components.Schemas.BasePriceItem;
 export type BasePriceItemCommon = Components.Schemas.BasePriceItemCommon;
 export type BasePriceItemDto = Components.Schemas.BasePriceItemDto;
 export type BasicAuthCredentials = Components.Schemas.BasicAuthCredentials;
+export type BasicAuthIntegration = Components.Schemas.BasicAuthIntegration;
 export type BillingPeriod = Components.Schemas.BillingPeriod;
 export type Cart = Components.Schemas.Cart;
 export type CartDto = Components.Schemas.CartDto;
@@ -6274,11 +6349,14 @@ export type File = Components.Schemas.File;
 export type GasConcessionType = Components.Schemas.GasConcessionType;
 export type HistoricMarketPriceRecord = Components.Schemas.HistoricMarketPriceRecord;
 export type HistoricMarketPricesResult = Components.Schemas.HistoricMarketPricesResult;
+export type IntegrationAuthCredentials = Components.Schemas.IntegrationAuthCredentials;
 export type IntegrationCredentialsResult = Components.Schemas.IntegrationCredentialsResult;
 export type IntegrationId = Components.Schemas.IntegrationId;
 export type JourneyContext = Components.Schemas.JourneyContext;
 export type MarkupPricingModel = Components.Schemas.MarkupPricingModel;
 export type MetaData = Components.Schemas.MetaData;
+export type OAuthCredentials = Components.Schemas.OAuthCredentials;
+export type OAuthIntegration = Components.Schemas.OAuthIntegration;
 export type Opportunity = Components.Schemas.Opportunity;
 export type OpportunitySource = Components.Schemas.OpportunitySource;
 export type Order = Components.Schemas.Order;

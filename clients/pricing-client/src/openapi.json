@@ -3298,10 +3298,10 @@
         ]
       },
       "IntegrationCredentialsResult": {
-        "$ref": "#/components/schemas/BasicAuthCredentials"
+        "$ref": "#/components/schemas/IntegrationAuthCredentials"
       },
       "SaveIntegrationCredentialsParams": {
-        "$ref": "#/components/schemas/BasicAuthCredentials"
+        "$ref": "#/components/schemas/IntegrationAuthCredentials"
       },
       "ComputePriceParamsBase": {
         "type": "object",
@@ -3733,8 +3733,61 @@
           "unit_amount_currency"
         ]
       },
+      "OAuthCredentials": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "description": "The OAuth client ID",
+            "type": "string",
+            "example": "client_id_123"
+          },
+          "client_secret": {
+            "description": "The OAuth client secret",
+            "type": "string",
+            "example": "client_secret_456"
+          },
+          "authorization_url": {
+            "description": "The URL to obtain OAuth tokens",
+            "type": "string",
+            "example": "https://api.example.com/oauth/token"
+          },
+          "grant_type": {
+            "description": "The OAuth grant type",
+            "type": "string",
+            "enum": [
+              "client_credentials"
+            ],
+            "default": "client_credentials"
+          },
+          "scope": {
+            "description": "The OAuth scope",
+            "type": "string",
+            "example": "read:user write:user"
+          },
+          "access_token": {
+            "description": "The OAuth access token",
+            "type": "string",
+            "example": "access_token_789"
+          },
+          "access_token_expires_in": {
+            "description": "The expiration time of the OAuth access token in seconds",
+            "type": "number",
+            "example": 3600
+          },
+          "access_token_expires_at": {
+            "description": "The expiration time of the OAuth access token",
+            "type": "number",
+            "example": 1715731200
+          }
+        },
+        "required": [
+          "client_id",
+          "client_secret",
+          "authorization_url",
+          "grant_type"
+        ]
+      },
       "BasicAuthCredentials": {
-        "description": "The basic auth credentials",
         "type": "object",
         "properties": {
           "username": {
@@ -3746,6 +3799,48 @@
             "description": "The password",
             "type": "string",
             "example": "123456"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "BasicAuthIntegration": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BasicAuthCredentials"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "auth_type": {
+                "type": "string",
+                "enum": [
+                  "basic_auth"
+                ]
+              },
+              "base_url": {
+                "description": "The base URL",
+                "type": "string",
+                "example": "https://api.example.com"
+              }
+            }
+          }
+        ]
+      },
+      "OAuthIntegration": {
+        "type": "object",
+        "properties": {
+          "auth_type": {
+            "type": "string",
+            "enum": [
+              "oauth"
+            ]
+          },
+          "oauth": {
+            "$ref": "#/components/schemas/OAuthCredentials"
           },
           "base_url": {
             "description": "The base URL",
@@ -3754,8 +3849,20 @@
           }
         },
         "required": [
-          "username",
-          "password"
+          "auth_type",
+          "oauth"
+        ]
+      },
+      "IntegrationAuthCredentials": {
+        "description": "The auth credentials for external integrations",
+        "type": "object",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BasicAuthIntegration"
+          },
+          {
+            "$ref": "#/components/schemas/OAuthIntegration"
+          }
         ]
       },
       "SearchStreetsResult": {
