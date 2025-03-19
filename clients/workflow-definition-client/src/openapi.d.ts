@@ -210,9 +210,9 @@ declare namespace Components {
             to_id: string;
             condition_id?: string;
             /**
-             * Temporary MVP flag to indicate the negated condition of a binary decision task
+             * Indicates a default case for a decision task. Only decision task edges can have this field and the flow advances using this edge if no conditions are met.
              */
-            not_met?: boolean;
+            none_met?: boolean;
         }
         /**
          * describe the requirement for a task to be enabled

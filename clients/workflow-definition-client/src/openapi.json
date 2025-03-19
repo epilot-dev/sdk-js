@@ -1874,9 +1874,9 @@
           "condition_id": {
             "type": "string"
           },
-          "not_met": {
+          "none_met": {
             "type": "boolean",
-            "description": "Temporary MVP flag to indicate the negated condition of a binary decision task"
+            "description": "Indicates a default case for a decision task. Only decision task edges can have this field and the flow advances using this edge if no conditions are met."
           }
         },
         "required": [
