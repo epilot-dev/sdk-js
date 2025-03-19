@@ -12,7 +12,21 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/submission/nonce/{nonce_id}": {
+      "get": {
+        "operationId": "getNonce",
+        "parameters": [
+          {
+            "name": "nonce_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
       }
     }
   },

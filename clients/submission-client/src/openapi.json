@@ -9,6 +9,31 @@
     {
       "name": "Submissions",
       "description": "Journey Submission"
+    },
+    {
+      "name": "submission_schema",
+      "x-displayName": "Submission",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/SubmissionEntity\" />\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "APIs",
+      "tags": [
+        "Submissions"
+      ]
+    },
+    {
+      "name": "Schemas",
+      "tags": [
+        "submission_schema"
+      ]
+    }
+  ],
+  "security": [
+    {},
+    {
+      "EpilotAuth": []
     }
   ],
   "paths": {
@@ -35,10 +60,85 @@
           }
         }
       }
+    },
+    "/v1/submission/nonce/{nonce_id}": {
+      "get": {
+        "operationId": "getNonce",
+        "summary": "Check if a nonce was already used (aka exists in storage)",
+        "description": "Returns { exists: boolean } along some meta data",
+        "tags": [
+          "Submissions"
+        ],
+        "parameters": [
+          {
+            "name": "nonce_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nonce found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SubmissionNonce"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "exists": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Authorization Bearer Token - public access token / user token",
+        "bearerFormat": "JWT"
+      }
+    },
     "schemas": {
+      "SubmissionNonce": {
+        "type": "object",
+        "properties": {
+          "nonce": {
+            "type": "string"
+          },
+          "submission_id": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "ttl": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "nonce",
+          "submission_id",
+          "organization_id"
+        ]
+      },
       "SubmissionPayload": {
         "description": "Holds content and meta information",
         "type": "object",
@@ -207,9 +307,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://submission.sls.epilot.io"
-    },
     {
       "url": "https://submission.sls.epilot.io"
     }

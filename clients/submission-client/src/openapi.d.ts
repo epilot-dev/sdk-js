@@ -90,6 +90,12 @@ declare namespace Components {
                 relation_tags?: string[];
             }[];
         }
+        export interface SubmissionNonce {
+            nonce: string;
+            submission_id: string;
+            organization_id: string;
+            ttl?: number;
+        }
         /**
          * Holds content and meta information
          */
@@ -378,6 +384,27 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetNonce {
+        namespace Parameters {
+            export type NonceId = string;
+        }
+        export interface PathParameters {
+            nonce_id: Parameters.NonceId;
+        }
+        namespace Responses {
+            export interface $200 {
+                nonce: string;
+                submission_id: string;
+                organization_id: string;
+                ttl?: number;
+                /**
+                 * example:
+                 * true
+                 */
+                exists?: boolean;
+            }
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -392,6 +419,16 @@ export interface OperationMethods {
     data?: Paths.CreateSubmission.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateSubmission.Responses.$201>
+  /**
+   * getNonce - Check if a nonce was already used (aka exists in storage)
+   * 
+   * Returns { exists: boolean } along some meta data
+   */
+  'getNonce'(
+    parameters?: Parameters<Paths.GetNonce.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetNonce.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -408,6 +445,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateSubmission.Responses.$201>
   }
+  ['/v1/submission/nonce/{nonce_id}']: {
+    /**
+     * getNonce - Check if a nonce was already used (aka exists in storage)
+     * 
+     * Returns { exists: boolean } along some meta data
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetNonce.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetNonce.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -415,4 +464,5 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type OptIn = Components.Schemas.OptIn;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SubmissionEntity = Components.Schemas.SubmissionEntity;
+export type SubmissionNonce = Components.Schemas.SubmissionNonce;
 export type SubmissionPayload = Components.Schemas.SubmissionPayload;
