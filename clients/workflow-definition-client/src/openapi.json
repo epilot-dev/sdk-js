@@ -1526,6 +1526,9 @@
               "id": {
                 "type": "string"
               },
+              "type": {
+                "$ref": "#/components/schemas/TriggerType"
+              },
               "automation_config": {
                 "$ref": "#/components/schemas/AutomationConfig"
               }
@@ -2315,6 +2318,13 @@
           "order",
           "type",
           "steps"
+        ]
+      },
+      "TriggerType": {
+        "type": "string",
+        "enum": [
+          "MANUAL",
+          "AUTOMATIC"
         ]
       },
       "ItemType": {

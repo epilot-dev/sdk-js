@@ -135,6 +135,7 @@ declare namespace Components {
             taxonomies?: string[];
             trigger?: {
                 id: string;
+                type?: TriggerType;
                 automation_config?: /* Configuration for automation execution to run */ AutomationConfig;
             };
         }
@@ -281,6 +282,7 @@ declare namespace Components {
             taxonomies?: string[];
             trigger?: {
                 id: string;
+                type?: TriggerType;
                 automation_config?: /* Configuration for automation execution to run */ AutomationConfig;
             };
         }
@@ -479,6 +481,7 @@ declare namespace Components {
         export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION";
         export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months";
         export type TriggerMode = "manual" | "automatic";
+        export type TriggerType = "MANUAL" | "AUTOMATIC";
         export interface UpdateEntityAttributes {
             source: "workflow_status" | "current_section" | "current_step";
             target: {
@@ -1291,5 +1294,6 @@ export type TaskBase = Components.Schemas.TaskBase;
 export type TaskType = Components.Schemas.TaskType;
 export type TimeUnit = Components.Schemas.TimeUnit;
 export type TriggerMode = Components.Schemas.TriggerMode;
+export type TriggerType = Components.Schemas.TriggerType;
 export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
 export type WorkflowDefinition = Components.Schemas.WorkflowDefinition;
