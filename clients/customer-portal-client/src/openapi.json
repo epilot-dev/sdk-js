@@ -9631,6 +9631,9 @@
           },
           "oidc_config": {
             "$ref": "#/components/schemas/OIDCProviderConfig"
+          },
+          "mobile_oidc_config": {
+            "$ref": "#/components/schemas/MoblieOIDCConfig"
           }
         },
         "required": [

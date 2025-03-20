@@ -3339,6 +3339,7 @@ declare namespace Components {
              */
             ProviderDisplayName;
             oidc_config?: OIDCProviderConfig;
+            mobile_oidc_config?: MoblieOIDCConfig;
         }
         /**
          * URL-friendly slug to use as organization-unique identifier for Provider
