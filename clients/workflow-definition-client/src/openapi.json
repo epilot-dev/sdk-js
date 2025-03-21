@@ -1448,6 +1448,9 @@
           "description": {
             "type": "string"
           },
+          "trigger": {
+            "$ref": "#/components/schemas/Trigger"
+          },
           "created_at": {
             "type": "string",
             "description": "ISO String Date & Time",
@@ -1516,23 +1519,56 @@
               "type": "string"
             },
             "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          }
+        }
+      },
+      "Trigger": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ManualTrigger"
           },
-          "trigger": {
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "type": {
-                "$ref": "#/components/schemas/TriggerType"
-              },
-              "automation_config": {
-                "$ref": "#/components/schemas/AutomationConfig"
-              }
-            }
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
+          }
+        ],
+        "example": {
+          "type": "automation",
+          "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
+        }
+      },
+      "ManualTrigger": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "manual"
+            ]
+          },
+          "entity_schema": {
+            "type": "string"
+          }
+        }
+      },
+      "AutomationTrigger": {
+        "type": "object",
+        "required": [
+          "type",
+          "automation_id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "automation"
+            ]
+          },
+          "automation_id": {
+            "type": "string",
+            "description": "Id of the automation config that triggers this workflow"
           }
         }
       },

@@ -48,6 +48,13 @@ declare namespace Components {
             trigger_mode?: TriggerMode;
             schedule?: ActionSchedule;
         }
+        export interface AutomationTrigger {
+            type: "automation";
+            /**
+             * Id of the automation config that triggers this workflow
+             */
+            automation_id: string;
+        }
         export interface ChangeReasonStatusReq {
             status: ClosingReasonsStatus;
         }
@@ -97,6 +104,14 @@ declare namespace Components {
             org_id?: string;
             name: string;
             description?: string;
+            trigger?: /**
+             * example:
+             * {
+             *   "type": "automation",
+             *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
+             * }
+             */
+            Trigger;
             /**
              * ISO String Date & Time
              * example:
@@ -133,11 +148,6 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
-            trigger?: {
-                id: string;
-                type?: TriggerType;
-                automation_config?: /* Configuration for automation execution to run */ AutomationConfig;
-            };
         }
         export interface DecisionTask {
             id: string;
@@ -244,6 +254,14 @@ declare namespace Components {
             org_id?: string;
             name: string;
             description?: string;
+            trigger?: /**
+             * example:
+             * {
+             *   "type": "automation",
+             *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
+             * }
+             */
+            Trigger;
             /**
              * ISO String Date & Time
              * example:
@@ -280,11 +298,6 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
-            trigger?: {
-                id: string;
-                type?: TriggerType;
-                automation_config?: /* Configuration for automation execution to run */ AutomationConfig;
-            };
         }
         /**
          * Short unique id (length 8) to identify the Flow Template.
@@ -323,6 +336,10 @@ declare namespace Components {
             taxonomies?: string[];
             phase_id?: string;
             task_type: TaskType;
+        }
+        export interface ManualTrigger {
+            type: "manual";
+            entity_schema?: string;
         }
         export interface MaxAllowedLimit {
             currentNoOfWorkflows?: number;
@@ -480,6 +497,21 @@ declare namespace Components {
         }
         export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION";
         export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months";
+        /**
+         * example:
+         * {
+         *   "type": "automation",
+         *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
+         * }
+         */
+        export type Trigger = /**
+         * example:
+         * {
+         *   "type": "automation",
+         *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
+         * }
+         */
+        ManualTrigger | AutomationTrigger;
         export type TriggerMode = "manual" | "automatic";
         export type TriggerType = "MANUAL" | "AUTOMATIC";
         export interface UpdateEntityAttributes {
@@ -1253,6 +1285,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
 export type AutomationTask = Components.Schemas.AutomationTask;
+export type AutomationTrigger = Components.Schemas.AutomationTrigger;
 export type ChangeReasonStatusReq = Components.Schemas.ChangeReasonStatusReq;
 export type ClosingReason = Components.Schemas.ClosingReason;
 export type ClosingReasonId = Components.Schemas.ClosingReasonId;
@@ -1278,6 +1311,7 @@ export type FlowTemplatesList = Components.Schemas.FlowTemplatesList;
 export type ImmediateSchedule = Components.Schemas.ImmediateSchedule;
 export type ItemType = Components.Schemas.ItemType;
 export type ManualTask = Components.Schemas.ManualTask;
+export type ManualTrigger = Components.Schemas.ManualTrigger;
 export type MaxAllowedLimit = Components.Schemas.MaxAllowedLimit;
 export type Operator = Components.Schemas.Operator;
 export type Phase = Components.Schemas.Phase;
@@ -1293,6 +1327,7 @@ export type Task = Components.Schemas.Task;
 export type TaskBase = Components.Schemas.TaskBase;
 export type TaskType = Components.Schemas.TaskType;
 export type TimeUnit = Components.Schemas.TimeUnit;
+export type Trigger = Components.Schemas.Trigger;
 export type TriggerMode = Components.Schemas.TriggerMode;
 export type TriggerType = Components.Schemas.TriggerType;
 export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;

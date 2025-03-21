@@ -391,17 +391,17 @@ declare namespace Components {
              * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
-            trigger: {
-                id?: string;
-                type?: TriggerType;
-                automation_config?: AutomationInfo;
-            };
+            trigger: FlowTrigger;
         }
         export type FlowExecutionId = string;
         export interface FlowSlim {
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export type FlowTemplateId = string;
+        export interface FlowTrigger {
+            type?: TriggerType;
+            automation_config?: AutomationInfo;
+        }
         export interface ImmediateSchedule {
             mode: "immediate";
         }
@@ -684,7 +684,7 @@ declare namespace Components {
         export type SectionStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED";
         export interface StartFlowReq {
             flow_template_id: string;
-            trigger_type?: TriggerType;
+            trigger?: FlowTrigger;
             contexts: FlowContext[];
             /**
              * An array of purposes to filter workflow phases.
@@ -2183,6 +2183,7 @@ export type FlowExecution = Components.Schemas.FlowExecution;
 export type FlowExecutionId = Components.Schemas.FlowExecutionId;
 export type FlowSlim = Components.Schemas.FlowSlim;
 export type FlowTemplateId = Components.Schemas.FlowTemplateId;
+export type FlowTrigger = Components.Schemas.FlowTrigger;
 export type ImmediateSchedule = Components.Schemas.ImmediateSchedule;
 export type ItemType = Components.Schemas.ItemType;
 export type LastEvaluatedKey = Components.Schemas.LastEvaluatedKey;

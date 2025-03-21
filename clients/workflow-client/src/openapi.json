@@ -2412,15 +2412,14 @@
         "type": "object",
         "required": [
           "flow_template_id",
-          "trigger",
           "contexts"
         ],
         "properties": {
           "flow_template_id": {
             "type": "string"
           },
-          "trigger_type": {
-            "$ref": "#/components/schemas/TriggerType"
+          "trigger": {
+            "$ref": "#/components/schemas/FlowTrigger"
           },
           "contexts": {
             "type": "array",
@@ -2645,18 +2644,18 @@
             "description": "Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering"
           },
           "trigger": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "type": {
-                "$ref": "#/components/schemas/TriggerType"
-              },
-              "automation_config": {
-                "$ref": "#/components/schemas/AutomationInfo"
-              }
-            }
+            "$ref": "#/components/schemas/FlowTrigger"
+          }
+        }
+      },
+      "FlowTrigger": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TriggerType"
+          },
+          "automation_config": {
+            "$ref": "#/components/schemas/AutomationInfo"
           }
         }
       },
