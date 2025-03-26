@@ -171,6 +171,7 @@
         "operationId": "replaceVariables",
         "summary": "replaceVariables",
         "description": "Get template detail and replace all variables (template variables and document generation)",
+        "deprecated": true,
         "tags": [
           "Variables"
         ],
@@ -189,6 +190,11 @@
                   },
                   "variable_parameters": {
                     "$ref": "#/components/schemas/VariableParameters"
+                  },
+                  "must_include_unsubscribe_link": {
+                    "type": "boolean",
+                    "description": "If true then include unsubscribe link in the email body\n",
+                    "default": false
                   },
                   "skip_document_generation": {
                     "type": "boolean",
@@ -248,14 +254,14 @@
                   "variable_parameters": {
                     "$ref": "#/components/schemas/VariableParameters"
                   },
+                  "must_include_unsubscribe_link": {
+                    "type": "boolean",
+                    "description": "If true then include unsubscribe link in the email body\n",
+                    "default": false
+                  },
                   "skip_document_generation": {
                     "type": "boolean",
                     "description": "If true then skip document generation. This is useful when you want to replace html variables only. Speeds up the process.\n",
-                    "default": false
-                  },
-                  "add_unsubscribe_link": {
-                    "type": "boolean",
-                    "description": "If true then add unsubscribe link to email template body.\n",
                     "default": false
                   }
                 }
@@ -1121,11 +1127,6 @@
               "3fa85f64-5717-4562-b3fc-2c963f66afa7",
               "3fa85f64-5717-4562-b3fc-2c963f66afa8"
             ]
-          },
-          "add_unsubscribe_link": {
-            "type": "boolean",
-            "description": "If true then add unsubscribe link to email template body.\n",
-            "default": false
           }
         }
       },
@@ -1149,11 +1150,6 @@
             "type": "string",
             "description": "Entity search query to select recipients",
             "example": "_schema:contact AND consent_email_marketing:active"
-          },
-          "add_unsubscribe_link": {
-            "type": "boolean",
-            "description": "If true then add unsubscribe link to email template body.\n",
-            "default": false
           }
         }
       },
