@@ -48,6 +48,7 @@
     "/v1/email-template/templates:replace": {
       "post": {
         "operationId": "replaceVariables",
+        "deprecated": true,
         "requestBody": {
           "content": {
             "application/json": {}

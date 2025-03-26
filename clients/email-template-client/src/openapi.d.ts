@@ -368,11 +368,6 @@ declare namespace Components {
              * ]
              */
             recipient_ids: string[];
-            /**
-             * If true then add unsubscribe link to email template body.
-             *
-             */
-            add_unsubscribe_link?: boolean;
         }
         /**
          * It takes an entity query to derive recipient_ids, treating each as a separate mainEntity to construct individual messages.
@@ -394,11 +389,6 @@ declare namespace Components {
              * _schema:contact AND consent_email_marketing:active
              */
             recipient_query: string;
-            /**
-             * If true then add unsubscribe link to email template body.
-             *
-             */
-            add_unsubscribe_link?: boolean;
         }
         export interface CreateSystemTemplatesReq {
             /**
@@ -858,6 +848,11 @@ declare namespace Paths {
             email_template_id: string;
             variable_parameters?: Components.Schemas.VariableParameters;
             /**
+             * If true then include unsubscribe link in the email body
+             *
+             */
+            must_include_unsubscribe_link?: boolean;
+            /**
              * If true then skip document generation. This is useful when you want to replace html variables only. Speeds up the process.
              *
              */
@@ -884,15 +879,15 @@ declare namespace Paths {
             email_template_id?: string;
             variable_parameters?: Components.Schemas.VariableParameters;
             /**
+             * If true then include unsubscribe link in the email body
+             *
+             */
+            must_include_unsubscribe_link?: boolean;
+            /**
              * If true then skip document generation. This is useful when you want to replace html variables only. Speeds up the process.
              *
              */
             skip_document_generation?: boolean;
-            /**
-             * If true then add unsubscribe link to email template body.
-             *
-             */
-            add_unsubscribe_link?: boolean;
         }
         namespace Responses {
             export type $200 = Components.Schemas.AsyncEmailTemplateResponse;
