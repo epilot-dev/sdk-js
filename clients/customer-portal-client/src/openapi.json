@@ -5822,6 +5822,10 @@
           "confirmEmailUpdate": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the email template for setting password while updating email"
+          },
+          "verifyCodeToSetPassword": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the email template for setting password while verifying code"
           }
         }
       },
