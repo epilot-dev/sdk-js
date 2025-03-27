@@ -270,12 +270,20 @@
             "$ref": "#/components/parameters/TaskIdParam"
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/execute": {
+      "post": {
+        "operationId": "executeTask",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
           }
-        },
+        ],
         "responses": {}
       }
     },
@@ -288,6 +296,23 @@
           },
           {
             "$ref": "#/components/parameters/PhaseIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks": {
+      "post": {
+        "operationId": "addTask",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
           }
         ],
         "requestBody": {

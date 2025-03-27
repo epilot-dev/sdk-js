@@ -25,6 +25,42 @@ declare namespace Components {
     }
     namespace Schemas {
         export type ActionSchedule = ImmediateSchedule | DelayedSchedule | RelativeSchedule;
+        export interface AddTaskReq {
+            /**
+             * Source node id for the edge to this task
+             */
+            previous_task_id: string; // uuid
+            /**
+             * Target node id for the edge from this task
+             */
+            next_task_id: string; // uuid
+            task: {
+                /**
+                 * Id of the task
+                 */
+                id: string; // uuid
+                name: string;
+                status?: /**
+                 * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+                 *
+                 */
+                StepStatus;
+                /**
+                 * example:
+                 * 2021-04-27T12:00:00.000Z
+                 */
+                due_date?: string;
+                due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+                assigned_to?: /* The user ids */ Assignees;
+                /**
+                 * flag for controlling enabled/disabled state of the task
+                 */
+                enabled?: boolean;
+                automation_config?: AutomationInfo;
+                phase_id?: string;
+                task_type?: TaskType;
+            };
+        }
         export interface AnalyticsInfo {
             started_at?: string; // date-time
             in_progress_at?: string; // date-time
@@ -236,6 +272,7 @@ declare namespace Components {
             phase_id?: string;
             task_type: TaskType;
             conditions: Condition[];
+            schedule?: DelayedSchedule | RelativeSchedule;
         }
         export interface DelayedSchedule {
             mode: "delayed";
@@ -503,9 +540,6 @@ declare namespace Components {
              * The id of the created schedule
              */
             schedule_id?: string;
-        }
-        export interface RunTaskAutomationReq {
-            entity_id: string; // uuid
         }
         export interface SearchExecutionsReq {
             name?: string;
@@ -1312,6 +1346,21 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace AddTask {
+        namespace Parameters {
+            export type ExecutionId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+        }
+        export type RequestBody = Components.Schemas.AddTaskReq;
+        namespace Responses {
+            export type $201 = Components.Schemas.Task;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace CreateExecution {
         export type RequestBody = /**
          * example:
@@ -1450,6 +1499,22 @@ declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
+    namespace ExecuteTask {
+        namespace Parameters {
+            export type ExecutionId = string;
+            export type TaskId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+            task_id: Parameters.TaskId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Task;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -1650,7 +1715,6 @@ declare namespace Paths {
             execution_id: Parameters.ExecutionId;
             task_id: Parameters.TaskId;
         }
-        export type RequestBody = Components.Schemas.RunTaskAutomationReq;
         namespace Responses {
             export type $200 = Components.Schemas.AutomationTask;
             export type $400 = Components.Schemas.ErrorResp;
@@ -1916,9 +1980,19 @@ export interface OperationMethods {
    */
   'runTaskAutomation'(
     parameters?: Parameters<Paths.RunTaskAutomation.PathParameters> | null,
-    data?: Paths.RunTaskAutomation.RequestBody,
+    data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RunTaskAutomation.Responses.$200>
+  /**
+   * executeTask - executeTask
+   * 
+   * Executes any kind of flow task immediately.
+   */
+  'executeTask'(
+    parameters?: Parameters<Paths.ExecuteTask.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ExecuteTask.Responses.$200>
   /**
    * patchPhase - patchPhase
    * 
@@ -1929,6 +2003,16 @@ export interface OperationMethods {
     data?: Paths.PatchPhase.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PatchPhase.Responses.$200>
+  /**
+   * addTask - addTask
+   * 
+   * Create a new task in current workflow execution.
+   */
+  'addTask'(
+    parameters?: Parameters<Paths.AddTask.PathParameters> | null,
+    data?: Paths.AddTask.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AddTask.Responses.$201>
 }
 
 export interface PathsDictionary {
@@ -2135,9 +2219,21 @@ export interface PathsDictionary {
      */
     'post'(
       parameters?: Parameters<Paths.RunTaskAutomation.PathParameters> | null,
-      data?: Paths.RunTaskAutomation.RequestBody,
+      data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RunTaskAutomation.Responses.$200>
+  }
+  ['/v2/flows/executions/{execution_id}/tasks/{task_id}/execute']: {
+    /**
+     * executeTask - executeTask
+     * 
+     * Executes any kind of flow task immediately.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ExecuteTask.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ExecuteTask.Responses.$200>
   }
   ['/v2/flows/executions/{execution_id}/phases/{phase_id}']: {
     /**
@@ -2151,11 +2247,24 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchPhase.Responses.$200>
   }
+  ['/v2/flows/executions/{execution_id}/tasks']: {
+    /**
+     * addTask - addTask
+     * 
+     * Create a new task in current workflow execution.
+     */
+    'post'(
+      parameters?: Parameters<Paths.AddTask.PathParameters> | null,
+      data?: Paths.AddTask.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AddTask.Responses.$201>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type ActionSchedule = Components.Schemas.ActionSchedule;
+export type AddTaskReq = Components.Schemas.AddTaskReq;
 export type AnalyticsInfo = Components.Schemas.AnalyticsInfo;
 export type Assignees = Components.Schemas.Assignees;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
@@ -2196,7 +2305,6 @@ export type Phase = Components.Schemas.Phase;
 export type PhaseId = Components.Schemas.PhaseId;
 export type PhaseInEntity = Components.Schemas.PhaseInEntity;
 export type RelativeSchedule = Components.Schemas.RelativeSchedule;
-export type RunTaskAutomationReq = Components.Schemas.RunTaskAutomationReq;
 export type SearchExecutionsReq = Components.Schemas.SearchExecutionsReq;
 export type SearchExecutionsResp = Components.Schemas.SearchExecutionsResp;
 export type SearchFlowsReq = Components.Schemas.SearchFlowsReq;

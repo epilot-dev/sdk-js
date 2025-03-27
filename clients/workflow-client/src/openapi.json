@@ -1014,17 +1014,6 @@
             "$ref": "#/components/parameters/TaskIdParam"
           }
         ],
-        "requestBody": {
-          "description": "Payload for running automations",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RunTaskAutomationReq"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Success - when task automation has been successfully started",
@@ -1032,6 +1021,66 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AutomationTask"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/execute": {
+      "post": {
+        "operationId": "executeTask",
+        "summary": "executeTask",
+        "description": "Executes any kind of flow task immediately.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - when task has been executed manually or automation has been started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
                 }
               }
             }
@@ -1103,6 +1152,74 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Phase"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks": {
+      "post": {
+        "operationId": "addTask",
+        "summary": "addTask",
+        "description": "Create a new task in current workflow execution.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          }
+        ],
+        "requestBody": {
+          "description": "Workflow Execution Task payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTaskReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success - if the task is created with success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
                 }
               }
             }
@@ -2483,18 +2600,6 @@
           }
         }
       },
-      "RunTaskAutomationReq": {
-        "type": "object",
-        "properties": {
-          "entity_id": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "entity_id"
-        ]
-      },
       "FlowExecution": {
         "type": "object",
         "required": [
@@ -2877,6 +2982,16 @@
                 "items": {
                   "$ref": "#/components/schemas/Condition"
                 }
+              },
+              "schedule": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DelayedSchedule"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RelativeSchedule"
+                  }
+                ]
               }
             }
           }
@@ -3378,6 +3493,69 @@
             "$ref": "#/components/schemas/Assignees"
           }
         }
+      },
+      "AddTaskReq": {
+        "type": "object",
+        "properties": {
+          "previous_task_id": {
+            "type": "string",
+            "description": "Source node id for the edge to this task",
+            "format": "uuid"
+          },
+          "next_task_id": {
+            "type": "string",
+            "description": "Target node id for the edge from this task",
+            "format": "uuid"
+          },
+          "task": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Id of the task",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/components/schemas/StepStatus"
+              },
+              "due_date": {
+                "type": "string",
+                "example": "2021-04-27T12:00:00.000Z"
+              },
+              "due_date_config": {
+                "$ref": "#/components/schemas/DueDateConfig"
+              },
+              "assigned_to": {
+                "$ref": "#/components/schemas/Assignees"
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "flag for controlling enabled/disabled state of the task"
+              },
+              "automation_config": {
+                "$ref": "#/components/schemas/AutomationInfo"
+              },
+              "phase_id": {
+                "type": "string"
+              },
+              "task_type": {
+                "$ref": "#/components/schemas/TaskType"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          }
+        },
+        "required": [
+          "previous_task_id",
+          "next_task_id",
+          "task"
+        ]
       }
     }
   }
