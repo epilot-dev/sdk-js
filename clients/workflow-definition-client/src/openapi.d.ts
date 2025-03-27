@@ -113,15 +113,19 @@ declare namespace Components {
              */
             Trigger;
             /**
+             * Whether the workflow is enabled or not
+             */
+            enabled?: boolean;
+            /**
+             * Whether the workflow is migrated from workflows to flows or not
+             */
+            is_flow_migrated?: boolean;
+            /**
              * ISO String Date & Time
              * example:
              * 2021-04-27T12:01:13.000Z
              */
             created_at?: string;
-            /**
-             * Whether the workflow is enabled or not
-             */
-            enabled?: boolean;
             /**
              * ISO String Date & Time
              * example:
@@ -174,6 +178,7 @@ declare namespace Components {
             phase_id?: string;
             task_type: TaskType;
             conditions: Condition[];
+            schedule?: DelayedSchedule | RelativeSchedule;
         }
         /**
          * Definition could be not found
@@ -263,15 +268,19 @@ declare namespace Components {
              */
             Trigger;
             /**
+             * Whether the workflow is enabled or not
+             */
+            enabled?: boolean;
+            /**
+             * Whether the workflow is migrated from workflows to flows or not
+             */
+            is_flow_migrated?: boolean;
+            /**
              * ISO String Date & Time
              * example:
              * 2021-04-27T12:01:13.000Z
              */
             created_at?: string;
-            /**
-             * Whether the workflow is enabled or not
-             */
-            enabled?: boolean;
             /**
              * ISO String Date & Time
              * example:

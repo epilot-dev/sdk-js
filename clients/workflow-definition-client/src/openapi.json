@@ -1451,15 +1451,20 @@
           "trigger": {
             "$ref": "#/components/schemas/Trigger"
           },
-          "created_at": {
-            "type": "string",
-            "description": "ISO String Date & Time",
-            "example": "2021-04-27T12:01:13.000Z"
-          },
           "enabled": {
             "type": "boolean",
             "description": "Whether the workflow is enabled or not",
             "default": true
+          },
+          "is_flow_migrated": {
+            "type": "boolean",
+            "description": "Whether the workflow is migrated from workflows to flows or not",
+            "default": false
+          },
+          "created_at": {
+            "type": "string",
+            "description": "ISO String Date & Time",
+            "example": "2021-04-27T12:01:13.000Z"
           },
           "updated_at": {
             "type": "string",
@@ -1789,6 +1794,16 @@
                 "items": {
                   "$ref": "#/components/schemas/Condition"
                 }
+              },
+              "schedule": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DelayedSchedule"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RelativeSchedule"
+                  }
+                ]
               }
             }
           }
