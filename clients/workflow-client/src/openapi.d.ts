@@ -307,7 +307,9 @@ declare namespace Components {
          * Details regarding ECP for the workflow step
          */
         export interface ECPDetails {
+            enabled?: boolean;
             label?: string;
+            description?: string;
             journey?: StepJourney;
         }
         export interface Edge {
@@ -487,6 +489,9 @@ declare namespace Components {
              */
             enabled?: boolean;
             automation_config?: AutomationInfo;
+            description?: /* Longer information regarding Task */ StepDescription;
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
         }
         export interface Phase {
             id: PhaseId;

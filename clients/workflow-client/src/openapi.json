@@ -2027,7 +2027,13 @@
         "type": "object",
         "description": "Details regarding ECP for the workflow step",
         "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
           "label": {
+            "type": "string"
+          },
+          "description": {
             "type": "string"
           },
           "journey": {
@@ -3473,6 +3479,15 @@
           },
           "automation_config": {
             "$ref": "#/components/schemas/AutomationInfo"
+          },
+          "description": {
+            "$ref": "#/components/schemas/StepDescription"
+          },
+          "ecp": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "installer": {
+            "$ref": "#/components/schemas/ECPDetails"
           }
         }
       },
