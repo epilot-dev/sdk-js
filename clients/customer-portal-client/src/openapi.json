@@ -2505,13 +2505,15 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "confirmed"
-                  ],
                   "properties": {
                     "confirmed": {
                       "type": "boolean",
                       "description": "Is the user confirmed",
+                      "example": true
+                    },
+                    "user_already_confirmed": {
+                      "type": "boolean",
+                      "description": "Is the user previously confirmed",
                       "example": true
                     }
                   }

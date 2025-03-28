@@ -4400,7 +4400,13 @@ declare namespace Paths {
                  * example:
                  * true
                  */
-                confirmed: boolean;
+                confirmed?: boolean;
+                /**
+                 * Is the user previously confirmed
+                 * example:
+                 * true
+                 */
+                user_already_confirmed?: boolean;
             }
             export interface $301 {
             }
