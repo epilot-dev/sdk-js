@@ -489,6 +489,20 @@ declare namespace Components {
             size?: number;
             hydrate?: boolean;
         }
+        export interface SearchParamsV2 {
+            /**
+             * Lucene query syntax supported with ElasticSearch
+             * example:
+             * subject:"Request for solar panel price" AND _tags:INBOX
+             */
+            q: string;
+            from?: number;
+            size?: number;
+            hydrate?: boolean;
+            include_scores?: boolean;
+            sort?: string;
+            highlight?: any;
+        }
         /**
          * Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.
          */
@@ -1158,7 +1172,7 @@ declare namespace Paths {
             id: Parameters.Id;
         }
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1173,7 +1187,7 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.ReadMessagePayload;
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1244,7 +1258,7 @@ declare namespace Paths {
             id: Parameters.Id;
         }
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1259,9 +1273,29 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.ReadMessagePayload;
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
             export interface $403 {
+            }
+        }
+    }
+    namespace PinThread {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
             }
         }
     }
@@ -1286,6 +1320,97 @@ declare namespace Paths {
     }
     namespace SearchThreads {
         export type RequestBody = Components.Schemas.SearchParams;
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Total of matched threads
+                 * example:
+                 * 14
+                 */
+                hits: number;
+                /**
+                 * Matched threads
+                 */
+                results: {
+                    /**
+                     * Entity ID
+                     * example:
+                     * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                     */
+                    _id: string;
+                    /**
+                     * Entity title
+                     */
+                    _title: string;
+                    /**
+                     * Organization ID the entity belongs to
+                     * example:
+                     * 206801
+                     */
+                    _org: string;
+                    /**
+                     * URL-friendly identifier for the entity schema
+                     * example:
+                     * message
+                     */
+                    _schema: string;
+                    /**
+                     * Entity tags
+                     * example:
+                     * [
+                     *   "pricing",
+                     *   "INBOX"
+                     * ]
+                     */
+                    _tags?: string[];
+                    /**
+                     * Created date
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _created_at: string; // date-time
+                    /**
+                     * Updated date
+                     * example:
+                     * 2021-02-10T09:14:31.990Z
+                     */
+                    _updated_at: string; // date-time
+                    /**
+                     * Message topic (e.g. which service sends the message or message category)
+                     * example:
+                     * CUSTOMER_MESSAGE
+                     */
+                    topic: string;
+                    /**
+                     * User ID of who the message is assigned to. Default is the user who sends message.
+                     */
+                    assigned_to?: string[];
+                    /**
+                     * Organization ID of organization read the message.
+                     */
+                    org_read_message?: string[];
+                    /**
+                     * Whether the thread is marked as Done
+                     * example:
+                     * false
+                     */
+                    done?: boolean;
+                    latest_message?: Components.Schemas.Message;
+                    latest_trash_message?: Components.Schemas.Message;
+                    /**
+                     * The date of the latest message time in the thread
+                     * example:
+                     * 2024-02-10T09:14:31.990Z
+                     */
+                    latest_message_at?: string;
+                }[];
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace SearchThreadsV2 {
+        export type RequestBody = Components.Schemas.SearchParamsV2;
         namespace Responses {
             export interface $200 {
                 /**
@@ -1522,10 +1647,37 @@ declare namespace Paths {
             }
         }
     }
+    namespace ThreadBulkActionsDelete {
+        export type RequestBody = Components.Schemas.BulkActionsPayload;
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace ThreadBulkActionsDone {
+        export type RequestBody = Components.Schemas.BulkActionsPayload;
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace ThreadBulkActionsFavorite {
         export type RequestBody = Components.Schemas.BulkActionsPayload;
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace ThreadBulkActionsOpen {
+        export type RequestBody = Components.Schemas.BulkActionsPayload;
+        namespace Responses {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1534,7 +1686,7 @@ declare namespace Paths {
     namespace ThreadBulkActionsRead {
         export type RequestBody = Components.Schemas.BulkActionsPayloadWithScopes;
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1543,7 +1695,7 @@ declare namespace Paths {
     namespace ThreadBulkActionsTrash {
         export type RequestBody = Components.Schemas.BulkActionsPayload;
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1552,7 +1704,7 @@ declare namespace Paths {
     namespace ThreadBulkActionsUnfavorite {
         export type RequestBody = Components.Schemas.BulkActionsPayload;
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1561,7 +1713,7 @@ declare namespace Paths {
     namespace ThreadBulkActionsUnread {
         export type RequestBody = Components.Schemas.BulkActionsPayloadWithScopes;
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1570,7 +1722,7 @@ declare namespace Paths {
     namespace ThreadBulkActionsUntrash {
         export type RequestBody = Components.Schemas.BulkActionsPayload;
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1598,7 +1750,7 @@ declare namespace Paths {
             id: Parameters.Id;
         }
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1635,6 +1787,26 @@ declare namespace Paths {
             }
         }
     }
+    namespace UnpinThread {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace UntrashMessage {
         namespace Parameters {
             export type Id = string;
@@ -1657,7 +1829,7 @@ declare namespace Paths {
             id: Parameters.Id;
         }
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1997,6 +2169,21 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchThreads.Responses.$200>
   /**
+   * searchThreadsV2 - searchThreadsV2
+   * 
+   * Search for threads of email messages.
+   * 
+   * Messages with no replies yet are treated as threads with single message.
+   * 
+   * Lucene syntax supported.
+   * 
+   */
+  'searchThreadsV2'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchThreadsV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchThreadsV2.Responses.$200>
+  /**
    * searchIds - Search threads and return all id's
    * 
    * Return all thread id's that match a criteria
@@ -2068,7 +2255,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.TrashThread.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.TrashThread.Responses.$204>
+  ): OperationResponse<Paths.TrashThread.Responses.$200>
   /**
    * untrashThread - untrashThread
    * 
@@ -2078,7 +2265,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.UntrashThread.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UntrashThread.Responses.$204>
+  ): OperationResponse<Paths.UntrashThread.Responses.$200>
   /**
    * threadBulkActionsRead - threadBulkActionsRead
    * 
@@ -2088,7 +2275,7 @@ export interface OperationMethods {
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.ThreadBulkActionsRead.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ThreadBulkActionsRead.Responses.$204>
+  ): OperationResponse<Paths.ThreadBulkActionsRead.Responses.$200>
   /**
    * threadBulkActionsUnread - threadBulkActionsUnread
    * 
@@ -2098,7 +2285,7 @@ export interface OperationMethods {
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.ThreadBulkActionsUnread.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ThreadBulkActionsUnread.Responses.$204>
+  ): OperationResponse<Paths.ThreadBulkActionsUnread.Responses.$200>
   /**
    * threadBulkActionsFavorite - threadBulkActionsFavorite
    * 
@@ -2108,7 +2295,7 @@ export interface OperationMethods {
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.ThreadBulkActionsFavorite.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ThreadBulkActionsFavorite.Responses.$204>
+  ): OperationResponse<Paths.ThreadBulkActionsFavorite.Responses.$200>
   /**
    * threadBulkActionsUnfavorite - threadBulkActionsUnfavorite
    * 
@@ -2118,7 +2305,7 @@ export interface OperationMethods {
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.ThreadBulkActionsUnfavorite.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ThreadBulkActionsUnfavorite.Responses.$204>
+  ): OperationResponse<Paths.ThreadBulkActionsUnfavorite.Responses.$200>
   /**
    * threadBulkActionsTrash - threadBulkActionsTrash
    * 
@@ -2128,7 +2315,7 @@ export interface OperationMethods {
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.ThreadBulkActionsTrash.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ThreadBulkActionsTrash.Responses.$204>
+  ): OperationResponse<Paths.ThreadBulkActionsTrash.Responses.$200>
   /**
    * threadBulkActionsUntrash - threadBulkActionsUntrash
    * 
@@ -2138,7 +2325,37 @@ export interface OperationMethods {
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.ThreadBulkActionsUntrash.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ThreadBulkActionsUntrash.Responses.$204>
+  ): OperationResponse<Paths.ThreadBulkActionsUntrash.Responses.$200>
+  /**
+   * threadBulkActionsDelete - threadBulkActionsDelete
+   * 
+   * Performs a bulk permanent delete for all threads
+   */
+  'threadBulkActionsDelete'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ThreadBulkActionsDelete.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ThreadBulkActionsDelete.Responses.$200>
+  /**
+   * threadBulkActionsDone - threadBulkActionsDone
+   * 
+   * Perform a bulk action of marking an array of threads as done
+   */
+  'threadBulkActionsDone'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ThreadBulkActionsDone.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ThreadBulkActionsDone.Responses.$200>
+  /**
+   * threadBulkActionsOpen - threadBulkActionsOpen
+   * 
+   * Perform a bulk action of marking an array of threads as open
+   */
+  'threadBulkActionsOpen'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ThreadBulkActionsOpen.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ThreadBulkActionsOpen.Responses.$200>
   /**
    * markReadThread - markReadThread
    * 
@@ -2148,7 +2365,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.MarkReadThread.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.MarkReadThread.Responses.$204>
+  ): OperationResponse<Paths.MarkReadThread.Responses.$200>
   /**
    * markReadThreadV2 - markReadThreadV2
    * 
@@ -2158,7 +2375,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.MarkReadThreadV2.PathParameters> | null,
     data?: Paths.MarkReadThreadV2.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.MarkReadThreadV2.Responses.$204>
+  ): OperationResponse<Paths.MarkReadThreadV2.Responses.$200>
   /**
    * markUnreadThread - markUnreadThread
    * 
@@ -2168,7 +2385,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.MarkUnreadThread.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.MarkUnreadThread.Responses.$204>
+  ): OperationResponse<Paths.MarkUnreadThread.Responses.$200>
   /**
    * markUnreadThreadV2 - markUnreadThreadV2
    * 
@@ -2178,7 +2395,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.MarkUnreadThreadV2.PathParameters> | null,
     data?: Paths.MarkUnreadThreadV2.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.MarkUnreadThreadV2.Responses.$204>
+  ): OperationResponse<Paths.MarkUnreadThreadV2.Responses.$200>
   /**
    * assignThread - assignThread
    * 
@@ -2211,6 +2428,26 @@ export interface OperationMethods {
     data?: Paths.AssignUsers.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AssignUsers.Responses.$204>
+  /**
+   * pinThread - Pin a single thread
+   * 
+   * Pin a single thread
+   */
+  'pinThread'(
+    parameters?: Parameters<Paths.PinThread.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PinThread.Responses.$204>
+  /**
+   * unpinThread - Unpin a single thread
+   * 
+   * Unpin a single thread
+   */
+  'unpinThread'(
+    parameters?: Parameters<Paths.UnpinThread.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UnpinThread.Responses.$204>
   /**
    * createDraft - createDraft
    * 
@@ -2387,6 +2624,23 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchThreads.Responses.$200>
   }
+  ['/v2/message/threads:search']: {
+    /**
+     * searchThreadsV2 - searchThreadsV2
+     * 
+     * Search for threads of email messages.
+     * 
+     * Messages with no replies yet are treated as threads with single message.
+     * 
+     * Lucene syntax supported.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchThreadsV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchThreadsV2.Responses.$200>
+  }
   ['/v1/message/threads:searchIds']: {
     /**
      * searchIds - Search threads and return all id's
@@ -2472,7 +2726,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.TrashThread.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.TrashThread.Responses.$204>
+    ): OperationResponse<Paths.TrashThread.Responses.$200>
   }
   ['/v1/message/threads/{id}/untrash']: {
     /**
@@ -2484,7 +2738,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.UntrashThread.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UntrashThread.Responses.$204>
+    ): OperationResponse<Paths.UntrashThread.Responses.$200>
   }
   ['/v1/message/threads/bulk:read']: {
     /**
@@ -2496,7 +2750,7 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.ThreadBulkActionsRead.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ThreadBulkActionsRead.Responses.$204>
+    ): OperationResponse<Paths.ThreadBulkActionsRead.Responses.$200>
   }
   ['/v1/message/threads/bulk:unread']: {
     /**
@@ -2508,7 +2762,7 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.ThreadBulkActionsUnread.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ThreadBulkActionsUnread.Responses.$204>
+    ): OperationResponse<Paths.ThreadBulkActionsUnread.Responses.$200>
   }
   ['/v1/message/threads/bulk:favorite']: {
     /**
@@ -2520,7 +2774,7 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.ThreadBulkActionsFavorite.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ThreadBulkActionsFavorite.Responses.$204>
+    ): OperationResponse<Paths.ThreadBulkActionsFavorite.Responses.$200>
   }
   ['/v1/message/threads/bulk:unfavorite']: {
     /**
@@ -2532,7 +2786,7 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.ThreadBulkActionsUnfavorite.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ThreadBulkActionsUnfavorite.Responses.$204>
+    ): OperationResponse<Paths.ThreadBulkActionsUnfavorite.Responses.$200>
   }
   ['/v1/message/threads/bulk:trash']: {
     /**
@@ -2544,7 +2798,7 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.ThreadBulkActionsTrash.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ThreadBulkActionsTrash.Responses.$204>
+    ): OperationResponse<Paths.ThreadBulkActionsTrash.Responses.$200>
   }
   ['/v1/message/threads/bulk:untrash']: {
     /**
@@ -2556,7 +2810,43 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.ThreadBulkActionsUntrash.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ThreadBulkActionsUntrash.Responses.$204>
+    ): OperationResponse<Paths.ThreadBulkActionsUntrash.Responses.$200>
+  }
+  ['/v1/message/threads/bulk:delete']: {
+    /**
+     * threadBulkActionsDelete - threadBulkActionsDelete
+     * 
+     * Performs a bulk permanent delete for all threads
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ThreadBulkActionsDelete.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ThreadBulkActionsDelete.Responses.$200>
+  }
+  ['/v1/message/threads/bulk:done']: {
+    /**
+     * threadBulkActionsDone - threadBulkActionsDone
+     * 
+     * Perform a bulk action of marking an array of threads as done
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ThreadBulkActionsDone.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ThreadBulkActionsDone.Responses.$200>
+  }
+  ['/v1/message/threads/bulk:open']: {
+    /**
+     * threadBulkActionsOpen - threadBulkActionsOpen
+     * 
+     * Perform a bulk action of marking an array of threads as open
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ThreadBulkActionsOpen.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ThreadBulkActionsOpen.Responses.$200>
   }
   ['/v1/message/threads/{id}/read']: {
     /**
@@ -2568,7 +2858,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.MarkReadThread.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.MarkReadThread.Responses.$204>
+    ): OperationResponse<Paths.MarkReadThread.Responses.$200>
   }
   ['/v2/message/threads/{id}/read']: {
     /**
@@ -2580,7 +2870,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.MarkReadThreadV2.PathParameters> | null,
       data?: Paths.MarkReadThreadV2.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.MarkReadThreadV2.Responses.$204>
+    ): OperationResponse<Paths.MarkReadThreadV2.Responses.$200>
   }
   ['/v1/message/threads/{id}/unread']: {
     /**
@@ -2592,7 +2882,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.MarkUnreadThread.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.MarkUnreadThread.Responses.$204>
+    ): OperationResponse<Paths.MarkUnreadThread.Responses.$200>
   }
   ['/v2/message/threads/{id}/unread']: {
     /**
@@ -2604,7 +2894,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.MarkUnreadThreadV2.PathParameters> | null,
       data?: Paths.MarkUnreadThreadV2.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.MarkUnreadThreadV2.Responses.$204>
+    ): OperationResponse<Paths.MarkUnreadThreadV2.Responses.$200>
   }
   ['/v1/message/threads/{id}/assign']: {
     /**
@@ -2643,6 +2933,28 @@ export interface PathsDictionary {
       data?: Paths.AssignUsers.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AssignUsers.Responses.$204>
+  }
+  ['/v1/message/threads/{id}:pin']: {
+    /**
+     * pinThread - Pin a single thread
+     * 
+     * Pin a single thread
+     */
+    'post'(
+      parameters?: Parameters<Paths.PinThread.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PinThread.Responses.$204>
+    /**
+     * unpinThread - Unpin a single thread
+     * 
+     * Unpin a single thread
+     */
+    'delete'(
+      parameters?: Parameters<Paths.UnpinThread.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UnpinThread.Responses.$204>
   }
   ['/v1/message/drafts']: {
     /**
@@ -2707,6 +3019,7 @@ export type ReadMessagePayload = Components.Schemas.ReadMessagePayload;
 export type ReadingScope = Components.Schemas.ReadingScope;
 export type SearchIDParams = Components.Schemas.SearchIDParams;
 export type SearchParams = Components.Schemas.SearchParams;
+export type SearchParamsV2 = Components.Schemas.SearchParamsV2;
 export type Thread = Components.Schemas.Thread;
 export type ThreadDoneEvent = Components.Schemas.ThreadDoneEvent;
 export type ThreadOpenEvent = Components.Schemas.ThreadOpenEvent;

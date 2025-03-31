@@ -1345,6 +1345,80 @@
         }
       }
     },
+    "/v1/message/threads/{id}:pin": {
+      "post": {
+        "operationId": "pinThread",
+        "summary": "Pin a single thread",
+        "description": "Pin a single thread",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Thread not found"
+          },
+          "409": {
+            "description": "Concurrent update error"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "unpinThread",
+        "summary": "Unpin a single thread",
+        "description": "Unpin a single thread",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Thread not found"
+          },
+          "409": {
+            "description": "Concurrent update error"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/v1/message/drafts": {
       "post": {
         "operationId": "createDraft",
@@ -2170,6 +2244,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://message.sls.epilot.io"
+    },
     {
       "url": "https://message.sls.epilot.io"
     }

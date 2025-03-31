@@ -486,6 +486,30 @@
         "responses": {}
       }
     },
+    "/v1/message/threads/{id}:pin": {
+      "post": {
+        "operationId": "pinThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "unpinThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/message/drafts": {
       "post": {
         "operationId": "createDraft",
