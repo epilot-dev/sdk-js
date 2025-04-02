@@ -5513,6 +5513,501 @@
           }
         }
       }
+    },
+    "/v2/portal/pages/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getPortalPage",
+        "summary": "getPortalPage",
+        "description": "Fetch a portal page by id",
+        "tags": [
+          "ECP",
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The portal page has been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updatePortalPage",
+        "summary": "updatePortalPage",
+        "description": "Update a portal page by id",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "The portal page to update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortalPageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The portal page has been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePortalPage",
+        "summary": "deletePortalPage",
+        "description": "Delete a portal page by id",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The portal page has been fetched successfully."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/pages": {
+      "parameters": [
+        {
+          "in": "query",
+          "name": "domain",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "example": "customer-portal.epilot.io",
+            "description": "The domain of the portal"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getPortalPages",
+        "summary": "getPortalPages",
+        "description": "Fetch all portal pages",
+        "tags": [
+          "ECP",
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "description": "The fields to include in the response",
+            "schema": {
+              "type": "string",
+              "example": "id,slug,description"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "description": "The filter to apply to the response",
+            "schema": {
+              "type": "string",
+              "example": "schema=contract,slug=contracts"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The portal pages have been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PortalPage"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createPortalPage",
+        "summary": "createPortalPage",
+        "description": "Create a new portal page",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "The portal page to create",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortalPageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The portal page has been created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/pages/{id}/blocks": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "createPortalPageBlock",
+        "summary": "createPortalPageBlock",
+        "description": "Create a new portal page block",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "The portal page block to create",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortalPageBlockRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The portal page block has been created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalPageBlock"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "get": {
+        "operationId": "getPortalPageBlocks",
+        "summary": "getPortalPageBlocks",
+        "description": "Fetch all portal page blocks",
+        "tags": [
+          "ECP",
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The portal page blocks have been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PortalPageBlock"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/pages/{id}/blocks/{block_id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+          }
+        },
+        {
+          "in": "path",
+          "name": "block_id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getPortalPageBlock",
+        "summary": "getPortalPageBlock",
+        "description": "Fetch a portal page block by id",
+        "tags": [
+          "ECP",
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The portal page block has been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalPageBlock"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updatePortalPageBlock",
+        "summary": "updatePortalPageBlock",
+        "description": "Update a portal page block by id",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "The portal page block to update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortalPageBlockRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The portal page block has been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalPageBlock"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePortalPageBlock",
+        "summary": "deletePortalPageBlock",
+        "description": "Delete a portal page block by id",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The portal page block has been fetched successfully."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -9836,6 +10331,131 @@
             "example": "123456"
           }
         }
+      },
+      "PortalPageBlockRequest": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the block",
+            "example": "table"
+          },
+          "conditions": {
+            "type": "object",
+            "description": "The conditions that need to be met for the block to be shown"
+          }
+        }
+      },
+      "PortalPageBlock": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PortalPageBlockRequest"
+          },
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The id of the block",
+                "format": "uuid",
+                "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
+              }
+            }
+          }
+        ]
+      },
+      "PortalPageRequest": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "slug",
+          "schema",
+          "path"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "The slug of the page",
+            "example": "contracts"
+          },
+          "schema": {
+            "type": "string",
+            "description": "The schema of the entity that page holds",
+            "example": "contract"
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the page",
+            "example": "Contracts"
+          },
+          "path": {
+            "type": "string",
+            "description": "The path of the page",
+            "example": "/contracts"
+          },
+          "conditions": {
+            "type": "object",
+            "description": "The conditions that need to be met for the page to be shown"
+          },
+          "navigation": {
+            "type": "object",
+            "description": "The navigation of the page",
+            "properties": {
+              "label": {
+                "type": "object",
+                "description": "The label of the navigation",
+                "properties": {
+                  "en": {
+                    "type": "string",
+                    "description": "The label of the navigation in English"
+                  },
+                  "de": {
+                    "type": "string",
+                    "description": "The label of the navigation in German"
+                  }
+                }
+              }
+            }
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortalPageBlock"
+            }
+          }
+        }
+      },
+      "PortalPage": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PortalPageRequest"
+          },
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The id of the page",
+                "format": "uuid",
+                "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
+              }
+            }
+          }
+        ]
       }
     }
   },
