@@ -1302,6 +1302,123 @@
         },
         "responses": {}
       }
+    },
+    "/v2/portal/pages/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getPortalPage",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updatePortalPage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deletePortalPage",
+        "responses": {}
+      }
+    },
+    "/v2/portal/pages": {
+      "parameters": [
+        {
+          "in": "query",
+          "name": "domain",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getPortalPages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createPortalPage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/pages/{id}/blocks": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true
+        }
+      ],
+      "post": {
+        "operationId": "createPortalPageBlock",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getPortalPageBlocks",
+        "responses": {}
+      }
+    },
+    "/v2/portal/pages/{id}/blocks/{block_id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true
+        },
+        {
+          "in": "path",
+          "name": "block_id",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getPortalPageBlock",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updatePortalPageBlock",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deletePortalPageBlock",
+        "responses": {}
+      }
     }
   },
   "components": {
