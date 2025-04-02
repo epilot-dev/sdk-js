@@ -157,10 +157,7 @@ declare namespace Components {
              * ID of the resource
              */
             id: string;
-            /**
-             * Type of the resource
-             */
-            type: ResourceNodeType;
+            type: /* Type of the resource */ ResourceNodeType;
             /**
              * Name of the resource
              */
@@ -181,7 +178,7 @@ declare namespace Components {
             code?: FormattedErrorCodes;
             data?: FormattedErrorData;
         }
-        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error";
+        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error";
         export interface FormattedErrorData {
             resource?: {
                 id?: string;
@@ -551,7 +548,7 @@ declare namespace Components {
              * ID of the resource
              */
             id: string;
-            type: ResourceNodeType;
+            type: /* Type of the resource */ ResourceNodeType;
             /**
              * Name of the resource
              */
@@ -574,10 +571,13 @@ declare namespace Components {
             dependencies?: ResourceNode[] | null;
             parents?: {
                 id?: string;
-                type?: ResourceNodeType;
+                type?: /* Type of the resource */ ResourceNodeType;
             }[];
             changes?: PlanChanges;
         }
+        /**
+         * Type of the resource
+         */
         export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "custom_variable" | "coupon" | "usergroup";
         export interface ResourceReplacement {
             /**
@@ -598,7 +598,7 @@ declare namespace Components {
              * ID of the resource
              */
             id: string;
-            type: ResourceNodeType;
+            type: /* Type of the resource */ ResourceNodeType;
             /**
              * Name of the resource
              */
@@ -636,7 +636,7 @@ declare namespace Components {
         export interface SelectedResources {
             exported_root_resources: {
                 id: string;
-                type: ResourceNodeType;
+                type: /* Type of the resource */ ResourceNodeType;
             }[];
             selected_resources: string[];
             /**
@@ -656,7 +656,7 @@ declare namespace Components {
              * ID of the resource
              */
             id: string;
-            type: ResourceNodeType;
+            type: /* Type of the resource */ ResourceNodeType;
             /**
              * Name of the resource
              */
@@ -715,9 +715,34 @@ declare namespace Paths {
     }
     namespace CreateExport {
         export type RequestBody = {
-            resourceType: Components.Schemas.ResourceNodeType;
+            resourceType: /* Type of the resource */ Components.Schemas.ResourceNodeType;
             resourceIds: [
                 string,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
                 string?,
                 string?,
                 string?,
@@ -760,11 +785,11 @@ declare namespace Paths {
         } | {
             resources: [
                 {
-                    type: Components.Schemas.ResourceNodeType;
+                    type: /* Type of the resource */ Components.Schemas.ResourceNodeType;
                     id: string;
                 },
                 ...{
-                    type: Components.Schemas.ResourceNodeType;
+                    type: /* Type of the resource */ Components.Schemas.ResourceNodeType;
                     id: string;
                 }[]
             ];

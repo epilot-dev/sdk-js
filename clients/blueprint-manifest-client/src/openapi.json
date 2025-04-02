@@ -89,7 +89,7 @@
                           "type": "string"
                         },
                         "minItems": 1,
-                        "maxItems": 25
+                        "maxItems": 50
                       },
                       "jobId": {
                         "$ref": "#/components/schemas/JobID"
@@ -704,6 +704,7 @@
       },
       "ResourceNodeType": {
         "type": "string",
+        "description": "Type of the resource",
         "enum": [
           "designbuilder",
           "journey",
@@ -748,8 +749,7 @@
             "description": "ID of the resource"
           },
           "type": {
-            "$ref": "#/components/schemas/ResourceNodeType",
-            "description": "Type of the resource"
+            "$ref": "#/components/schemas/ResourceNodeType"
           },
           "name": {
             "type": "string",
@@ -1137,7 +1137,8 @@
           "terraform_init_error",
           "terraform_plan_error",
           "terraform_apply_error",
-          "terraform_show_error"
+          "terraform_show_error",
+          "generic_error"
         ]
       },
       "FormattedErrorData": {
