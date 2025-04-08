@@ -111,8 +111,32 @@ declare namespace Components {
              * Unique identifier for the component
              */
             id: string;
-            name?: TranslatedString;
-            description?: TranslatedString;
+            /**
+             * Name of the component
+             */
+            name?: {
+                /**
+                 * English translation
+                 */
+                en?: string | null;
+                /**
+                 * German translation
+                 */
+                de: string;
+            };
+            /**
+             * Description of the component
+             */
+            description?: {
+                /**
+                 * English translation
+                 */
+                en?: string | null;
+                /**
+                 * German translation
+                 */
+                de: string;
+            };
             /**
              * List of options for the app component
              */
@@ -126,11 +150,29 @@ declare namespace Components {
             /**
              * Name of the component
              */
-            name?: TranslatedString;
+            name?: {
+                /**
+                 * English translation
+                 */
+                en?: string | null;
+                /**
+                 * German translation
+                 */
+                de: string;
+            };
             /**
              * Description of the component
              */
-            description?: TranslatedString;
+            description?: {
+                /**
+                 * English translation
+                 */
+                en?: string | null;
+                /**
+                 * German translation
+                 */
+                de: string;
+            };
             /**
              * List of options for the app component
              */
@@ -211,8 +253,34 @@ declare namespace Components {
              * URL of the app documentation.
              */
             documentation_url?: string;
-            description: TranslatedString;
-            notifications?: NotificationConfig;
+            /**
+             * Markdown description of the app.
+             */
+            description: {
+                /**
+                 * English translation
+                 */
+                en?: string | null;
+                /**
+                 * German translation
+                 */
+                de: string;
+            };
+            /**
+             * Configuration for developer notifications
+             */
+            notifications?: {
+                /**
+                 * Email address to receive notifications
+                 * example:
+                 * developer@example.com
+                 */
+                email?: string; // email
+                /**
+                 * List of events to subscribe to
+                 */
+                events?: NotificationEvent[];
+            };
             /**
              * Organization ID of the app owner
              */
@@ -221,8 +289,34 @@ declare namespace Components {
              * Flag to indicate if the app is built by epilot.
              */
             internal?: boolean;
-            pricing?: Pricing;
-            configuration_audit?: Audit;
+            /**
+             * Pricing information for the app
+             */
+            pricing?: {
+                pricing_type?: "FREE" | "SUBSCRIPTION" | "USAGE_BASED" | "ONE_TIME" | "CUSTOM" | "UNKNOWN";
+                billing_frequency?: /* How often the subscription is billed */ BillingFrequency;
+            };
+            /**
+             * Audit information for the app
+             */
+            configuration_audit?: {
+                /**
+                 * Timestamp of the creation
+                 */
+                created_at?: string;
+                /**
+                 * User ID of the creator
+                 */
+                created_by?: string;
+                /**
+                 * Timestamp of the last update
+                 */
+                updated_at?: string;
+                /**
+                 * User ID of the last updater
+                 */
+                updated_by?: string;
+            };
             components: BaseComponent[];
             /**
              * Flag to indicate if the app is public.
@@ -320,11 +414,31 @@ declare namespace Components {
             /**
              * Markdown description of the app.
              */
-            description: TranslatedString;
+            description: {
+                /**
+                 * English translation
+                 */
+                en?: string | null;
+                /**
+                 * German translation
+                 */
+                de: string;
+            };
             /**
              * Configuration for developer notifications
              */
-            notifications?: NotificationConfig;
+            notifications?: {
+                /**
+                 * Email address to receive notifications
+                 * example:
+                 * developer@example.com
+                 */
+                email?: string; // email
+                /**
+                 * List of events to subscribe to
+                 */
+                events?: NotificationEvent[];
+            };
             /**
              * Organization ID of the app owner, required for private apps or sandbox accounts
              */
@@ -336,11 +450,31 @@ declare namespace Components {
             /**
              * Pricing information for the app
              */
-            pricing?: Pricing;
+            pricing?: {
+                pricing_type?: "FREE" | "SUBSCRIPTION" | "USAGE_BASED" | "ONE_TIME" | "CUSTOM" | "UNKNOWN";
+                billing_frequency?: /* How often the subscription is billed */ BillingFrequency;
+            };
             /**
              * Audit information for the app
              */
-            configuration_audit?: Audit;
+            configuration_audit?: {
+                /**
+                 * Timestamp of the creation
+                 */
+                created_at?: string;
+                /**
+                 * User ID of the creator
+                 */
+                created_by?: string;
+                /**
+                 * Timestamp of the last update
+                 */
+                updated_at?: string;
+                /**
+                 * User ID of the last updater
+                 */
+                updated_by?: string;
+            };
         }
         /**
          * Configuration data about your app which is versionable
@@ -425,7 +559,16 @@ declare namespace Components {
                     /**
                      * Display label for the option
                      */
-                    label: TranslatedString;
+                    label: {
+                        /**
+                         * English translation
+                         */
+                        en?: string | null;
+                        /**
+                         * German translation
+                         */
+                        de: string;
+                    };
                 },
                 ...{
                     /**
@@ -435,7 +578,16 @@ declare namespace Components {
                     /**
                      * Display label for the option
                      */
-                    label: TranslatedString;
+                    label: {
+                        /**
+                         * English translation
+                         */
+                        en?: string | null;
+                        /**
+                         * German translation
+                         */
+                        de: string;
+                    };
                 }[]
             ];
         }
@@ -471,7 +623,27 @@ declare namespace Components {
              * Version of the app that is installed
              */
             installed_version: string;
-            installation_audit?: Audit;
+            /**
+             * Audit information for the app
+             */
+            installation_audit?: {
+                /**
+                 * Timestamp of the creation
+                 */
+                created_at?: string;
+                /**
+                 * User ID of the creator
+                 */
+                created_by?: string;
+                /**
+                 * Timestamp of the last update
+                 */
+                updated_at?: string;
+                /**
+                 * User ID of the last updater
+                 */
+                updated_by?: string;
+            };
         }
         export interface JourneyBlockComponent {
             component_type: "CUSTOM_JOURNEY_BLOCK";
@@ -487,8 +659,32 @@ declare namespace Components {
              * Flag to indicate if this option is required
              */
             required?: boolean;
-            description?: TranslatedString;
-            label: TranslatedString;
+            /**
+             * Description of what this component arg does
+             */
+            description?: {
+                /**
+                 * English translation
+                 */
+                en?: string | null;
+                /**
+                 * German translation
+                 */
+                de: string;
+            };
+            /**
+             * Human-readable label for the component arg
+             */
+            label: {
+                /**
+                 * English translation
+                 */
+                en?: string | null;
+                /**
+                 * German translation
+                 */
+                de: string;
+            };
         } & (TextArg | BooleanArg | EnumArg);
         export interface JourneyBlockConfig {
             /**
@@ -513,7 +709,7 @@ declare namespace Components {
              * Define data which is mapped to entity mapping ui blocks
              */
             component_mapping?: {
-                [name: string]: "string" | "boolean" | "date" | "datetime" | "link";
+                [name: string]: "string" | "boolean" | "date" | "datetime" | "link" | "number";
             };
         }
         export interface NotificationConfig {
@@ -658,11 +854,23 @@ declare namespace Components {
             /**
              * Markdown description of the app.
              */
-            description?: TranslatedString;
+            description?: {
+                /**
+                 * English translation
+                 */
+                en?: string | null;
+                /**
+                 * German translation
+                 */
+                de: string;
+            };
             /**
              * Pricing information for the app
              */
-            pricing?: Pricing;
+            pricing?: {
+                pricing_type?: "FREE" | "SUBSCRIPTION" | "USAGE_BASED" | "ONE_TIME" | "CUSTOM" | "UNKNOWN";
+                billing_frequency?: /* How often the subscription is billed */ BillingFrequency;
+            };
             components: BaseComponent[];
             /**
              * Flag to indicate if the app is in beta.
@@ -676,6 +884,10 @@ declare namespace Components {
              * Version of the app that is installed
              */
             version: string;
+            /**
+             * Flag to indicate if the app is public.
+             */
+            public?: boolean;
         }
         export interface S3Reference {
             /**
@@ -703,12 +915,6 @@ declare namespace Components {
              * German translation
              */
             de: string;
-        }
-        export interface UploadFilePayload {
-            /**
-             * ID of the app configuration. Required for app updates.
-             */
-            app_id?: string;
         }
     }
 }
@@ -1581,4 +1787,3 @@ export type PublicConfiguration = Components.Schemas.PublicConfiguration;
 export type S3Reference = Components.Schemas.S3Reference;
 export type TextArg = Components.Schemas.TextArg;
 export type TranslatedString = Components.Schemas.TranslatedString;
-export type UploadFilePayload = Components.Schemas.UploadFilePayload;
