@@ -68,7 +68,7 @@
     "@epilot/partner-directory-client": "^0.9.1",
     "@epilot/permissions-client": "^0.14.1",
     "@epilot/pricing-client": "^3.35.10",
-    "@epilot/sandbox-client": "^0.2.0",
+    "@epilot/sandbox-client": "^0.3.0",
     "@epilot/submission-client": "^1.6.1",
     "@epilot/template-variables-client": "^1.14.3",
     "@epilot/user-client": "^3.11.0",
