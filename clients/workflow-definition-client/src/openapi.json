@@ -1451,6 +1451,9 @@
           "trigger": {
             "$ref": "#/components/schemas/Trigger"
           },
+          "managed_by": {
+            "$ref": "#/components/schemas/ManagedBy"
+          },
           "enabled": {
             "type": "boolean",
             "description": "Whether the workflow is enabled or not",
@@ -1524,6 +1527,23 @@
               "type": "string"
             },
             "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          }
+        }
+      },
+      "ManagedBy": {
+        "type": "object",
+        "description": "Details about who is managing this flow template",
+        "properties": {
+          "system": {
+            "type": "string",
+            "enum": [
+              "journey"
+            ],
+            "description": "Type of system managing this flow template"
+          },
+          "journey_id": {
+            "type": "string",
+            "description": "ID of the journey that created and manages this flow template"
           }
         }
       },

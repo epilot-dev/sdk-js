@@ -112,6 +112,7 @@ declare namespace Components {
              * }
              */
             Trigger;
+            managed_by?: /* Details about who is managing this flow template */ ManagedBy;
             /**
              * Whether the workflow is enabled or not
              */
@@ -267,6 +268,7 @@ declare namespace Components {
              * }
              */
             Trigger;
+            managed_by?: /* Details about who is managing this flow template */ ManagedBy;
             /**
              * Whether the workflow is enabled or not
              */
@@ -321,6 +323,19 @@ declare namespace Components {
             mode?: "immediate";
         }
         export type ItemType = "STEP" | "SECTION";
+        /**
+         * Details about who is managing this flow template
+         */
+        export interface ManagedBy {
+            /**
+             * Type of system managing this flow template
+             */
+            system?: "journey";
+            /**
+             * ID of the journey that created and manages this flow template
+             */
+            journey_id?: string;
+        }
         export interface ManualTask {
             id: string;
             name: string;
@@ -1319,6 +1334,7 @@ export type FlowTemplateId = Components.Schemas.FlowTemplateId;
 export type FlowTemplatesList = Components.Schemas.FlowTemplatesList;
 export type ImmediateSchedule = Components.Schemas.ImmediateSchedule;
 export type ItemType = Components.Schemas.ItemType;
+export type ManagedBy = Components.Schemas.ManagedBy;
 export type ManualTask = Components.Schemas.ManualTask;
 export type ManualTrigger = Components.Schemas.ManualTrigger;
 export type MaxAllowedLimit = Components.Schemas.MaxAllowedLimit;
