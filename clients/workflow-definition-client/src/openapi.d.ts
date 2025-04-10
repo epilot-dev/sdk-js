@@ -112,7 +112,6 @@ declare namespace Components {
              * }
              */
             Trigger;
-            managed_by?: /* Details about who is managing this flow template */ ManagedBy;
             /**
              * Whether the workflow is enabled or not
              */
@@ -268,7 +267,6 @@ declare namespace Components {
              * }
              */
             Trigger;
-            managed_by?: /* Details about who is managing this flow template */ ManagedBy;
             /**
              * Whether the workflow is enabled or not
              */
@@ -323,18 +321,13 @@ declare namespace Components {
             mode?: "immediate";
         }
         export type ItemType = "STEP" | "SECTION";
-        /**
-         * Details about who is managing this flow template
-         */
-        export interface ManagedBy {
+        export interface JourneySubmissionTrigger {
+            type: "journey_submission";
             /**
-             * Type of system managing this flow template
+             * ID of the journey that will trigger this flow
              */
-            system?: "journey";
-            /**
-             * ID of the journey that created and manages this flow template
-             */
-            journey_id?: string;
+            journey_id: string;
+            automation_id?: string;
         }
         export interface ManualTask {
             id: string;
@@ -535,7 +528,7 @@ declare namespace Components {
          *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
          * }
          */
-        ManualTrigger | AutomationTrigger;
+        ManualTrigger | AutomationTrigger | JourneySubmissionTrigger;
         export type TriggerMode = "manual" | "automatic";
         export type TriggerType = "MANUAL" | "AUTOMATIC";
         export interface UpdateEntityAttributes {
@@ -1334,7 +1327,7 @@ export type FlowTemplateId = Components.Schemas.FlowTemplateId;
 export type FlowTemplatesList = Components.Schemas.FlowTemplatesList;
 export type ImmediateSchedule = Components.Schemas.ImmediateSchedule;
 export type ItemType = Components.Schemas.ItemType;
-export type ManagedBy = Components.Schemas.ManagedBy;
+export type JourneySubmissionTrigger = Components.Schemas.JourneySubmissionTrigger;
 export type ManualTask = Components.Schemas.ManualTask;
 export type ManualTrigger = Components.Schemas.ManualTrigger;
 export type MaxAllowedLimit = Components.Schemas.MaxAllowedLimit;

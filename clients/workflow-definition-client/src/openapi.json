@@ -1451,9 +1451,6 @@
           "trigger": {
             "$ref": "#/components/schemas/Trigger"
           },
-          "managed_by": {
-            "$ref": "#/components/schemas/ManagedBy"
-          },
           "enabled": {
             "type": "boolean",
             "description": "Whether the workflow is enabled or not",
@@ -1530,23 +1527,6 @@
           }
         }
       },
-      "ManagedBy": {
-        "type": "object",
-        "description": "Details about who is managing this flow template",
-        "properties": {
-          "system": {
-            "type": "string",
-            "enum": [
-              "journey"
-            ],
-            "description": "Type of system managing this flow template"
-          },
-          "journey_id": {
-            "type": "string",
-            "description": "ID of the journey that created and manages this flow template"
-          }
-        }
-      },
       "Trigger": {
         "anyOf": [
           {
@@ -1554,6 +1534,9 @@
           },
           {
             "$ref": "#/components/schemas/AutomationTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/JourneySubmissionTrigger"
           }
         ],
         "example": {
@@ -1594,6 +1577,28 @@
           "automation_id": {
             "type": "string",
             "description": "Id of the automation config that triggers this workflow"
+          }
+        }
+      },
+      "JourneySubmissionTrigger": {
+        "type": "object",
+        "required": [
+          "type",
+          "journey_id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "journey_submission"
+            ]
+          },
+          "journey_id": {
+            "type": "string",
+            "description": "ID of the journey that will trigger this flow"
+          },
+          "automation_id": {
+            "type": "string"
           }
         }
       },
