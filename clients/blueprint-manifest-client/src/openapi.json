@@ -726,7 +726,8 @@
           "webhook",
           "custom_variable",
           "coupon",
-          "usergroup"
+          "usergroup",
+          "saved_view"
         ]
       },
       "PlanChanges": {
