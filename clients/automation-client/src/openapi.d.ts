@@ -126,7 +126,33 @@ declare namespace Components {
                 types?: (("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword" | "SelfAssignmentFromPortal") | string)[];
             };
         }
-        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | AutomationAction;
+        export interface AdvancedCustomActionConfig {
+            /**
+             * Name of the custom action
+             */
+            name?: string;
+            /**
+             * Description of the custom action
+             */
+            description?: string;
+            /**
+             * The ID of the app to fetch configuration from the app API
+             * example:
+             * c451c26a-cc7a-4c1c-92bf-1c6246cbfe88
+             */
+            app_id?: string;
+            /**
+             * The ID of the component from the app. As the app can potentially have multiple custom actions, this ID is used to identify the component
+             * example:
+             * 2f1c26a-cc7a-4c1c-92bf-1c6246cbfe88
+             */
+            component_id?: string;
+            type: "advanced";
+            advanced_settings?: {
+                [name: string]: any;
+            };
+        }
+        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction;
         export type AnyActionConfig = /**
          * example:
          * {
@@ -326,7 +352,7 @@ declare namespace Components {
          *   }
          * }
          */
-        SendEmailActionConfig | /* Creates an order entity with prices from journey */ CartCheckoutActionConfig | AutomationActionConfig;
+        SendEmailActionConfig | /* Creates an order entity with prices from journey */ CartCheckoutActionConfig | CustomActionConfig | AutomationActionConfig;
         export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | /**
          * - If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.
          * - The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`
@@ -443,7 +469,7 @@ declare namespace Components {
          *       ```
          *
          */
-        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
+        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | FlowsTrigger;
         export interface AnythingButCondition {
             "anything-but"?: string[];
         }
@@ -885,6 +911,64 @@ declare namespace Components {
              */
             id?: string; // uuid
         }
+        export interface BaseCustomActionConfig {
+            /**
+             * Name of the custom action
+             */
+            name?: string;
+            /**
+             * Description of the custom action
+             */
+            description?: string;
+            /**
+             * The ID of the app to fetch configuration from the app API
+             * example:
+             * c451c26a-cc7a-4c1c-92bf-1c6246cbfe88
+             */
+            app_id?: string;
+            /**
+             * The ID of the component from the app. As the app can potentially have multiple custom actions, this ID is used to identify the component
+             * example:
+             * 2f1c26a-cc7a-4c1c-92bf-1c6246cbfe88
+             */
+            component_id?: string;
+        }
+        export interface BasicCustomActionConfig {
+            /**
+             * Name of the custom action
+             */
+            name?: string;
+            /**
+             * Description of the custom action
+             */
+            description?: string;
+            /**
+             * The ID of the app to fetch configuration from the app API
+             * example:
+             * c451c26a-cc7a-4c1c-92bf-1c6246cbfe88
+             */
+            app_id?: string;
+            /**
+             * The ID of the component from the app. As the app can potentially have multiple custom actions, this ID is used to identify the component
+             * example:
+             * 2f1c26a-cc7a-4c1c-92bf-1c6246cbfe88
+             */
+            component_id?: string;
+            type: "basic";
+            basic_settings?: {
+                /**
+                 * URL to call
+                 */
+                url?: string;
+                headers?: {
+                    [name: string]: any;
+                };
+                /**
+                 * SSM Reference to the auth token to use for the request
+                 */
+                auth_token_ref?: string;
+            };
+        }
         export interface BulkTriggerJob {
             job_id: /**
              * Job ID for tracking the status of bulk trigger automation executions
@@ -1289,6 +1373,116 @@ declare namespace Components {
             template_id?: string;
             filename?: string;
         }
+        export interface CustomAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "custom-action";
+            config?: BasicCustomActionConfig | AdvancedCustomActionConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+        }
+        export interface CustomActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "custom-action";
+            config?: BasicCustomActionConfig | AdvancedCustomActionConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+        }
         export type DiffAdded = FilterConditionOnEvent;
         export type DiffDeleted = FilterConditionOnEvent;
         export type DiffUpdated = FilterConditionOnEvent;
@@ -1598,6 +1792,17 @@ declare namespace Components {
         export type FilterConditionOnEvent = OrCondition | {
             [name: string]: (string | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
         };
+        export interface FlowsTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
+            type: "flows_trigger";
+            configuration: {
+                source_id: string; // uuid
+            };
+        }
         export interface FrontendSubmitTrigger {
             /**
              * example:
@@ -3408,6 +3613,7 @@ export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type ActionScheduleSource = Components.Schemas.ActionScheduleSource;
 export type ActivityId = Components.Schemas.ActivityId;
 export type ActivityTrigger = Components.Schemas.ActivityTrigger;
+export type AdvancedCustomActionConfig = Components.Schemas.AdvancedCustomActionConfig;
 export type AnyAction = Components.Schemas.AnyAction;
 export type AnyActionConfig = Components.Schemas.AnyActionConfig;
 export type AnyTrigger = Components.Schemas.AnyTrigger;
@@ -3425,6 +3631,8 @@ export type AutomationExecutionId = Components.Schemas.AutomationExecutionId;
 export type AutomationFlow = Components.Schemas.AutomationFlow;
 export type AutomationFlowId = Components.Schemas.AutomationFlowId;
 export type AutomationTrigger = Components.Schemas.AutomationTrigger;
+export type BaseCustomActionConfig = Components.Schemas.BaseCustomActionConfig;
+export type BasicCustomActionConfig = Components.Schemas.BasicCustomActionConfig;
 export type BulkTriggerJob = Components.Schemas.BulkTriggerJob;
 export type BulkTriggerRequest = Components.Schemas.BulkTriggerRequest;
 export type CartCheckoutAction = Components.Schemas.CartCheckoutAction;
@@ -3436,6 +3644,8 @@ export type CopyValueMapper = Components.Schemas.CopyValueMapper;
 export type CreateDocumentAction = Components.Schemas.CreateDocumentAction;
 export type CreateDocumentActionConfig = Components.Schemas.CreateDocumentActionConfig;
 export type CreateDocumentConfig = Components.Schemas.CreateDocumentConfig;
+export type CustomAction = Components.Schemas.CustomAction;
+export type CustomActionConfig = Components.Schemas.CustomActionConfig;
 export type DiffAdded = Components.Schemas.DiffAdded;
 export type DiffDeleted = Components.Schemas.DiffDeleted;
 export type DiffUpdated = Components.Schemas.DiffUpdated;
@@ -3454,6 +3664,7 @@ export type ExecItem = Components.Schemas.ExecItem;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
 export type ExistsCondition = Components.Schemas.ExistsCondition;
 export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;
+export type FlowsTrigger = Components.Schemas.FlowsTrigger;
 export type FrontendSubmitTrigger = Components.Schemas.FrontendSubmitTrigger;
 export type GetExecutionsResp = Components.Schemas.GetExecutionsResp;
 export type JobId = Components.Schemas.JobId;
