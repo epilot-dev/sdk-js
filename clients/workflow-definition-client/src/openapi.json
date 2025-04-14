@@ -1550,6 +1550,9 @@
           "type"
         ],
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "type": {
             "type": "string",
             "enum": [
@@ -1568,6 +1571,9 @@
           "automation_id"
         ],
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "type": {
             "type": "string",
             "enum": [
@@ -1587,6 +1593,9 @@
           "journey_id"
         ],
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "type": {
             "type": "string",
             "enum": [
