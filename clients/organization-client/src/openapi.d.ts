@@ -120,6 +120,7 @@ declare namespace Components {
                 street_number?: string | null;
             };
             organization_use?: "Production" | "Sandbox";
+            parent_production_org_id?: string | null;
             /**
              * Organization created date
              */
@@ -213,6 +214,7 @@ declare namespace Components {
                 street_number?: string | null;
             };
             organization_use?: "Production" | "Sandbox";
+            parent_production_org_id?: string | null;
             /**
              * Organization created date
              */
@@ -281,17 +283,12 @@ declare namespace Components {
              *   {
              *     "action": "Delete",
              *     "resource": "OrgTable",
-             *     "extra_info": [
-             *       "pk: ORG#739224"
-             *     ]
+             *     "extra_info": "ORG#739224"
              *   },
              *   {
              *     "action": "Archive",
              *     "resource": "s3://my-bucket",
-             *     "extra_info": [
-             *       "my-bucket/my-key.txt",
-             *       "my-bucket/my-key2.txt"
-             *     ]
+             *     "extra_info": "my-bucket/my-key.txt"
              *   }
              * ]
              */
