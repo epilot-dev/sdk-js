@@ -464,6 +464,10 @@ declare namespace Components {
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
+            /**
+             * A detailed description of the price. This is shown on the order document and order table.
+             */
+            long_description?: string;
             price_mappings?: /**
              * example:
              * [
@@ -779,6 +783,10 @@ declare namespace Components {
              */
             description?: string;
             /**
+             * A detailed description of the price. This is shown on the order document and order table.
+             */
+            long_description?: string;
+            /**
              * Price mapping information required to compute totals
              */
             price_mappings?: /**
@@ -927,6 +935,10 @@ declare namespace Components {
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
+            /**
+             * A detailed description of the price. This is shown on the order document and order table.
+             */
+            long_description?: string;
             price_mappings?: /**
              * example:
              * [
@@ -1608,6 +1620,10 @@ declare namespace Components {
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
+            /**
+             * A detailed description of the price. This is shown on the order document and order table.
+             */
+            long_description?: string;
             price_mappings?: /**
              * example:
              * [
@@ -1934,6 +1950,10 @@ declare namespace Components {
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
+            /**
+             * A detailed description of the price. This is shown on the order document and order table.
+             */
+            long_description?: string;
             price_mappings?: /**
              * example:
              * [
@@ -3867,6 +3887,10 @@ declare namespace Components {
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
+            /**
+             * A detailed description of the price. This is shown on the order document and order table.
+             */
+            long_description?: string;
             price_mappings?: /**
              * example:
              * [
@@ -4203,6 +4227,10 @@ declare namespace Components {
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
+            /**
+             * A detailed description of the price. This is shown on the order document and order table.
+             */
+            long_description?: string;
             price_mappings?: /**
              * example:
              * [
