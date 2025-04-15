@@ -246,7 +246,7 @@
           "phone": {
             "description": "Organization contact phone",
             "type": "string",
-            "example": 49123123123,
+            "example": "49123123123",
             "nullable": true
           },
           "website": {
@@ -288,6 +288,10 @@
               "Production",
               "Sandbox"
             ],
+            "nullable": true
+          },
+          "parent_production_org_id": {
+            "type": "string",
             "nullable": true
           },
           "created_date": {
@@ -530,17 +534,12 @@
               {
                 "action": "Delete",
                 "resource": "OrgTable",
-                "extra_info": [
-                  "pk: ORG#739224"
-                ]
+                "extra_info": "ORG#739224"
               },
               {
                 "action": "Archive",
                 "resource": "s3://my-bucket",
-                "extra_info": [
-                  "my-bucket/my-key.txt",
-                  "my-bucket/my-key2.txt"
-                ]
+                "extra_info": "my-bucket/my-key.txt"
               }
             ],
             "type": "array",
@@ -588,6 +587,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://organization-v2.sls.epilot.io"
+    },
     {
       "url": "https://organization-v2.sls.epilot.io"
     }
