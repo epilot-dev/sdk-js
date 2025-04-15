@@ -220,5 +220,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://automation.sls.epilot.io"
+    }
+  ]
 }
