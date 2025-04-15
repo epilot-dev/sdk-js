@@ -1262,7 +1262,8 @@
         "type": "string",
         "enum": [
           "CUSTOM_JOURNEY_BLOCK",
-          "PORTAL_EXTENSION"
+          "PORTAL_EXTENSION",
+          "CUSTOM_FLOW_ACTION"
         ],
         "description": "Type of app component"
       },
@@ -1365,7 +1366,8 @@
               "propertyName": "component_type",
               "mapping": {
                 "CUSTOM_JOURNEY_BLOCK": "#/components/schemas/JourneyBlockComponent",
-                "PORTAL_EXTENSION": "#/components/schemas/PortalExtensionComponent"
+                "PORTAL_EXTENSION": "#/components/schemas/PortalExtensionComponent",
+                "CUSTOM_FLOW_ACTION": "#/components/schemas/CustomFlowActionComponent"
               }
             },
             "oneOf": [
@@ -1374,6 +1376,9 @@
               },
               {
                 "$ref": "#/components/schemas/PortalExtensionComponent"
+              },
+              {
+                "$ref": "#/components/schemas/CustomFlowActionComponent"
               }
             ]
           }
@@ -1394,6 +1399,103 @@
           },
           "configuration": {
             "$ref": "#/components/schemas/JourneyBlockConfig"
+          }
+        }
+      },
+      "CustomFlowActionComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "CUSTOM_FLOW_ACTION"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/CustomFlowConfig"
+          }
+        }
+      },
+      "BaseCustomActionConfig": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the custom action"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the custom action"
+          },
+          "app_id": {
+            "type": "string",
+            "description": "The ID of the app to fetch configuration from the app API",
+            "example": "c451c26a-cc7a-4c1c-92bf-1c6246cbfe88"
+          },
+          "component_id": {
+            "type": "string",
+            "description": "The ID of the component to fetch configuration from the app API",
+            "example": "12345678-1234-1234-1234-123456789012"
+          }
+        },
+        "required": [
+          "app_id",
+          "component_id"
+        ]
+      },
+      "ExternalIntegrationCustomActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCustomActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "external_integration"
+                ]
+              },
+              "external_integration_settings": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "URL to call"
+                  },
+                  "headers": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "auth_token_ref": {
+                    "type": "string",
+                    "description": "SSM Reference to the auth token to use for the request"
+                  }
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "CustomFlowConfig": {
+        "type": "object",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ExternalIntegrationCustomActionConfig"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "external_integration": "#/components/schemas/ExternalIntegrationCustomActionConfig"
           }
         }
       },

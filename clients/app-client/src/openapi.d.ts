@@ -141,7 +141,7 @@ declare namespace Components {
              * List of options for the app component
              */
             options?: /* Options for the component configuration */ Options[];
-        } & (JourneyBlockComponent | PortalExtensionComponent);
+        } & (JourneyBlockComponent | PortalExtensionComponent | CustomFlowActionComponent);
         export interface BaseComponentCommon {
             /**
              * Unique identifier for the component
@@ -177,6 +177,28 @@ declare namespace Components {
              * List of options for the app component
              */
             options?: /* Options for the component configuration */ Options[];
+        }
+        export interface BaseCustomActionConfig {
+            /**
+             * Name of the custom action
+             */
+            name?: string;
+            /**
+             * Description of the custom action
+             */
+            description?: string;
+            /**
+             * The ID of the app to fetch configuration from the app API
+             * example:
+             * c451c26a-cc7a-4c1c-92bf-1c6246cbfe88
+             */
+            app_id: string;
+            /**
+             * The ID of the component to fetch configuration from the app API
+             * example:
+             * 12345678-1234-1234-1234-123456789012
+             */
+            component_id: string;
         }
         /**
          * How often the subscription is billed
@@ -214,7 +236,7 @@ declare namespace Components {
         /**
          * Type of app component
          */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION";
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION";
         /**
          * Configuration of the published app
          */
@@ -541,6 +563,11 @@ declare namespace Components {
                 versioned_by?: string;
             };
         }
+        export interface CustomFlowActionComponent {
+            component_type: "CUSTOM_FLOW_ACTION";
+            configuration: CustomFlowConfig;
+        }
+        export type CustomFlowConfig = ExternalIntegrationCustomActionConfig;
         export interface EnumArg {
             type?: "enum";
             /**
@@ -590,6 +617,42 @@ declare namespace Components {
                     };
                 }[]
             ];
+        }
+        export interface ExternalIntegrationCustomActionConfig {
+            /**
+             * Name of the custom action
+             */
+            name?: string;
+            /**
+             * Description of the custom action
+             */
+            description?: string;
+            /**
+             * The ID of the app to fetch configuration from the app API
+             * example:
+             * c451c26a-cc7a-4c1c-92bf-1c6246cbfe88
+             */
+            app_id: string;
+            /**
+             * The ID of the component to fetch configuration from the app API
+             * example:
+             * 12345678-1234-1234-1234-123456789012
+             */
+            component_id: string;
+            type: "external_integration";
+            external_integration_settings?: {
+                /**
+                 * URL to call
+                 */
+                url?: string;
+                headers?: {
+                    [name: string]: any;
+                };
+                /**
+                 * SSM Reference to the auth token to use for the request
+                 */
+                auth_token_ref?: string;
+            };
         }
         /**
          * Information about the installed app. Has configuration data of the installed version
@@ -1762,6 +1825,7 @@ export type Audit = Components.Schemas.Audit;
 export type Author = Components.Schemas.Author;
 export type BaseComponent = Components.Schemas.BaseComponent;
 export type BaseComponentCommon = Components.Schemas.BaseComponentCommon;
+export type BaseCustomActionConfig = Components.Schemas.BaseCustomActionConfig;
 export type BillingFrequency = Components.Schemas.BillingFrequency;
 export type BooleanArg = Components.Schemas.BooleanArg;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
@@ -1769,7 +1833,10 @@ export type ComponentType = Components.Schemas.ComponentType;
 export type Configuration = Components.Schemas.Configuration;
 export type ConfigurationMetadata = Components.Schemas.ConfigurationMetadata;
 export type ConfigurationVersion = Components.Schemas.ConfigurationVersion;
+export type CustomFlowActionComponent = Components.Schemas.CustomFlowActionComponent;
+export type CustomFlowConfig = Components.Schemas.CustomFlowConfig;
 export type EnumArg = Components.Schemas.EnumArg;
+export type ExternalIntegrationCustomActionConfig = Components.Schemas.ExternalIntegrationCustomActionConfig;
 export type Installation = Components.Schemas.Installation;
 export type JourneyBlockComponent = Components.Schemas.JourneyBlockComponent;
 export type JourneyBlockComponentArgs = Components.Schemas.JourneyBlockComponentArgs;

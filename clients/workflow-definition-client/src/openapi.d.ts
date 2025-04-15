@@ -49,6 +49,7 @@ declare namespace Components {
             schedule?: ActionSchedule;
         }
         export interface AutomationTrigger {
+            id?: string;
             type: "automation";
             /**
              * Id of the automation config that triggers this workflow
@@ -322,6 +323,7 @@ declare namespace Components {
         }
         export type ItemType = "STEP" | "SECTION";
         export interface JourneySubmissionTrigger {
+            id?: string;
             type: "journey_submission";
             /**
              * ID of the journey that will trigger this flow
@@ -355,6 +357,7 @@ declare namespace Components {
             task_type: TaskType;
         }
         export interface ManualTrigger {
+            id?: string;
             type: "manual";
             entity_schema?: string;
         }
