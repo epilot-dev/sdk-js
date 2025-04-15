@@ -46,6 +46,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
+    "@epilot/access-token-client": "^1.0.0",
     "@epilot/address-suggestions-client": "^1.2.1",
     "@epilot/audit-logs-client": "^0.3.2",
     "@epilot/auth": "^0.7.1",

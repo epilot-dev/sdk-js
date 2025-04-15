@@ -4,6 +4,7 @@ import {
   default as addressSuggestionsClient,
   getClient as getAddressSuggestionsClient,
 } from './address-suggestions-client';
+import { default as accessTokenClient, getClient as getAccessTokenClient } from './access-token-client';
 import { default as auditLogsClient, getClient as getAuditLogsClient } from './audit-logs-client';
 import { default as automationClient, getClient as getAutomationClient } from './automation-client';
 import {
@@ -95,6 +96,9 @@ export class EpilotClient {
   get auditLogs() {
     return getAuditLogsClient();
   }
+  get accessToken() {
+    return getAccessTokenClient();
+  }
 
   public authorize(token: string) {
     authorizeWithToken(this.entity, token);
@@ -118,6 +122,7 @@ export class EpilotClient {
     authorizeWithToken(this.sandbox, token);
     authorizeWithToken(this.design, token);
     authorizeWithToken(this.auditLogs, token);
+    authorizeWithToken(this.accessToken, token);
 
     return this;
   }
@@ -146,6 +151,7 @@ export class EpilotClient {
     authorizer.configureClient(this.sandbox);
     authorizer.configureClient(this.design);
     authorizer.configureClient(this.auditLogs);
+    authorizer.configureClient(this.accessToken);
 
     return this;
   }
@@ -174,3 +180,4 @@ export { blueprintManifestClient };
 export { sandboxClient };
 export { designClient };
 export { auditLogsClient };
+export { accessTokenClient };
