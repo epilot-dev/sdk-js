@@ -280,26 +280,104 @@ declare namespace Components {
          * Dictionary of epilot user attributes to claims
          */
         export interface AttributeMappingConfig {
-            /**
-             * example:
-             * email
-             */
-            email: string;
-            /**
-             * example:
-             * name
-             */
-            display_name?: string;
-            /**
-             * example:
-             * phone
-             */
-            phone?: string;
-            /**
-             * example:
-             * language
-             */
-            preferred_language?: string;
+            contact: {
+                [name: string]: any;
+                /**
+                 * example:
+                 * email
+                 */
+                email: string;
+                /**
+                 * example:
+                 * first_name
+                 */
+                first_name?: string;
+                /**
+                 * example:
+                 * last_name
+                 */
+                last_name?: string;
+                /**
+                 * example:
+                 * tel
+                 */
+                phone?: string;
+                /**
+                 * example:
+                 * language
+                 */
+                preferred_language?: string;
+                /**
+                 * The concession of the user. For eg: GPE, EPE, WPE
+                 * example:
+                 * GPE
+                 */
+                concession?: string;
+                /**
+                 * The installer number of the user
+                 * example:
+                 * 123456
+                 */
+                installer_number?: string;
+            };
+            account?: {
+                [name: string]: any;
+                /**
+                 * example:
+                 * company_name
+                 */
+                name?: string;
+                /**
+                 * example:
+                 * street_name
+                 */
+                street?: string;
+                /**
+                 * example:
+                 * house_number
+                 */
+                house_number?: string;
+                /**
+                 * example:
+                 * postal_code
+                 */
+                postal_code?: string;
+                /**
+                 * example:
+                 * city
+                 */
+                city?: string;
+            };
+            portal_user?: {
+                [name: string]: any;
+                /**
+                 * example:
+                 * access_status
+                 */
+                access_status?: string;
+                /**
+                 * example:
+                 * expires_at
+                 */
+                expires_at?: string;
+            };
+            concession_attributes?: {
+                /**
+                 * example:
+                 * water
+                 */
+                water?: string;
+                /**
+                 * example:
+                 * energy
+                 */
+                energy?: string;
+                /**
+                 * example:
+                 * gas
+                 */
+                gas?: string;
+            };
         }
         export interface AuthConfig {
             /**
@@ -3217,6 +3295,152 @@ declare namespace Components {
             grants?: Grant[];
             identity_providers?: ProviderPublicConfig[];
         }
+        export interface PortalPage {
+            [name: string]: any;
+            /**
+             * The slug of the page
+             * example:
+             * contracts
+             */
+            slug: string;
+            /**
+             * The schema of the entity that page holds
+             * example:
+             * contract
+             */
+            schema: string;
+            /**
+             * The description of the page
+             * example:
+             * Contracts
+             */
+            description?: string;
+            /**
+             * The path of the page
+             * example:
+             * /contracts
+             */
+            path: string;
+            /**
+             * The conditions that need to be met for the page to be shown
+             */
+            conditions?: {
+                [key: string]: any;
+            };
+            /**
+             * The navigation of the page
+             */
+            navigation?: {
+                /**
+                 * The label of the navigation
+                 */
+                label?: {
+                    /**
+                     * The label of the navigation in English
+                     */
+                    en?: string;
+                    /**
+                     * The label of the navigation in German
+                     */
+                    de?: string;
+                };
+            };
+            blocks?: PortalPageBlock[];
+            /**
+             * The id of the page
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            id: string; // uuid
+        }
+        export interface PortalPageBlock {
+            [name: string]: any;
+            /**
+             * The type of the block
+             * example:
+             * table
+             */
+            type: string;
+            /**
+             * The conditions that need to be met for the block to be shown
+             */
+            conditions?: {
+                [key: string]: any;
+            };
+            /**
+             * The id of the block
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            id: string; // uuid
+        }
+        export interface PortalPageBlockRequest {
+            [name: string]: any;
+            /**
+             * The type of the block
+             * example:
+             * table
+             */
+            type: string;
+            /**
+             * The conditions that need to be met for the block to be shown
+             */
+            conditions?: {
+                [key: string]: any;
+            };
+        }
+        export interface PortalPageRequest {
+            [name: string]: any;
+            /**
+             * The slug of the page
+             * example:
+             * contracts
+             */
+            slug: string;
+            /**
+             * The schema of the entity that page holds
+             * example:
+             * contract
+             */
+            schema: string;
+            /**
+             * The description of the page
+             * example:
+             * Contracts
+             */
+            description?: string;
+            /**
+             * The path of the page
+             * example:
+             * /contracts
+             */
+            path: string;
+            /**
+             * The conditions that need to be met for the page to be shown
+             */
+            conditions?: {
+                [key: string]: any;
+            };
+            /**
+             * The navigation of the page
+             */
+            navigation?: {
+                /**
+                 * The label of the navigation
+                 */
+                label?: {
+                    /**
+                     * The label of the navigation in English
+                     */
+                    en?: string;
+                    /**
+                     * The label of the navigation in German
+                     */
+                    de?: string;
+                };
+            };
+            blocks?: PortalPageBlock[];
+        }
         /**
          * The portal user entity
          */
@@ -4497,6 +4721,26 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace CreatePortalPage {
+        export type RequestBody = Components.Schemas.PortalPageRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalPage;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreatePortalPageBlock {
+        export type RequestBody = Components.Schemas.PortalPageBlockRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalPageBlock;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace CreateUser {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -4543,6 +4787,26 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeletePortalPage {
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeletePortalPageBlock {
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -6182,6 +6446,65 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetPortalPage {
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalPage;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPortalPageBlock {
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalPageBlock;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPortalPageBlocks {
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalPageBlock[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPortalPages {
+        namespace Parameters {
+            /**
+             * example:
+             * id,slug,description
+             */
+            export type Fields = string;
+            /**
+             * example:
+             * schema=contract,slug=contracts
+             */
+            export type Filter = string;
+        }
+        export interface QueryParameters {
+            fields?: /**
+             * example:
+             * id,slug,description
+             */
+            Parameters.Fields;
+            filter?: /**
+             * example:
+             * schema=contract,slug=contracts
+             */
+            Parameters.Filter;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalPage[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetPortalUser {
         namespace Responses {
             export interface $200 {
@@ -7087,6 +7410,26 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpdatePortalPage {
+        export type RequestBody = Components.Schemas.PortalPageRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalPage;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdatePortalPageBlock {
+        export type RequestBody = Components.Schemas.PortalPageBlockRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalPageBlock;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace UpdatePortalUser {
         export type RequestBody = Components.Schemas.Entity;
         namespace Responses {
@@ -7281,6 +7624,82 @@ declare namespace Paths {
                 exists: boolean;
             }
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace V2PortalPages {
+        namespace Parameters {
+            /**
+             * The domain of the portal
+             * example:
+             * customer-portal.epilot.io
+             */
+            export type Domain = string;
+        }
+        export interface QueryParameters {
+            domain: /**
+             * The domain of the portal
+             * example:
+             * customer-portal.epilot.io
+             */
+            Parameters.Domain;
+        }
+    }
+    namespace V2PortalPages$Id {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.Id /* uuid */;
+        }
+    }
+    namespace V2PortalPages$IdBlocks {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.Id /* uuid */;
+        }
+    }
+    namespace V2PortalPages$IdBlocks$BlockId {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type BlockId = string; // uuid
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.Id /* uuid */;
+            block_id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.BlockId /* uuid */;
         }
     }
     namespace ValidateCaaRecords {
@@ -8189,6 +8608,106 @@ export interface OperationMethods {
     data?: Paths.SsoCallback.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SsoCallback.Responses.$200>
+  /**
+   * getPortalPage - getPortalPage
+   * 
+   * Fetch a portal page by id
+   */
+  'getPortalPage'(
+    parameters?: Parameters<Paths.V2PortalPages$Id.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalPage.Responses.$200>
+  /**
+   * updatePortalPage - updatePortalPage
+   * 
+   * Update a portal page by id
+   */
+  'updatePortalPage'(
+    parameters?: Parameters<Paths.V2PortalPages$Id.PathParameters> | null,
+    data?: Paths.UpdatePortalPage.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdatePortalPage.Responses.$200>
+  /**
+   * deletePortalPage - deletePortalPage
+   * 
+   * Delete a portal page by id
+   */
+  'deletePortalPage'(
+    parameters?: Parameters<Paths.V2PortalPages$Id.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeletePortalPage.Responses.$204>
+  /**
+   * getPortalPages - getPortalPages
+   * 
+   * Fetch all portal pages
+   */
+  'getPortalPages'(
+    parameters?: Parameters<Paths.GetPortalPages.QueryParameters & Paths.V2PortalPages.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalPages.Responses.$200>
+  /**
+   * createPortalPage - createPortalPage
+   * 
+   * Create a new portal page
+   */
+  'createPortalPage'(
+    parameters?: Parameters<Paths.V2PortalPages.QueryParameters> | null,
+    data?: Paths.CreatePortalPage.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePortalPage.Responses.$200>
+  /**
+   * getPortalPageBlocks - getPortalPageBlocks
+   * 
+   * Fetch all portal page blocks
+   */
+  'getPortalPageBlocks'(
+    parameters?: Parameters<Paths.V2PortalPages$IdBlocks.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalPageBlocks.Responses.$200>
+  /**
+   * createPortalPageBlock - createPortalPageBlock
+   * 
+   * Create a new portal page block
+   */
+  'createPortalPageBlock'(
+    parameters?: Parameters<Paths.V2PortalPages$IdBlocks.PathParameters> | null,
+    data?: Paths.CreatePortalPageBlock.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePortalPageBlock.Responses.$200>
+  /**
+   * getPortalPageBlock - getPortalPageBlock
+   * 
+   * Fetch a portal page block by id
+   */
+  'getPortalPageBlock'(
+    parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalPageBlock.Responses.$200>
+  /**
+   * updatePortalPageBlock - updatePortalPageBlock
+   * 
+   * Update a portal page block by id
+   */
+  'updatePortalPageBlock'(
+    parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockId.PathParameters> | null,
+    data?: Paths.UpdatePortalPageBlock.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdatePortalPageBlock.Responses.$200>
+  /**
+   * deletePortalPageBlock - deletePortalPageBlock
+   * 
+   * Delete a portal page block by id
+   */
+  'deletePortalPageBlock'(
+    parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeletePortalPageBlock.Responses.$204>
 }
 
 export interface PathsDictionary {
@@ -9171,6 +9690,114 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SsoCallback.Responses.$200>
   }
+  ['/v2/portal/pages/{id}']: {
+    /**
+     * getPortalPage - getPortalPage
+     * 
+     * Fetch a portal page by id
+     */
+    'get'(
+      parameters?: Parameters<Paths.V2PortalPages$Id.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalPage.Responses.$200>
+    /**
+     * updatePortalPage - updatePortalPage
+     * 
+     * Update a portal page by id
+     */
+    'put'(
+      parameters?: Parameters<Paths.V2PortalPages$Id.PathParameters> | null,
+      data?: Paths.UpdatePortalPage.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdatePortalPage.Responses.$200>
+    /**
+     * deletePortalPage - deletePortalPage
+     * 
+     * Delete a portal page by id
+     */
+    'delete'(
+      parameters?: Parameters<Paths.V2PortalPages$Id.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeletePortalPage.Responses.$204>
+  }
+  ['/v2/portal/pages']: {
+    /**
+     * getPortalPages - getPortalPages
+     * 
+     * Fetch all portal pages
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPortalPages.QueryParameters & Paths.V2PortalPages.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalPages.Responses.$200>
+    /**
+     * createPortalPage - createPortalPage
+     * 
+     * Create a new portal page
+     */
+    'post'(
+      parameters?: Parameters<Paths.V2PortalPages.QueryParameters> | null,
+      data?: Paths.CreatePortalPage.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePortalPage.Responses.$200>
+  }
+  ['/v2/portal/pages/{id}/blocks']: {
+    /**
+     * createPortalPageBlock - createPortalPageBlock
+     * 
+     * Create a new portal page block
+     */
+    'post'(
+      parameters?: Parameters<Paths.V2PortalPages$IdBlocks.PathParameters> | null,
+      data?: Paths.CreatePortalPageBlock.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePortalPageBlock.Responses.$200>
+    /**
+     * getPortalPageBlocks - getPortalPageBlocks
+     * 
+     * Fetch all portal page blocks
+     */
+    'get'(
+      parameters?: Parameters<Paths.V2PortalPages$IdBlocks.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalPageBlocks.Responses.$200>
+  }
+  ['/v2/portal/pages/{id}/blocks/{block_id}']: {
+    /**
+     * getPortalPageBlock - getPortalPageBlock
+     * 
+     * Fetch a portal page block by id
+     */
+    'get'(
+      parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalPageBlock.Responses.$200>
+    /**
+     * updatePortalPageBlock - updatePortalPageBlock
+     * 
+     * Update a portal page block by id
+     */
+    'put'(
+      parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockId.PathParameters> | null,
+      data?: Paths.UpdatePortalPageBlock.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdatePortalPageBlock.Responses.$200>
+    /**
+     * deletePortalPageBlock - deletePortalPageBlock
+     * 
+     * Delete a portal page block by id
+     */
+    'delete'(
+      parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeletePortalPageBlock.Responses.$204>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -9250,6 +9877,10 @@ export type OrganizationSettings = Components.Schemas.OrganizationSettings;
 export type Origin = Components.Schemas.Origin;
 export type PaymentWidget = Components.Schemas.PaymentWidget;
 export type PortalConfig = Components.Schemas.PortalConfig;
+export type PortalPage = Components.Schemas.PortalPage;
+export type PortalPageBlock = Components.Schemas.PortalPageBlock;
+export type PortalPageBlockRequest = Components.Schemas.PortalPageBlockRequest;
+export type PortalPageRequest = Components.Schemas.PortalPageRequest;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type Product = Components.Schemas.Product;
