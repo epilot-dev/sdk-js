@@ -662,6 +662,10 @@
                   "user"
                 ],
                 "description": "Who disabled the flow (system or user)"
+              },
+              "blame": {
+                "type": "string",
+                "description": "The 360 user email that disabled the flow"
               }
             },
             "required": [
@@ -822,6 +826,9 @@
           },
           {
             "$ref": "#/components/schemas/ReceivedEmailTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/FlowsTrigger"
           }
         ]
       },
@@ -2788,6 +2795,40 @@
           }
         }
       },
+      "FlowsTrigger": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "flows_trigger"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "source_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "source_id"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
+          }
+        ]
+      },
       "JourneySubmitTrigger": {
         "allOf": [
           {
@@ -3509,9 +3550,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://automation.sls.epilot.io"
-    },
     {
       "url": "https://automation.sls.epilot.io"
     }

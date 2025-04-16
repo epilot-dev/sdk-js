@@ -443,7 +443,7 @@ declare namespace Components {
          *       ```
          *
          */
-        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger;
+        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | FlowsTrigger;
         export interface AnythingButCondition {
             "anything-but"?: string[];
         }
@@ -793,6 +793,10 @@ declare namespace Components {
                  * Who disabled the flow (system or user)
                  */
                 disabled_by: "system" | "user";
+                /**
+                 * The 360 user email that disabled the flow
+                 */
+                blame?: string;
             };
             triggers: AnyTrigger[];
             trigger_conditions?: /**
@@ -1685,6 +1689,17 @@ declare namespace Components {
         export type FilterConditionOnEvent = OrCondition | {
             [name: string]: (string | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
         };
+        export interface FlowsTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
+            type: "flows_trigger";
+            configuration: {
+                source_id: string; // uuid
+            };
+        }
         export interface FrontendSubmitTrigger {
             /**
              * example:
@@ -3542,6 +3557,7 @@ export type ExecItem = Components.Schemas.ExecItem;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
 export type ExistsCondition = Components.Schemas.ExistsCondition;
 export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;
+export type FlowsTrigger = Components.Schemas.FlowsTrigger;
 export type FrontendSubmitTrigger = Components.Schemas.FrontendSubmitTrigger;
 export type GetExecutionsResp = Components.Schemas.GetExecutionsResp;
 export type JobId = Components.Schemas.JobId;
