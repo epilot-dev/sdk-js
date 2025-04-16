@@ -5310,7 +5310,7 @@ declare namespace Components {
             _updated_at: string; // date-time
             type: "VAT" | "GST" | "Custom";
             description?: string;
-            rate: number;
+            rate: number | null;
             active?: boolean;
             region?: string;
             region_label?: string;
@@ -5411,7 +5411,7 @@ declare namespace Components {
             Tax;
         }
         export interface TaxBreakdownInfo {
-            rate?: number;
+            rate?: number | null;
             type?: "VAT" | "GST" | "Custom";
             _id?: string;
         }

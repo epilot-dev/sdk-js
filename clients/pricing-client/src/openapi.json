@@ -5607,7 +5607,8 @@
             "type": "string"
           },
           "rate": {
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "active": {
             "type": "boolean"
@@ -5640,7 +5641,8 @@
         "type": "object",
         "properties": {
           "rate": {
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "type": {
             "type": "string",
