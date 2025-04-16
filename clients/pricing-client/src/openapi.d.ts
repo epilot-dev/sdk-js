@@ -465,9 +465,13 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * A detailed description of the price. This is shown on the order document and order table.
+             * The description for the product.
              */
-            long_description?: string;
+            product_description?: string;
+            /**
+             * The name for the product.
+             */
+            product_name?: string;
             price_mappings?: /**
              * example:
              * [
@@ -783,9 +787,13 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * A detailed description of the price. This is shown on the order document and order table.
+             * The description for the product.
              */
-            long_description?: string;
+            product_description?: string;
+            /**
+             * The name for the product.
+             */
+            product_name?: string;
             /**
              * Price mapping information required to compute totals
              */
@@ -936,9 +944,13 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * A detailed description of the price. This is shown on the order document and order table.
+             * The description for the product.
              */
-            long_description?: string;
+            product_description?: string;
+            /**
+             * The name for the product.
+             */
+            product_name?: string;
             price_mappings?: /**
              * example:
              * [
@@ -1621,9 +1633,13 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * A detailed description of the price. This is shown on the order document and order table.
+             * The description for the product.
              */
-            long_description?: string;
+            product_description?: string;
+            /**
+             * The name for the product.
+             */
+            product_name?: string;
             price_mappings?: /**
              * example:
              * [
@@ -1951,9 +1967,13 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * A detailed description of the price. This is shown on the order document and order table.
+             * The description for the product.
              */
-            long_description?: string;
+            product_description?: string;
+            /**
+             * The name for the product.
+             */
+            product_name?: string;
             price_mappings?: /**
              * example:
              * [
@@ -3888,9 +3908,13 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * A detailed description of the price. This is shown on the order document and order table.
+             * The description for the product.
              */
-            long_description?: string;
+            product_description?: string;
+            /**
+             * The name for the product.
+             */
+            product_name?: string;
             price_mappings?: /**
              * example:
              * [
@@ -4228,9 +4252,13 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * A detailed description of the price. This is shown on the order document and order table.
+             * The description for the product.
              */
-            long_description?: string;
+            product_description?: string;
+            /**
+             * The name for the product.
+             */
+            product_name?: string;
             price_mappings?: /**
              * example:
              * [
