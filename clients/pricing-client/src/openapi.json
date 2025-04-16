@@ -4100,6 +4100,14 @@
             "type": "string",
             "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
           },
+          "product_description": {
+            "type": "string",
+            "description": "The description for the product."
+          },
+          "product_name": {
+            "type": "string",
+            "description": "The name for the product."
+          },
           "price_mappings": {
             "description": "Price mapping information required to compute totals",
             "$ref": "#/components/schemas/PriceInputMappings"
