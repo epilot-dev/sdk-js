@@ -37,6 +37,14 @@
     {
       "name": "Elastic Cluster Assignment",
       "description": "Elastic Cluster assignment for organizations"
+    },
+    {
+      "name": "Internal",
+      "description": "Internal APIs"
+    },
+    {
+      "name": "Public",
+      "description": "Public"
     }
   ],
   "security": [
@@ -197,6 +205,14 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "dereference",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -1133,6 +1149,52 @@
         }
       }
     },
+    "/v1/entity/{slug}/{id}:reindex": {
+      "post": {
+        "operationId": "reindexEntity",
+        "summary": "reindexEntity",
+        "description": "Triggers a reindex for the Entity for search.\n",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "This endpoint doesn't require a payload, but an empty object can be sent to satisfy certain HTTP clients."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The reindexed entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The entity was not found"
+          },
+          "500": {
+            "description": "The entity could not be indexed"
+          }
+        }
+      }
+    },
     "/v1/entity/{slug}/{id}": {
       "get": {
         "operationId": "getEntity",
@@ -1727,6 +1789,9 @@
                   },
                   {
                     "_id": "9924c4de-d3ed-4752-821d-fc0b9bd57c1b",
+                    "_title": "John Doe",
+                    "attribute": "contacts",
+                    "entity_id": "9924c4de-d3ed-4752-821d-fc0b9bd57c1b",
                     "order_number": "a34234jd",
                     "customer_email": "johndoe@epilot.cloud",
                     "billing_first_name": "john",
@@ -2969,6 +3034,10 @@
                       "items": {
                         "$ref": "#/components/schemas/TaxonomyClassification"
                       }
+                    },
+                    "hits": {
+                      "type": "integer",
+                      "example": 10
                     }
                   }
                 }
@@ -3098,10 +3167,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TaxonomyBulkJob"
-                  }
+                  "$ref": "#/components/schemas/TaxonomyBulkJob"
                 }
               }
             }
@@ -3128,8 +3194,14 @@
                     "type": "string"
                   },
                   "target_taxonomy": {
-                    "description": "The target taxonomy to which the classifications will be moved",
-                    "$ref": "#/components/schemas/TaxonomySlug"
+                    "allOf": [
+                      {
+                        "description": "The target taxonomy to which the classifications will be moved"
+                      },
+                      {
+                        "$ref": "#/components/schemas/TaxonomySlug"
+                      }
+                    ]
                   },
                   "classification_ids": {
                     "type": "array",
@@ -3156,7 +3228,7 @@
                   "$ref": "#/components/schemas/TaxonomyBulkJobTriggerResponse"
                 },
                 "example": {
-                  "job_id": "123",
+                  "job_id": "5684fcb1-62ef-45e4-9187-ebf96dcbff12",
                   "status": "PENDING"
                 }
               }
@@ -3184,8 +3256,14 @@
                     "type": "string"
                   },
                   "target_classification": {
-                    "description": "The target classification id to which the classifications will be merged into",
-                    "$ref": "#/components/schemas/TaxonomySlug"
+                    "allOf": [
+                      {
+                        "description": "The target classification id to which the classifications will be merged into"
+                      },
+                      {
+                        "$ref": "#/components/schemas/TaxonomySlug"
+                      }
+                    ]
                   },
                   "classification_ids": {
                     "type": "array",
@@ -3212,7 +3290,7 @@
                   "$ref": "#/components/schemas/TaxonomyBulkJobTriggerResponse"
                 },
                 "example": {
-                  "job_id": "123",
+                  "job_id": "5684fcb1-62ef-45e4-9187-ebf96dcbff12",
                   "status": "PENDING"
                 }
               }
@@ -3264,7 +3342,7 @@
                   "$ref": "#/components/schemas/TaxonomyBulkJobTriggerResponse"
                 },
                 "example": {
-                  "job_id": "123",
+                  "job_id": "5684fcb1-62ef-45e4-9187-ebf96dcbff12",
                   "status": "PENDING"
                 }
               }
@@ -5287,23 +5365,21 @@
                     }
                   }
                 },
-                "example": {
-                  "value": [
-                    {
-                      "action_type": "add_existing",
-                      "label": "entityrelation.add_existing",
-                      "default": true
-                    },
-                    {
-                      "action_type": "create_new",
-                      "label": "entityrelation.create_new"
-                    },
-                    {
-                      "action_type": "create_from_existing",
-                      "label": "entityrelation.create_from_existing"
-                    }
-                  ]
-                }
+                "example": [
+                  {
+                    "action_type": "add_existing",
+                    "label": "entityrelation.add_existing",
+                    "default": true
+                  },
+                  {
+                    "action_type": "create_new",
+                    "label": "entityrelation.create_new"
+                  },
+                  {
+                    "action_type": "create_from_existing",
+                    "label": "entityrelation.create_from_existing"
+                  }
+                ]
               },
               "drawer_size": {
                 "type": "string",
@@ -5405,35 +5481,11 @@
       },
       "DefaultAddressFields": {
         "type": "array",
-        "description": "Default fields visible on addresses",
+        "nullable": true,
+        "description": "Default fields visible on addresses\n\nValid values are:\n  - postal_code (default)\n  - city (default)\n  - street (default)\n  - street_number (default)\n  - plot_area\n  - plot_of_land\n  - suburb\n  - country\n  - additional_info\n  - coordinates\n  - start_date\n  - end_date\n  - salutation\n  - title\n  - first_name\n  - last_name\n  - company_name\n",
         "items": {
-          "type": "string",
-          "enum": [
-            "postal_code",
-            "city",
-            "street",
-            "street_number",
-            "plot_area",
-            "plot_of_land",
-            "suburb",
-            "country",
-            "additional_info",
-            "coordinates",
-            "start_date",
-            "end_date",
-            "salutation",
-            "title",
-            "first_name",
-            "last_name",
-            "company_name"
-          ]
-        },
-        "default": [
-          "postal_code",
-          "city",
-          "street",
-          "street_number"
-        ]
+          "type": "string"
+        }
       },
       "AddressAttribute": {
         "allOf": [
@@ -6156,7 +6208,7 @@
                     },
                     "resource": {
                       "type": "string",
-                      "example": 123
+                      "example": "123"
                     }
                   },
                   "required": [
@@ -6380,8 +6432,14 @@
         "additionalProperties": true,
         "properties": {
           "_id": {
-            "readOnly": true,
-            "$ref": "#/components/schemas/EntityId"
+            "allOf": [
+              {
+                "readOnly": true
+              },
+              {
+                "$ref": "#/components/schemas/EntityId"
+              }
+            ]
           },
           "_org": {
             "type": "string",
@@ -6429,8 +6487,14 @@
             "readOnly": true
           },
           "_acl": {
-            "readOnly": true,
-            "$ref": "#/components/schemas/EntityAcl"
+            "allOf": [
+              {
+                "readOnly": true
+              },
+              {
+                "$ref": "#/components/schemas/EntityAcl"
+              }
+            ]
           },
           "_purpose": {
             "type": "array",
@@ -7450,7 +7514,9 @@
             "enum": [
               "createEntity",
               "updateEntity",
-              "deleteEntity"
+              "deleteEntity",
+              "softDeleteEntity",
+              "restoreEntity"
             ]
           },
           "params": {
@@ -7632,7 +7698,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "example": 11701
+              "example": "11701"
             }
           },
           "created_by": {
@@ -7702,7 +7768,6 @@
             "required": [
               "slug",
               "name",
-              "created_by",
               "ui_config"
             ]
           }
@@ -8036,11 +8101,11 @@
         "example": {
           "job_id": "123e4567-e89b-12d3-a456-426614174000",
           "status": "PENDING",
-          "action_type": "MOVE_LABELS",
-          "created_by": 10598,
+          "action_type": "MOVE_CLASSIFICATIONS",
+          "created_by": "10598",
           "created_at": "2024-01-01T00:00:00.000Z",
           "updated_at": "2024-01-01T00:00:00.000Z",
-          "org": 66,
+          "org": "66",
           "progress": 0.5
         }
       },
@@ -8250,7 +8315,10 @@
         "required": false,
         "style": "form",
         "explode": false,
-        "example": "contact,account",
+        "example": [
+          "contact",
+          "account"
+        ],
         "schema": {
           "type": "array",
           "items": {
@@ -8265,7 +8333,10 @@
         "required": false,
         "style": "form",
         "explode": false,
-        "example": "file,message",
+        "example": [
+          "file",
+          "message"
+        ],
         "schema": {
           "type": "array",
           "items": {
@@ -8990,10 +9061,5 @@
         }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    }
-  ]
+  }
 }

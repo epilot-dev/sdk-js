@@ -65,6 +65,10 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "dereference"
           }
         ],
         "responses": {}
@@ -274,6 +278,25 @@
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}:reindex": {
+      "post": {
+        "operationId": "reindexEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           }
         ],
         "requestBody": {
@@ -1436,10 +1459,5 @@
         }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    }
-  ]
+  }
 }

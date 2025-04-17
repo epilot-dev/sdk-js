@@ -403,7 +403,30 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             type: "address";
-            default_address_fields?: /* Default fields visible on addresses */ DefaultAddressFields;
+            default_address_fields?: /**
+             * Default fields visible on addresses
+             *
+             * Valid values are:
+             *   - postal_code (default)
+             *   - city (default)
+             *   - street (default)
+             *   - street_number (default)
+             *   - plot_area
+             *   - plot_of_land
+             *   - suburb
+             *   - country
+             *   - additional_info
+             *   - coordinates
+             *   - start_date
+             *   - end_date
+             *   - salutation
+             *   - title
+             *   - first_name
+             *   - last_name
+             *   - company_name
+             *
+             */
+            DefaultAddressFields;
         }
         /**
          * Reference to an address attribute of another entity
@@ -545,7 +568,30 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             type: "relation_address";
-            default_address_fields?: /* Default fields visible on addresses */ DefaultAddressFields;
+            default_address_fields?: /**
+             * Default fields visible on addresses
+             *
+             * Valid values are:
+             *   - postal_code (default)
+             *   - city (default)
+             *   - street (default)
+             *   - street_number (default)
+             *   - plot_area
+             *   - plot_of_land
+             *   - suburb
+             *   - country
+             *   - additional_info
+             *   - coordinates
+             *   - start_date
+             *   - end_date
+             *   - salutation
+             *   - title
+             *   - first_name
+             *   - last_name
+             *   - company_name
+             *
+             */
+            DefaultAddressFields;
         }
         export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute;
         /**
@@ -924,7 +970,7 @@ declare namespace Components {
          */
         export interface BaseEntity {
             [name: string]: any;
-            _id: EntityId /* uuid */;
+            _id: string; // uuid
             /**
              * Organization Id the entity belongs to
              */
@@ -950,7 +996,15 @@ declare namespace Components {
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
             _deleted_at?: string | null; // date-time
-            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+            /**
+             * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+             */
+            _acl?: {
+                [name: string]: any;
+                view?: string[];
+                edit?: string[];
+                delete?: string[];
+            };
             _purpose?: string[] | null;
             /**
              * Manifest ID used to create/update the entity
@@ -1861,8 +1915,28 @@ declare namespace Components {
         }
         /**
          * Default fields visible on addresses
+         *
+         * Valid values are:
+         *   - postal_code (default)
+         *   - city (default)
+         *   - street (default)
+         *   - street_number (default)
+         *   - plot_area
+         *   - plot_of_land
+         *   - suburb
+         *   - country
+         *   - additional_info
+         *   - coordinates
+         *   - start_date
+         *   - end_date
+         *   - salutation
+         *   - title
+         *   - first_name
+         *   - last_name
+         *   - company_name
+         *
          */
-        export type DefaultAddressFields = ("postal_code" | "city" | "street" | "street_number" | "plot_area" | "plot_of_land" | "suburb" | "country" | "additional_info" | "coordinates" | "start_date" | "end_date" | "salutation" | "title" | "first_name" | "last_name" | "company_name")[];
+        export type DefaultAddressFields = string[] | null;
         export interface ESClusterAssignment {
             /**
              * The organization for which the cluster assignment is returned
@@ -2051,7 +2125,7 @@ declare namespace Components {
          */
         export interface Entity {
             [name: string]: any;
-            _id?: EntityId /* uuid */;
+            _id?: string; // uuid
             /**
              * Organization Id the entity belongs to
              */
@@ -2077,7 +2151,15 @@ declare namespace Components {
             _created_at?: string | null; // date-time
             _updated_at?: string | null; // date-time
             _deleted_at?: string | null; // date-time
-            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+            /**
+             * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+             */
+            _acl?: {
+                [name: string]: any;
+                view?: string[];
+                edit?: string[];
+                delete?: string[];
+            };
             _purpose?: string[] | null;
             /**
              * Manifest ID used to create/update the entity
@@ -2482,7 +2564,7 @@ declare namespace Components {
          */
         export interface EntityItem {
             [name: string]: any;
-            _id: EntityId /* uuid */;
+            _id: string; // uuid
             /**
              * Organization Id the entity belongs to
              */
@@ -2508,7 +2590,15 @@ declare namespace Components {
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
             _deleted_at?: string | null; // date-time
-            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+            /**
+             * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+             */
+            _acl?: {
+                [name: string]: any;
+                view?: string[];
+                edit?: string[];
+                delete?: string[];
+            };
             _purpose?: string[] | null;
             /**
              * Manifest ID used to create/update the entity
@@ -2608,7 +2698,7 @@ declare namespace Components {
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
             ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
-            operation: "createEntity" | "updateEntity" | "deleteEntity";
+            operation: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity";
             /**
              * example:
              * {
@@ -2663,7 +2753,7 @@ declare namespace Components {
              */
             payload?: {
                 [name: string]: any;
-                _id?: EntityId /* uuid */;
+                _id?: string; // uuid
                 /**
                  * Organization Id the entity belongs to
                  */
@@ -2689,7 +2779,15 @@ declare namespace Components {
                 _created_at?: string | null; // date-time
                 _updated_at?: string | null; // date-time
                 _deleted_at?: string | null; // date-time
-                _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+                /**
+                 * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+                 */
+                _acl?: {
+                    [name: string]: any;
+                    view?: string[];
+                    edit?: string[];
+                    delete?: string[];
+                };
                 _purpose?: string[] | null;
                 /**
                  * Manifest ID used to create/update the entity
@@ -4319,7 +4417,7 @@ declare namespace Components {
          */
         export interface HydratedEntityItem {
             [name: string]: any;
-            _id: EntityId /* uuid */;
+            _id: string; // uuid
             /**
              * Organization Id the entity belongs to
              */
@@ -4345,7 +4443,15 @@ declare namespace Components {
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
             _deleted_at?: string | null; // date-time
-            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+            /**
+             * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+             */
+            _acl?: {
+                [name: string]: any;
+                view?: string[];
+                edit?: string[];
+                delete?: string[];
+            };
             _purpose?: string[] | null;
             /**
              * Manifest ID used to create/update the entity
@@ -6733,23 +6839,21 @@ declare namespace Components {
             };
             /**
              * example:
-             * {
-             *   "value": [
-             *     {
-             *       "action_type": "add_existing",
-             *       "label": "entityrelation.add_existing",
-             *       "default": true
-             *     },
-             *     {
-             *       "action_type": "create_new",
-             *       "label": "entityrelation.create_new"
-             *     },
-             *     {
-             *       "action_type": "create_from_existing",
-             *       "label": "entityrelation.create_from_existing"
-             *     }
-             *   ]
-             * }
+             * [
+             *   {
+             *     "action_type": "add_existing",
+             *     "label": "entityrelation.add_existing",
+             *     "default": true
+             *   },
+             *   {
+             *     "action_type": "create_new",
+             *     "label": "entityrelation.create_new"
+             *   },
+             *   {
+             *     "action_type": "create_from_existing",
+             *     "label": "entityrelation.create_from_existing"
+             *   }
+             * ]
              */
             actions?: {
                 /**
@@ -6848,7 +6952,7 @@ declare namespace Components {
          */
         export interface RelationEntity {
             [name: string]: any;
-            _id: EntityId /* uuid */;
+            _id: string; // uuid
             /**
              * Organization Id the entity belongs to
              */
@@ -6874,7 +6978,15 @@ declare namespace Components {
             _created_at: string | null; // date-time
             _updated_at: string | null; // date-time
             _deleted_at?: string | null; // date-time
-            _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ EntityAcl;
+            /**
+             * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+             */
+            _acl?: {
+                [name: string]: any;
+                view?: string[];
+                edit?: string[];
+                delete?: string[];
+            };
             _purpose?: string[] | null;
             /**
              * Manifest ID used to create/update the entity
@@ -7070,7 +7182,7 @@ declare namespace Components {
              * List of users (IDs) that have favorited the view
              */
             isFavoritedBy?: string[];
-            created_by: {
+            created_by?: {
                 /**
                  * example:
                  * 10598
@@ -7147,7 +7259,7 @@ declare namespace Components {
              * List of users (IDs) that have favorited the view
              */
             isFavoritedBy?: string[];
-            created_by: {
+            created_by?: {
                 /**
                  * example:
                  * 10598
@@ -8194,11 +8306,11 @@ declare namespace Components {
          * {
          *   "job_id": "123e4567-e89b-12d3-a456-426614174000",
          *   "status": "PENDING",
-         *   "action_type": "MOVE_LABELS",
-         *   "created_by": 10598,
+         *   "action_type": "MOVE_CLASSIFICATIONS",
+         *   "created_by": "10598",
          *   "created_at": "2024-01-01T00:00:00.000Z",
          *   "updated_at": "2024-01-01T00:00:00.000Z",
-         *   "org": 66,
+         *   "org": "66",
          *   "progress": 0.5
          * }
          */
@@ -8740,14 +8852,11 @@ declare namespace Paths {
              */
             job_id?: string;
             /**
-             * The target classification id to which the classifications will be merged into
-             */
-            target_classification?: /**
              * URL-friendly name for taxonomy
              * example:
              * purpose
              */
-            Components.Schemas.TaxonomySlug;
+            target_classification?: string;
             classification_ids?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -8765,14 +8874,11 @@ declare namespace Paths {
              */
             job_id?: string;
             /**
-             * The target taxonomy to which the classifications will be moved
-             */
-            target_taxonomy?: /**
              * URL-friendly name for taxonomy
              * example:
              * purpose
              */
-            Components.Schemas.TaxonomySlug;
+            target_taxonomy?: string;
             classification_ids?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -9485,6 +9591,7 @@ declare namespace Paths {
     }
     namespace GetJsonSchema {
         namespace Parameters {
+            export type Dereference = boolean;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -9494,6 +9601,9 @@ declare namespace Paths {
         }
         export interface PathParameters {
             slug: Parameters.Slug;
+        }
+        export interface QueryParameters {
+            dereference?: Parameters.Dereference;
         }
         namespace Responses {
             /**
@@ -10274,15 +10384,15 @@ declare namespace Paths {
              * {
              *   "job_id": "123e4567-e89b-12d3-a456-426614174000",
              *   "status": "PENDING",
-             *   "action_type": "MOVE_LABELS",
-             *   "created_by": 10598,
+             *   "action_type": "MOVE_CLASSIFICATIONS",
+             *   "created_by": "10598",
              *   "created_at": "2024-01-01T00:00:00.000Z",
              *   "updated_at": "2024-01-01T00:00:00.000Z",
-             *   "org": 66,
+             *   "org": "66",
              *   "progress": 0.5
              * }
              */
-            Components.Schemas.TaxonomyBulkJob[];
+            Components.Schemas.TaxonomyBulkJob;
         }
     }
     namespace GetTaxonomyBulkActionJobs {
@@ -10303,11 +10413,11 @@ declare namespace Paths {
              * {
              *   "job_id": "123e4567-e89b-12d3-a456-426614174000",
              *   "status": "PENDING",
-             *   "action_type": "MOVE_LABELS",
-             *   "created_by": 10598,
+             *   "action_type": "MOVE_CLASSIFICATIONS",
+             *   "created_by": "10598",
              *   "created_at": "2024-01-01T00:00:00.000Z",
              *   "updated_at": "2024-01-01T00:00:00.000Z",
-             *   "org": 66,
+             *   "org": "66",
              *   "progress": 0.5
              * }
              */
@@ -10698,6 +10808,79 @@ declare namespace Paths {
             export type $200 = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
         }
     }
+    namespace ReindexEntity {
+        namespace Parameters {
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            slug: Parameters.Slug;
+        }
+        /**
+         * This endpoint doesn't require a payload, but an empty object can be sent to satisfy certain HTTP clients.
+         */
+        export interface RequestBody {
+        }
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * {
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "_org": "123",
+             *   "_owners": [
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     },
+             *     {
+             *       "org_id": "123",
+             *       "user_id": "123"
+             *     }
+             *   ],
+             *   "_schema": "contact",
+             *   "_tags": [
+             *     "example",
+             *     "mock",
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z",
+             *   "_acl": {
+             *     "view": [
+             *       "org:456",
+             *       "org:789",
+             *       "org:456",
+             *       "org:789"
+             *     ],
+             *     "edit": [
+             *       "org:456",
+             *       "org:456"
+             *     ],
+             *     "delete": [
+             *       "org:456",
+             *       "org:456"
+             *     ]
+             *   },
+             *   "_manifest": [
+             *     "123e4567-e89b-12d3-a456-426614174000",
+             *     "123e4567-e89b-12d3-a456-426614174000"
+             *   ]
+             * }
+             */
+            Components.Schemas.EntityItem;
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace RemoveRelations {
         namespace Parameters {
             export type ActivityId = /**
@@ -10874,6 +11057,11 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 results?: Components.Schemas.TaxonomyClassification[];
+                /**
+                 * example:
+                 * 10
+                 */
+                hits?: number;
             }
         }
     }
@@ -11465,7 +11653,7 @@ export interface OperationMethods {
    * Get formal JSON schema definition draft 2020-12 for the given epilot schema
    */
   'getJsonSchema'(
-    parameters?: Parameters<Paths.GetJsonSchema.PathParameters> | null,
+    parameters?: Parameters<Paths.GetJsonSchema.QueryParameters & Paths.GetJsonSchema.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJsonSchema.Responses.$200>
@@ -11688,6 +11876,17 @@ export interface OperationMethods {
     data?: Paths.RestoreEntity.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RestoreEntity.Responses.$200>
+  /**
+   * reindexEntity - reindexEntity
+   * 
+   * Triggers a reindex for the Entity for search.
+   * 
+   */
+  'reindexEntity'(
+    parameters?: Parameters<Paths.ReindexEntity.PathParameters> | null,
+    data?: Paths.ReindexEntity.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReindexEntity.Responses.$200>
   /**
    * getEntity - getEntity
    * 
@@ -12497,7 +12696,7 @@ export interface PathsDictionary {
      * Get formal JSON schema definition draft 2020-12 for the given epilot schema
      */
     'get'(
-      parameters?: Parameters<Paths.GetJsonSchema.PathParameters> | null,
+      parameters?: Parameters<Paths.GetJsonSchema.QueryParameters & Paths.GetJsonSchema.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetJsonSchema.Responses.$200>
@@ -12742,6 +12941,19 @@ export interface PathsDictionary {
       data?: Paths.RestoreEntity.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RestoreEntity.Responses.$200>
+  }
+  ['/v1/entity/{slug}/{id}:reindex']: {
+    /**
+     * reindexEntity - reindexEntity
+     * 
+     * Triggers a reindex for the Entity for search.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ReindexEntity.PathParameters> | null,
+      data?: Paths.ReindexEntity.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReindexEntity.Responses.$200>
   }
   ['/v1/entity/{slug}/{id}']: {
     /**
