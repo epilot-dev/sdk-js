@@ -798,6 +798,16 @@ declare namespace Paths {
         }
     }
     namespace ListFlowTemplates {
+        namespace Parameters {
+            export type TriggerSchema = string;
+            export type TriggerSourceId = string;
+            export type TriggerType = "automation" | "manual" | "journey_submission";
+        }
+        export interface QueryParameters {
+            trigger_type?: Parameters.TriggerType;
+            trigger_source_id?: Parameters.TriggerSourceId;
+            trigger_schema?: Parameters.TriggerSchema;
+        }
         namespace Responses {
             export type $200 = Components.Schemas.FlowTemplatesList;
             export type $500 = Components.Schemas.ErrorResp;
@@ -910,10 +920,10 @@ export interface OperationMethods {
   /**
    * listFlowTemplates - listFlowTemplates
    * 
-   * List all Flow Templates for a customer
+   * List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values.
    */
   'listFlowTemplates'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.ListFlowTemplates.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListFlowTemplates.Responses.$200>
@@ -1118,10 +1128,10 @@ export interface PathsDictionary {
     /**
      * listFlowTemplates - listFlowTemplates
      * 
-     * List all Flow Templates for a customer
+     * List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values.
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.ListFlowTemplates.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListFlowTemplates.Responses.$200>
