@@ -178,6 +178,7 @@ declare namespace Components {
             taxonomies?: string[];
             phase_id?: string;
             task_type: TaskType;
+            trigger_mode: TriggerMode;
             conditions: Condition[];
             schedule?: DelayedSchedule | RelativeSchedule;
         }
