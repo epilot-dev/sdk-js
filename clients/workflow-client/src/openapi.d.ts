@@ -38,7 +38,7 @@ declare namespace Components {
                 /**
                  * Id of the task
                  */
-                id: string; // uuid
+                id?: string; // uuid
                 name: string;
                 status?: /**
                  * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
@@ -271,6 +271,7 @@ declare namespace Components {
             taxonomies?: string[];
             phase_id?: string;
             task_type: TaskType;
+            trigger_mode: TriggerMode;
             conditions: Condition[];
             schedule?: DelayedSchedule | RelativeSchedule;
         }
@@ -492,6 +493,10 @@ declare namespace Components {
             description?: /* Longer information regarding Task */ StepDescription;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Condition to evaluate as true for a decision task with a manual trigger mode
+             */
+            next_condition_id?: string;
         }
         export interface Phase {
             id: PhaseId;

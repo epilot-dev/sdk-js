@@ -2979,10 +2979,10 @@
           },
           {
             "type": "object",
-            "required": [
-              "conditions"
-            ],
             "properties": {
+              "trigger_mode": {
+                "$ref": "#/components/schemas/TriggerMode"
+              },
               "conditions": {
                 "type": "array",
                 "items": {
@@ -2999,7 +2999,11 @@
                   }
                 ]
               }
-            }
+            },
+            "required": [
+              "trigger_mode",
+              "conditions"
+            ]
           }
         ]
       },
@@ -3488,6 +3492,10 @@
           },
           "installer": {
             "$ref": "#/components/schemas/ECPDetails"
+          },
+          "next_condition_id": {
+            "type": "string",
+            "description": "Condition to evaluate as true for a decision task with a manual trigger mode"
           }
         }
       },
@@ -3561,7 +3569,6 @@
               }
             },
             "required": [
-              "id",
               "name"
             ]
           }
