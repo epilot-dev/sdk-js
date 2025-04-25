@@ -5546,7 +5546,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalPage"
+                  "$ref": "#/components/schemas/Page"
                 }
               }
             }
@@ -5583,7 +5583,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PortalPageRequest"
+                "$ref": "#/components/schemas/PageRequest"
               }
             }
           }
@@ -5594,7 +5594,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalPage"
+                  "$ref": "#/components/schemas/Page"
                 }
               }
             }
@@ -5700,7 +5700,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PortalPage"
+                    "$ref": "#/components/schemas/Page"
                   }
                 }
               }
@@ -5735,7 +5735,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PortalPageRequest"
+                "$ref": "#/components/schemas/PageRequest"
               }
             }
           }
@@ -5746,7 +5746,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalPage"
+                  "$ref": "#/components/schemas/Page"
                 }
               }
             }
@@ -5797,7 +5797,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PortalPageBlockRequest"
+                "$ref": "#/components/schemas/BlockRequest"
               }
             }
           }
@@ -5808,7 +5808,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalPageBlock"
+                  "$ref": "#/components/schemas/Block"
                 }
               }
             }
@@ -5848,7 +5848,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PortalPageBlock"
+                    "$ref": "#/components/schemas/Block"
                   }
                 }
               }
@@ -5911,7 +5911,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalPageBlock"
+                  "$ref": "#/components/schemas/Block"
                 }
               }
             }
@@ -5948,7 +5948,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PortalPageBlockRequest"
+                "$ref": "#/components/schemas/BlockRequest"
               }
             }
           }
@@ -5959,7 +5959,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalPageBlock"
+                  "$ref": "#/components/schemas/Block"
                 }
               }
             }
@@ -6875,6 +6875,20 @@
               }
             ]
           },
+          "contract_selector_config": {
+            "type": "object",
+            "description": "Configuration for contract selector in the portal",
+            "properties": {
+              "show_inactive": {
+                "type": "boolean",
+                "description": "Whether to show inactive contracts in the selector"
+              },
+              "title_path": {
+                "type": "string",
+                "description": "Path to the property to use as the contract title"
+              }
+            }
+          },
           "registration_identifiers": {
             "type": "array",
             "description": "Identifiers to identify a contact of a portal user during the registration.",
@@ -6983,6 +6997,12 @@
           "inactive_contract_cutoff_years": {
             "type": "number",
             "description": "Number of years to look back for showing inactive contracts in the portal"
+          },
+          "pages": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Page"
+            }
           }
         }
       },
@@ -10412,32 +10432,69 @@
           }
         }
       },
-      "PortalPageBlockRequest": {
+      "BlockProps": {
         "type": "object",
         "additionalProperties": true,
-        "required": [
-          "type"
-        ],
         "properties": {
-          "type": {
-            "type": "string",
-            "description": "The type of the block",
-            "example": "table"
-          },
-          "conditions": {
+          "visibility": {
             "type": "object",
             "description": "The conditions that need to be met for the block to be shown"
+          },
+          "content": {
+            "type": "object",
+            "description": "The content of the block"
+          },
+          "design": {
+            "type": "object",
+            "description": "The design of the block"
           }
         }
       },
-      "PortalPageBlock": {
+      "BlockType": {
+        "type": "string",
+        "description": "The type of the block. eg; tabs, tab, group, attribute",
+        "example": "tab"
+      },
+      "BlockRequest": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "type",
+          "order"
+        ],
+        "properties": {
+          "props": {
+            "$ref": "#/components/schemas/BlockProps"
+          },
+          "parent_id": {
+            "type": "string",
+            "description": "The id of the parent block",
+            "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
+          },
+          "type": {
+            "$ref": "#/components/schemas/BlockType"
+          },
+          "order": {
+            "type": "number",
+            "description": "The order of the block",
+            "example": 1
+          }
+        }
+      },
+      "BlockId": {
+        "type": "string",
+        "description": "The id of the block",
+        "format": "uuid",
+        "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
+      },
+      "Block": {
         "type": "object",
         "required": [
           "id"
         ],
         "allOf": [
           {
-            "$ref": "#/components/schemas/PortalPageBlockRequest"
+            "$ref": "#/components/schemas/BlockRequest"
           },
           {
             "type": "object",
@@ -10453,75 +10510,55 @@
           }
         ]
       },
-      "PortalPageRequest": {
+      "PageRequest": {
         "type": "object",
         "additionalProperties": true,
         "required": [
           "slug",
-          "schema",
-          "path"
+          "path",
+          "order"
         ],
         "properties": {
           "slug": {
             "type": "string",
             "description": "The slug of the page",
-            "example": "contracts"
-          },
-          "schema": {
-            "type": "string",
-            "description": "The schema of the entity that page holds",
-            "example": "contract"
-          },
-          "description": {
-            "type": "string",
-            "description": "The description of the page",
-            "example": "Contracts"
+            "example": "dashboard"
           },
           "path": {
             "type": "string",
             "description": "The path of the page",
-            "example": "/contracts"
+            "example": "/dashboard"
           },
-          "conditions": {
+          "visibility": {
             "type": "object",
             "description": "The conditions that need to be met for the page to be shown"
           },
-          "navigation": {
+          "blocks": {
             "type": "object",
-            "description": "The navigation of the page",
-            "properties": {
-              "label": {
-                "type": "object",
-                "description": "The label of the navigation",
-                "properties": {
-                  "en": {
-                    "type": "string",
-                    "description": "The label of the navigation in English"
-                  },
-                  "de": {
-                    "type": "string",
-                    "description": "The label of the navigation in German"
-                  }
-                }
-              }
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Block"
             }
           },
-          "blocks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PortalPageBlock"
-            }
+          "order": {
+            "type": "number",
+            "description": "The order of the block",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the page",
+            "example": "Dashboard"
           }
         }
       },
-      "PortalPage": {
+      "Page": {
         "type": "object",
         "required": [
           "id"
         ],
         "allOf": [
           {
-            "$ref": "#/components/schemas/PortalPageRequest"
+            "$ref": "#/components/schemas/PageRequest"
           },
           {
             "type": "object",

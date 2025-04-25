@@ -561,6 +561,89 @@ declare namespace Components {
              */
             billing_amount_decimal?: string;
         } & (/* An entity that describes a billing event such as a future installment or a reimbursement back to the customer. */ /* An entity that describes an installment billing event. */ InstallmentEvent | /* An entity that describes a reimbursement billing event. */ ReimbursementEvent);
+        export interface Block {
+            [name: string]: any;
+            props?: BlockProps;
+            /**
+             * The id of the parent block
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            parent_id?: string;
+            type: /**
+             * The type of the block. eg; tabs, tab, group, attribute
+             * example:
+             * tab
+             */
+            BlockType;
+            /**
+             * The order of the block
+             * example:
+             * 1
+             */
+            order: number;
+            /**
+             * The id of the block
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            id: string; // uuid
+        }
+        /**
+         * The id of the block
+         * example:
+         * c495fef9-eeca-4019-a989-8390dcd9825b
+         */
+        export type BlockId = string; // uuid
+        export interface BlockProps {
+            [name: string]: any;
+            /**
+             * The conditions that need to be met for the block to be shown
+             */
+            visibility?: {
+                [key: string]: any;
+            };
+            /**
+             * The content of the block
+             */
+            content?: {
+                [key: string]: any;
+            };
+            /**
+             * The design of the block
+             */
+            design?: {
+                [key: string]: any;
+            };
+        }
+        export interface BlockRequest {
+            [name: string]: any;
+            props?: BlockProps;
+            /**
+             * The id of the parent block
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            parent_id?: string;
+            type: /**
+             * The type of the block. eg; tabs, tab, group, attribute
+             * example:
+             * tab
+             */
+            BlockType;
+            /**
+             * The order of the block
+             * example:
+             * 1
+             */
+            order: number;
+        }
+        /**
+         * The type of the block. eg; tabs, tab, group, attribute
+         * example:
+         * tab
+         */
+        export type BlockType = string;
         export interface CommonConfigAttributes {
             /**
              * Enable/Disable the portal access
@@ -768,6 +851,19 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * Configuration for contract selector in the portal
+             */
+            contract_selector_config?: {
+                /**
+                 * Whether to show inactive contracts in the selector
+                 */
+                show_inactive?: boolean;
+                /**
+                 * Path to the property to use as the contract title
+                 */
+                title_path?: string;
+            };
+            /**
              * Identifiers to identify a contact of a portal user during the registration.
              * example:
              * [
@@ -855,6 +951,9 @@ declare namespace Components {
              * Number of years to look back for showing inactive contracts in the portal
              */
             inactive_contract_cutoff_years?: number;
+            pages?: {
+                [name: string]: Page;
+            };
         }
         /**
          * The mapped contact of the portal user
@@ -2940,6 +3039,84 @@ declare namespace Components {
          * Origin of the portal
          */
         export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
+        export interface Page {
+            [name: string]: any;
+            /**
+             * The slug of the page
+             * example:
+             * dashboard
+             */
+            slug: string;
+            /**
+             * The path of the page
+             * example:
+             * /dashboard
+             */
+            path: string;
+            /**
+             * The conditions that need to be met for the page to be shown
+             */
+            visibility?: {
+                [key: string]: any;
+            };
+            blocks?: {
+                [name: string]: Block;
+            };
+            /**
+             * The order of the block
+             * example:
+             * 1
+             */
+            order: number;
+            /**
+             * The name of the page
+             * example:
+             * Dashboard
+             */
+            name?: string;
+            /**
+             * The id of the page
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            id: string; // uuid
+        }
+        export interface PageRequest {
+            [name: string]: any;
+            /**
+             * The slug of the page
+             * example:
+             * dashboard
+             */
+            slug: string;
+            /**
+             * The path of the page
+             * example:
+             * /dashboard
+             */
+            path: string;
+            /**
+             * The conditions that need to be met for the page to be shown
+             */
+            visibility?: {
+                [key: string]: any;
+            };
+            blocks?: {
+                [name: string]: Block;
+            };
+            /**
+             * The order of the block
+             * example:
+             * 1
+             */
+            order: number;
+            /**
+             * The name of the page
+             * example:
+             * Dashboard
+             */
+            name?: string;
+        }
         export interface PaymentWidget {
             id: string;
             type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
@@ -3160,6 +3337,19 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * Configuration for contract selector in the portal
+             */
+            contract_selector_config?: {
+                /**
+                 * Whether to show inactive contracts in the selector
+                 */
+                show_inactive?: boolean;
+                /**
+                 * Path to the property to use as the contract title
+                 */
+                title_path?: string;
+            };
+            /**
              * Identifiers to identify a contact of a portal user during the registration.
              * example:
              * [
@@ -3247,6 +3437,9 @@ declare namespace Components {
              * Number of years to look back for showing inactive contracts in the portal
              */
             inactive_contract_cutoff_years?: number;
+            pages?: {
+                [name: string]: Page;
+            };
             /**
              * ID of the organization
              * example:
@@ -3294,152 +3487,6 @@ declare namespace Components {
              */
             grants?: Grant[];
             identity_providers?: ProviderPublicConfig[];
-        }
-        export interface PortalPage {
-            [name: string]: any;
-            /**
-             * The slug of the page
-             * example:
-             * contracts
-             */
-            slug: string;
-            /**
-             * The schema of the entity that page holds
-             * example:
-             * contract
-             */
-            schema: string;
-            /**
-             * The description of the page
-             * example:
-             * Contracts
-             */
-            description?: string;
-            /**
-             * The path of the page
-             * example:
-             * /contracts
-             */
-            path: string;
-            /**
-             * The conditions that need to be met for the page to be shown
-             */
-            conditions?: {
-                [key: string]: any;
-            };
-            /**
-             * The navigation of the page
-             */
-            navigation?: {
-                /**
-                 * The label of the navigation
-                 */
-                label?: {
-                    /**
-                     * The label of the navigation in English
-                     */
-                    en?: string;
-                    /**
-                     * The label of the navigation in German
-                     */
-                    de?: string;
-                };
-            };
-            blocks?: PortalPageBlock[];
-            /**
-             * The id of the page
-             * example:
-             * c495fef9-eeca-4019-a989-8390dcd9825b
-             */
-            id: string; // uuid
-        }
-        export interface PortalPageBlock {
-            [name: string]: any;
-            /**
-             * The type of the block
-             * example:
-             * table
-             */
-            type: string;
-            /**
-             * The conditions that need to be met for the block to be shown
-             */
-            conditions?: {
-                [key: string]: any;
-            };
-            /**
-             * The id of the block
-             * example:
-             * c495fef9-eeca-4019-a989-8390dcd9825b
-             */
-            id: string; // uuid
-        }
-        export interface PortalPageBlockRequest {
-            [name: string]: any;
-            /**
-             * The type of the block
-             * example:
-             * table
-             */
-            type: string;
-            /**
-             * The conditions that need to be met for the block to be shown
-             */
-            conditions?: {
-                [key: string]: any;
-            };
-        }
-        export interface PortalPageRequest {
-            [name: string]: any;
-            /**
-             * The slug of the page
-             * example:
-             * contracts
-             */
-            slug: string;
-            /**
-             * The schema of the entity that page holds
-             * example:
-             * contract
-             */
-            schema: string;
-            /**
-             * The description of the page
-             * example:
-             * Contracts
-             */
-            description?: string;
-            /**
-             * The path of the page
-             * example:
-             * /contracts
-             */
-            path: string;
-            /**
-             * The conditions that need to be met for the page to be shown
-             */
-            conditions?: {
-                [key: string]: any;
-            };
-            /**
-             * The navigation of the page
-             */
-            navigation?: {
-                /**
-                 * The label of the navigation
-                 */
-                label?: {
-                    /**
-                     * The label of the navigation in English
-                     */
-                    en?: string;
-                    /**
-                     * The label of the navigation in German
-                     */
-                    de?: string;
-                };
-            };
-            blocks?: PortalPageBlock[];
         }
         /**
          * The portal user entity
@@ -4261,6 +4308,19 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * Configuration for contract selector in the portal
+             */
+            contract_selector_config?: {
+                /**
+                 * Whether to show inactive contracts in the selector
+                 */
+                show_inactive?: boolean;
+                /**
+                 * Path to the property to use as the contract title
+                 */
+                title_path?: string;
+            };
+            /**
              * Identifiers to identify a contact of a portal user during the registration.
              * example:
              * [
@@ -4348,6 +4408,9 @@ declare namespace Components {
              * Number of years to look back for showing inactive contracts in the portal
              */
             inactive_contract_cutoff_years?: number;
+            pages?: {
+                [name: string]: Page;
+            };
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -4722,9 +4785,9 @@ declare namespace Paths {
         }
     }
     namespace CreatePortalPage {
-        export type RequestBody = Components.Schemas.PortalPageRequest;
+        export type RequestBody = Components.Schemas.PageRequest;
         namespace Responses {
-            export type $200 = Components.Schemas.PortalPage;
+            export type $200 = Components.Schemas.Page;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -4732,9 +4795,9 @@ declare namespace Paths {
         }
     }
     namespace CreatePortalPageBlock {
-        export type RequestBody = Components.Schemas.PortalPageBlockRequest;
+        export type RequestBody = Components.Schemas.BlockRequest;
         namespace Responses {
-            export type $200 = Components.Schemas.PortalPageBlock;
+            export type $200 = Components.Schemas.Block;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -6235,6 +6298,19 @@ declare namespace Paths {
                  */
                 contract_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * Configuration for contract selector in the portal
+                 */
+                contract_selector_config?: {
+                    /**
+                     * Whether to show inactive contracts in the selector
+                     */
+                    show_inactive?: boolean;
+                    /**
+                     * Path to the property to use as the contract title
+                     */
+                    title_path?: string;
+                };
+                /**
                  * Identifiers to identify a contact of a portal user during the registration.
                  * example:
                  * [
@@ -6322,6 +6398,9 @@ declare namespace Paths {
                  * Number of years to look back for showing inactive contracts in the portal
                  */
                 inactive_contract_cutoff_years?: number;
+                pages?: {
+                    [name: string]: Components.Schemas.Page;
+                };
                 /**
                  * ID of the organization
                  * example:
@@ -6448,7 +6527,7 @@ declare namespace Paths {
     }
     namespace GetPortalPage {
         namespace Responses {
-            export type $200 = Components.Schemas.PortalPage;
+            export type $200 = Components.Schemas.Page;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -6457,7 +6536,7 @@ declare namespace Paths {
     }
     namespace GetPortalPageBlock {
         namespace Responses {
-            export type $200 = Components.Schemas.PortalPageBlock;
+            export type $200 = Components.Schemas.Block;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -6466,7 +6545,7 @@ declare namespace Paths {
     }
     namespace GetPortalPageBlocks {
         namespace Responses {
-            export type $200 = Components.Schemas.PortalPageBlock[];
+            export type $200 = Components.Schemas.Block[];
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -6499,7 +6578,7 @@ declare namespace Paths {
             Parameters.Filter;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.PortalPage[];
+            export type $200 = Components.Schemas.Page[];
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -7411,9 +7490,9 @@ declare namespace Paths {
         }
     }
     namespace UpdatePortalPage {
-        export type RequestBody = Components.Schemas.PortalPageRequest;
+        export type RequestBody = Components.Schemas.PageRequest;
         namespace Responses {
-            export type $200 = Components.Schemas.PortalPage;
+            export type $200 = Components.Schemas.Page;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -7421,9 +7500,9 @@ declare namespace Paths {
         }
     }
     namespace UpdatePortalPageBlock {
-        export type RequestBody = Components.Schemas.PortalPageBlockRequest;
+        export type RequestBody = Components.Schemas.BlockRequest;
         namespace Responses {
-            export type $200 = Components.Schemas.PortalPageBlock;
+            export type $200 = Components.Schemas.Block;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -9817,6 +9896,11 @@ export type Balance = Components.Schemas.Balance;
 export type BaseBillingEvent = Components.Schemas.BaseBillingEvent;
 export type BaseEntity = Components.Schemas.BaseEntity;
 export type BillingEvent = Components.Schemas.BillingEvent;
+export type Block = Components.Schemas.Block;
+export type BlockId = Components.Schemas.BlockId;
+export type BlockProps = Components.Schemas.BlockProps;
+export type BlockRequest = Components.Schemas.BlockRequest;
+export type BlockType = Components.Schemas.BlockType;
 export type CommonConfigAttributes = Components.Schemas.CommonConfigAttributes;
 export type Contact = Components.Schemas.Contact;
 export type ContactCountRequest = Components.Schemas.ContactCountRequest;
@@ -9875,12 +9959,10 @@ export type Opportunity = Components.Schemas.Opportunity;
 export type Order = Components.Schemas.Order;
 export type OrganizationSettings = Components.Schemas.OrganizationSettings;
 export type Origin = Components.Schemas.Origin;
+export type Page = Components.Schemas.Page;
+export type PageRequest = Components.Schemas.PageRequest;
 export type PaymentWidget = Components.Schemas.PaymentWidget;
 export type PortalConfig = Components.Schemas.PortalConfig;
-export type PortalPage = Components.Schemas.PortalPage;
-export type PortalPageBlock = Components.Schemas.PortalPageBlock;
-export type PortalPageBlockRequest = Components.Schemas.PortalPageBlockRequest;
-export type PortalPageRequest = Components.Schemas.PortalPageRequest;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type Product = Components.Schemas.Product;
