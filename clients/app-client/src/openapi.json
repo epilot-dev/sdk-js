@@ -443,6 +443,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid parameter"
           }
         }
       }
@@ -2242,6 +2245,13 @@
             "default": true,
             "description": "Flag to indicate if the app is public.",
             "readOnly": true
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigurationVersion"
+            },
+            "description": "List of available versions of the app"
           }
         }
       },

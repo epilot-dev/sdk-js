@@ -951,6 +951,10 @@ declare namespace Components {
              * Flag to indicate if the app is public.
              */
             public?: boolean;
+            /**
+             * List of available versions of the app
+             */
+            versions?: /* Configuration data about your app which is versionable */ ConfigurationVersion[];
         }
         export interface S3Reference {
             /**
@@ -1262,6 +1266,8 @@ declare namespace Paths {
                     page?: number;
                     pageSize?: number;
                 };
+            }
+            export interface $400 {
             }
         }
     }
