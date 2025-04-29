@@ -54,6 +54,32 @@
           }
         }
       }
+    },
+    "/v1/campaign/{campaign_id}/job": {
+      "get": {
+        "operationId": "getCampaignJobStatus",
+        "description": "Get the status of a campaign's automation job",
+        "summary": "Get the status of a campaign's automation job",
+        "tags": [
+          "Campaign"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JobStatusResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -237,6 +263,40 @@
           "inactive"
         ]
       },
+      "ExecutionSummaryItem": {
+        "type": "object",
+        "properties": {
+          "execution_id": {
+            "type": "string"
+          },
+          "execution_status": {
+            "type": "string"
+          }
+        }
+      },
+      "JobStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "The status of the automation job",
+            "enum": [
+              "queued",
+              "processing",
+              "finished",
+              "failed",
+              "cancelled",
+              "send_report"
+            ]
+          },
+          "execution_summary": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExecutionSummaryItem"
+            }
+          }
+        }
+      },
       "Campaign": {
         "allOf": [
           {
@@ -266,6 +326,9 @@
                 "format": "date"
               },
               "flow_id": {
+                "type": "string"
+              },
+              "job_id": {
                 "type": "string"
               },
               "target": {
@@ -350,6 +413,16 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Campaign"
+            }
+          }
+        }
+      },
+      "JobStatusResponse": {
+        "description": "Campaign job status response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/JobStatus"
             }
           }
         }

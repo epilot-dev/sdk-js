@@ -22,6 +22,7 @@ declare namespace Components {
     namespace Responses {
         export type CampaignResponse = Schemas.Campaign;
         export type ClientErrorResponse = Schemas.ClientError;
+        export type JobStatusResponse = Schemas.JobStatus;
         export type ServerErrorResponse = Schemas.ServerError;
     }
     namespace Schemas {
@@ -142,10 +143,22 @@ declare namespace Components {
             start_date?: string; // date
             end_date?: string; // date
             flow_id?: string;
+            job_id?: string;
             target?: BaseRelation;
         }
         export type CampaignStatus = "draft" | "active" | "inactive";
         export type ClientError = BaseError;
+        export interface ExecutionSummaryItem {
+            execution_id?: string;
+            execution_status?: string;
+        }
+        export interface JobStatus {
+            /**
+             * The status of the automation job
+             */
+            status?: "queued" | "processing" | "finished" | "failed" | "cancelled" | "send_report";
+            execution_summary?: ExecutionSummaryItem[];
+        }
         export type ServerError = BaseError;
         export interface Target {
             /**
@@ -197,6 +210,23 @@ declare namespace Paths {
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
+    namespace GetCampaignJobStatus {
+        namespace Parameters {
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+        }
+        namespace Responses {
+            export type $200 = Components.Responses.JobStatusResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -210,6 +240,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ChangeCampaignStatus.Responses.$200>
+  /**
+   * getCampaignJobStatus - Get the status of a campaign's automation job
+   * 
+   * Get the status of a campaign's automation job
+   */
+  'getCampaignJobStatus'(
+    parameters?: Parameters<Paths.GetCampaignJobStatus.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCampaignJobStatus.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -224,6 +264,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ChangeCampaignStatus.Responses.$200>
+  }
+  ['/v1/campaign/{campaign_id}/job']: {
+    /**
+     * getCampaignJobStatus - Get the status of a campaign's automation job
+     * 
+     * Get the status of a campaign's automation job
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetCampaignJobStatus.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCampaignJobStatus.Responses.$200>
   }
 }
 
@@ -242,5 +294,7 @@ export type BaseUUID = Components.Schemas.BaseUUID;
 export type Campaign = Components.Schemas.Campaign;
 export type CampaignStatus = Components.Schemas.CampaignStatus;
 export type ClientError = Components.Schemas.ClientError;
+export type ExecutionSummaryItem = Components.Schemas.ExecutionSummaryItem;
+export type JobStatus = Components.Schemas.JobStatus;
 export type ServerError = Components.Schemas.ServerError;
 export type Target = Components.Schemas.Target;

@@ -20,6 +20,17 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/campaign/{campaign_id}/job": {
+      "get": {
+        "operationId": "getCampaignJobStatus",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -42,6 +53,11 @@
         }
       },
       "CampaignResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "JobStatusResponse": {
         "content": {
           "application/json": {}
         }
