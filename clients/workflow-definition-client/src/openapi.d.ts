@@ -480,6 +480,10 @@ declare namespace Components {
             id?: string;
             journeyId?: string;
             name?: string;
+            /**
+             * If true, the task be auto completed when the journey is completed
+             */
+            complete_task_automatically?: boolean;
         }
         /**
          * describe the requirement for step enablement
@@ -799,16 +803,6 @@ declare namespace Paths {
         }
     }
     namespace ListFlowTemplates {
-        namespace Parameters {
-            export type TriggerSchema = string;
-            export type TriggerSourceId = string;
-            export type TriggerType = "automation" | "manual" | "journey_submission";
-        }
-        export interface QueryParameters {
-            trigger_type?: Parameters.TriggerType;
-            trigger_source_id?: Parameters.TriggerSourceId;
-            trigger_schema?: Parameters.TriggerSchema;
-        }
         namespace Responses {
             export type $200 = Components.Schemas.FlowTemplatesList;
             export type $500 = Components.Schemas.ErrorResp;
@@ -921,10 +915,10 @@ export interface OperationMethods {
   /**
    * listFlowTemplates - listFlowTemplates
    * 
-   * List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values.
+   * List all Flow Templates for a customer
    */
   'listFlowTemplates'(
-    parameters?: Parameters<Paths.ListFlowTemplates.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListFlowTemplates.Responses.$200>
@@ -1129,10 +1123,10 @@ export interface PathsDictionary {
     /**
      * listFlowTemplates - listFlowTemplates
      * 
-     * List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values.
+     * List all Flow Templates for a customer
      */
     'get'(
-      parameters?: Parameters<Paths.ListFlowTemplates.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListFlowTemplates.Responses.$200>

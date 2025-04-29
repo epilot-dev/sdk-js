@@ -1999,6 +1999,10 @@
           },
           "name": {
             "type": "string"
+          },
+          "complete_task_automatically": {
+            "type": "boolean",
+            "description": "If true, the task be auto completed when the journey is completed"
           }
         }
       },
@@ -2341,6 +2345,12 @@
           },
           "phase_progress": {
             "type": "number"
+          },
+          "phase_assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
