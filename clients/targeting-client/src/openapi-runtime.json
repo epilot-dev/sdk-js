@@ -1,0 +1,51 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://targeting.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/campaign/{campaign_id}/status": {
+      "post": {
+        "operationId": "changeCampaignStatus",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "CampaignIdPathParam": {
+        "name": "campaign_id",
+        "in": "path",
+        "required": true
+      }
+    },
+    "responses": {
+      "ClientErrorResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ServerErrorResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "CampaignResponse": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  }
+}

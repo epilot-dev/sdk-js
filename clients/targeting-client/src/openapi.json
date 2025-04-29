@@ -1,0 +1,359 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Targeting API",
+    "description": "API for Targeting",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Campaign",
+      "description": "Campaign Endpoints"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://targeting.sls.epilot.io"
+    },
+    {
+      "url": "https://targeting.sls.epilot.io"
+    },
+    {
+      "url": "https://targeting.sls.epilot.io",
+      "description": "Production Server"
+    }
+  ],
+  "paths": {
+    "/v1/campaign/{campaign_id}/status": {
+      "post": {
+        "operationId": "changeCampaignStatus",
+        "description": "Change the status of a campaign",
+        "summary": "Change the status of a campaign",
+        "tags": [
+          "Campaign"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CampaignResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BaseError": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 404
+          },
+          "message": {
+            "type": "string",
+            "example": "Entity not found"
+          }
+        },
+        "required": [
+          "status",
+          "message"
+        ]
+      },
+      "ServerError": {
+        "$ref": "#/components/schemas/BaseError"
+      },
+      "ClientError": {
+        "$ref": "#/components/schemas/BaseError"
+      },
+      "BaseUUID": {
+        "type": "string",
+        "format": "uuid",
+        "example": "b8c01433-5556-4e2b-aad4-6f5348d1df84"
+      },
+      "BaseNanoID": {
+        "type": "string",
+        "example": "xHcOoJCa07eysJ1GaQeSb"
+      },
+      "BaseTags": {
+        "type": "array",
+        "nullable": true,
+        "items": {
+          "type": "string"
+        }
+      },
+      "BaseRelation": {
+        "type": "object",
+        "properties": {
+          "$relation": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "_tags": {
+                  "$ref": "#/components/schemas/BaseTags"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BaseSystemId": {
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          }
+        },
+        "required": [
+          "_id"
+        ]
+      },
+      "BaseEntityOwner": {
+        "description": "The user / organization owning this entity.\n\nNote: Owner implicitly has access to the entity regardless of ACLs.\n",
+        "type": "object",
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": "123"
+          },
+          "user_id": {
+            "type": "string",
+            "example": "123"
+          }
+        },
+        "required": [
+          "org_id"
+        ]
+      },
+      "BaseEntityAcl": {
+        "type": "object",
+        "description": "Access control list (ACL) for an entity. Defines sharing access to external orgs or users.",
+        "additionalProperties": true,
+        "readOnly": true,
+        "properties": {
+          "view": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          },
+          "edit": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          },
+          "delete": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          }
+        }
+      },
+      "BaseSystemFields": {
+        "type": "object",
+        "properties": {
+          "_org": {
+            "type": "string",
+            "description": "Organization Id the entity belongs to",
+            "readOnly": true
+          },
+          "_owners": {
+            "type": "array",
+            "readOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/BaseEntityOwner"
+            }
+          },
+          "_schema": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "_title": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "_tags": {
+            "$ref": "#/components/schemas/BaseTags"
+          },
+          "_created_at": {
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "_acl": {
+            "$ref": "#/components/schemas/BaseEntityAcl"
+          }
+        }
+      },
+      "BaseSystemFieldsRequired": {
+        "type": "object",
+        "required": [
+          "_org",
+          "_owners",
+          "_schema",
+          "_title",
+          "_tags",
+          "_created_at",
+          "_updated_at",
+          "_acl"
+        ]
+      },
+      "CampaignStatus": {
+        "type": "string",
+        "default": "draft",
+        "enum": [
+          "draft",
+          "active",
+          "inactive"
+        ]
+      },
+      "Campaign": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseSystemFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/BaseUUID"
+              },
+              "name": {
+                "type": "string"
+              },
+              "goal": {
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/components/schemas/CampaignStatus"
+              },
+              "start_date": {
+                "type": "string",
+                "format": "date"
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date"
+              },
+              "flow_id": {
+                "type": "string"
+              },
+              "target": {
+                "$ref": "#/components/schemas/BaseRelation"
+              }
+            }
+          }
+        ]
+      },
+      "Target": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseSystemFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/BaseUUID"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "entity_schema": {
+                "type": "string"
+              },
+              "entity_filters": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        ]
+      }
+    },
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "CampaignIdPathParam": {
+        "name": "campaign_id",
+        "description": "The campaign ID",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/BaseUUID"
+        }
+      }
+    },
+    "responses": {
+      "ClientErrorResponse": {
+        "description": "Any error based on client data errors",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ClientError"
+            }
+          }
+        }
+      },
+      "ServerErrorResponse": {
+        "description": "Any error based on the server-side",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ServerError"
+            }
+          }
+        }
+      },
+      "CampaignResponse": {
+        "description": "Campaign entity response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Campaign"
+            }
+          }
+        }
+      }
+    }
+  }
+}
