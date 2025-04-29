@@ -21,9 +21,6 @@
       "url": "https://targeting.sls.epilot.io"
     },
     {
-      "url": "https://targeting.sls.epilot.io"
-    },
-    {
       "url": "https://targeting.sls.epilot.io",
       "description": "Production Server"
     }
@@ -32,10 +29,15 @@
     "/v1/campaign/{campaign_id}/status": {
       "post": {
         "operationId": "changeCampaignStatus",
-        "description": "Change the status of a campaign",
         "summary": "Change the status of a campaign",
+        "description": "Change the status of a campaign to a desired status.\n\nThe status can be one of the following: active, inactive.\n\nStatus transition is accompanied by side effects, e.g., automation execution.\n",
         "tags": [
           "Campaign"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
         ],
         "parameters": [
           {
@@ -71,6 +73,42 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/JobStatusResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/campaign:match": {
+      "post": {
+        "operationId": "matchCampaigns",
+        "summary": "Match campaigns",
+        "description": "Match campaigns based on target entities.\n\nThis endpoint returns the list of campaigns where the provided entities are part of the target.\n",
+        "tags": [
+          "Campaign"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchCampaignParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MatchCampaignsResponse"
           },
           "400": {
             "$ref": "#/components/responses/ClientErrorResponse"
@@ -365,6 +403,48 @@
             }
           }
         ]
+      },
+      "MatchCampaignParams": {
+        "type": "object",
+        "properties": {
+          "entity_refs": {
+            "type": "array",
+            "description": "List of entities (e.g. Contacts or Contracts) that should be part of the campaign target.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "entity_schema": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "entity_id",
+                "entity_schema"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "campaign_ids": {
+            "type": "array",
+            "description": "List of campaign IDs to check.",
+            "items": {
+              "$ref": "#/components/schemas/BaseUUID"
+            },
+            "example": [
+              "b8c01433-5556-4e2b-aad4-6f5348d1df84"
+            ],
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "entity_refs"
+        ],
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
@@ -423,6 +503,37 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/JobStatus"
+            }
+          }
+        }
+      },
+      "MatchCampaignsResponse": {
+        "description": "List of campaigns where the target entities match the given entities.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "hits": {
+                  "type": "number",
+                  "description": "Number of matching campaigns."
+                },
+                "results": {
+                  "type": "array",
+                  "description": "List of matching campaigns.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "campaign": {
+                        "$ref": "#/components/schemas/Campaign"
+                      }
+                    },
+                    "required": [
+                      "campaign"
+                    ]
+                  }
+                }
+              }
             }
           }
         }

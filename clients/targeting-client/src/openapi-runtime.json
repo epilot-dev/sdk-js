@@ -31,6 +31,18 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/campaign:match": {
+      "post": {
+        "operationId": "matchCampaigns",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -58,6 +70,11 @@
         }
       },
       "JobStatusResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "MatchCampaignsResponse": {
         "content": {
           "application/json": {}
         }
