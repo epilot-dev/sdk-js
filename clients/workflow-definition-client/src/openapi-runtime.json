@@ -35,23 +35,6 @@
     "/v2/flows/templates": {
       "get": {
         "operationId": "listFlowTemplates",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "trigger_type",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "trigger_source_id",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "trigger_schema",
-            "required": false
-          }
-        ],
         "responses": {}
       },
       "post": {

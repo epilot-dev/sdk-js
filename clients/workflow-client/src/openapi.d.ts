@@ -525,6 +525,7 @@ declare namespace Components {
             phase_id?: string;
             phase_name?: string;
             phase_progress?: number;
+            phase_assignees?: string[];
         }
         export interface RelativeSchedule {
             mode: "relative";
@@ -862,6 +863,10 @@ declare namespace Components {
             id?: string;
             journeyId?: string;
             name?: string;
+            /**
+             * If true, the task be auto completed when the journey is completed
+             */
+            complete_task_automatically?: boolean;
         }
         export interface StepPositionAt {
             index: number;
