@@ -6008,6 +6008,80 @@
           }
         }
       }
+    },
+    "/v2/portal/public/user/entry-point": {
+      "get": {
+        "operationId": "getUserEntryPoint",
+        "summary": "getUserEntryPoint",
+        "description": "Get the entry point for the user",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Email Address of the portal user",
+              "example": "user@example.com"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Domain of the portal",
+              "example": "customer-portal.epilot.io"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned the entry point for the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "entry_point",
+                    "user_exists"
+                  ],
+                  "properties": {
+                    "user_exists": {
+                      "type": "boolean",
+                      "description": "Whether the user exists in the portal",
+                      "example": true
+                    },
+                    "entry_point": {
+                      "type": "string",
+                      "description": "The entry point for the user",
+                      "enum": [
+                        "PASSWORD",
+                        "SSO"
+                      ]
+                    },
+                    "preferred_sso_providers": {
+                      "type": "array",
+                      "description": "The SSO providers for the user",
+                      "items": {
+                        "$ref": "#/components/schemas/ProviderSlug"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -6714,6 +6788,25 @@
               "enabled": {
                 "type": "boolean",
                 "description": "Advanced MFA feature flag"
+              }
+            }
+          },
+          "auth_settings": {
+            "type": "object",
+            "description": "Authentication settings for the portal",
+            "properties": {
+              "entry_point": {
+                "type": "string",
+                "enum": [
+                  "PASSWORD",
+                  "SSO"
+                ]
+              },
+              "preferred_sso_providers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProviderSlug"
+                }
               }
             }
           },

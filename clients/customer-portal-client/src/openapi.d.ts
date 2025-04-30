@@ -707,6 +707,18 @@ declare namespace Components {
                 enabled?: boolean;
             };
             /**
+             * Authentication settings for the portal
+             */
+            auth_settings?: {
+                entry_point?: "PASSWORD" | "SSO";
+                preferred_sso_providers?: /**
+                 * URL-friendly slug to use as organization-unique identifier for Provider
+                 * example:
+                 * office-365-login
+                 */
+                ProviderSlug /* [0-9a-z-]+ */[];
+            };
+            /**
              * AWS Cognito Pool details for the portal
              */
             cognito_details?: {
@@ -3193,6 +3205,18 @@ declare namespace Components {
                 enabled?: boolean;
             };
             /**
+             * Authentication settings for the portal
+             */
+            auth_settings?: {
+                entry_point?: "PASSWORD" | "SSO";
+                preferred_sso_providers?: /**
+                 * URL-friendly slug to use as organization-unique identifier for Provider
+                 * example:
+                 * office-365-login
+                 */
+                ProviderSlug /* [0-9a-z-]+ */[];
+            };
+            /**
              * AWS Cognito Pool details for the portal
              */
             cognito_details?: {
@@ -4162,6 +4186,18 @@ declare namespace Components {
                  * Advanced MFA feature flag
                  */
                 enabled?: boolean;
+            };
+            /**
+             * Authentication settings for the portal
+             */
+            auth_settings?: {
+                entry_point?: "PASSWORD" | "SSO";
+                preferred_sso_providers?: /**
+                 * URL-friendly slug to use as organization-unique identifier for Provider
+                 * example:
+                 * office-365-login
+                 */
+                ProviderSlug /* [0-9a-z-]+ */[];
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -6154,6 +6190,18 @@ declare namespace Paths {
                     enabled?: boolean;
                 };
                 /**
+                 * Authentication settings for the portal
+                 */
+                auth_settings?: {
+                    entry_point?: "PASSWORD" | "SSO";
+                    preferred_sso_providers?: /**
+                     * URL-friendly slug to use as organization-unique identifier for Provider
+                     * example:
+                     * office-365-login
+                     */
+                    Components.Schemas.ProviderSlug /* [0-9a-z-]+ */[];
+                };
+                /**
                  * AWS Cognito Pool details for the portal
                  */
                 cognito_details?: {
@@ -7016,6 +7064,60 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetUserEntryPoint {
+        namespace Parameters {
+            /**
+             * Domain of the portal
+             * example:
+             * customer-portal.epilot.io
+             */
+            export type Domain = string;
+            /**
+             * Email Address of the portal user
+             * example:
+             * user@example.com
+             */
+            export type Email = string;
+        }
+        export interface QueryParameters {
+            email: /**
+             * Email Address of the portal user
+             * example:
+             * user@example.com
+             */
+            Parameters.Email;
+            domain: /**
+             * Domain of the portal
+             * example:
+             * customer-portal.epilot.io
+             */
+            Parameters.Domain;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether the user exists in the portal
+                 * example:
+                 * true
+                 */
+                user_exists: boolean;
+                /**
+                 * The entry point for the user
+                 */
+                entry_point: "PASSWORD" | "SSO";
+                /**
+                 * The SSO providers for the user
+                 */
+                preferred_sso_providers?: /**
+                 * URL-friendly slug to use as organization-unique identifier for Provider
+                 * example:
+                 * office-365-login
+                 */
+                Components.Schemas.ProviderSlug /* [0-9a-z-]+ */[];
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -8787,6 +8889,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortalPageBlock.Responses.$204>
+  /**
+   * getUserEntryPoint - getUserEntryPoint
+   * 
+   * Get the entry point for the user
+   */
+  'getUserEntryPoint'(
+    parameters?: Parameters<Paths.GetUserEntryPoint.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetUserEntryPoint.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -9876,6 +9988,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortalPageBlock.Responses.$204>
+  }
+  ['/v2/portal/public/user/entry-point']: {
+    /**
+     * getUserEntryPoint - getUserEntryPoint
+     * 
+     * Get the entry point for the user
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetUserEntryPoint.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetUserEntryPoint.Responses.$200>
   }
 }
 
