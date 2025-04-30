@@ -65,6 +65,11 @@
         "tags": [
           "Campaign"
         ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/CampaignIdPathParam"
@@ -73,6 +78,37 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/JobStatusResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/campaign/{campaign_id}/portals": {
+      "get": {
+        "operationId": "getCampaignPortals",
+        "summary": "Get portals usage info for a campaign",
+        "description": "Get the list of portals and its widgets where the campaign is used.\n",
+        "tags": [
+          "Campaign"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CampaignPortalsResponse"
           },
           "400": {
             "$ref": "#/components/responses/ClientErrorResponse"
@@ -533,6 +569,70 @@
                     ]
                   }
                 }
+              }
+            }
+          }
+        }
+      },
+      "CampaignPortalsResponse": {
+        "description": "List of portals and its widgets where the campaign is used",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "portal": {
+                    "type": "object",
+                    "properties": {
+                      "origin": {
+                        "type": "string",
+                        "description": "The origin of the portal"
+                      },
+                      "domain": {
+                        "type": "string",
+                        "description": "The domain of the portal"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the portal"
+                      }
+                    }
+                  },
+                  "widgets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of the widget"
+                        },
+                        "headline": {
+                          "type": "object",
+                          "properties": {
+                            "en": {
+                              "type": "string",
+                              "description": "The headline in English"
+                            },
+                            "de": {
+                              "type": "string",
+                              "description": "The headline in German"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "portal",
+                  "widgets"
+                ]
               }
             }
           }

@@ -20,6 +20,38 @@ declare namespace Components {
         CampaignIdPathParam?: Parameters.CampaignIdPathParam;
     }
     namespace Responses {
+        export type CampaignPortalsResponse = {
+            portal: {
+                /**
+                 * The origin of the portal
+                 */
+                origin?: string;
+                /**
+                 * The domain of the portal
+                 */
+                domain?: string;
+                /**
+                 * The name of the portal
+                 */
+                name?: string;
+            };
+            widgets: {
+                /**
+                 * The ID of the widget
+                 */
+                id: string;
+                headline?: {
+                    /**
+                     * The headline in English
+                     */
+                    en?: string;
+                    /**
+                     * The headline in German
+                     */
+                    de?: string;
+                };
+            }[];
+        }[];
         export type CampaignResponse = Schemas.Campaign;
         export type ClientErrorResponse = Schemas.ClientError;
         export type JobStatusResponse = Schemas.JobStatus;
@@ -761,6 +793,23 @@ declare namespace Paths {
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
+    namespace GetCampaignPortals {
+        namespace Parameters {
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+        }
+        namespace Responses {
+            export type $200 = Components.Responses.CampaignPortalsResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
     namespace MatchCampaigns {
         export type RequestBody = Components.Schemas.MatchCampaignParams;
         namespace Responses {
@@ -797,6 +846,17 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCampaignJobStatus.Responses.$200>
+  /**
+   * getCampaignPortals - Get portals usage info for a campaign
+   * 
+   * Get the list of portals and its widgets where the campaign is used.
+   * 
+   */
+  'getCampaignPortals'(
+    parameters?: Parameters<Paths.GetCampaignPortals.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCampaignPortals.Responses.$200>
   /**
    * matchCampaigns - Match campaigns
    * 
@@ -841,6 +901,19 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCampaignJobStatus.Responses.$200>
+  }
+  ['/v1/campaign/{campaign_id}/portals']: {
+    /**
+     * getCampaignPortals - Get portals usage info for a campaign
+     * 
+     * Get the list of portals and its widgets where the campaign is used.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetCampaignPortals.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCampaignPortals.Responses.$200>
   }
   ['/v1/campaign:match']: {
     /**
