@@ -1419,6 +1419,24 @@
         "operationId": "deletePortalPageBlock",
         "responses": {}
       }
+    },
+    "/v2/portal/public/user/entry-point": {
+      "get": {
+        "operationId": "getUserEntryPoint",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
