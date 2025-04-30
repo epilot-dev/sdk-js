@@ -1538,6 +1538,15 @@
               "$ref": "#/components/schemas/Origin"
             },
             "description": "Origin of the portal"
+          },
+          {
+            "in": "query",
+            "name": "contract_id",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "description": "Contract context for widgets"
           }
         ],
         "responses": {
@@ -7220,7 +7229,8 @@
               "DOCUMENT_WIDGET",
               "PAYMENT_WIDGET",
               "METER_READING_WIDGET",
-              "METER_CHART_WIDGET"
+              "METER_CHART_WIDGET",
+              "CAMPAIGN_WIDGET"
             ]
           },
           "listIndex": {
@@ -7434,6 +7444,22 @@
           }
         ]
       },
+      "CampaignWidget": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TeaserWidget"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "campaign_id": {
+                "type": "string",
+                "description": "ID of the campaign"
+              }
+            }
+          }
+        ]
+      },
       "PortalWidget": {
         "anyOf": [
           {
@@ -7459,6 +7485,9 @@
           },
           {
             "$ref": "#/components/schemas/MeterChartWidget"
+          },
+          {
+            "$ref": "#/components/schemas/CampaignWidget"
           }
         ]
       },

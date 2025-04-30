@@ -394,6 +394,11 @@
             "in": "query",
             "name": "origin",
             "required": false
+          },
+          {
+            "in": "query",
+            "name": "contract_id",
+            "required": false
           }
         ],
         "responses": {}

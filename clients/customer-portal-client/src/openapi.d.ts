@@ -57,7 +57,7 @@ declare namespace Components {
         }
         export interface ActionWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -644,6 +644,34 @@ declare namespace Components {
          * tab
          */
         export type BlockType = string;
+        export interface CampaignWidget {
+            id: string;
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
+            /**
+             * Index of the widget in the list, used for ordering (left or right)
+             */
+            listIndex: number;
+            headline?: {
+                en?: string;
+                de?: string;
+            };
+            subHeadline?: {
+                en?: string;
+                de?: string;
+            };
+            imageUrl?: string;
+            button?: {
+                label?: {
+                    en?: string;
+                    de?: string;
+                };
+                url?: string;
+            };
+            /**
+             * ID of the campaign
+             */
+            campaign_id?: string;
+        }
         export interface CommonConfigAttributes {
             /**
              * Enable/Disable the portal access
@@ -1054,7 +1082,7 @@ declare namespace Components {
         }
         export interface ContentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1363,7 +1391,7 @@ declare namespace Components {
         export type Direction = "feed-in" | "feed-out";
         export interface DocumentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1642,7 +1670,7 @@ declare namespace Components {
         export type EntitySlug = "contact" | "contract" | "file" | "order" | "opportunity" | "product" | "price" | "meter" | "meter_counter";
         export interface EntityWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2617,7 +2645,7 @@ declare namespace Components {
         }
         export interface MeterChartWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -2753,7 +2781,7 @@ declare namespace Components {
         }
         export interface MeterReadingWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -3131,7 +3159,7 @@ declare namespace Components {
         }
         export interface PaymentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -3558,7 +3586,7 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "portal_user";
         }
-        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget;
+        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget | CampaignWidget;
         /**
          * The product entity
          */
@@ -3999,7 +4027,7 @@ declare namespace Components {
         export type TariffType = "ht" | "nt";
         export interface TeaserWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -4496,7 +4524,7 @@ declare namespace Components {
         }
         export interface WidgetBase {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -6643,10 +6671,17 @@ declare namespace Paths {
     }
     namespace GetPortalWidgets {
         namespace Parameters {
+            export type ContractId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
         }
         export interface QueryParameters {
             origin?: Parameters.Origin;
+            contract_id?: Parameters.ContractId;
         }
         namespace Responses {
             export type $200 = Components.Schemas.UpsertPortalWidget;
@@ -10025,6 +10060,7 @@ export type BlockId = Components.Schemas.BlockId;
 export type BlockProps = Components.Schemas.BlockProps;
 export type BlockRequest = Components.Schemas.BlockRequest;
 export type BlockType = Components.Schemas.BlockType;
+export type CampaignWidget = Components.Schemas.CampaignWidget;
 export type CommonConfigAttributes = Components.Schemas.CommonConfigAttributes;
 export type Contact = Components.Schemas.Contact;
 export type ContactCountRequest = Components.Schemas.ContactCountRequest;
