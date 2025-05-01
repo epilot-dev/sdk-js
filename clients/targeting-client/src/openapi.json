@@ -9,6 +9,10 @@
     {
       "name": "Campaign",
       "description": "Campaign Endpoints"
+    },
+    {
+      "name": "Target",
+      "description": "Target Endpoints"
     }
   ],
   "security": [
@@ -145,6 +149,42 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/MatchCampaignsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/target:match": {
+      "post": {
+        "operationId": "matchTargets",
+        "summary": "Match targets",
+        "description": "Find targets from the provided list that include the provide entities.\n",
+        "tags": [
+          "Target"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchTargetParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MatchTargetsResponse"
           },
           "400": {
             "$ref": "#/components/responses/ClientErrorResponse"
@@ -478,7 +518,51 @@
           }
         },
         "required": [
-          "entity_refs"
+          "entity_refs",
+          "campaign_ids"
+        ],
+        "additionalProperties": false
+      },
+      "MatchTargetParams": {
+        "type": "object",
+        "properties": {
+          "entity_refs": {
+            "type": "array",
+            "description": "List of entities (e.g. Contacts or Contracts) that should be part of the targets.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "entity_schema": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "entity_id",
+                "entity_schema"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "target_ids": {
+            "type": "array",
+            "description": "List of target IDs to check.",
+            "items": {
+              "$ref": "#/components/schemas/BaseUUID"
+            },
+            "example": [
+              "b8c01433-5556-4e2b-aad4-6f5348d1df84"
+            ],
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "entity_refs",
+          "target_ids"
         ],
         "additionalProperties": false
       }
@@ -528,7 +612,12 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Campaign"
+              "type": "object",
+              "properties": {
+                "campaign": {
+                  "$ref": "#/components/schemas/Campaign"
+                }
+              }
             }
           }
         }
@@ -566,6 +655,37 @@
                     },
                     "required": [
                       "campaign"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "MatchTargetsResponse": {
+        "description": "List of targets where the given entities are found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "hits": {
+                  "type": "number",
+                  "description": "Number of matching targets."
+                },
+                "results": {
+                  "type": "array",
+                  "description": "List of matching targets.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "target": {
+                        "$ref": "#/components/schemas/Target"
+                      }
+                    },
+                    "required": [
+                      "target"
                     ]
                   }
                 }

@@ -54,6 +54,18 @@
         },
         "responses": {}
       }
+    },
+    "/v1/target:match": {
+      "post": {
+        "operationId": "matchTargets",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -86,6 +98,11 @@
         }
       },
       "MatchCampaignsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "MatchTargetsResponse": {
         "content": {
           "application/json": {}
         }

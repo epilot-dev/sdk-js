@@ -26,4 +26,42 @@ const result = await targetingClient.changeCampaignStatus({ campaign_id:  });
 
 ## Documentation
 
-tbw
+### Matching Campaigns and Targets
+
+To find out if the given entity or entities are part of a campaign or campaigns, run, e.g.:
+
+```typescript
+import { getClient } from '@epilot/targeting-client';
+const targetingClient = getClient();
+
+const result = await targetingClient.matchCampaigns(null, {
+    "campaign_ids": [
+        "80d910d9-1c7f-49f2-9a31-75d5a0f4c744"
+    ],
+    "entity_refs": [
+        {
+            "entity_schema": "contact",
+            "entity_id": "5817e702-b5d5-4c65-8856-7af0b0aa4067"
+        }
+    ]
+});
+```
+
+Similarly, if you want to know if the given entity or entities are part of specif targets:
+
+```typescript
+import { getClient } from '@epilot/targeting-client';
+const targetingClient = getClient();
+
+const result = await targetingClient.matchTargets(null, {
+    "target_ids": [
+        "80d910d9-1c7f-49f2-9a31-75d5a0f4c744"
+    ],
+    "entity_refs": [
+        {
+            "entity_schema": "contact",
+            "entity_id": "5817e702-b5d5-4c65-8856-7af0b0aa4067"
+        }
+    ]
+});
+```

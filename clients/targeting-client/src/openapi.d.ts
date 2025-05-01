@@ -52,7 +52,9 @@ declare namespace Components {
                 };
             }[];
         }[];
-        export type CampaignResponse = Schemas.Campaign;
+        export interface CampaignResponse {
+            campaign?: Schemas.Campaign;
+        }
         export type ClientErrorResponse = Schemas.ClientError;
         export type JobStatusResponse = Schemas.JobStatus;
         export interface MatchCampaignsResponse {
@@ -65,6 +67,18 @@ declare namespace Components {
              */
             results?: {
                 campaign: Schemas.Campaign;
+            }[];
+        }
+        export interface MatchTargetsResponse {
+            /**
+             * Number of matching targets.
+             */
+            hits?: number;
+            /**
+             * List of matching targets.
+             */
+            results?: {
+                target: Schemas.Target;
             }[];
         }
         export type ServerErrorResponse = Schemas.ServerError;
@@ -222,7 +236,529 @@ declare namespace Components {
              *   "b8c01433-5556-4e2b-aad4-6f5348d1df84"
              * ]
              */
-            campaign_ids?: [
+            campaign_ids: [
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?
+            ];
+        }
+        export interface MatchTargetParams {
+            /**
+             * List of entities (e.g. Contacts or Contracts) that should be part of the targets.
+             */
+            entity_refs: {
+                entity_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                entity_schema: string;
+            }[];
+            /**
+             * List of target IDs to check.
+             * example:
+             * [
+             *   "b8c01433-5556-4e2b-aad4-6f5348d1df84"
+             * ]
+             */
+            target_ids: [
                 /**
                  * example:
                  * b8c01433-5556-4e2b-aad4-6f5348d1df84
@@ -818,6 +1354,14 @@ declare namespace Paths {
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
+    namespace MatchTargets {
+        export type RequestBody = Components.Schemas.MatchTargetParams;
+        namespace Responses {
+            export type $200 = Components.Responses.MatchTargetsResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -870,6 +1414,17 @@ export interface OperationMethods {
     data?: Paths.MatchCampaigns.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MatchCampaigns.Responses.$200>
+  /**
+   * matchTargets - Match targets
+   * 
+   * Find targets from the provided list that include the provide entities.
+   * 
+   */
+  'matchTargets'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.MatchTargets.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MatchTargets.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -930,6 +1485,19 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MatchCampaigns.Responses.$200>
   }
+  ['/v1/target:match']: {
+    /**
+     * matchTargets - Match targets
+     * 
+     * Find targets from the provided list that include the provide entities.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.MatchTargets.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MatchTargets.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -950,5 +1518,6 @@ export type ClientError = Components.Schemas.ClientError;
 export type ExecutionSummaryItem = Components.Schemas.ExecutionSummaryItem;
 export type JobStatus = Components.Schemas.JobStatus;
 export type MatchCampaignParams = Components.Schemas.MatchCampaignParams;
+export type MatchTargetParams = Components.Schemas.MatchTargetParams;
 export type ServerError = Components.Schemas.ServerError;
 export type Target = Components.Schemas.Target;
