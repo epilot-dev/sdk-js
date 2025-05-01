@@ -573,28 +573,32 @@
             "in": "query",
             "name": "versions_from",
             "schema": {
-              "type": "number"
+              "type": "number",
+              "default": 0
             }
           },
           {
             "in": "query",
             "name": "versions_size",
             "schema": {
-              "type": "number"
+              "type": "number",
+              "default": 20
             }
           },
           {
             "in": "query",
             "name": "drafts_from",
             "schema": {
-              "type": "number"
+              "type": "number",
+              "default": 0
             }
           },
           {
             "in": "query",
             "name": "drafts_size",
             "schema": {
-              "type": "number"
+              "type": "number",
+              "default": 0
             }
           },
           {
@@ -635,8 +639,20 @@
                       "items": {
                         "$ref": "#/components/schemas/EntitySchemaItem"
                       }
+                    },
+                    "versions_more": {
+                      "description": "Pagination: Whether more versions are available",
+                      "type": "boolean"
+                    },
+                    "drafts_more": {
+                      "description": "Pagination: Whether more drafts are available",
+                      "type": "boolean"
                     }
-                  }
+                  },
+                  "required": [
+                    "versions",
+                    "versions_more"
+                  ]
                 }
               }
             }
@@ -1647,7 +1663,7 @@
           {
             "in": "query",
             "name": "after",
-            "description": "Get activities after this timestamp",
+            "description": "Get activities strictly after this timestamp. Cannot be used with 'before', 'start_date', 'end_date', or 'preset_range'.",
             "schema": {
               "type": "string",
               "format": "date-time"
@@ -1656,10 +1672,42 @@
           {
             "in": "query",
             "name": "before",
-            "description": "get activities before this timestamp",
+            "description": "Get activities strictly before this timestamp. Cannot be used with 'after', 'start_date', 'end_date', or 'preset_range'.",
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start_date",
+            "description": "The inclusive start timestamp for a date range filter. Requires 'end_date' to also be provided. Cannot be used with 'before', 'after', or 'preset_range'.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end_date",
+            "description": "The inclusive end timestamp for a date range filter. Requires 'start_date' to also be provided. Cannot be used with 'before', 'after', or 'preset_range'.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "preset_range",
+            "description": "Get activities within a predefined date range (e.g., 'today', 'last_week'). Cannot be used with 'before', 'after', 'start_date', or 'end_date'.",
+            "schema": {
+              "type": "string",
+              "example": "last_week",
+              "enum": [
+                "today",
+                "this_week",
+                "last_week"
+              ]
             }
           },
           {
@@ -8092,10 +8140,6 @@
           },
           "org": {
             "type": "string"
-          },
-          "progress": {
-            "description": "Progress of the job on a scale of 0 to 1",
-            "type": "number"
           }
         },
         "example": {
@@ -8105,8 +8149,7 @@
           "created_by": "10598",
           "created_at": "2024-01-01T00:00:00.000Z",
           "updated_at": "2024-01-01T00:00:00.000Z",
-          "org": "66",
-          "progress": 0.5
+          "org": "66"
         }
       },
       "ESClusterAssignment": {
@@ -9061,5 +9104,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    }
+  ]
 }
