@@ -1,0 +1,72 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/kanban/board": {
+      "post": {
+        "operationId": "createKanbanBoard",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/kanban/boards": {
+      "get": {
+        "operationId": "getKanbanBoards",
+        "responses": {}
+      }
+    },
+    "/v1/kanban/board/{boardId}": {
+      "get": {
+        "operationId": "getKanbanBoard",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateKanbanBoard",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteKanbanBoard",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://kanban.sls.epilot.io"
+    }
+  ]
+}
