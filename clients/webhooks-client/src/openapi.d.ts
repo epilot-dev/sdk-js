@@ -261,6 +261,14 @@ declare namespace Components {
              * ID used to track the event
              */
             correlation_id?: string;
+            /**
+             * When triggered by an automation this is its execution id
+             */
+            execution_id?: string;
+            /**
+             * When triggered by an automation this is the id of the action
+             */
+            action_id?: string;
         }
         /**
          * To be sent only if authType is OAUTH_CLIENT_CREDENTIALS

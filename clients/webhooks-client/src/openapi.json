@@ -1305,6 +1305,14 @@
           "correlation_id": {
             "type": "string",
             "description": "ID used to track the event"
+          },
+          "execution_id": {
+            "type": "string",
+            "description": "When triggered by an automation this is its execution id"
+          },
+          "action_id": {
+            "type": "string",
+            "description": "When triggered by an automation this is the id of the action"
           }
         },
         "required": [
