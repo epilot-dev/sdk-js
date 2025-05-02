@@ -912,7 +912,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "readOnly": true
           },
           "name": {
             "type": "string"
@@ -953,6 +954,10 @@
               "inactive",
               "incomplete"
             ]
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "JSONata expression to transform the payload"
           }
         },
         "required": [

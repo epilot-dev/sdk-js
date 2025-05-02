@@ -338,6 +338,10 @@ declare namespace Components {
             payloadConfiguration?: /* Configuration for the webhook payload */ PayloadConfiguration;
             enableStaticIP?: boolean;
             status?: "active" | "inactive" | "incomplete";
+            /**
+             * JSONata expression to transform the payload
+             */
+            jsonataExpression?: string;
         }
         export interface WebhookEvent {
             event_id: string;
