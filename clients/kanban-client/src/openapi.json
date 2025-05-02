@@ -1,0 +1,398 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Kanban API",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Kanban",
+      "description": "Kanban endpoints"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/kanban/board": {
+      "post": {
+        "operationId": "createKanbanBoard",
+        "summary": "Create a Kanban board",
+        "description": "Create a Kanban board",
+        "tags": [
+          "Kanban"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Board"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully created board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Board"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/kanban/boards": {
+      "get": {
+        "operationId": "getKanbanBoards",
+        "summary": "Get all Kanban boards",
+        "description": "Get all Kanban boards",
+        "tags": [
+          "Kanban"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved boards",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BoardSummary"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/kanban/board/{boardId}": {
+      "get": {
+        "operationId": "getKanbanBoard",
+        "summary": "Get a Kanban board",
+        "description": "Get a Kanban board",
+        "tags": [
+          "Kanban"
+        ],
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Board"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Board not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateKanbanBoard",
+        "summary": "Update a Kanban board",
+        "description": "Update a Kanban board",
+        "tags": [
+          "Kanban"
+        ],
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Board"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Board"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Board not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteKanbanBoard",
+        "summary": "Delete a Kanban board",
+        "description": "Delete a Kanban board",
+        "tags": [
+          "Kanban"
+        ],
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted board"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Board not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotPublicAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot public access token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "BoardSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "example": "Board 1"
+          },
+          "description": {
+            "type": "string",
+            "example": "Board description"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "updated_by": {
+            "type": "string"
+          }
+        }
+      },
+      "Board": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BoardSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "type": "object",
+                "properties": {
+                  "dataset": {
+                    "type": "string",
+                    "example": "workflow_tasks_overview"
+                  },
+                  "swimlanes": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Swimlane"
+                    }
+                  },
+                  "board_filters": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/BoardFilter"
+                    }
+                  },
+                  "sorting": {
+                    "$ref": "#/components/schemas/Sorting"
+                  }
+                }
+              }
+            },
+            "required": [
+              "title",
+              "config"
+            ]
+          }
+        ]
+      },
+      "Swimlane": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BoardFilter"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "title": {
+                "type": "string",
+                "example": "Swimlane 1"
+              },
+              "position": {
+                "type": "number",
+                "example": 1
+              },
+              "title_chip_variant": {
+                "type": "string",
+                "example": "success"
+              }
+            }
+          }
+        ]
+      },
+      "Sorting": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "example": "createdAt"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "asc"
+          }
+        },
+        "required": [
+          "field"
+        ]
+      },
+      "BoardFilter": {
+        "type": "object",
+        "properties": {
+          "filter_field": {
+            "type": "string",
+            "example": "status"
+          },
+          "filter_values": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "SKIPPED"
+            }
+          }
+        },
+        "required": [
+          "filter_field",
+          "filter_values"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://kanban.sls.epilot.io"
+    },
+    {
+      "url": "https://kanban.sls.epilot.io"
+    }
+  ]
+}
