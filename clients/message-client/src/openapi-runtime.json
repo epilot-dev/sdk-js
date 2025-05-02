@@ -121,6 +121,19 @@
         "responses": {}
       }
     },
+    "/v1/message/messages/unread/{actor}": {
+      "get": {
+        "operationId": "getUnread",
+        "parameters": [
+          {
+            "name": "actor",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/message/messages/{id}/unread": {
       "post": {
         "operationId": "markUnreadMessageV2",

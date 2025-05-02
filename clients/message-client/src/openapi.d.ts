@@ -124,6 +124,24 @@ declare namespace Components {
              */
             scopes?: /* Who is marking an item as read or unread. */ ReadingScope[];
         }
+        /**
+         * List of entity fields to include or exclude in the response
+         *
+         * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+         *
+         * Globbing and globstart (**) is supported for nested fields.
+         *
+         * example:
+         * [
+         *   "_id",
+         *   "_title",
+         *   "first_name",
+         *   "account",
+         *   "!account.*._files",
+         *   "**._product"
+         * ]
+         */
+        export type FieldsParam = string[];
         export interface File {
             /**
              * File entity ID
@@ -496,6 +514,10 @@ declare namespace Components {
              * subject:"Request for solar panel price" AND _tags:INBOX
              */
             q: string;
+            /**
+             * List of entity fields to include in results
+             */
+            fields?: any;
             from?: number;
             size?: number;
             hydrate?: boolean;
@@ -1131,6 +1153,26 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.ThreadTimeline;
+            export interface $403 {
+            }
+        }
+    }
+    namespace GetUnread {
+        namespace Parameters {
+            export type Actor = "organization" | "user";
+        }
+        export interface PathParameters {
+            actor: Parameters.Actor;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Total of unread messages
+                 * example:
+                 * 14
+                 */
+                count: number;
+            }
             export interface $403 {
             }
         }
@@ -2144,6 +2186,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MarkUnreadMessage.Responses.$204>
   /**
+   * getUnread - getUnread
+   * 
+   * Get all unread messages by actor
+   */
+  'getUnread'(
+    parameters?: Parameters<Paths.GetUnread.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetUnread.Responses.$200>
+  /**
    * markUnreadMessageV2 - markUnreadMessageV2
    * 
    * Mark message as unread within a scope
@@ -2595,6 +2647,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MarkUnreadMessage.Responses.$204>
   }
+  ['/v1/message/messages/unread/{actor}']: {
+    /**
+     * getUnread - getUnread
+     * 
+     * Get all unread messages by actor
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetUnread.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetUnread.Responses.$200>
+  }
   ['/v2/message/messages/{id}/unread']: {
     /**
      * markUnreadMessageV2 - markUnreadMessageV2
@@ -3011,6 +3075,7 @@ export type AttachmentsRelation = Components.Schemas.AttachmentsRelation;
 export type BaseEntity = Components.Schemas.BaseEntity;
 export type BulkActionsPayload = Components.Schemas.BulkActionsPayload;
 export type BulkActionsPayloadWithScopes = Components.Schemas.BulkActionsPayloadWithScopes;
+export type FieldsParam = Components.Schemas.FieldsParam;
 export type File = Components.Schemas.File;
 export type Message = Components.Schemas.Message;
 export type MessageRequestParams = Components.Schemas.MessageRequestParams;

@@ -365,6 +365,56 @@
         }
       }
     },
+    "/v1/message/messages/unread/{actor}": {
+      "get": {
+        "operationId": "getUnread",
+        "summary": "getUnread",
+        "description": "Get all unread messages by actor",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "name": "actor",
+            "description": "Actor performing call, can be user or organization",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "organization",
+                "user"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "count"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "number",
+                      "description": "Total of unread messages",
+                      "example": 14
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v2/message/messages/{id}/unread": {
       "post": {
         "operationId": "markUnreadMessageV2",
@@ -2007,6 +2057,12 @@
             "type": "string",
             "example": "subject:\"Request for solar panel price\" AND _tags:INBOX"
           },
+          "fields": {
+            "description": "List of entity fields to include in results",
+            "schema": {
+              "$ref": "#/components/schemas/FieldsParam"
+            }
+          },
           "from": {
             "type": "integer",
             "minimum": 0,
@@ -2240,13 +2296,25 @@
             }
           }
         }
+      },
+      "FieldsParam": {
+        "type": "array",
+        "description": "List of entity fields to include or exclude in the response\n\nUse ! to exclude fields, e.g. `!_id` to exclude the `_id` field.\n\nGlobbing and globstart (**) is supported for nested fields.\n",
+        "items": {
+          "type": "string"
+        },
+        "example": [
+          "_id",
+          "_title",
+          "first_name",
+          "account",
+          "!account.*._files",
+          "**._product"
+        ]
       }
     }
   },
   "servers": [
-    {
-      "url": "https://message.sls.epilot.io"
-    },
     {
       "url": "https://message.sls.epilot.io"
     }
