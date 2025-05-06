@@ -123,6 +123,12 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json
              */
             selected_resources_url?: string;
+            /**
+             * All the resources that were marked as ready by the user
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/ready_imported_resources.json
+             */
+            ready_imported_resources_url?: string;
         }
         export interface CommonMarkdownFields {
             /**
@@ -315,6 +321,12 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json
              */
             selected_resources_url?: string;
+            /**
+             * All the resources that were marked as ready by the user
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/ready_imported_resources.json
+             */
+            ready_imported_resources_url?: string;
         }
         /**
          * ID of an import or export job (state machine)
@@ -399,6 +411,12 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json
              */
             selected_resources_url?: string;
+            /**
+             * All the resources that were marked as ready by the user
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/ready_imported_resources.json
+             */
+            ready_imported_resources_url?: string;
             /**
              * Markdown content part of a manifest file
              */
@@ -513,6 +531,12 @@ declare namespace Components {
              */
             selected_resources_url?: string;
             /**
+             * All the resources that were marked as ready by the user
+             * example:
+             * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/ready_imported_resources.json
+             */
+            ready_imported_resources_url?: string;
+            /**
              * When the manifest was first installed (applied)
              */
             created_at?: string; // date-time
@@ -542,6 +566,10 @@ declare namespace Components {
              * Markdown content of the manifest
              */
             markdown?: string;
+            /**
+             * Array of ids of resources selected to be ready by the user
+             */
+            ready_resources?: string[];
         }
         export interface ResourceNode {
             /**

@@ -1045,6 +1045,11 @@
             "type": "string",
             "description": "All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest",
             "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json"
+          },
+          "ready_imported_resources_url": {
+            "type": "string",
+            "description": "All the resources that were marked as ready by the user",
+            "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/ready_imported_resources.json"
           }
         }
       },
@@ -1277,6 +1282,13 @@
           "markdown": {
             "type": "string",
             "description": "Markdown content of the manifest"
+          },
+          "ready_resources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of ids of resources selected to be ready by the user"
           }
         },
         "required": [
