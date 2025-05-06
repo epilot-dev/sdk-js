@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "App API",
     "description": "API for managing app publishing and installed app.",
@@ -533,6 +533,48 @@
           },
           "409": {
             "description": "Version is in use by installations"
+          }
+        }
+      },
+      "patch": {
+        "summary": "patchVersion",
+        "description": "Patch an existing app version",
+        "operationId": "patchVersion",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to update"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PatchVersionRequest"
+        },
+        "responses": {
+          "204": {
+            "description": "Version patched successfully"
+          },
+          "400": {
+            "description": "Invalid version format"
+          },
+          "404": {
+            "description": "Version not found"
           }
         }
       }
@@ -1093,6 +1135,26 @@
           }
         }
       },
+      "PatchVersionRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "role_id": {
+                  "nullable": true,
+                  "type": "string",
+                  "description": "Name of the role"
+                },
+                "grants": {
+                  "$ref": "#/components/schemas/Grants"
+                }
+              }
+            }
+          }
+        }
+      },
       "UpsertComponentRequest": {
         "required": true,
         "content": {
@@ -1167,6 +1229,18 @@
       }
     },
     "schemas": {
+      "Role": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Name of the role"
+          },
+          "grants": {
+            "$ref": "#/components/schemas/Grants"
+          }
+        }
+      },
       "Options": {
         "type": "object",
         "description": "Options for the component configuration",
@@ -2065,6 +2139,9 @@
             ],
             "description": "Status of the review process"
           },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
           "version_audit": {
             "readOnly": true,
             "allOf": [
@@ -2087,6 +2164,26 @@
                 }
               }
             ]
+          }
+        }
+      },
+      "Grants": {
+        "type": "array",
+        "description": "Required grants for the app in order to call APIs for the installing tenant",
+        "items": {
+          "type": "object",
+          "required": [
+            "action"
+          ],
+          "properties": {
+            "action": {
+              "type": "string",
+              "description": "The action the app can perform"
+            },
+            "resource": {
+              "type": "string",
+              "description": "The resource the app can access"
+            }
           }
         }
       },
@@ -2143,6 +2240,10 @@
             "type": "string",
             "description": "Version of the app that is installed",
             "readOnly": true
+          },
+          "role": {
+            "type": "string",
+            "description": "The name of the role the app can use to access APIs"
           },
           "installation_audit": {
             "readOnly": true,
@@ -2239,6 +2340,9 @@
             "type": "string",
             "description": "Version of the app that is installed",
             "readOnly": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
           },
           "public": {
             "type": "boolean",

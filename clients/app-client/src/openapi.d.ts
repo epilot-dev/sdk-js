@@ -71,6 +71,13 @@ declare namespace Components {
              */
             support_email?: string;
         }
+        export interface PatchVersionRequest {
+            /**
+             * Name of the role
+             */
+            role_id?: string | null;
+            grants?: /* Required grants for the app in order to call APIs for the installing tenant */ Schemas.Grants;
+        }
         export type UpsertComponentRequest = Schemas.BaseComponent;
     }
     namespace Schemas {
@@ -368,6 +375,7 @@ declare namespace Components {
              * Status of the review process
              */
             review_status?: "approved" | "rejected" | "pending";
+            role?: Role;
             version_audit: {
                 /**
                  * Timestamp of the creation
@@ -536,6 +544,7 @@ declare namespace Components {
              * Status of the review process
              */
             review_status?: "approved" | "rejected" | "pending";
+            role?: Role;
             version_audit: {
                 /**
                  * Timestamp of the creation
@@ -655,6 +664,19 @@ declare namespace Components {
             };
         }
         /**
+         * Required grants for the app in order to call APIs for the installing tenant
+         */
+        export type Grants = {
+            /**
+             * The action the app can perform
+             */
+            action: string;
+            /**
+             * The resource the app can access
+             */
+            resource?: string;
+        }[];
+        /**
          * Information about the installed app. Has configuration data of the installed version
          */
         export interface Installation {
@@ -686,6 +708,10 @@ declare namespace Components {
              * Version of the app that is installed
              */
             installed_version: string;
+            /**
+             * The name of the role the app can use to access APIs
+             */
+            role?: string;
             /**
              * Audit information for the app
              */
@@ -947,6 +973,7 @@ declare namespace Components {
              * Version of the app that is installed
              */
             version: string;
+            role?: Role;
             /**
              * Flag to indicate if the app is public.
              */
@@ -955,6 +982,13 @@ declare namespace Components {
              * List of available versions of the app
              */
             versions?: /* Configuration data about your app which is versionable */ ConfigurationVersion[];
+        }
+        export interface Role {
+            /**
+             * Name of the role
+             */
+            id?: string;
+            grants?: /* Required grants for the app in order to call APIs for the installing tenant */ Grants;
         }
         export interface S3Reference {
             /**
@@ -1316,6 +1350,25 @@ declare namespace Paths {
             }
         }
     }
+    namespace PatchVersion {
+        namespace Parameters {
+            export type AppId = string;
+            export type Version = string;
+        }
+        export interface PathParameters {
+            appId: Parameters.AppId;
+            version: Parameters.Version;
+        }
+        export type RequestBody = Components.RequestBodies.PatchVersionRequest;
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace PromoteVersion {
         namespace Parameters {
             export type AppId = string;
@@ -1474,6 +1527,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetVersion.Responses.$200>
+  /**
+   * patchVersion - patchVersion
+   * 
+   * Patch an existing app version
+   */
+  'patchVersion'(
+    parameters?: Parameters<Paths.PatchVersion.PathParameters> | null,
+    data?: Paths.PatchVersion.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PatchVersion.Responses.$204>
   /**
    * deleteVersion - deleteVersion
    * 
@@ -1710,6 +1773,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteVersion.Responses.$204>
+    /**
+     * patchVersion - patchVersion
+     * 
+     * Patch an existing app version
+     */
+    'patch'(
+      parameters?: Parameters<Paths.PatchVersion.PathParameters> | null,
+      data?: Paths.PatchVersion.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PatchVersion.Responses.$204>
   }
   ['/v1/app-configurations/{appId}/versions/{version}/components']: {
     /**
@@ -1843,6 +1916,7 @@ export type CustomFlowActionComponent = Components.Schemas.CustomFlowActionCompo
 export type CustomFlowConfig = Components.Schemas.CustomFlowConfig;
 export type EnumArg = Components.Schemas.EnumArg;
 export type ExternalIntegrationCustomActionConfig = Components.Schemas.ExternalIntegrationCustomActionConfig;
+export type Grants = Components.Schemas.Grants;
 export type Installation = Components.Schemas.Installation;
 export type JourneyBlockComponent = Components.Schemas.JourneyBlockComponent;
 export type JourneyBlockComponentArgs = Components.Schemas.JourneyBlockComponentArgs;
@@ -1857,6 +1931,7 @@ export type PortalExtensionComponent = Components.Schemas.PortalExtensionCompone
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
 export type Pricing = Components.Schemas.Pricing;
 export type PublicConfiguration = Components.Schemas.PublicConfiguration;
+export type Role = Components.Schemas.Role;
 export type S3Reference = Components.Schemas.S3Reference;
 export type TextArg = Components.Schemas.TextArg;
 export type TranslatedString = Components.Schemas.TranslatedString;
