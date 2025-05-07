@@ -954,6 +954,7 @@ declare namespace Paths {
              * journey_HouseConnectionJourney
              */
             resourceName: string;
+            metadata?: any;
             /**
              * Temporary flag to indicate if multiple resources are being exported
              */

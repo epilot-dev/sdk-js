@@ -200,6 +200,34 @@
                     "type": "string",
                     "example": "journey_HouseConnectionJourney"
                   },
+                  "metadata": {
+                    "markdown": {
+                      "type": "object",
+                      "properties": {
+                        "manifest": {
+                          "type": "string"
+                        },
+                        "preinstall": {
+                          "type": "string"
+                        },
+                        "postinstall": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "docs_link": {
+                      "type": "string"
+                    },
+                    "source_blueprint_name": {
+                      "type": "string"
+                    },
+                    "source_blueprint_slug": {
+                      "type": "string"
+                    },
+                    "source_blueprint_version": {
+                      "type": "string"
+                    }
+                  },
                   "isExportingMultipleResources": {
                     "type": "boolean",
                     "description": "Temporary flag to indicate if multiple resources are being exported"
