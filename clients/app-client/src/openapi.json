@@ -236,6 +236,22 @@
             "description": "App configuration not found"
           }
         }
+      },
+      "delete": {
+        "summary": "Delete app configuration",
+        "description": "Delete an app configuration and all its versions and components.",
+        "operationId": "deleteConfiguration",
+        "tags": [
+          "App Configuration"
+        ],
+        "responses": {
+          "204": {
+            "description": "App configuration deleted successfully"
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
       }
     },
     "/v1/app-configurations/{appId}/bundle": {

@@ -1138,6 +1138,14 @@ declare namespace Paths {
             }
         }
     }
+    namespace DeleteConfiguration {
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace DeleteLogo {
         namespace Responses {
             export interface $204 {
@@ -1478,6 +1486,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PatchMetadata.Responses.$204>
   /**
+   * deleteConfiguration - Delete app configuration
+   * 
+   * Delete an app configuration and all its versions and components.
+   */
+  'deleteConfiguration'(
+    parameters?: Parameters<Paths.V1AppConfigurations$AppId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteConfiguration.Responses.$204>
+  /**
    * createBundleUploadUrl - createBundleUploadUrl
    * 
    * Generate a presigned URL for uploading app bundle to /<app-id>/bundle.zip path
@@ -1705,6 +1723,16 @@ export interface PathsDictionary {
       data?: Paths.PatchMetadata.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchMetadata.Responses.$204>
+    /**
+     * deleteConfiguration - Delete app configuration
+     * 
+     * Delete an app configuration and all its versions and components.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.V1AppConfigurations$AppId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteConfiguration.Responses.$204>
   }
   ['/v1/app-configurations/{appId}/bundle']: {
     /**

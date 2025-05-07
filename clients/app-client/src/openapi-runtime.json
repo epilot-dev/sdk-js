@@ -78,6 +78,10 @@
           "$ref": "#/components/requestBodies/PatchConfigMetadataRequest"
         },
         "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteConfiguration",
+        "responses": {}
       }
     },
     "/v1/app-configurations/{appId}/bundle": {
