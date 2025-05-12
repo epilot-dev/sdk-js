@@ -1160,18 +1160,34 @@ declare namespace Paths {
     namespace GetUnread {
         namespace Parameters {
             export type Actor = "organization" | "user";
+            export type EmailFilter = any[];
         }
         export interface PathParameters {
             actor: Parameters.Actor;
+        }
+        export interface QueryParameters {
+            email_filter?: Parameters.EmailFilter;
         }
         namespace Responses {
             export interface $200 {
                 /**
                  * Total of unread messages
                  * example:
-                 * 14
+                 * 0
                  */
-                count: number;
+                unread?: number;
+                /**
+                 * Total of drafts messages
+                 * example:
+                 * 12
+                 */
+                drafts?: number;
+                /**
+                 * Total of unassigned messages
+                 * example:
+                 * 1
+                 */
+                unassigned?: number;
             }
             export interface $403 {
             }
@@ -2191,7 +2207,7 @@ export interface OperationMethods {
    * Get all unread messages by actor
    */
   'getUnread'(
-    parameters?: Parameters<Paths.GetUnread.PathParameters> | null,
+    parameters?: Parameters<Paths.GetUnread.QueryParameters & Paths.GetUnread.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUnread.Responses.$200>
@@ -2654,7 +2670,7 @@ export interface PathsDictionary {
      * Get all unread messages by actor
      */
     'get'(
-      parameters?: Parameters<Paths.GetUnread.PathParameters> | null,
+      parameters?: Parameters<Paths.GetUnread.QueryParameters & Paths.GetUnread.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUnread.Responses.$200>

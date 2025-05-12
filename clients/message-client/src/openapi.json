@@ -386,6 +386,15 @@
                 "user"
               ]
             }
+          },
+          {
+            "in": "query",
+            "name": "email_filter",
+            "description": "emails to filter by",
+            "schema": {
+              "default": "test@epilot.dev",
+              "type": "array"
+            }
           }
         ],
         "responses": {
@@ -399,10 +408,20 @@
                     "count"
                   ],
                   "properties": {
-                    "count": {
+                    "unread": {
                       "type": "number",
                       "description": "Total of unread messages",
-                      "example": 14
+                      "example": 0
+                    },
+                    "drafts": {
+                      "type": "number",
+                      "description": "Total of drafts messages",
+                      "example": 12
+                    },
+                    "unassigned": {
+                      "type": "number",
+                      "description": "Total of unassigned messages",
+                      "example": 1
                     }
                   }
                 }
