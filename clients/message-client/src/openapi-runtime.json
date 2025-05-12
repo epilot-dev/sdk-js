@@ -129,6 +129,10 @@
             "name": "actor",
             "in": "path",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "email_filter"
           }
         ],
         "responses": {}
