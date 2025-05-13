@@ -126,7 +126,7 @@ declare namespace Components {
                 types?: (("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword" | "SelfAssignmentFromPortal") | string)[];
             };
         }
-        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction;
+        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | InformERPAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction;
         export type AnyActionConfig = /**
          * example:
          * {
@@ -297,6 +297,21 @@ declare namespace Components {
          * }
          */
         TriggerWebhookActionConfig | /**
+         * example:
+         * {
+         *   "id": "2520gja-2sgmsaga-0asg-822jgal",
+         *   "name": "Inform ERP",
+         *   "type": "inform-erp",
+         *   "config": {
+         *     "entity_sources": [
+         *       "contact",
+         *       "account"
+         *     ],
+         *     "target_webhook_id": "25jg9ag2ga"
+         *   }
+         * }
+         */
+        InformERPActionConfig | /**
          * example:
          * {
          *   "id": "08g988-ojt2jtaga-292h-8978gsaga",
@@ -945,15 +960,46 @@ declare namespace Components {
              */
             execution_summary: /* Execution item for bulk trigger automation. It maps each entity to its automation execution id & status */ ExecItem[];
         }
-        export interface BulkTriggerRequest {
+        export type BulkTriggerRequest = {
             flow_id: /**
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
             AutomationFlowId;
-            entities_refs?: EntityRef[];
-            entities_query?: string;
-        }
+            entities_refs: EntityRef[];
+        } | {
+            flow_id: /**
+             * example:
+             * 7791b04a-16d2-44a2-9af9-2d59c25c512f
+             */
+            AutomationFlowId;
+            entities_query: string;
+        } | {
+            flow_id: /**
+             * example:
+             * 7791b04a-16d2-44a2-9af9-2d59c25c512f
+             */
+            AutomationFlowId;
+            entities_filter: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            EntitySearchFilter;
+        };
         /**
          * Creates an order entity with prices from journey
          */
@@ -1418,7 +1464,7 @@ declare namespace Components {
                 schema?: string;
             };
         }
-        export type EntityOperation = "createEntity" | "updateEntity" | "deleteEntity";
+        export type EntityOperation = "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity";
         /**
          * - If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.
          * - The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`
@@ -1632,6 +1678,166 @@ declare namespace Components {
             EntityId;
             entity_schema: string;
         }
+        /**
+         * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+         * example:
+         * [
+         *   {
+         *     "term": {
+         *       "_schema": "contact"
+         *     }
+         *   },
+         *   {
+         *     "terms": {
+         *       "status": [
+         *         "active"
+         *       ]
+         *     }
+         *   }
+         * ]
+         */
+        export type EntitySearchFilter = {
+            /**
+             * Returns documents that contain an exact term in a provided field.
+             *
+             * To return a document, the query term must exactly match the queried field's value, including whitespace and capitalization.
+             *
+             * You likely DO NOT want to use this filter on text fields and want to target its .keyword instead.
+             *
+             * example:
+             * {
+             *   "_schema": "contact"
+             * }
+             */
+            term?: {
+                [name: string]: /* A filter field value. */ EntitySearchFilterValue;
+            };
+            /**
+             * Returns documents that contain one of the exact terms in a provided field. See term filter for more info.
+             * example:
+             * {
+             *   "status": [
+             *     "active"
+             *   ]
+             * }
+             */
+            terms?: {
+                [name: string]: /* A filter field value. */ EntitySearchFilterValue[];
+            };
+            /**
+             * Returns documents based on their IDs.
+             * example:
+             * {
+             *   "values": [
+             *     "550e8400-e29b-41d4-a716-446655440000"
+             *   ]
+             * }
+             */
+            ids?: {
+                values?: string[];
+            };
+            /**
+             * Returns documents with fields that have terms within a certain range.
+             * example:
+             * {
+             *   "_created_at": {
+             *     "gte": "2021-01-01T00:00:00.000Z",
+             *     "lte": "2021-01-31T23:59:59.999Z"
+             *   }
+             * }
+             */
+            range?: {
+                [name: string]: {
+                    gt?: /* A filter field value. */ EntitySearchFilterValue;
+                    gte?: /* A filter field value. */ EntitySearchFilterValue;
+                    lt?: /* A filter field value. */ EntitySearchFilterValue;
+                    lte?: /* A filter field value. */ EntitySearchFilterValue;
+                    /**
+                     * The date format used to parse date values.
+                     */
+                    format?: string;
+                    /**
+                     * Indicates how the range query matches values for range fields.
+                     */
+                    relation?: "INTERSECTS" | "CONTAINS" | "WITHIN";
+                    /**
+                     * Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query to UTC.
+                     */
+                    time_zone?: string;
+                };
+            };
+            /**
+             * Returns documents that have a value in the specified field.
+             * example:
+             * {
+             *   "field": "_tags"
+             * }
+             */
+            exists?: {
+                field: string;
+            };
+            $and?: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            EntitySearchFilter;
+            $or?: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            EntitySearchFilter;
+            $not?: /**
+             * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "_schema": "contact"
+             *     }
+             *   },
+             *   {
+             *     "terms": {
+             *       "status": [
+             *         "active"
+             *       ]
+             *     }
+             *   }
+             * ]
+             */
+            EntitySearchFilter;
+        }[];
+        /**
+         * A filter field value.
+         */
+        export type EntitySearchFilterValue = /* A filter field value. */ (string | null) | number | boolean;
         export interface EqualsIgnoreCaseCondition {
             "equals-ignore-case"?: string;
         }
@@ -1718,6 +1924,139 @@ declare namespace Components {
         export interface GetExecutionsResp {
             total: number;
             results: AutomationExecution[];
+        }
+        export interface InformERPAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "trigger-webhook";
+            config?: InformERPConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+        }
+        /**
+         * example:
+         * {
+         *   "id": "2520gja-2sgmsaga-0asg-822jgal",
+         *   "name": "Inform ERP",
+         *   "type": "inform-erp",
+         *   "config": {
+         *     "entity_sources": [
+         *       "contact",
+         *       "account"
+         *     ],
+         *     "target_webhook_id": "25jg9ag2ga"
+         *   }
+         * }
+         */
+        export interface InformERPActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "trigger-webhook";
+            config?: InformERPConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+        }
+        export interface InformERPConfig {
+            entity_sources?: string[];
+            target_webhook_id?: string;
+            /**
+             * Whether to wait for the request to finish before continuing automation execution
+             */
+            sync?: boolean;
         }
         /**
          * Job ID for tracking the status of bulk trigger automation executions
@@ -3191,6 +3530,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * searchFlows - searchFlows
@@ -3505,6 +3845,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type ActionCondition = Components.Schemas.ActionCondition;
 export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type ActionScheduleSource = Components.Schemas.ActionScheduleSource;
@@ -3548,6 +3889,8 @@ export type EntityManualTrigger = Components.Schemas.EntityManualTrigger;
 export type EntityOperation = Components.Schemas.EntityOperation;
 export type EntityOperationTrigger = Components.Schemas.EntityOperationTrigger;
 export type EntityRef = Components.Schemas.EntityRef;
+export type EntitySearchFilter = Components.Schemas.EntitySearchFilter;
+export type EntitySearchFilterValue = Components.Schemas.EntitySearchFilterValue;
 export type EqualsIgnoreCaseCondition = Components.Schemas.EqualsIgnoreCaseCondition;
 export type ErrorCode = Components.Schemas.ErrorCode;
 export type ErrorDetail = Components.Schemas.ErrorDetail;
@@ -3560,6 +3903,9 @@ export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;
 export type FlowsTrigger = Components.Schemas.FlowsTrigger;
 export type FrontendSubmitTrigger = Components.Schemas.FrontendSubmitTrigger;
 export type GetExecutionsResp = Components.Schemas.GetExecutionsResp;
+export type InformERPAction = Components.Schemas.InformERPAction;
+export type InformERPActionConfig = Components.Schemas.InformERPActionConfig;
+export type InformERPConfig = Components.Schemas.InformERPConfig;
 export type JobId = Components.Schemas.JobId;
 export type JourneySubmitTrigger = Components.Schemas.JourneySubmitTrigger;
 export type MapEntityAction = Components.Schemas.MapEntityAction;
