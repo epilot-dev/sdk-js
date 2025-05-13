@@ -42,6 +42,7 @@
   ],
   "author": "epilot GmbH",
   "license": "UNLICENSED",
+  "private": false,
   "peerDependencies": {
     "axios": "^1.6.2"
   },

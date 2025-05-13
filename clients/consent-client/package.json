@@ -37,6 +37,7 @@
   ],
   "author": "epilot GmbH",
   "license": "MIT",
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git"
