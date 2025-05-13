@@ -1,6 +1,6 @@
 {
   "name": "@epilot/user-client",
-  "version": "3.11.0",
+  "version": "3.11.1",
   "description": "Client library for the epilot User API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,6 +9,7 @@
     "typescript": "tsc",
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/user.yaml",
+    "openapi:local": "node ../../scripts/update-openapi.js ../../../user-api/lambda/ApiHandlerFunction/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
