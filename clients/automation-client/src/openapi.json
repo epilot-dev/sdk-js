@@ -850,7 +850,7 @@
             "$ref": "#/components/schemas/TriggerWebhookAction"
           },
           {
-            "$ref": "#/components/schemas/InformERPAction"
+            "$ref": "#/components/schemas/ERPAction"
           },
           {
             "$ref": "#/components/schemas/CreateDocumentAction"
@@ -881,7 +881,7 @@
             "$ref": "#/components/schemas/TriggerWebhookActionConfig"
           },
           {
-            "$ref": "#/components/schemas/InformERPActionConfig"
+            "$ref": "#/components/schemas/ERPActionConfig"
           },
           {
             "$ref": "#/components/schemas/CreateDocumentActionConfig"
@@ -2138,7 +2138,7 @@
           }
         }
       },
-      "InformERPActionConfig": {
+      "ERPActionConfig": {
         "allOf": [
           {
             "$ref": "#/components/schemas/AutomationActionConfig"
@@ -2148,19 +2148,19 @@
             "properties": {
               "type": {
                 "enum": [
-                  "trigger-webhook"
+                  "erp"
                 ]
               },
               "config": {
-                "$ref": "#/components/schemas/InformERPConfig"
+                "$ref": "#/components/schemas/ERPConfig"
               }
             }
           }
         ],
         "example": {
           "id": "2520gja-2sgmsaga-0asg-822jgal",
-          "name": "Inform ERP",
-          "type": "inform-erp",
+          "name": "ERP",
+          "type": "erp",
           "config": {
             "entity_sources": [
               "contact",
@@ -2170,7 +2170,7 @@
           }
         }
       },
-      "InformERPAction": {
+      "ERPAction": {
         "allOf": [
           {
             "$ref": "#/components/schemas/AutomationAction"
@@ -2184,13 +2184,13 @@
                 ]
               },
               "config": {
-                "$ref": "#/components/schemas/InformERPConfig"
+                "$ref": "#/components/schemas/ERPConfig"
               }
             }
           }
         ]
       },
-      "InformERPConfig": {
+      "ERPConfig": {
         "type": "object",
         "properties": {
           "entity_sources": {

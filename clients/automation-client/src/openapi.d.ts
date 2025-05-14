@@ -126,7 +126,7 @@ declare namespace Components {
                 types?: (("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword" | "SelfAssignmentFromPortal") | string)[];
             };
         }
-        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | InformERPAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction;
+        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerWebhookAction | ERPAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction;
         export type AnyActionConfig = /**
          * example:
          * {
@@ -300,8 +300,8 @@ declare namespace Components {
          * example:
          * {
          *   "id": "2520gja-2sgmsaga-0asg-822jgal",
-         *   "name": "Inform ERP",
-         *   "type": "inform-erp",
+         *   "name": "ERP",
+         *   "type": "erp",
          *   "config": {
          *     "entity_sources": [
          *       "contact",
@@ -311,7 +311,7 @@ declare namespace Components {
          *   }
          * }
          */
-        InformERPActionConfig | /**
+        ERPActionConfig | /**
          * example:
          * {
          *   "id": "08g988-ojt2jtaga-292h-8978gsaga",
@@ -1429,6 +1429,139 @@ declare namespace Components {
         export type DiffAdded = FilterConditionOnEvent;
         export type DiffDeleted = FilterConditionOnEvent;
         export type DiffUpdated = FilterConditionOnEvent;
+        export interface ERPAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "trigger-webhook";
+            config?: ERPConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+        }
+        /**
+         * example:
+         * {
+         *   "id": "2520gja-2sgmsaga-0asg-822jgal",
+         *   "name": "ERP",
+         *   "type": "erp",
+         *   "config": {
+         *     "entity_sources": [
+         *       "contact",
+         *       "account"
+         *     ],
+         *     "target_webhook_id": "25jg9ag2ga"
+         *   }
+         * }
+         */
+        export interface ERPActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "erp";
+            config?: ERPConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+        }
+        export interface ERPConfig {
+            entity_sources?: string[];
+            target_webhook_id?: string;
+            /**
+             * Whether to wait for the request to finish before continuing automation execution
+             */
+            sync?: boolean;
+        }
         /**
          * example:
          * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
@@ -1924,139 +2057,6 @@ declare namespace Components {
         export interface GetExecutionsResp {
             total: number;
             results: AutomationExecution[];
-        }
-        export interface InformERPAction {
-            id?: /**
-             * example:
-             * 9ec3711b-db63-449c-b894-54d5bb622a8f
-             */
-            AutomationActionId;
-            flow_action_id?: /**
-             * example:
-             * 9ec3711b-db63-449c-b894-54d5bb622a8f
-             */
-            AutomationActionId;
-            name?: string;
-            type?: "trigger-webhook";
-            config?: InformERPConfig;
-            /**
-             * Whether to stop execution in a failed state if this action fails
-             */
-            allow_failure?: boolean;
-            /**
-             * Flag indicating whether the action was created automatically or manually
-             */
-            created_automatically?: boolean;
-            /**
-             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
-             */
-            is_bulk_action?: boolean;
-            reason?: {
-                /**
-                 * Why the action has to be skipped/failed
-                 * example:
-                 * There are no registered portal users for the given emails, hence skipping the action
-                 */
-                message?: string;
-                /**
-                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
-                 */
-                payload?: {
-                    [name: string]: any;
-                };
-            };
-            /**
-             * Condition Id to be checked before executing the action
-             */
-            condition_id?: string;
-            /**
-             * Schedule Id which indicates the schedule of the action
-             */
-            schedule_id?: string;
-            execution_status?: ExecutionStatus;
-            started_at?: string;
-            updated_at?: string;
-            /**
-             * example:
-             * {}
-             */
-            outputs?: {
-                [name: string]: any;
-            };
-            error_output?: ErrorOutput;
-            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
-        }
-        /**
-         * example:
-         * {
-         *   "id": "2520gja-2sgmsaga-0asg-822jgal",
-         *   "name": "Inform ERP",
-         *   "type": "inform-erp",
-         *   "config": {
-         *     "entity_sources": [
-         *       "contact",
-         *       "account"
-         *     ],
-         *     "target_webhook_id": "25jg9ag2ga"
-         *   }
-         * }
-         */
-        export interface InformERPActionConfig {
-            id?: /**
-             * example:
-             * 9ec3711b-db63-449c-b894-54d5bb622a8f
-             */
-            AutomationActionId;
-            flow_action_id?: /**
-             * example:
-             * 9ec3711b-db63-449c-b894-54d5bb622a8f
-             */
-            AutomationActionId;
-            name?: string;
-            type?: "trigger-webhook";
-            config?: InformERPConfig;
-            /**
-             * Whether to stop execution in a failed state if this action fails
-             */
-            allow_failure?: boolean;
-            /**
-             * Flag indicating whether the action was created automatically or manually
-             */
-            created_automatically?: boolean;
-            /**
-             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
-             */
-            is_bulk_action?: boolean;
-            reason?: {
-                /**
-                 * Why the action has to be skipped/failed
-                 * example:
-                 * There are no registered portal users for the given emails, hence skipping the action
-                 */
-                message?: string;
-                /**
-                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
-                 */
-                payload?: {
-                    [name: string]: any;
-                };
-            };
-            /**
-             * Condition Id to be checked before executing the action
-             */
-            condition_id?: string;
-            /**
-             * Schedule Id which indicates the schedule of the action
-             */
-            schedule_id?: string;
-        }
-        export interface InformERPConfig {
-            entity_sources?: string[];
-            target_webhook_id?: string;
-            /**
-             * Whether to wait for the request to finish before continuing automation execution
-             */
-            sync?: boolean;
         }
         /**
          * Job ID for tracking the status of bulk trigger automation executions
@@ -3883,6 +3883,9 @@ export type CustomAction = Components.Schemas.CustomAction;
 export type DiffAdded = Components.Schemas.DiffAdded;
 export type DiffDeleted = Components.Schemas.DiffDeleted;
 export type DiffUpdated = Components.Schemas.DiffUpdated;
+export type ERPAction = Components.Schemas.ERPAction;
+export type ERPActionConfig = Components.Schemas.ERPActionConfig;
+export type ERPConfig = Components.Schemas.ERPConfig;
 export type EntityId = Components.Schemas.EntityId;
 export type EntityItemSnapshot = Components.Schemas.EntityItemSnapshot;
 export type EntityManualTrigger = Components.Schemas.EntityManualTrigger;
@@ -3903,9 +3906,6 @@ export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;
 export type FlowsTrigger = Components.Schemas.FlowsTrigger;
 export type FrontendSubmitTrigger = Components.Schemas.FrontendSubmitTrigger;
 export type GetExecutionsResp = Components.Schemas.GetExecutionsResp;
-export type InformERPAction = Components.Schemas.InformERPAction;
-export type InformERPActionConfig = Components.Schemas.InformERPActionConfig;
-export type InformERPConfig = Components.Schemas.InformERPConfig;
 export type JobId = Components.Schemas.JobId;
 export type JourneySubmitTrigger = Components.Schemas.JourneySubmitTrigger;
 export type MapEntityAction = Components.Schemas.MapEntityAction;
