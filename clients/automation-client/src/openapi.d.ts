@@ -300,8 +300,8 @@ declare namespace Components {
          * example:
          * {
          *   "id": "2520gja-2sgmsaga-0asg-822jgal",
-         *   "name": "ERP",
-         *   "type": "erp",
+         *   "name": "Inform ERP",
+         *   "type": "inform-erp",
          *   "config": {
          *     "entity_sources": [
          *       "contact",
@@ -1441,7 +1441,7 @@ declare namespace Components {
              */
             AutomationActionId;
             name?: string;
-            type?: "trigger-webhook";
+            type?: "inform-erp";
             config?: ERPConfig;
             /**
              * Whether to stop execution in a failed state if this action fails
@@ -1494,8 +1494,8 @@ declare namespace Components {
          * example:
          * {
          *   "id": "2520gja-2sgmsaga-0asg-822jgal",
-         *   "name": "ERP",
-         *   "type": "erp",
+         *   "name": "Inform ERP",
+         *   "type": "inform-erp",
          *   "config": {
          *     "entity_sources": [
          *       "contact",
@@ -1517,7 +1517,7 @@ declare namespace Components {
              */
             AutomationActionId;
             name?: string;
-            type?: "erp";
+            type?: "inform-erp";
             config?: ERPConfig;
             /**
              * Whether to stop execution in a failed state if this action fails
@@ -3530,7 +3530,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * searchFlows - searchFlows
@@ -3844,7 +3843,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type ActionCondition = Components.Schemas.ActionCondition;
 export type ActionSchedule = Components.Schemas.ActionSchedule;

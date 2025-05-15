@@ -2148,7 +2148,7 @@
             "properties": {
               "type": {
                 "enum": [
-                  "erp"
+                  "inform-erp"
                 ]
               },
               "config": {
@@ -2159,8 +2159,8 @@
         ],
         "example": {
           "id": "2520gja-2sgmsaga-0asg-822jgal",
-          "name": "ERP",
-          "type": "erp",
+          "name": "Inform ERP",
+          "type": "inform-erp",
           "config": {
             "entity_sources": [
               "contact",
@@ -2180,7 +2180,7 @@
             "properties": {
               "type": {
                 "enum": [
-                  "trigger-webhook"
+                  "inform-erp"
                 ]
               },
               "config": {
