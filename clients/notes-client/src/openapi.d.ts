@@ -214,6 +214,7 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            read_by?: string[];
         }
         /**
          * The Note's parent Note

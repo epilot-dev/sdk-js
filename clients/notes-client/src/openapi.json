@@ -496,15 +496,15 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "read_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
-        "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place.",
-        "read_by": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
+        "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place."
       },
       "Entity": {
         "type": "object",
