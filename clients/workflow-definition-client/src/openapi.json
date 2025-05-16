@@ -323,9 +323,46 @@
       "get": {
         "operationId": "listFlowTemplates",
         "summary": "listFlowTemplates",
-        "description": "List all Flow Templates for a customer",
+        "description": "List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values.",
         "tags": [
           "Flows V2"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "trigger_type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "automation",
+                "manual",
+                "journey_submission"
+              ]
+            },
+            "required": false,
+            "description": "Type of trigger for whom to filter flow templates",
+            "example": "journey_submission"
+          },
+          {
+            "in": "query",
+            "name": "trigger_source_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Id of the trigger source to filter flow templates. Interpretation depends on **trigger_type**:\n- **automation**: use an `{automation_flow_id}` value\n- **journey_submission**: use a `{journey_id}` value\n- **manual**: this parameter is ignored; you can optionally filter by `{trigger_schema}`\n",
+            "example": "j208g0aj-08g9agajggak-g9aug9-892kgl1m"
+          },
+          {
+            "in": "query",
+            "name": "trigger_schema",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Schema of the trigger source to filter flow templates. This parameter only makes sense when **trigger_type** is `manual`\n",
+            "example": "opportunity"
+          }
         ],
         "responses": {
           "200": {
@@ -592,7 +629,7 @@
         }
       }
     },
-    "/v2/flows/templates/{flowId}:duplicate": {
+    "/v2/flows/templates/{flowId}/duplicate": {
       "post": {
         "operationId": "duplicateFlowTemplate",
         "summary": "duplicateFlowTemplate",
