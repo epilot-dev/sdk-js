@@ -117,10 +117,17 @@ declare namespace Components {
              * Whether the workflow is enabled or not
              */
             enabled?: boolean;
-            /**
-             * Whether the workflow is migrated from workflows to flows or not
+            version?: /**
+             * Version of the workflow schema.
+             *
+             * - `v1` – *Deprecated*. The initial version of workflows with limited structure and automation capabilities.
+             * - `v2` – Linear workflows. Supports sequential task execution with basic automation triggers.
+             * - `v3` – Advanced workflows. Adds support for branching logic (conditions), parallel paths, and enhanced automation features such as dynamic triggers and flow control.
+             *
+             * example:
+             * 2
              */
-            is_flow_migrated?: boolean;
+            Version;
             /**
              * ISO String Date & Time
              * example:
@@ -273,10 +280,17 @@ declare namespace Components {
              * Whether the workflow is enabled or not
              */
             enabled?: boolean;
-            /**
-             * Whether the workflow is migrated from workflows to flows or not
+            version?: /**
+             * Version of the workflow schema.
+             *
+             * - `v1` – *Deprecated*. The initial version of workflows with limited structure and automation capabilities.
+             * - `v2` – Linear workflows. Supports sequential task execution with basic automation triggers.
+             * - `v3` – Advanced workflows. Adds support for branching logic (conditions), parallel paths, and enhanced automation features such as dynamic triggers and flow control.
+             *
+             * example:
+             * 2
              */
-            is_flow_migrated?: boolean;
+            Version;
             /**
              * ISO String Date & Time
              * example:
@@ -554,6 +568,17 @@ declare namespace Components {
                 entityAttribute: string;
             };
         }
+        /**
+         * Version of the workflow schema.
+         *
+         * - `v1` – *Deprecated*. The initial version of workflows with limited structure and automation capabilities.
+         * - `v2` – Linear workflows. Supports sequential task execution with basic automation triggers.
+         * - `v3` – Advanced workflows. Adds support for branching logic (conditions), parallel paths, and enhanced automation features such as dynamic triggers and flow control.
+         *
+         * example:
+         * 2
+         */
+        export type Version = "v1" | "v2" | "v3";
         export interface WorkflowDefinition {
             id?: string;
             name: string;
@@ -694,6 +719,25 @@ declare namespace Paths {
             export type $401 = Components.Schemas.ErrorResp;
             export interface $404 {
             }
+        }
+    }
+    namespace DuplicateFlowTemplate {
+        namespace Parameters {
+            export type FlowId = /**
+             * Short unique id (length 8) to identify the Flow Template.
+             * example:
+             * 7hj28akg
+             */
+            Components.Schemas.FlowTemplateId;
+        }
+        export interface PathParameters {
+            flowId: Parameters.FlowId;
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.FlowTemplate;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace GetAllClosingReasons {
@@ -963,6 +1007,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteFlowTemplate.Responses.$204>
   /**
+   * duplicateFlowTemplate - duplicateFlowTemplate
+   * 
+   * Duplicate a Flow Template from an existing workflow.
+   */
+  'duplicateFlowTemplate'(
+    parameters?: Parameters<Paths.DuplicateFlowTemplate.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DuplicateFlowTemplate.Responses.$201>
+  /**
    * getDefinition - getDefinition
    * 
    * Get specific Definition by id from the Organization.
@@ -1173,6 +1227,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteFlowTemplate.Responses.$204>
   }
+  ['/v2/flows/templates/{flowId}:duplicate']: {
+    /**
+     * duplicateFlowTemplate - duplicateFlowTemplate
+     * 
+     * Duplicate a Flow Template from an existing workflow.
+     */
+    'post'(
+      parameters?: Parameters<Paths.DuplicateFlowTemplate.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DuplicateFlowTemplate.Responses.$201>
+  }
   ['/v1/workflows/definitions/{definitionId}']: {
     /**
      * getDefinition - getDefinition
@@ -1357,4 +1423,5 @@ export type Trigger = Components.Schemas.Trigger;
 export type TriggerMode = Components.Schemas.TriggerMode;
 export type TriggerType = Components.Schemas.TriggerType;
 export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
+export type Version = Components.Schemas.Version;
 export type WorkflowDefinition = Components.Schemas.WorkflowDefinition;

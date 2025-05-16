@@ -89,6 +89,19 @@
         "responses": {}
       }
     },
+    "/v2/flows/templates/{flowId}:duplicate": {
+      "post": {
+        "operationId": "duplicateFlowTemplate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/workflows/definitions/{definitionId}": {
       "get": {
         "operationId": "getDefinition",

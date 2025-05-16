@@ -592,6 +592,68 @@
         }
       }
     },
+    "/v2/flows/templates/{flowId}:duplicate": {
+      "post": {
+        "operationId": "duplicateFlowTemplate",
+        "summary": "duplicateFlowTemplate",
+        "description": "Duplicate a Flow Template from an existing workflow.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "schema": {
+              "$ref": "#/components/schemas/FlowTemplateId"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Flow template has been duplicated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/workflows/definitions/{definitionId}": {
       "get": {
         "operationId": "getDefinition",
@@ -1456,10 +1518,8 @@
             "description": "Whether the workflow is enabled or not",
             "default": true
           },
-          "is_flow_migrated": {
-            "type": "boolean",
-            "description": "Whether the workflow is migrated from workflows to flows or not",
-            "default": false
+          "version": {
+            "$ref": "#/components/schemas/Version"
           },
           "created_at": {
             "type": "string",
@@ -1526,6 +1586,16 @@
             "description": "Taxonomy ids that are associated with this workflow and used for filtering"
           }
         }
+      },
+      "Version": {
+        "type": "string",
+        "enum": [
+          "v1",
+          "v2",
+          "v3"
+        ],
+        "description": "Version of the workflow schema.\n\n- `v1` – *Deprecated*. The initial version of workflows with limited structure and automation capabilities.  \n- `v2` – Linear workflows. Supports sequential task execution with basic automation triggers.  \n- `v3` – Advanced workflows. Adds support for branching logic (conditions), parallel paths, and enhanced automation features such as dynamic triggers and flow control.\n",
+        "example": 2
       },
       "Trigger": {
         "anyOf": [
