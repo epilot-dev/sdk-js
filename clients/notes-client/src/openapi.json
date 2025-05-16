@@ -5,11 +5,6 @@
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
-  "servers": [
-    {
-      "url": "https://notes.sls.epilot.io"
-    }
-  ],
   "tags": [
     {
       "name": "Notes"
@@ -503,7 +498,13 @@
             "format": "date-time"
           }
         },
-        "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place."
+        "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place.",
+        "read_by": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       },
       "Entity": {
         "type": "object",
@@ -1066,5 +1067,13 @@
         "description": "Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data"
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://notes.sls.epilot.io"
+    },
+    {
+      "url": "https://notes.sls.epilot.io"
+    }
+  ]
 }

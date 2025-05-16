@@ -4,11 +4,6 @@
     "title": "",
     "version": ""
   },
-  "servers": [
-    {
-      "url": "https://notes.sls.epilot.io"
-    }
-  ],
   "paths": {
     "/v1/note": {
       "post": {
@@ -133,5 +128,10 @@
       }
     }
   },
-  "components": {}
+  "components": {},
+  "servers": [
+    {
+      "url": "https://notes.sls.epilot.io"
+    }
+  ]
 }
