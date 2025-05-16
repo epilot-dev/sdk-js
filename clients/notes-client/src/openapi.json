@@ -499,6 +499,7 @@
           },
           "read_by": {
             "type": "array",
+            "description": "Array of user ids that have read this note",
             "items": {
               "type": "string"
             }
@@ -725,6 +726,13 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "read_by": {
+            "type": "array",
+            "description": "Array of user ids that have read this note",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -813,6 +821,13 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "read_by": {
+            "type": "array",
+            "description": "Array of user ids that have read this note",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
