@@ -55,7 +55,15 @@ declare namespace Components {
         export interface CampaignResponse {
             campaign?: Schemas.Campaign;
         }
-        export type ClientErrorResponse = Schemas.ClientError;
+        export type ClientErrorResponse = /**
+         * Describes the structure of a client error response, which can be one of several types:
+         * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
+         * 2. `CodeError`: Contains a 'code' field for specific, machine-readable error codes.
+         * 3. `StatusedError`: Contains 'error' and 'status' fields.
+         * The HTTP status code of the response itself (e.g., 400, 404, 409) will always indicate the overall error category.
+         *
+         */
+        Schemas.ClientError;
         export type JobStatusResponse = Schemas.JobStatus;
         export interface MatchCampaignsResponse {
             /**
@@ -205,7 +213,50 @@ declare namespace Components {
             target?: BaseRelation;
         }
         export type CampaignStatus = "draft" | "active" | "inactive";
-        export type ClientError = BaseError;
+        /**
+         * Describes the structure of a client error response, which can be one of several types:
+         * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
+         * 2. `CodeError`: Contains a 'code' field for specific, machine-readable error codes.
+         * 3. `StatusedError`: Contains 'error' and 'status' fields.
+         * The HTTP status code of the response itself (e.g., 400, 404, 409) will always indicate the overall error category.
+         *
+         */
+        export type ClientError = /**
+         * Describes the structure of a client error response, which can be one of several types:
+         * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
+         * 2. `CodeError`: Contains a 'code' field for specific, machine-readable error codes.
+         * 3. `StatusedError`: Contains 'error' and 'status' fields.
+         * The HTTP status code of the response itself (e.g., 400, 404, 409) will always indicate the overall error category.
+         *
+         */
+        {
+            /**
+             * A descriptive error message.
+             * example:
+             * The provided input was invalid.
+             */
+            message: string;
+        } | {
+            /**
+             * A specific machine-readable error code indicating a known error condition.
+             * example:
+             * CAMPAIGN_NOT_FOUND
+             */
+            code: "CAMPAIGN_NOT_FOUND" | "CAMPAIGN_HAS_NO_TARGET" | "CAMPAIGN_HAS_NO_DELIVERY_METHOD" | "CAMPAIGN_HAS_JOB_IN_PROGRESS" | "CAMPAIGN_HAS_UNEXPECTED_STATUS" | "JOB_TOKEN_MISSING" | "TARGET_WITHOUT_FILTERS";
+        } | {
+            /**
+             * A descriptive error message.
+             * example:
+             * An unexpected error occurred during processing.
+             */
+            error: string;
+            /**
+             * An explicit status code in the body, often mirroring the HTTP status but provided for programmatic access.
+             * example:
+             * 400
+             */
+            status: number;
+        };
         export interface ExecutionSummaryItem {
             execution_id?: string;
             execution_status?: string;
