@@ -5,11 +5,6 @@
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
-  "servers": [
-    {
-      "url": "https://notes.sls.epilot.io"
-    }
-  ],
   "tags": [
     {
       "name": "Notes"
@@ -501,6 +496,13 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "read_by": {
+            "type": "array",
+            "description": "Array of user ids that have read this note",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place."
@@ -724,6 +726,13 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "read_by": {
+            "type": "array",
+            "description": "Array of user ids that have read this note",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -812,6 +821,13 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "read_by": {
+            "type": "array",
+            "description": "Array of user ids that have read this note",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -1066,5 +1082,13 @@
         "description": "Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data"
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://notes.sls.epilot.io"
+    },
+    {
+      "url": "https://notes.sls.epilot.io"
+    }
+  ]
 }

@@ -1476,6 +1476,10 @@
             "type": "string",
             "example": "Vendor"
           },
+          "organization_use": {
+            "type": "string",
+            "example": "Production"
+          },
           "cognito_region": {
             "type": "string",
             "example": "eu-central-1"
@@ -1852,13 +1856,5 @@
         }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://user.sls.epilot.io"
-    },
-    {
-      "url": "https://user.sls.epilot.io"
-    }
-  ]
+  }
 }

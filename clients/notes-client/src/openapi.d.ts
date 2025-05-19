@@ -140,6 +140,10 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            /**
+             * Array of user ids that have read this note
+             */
+            read_by?: string[];
         }
         /**
          * List of resolved Entity and non-Entity contexts attached to a given Note.
@@ -214,6 +218,10 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            /**
+             * Array of user ids that have read this note
+             */
+            read_by?: string[];
         }
         /**
          * The Note's parent Note
@@ -320,6 +328,10 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            /**
+             * Array of user ids that have read this note
+             */
+            read_by?: string[];
         }
         export interface NotePostRequestBody {
             /**

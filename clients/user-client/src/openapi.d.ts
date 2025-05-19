@@ -289,6 +289,11 @@ declare namespace Components {
             organization_type?: string;
             /**
              * example:
+             * Production
+             */
+            organization_use?: string;
+            /**
+             * example:
              * eu-central-1
              */
             cognito_region?: string;

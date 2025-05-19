@@ -1,12 +1,12 @@
 {
   "name": "@epilot/targeting-client",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "JavaScript client library for the epilot Targeting API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "epilot GmbH",
-  "private": false,
   "license": "MIT",
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git",

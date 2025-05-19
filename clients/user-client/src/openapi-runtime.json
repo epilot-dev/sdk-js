@@ -370,10 +370,5 @@
       }
     }
   },
-  "components": {},
-  "servers": [
-    {
-      "url": "https://user.sls.epilot.io"
-    }
-  ]
+  "components": {}
 }

@@ -25,6 +25,9 @@
       "url": "https://targeting.sls.epilot.io"
     },
     {
+      "url": "https://targeting.sls.epilot.io"
+    },
+    {
       "url": "https://targeting.sls.epilot.io",
       "description": "Production Server"
     }
@@ -219,7 +222,72 @@
         "$ref": "#/components/schemas/BaseError"
       },
       "ClientError": {
-        "$ref": "#/components/schemas/BaseError"
+        "oneOf": [
+          {
+            "type": "object",
+            "title": "MessageError",
+            "description": "An error object containing a human-readable message.",
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "A descriptive error message.",
+                "example": "The provided input was invalid."
+              }
+            },
+            "required": [
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "title": "CodeError",
+            "description": "An error object containing a specific machine-readable error code.",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "A specific machine-readable error code indicating a known error condition.",
+                "enum": [
+                  "CAMPAIGN_NOT_FOUND",
+                  "CAMPAIGN_HAS_NO_TARGET",
+                  "CAMPAIGN_HAS_NO_DELIVERY_METHOD",
+                  "CAMPAIGN_HAS_JOB_IN_PROGRESS",
+                  "CAMPAIGN_HAS_UNEXPECTED_STATUS",
+                  "JOB_TOKEN_MISSING",
+                  "TARGET_WITHOUT_FILTERS"
+                ],
+                "example": "CAMPAIGN_NOT_FOUND"
+              }
+            },
+            "required": [
+              "code"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "title": "StatusedError",
+            "description": "An error object containing a message and an explicit status, typically from a more generic error handler.",
+            "properties": {
+              "error": {
+                "type": "string",
+                "description": "A descriptive error message.",
+                "example": "An unexpected error occurred during processing."
+              },
+              "status": {
+                "type": "integer",
+                "description": "An explicit status code in the body, often mirroring the HTTP status but provided for programmatic access.",
+                "example": 400
+              }
+            },
+            "required": [
+              "error",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "description": "Describes the structure of a client error response, which can be one of several types:\n1. `MessageError`: Contains a 'message' field for general descriptive errors.\n2. `CodeError`: Contains a 'code' field for specific, machine-readable error codes.\n3. `StatusedError`: Contains 'error' and 'status' fields.\nThe HTTP status code of the response itself (e.g., 400, 404, 409) will always indicate the overall error category.\n"
       },
       "BaseUUID": {
         "type": "string",
