@@ -847,10 +847,13 @@
             "$ref": "#/components/schemas/TriggerWorkflowAction"
           },
           {
+            "$ref": "#/components/schemas/TriggerShareEntityAction"
+          },
+          {
             "$ref": "#/components/schemas/TriggerWebhookAction"
           },
           {
-            "$ref": "#/components/schemas/ERPAction"
+            "$ref": "#/components/schemas/InformERPAction"
           },
           {
             "$ref": "#/components/schemas/CreateDocumentAction"
@@ -878,10 +881,13 @@
             "$ref": "#/components/schemas/TriggerWorkflowActionConfig"
           },
           {
+            "$ref": "#/components/schemas/TriggerShareEntityActionConfig"
+          },
+          {
             "$ref": "#/components/schemas/TriggerWebhookActionConfig"
           },
           {
-            "$ref": "#/components/schemas/ERPActionConfig"
+            "$ref": "#/components/schemas/InformERPActionConfig"
           },
           {
             "$ref": "#/components/schemas/CreateDocumentActionConfig"
@@ -1990,6 +1996,57 @@
           "value": "test@epilot.cloud"
         }
       },
+      "TriggerShareEntityActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "trigger-workflow"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/TriggerShareEntityConfig"
+              }
+            }
+          }
+        ]
+      },
+      "TriggerShareEntityAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "trigger-share-entity"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/TriggerShareEntityConfig"
+              }
+            }
+          }
+        ]
+      },
+      "TriggerShareEntityConfig": {
+        "type": "object",
+        "properties": {
+          "partner_org_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "AssignUsersToStep": {
         "type": "object",
         "properties": {
@@ -2138,7 +2195,7 @@
           }
         }
       },
-      "ERPActionConfig": {
+      "InformERPActionConfig": {
         "allOf": [
           {
             "$ref": "#/components/schemas/AutomationActionConfig"
@@ -2152,7 +2209,7 @@
                 ]
               },
               "config": {
-                "$ref": "#/components/schemas/ERPConfig"
+                "$ref": "#/components/schemas/InformERPConfig"
               }
             }
           }
@@ -2170,7 +2227,7 @@
           }
         }
       },
-      "ERPAction": {
+      "InformERPAction": {
         "allOf": [
           {
             "$ref": "#/components/schemas/AutomationAction"
@@ -2184,13 +2241,13 @@
                 ]
               },
               "config": {
-                "$ref": "#/components/schemas/ERPConfig"
+                "$ref": "#/components/schemas/InformERPConfig"
               }
             }
           }
         ]
       },
-      "ERPConfig": {
+      "InformERPConfig": {
         "type": "object",
         "properties": {
           "entity_sources": {
