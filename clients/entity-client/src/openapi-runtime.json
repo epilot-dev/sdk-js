@@ -504,6 +504,18 @@
             "name": "before"
           },
           {
+            "in": "query",
+            "name": "start_date"
+          },
+          {
+            "in": "query",
+            "name": "end_date"
+          },
+          {
+            "in": "query",
+            "name": "preset_range"
+          },
+          {
             "$ref": "#/components/parameters/FromPageQueryParam"
           },
           {
@@ -905,6 +917,10 @@
           {
             "in": "query",
             "name": "include_disabled"
+          },
+          {
+            "in": "query",
+            "name": "type"
           }
         ],
         "responses": {}
@@ -1459,5 +1475,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    }
+  ]
 }

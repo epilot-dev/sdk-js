@@ -8261,6 +8261,12 @@ declare namespace Components {
              */
             kind?: "system" | "user_defined";
             /**
+             * Type of taxonomy. Whether it classifies entities or relations.
+             * example:
+             * entity
+             */
+            type?: "entity" | "relation";
+            /**
              * Icon name for the taxonomy (from epilot360/icons icon set)
              * example:
              * purpose
@@ -8310,8 +8316,7 @@ declare namespace Components {
          *   "created_by": "10598",
          *   "created_at": "2024-01-01T00:00:00.000Z",
          *   "updated_at": "2024-01-01T00:00:00.000Z",
-         *   "org": "66",
-         *   "progress": 0.5
+         *   "org": "66"
          * }
          */
         export interface TaxonomyBulkJob {
@@ -8347,10 +8352,6 @@ declare namespace Components {
             created_at?: string; // date-time
             updated_at?: string; // date-time
             org?: string;
-            /**
-             * Progress of the job on a scale of 0 to 1
-             */
-            progress?: number;
         }
         export type TaxonomyBulkJobActionType = "MOVE_CLASSIFICATIONS" | "MERGE_CLASSIFICATIONS" | "DELETE_CLASSIFICATIONS";
         /**
@@ -9441,9 +9442,15 @@ declare namespace Paths {
         namespace Parameters {
             export type After = string; // date-time
             export type Before = string; // date-time
+            export type EndDate = string; // date-time
             export type From = number;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type IncludeRelations = boolean;
+            /**
+             * example:
+             * last_week
+             */
+            export type PresetRange = "today" | "this_week" | "last_week";
             export type Size = number;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -9451,6 +9458,7 @@ declare namespace Paths {
              * contact
              */
             Components.Schemas.EntitySlug;
+            export type StartDate = string; // date-time
             /**
              * example:
              * SyncActivity
@@ -9464,6 +9472,13 @@ declare namespace Paths {
         export interface QueryParameters {
             after?: Parameters.After /* date-time */;
             before?: Parameters.Before /* date-time */;
+            start_date?: Parameters.StartDate /* date-time */;
+            end_date?: Parameters.EndDate /* date-time */;
+            preset_range?: /**
+             * example:
+             * last_week
+             */
+            Parameters.PresetRange;
             from?: Parameters.From;
             size?: Parameters.Size;
             type?: /**
@@ -10346,8 +10361,16 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                versions?: /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem[];
+                versions: /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem[];
                 drafts?: /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem[];
+                /**
+                 * Pagination: Whether more versions are available
+                 */
+                versions_more: boolean;
+                /**
+                 * Pagination: Whether more drafts are available
+                 */
+                drafts_more?: boolean;
             }
         }
     }
@@ -10388,8 +10411,7 @@ declare namespace Paths {
              *   "created_by": "10598",
              *   "created_at": "2024-01-01T00:00:00.000Z",
              *   "updated_at": "2024-01-01T00:00:00.000Z",
-             *   "org": "66",
-             *   "progress": 0.5
+             *   "org": "66"
              * }
              */
             Components.Schemas.TaxonomyBulkJob;
@@ -10417,8 +10439,7 @@ declare namespace Paths {
              *   "created_by": "10598",
              *   "created_at": "2024-01-01T00:00:00.000Z",
              *   "updated_at": "2024-01-01T00:00:00.000Z",
-             *   "org": "66",
-             *   "progress": 0.5
+             *   "org": "66"
              * }
              */
             Components.Schemas.TaxonomyBulkJob[];
@@ -10539,9 +10560,11 @@ declare namespace Paths {
     namespace ListTaxonomies {
         namespace Parameters {
             export type IncludeDisabled = boolean;
+            export type Type = "entity" | "relation";
         }
         export interface QueryParameters {
             include_disabled?: Parameters.IncludeDisabled;
+            type?: Parameters.Type;
         }
         namespace Responses {
             export interface $200 {
@@ -12363,7 +12386,10 @@ export interface OperationMethods {
   /**
    * getTaxonomyClassification - getTaxonomyClassification
    * 
-   * Get a classification for a taxonomy
+   * Get a classification for a taxonomy by slug
+   * 
+   * For backwards compatibility with purposes, you can also pass the classification id instead of the slug.
+   * 
    */
   'getTaxonomyClassification'(
     parameters?: Parameters<Paths.GetTaxonomyClassification.PathParameters> | null,
@@ -13472,7 +13498,10 @@ export interface PathsDictionary {
     /**
      * getTaxonomyClassification - getTaxonomyClassification
      * 
-     * Get a classification for a taxonomy
+     * Get a classification for a taxonomy by slug
+     * 
+     * For backwards compatibility with purposes, you can also pass the classification id instead of the slug.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetTaxonomyClassification.PathParameters> | null,
