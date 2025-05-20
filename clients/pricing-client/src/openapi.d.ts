@@ -457,10 +457,6 @@ declare namespace Components {
              */
             price_id?: string;
             /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
-            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -725,37 +721,7 @@ declare namespace Components {
             /**
              * The coupons applicable to the price item
              */
-            _coupons?: (/**
-             * The coupon configuration
-             * example:
-             * {
-             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
-             *   "_schema": "coupon",
-             *   "_org": "org_12345",
-             *   "_created_at": "2024-01-15T10:00:00.000Z",
-             *   "_updated_at": "2024-01-20T12:00:00.000Z",
-             *   "_title": "Sample Coupon",
-             *   "name": "Sample Coupon",
-             *   "type": "fixed",
-             *   "fixed_value": 555,
-             *   "fixed_value_currency": "USD",
-             *   "fixed_value_decimal": "5.55",
-             *   "active": true,
-             *   "prices": {
-             *     "$relation": [
-             *       {
-             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
-             *         "_tags": [
-             *           "discount",
-             *           "special"
-             *         ],
-             *         "_schema": "price"
-             *       }
-             *     ]
-             *   }
-             * }
-             */
-            Coupon)[];
+            _coupons?: (CouponItem)[];
             /**
              * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
@@ -778,10 +744,6 @@ declare namespace Components {
              * The id of the price.
              */
             price_id?: string;
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -935,10 +897,6 @@ declare namespace Components {
              * The id of the price.
              */
             price_id?: string;
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -1101,37 +1059,7 @@ declare namespace Components {
             /**
              * The coupons applicable to the price item
              */
-            _coupons?: (/**
-             * The coupon configuration
-             * example:
-             * {
-             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
-             *   "_schema": "coupon",
-             *   "_org": "org_12345",
-             *   "_created_at": "2024-01-15T10:00:00.000Z",
-             *   "_updated_at": "2024-01-20T12:00:00.000Z",
-             *   "_title": "Sample Coupon",
-             *   "name": "Sample Coupon",
-             *   "type": "fixed",
-             *   "fixed_value": 555,
-             *   "fixed_value_currency": "USD",
-             *   "fixed_value_decimal": "5.55",
-             *   "active": true,
-             *   "prices": {
-             *     "$relation": [
-             *       {
-             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
-             *         "_tags": [
-             *           "discount",
-             *           "special"
-             *         ],
-             *         "_schema": "price"
-             *       }
-             *     ]
-             *   }
-             * }
-             */
-            Coupon)[];
+            _coupons?: (CouponItem)[];
         }
         export interface BasicAuthCredentials {
             /**
@@ -1625,10 +1553,6 @@ declare namespace Components {
              */
             price_id?: string;
             /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
-            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -1893,37 +1817,7 @@ declare namespace Components {
             /**
              * The coupons applicable to the price item
              */
-            _coupons?: (/**
-             * The coupon configuration
-             * example:
-             * {
-             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
-             *   "_schema": "coupon",
-             *   "_org": "org_12345",
-             *   "_created_at": "2024-01-15T10:00:00.000Z",
-             *   "_updated_at": "2024-01-20T12:00:00.000Z",
-             *   "_title": "Sample Coupon",
-             *   "name": "Sample Coupon",
-             *   "type": "fixed",
-             *   "fixed_value": 555,
-             *   "fixed_value_currency": "USD",
-             *   "fixed_value_decimal": "5.55",
-             *   "active": true,
-             *   "prices": {
-             *     "$relation": [
-             *       {
-             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
-             *         "_tags": [
-             *           "discount",
-             *           "special"
-             *         ],
-             *         "_schema": "price"
-             *       }
-             *     ]
-             *   }
-             * }
-             */
-            Coupon)[];
+            _coupons?: (CouponItem)[];
             /**
              * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
@@ -1958,10 +1852,6 @@ declare namespace Components {
              * The id of the price.
              */
             price_id?: string;
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -2124,37 +2014,11 @@ declare namespace Components {
             /**
              * The coupons applicable to the price item
              */
-            _coupons?: (/**
-             * The coupon configuration
-             * example:
-             * {
-             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
-             *   "_schema": "coupon",
-             *   "_org": "org_12345",
-             *   "_created_at": "2024-01-15T10:00:00.000Z",
-             *   "_updated_at": "2024-01-20T12:00:00.000Z",
-             *   "_title": "Sample Coupon",
-             *   "name": "Sample Coupon",
-             *   "type": "fixed",
-             *   "fixed_value": 555,
-             *   "fixed_value_currency": "USD",
-             *   "fixed_value_decimal": "5.55",
-             *   "active": true,
-             *   "prices": {
-             *     "$relation": [
-             *       {
-             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
-             *         "_tags": [
-             *           "discount",
-             *           "special"
-             *         ],
-             *         "_schema": "price"
-             *       }
-             *     ]
-             *   }
-             * }
+            _coupons?: (CouponItem)[];
+            /**
+             * The flag for prices that contain price components.
              */
-            Coupon)[];
+            is_composite_price?: true;
             /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
@@ -2523,6 +2387,66 @@ declare namespace Components {
             promo_code_usage?: {
                 [name: string]: number;
             };
+        }
+        export interface CouponItem {
+            _id?: EntityId /* uuid */;
+            /**
+             * The auto-generated title for the title
+             */
+            _title?: string;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org?: string;
+            /**
+             * The schema of the entity, for coupons it is always `coupon`
+             */
+            _schema: "coupon";
+            _tags?: string[];
+            /**
+             * The creation date for the opportunity
+             */
+            _created_at?: string; // date-time
+            /**
+             * The date the coupon was last updated
+             */
+            _updated_at?: string; // date-time
+            name?: string | null;
+            description?: string | null;
+            type: "fixed" | "percentage";
+            category: "discount" | "cashback";
+            /**
+             * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
+             */
+            percentage_value?: string | null;
+            /**
+             * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
+             */
+            fixed_value?: number;
+            /**
+             * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
+             */
+            fixed_value_decimal?: string;
+            /**
+             * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
+             */
+            fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+             * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+             * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+             *
+             * example:
+             * EUR
+             */
+            Currency;
+            /**
+             * The cashback period, for now it's limited to either 0 months or 12 months
+             */
+            cashback_period?: "0" | "12";
+            active?: boolean;
+            /**
+             * Whether the coupon requires a promo code to be applied
+             */
+            requires_promo_code?: boolean;
         }
         /**
          * The coupon configuration
@@ -3900,10 +3824,6 @@ declare namespace Components {
              */
             price_id?: string;
             /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
-            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -4168,37 +4088,7 @@ declare namespace Components {
             /**
              * The coupons applicable to the price item
              */
-            _coupons?: (/**
-             * The coupon configuration
-             * example:
-             * {
-             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
-             *   "_schema": "coupon",
-             *   "_org": "org_12345",
-             *   "_created_at": "2024-01-15T10:00:00.000Z",
-             *   "_updated_at": "2024-01-20T12:00:00.000Z",
-             *   "_title": "Sample Coupon",
-             *   "name": "Sample Coupon",
-             *   "type": "fixed",
-             *   "fixed_value": 555,
-             *   "fixed_value_currency": "USD",
-             *   "fixed_value_decimal": "5.55",
-             *   "active": true,
-             *   "prices": {
-             *     "$relation": [
-             *       {
-             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
-             *         "_tags": [
-             *           "discount",
-             *           "special"
-             *         ],
-             *         "_schema": "price"
-             *       }
-             *     ]
-             *   }
-             * }
-             */
-            Coupon)[];
+            _coupons?: (CouponItem)[];
             /**
              * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
@@ -4243,10 +4133,6 @@ declare namespace Components {
              * The id of the price.
              */
             price_id?: string;
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -4409,37 +4295,7 @@ declare namespace Components {
             /**
              * The coupons applicable to the price item
              */
-            _coupons?: (/**
-             * The coupon configuration
-             * example:
-             * {
-             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
-             *   "_schema": "coupon",
-             *   "_org": "org_12345",
-             *   "_created_at": "2024-01-15T10:00:00.000Z",
-             *   "_updated_at": "2024-01-20T12:00:00.000Z",
-             *   "_title": "Sample Coupon",
-             *   "name": "Sample Coupon",
-             *   "type": "fixed",
-             *   "fixed_value": 555,
-             *   "fixed_value_currency": "USD",
-             *   "fixed_value_decimal": "5.55",
-             *   "active": true,
-             *   "prices": {
-             *     "$relation": [
-             *       {
-             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
-             *         "_tags": [
-             *           "discount",
-             *           "special"
-             *         ],
-             *         "_schema": "price"
-             *       }
-             *     ]
-             *   }
-             * }
-             */
-            Coupon)[];
+            _coupons?: (CouponItem)[];
             /**
              * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
              */
@@ -4469,6 +4325,10 @@ declare namespace Components {
              */
             unit_amount_decimal?: string;
             /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: false;
+            /**
              * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
              * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
@@ -4478,7 +4338,7 @@ declare namespace Components {
              * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
              *
              */
-            pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag";
+            pricing_model?: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag";
             /**
              * The snapshot of the price linked to the price item.
              * example:
@@ -4660,6 +4520,7 @@ declare namespace Components {
                 _tags?: string[];
             };
         }
+        export type PriceItemUnion = /* Represents a price input to the pricing library. */ PriceItemDto | /* Represents a composite price input to the pricing library. */ CompositePriceItemDto;
         /**
          * Tracks a set of product prices, quantities, (discounts) and taxes.
          */
@@ -4681,7 +4542,7 @@ declare namespace Components {
         /**
          * A valid set of product prices, quantities, (discounts) and taxes from a client.
          */
-        export type PriceItemsDto = (/* Represents a price input to the pricing library. */ PriceItemDto | /* Represents a composite price input to the pricing library. */ CompositePriceItemDto)[];
+        export type PriceItemsDto = PriceItemUnion[];
         export interface PriceTier {
             up_to?: number | null;
             flat_fee_amount?: number;
@@ -6387,6 +6248,7 @@ export type ComputedPriceBreakdown = Components.Schemas.ComputedPriceBreakdown;
 export type ComputedPriceComponents = Components.Schemas.ComputedPriceComponents;
 export type ConsumptionTypeGetAg = Components.Schemas.ConsumptionTypeGetAg;
 export type Coupon = Components.Schemas.Coupon;
+export type CouponItem = Components.Schemas.CouponItem;
 export type CouponWithoutPromoCodes = Components.Schemas.CouponWithoutPromoCodes;
 export type Currency = Components.Schemas.Currency;
 export type Customer = Components.Schemas.Customer;
@@ -6431,6 +6293,7 @@ export type PriceInputMapping = Components.Schemas.PriceInputMapping;
 export type PriceInputMappings = Components.Schemas.PriceInputMappings;
 export type PriceItem = Components.Schemas.PriceItem;
 export type PriceItemDto = Components.Schemas.PriceItemDto;
+export type PriceItemUnion = Components.Schemas.PriceItemUnion;
 export type PriceItems = Components.Schemas.PriceItems;
 export type PriceItemsDto = Components.Schemas.PriceItemsDto;
 export type PriceTier = Components.Schemas.PriceTier;

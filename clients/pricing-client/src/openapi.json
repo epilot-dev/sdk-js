@@ -161,6 +161,14 @@
                       },
                       {
                         "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                        "price_id": "396cb5f3-ea0b-4629-99ca-303661de5a9b",
+                        "quantity": 2,
+                        "coupon_ids": [
+                          "0f8c4852-23fa-4a64-a2f3-88702335f094"
+                        ]
+                      },
+                      {
+                        "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
                         "price_id": "2abe0c6f-63ef-417b-8c85-5546359382d9",
                         "quantity": 1,
                         "price_mappings": [
@@ -175,6 +183,263 @@
                             }
                           }
                         ]
+                      },
+                      {
+                        "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                        "price_id": "b59acf37-3cc0-456c-a712-1db0fc478d2d",
+                        "quantity": 1,
+                        "price_component_coupon_ids": {
+                          "583fb57a-7549-4624-82d6-342d5e6542f7": [
+                            "0f8c4852-23fa-4a64-a2f3-88702335f094"
+                          ]
+                        },
+                        "price_mappings": [
+                          {
+                            "price_id": "25c7dc77-ac80-480a-92c0-8c0e913b5534",
+                            "frequency_unit": "yearly",
+                            "value": 10000,
+                            "name": "Estimated consumption",
+                            "metadata": {
+                              "journey_title": "P&G",
+                              "step_name": "Number Inputs"
+                            }
+                          }
+                        ],
+                        "item_components": [
+                          {
+                            "pricing_model": "per_unit",
+                            "quantity": 1,
+                            "type": "recurring",
+                            "billing_period": "monthly",
+                            "price_id": "583fb57a-7549-4624-82d6-342d5e6542f7",
+                            "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                            "_price": {
+                              "pricing_model": "per_unit",
+                              "unit_amount": 1500,
+                              "unit_amount_currency": "EUR",
+                              "unit_amount_decimal": "15",
+                              "sales_tax": "standard",
+                              "active": true,
+                              "price_display_in_journeys": "show_price",
+                              "type": "recurring",
+                              "_title": "Base Price",
+                              "tax": [
+                                {
+                                  "_schema": "tax",
+                                  "active": true,
+                                  "description": "GST",
+                                  "rate": 19,
+                                  "region": "DE",
+                                  "type": "Custom",
+                                  "_id": "d792070e-328d-4d2c-8aba-5ac7b23ff621",
+                                  "_org": "739224",
+                                  "_created_at": "2024-12-18T14:14:53.340Z",
+                                  "_updated_at": "2025-02-11T11:07:49.660Z",
+                                  "_title": "GST",
+                                  "behavior": "inclusive"
+                                }
+                              ],
+                              "tax_behavior": "inclusive",
+                              "billing_period": "monthly",
+                              "billing_duration_unit": "months",
+                              "notice_time_unit": "months",
+                              "termination_time_unit": "months",
+                              "renewal_duration_unit": "months",
+                              "description": "Base Price",
+                              "is_tax_inclusive": false,
+                              "internal_description": "Base Price",
+                              "variable_price": true
+                            },
+                            "taxes": [
+                              {
+                                "tax": {
+                                  "_schema": "tax",
+                                  "active": true,
+                                  "description": "GST",
+                                  "rate": 19,
+                                  "region": "DE",
+                                  "type": "Custom",
+                                  "_id": "d792070e-328d-4d2c-8aba-5ac7b23ff621",
+                                  "_org": "739224",
+                                  "_created_at": "2024-12-18T14:14:53.340Z",
+                                  "_updated_at": "2025-02-11T11:07:49.660Z",
+                                  "_title": "GST",
+                                  "behavior": "inclusive"
+                                },
+                                "amount": 285
+                              }
+                            ],
+                            "unit_amount": 1000,
+                            "unit_amount_decimal": "10",
+                            "currency": "EUR",
+                            "description": "Base Price",
+                            "is_tax_inclusive": false
+                          },
+                          {
+                            "pricing_model": "per_unit",
+                            "quantity": 1,
+                            "type": "recurring",
+                            "billing_period": "monthly",
+                            "price_id": "25c7dc77-ac80-480a-92c0-8c0e913b5534",
+                            "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                            "_price": {
+                              "_id": "25c7dc77-ac80-480a-92c0-8c0e913b5534",
+                              "active": true,
+                              "description": "Work Price",
+                              "is_tax_inclusive": true,
+                              "price_display_in_journeys": "show_price",
+                              "pricing_model": "per_unit",
+                              "type": "recurring",
+                              "unit_amount": 10,
+                              "unit_amount_currency": "EUR",
+                              "unit_amount_decimal": "0.10",
+                              "variable_price": true,
+                              "billing_period": "monthly",
+                              "internal_description": "Work Price",
+                              "_title": "Work Price",
+                              "unit": "kwh"
+                            },
+                            "taxes": [
+                              {
+                                "tax": {
+                                  "_schema": "tax",
+                                  "active": true,
+                                  "description": "19%",
+                                  "rate": 19,
+                                  "region": "DE",
+                                  "type": "VAT",
+                                  "_id": "bd488a36-cae5-4b18-9ca5-f5cbf6d9735b",
+                                  "_org": "739224",
+                                  "_created_at": "2025-01-15T12:04:52.431Z",
+                                  "_updated_at": "2025-01-15T12:04:52.431Z",
+                                  "_title": "19%"
+                                },
+                                "amount": 1331
+                              }
+                            ],
+                            "unit_amount": 8,
+                            "unit_amount_decimal": "0.08",
+                            "currency": "EUR",
+                            "description": "Work Price",
+                            "is_tax_inclusive": true
+                          }
+                        ]
+                      },
+                      {
+                        "description": "Product Name",
+                        "quantity": 1,
+                        "is_composite_price": true,
+                        "item_components": [
+                          {
+                            "quantity": 1,
+                            "description": "Price Description",
+                            "unit_amount": 10000,
+                            "unit_amount_decimal": "100",
+                            "unit_amount_currency": "EUR",
+                            "pricing_model": "per_unit",
+                            "taxes": [
+                              {
+                                "rate": "nontaxable",
+                                "rateValue": 0,
+                                "amount": 0
+                              }
+                            ],
+                            "type": "one_time",
+                            "is_tax_inclusive": true
+                          }
+                        ],
+                        "currency": "EUR"
+                      },
+                      {
+                        "price_id": "b59acf37-3cc0-456c-a712-1db0fc478d2d",
+                        "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                        "quantity": 1,
+                        "description": "Power Test",
+                        "is_composite_price": true,
+                        "item_components": [
+                          {
+                            "price_id": "583fb57a-7549-4624-82d6-342d5e6542f7",
+                            "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                            "quantity": 1,
+                            "description": "Base Price",
+                            "unit_amount": 1500,
+                            "unit_amount_decimal": "15",
+                            "unit_amount_currency": "EUR",
+                            "pricing_model": "per_unit",
+                            "type": "recurring",
+                            "billing_period": "monthly",
+                            "is_tax_inclusive": false,
+                            "_coupons": [
+                              {
+                                "name": "My Custom Discount",
+                                "type": "fixed",
+                                "fixed_value": 500,
+                                "fixed_value_currency": "EUR",
+                                "fixed_value_decimal": "5",
+                                "category": "discount",
+                                "active": true,
+                                "_schema": "coupon",
+                                "requires_promo_code": false,
+                                "_org": "739224",
+                                "_created_at": "2025-02-24T10:01:24.537Z",
+                                "_updated_at": "2025-02-24T10:01:24.537Z",
+                                "percentage_value": "0",
+                                "_title": "My Custom Discount"
+                              }
+                            ]
+                          },
+                          {
+                            "price_id": "25c7dc77-ac80-480a-92c0-8c0e913b5534",
+                            "product_id": "c5695fb5-f02d-4e46-9fb2-a36dc4e9876f",
+                            "quantity": 1,
+                            "description": "Work Price",
+                            "unit_amount": 10,
+                            "unit_amount_decimal": "0.10123",
+                            "unit_amount_currency": "EUR",
+                            "pricing_model": "per_unit",
+                            "taxes": [
+                              {
+                                "tax": {
+                                  "_schema": "tax",
+                                  "active": true,
+                                  "description": "19%",
+                                  "rate": 19,
+                                  "region": "DE",
+                                  "type": "VAT",
+                                  "_id": "bd488a36-cae5-4b18-9ca5-f5cbf6d9735b",
+                                  "_org": "739224",
+                                  "_created_at": "2025-01-15T12:04:52.431Z",
+                                  "_updated_at": "2025-01-15T12:04:52.431Z",
+                                  "_title": "19%"
+                                },
+                                "amount": 2
+                              }
+                            ],
+                            "type": "recurring",
+                            "billing_period": "monthly",
+                            "unit_amount_net": 8,
+                            "unit_amount_gross": 10,
+                            "amount_subtotal": 8,
+                            "amount_total": 10,
+                            "amount_tax": 2,
+                            "is_tax_inclusive": true,
+                            "unit_amount_net_decimal": "0.084033613445",
+                            "unit_amount_gross_decimal": "0.1",
+                            "amount_subtotal_decimal": "0.084033613445",
+                            "amount_total_decimal": "0.1"
+                          }
+                        ],
+                        "price_mappings": [
+                          {
+                            "price_id": "583fb57a-7549-4624-82d6-342d5e6542f7",
+                            "value": 1
+                          },
+                          {
+                            "price_id": "25c7dc77-ac80-480a-92c0-8c0e913b5534",
+                            "value": 2000
+                          }
+                        ],
+                        "currency": "EUR"
                       }
                     ]
                   }
@@ -4081,7 +4346,7 @@
             "$ref": "#/components/schemas/MetaData"
           },
           "quantity": {
-            "type": "integer",
+            "type": "number",
             "description": "The quantity of products being purchased."
           },
           "product_id": {
@@ -4091,10 +4356,6 @@
           "price_id": {
             "type": "string",
             "description": "The id of the price."
-          },
-          "is_composite_price": {
-            "description": "The flag for prices that contain price components.",
-            "type": "boolean"
           },
           "description": {
             "type": "string",
@@ -4126,18 +4387,28 @@
           }
         }
       },
+      "PriceItemUnion": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/PriceItemDto"
+          },
+          {
+            "$ref": "#/components/schemas/CompositePriceItemDto"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "is_composite_price",
+          "mapping": {
+            "false": "#/components/schemas/PriceItemDto",
+            "true": "#/components/schemas/CompositePriceItemDto"
+          }
+        }
+      },
       "PriceItemsDto": {
         "description": "A valid set of product prices, quantities, (discounts) and taxes from a client.",
         "type": "array",
         "items": {
-          "anyOf": [
-            {
-              "$ref": "#/components/schemas/PriceItemDto"
-            },
-            {
-              "$ref": "#/components/schemas/CompositePriceItemDto"
-            }
-          ]
+          "$ref": "#/components/schemas/PriceItemUnion"
         }
       },
       "BasePriceItemDto": {
@@ -4205,7 +4476,7 @@
             "items": {
               "oneOf": [
                 {
-                  "$ref": "#/components/schemas/Coupon"
+                  "$ref": "#/components/schemas/CouponItem"
                 }
               ]
             }
@@ -4213,113 +4484,128 @@
         }
       },
       "PriceItemDto": {
+        "description": "Represents a price input to the pricing library.",
         "allOf": [
           {
             "$ref": "#/components/schemas/BasePriceItemDto"
-          }
-        ],
-        "description": "Represents a price input to the pricing library.",
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "description": "One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.",
-            "enum": [
-              "one_time",
-              "recurring"
-            ]
           },
-          "billing_period": {
-            "type": "string",
-            "description": "The price billing period.",
-            "enum": [
-              "weekly",
-              "monthly",
-              "every_quarter",
-              "every_6_months",
-              "yearly"
-            ]
-          },
-          "unit_amount": {
-            "type": "integer",
-            "description": "The unit amount value"
-          },
-          "unit_amount_gross": {
-            "type": "integer",
-            "description": "The unit gross amount value."
-          },
-          "unit_amount_currency": {
-            "$ref": "#/components/schemas/Currency"
-          },
-          "unit_amount_decimal": {
-            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
-            "type": "string"
-          },
-          "pricing_model": {
-            "type": "string",
-            "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
-            "enum": [
-              "per_unit",
-              "tiered_graduated",
-              "tiered_volume",
-              "tiered_flatfee",
-              "dynamic_tariff",
-              "external_getag"
-            ]
-          },
-          "_price": {
-            "description": "The snapshot of the price linked to the price item.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Price"
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.",
+                "enum": [
+                  "one_time",
+                  "recurring"
+                ]
+              },
+              "billing_period": {
+                "type": "string",
+                "description": "The price billing period.",
+                "enum": [
+                  "weekly",
+                  "monthly",
+                  "every_quarter",
+                  "every_6_months",
+                  "yearly"
+                ]
+              },
+              "unit_amount": {
+                "type": "integer",
+                "description": "The unit amount value"
+              },
+              "unit_amount_gross": {
+                "type": "integer",
+                "description": "The unit gross amount value."
+              },
+              "unit_amount_currency": {
+                "$ref": "#/components/schemas/Currency"
+              },
+              "unit_amount_decimal": {
+                "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+                "type": "string"
+              },
+              "is_composite_price": {
+                "description": "The flag for prices that contain price components.",
+                "type": "boolean",
+                "enum": [
+                  false
+                ]
+              },
+              "pricing_model": {
+                "type": "string",
+                "description": "Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.\n- `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity\n- `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.\n- `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `tiered_flatfee` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.\n- `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.\n- `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.\n",
+                "enum": [
+                  "per_unit",
+                  "tiered_graduated",
+                  "tiered_volume",
+                  "tiered_flatfee",
+                  "dynamic_tariff",
+                  "external_getag"
+                ]
+              },
+              "_price": {
+                "description": "The snapshot of the price linked to the price item.",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Price"
+                  }
+                ]
               }
-            ]
+            }
           }
-        },
-        "required": [
-          "pricing_model"
         ]
       },
       "CompositePriceItemDto": {
+        "description": "Represents a composite price input to the pricing library.",
         "allOf": [
           {
             "$ref": "#/components/schemas/BasePriceItemDto"
-          }
-        ],
-        "description": "Represents a composite price input to the pricing library.",
-        "type": "object",
-        "properties": {
-          "item_components": {
-            "type": "array",
-            "description": "Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).",
-            "items": {
-              "$ref": "#/components/schemas/PriceItemDto"
-            }
           },
-          "selected_price_component_ids": {
-            "type": "array",
-            "description": "The ids of the price components that should be selected for the price calculation.",
-            "items": {
-              "type": "string",
-              "description": "The id of the price component"
-            }
-          },
-          "price_component_coupon_ids": {
+          {
             "type": "object",
-            "description": "The map of coupon ids applicable to the price components",
-            "readOnly": true,
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "description": "The id of the coupon"
+            "properties": {
+              "is_composite_price": {
+                "description": "The flag for prices that contain price components.",
+                "type": "boolean",
+                "enum": [
+                  true
+                ]
+              },
+              "item_components": {
+                "type": "array",
+                "description": "Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).",
+                "items": {
+                  "$ref": "#/components/schemas/PriceItemDto"
+                }
+              },
+              "selected_price_component_ids": {
+                "type": "array",
+                "description": "The ids of the price components that should be selected for the price calculation.",
+                "items": {
+                  "type": "string",
+                  "description": "The id of the price component"
+                }
+              },
+              "price_component_coupon_ids": {
+                "type": "object",
+                "description": "The map of coupon ids applicable to the price components",
+                "readOnly": true,
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "The id of the coupon"
+                  }
+                }
+              },
+              "_price": {
+                "$ref": "#/components/schemas/CompositePrice"
               }
             }
-          },
-          "_price": {
-            "$ref": "#/components/schemas/CompositePrice"
           }
-        }
+        ]
       },
       "TaxAmountDto": {
         "type": "object",
@@ -4778,7 +5064,7 @@
             "items": {
               "oneOf": [
                 {
-                  "$ref": "#/components/schemas/Coupon"
+                  "$ref": "#/components/schemas/CouponItem"
                 }
               ]
             }
@@ -5848,6 +6134,115 @@
               "type": "number"
             },
             "description": "Map of ids of promo codes with their usage count"
+          }
+        }
+      },
+      "CouponItem": {
+        "type": "object",
+        "required": [
+          "type",
+          "category",
+          "_schema"
+        ],
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "readOnly": true
+          },
+          "_title": {
+            "type": "string",
+            "description": "The auto-generated title for the title",
+            "readOnly": true
+          },
+          "_org": {
+            "type": "string",
+            "description": "Organization Id the entity belongs to",
+            "readOnly": true
+          },
+          "_schema": {
+            "type": "string",
+            "enum": [
+              "coupon"
+            ],
+            "readOnly": true,
+            "description": "The schema of the entity, for coupons it is always `coupon`"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The creation date for the opportunity"
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "The date the coupon was last updated"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "fixed",
+              "percentage"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "discount",
+              "cashback"
+            ]
+          },
+          "percentage_value": {
+            "type": "string",
+            "description": "Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.",
+            "nullable": true
+          },
+          "fixed_value": {
+            "description": "Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.",
+            "type": "number"
+          },
+          "fixed_value_decimal": {
+            "description": "Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.",
+            "type": "string"
+          },
+          "fixed_value_currency": {
+            "description": "Use if type is set to fixed. Three-letter ISO currency code, in lowercase.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Currency"
+              }
+            ]
+          },
+          "cashback_period": {
+            "type": "string",
+            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
+            "enum": [
+              "0",
+              "12"
+            ],
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "requires_promo_code": {
+            "type": "boolean",
+            "description": "Whether the coupon requires a promo code to be applied"
           }
         }
       },
