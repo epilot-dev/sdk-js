@@ -4357,6 +4357,10 @@
             "type": "string",
             "description": "The id of the price."
           },
+          "is_composite_price": {
+            "description": "The flag for prices that contain price components.",
+            "type": "boolean"
+          },
           "description": {
             "type": "string",
             "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."

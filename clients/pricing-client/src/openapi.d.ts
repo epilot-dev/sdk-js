@@ -457,6 +457,10 @@ declare namespace Components {
              */
             price_id?: string;
             /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -745,6 +749,10 @@ declare namespace Components {
              */
             price_id?: string;
             /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -897,6 +905,10 @@ declare namespace Components {
              * The id of the price.
              */
             price_id?: string;
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -1553,6 +1565,10 @@ declare namespace Components {
              */
             price_id?: string;
             /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -1853,6 +1869,10 @@ declare namespace Components {
              */
             price_id?: string;
             /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: true;
+            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -2015,10 +2035,6 @@ declare namespace Components {
              * The coupons applicable to the price item
              */
             _coupons?: (CouponItem)[];
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: true;
             /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
@@ -3824,6 +3840,10 @@ declare namespace Components {
              */
             price_id?: string;
             /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: boolean;
+            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -4134,6 +4154,10 @@ declare namespace Components {
              */
             price_id?: string;
             /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: false;
+            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -4324,10 +4348,6 @@ declare namespace Components {
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: false;
             /**
              * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
