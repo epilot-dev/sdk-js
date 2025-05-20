@@ -945,8 +945,15 @@
           "$ref": "#/components/requestBodies/InstallRequest"
         },
         "responses": {
-          "204": {
-            "description": "App successfully installed."
+          "201": {
+            "description": "App successfully installed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Installation"
+                }
+              }
+            }
           },
           "404": {
             "description": "App not found."
@@ -1217,6 +1224,10 @@
             "schema": {
               "type": "object",
               "properties": {
+                "version": {
+                  "type": "string",
+                  "description": "Version of the app to update to"
+                },
                 "option_values": {
                   "type": "array",
                   "items": {
@@ -1523,22 +1534,8 @@
           "description": {
             "type": "string",
             "description": "Description of the custom action"
-          },
-          "app_id": {
-            "type": "string",
-            "description": "The ID of the app to fetch configuration from the app API",
-            "example": "c451c26a-cc7a-4c1c-92bf-1c6246cbfe88"
-          },
-          "component_id": {
-            "type": "string",
-            "description": "The ID of the component to fetch configuration from the app API",
-            "example": "12345678-1234-1234-1234-123456789012"
           }
-        },
-        "required": [
-          "app_id",
-          "component_id"
-        ]
+        }
       },
       "ExternalIntegrationCustomActionConfig": {
         "allOf": [
@@ -2359,6 +2356,11 @@
           },
           "role": {
             "$ref": "#/components/schemas/Role"
+          },
+          "latest_version": {
+            "type": "string",
+            "description": "Latest version of the app",
+            "readOnly": true
           },
           "public": {
             "type": "boolean",

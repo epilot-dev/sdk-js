@@ -48,6 +48,10 @@ declare namespace Components {
         }
         export interface InstallRequest {
             /**
+             * Version of the app to update to
+             */
+            version?: string;
+            /**
              * Configuration values for the app components
              */
             option_values?: Schemas.OptionsRef[];
@@ -194,18 +198,6 @@ declare namespace Components {
              * Description of the custom action
              */
             description?: string;
-            /**
-             * The ID of the app to fetch configuration from the app API
-             * example:
-             * c451c26a-cc7a-4c1c-92bf-1c6246cbfe88
-             */
-            app_id: string;
-            /**
-             * The ID of the component to fetch configuration from the app API
-             * example:
-             * 12345678-1234-1234-1234-123456789012
-             */
-            component_id: string;
         }
         /**
          * How often the subscription is billed
@@ -636,18 +628,6 @@ declare namespace Components {
              * Description of the custom action
              */
             description?: string;
-            /**
-             * The ID of the app to fetch configuration from the app API
-             * example:
-             * c451c26a-cc7a-4c1c-92bf-1c6246cbfe88
-             */
-            app_id: string;
-            /**
-             * The ID of the component to fetch configuration from the app API
-             * example:
-             * 12345678-1234-1234-1234-123456789012
-             */
-            component_id: string;
             type: "external_integration";
             external_integration_settings?: {
                 /**
@@ -975,6 +955,10 @@ declare namespace Components {
             version: string;
             role?: Role;
             /**
+             * Latest version of the app
+             */
+            latest_version?: string;
+            /**
              * Flag to indicate if the app is public.
              */
             public?: boolean;
@@ -1237,8 +1221,7 @@ declare namespace Paths {
         }
         export type RequestBody = Components.RequestBodies.InstallRequest;
         namespace Responses {
-            export interface $204 {
-            }
+            export type $201 = /* Information about the installed app. Has configuration data of the installed version */ Components.Schemas.Installation;
             export interface $404 {
             }
         }
@@ -1634,7 +1617,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.Install.PathParameters> | null,
     data?: Paths.Install.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.Install.Responses.$204>
+  ): OperationResponse<Paths.Install.Responses.$201>
   /**
    * patchInstallation - patchInstallation
    * 
@@ -1890,7 +1873,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.Install.PathParameters> | null,
       data?: Paths.Install.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.Install.Responses.$204>
+    ): OperationResponse<Paths.Install.Responses.$201>
     /**
      * patchInstallation - patchInstallation
      * 
