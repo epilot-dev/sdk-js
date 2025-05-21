@@ -15,6 +15,17 @@
         },
         "responses": {}
       }
+    },
+    "/v1/erp/trigger": {
+      "post": {
+        "operationId": "triggerErp",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {},

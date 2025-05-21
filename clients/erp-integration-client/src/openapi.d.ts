@@ -30,6 +30,25 @@ declare namespace Paths {
             }
         }
     }
+    namespace TriggerErp {
+        export interface RequestBody {
+            /**
+             * The Webhook that relates to this service action.
+             */
+            webhookId: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                message?: string;
+            }
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $500 {
+            }
+        }
+    }
 }
 
 
@@ -44,6 +63,16 @@ export interface OperationMethods {
     data?: Paths.AcknowledgeTracking.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AcknowledgeTracking.Responses.$200>
+  /**
+   * triggerErp - Trigger ERP integration
+   * 
+   * Triggers the ERP integration process
+   */
+  'triggerErp'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.TriggerErp.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TriggerErp.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -58,6 +87,18 @@ export interface PathsDictionary {
       data?: Paths.AcknowledgeTracking.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AcknowledgeTracking.Responses.$200>
+  }
+  ['/v1/erp/trigger']: {
+    /**
+     * triggerErp - Trigger ERP integration
+     * 
+     * Triggers the ERP integration process
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.TriggerErp.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TriggerErp.Responses.$200>
   }
 }
 
