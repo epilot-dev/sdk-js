@@ -1,0 +1,101 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ERP Integration API",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "erp",
+      "description": "ERP integration endpoints"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/erp/tracking/acknowledgement": {
+      "post": {
+        "operationId": "acknowledgeTracking",
+        "summary": "Acknowledge receival of ERP tracking record",
+        "description": "Acknowledges an ERP tracking record by removing it from the tracking table, requires public authentication",
+        "tags": [
+          "erp"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "ack_id"
+                ],
+                "properties": {
+                  "ack_id": {
+                    "type": "string",
+                    "description": "Unique identifier of the ERP tracking record to acknowledge"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Acknowledgment successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing ack_id"
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "404": {
+            "description": "Record not found"
+          },
+          "500": {
+            "description": "Server error processing the request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotPublicAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot public access token",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://erp-integration-api.sls.epilot.io"
+    },
+    {
+      "url": "https://erp-integration-api.sls.epilot.io"
+    }
+  ]
+}

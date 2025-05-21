@@ -1,0 +1,26 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/erp/tracking/acknowledgement": {
+      "post": {
+        "operationId": "acknowledgeTracking",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://erp-integration-api.sls.epilot.io"
+    }
+  ]
+}
