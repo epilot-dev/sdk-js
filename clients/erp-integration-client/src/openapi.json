@@ -72,6 +72,61 @@
           }
         }
       }
+    },
+    "/v1/erp/trigger": {
+      "post": {
+        "operationId": "triggerErp",
+        "summary": "Trigger ERP integration",
+        "description": "Triggers the ERP integration process",
+        "tags": [
+          "erp",
+          "trigger"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "webhookId"
+                ],
+                "properties": {
+                  "webhookId": {
+                    "type": "string",
+                    "description": "The Webhook that relates to this service action."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - if the ERP Toolkit was triggered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing webhookId"
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "500": {
+            "description": "Server error processing the request"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -91,9 +146,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://erp-integration-api.sls.epilot.io"
-    },
     {
       "url": "https://erp-integration-api.sls.epilot.io"
     }
