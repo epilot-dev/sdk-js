@@ -457,10 +457,6 @@ declare namespace Components {
              */
             price_id?: string;
             /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
-            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -749,10 +745,6 @@ declare namespace Components {
              */
             price_id?: string;
             /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
-            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -905,10 +897,6 @@ declare namespace Components {
              * The id of the price.
              */
             price_id?: string;
-            /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
             /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
@@ -1565,10 +1553,6 @@ declare namespace Components {
              */
             price_id?: string;
             /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
-            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -1869,10 +1853,6 @@ declare namespace Components {
              */
             price_id?: string;
             /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: true;
-            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -2035,6 +2015,10 @@ declare namespace Components {
              * The coupons applicable to the price item
              */
             _coupons?: (CouponItem)[];
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: true;
             /**
              * Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).
              */
@@ -2973,6 +2957,11 @@ declare namespace Components {
              */
             base_url?: string;
         }
+        export interface Offer {
+            product_id?: string;
+            price_id?: string;
+            target_id?: string;
+        }
         /**
          * The opportunity entity
          * example:
@@ -3840,10 +3829,6 @@ declare namespace Components {
              */
             price_id?: string;
             /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: boolean;
-            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -4154,10 +4139,6 @@ declare namespace Components {
              */
             price_id?: string;
             /**
-             * The flag for prices that contain price components.
-             */
-            is_composite_price?: false;
-            /**
              * An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name.
              */
             description?: string;
@@ -4348,6 +4329,10 @@ declare namespace Components {
              * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
+            /**
+             * The flag for prices that contain price components.
+             */
+            is_composite_price?: false;
             /**
              * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
@@ -4796,6 +4781,95 @@ declare namespace Components {
             _updated_at?: string;
         }
         export type ProductCategory = "power" | "gas";
+        /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z"
+         * }
+         */
+        export interface ProductRecommendation {
+            _id: EntityId /* uuid */;
+            /**
+             * Title of entity
+             */
+            _title: string;
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org: string;
+            _schema: string;
+            _tags?: string[];
+            _created_at: string; // date-time
+            _updated_at: string; // date-time
+            /**
+             * Price being used as source
+             */
+            source_price?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Product being used as source
+             */
+            source_product?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Type of product recommendation
+             */
+            type?: "change" | "cross-sell" | "up-sell";
+            offer?: Offer[];
+        }
+        /**
+         * Product recommendations request payload
+         */
+        export interface ProductRecommendationResponse {
+            /**
+             * The number os results returned.
+             */
+            hits?: number;
+            results?: /**
+             * example:
+             * {
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "_org": "123",
+             *   "_schema": "contact",
+             *   "_tags": [
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
+             * }
+             */
+            ProductRecommendation[];
+        }
+        /**
+         * Product recommendations request payload
+         */
+        export interface ProductRecommendationSearch {
+            product_recommendation_ids?: string[];
+            /**
+             * The catalog item to be used as source for the recommendation
+             */
+            catalog_item?: {
+                /**
+                 * Product id
+                 */
+                product_id?: string;
+                /**
+                 * Product id
+                 */
+                price_id?: string;
+            };
+        }
         /**
          * example:
          * {
@@ -5612,6 +5686,19 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $ProductRecommendations {
+        export interface HeaderParameters {
+            "X-Ivy-Org-ID"?: Parameters.XIvyOrgID;
+        }
+        namespace Parameters {
+            export type XIvyOrgID = string;
+        }
+        export type RequestBody = /* Product recommendations request payload */ Components.Schemas.ProductRecommendationSearch;
+        namespace Responses {
+            export type $200 = /* Product recommendations request payload */ Components.Schemas.ProductRecommendationResponse;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace $SaveCredentials {
         namespace Parameters {
             export type IntegrationId = Components.Schemas.IntegrationId;
@@ -5996,6 +6083,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
+  /**
+   * $productRecommendations - productRecommendations
+   * 
+   * Get a list of product recommendations based on the search parameters.
+   */
+  '$productRecommendations'(
+    parameters?: Parameters<Paths.$ProductRecommendations.HeaderParameters> | null,
+    data?: Paths.$ProductRecommendations.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ProductRecommendations.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -6226,6 +6323,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
   }
+  ['/v1/public/product-recommendations']: {
+    /**
+     * $productRecommendations - productRecommendations
+     * 
+     * Get a list of product recommendations based on the search parameters.
+     */
+    'post'(
+      parameters?: Parameters<Paths.$ProductRecommendations.HeaderParameters> | null,
+      data?: Paths.$ProductRecommendations.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ProductRecommendations.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -6295,6 +6404,7 @@ export type MarkupPricingModel = Components.Schemas.MarkupPricingModel;
 export type MetaData = Components.Schemas.MetaData;
 export type OAuthCredentials = Components.Schemas.OAuthCredentials;
 export type OAuthIntegration = Components.Schemas.OAuthIntegration;
+export type Offer = Components.Schemas.Offer;
 export type Opportunity = Components.Schemas.Opportunity;
 export type OpportunitySource = Components.Schemas.OpportunitySource;
 export type Order = Components.Schemas.Order;
@@ -6324,6 +6434,9 @@ export type PricingDetailsResponse = Components.Schemas.PricingDetailsResponse;
 export type PricingModel = Components.Schemas.PricingModel;
 export type Product = Components.Schemas.Product;
 export type ProductCategory = Components.Schemas.ProductCategory;
+export type ProductRecommendation = Components.Schemas.ProductRecommendation;
+export type ProductRecommendationResponse = Components.Schemas.ProductRecommendationResponse;
+export type ProductRecommendationSearch = Components.Schemas.ProductRecommendationSearch;
 export type PromoCode = Components.Schemas.PromoCode;
 export type PromoCodeValidationResponse = Components.Schemas.PromoCodeValidationResponse;
 export type Provider = Components.Schemas.Provider;

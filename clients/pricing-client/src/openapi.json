@@ -2211,6 +2211,133 @@
           }
         }
       }
+    },
+    "/v1/public/product-recommendations": {
+      "post": {
+        "description": "Get a list of product recommendations based on the search parameters.",
+        "operationId": "$productRecommendations",
+        "summary": "productRecommendations",
+        "security": [
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
+        "tags": [
+          "Product Recommendations API"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "example": 739224,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRecommendationSearch"
+              },
+              "examples": {
+                "Search product recommendations by id": {
+                  "value": {
+                    "product_recommendation_ids": [
+                      "bae8d40a-0093-483a-b4f9-3653800b6781"
+                    ]
+                  }
+                },
+                "Search product recommendations source product and price": {
+                  "value": {
+                    "catalog_item": {
+                      "product_id": "aa1ebf85-f36e-46ff-978c-ed948c646f12",
+                      "price_id": "4ecf9a61-a974-4594-bae2-bcb798f54d76"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The product recommendations result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductRecommendationResponse"
+                },
+                "examples": {
+                  "Product recommendations": {
+                    "value": {
+                      "hits": 1,
+                      "results": [
+                        {
+                          "_title": "Tarifwechsel 2025",
+                          "_created_at": "2025-01-29T15:46:41.014Z",
+                          "_updated_at": "2025-01-29T15:46:41.014Z",
+                          "name": "Tarifwechsel 2025",
+                          "type": "change",
+                          "source_product": {
+                            "$relation": [
+                              {
+                                "entity_id": "e2b12b54-d904-42b7-ac44-802d8ebaadf4"
+                              }
+                            ]
+                          },
+                          "source_price": {
+                            "$relation": [
+                              {
+                                "entity_id": "255877f3-f9c2-483e-9c71-89088c142bfc"
+                              }
+                            ]
+                          },
+                          "_schema": "product_recommendation",
+                          "offers": [
+                            {
+                              "target_id": "f9aa8757-505b-46bd-9310-605d64849565",
+                              "items": [
+                                {
+                                  "product_id": "70ad8a08-46c2-473b-b1c5-8bccfb85e452",
+                                  "price_id": "26c9c39d-db4a-4132-af2e-86ab5c7b156c"
+                                },
+                                {
+                                  "product_id": "dd97a2a4-e48b-43c5-8717-7ac563c67e05",
+                                  "price_id": "4ecf9a61-a974-4594-bae2-bcb798f54d76"
+                                },
+                                {
+                                  "product_id": "aa1ebf85-f36e-46ff-978c-ed948c646f12",
+                                  "price_id": "4ecf9a61-a974-4594-bae2-bcb798f54d76"
+                                }
+                              ]
+                            }
+                          ],
+                          "_id": "6d872912-ef8a-4815-b9db-01744c0828ac",
+                          "_org": "739224"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4356,10 +4483,6 @@
           "price_id": {
             "type": "string",
             "description": "The id of the price."
-          },
-          "is_composite_price": {
-            "description": "The flag for prices that contain price components.",
-            "type": "boolean"
           },
           "description": {
             "type": "string",
@@ -6720,6 +6843,112 @@
           "pricing_details",
           "_meta"
         ]
+      },
+      "ProductRecommendationSearch": {
+        "description": "Product recommendations request payload",
+        "type": "object",
+        "properties": {
+          "product_recommendation_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Product recommendation id"
+            }
+          },
+          "catalog_item": {
+            "type": "object",
+            "description": "The catalog item to be used as source for the recommendation",
+            "properties": {
+              "product_id": {
+                "type": "string",
+                "description": "Product id"
+              },
+              "price_id": {
+                "type": "string",
+                "description": "Product id"
+              }
+            }
+          }
+        }
+      },
+      "ProductRecommendationResponse": {
+        "description": "Product recommendations request payload",
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "number",
+            "description": "The number os results returned."
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendation"
+            }
+          }
+        }
+      },
+      "Offer": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "price_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductRecommendation": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EntityItem"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "source_price": {
+            "type": "object",
+            "description": "Price being used as source",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "source_product": {
+            "type": "object",
+            "description": "Product being used as source",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of product recommendation",
+            "enum": [
+              "change",
+              "cross-sell",
+              "up-sell"
+            ]
+          },
+          "offer": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Offer"
+            }
+          }
+        }
       }
     },
     "examples": {
