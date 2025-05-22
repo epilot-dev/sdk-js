@@ -2968,7 +2968,10 @@
           },
           "is_composite_price": {
             "description": "The flag for prices that contain price components.",
-            "type": "boolean"
+            "type": "boolean",
+            "enum": [
+              false
+            ]
           },
           "pricing_model": {
             "type": "string",
@@ -3144,19 +3147,22 @@
           "pricing_model"
         ]
       },
-      "CompositePrice": {
+      "BaseCompositePrice": {
         "allOf": [
           {
             "$ref": "#/components/schemas/PriceConditions"
           }
         ],
         "type": "object",
-        "description": "The price entity schema for dynamic pricing",
+        "description": "The common properties for a composite price entity, without the price components",
         "example": {
           "$ref": "#/components/examples/composite-price"
         },
         "additionalProperties": true,
         "readOnly": true,
+        "required": [
+          "is_composite_price"
+        ],
         "properties": {
           "active": {
             "type": "boolean",
@@ -3198,7 +3204,10 @@
           },
           "is_composite_price": {
             "description": "The flag for prices that contain price components.",
-            "type": "boolean"
+            "type": "boolean",
+            "enum": [
+              true
+            ]
           },
           "_created_at": {
             "description": "The price creation date",
@@ -3228,6 +3237,58 @@
             }
           }
         }
+      },
+      "NonHydratedCompositePrice": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCompositePrice"
+          }
+        ],
+        "type": "object",
+        "description": "The composite price entity",
+        "properties": {
+          "price_components": {
+            "description": "A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price.",
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PriceComponentRelation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "HydratedCompositePrice": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCompositePrice"
+          }
+        ],
+        "type": "object",
+        "description": "The composite price entity",
+        "properties": {
+          "price_components": {
+            "description": "A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Price"
+            }
+          }
+        }
+      },
+      "CompositePrice": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/NonHydratedCompositePrice"
+          },
+          {
+            "$ref": "#/components/schemas/HydratedCompositePrice"
+          }
+        ],
+        "description": "The composite price entity"
       },
       "PriceComponentRelation": {
         "type": "object",
@@ -4514,7 +4575,7 @@
           }
         }
       },
-      "PriceItemUnion": {
+      "PriceItemDtoUnion": {
         "anyOf": [
           {
             "$ref": "#/components/schemas/PriceItemDto"
@@ -4535,7 +4596,7 @@
         "description": "A valid set of product prices, quantities, (discounts) and taxes from a client.",
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/PriceItemUnion"
+          "$ref": "#/components/schemas/PriceItemDtoUnion"
         }
       },
       "BasePriceItemDto": {
@@ -4692,6 +4753,9 @@
           },
           {
             "type": "object",
+            "required": [
+              "is_composite_price"
+            ],
             "properties": {
               "is_composite_price": {
                 "description": "The flag for prices that contain price components.",
@@ -4999,7 +5063,17 @@
         ],
         "description": "Represents a composite price input to the pricing library.",
         "type": "object",
+        "required": [
+          "is_composite_price"
+        ],
         "properties": {
+          "is_composite_price": {
+            "description": "The flag for prices that contain price components.",
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
           "item_components": {
             "type": "array",
             "description": "Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).",
@@ -5295,6 +5369,13 @@
             "enum": [
               "one_time",
               "recurring"
+            ]
+          },
+          "is_composite_price": {
+            "description": "The flag for prices that contain price components.",
+            "type": "boolean",
+            "enum": [
+              false
             ]
           },
           "billing_period": {
@@ -5629,7 +5710,7 @@
           "matched_coupons": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/BaseCoupon"
+              "$ref": "#/components/schemas/CouponWithoutPromoCodes"
             }
           }
         }
@@ -6078,9 +6159,9 @@
           }
         }
       },
-      "BaseCoupon": {
+      "BaseCouponCommon": {
         "type": "object",
-        "description": "The coupon configuration",
+        "description": "The shared properties for the coupon entity and coupon item entity",
         "additionalProperties": true,
         "required": [
           "name",
@@ -6089,187 +6170,9 @@
           "_org",
           "_schema",
           "_created_at",
-          "_updated_at"
-        ],
-        "properties": {
-          "_id": {
-            "$ref": "#/components/schemas/EntityId",
-            "readOnly": true
-          },
-          "_title": {
-            "type": "string",
-            "description": "The auto-generated title for the title",
-            "readOnly": true
-          },
-          "_org": {
-            "type": "string",
-            "description": "Organization Id the entity belongs to",
-            "readOnly": true
-          },
-          "_schema": {
-            "type": "string",
-            "enum": [
-              "coupon"
-            ],
-            "readOnly": true,
-            "description": "The schema of the entity, for coupons it is always `coupon`"
-          },
-          "_tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "_created_at": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The creation date for the opportunity"
-          },
-          "_updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The date the coupon was last updated"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "fixed",
-              "percentage"
-            ]
-          },
-          "category": {
-            "type": "string",
-            "enum": [
-              "discount",
-              "cashback"
-            ]
-          },
-          "percentage_value": {
-            "type": "string",
-            "description": "Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.",
-            "nullable": true
-          },
-          "fixed_value": {
-            "description": "Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.",
-            "type": "number"
-          },
-          "fixed_value_decimal": {
-            "description": "Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.",
-            "type": "string"
-          },
-          "fixed_value_currency": {
-            "description": "Use if type is set to fixed. Three-letter ISO currency code, in lowercase.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Currency"
-              }
-            ]
-          },
-          "cashback_period": {
-            "type": "string",
-            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
-            "enum": [
-              "0",
-              "12"
-            ],
-            "nullable": true
-          },
-          "active": {
-            "type": "boolean"
-          },
-          "requires_promo_code": {
-            "type": "boolean",
-            "description": "Whether the coupon requires a promo code to be applied"
-          },
-          "prices": {
-            "description": "The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.",
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "$relation": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/EntityRelation"
-                    }
-                  }
-                }
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Price"
-                }
-              }
-            ]
-          }
-        },
-        "example": {
-          "_id": "123e4567-e89b-12d3-a456-426614174000",
-          "_schema": "coupon",
-          "_org": "org_12345",
-          "_created_at": "2024-01-15T10:00:00.000Z",
-          "_updated_at": "2024-01-20T12:00:00.000Z",
-          "_title": "Sample Coupon",
-          "name": "Sample Coupon",
-          "type": "fixed",
-          "fixed_value": 555,
-          "fixed_value_currency": "USD",
-          "fixed_value_decimal": "5.55",
-          "active": true,
-          "prices": {
-            "$relation": [
-              {
-                "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
-                "_tags": [
-                  "discount",
-                  "special"
-                ],
-                "_schema": "price"
-              }
-            ]
-          }
-        }
-      },
-      "Coupon": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseCoupon"
-          }
-        ],
-        "type": "object",
-        "properties": {
-          "promo_codes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PromoCode"
-            }
-          },
-          "promo_code_usage": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "number"
-            },
-            "description": "Map of ids of promo codes with their usage count"
-          }
-        }
-      },
-      "CouponItem": {
-        "type": "object",
-        "required": [
+          "_updated_at",
           "type",
-          "category",
-          "_schema"
+          "category"
         ],
         "properties": {
           "_id": {
@@ -6374,9 +6277,93 @@
         }
       },
       "CouponWithoutPromoCodes": {
+        "type": "object",
+        "description": "The base for the coupon entity without promo codes",
         "allOf": [
           {
-            "$ref": "#/components/schemas/BaseCoupon"
+            "$ref": "#/components/schemas/BaseCouponCommon"
+          }
+        ],
+        "properties": {
+          "prices": {
+            "description": "The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.",
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                }
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Price"
+                }
+              }
+            ]
+          }
+        },
+        "example": {
+          "_id": "123e4567-e89b-12d3-a456-426614174000",
+          "_schema": "coupon",
+          "_org": "org_12345",
+          "_created_at": "2024-01-15T10:00:00.000Z",
+          "_updated_at": "2024-01-20T12:00:00.000Z",
+          "_title": "Sample Coupon",
+          "name": "Sample Coupon",
+          "type": "fixed",
+          "fixed_value": 555,
+          "fixed_value_currency": "USD",
+          "fixed_value_decimal": "5.55",
+          "active": true,
+          "prices": {
+            "$relation": [
+              {
+                "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+                "_tags": [
+                  "discount",
+                  "special"
+                ],
+                "_schema": "price"
+              }
+            ]
+          }
+        }
+      },
+      "Coupon": {
+        "description": "The coupon entity",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CouponWithoutPromoCodes"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "promo_codes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromoCode"
+            }
+          },
+          "promo_code_usage": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Map of ids of promo codes with their usage count"
+          }
+        }
+      },
+      "CouponItem": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCouponCommon"
           }
         ]
       },
