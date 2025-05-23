@@ -2211,6 +2211,133 @@
           }
         }
       }
+    },
+    "/v1/public/product-recommendations": {
+      "post": {
+        "description": "Get a list of product recommendations based on the search parameters.",
+        "operationId": "$productRecommendations",
+        "summary": "productRecommendations",
+        "security": [
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
+        "tags": [
+          "Product Recommendations API"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "description": "The target Organization Id represented by the caller",
+            "example": 739224,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRecommendationSearch"
+              },
+              "examples": {
+                "Search product recommendations by id": {
+                  "value": {
+                    "product_recommendation_ids": [
+                      "bae8d40a-0093-483a-b4f9-3653800b6781"
+                    ]
+                  }
+                },
+                "Search product recommendations source product and price": {
+                  "value": {
+                    "catalog_item": {
+                      "product_id": "aa1ebf85-f36e-46ff-978c-ed948c646f12",
+                      "price_id": "4ecf9a61-a974-4594-bae2-bcb798f54d76"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The product recommendations result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductRecommendationResponse"
+                },
+                "examples": {
+                  "Product recommendations": {
+                    "value": {
+                      "hits": 1,
+                      "results": [
+                        {
+                          "_title": "Tarifwechsel 2025",
+                          "_created_at": "2025-01-29T15:46:41.014Z",
+                          "_updated_at": "2025-01-29T15:46:41.014Z",
+                          "name": "Tarifwechsel 2025",
+                          "type": "change",
+                          "source_product": {
+                            "$relation": [
+                              {
+                                "entity_id": "e2b12b54-d904-42b7-ac44-802d8ebaadf4"
+                              }
+                            ]
+                          },
+                          "source_price": {
+                            "$relation": [
+                              {
+                                "entity_id": "255877f3-f9c2-483e-9c71-89088c142bfc"
+                              }
+                            ]
+                          },
+                          "_schema": "product_recommendation",
+                          "offers": [
+                            {
+                              "target_id": "f9aa8757-505b-46bd-9310-605d64849565",
+                              "items": [
+                                {
+                                  "product_id": "70ad8a08-46c2-473b-b1c5-8bccfb85e452",
+                                  "price_id": "26c9c39d-db4a-4132-af2e-86ab5c7b156c"
+                                },
+                                {
+                                  "product_id": "dd97a2a4-e48b-43c5-8717-7ac563c67e05",
+                                  "price_id": "4ecf9a61-a974-4594-bae2-bcb798f54d76"
+                                },
+                                {
+                                  "product_id": "aa1ebf85-f36e-46ff-978c-ed948c646f12",
+                                  "price_id": "4ecf9a61-a974-4594-bae2-bcb798f54d76"
+                                }
+                              ]
+                            }
+                          ],
+                          "_id": "6d872912-ef8a-4815-b9db-01744c0828ac",
+                          "_org": "739224"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2841,7 +2968,10 @@
           },
           "is_composite_price": {
             "description": "The flag for prices that contain price components.",
-            "type": "boolean"
+            "type": "boolean",
+            "enum": [
+              false
+            ]
           },
           "pricing_model": {
             "type": "string",
@@ -3017,19 +3147,22 @@
           "pricing_model"
         ]
       },
-      "CompositePrice": {
+      "BaseCompositePrice": {
         "allOf": [
           {
             "$ref": "#/components/schemas/PriceConditions"
           }
         ],
         "type": "object",
-        "description": "The price entity schema for dynamic pricing",
+        "description": "The common properties for a composite price entity, without the price components",
         "example": {
           "$ref": "#/components/examples/composite-price"
         },
         "additionalProperties": true,
         "readOnly": true,
+        "required": [
+          "is_composite_price"
+        ],
         "properties": {
           "active": {
             "type": "boolean",
@@ -3071,7 +3204,10 @@
           },
           "is_composite_price": {
             "description": "The flag for prices that contain price components.",
-            "type": "boolean"
+            "type": "boolean",
+            "enum": [
+              true
+            ]
           },
           "_created_at": {
             "description": "The price creation date",
@@ -3101,6 +3237,58 @@
             }
           }
         }
+      },
+      "NonHydratedCompositePrice": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCompositePrice"
+          }
+        ],
+        "type": "object",
+        "description": "The composite price entity",
+        "properties": {
+          "price_components": {
+            "description": "A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price.",
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PriceComponentRelation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "HydratedCompositePrice": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCompositePrice"
+          }
+        ],
+        "type": "object",
+        "description": "The composite price entity",
+        "properties": {
+          "price_components": {
+            "description": "A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Price"
+            }
+          }
+        }
+      },
+      "CompositePrice": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/NonHydratedCompositePrice"
+          },
+          {
+            "$ref": "#/components/schemas/HydratedCompositePrice"
+          }
+        ],
+        "description": "The composite price entity"
       },
       "PriceComponentRelation": {
         "type": "object",
@@ -3193,14 +3381,7 @@
           }
         },
         "example": {
-          "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-          "frequency_unit": "weekly",
-          "value": 1000.245,
-          "name": "avg consumption",
-          "metadata": {
-            "journey_title": "energy journey",
-            "step_name": "avg consumption picker"
-          }
+          "$ref": "#/components/examples/price-input-mapping/value"
         }
       },
       "PriceConditions": {
@@ -3293,14 +3474,9 @@
         "items": {
           "$ref": "#/components/schemas/ExternalFeeMapping"
         },
-        "example": [
-          {
-            "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-            "frequency_unit": "weekly",
-            "amount_total": 1000,
-            "amount_total_decimal": "10.00"
-          }
-        ]
+        "example": {
+          "$ref": "#/components/examples/external-fee-mappings/value"
+        }
       },
       "ExternalFeeMapping": {
         "type": "object",
@@ -3327,10 +3503,7 @@
           }
         },
         "example": {
-          "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
-          "frequency_unit": "weekly",
-          "amount_total": 1000,
-          "amount_total_decimal": "10.00"
+          "$ref": "#/components/examples/external-fee-mapping/value"
         }
       },
       "CatalogSearch": {
@@ -4357,10 +4530,6 @@
             "type": "string",
             "description": "The id of the price."
           },
-          "is_composite_price": {
-            "description": "The flag for prices that contain price components.",
-            "type": "boolean"
-          },
           "description": {
             "type": "string",
             "description": "An arbitrary string attached to the price item. Often useful for displaying to users. Defaults to product name."
@@ -4391,7 +4560,7 @@
           }
         }
       },
-      "PriceItemUnion": {
+      "PriceItemDtoUnion": {
         "anyOf": [
           {
             "$ref": "#/components/schemas/PriceItemDto"
@@ -4412,7 +4581,7 @@
         "description": "A valid set of product prices, quantities, (discounts) and taxes from a client.",
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/PriceItemUnion"
+          "$ref": "#/components/schemas/PriceItemDtoUnion"
         }
       },
       "BasePriceItemDto": {
@@ -4505,14 +4674,11 @@
                 ]
               },
               "billing_period": {
-                "type": "string",
                 "description": "The price billing period.",
-                "enum": [
-                  "weekly",
-                  "monthly",
-                  "every_quarter",
-                  "every_6_months",
-                  "yearly"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/BillingPeriod"
+                  }
                 ]
               },
               "unit_amount": {
@@ -4569,6 +4735,9 @@
           },
           {
             "type": "object",
+            "required": [
+              "is_composite_price"
+            ],
             "properties": {
               "is_composite_price": {
                 "description": "The flag for prices that contain price components.",
@@ -4671,14 +4840,11 @@
             "description": "The price type."
           },
           "billing_period": {
-            "type": "string",
             "description": "The price billing period.",
-            "enum": [
-              "weekly",
-              "monthly",
-              "every_quarter",
-              "every_6_months",
-              "yearly"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BillingPeriod"
+              }
             ]
           },
           "unit_amount_gross": {
@@ -4876,7 +5042,17 @@
         ],
         "description": "Represents a composite price input to the pricing library.",
         "type": "object",
+        "required": [
+          "is_composite_price"
+        ],
         "properties": {
+          "is_composite_price": {
+            "description": "The flag for prices that contain price components.",
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
           "item_components": {
             "type": "array",
             "description": "Contains price item configurations, per price component, when the main price item is a [composite price](/api/pricing#tag/dynamic_price_schema).",
@@ -5174,15 +5350,19 @@
               "recurring"
             ]
           },
-          "billing_period": {
-            "type": "string",
-            "description": "The price billing period.",
+          "is_composite_price": {
+            "description": "The flag for prices that contain price components.",
+            "type": "boolean",
             "enum": [
-              "weekly",
-              "monthly",
-              "every_quarter",
-              "every_6_months",
-              "yearly"
+              false
+            ]
+          },
+          "billing_period": {
+            "description": "The price billing period.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BillingPeriod"
+              }
             ]
           },
           "pricing_model": {
@@ -5274,14 +5454,11 @@
             "description": "The price type."
           },
           "billing_period": {
-            "type": "string",
             "description": "The price billing period.",
-            "enum": [
-              "weekly",
-              "monthly",
-              "every_quarter",
-              "every_6_months",
-              "yearly"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BillingPeriod"
+              }
             ]
           },
           "unit_amount_gross": {
@@ -5344,14 +5521,11 @@
             "description": "The price type."
           },
           "billing_period": {
-            "type": "string",
             "description": "The price billing period.",
-            "enum": [
-              "weekly",
-              "monthly",
-              "every_quarter",
-              "every_6_months",
-              "yearly"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BillingPeriod"
+              }
             ]
           },
           "amount_total": {
@@ -5506,7 +5680,7 @@
           "matched_coupons": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/BaseCoupon"
+              "$ref": "#/components/schemas/CouponWithoutPromoCodes"
             }
           }
         }
@@ -5824,15 +5998,7 @@
           "_updated_at"
         ],
         "example": {
-          "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "_org": "123",
-          "_schema": "contact",
-          "_tags": [
-            "example",
-            "mock"
-          ],
-          "_created_at": "2021-02-09T12:41:43.662Z",
-          "_updated_at": "2021-02-09T12:41:43.662Z"
+          "$ref": "#/components/examples/entity-item/value"
         }
       },
       "EntityRelation": {
@@ -5919,20 +6085,7 @@
           }
         },
         "example": {
-          "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "type": "VAT",
-          "description": "Tax description",
-          "active": "true",
-          "region": "DE",
-          "region_label": "Germany",
-          "_org": "123",
-          "_schema": "tax",
-          "_tags": [
-            "example",
-            "mock"
-          ],
-          "_created_at": "2021-02-09T12:41:43.662Z",
-          "_updated_at": "2021-02-09T12:41:43.662Z"
+          "$ref": "#/components/examples/tax/value"
         }
       },
       "TaxBreakdownInfo": {
@@ -5955,9 +6108,9 @@
           }
         }
       },
-      "BaseCoupon": {
+      "BaseCouponCommon": {
         "type": "object",
-        "description": "The coupon configuration",
+        "description": "The shared properties for the coupon entity and coupon item entity",
         "additionalProperties": true,
         "required": [
           "name",
@@ -5966,187 +6119,9 @@
           "_org",
           "_schema",
           "_created_at",
-          "_updated_at"
-        ],
-        "properties": {
-          "_id": {
-            "$ref": "#/components/schemas/EntityId",
-            "readOnly": true
-          },
-          "_title": {
-            "type": "string",
-            "description": "The auto-generated title for the title",
-            "readOnly": true
-          },
-          "_org": {
-            "type": "string",
-            "description": "Organization Id the entity belongs to",
-            "readOnly": true
-          },
-          "_schema": {
-            "type": "string",
-            "enum": [
-              "coupon"
-            ],
-            "readOnly": true,
-            "description": "The schema of the entity, for coupons it is always `coupon`"
-          },
-          "_tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "_created_at": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The creation date for the opportunity"
-          },
-          "_updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true,
-            "description": "The date the coupon was last updated"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "fixed",
-              "percentage"
-            ]
-          },
-          "category": {
-            "type": "string",
-            "enum": [
-              "discount",
-              "cashback"
-            ]
-          },
-          "percentage_value": {
-            "type": "string",
-            "description": "Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.",
-            "nullable": true
-          },
-          "fixed_value": {
-            "description": "Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.",
-            "type": "number"
-          },
-          "fixed_value_decimal": {
-            "description": "Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.",
-            "type": "string"
-          },
-          "fixed_value_currency": {
-            "description": "Use if type is set to fixed. Three-letter ISO currency code, in lowercase.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Currency"
-              }
-            ]
-          },
-          "cashback_period": {
-            "type": "string",
-            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
-            "enum": [
-              "0",
-              "12"
-            ],
-            "nullable": true
-          },
-          "active": {
-            "type": "boolean"
-          },
-          "requires_promo_code": {
-            "type": "boolean",
-            "description": "Whether the coupon requires a promo code to be applied"
-          },
-          "prices": {
-            "description": "The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.",
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "$relation": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/EntityRelation"
-                    }
-                  }
-                }
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Price"
-                }
-              }
-            ]
-          }
-        },
-        "example": {
-          "_id": "123e4567-e89b-12d3-a456-426614174000",
-          "_schema": "coupon",
-          "_org": "org_12345",
-          "_created_at": "2024-01-15T10:00:00.000Z",
-          "_updated_at": "2024-01-20T12:00:00.000Z",
-          "_title": "Sample Coupon",
-          "name": "Sample Coupon",
-          "type": "fixed",
-          "fixed_value": 555,
-          "fixed_value_currency": "USD",
-          "fixed_value_decimal": "5.55",
-          "active": true,
-          "prices": {
-            "$relation": [
-              {
-                "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
-                "_tags": [
-                  "discount",
-                  "special"
-                ],
-                "_schema": "price"
-              }
-            ]
-          }
-        }
-      },
-      "Coupon": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseCoupon"
-          }
-        ],
-        "type": "object",
-        "properties": {
-          "promo_codes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PromoCode"
-            }
-          },
-          "promo_code_usage": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "number"
-            },
-            "description": "Map of ids of promo codes with their usage count"
-          }
-        }
-      },
-      "CouponItem": {
-        "type": "object",
-        "required": [
+          "_updated_at",
           "type",
-          "category",
-          "_schema"
+          "category"
         ],
         "properties": {
           "_id": {
@@ -6251,9 +6226,70 @@
         }
       },
       "CouponWithoutPromoCodes": {
+        "type": "object",
+        "description": "The base for the coupon entity without promo codes",
         "allOf": [
           {
-            "$ref": "#/components/schemas/BaseCoupon"
+            "$ref": "#/components/schemas/BaseCouponCommon"
+          }
+        ],
+        "properties": {
+          "prices": {
+            "description": "The prices associated with the coupon. Will hold price entities if hydrated, relations otherwise.",
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                }
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Price"
+                }
+              }
+            ]
+          }
+        },
+        "example": {
+          "$ref": "#/components/examples/coupon-without-promo-codes/value"
+        }
+      },
+      "Coupon": {
+        "description": "The coupon entity",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CouponWithoutPromoCodes"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "promo_codes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromoCode"
+            }
+          },
+          "promo_code_usage": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Map of ids of promo codes with their usage count"
+          }
+        }
+      },
+      "CouponItem": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCouponCommon"
           }
         ]
       },
@@ -6283,10 +6319,7 @@
           }
         },
         "example": {
-          "id": "123e4567-e89b-12d3-a456-426614174000",
-          "code": "123456",
-          "has_usage_limit": true,
-          "usage_limit": 10
+          "$ref": "#/components/examples/promo-code/value"
         }
       },
       "RedeemedPromo": {
@@ -6720,6 +6753,112 @@
           "pricing_details",
           "_meta"
         ]
+      },
+      "ProductRecommendationSearch": {
+        "description": "Product recommendations request payload",
+        "type": "object",
+        "properties": {
+          "product_recommendation_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Product recommendation id"
+            }
+          },
+          "catalog_item": {
+            "type": "object",
+            "description": "The catalog item to be used as source for the recommendation",
+            "properties": {
+              "product_id": {
+                "type": "string",
+                "description": "Product id"
+              },
+              "price_id": {
+                "type": "string",
+                "description": "Product id"
+              }
+            }
+          }
+        }
+      },
+      "ProductRecommendationResponse": {
+        "description": "Product recommendations request payload",
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "number",
+            "description": "The number os results returned."
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendation"
+            }
+          }
+        }
+      },
+      "Offer": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "price_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductRecommendation": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EntityItem"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "source_price": {
+            "type": "object",
+            "description": "Price being used as source",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "source_product": {
+            "type": "object",
+            "description": "Product being used as source",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of product recommendation",
+            "enum": [
+              "change",
+              "cross-sell",
+              "up-sell"
+            ]
+          },
+          "offer": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Offer"
+            }
+          }
+        }
       }
     },
     "examples": {
@@ -8316,6 +8455,100 @@
             }
           ]
         }
+      },
+      "entity-item": {
+        "value": {
+          "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "_org": "123",
+          "_schema": "contact",
+          "_tags": [
+            "example",
+            "mock"
+          ],
+          "_created_at": "2021-02-09T12:41:43.662Z",
+          "_updated_at": "2021-02-09T12:41:43.662Z"
+        }
+      },
+      "tax": {
+        "value": {
+          "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "type": "VAT",
+          "description": "Tax description",
+          "active": "true",
+          "region": "DE",
+          "region_label": "Germany",
+          "_org": "123",
+          "_schema": "tax",
+          "_tags": [
+            "example",
+            "mock"
+          ],
+          "_created_at": "2021-02-09T12:41:43.662Z",
+          "_updated_at": "2021-02-09T12:41:43.662Z"
+        }
+      },
+      "coupon-without-promo-codes": {
+        "value": {
+          "_id": "123e4567-e89b-12d3-a456-426614174000",
+          "_schema": "coupon",
+          "_org": "org_12345",
+          "_created_at": "2024-01-15T10:00:00.000Z",
+          "_updated_at": "2024-01-20T12:00:00.000Z",
+          "_title": "Sample Coupon",
+          "name": "Sample Coupon",
+          "type": "fixed",
+          "fixed_value": 555,
+          "fixed_value_currency": "USD",
+          "fixed_value_decimal": "5.55",
+          "active": true,
+          "prices": {
+            "$relation": [
+              {
+                "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+                "_tags": [
+                  "discount",
+                  "special"
+                ],
+                "_schema": "price"
+              }
+            ]
+          }
+        }
+      },
+      "promo-code": {
+        "value": {
+          "id": "123e4567-e89b-12d3-a456-426614174000",
+          "code": "123456",
+          "has_usage_limit": true,
+          "usage_limit": 10
+        }
+      },
+      "price-input-mapping": {
+        "value": {
+          "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+          "frequency_unit": "weekly",
+          "value": 1000.245,
+          "name": "avg consumption",
+          "metadata": {
+            "journey_title": "energy journey",
+            "step_name": "avg consumption picker"
+          }
+        }
+      },
+      "external-fee-mapping": {
+        "value": {
+          "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+          "frequency_unit": "weekly",
+          "amount_total": 1000,
+          "amount_total_decimal": "10.00"
+        }
+      },
+      "external-fee-mappings": {
+        "value": [
+          {
+            "$ref": "#/components/examples/external-fee-mapping"
+          }
+        ]
       }
     }
   }
