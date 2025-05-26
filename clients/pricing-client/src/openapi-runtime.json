@@ -356,6 +356,24 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/public/product-recommendations": {
+      "post": {
+        "operationId": "$productRecommendations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {}
