@@ -4979,6 +4979,10 @@ declare namespace Components {
                  */
                 price_id?: string;
             };
+            /**
+             * The contract id to be used as source for the recommendation
+             */
+            contract_id?: string;
         }
         /**
          * example:

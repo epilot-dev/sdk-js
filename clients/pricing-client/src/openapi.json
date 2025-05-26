@@ -2251,12 +2251,17 @@
                     ]
                   }
                 },
-                "Search product recommendations source product and price": {
+                "Search product recommendations by source product and price": {
                   "value": {
                     "catalog_item": {
                       "product_id": "aa1ebf85-f36e-46ff-978c-ed948c646f12",
                       "price_id": "4ecf9a61-a974-4594-bae2-bcb798f54d76"
                     }
+                  }
+                },
+                "Search product recommendations by contract": {
+                  "value": {
+                    "contract_id": "98ffca40-46ab-4288-af10-a478893b2aa2"
                   }
                 }
               }
@@ -6807,6 +6812,10 @@
                 "description": "Product id"
               }
             }
+          },
+          "contract_id": {
+            "type": "string",
+            "description": "The contract id to be used as source for the recommendation"
           }
         }
       },
