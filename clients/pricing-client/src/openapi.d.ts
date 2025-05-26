@@ -82,14 +82,6 @@ declare namespace Components {
              */
             amount_total_decimal?: string;
             /**
-             * The discount amount.
-             */
-            discount_amount?: number;
-            /**
-             * The discount amount as a string with all the decimal places.
-             */
-            discount_amount_decimal?: string;
-            /**
              * The cashback amount.
              */
             cashback_amount?: number;
@@ -97,10 +89,7 @@ declare namespace Components {
              * The cashback amount as a string with all the decimal places.
              */
             cashback_amount_decimal?: string;
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period?: "0" | "12";
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             /**
              * Total amount after cashback is applied.
              */
@@ -109,6 +98,14 @@ declare namespace Components {
              * Total amount after cashback is applied as a string with all the decimal places.
              */
             after_cashback_amount_total_decimal?: string;
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -409,10 +406,7 @@ declare namespace Components {
              * EUR
              */
             Currency;
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period?: "0" | "12";
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
             /**
              * Whether the coupon requires a promo code to be applied
@@ -466,14 +460,6 @@ declare namespace Components {
              */
             amount_total_decimal?: string;
             /**
-             * The discount amount.
-             */
-            discount_amount?: number;
-            /**
-             * The discount amount as a string with all the decimal places.
-             */
-            discount_amount_decimal?: string;
-            /**
              * The cashback amount.
              */
             cashback_amount?: number;
@@ -481,10 +467,7 @@ declare namespace Components {
              * The cashback amount as a string with all the decimal places.
              */
             cashback_amount_decimal?: string;
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period?: "0" | "12";
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             /**
              * Total amount after cashback is applied.
              */
@@ -493,6 +476,14 @@ declare namespace Components {
              * Total amount after cashback is applied as a string with all the decimal places.
              */
             after_cashback_amount_total_decimal?: string;
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -1168,14 +1159,6 @@ declare namespace Components {
              */
             amount_total_decimal?: string;
             /**
-             * The discount amount.
-             */
-            discount_amount?: number;
-            /**
-             * The discount amount as a string with all the decimal places.
-             */
-            discount_amount_decimal?: string;
-            /**
              * The cashback amount.
              */
             cashback_amount?: number;
@@ -1183,10 +1166,7 @@ declare namespace Components {
              * The cashback amount as a string with all the decimal places.
              */
             cashback_amount_decimal?: string;
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period?: "0" | "12";
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             /**
              * Total amount after cashback is applied.
              */
@@ -1195,6 +1175,14 @@ declare namespace Components {
              * Total amount after cashback is applied as a string with all the decimal places.
              */
             after_cashback_amount_total_decimal?: string;
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -1288,15 +1276,35 @@ declare namespace Components {
          * An amount associated with a specific cashback period.
          */
         export interface CashbackAmount {
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period: "0" | "12";
+            cashback_period: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             /**
              * The sum of all cashbacks for a specific cashback period
              */
             amount_total: number;
         }
+        export interface CashbackAmounts {
+            /**
+             * The cashback amount.
+             */
+            cashback_amount?: number;
+            /**
+             * The cashback amount as a string with all the decimal places.
+             */
+            cashback_amount_decimal?: string;
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
+            /**
+             * Total amount after cashback is applied.
+             */
+            after_cashback_amount_total?: number;
+            /**
+             * Total amount after cashback is applied as a string with all the decimal places.
+             */
+            after_cashback_amount_total_decimal?: string;
+        }
+        /**
+         * The cashback period, for now it's limited to either 0 months or 12 months
+         */
+        export type CashbackPeriod = "0" | "12";
         /**
          * A catalog search payload
          * example:
@@ -1443,14 +1451,6 @@ declare namespace Components {
              */
             amount_total_decimal?: string;
             /**
-             * The discount amount.
-             */
-            discount_amount?: number;
-            /**
-             * The discount amount as a string with all the decimal places.
-             */
-            discount_amount_decimal?: string;
-            /**
              * The cashback amount.
              */
             cashback_amount?: number;
@@ -1458,10 +1458,7 @@ declare namespace Components {
              * The cashback amount as a string with all the decimal places.
              */
             cashback_amount_decimal?: string;
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period?: "0" | "12";
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             /**
              * Total amount after cashback is applied.
              */
@@ -1470,6 +1467,14 @@ declare namespace Components {
              * Total amount after cashback is applied as a string with all the decimal places.
              */
             after_cashback_amount_total_decimal?: string;
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -1751,9 +1756,82 @@ declare namespace Components {
              */
             recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
             /**
-             * The coupons applicable to the price item
+             * The coupons applicable to the composite price item + related (cashback) amounts
              */
-            _coupons?: (/* The shared properties for the coupon entity and coupon item entity */ CouponItem)[];
+            _coupons?: ({
+                [name: string]: any;
+                _id: EntityId /* uuid */;
+                /**
+                 * The auto-generated title for the title
+                 */
+                _title: string;
+                /**
+                 * Organization Id the entity belongs to
+                 */
+                _org: string;
+                /**
+                 * The schema of the entity, for coupons it is always `coupon`
+                 */
+                _schema: "coupon";
+                _tags?: string[];
+                /**
+                 * The creation date for the opportunity
+                 */
+                _created_at: string; // date-time
+                /**
+                 * The date the coupon was last updated
+                 */
+                _updated_at: string; // date-time
+                name: string | null;
+                description?: string | null;
+                type: "fixed" | "percentage";
+                category: "discount" | "cashback";
+                /**
+                 * Use if type is set to percentage. The percentage to be discounted, represented as a whole integer.
+                 */
+                percentage_value?: string | null;
+                /**
+                 * Use if type is set to fixed. The fixed amount in cents to be discounted, represented as a whole integer.
+                 */
+                fixed_value?: number;
+                /**
+                 * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
+                 */
+                fixed_value_decimal?: string;
+                /**
+                 * Use if type is set to fixed. Three-letter ISO currency code, in lowercase.
+                 */
+                fixed_value_currency?: /* Use if type is set to fixed. Three-letter ISO currency code, in lowercase. */ /**
+                 * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+                 * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+                 *
+                 * example:
+                 * EUR
+                 */
+                Currency;
+                cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
+                active?: boolean;
+                /**
+                 * Whether the coupon requires a promo code to be applied
+                 */
+                requires_promo_code?: boolean;
+                /**
+                 * The cashback amount.
+                 */
+                cashback_amount?: number;
+                /**
+                 * The cashback amount as a string with all the decimal places.
+                 */
+                cashback_amount_decimal?: string;
+                /**
+                 * Total amount after cashback is applied.
+                 */
+                after_cashback_amount_total?: number;
+                /**
+                 * Total amount after cashback is applied as a string with all the decimal places.
+                 */
+                after_cashback_amount_total_decimal?: string;
+            } & /* The shared properties for the coupon entity and coupon item entity */ (/* The shared properties for the coupon entity and coupon item entity */ CouponItem))[];
             /**
              * When set to true on a `_price` displayed as OnRequest (`show_as_on_request: 'on_request'`) this flag means the price has been approved and can now be displayed to the customer. This flag is only valid for prices shown as 'on_request'.
              */
@@ -2254,10 +2332,7 @@ declare namespace Components {
              * EUR
              */
             Currency;
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period?: "0" | "12";
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
             /**
              * Whether the coupon requires a promo code to be applied
@@ -2344,10 +2419,7 @@ declare namespace Components {
              * EUR
              */
             Currency;
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period?: "0" | "12";
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
             /**
              * Whether the coupon requires a promo code to be applied
@@ -2412,10 +2484,7 @@ declare namespace Components {
              * EUR
              */
             Currency;
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period?: "0" | "12";
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
             /**
              * Whether the coupon requires a promo code to be applied
@@ -2453,6 +2522,28 @@ declare namespace Components {
              */
             email?: string;
             phone?: string;
+        }
+        export interface DiscountAmounts {
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
+            /**
+             * The discount percentage, if the applied coupon had a percentage type.
+             */
+            discount_percentage?: number;
+            /**
+             * Total amount before discount is applied.
+             */
+            before_discount_amount_total?: number;
+            /**
+             * Total amount before discount is applied as a string with all the decimal places.
+             */
+            before_discount_amount_total_decimal?: string;
         }
         /**
          * The interval of the tariff if a spot market price is used as base.
@@ -3630,6 +3721,24 @@ declare namespace Components {
              */
             _tags?: string[];
         }
+        export interface PriceAmounts {
+            /**
+             * Total of all items before (discounts or) taxes are applied.
+             */
+            amount_subtotal?: number;
+            /**
+             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
+             */
+            amount_subtotal_decimal?: string;
+            /**
+             * Total of all items after (discounts and) taxes are applied.
+             */
+            amount_total?: number;
+            /**
+             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
+             */
+            amount_total_decimal?: string;
+        }
         export interface PriceComponentRelation {
             /**
              * The id of the price component
@@ -3817,14 +3926,6 @@ declare namespace Components {
              */
             amount_total_decimal?: string;
             /**
-             * The discount amount.
-             */
-            discount_amount?: number;
-            /**
-             * The discount amount as a string with all the decimal places.
-             */
-            discount_amount_decimal?: string;
-            /**
              * The cashback amount.
              */
             cashback_amount?: number;
@@ -3832,10 +3933,7 @@ declare namespace Components {
              * The cashback amount as a string with all the decimal places.
              */
             cashback_amount_decimal?: string;
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period?: "0" | "12";
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             /**
              * Total amount after cashback is applied.
              */
@@ -3844,6 +3942,14 @@ declare namespace Components {
              * Total amount after cashback is applied as a string with all the decimal places.
              */
             after_cashback_amount_total_decimal?: string;
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -4945,14 +5051,6 @@ declare namespace Components {
              */
             amount_total_decimal: string;
             /**
-             * The discount amount.
-             */
-            discount_amount?: number;
-            /**
-             * The discount amount as a string with all the decimal places.
-             */
-            discount_amount_decimal?: string;
-            /**
              * The cashback amount.
              */
             cashback_amount?: number;
@@ -4960,10 +5058,7 @@ declare namespace Components {
              * The cashback amount as a string with all the decimal places.
              */
             cashback_amount_decimal?: string;
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period?: "0" | "12";
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             /**
              * Total amount after cashback is applied.
              */
@@ -4972,6 +5067,14 @@ declare namespace Components {
              * Total amount after cashback is applied as a string with all the decimal places.
              */
             after_cashback_amount_total_decimal?: string;
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -5038,14 +5141,6 @@ declare namespace Components {
              */
             amount_total_decimal: string;
             /**
-             * The discount amount.
-             */
-            discount_amount?: number;
-            /**
-             * The discount amount as a string with all the decimal places.
-             */
-            discount_amount_decimal?: string;
-            /**
              * The cashback amount.
              */
             cashback_amount?: number;
@@ -5053,10 +5148,7 @@ declare namespace Components {
              * The cashback amount as a string with all the decimal places.
              */
             cashback_amount_decimal?: string;
-            /**
-             * The cashback period, for now it's limited to either 0 months or 12 months
-             */
-            cashback_period?: "0" | "12";
+            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             /**
              * Total amount after cashback is applied.
              */
@@ -5065,6 +5157,14 @@ declare namespace Components {
              * Total amount after cashback is applied as a string with all the decimal places.
              */
             after_cashback_amount_total_decimal?: string;
+            /**
+             * The discount amount.
+             */
+            discount_amount?: number;
+            /**
+             * The discount amount as a string with all the decimal places.
+             */
+            discount_amount_decimal?: string;
             /**
              * The discount percentage, if the applied coupon had a percentage type.
              */
@@ -6276,6 +6376,8 @@ export type BillingPeriod = Components.Schemas.BillingPeriod;
 export type Cart = Components.Schemas.Cart;
 export type CartDto = Components.Schemas.CartDto;
 export type CashbackAmount = Components.Schemas.CashbackAmount;
+export type CashbackAmounts = Components.Schemas.CashbackAmounts;
+export type CashbackPeriod = Components.Schemas.CashbackPeriod;
 export type CatalogSearch = Components.Schemas.CatalogSearch;
 export type CatalogSearchResult = Components.Schemas.CatalogSearchResult;
 export type CheckoutCart = Components.Schemas.CheckoutCart;
@@ -6298,6 +6400,7 @@ export type CouponItem = Components.Schemas.CouponItem;
 export type CouponWithoutPromoCodes = Components.Schemas.CouponWithoutPromoCodes;
 export type Currency = Components.Schemas.Currency;
 export type Customer = Components.Schemas.Customer;
+export type DiscountAmounts = Components.Schemas.DiscountAmounts;
 export type DynamicTariffInterval = Components.Schemas.DynamicTariffInterval;
 export type DynamicTariffMode = Components.Schemas.DynamicTariffMode;
 export type EntityId = Components.Schemas.EntityId;
@@ -6334,6 +6437,7 @@ export type OrderStatus = Components.Schemas.OrderStatus;
 export type PaymentMethod = Components.Schemas.PaymentMethod;
 export type PowerMeterType = Components.Schemas.PowerMeterType;
 export type Price = Components.Schemas.Price;
+export type PriceAmounts = Components.Schemas.PriceAmounts;
 export type PriceComponentRelation = Components.Schemas.PriceComponentRelation;
 export type PriceConditions = Components.Schemas.PriceConditions;
 export type PriceDynamicTariff = Components.Schemas.PriceDynamicTariff;

@@ -5062,6 +5062,21 @@
           },
           "total_details": {
             "$ref": "#/components/schemas/TotalDetails"
+          },
+          "_coupons": {
+            "type": "array",
+            "description": "The coupons applicable to the composite price item + related (cashback) amounts",
+            "readOnly": true,
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/CouponItem"
+                },
+                {
+                  "$ref": "#/components/schemas/CashbackAmounts"
+                }
+              ]
+            }
           }
         }
       },
@@ -5255,35 +5270,9 @@
           }
         }
       },
-      "Amounts": {
+      "CashbackAmounts": {
         "type": "object",
         "properties": {
-          "amount_subtotal": {
-            "type": "integer",
-            "description": "Total of all items before (discounts or) taxes are applied."
-          },
-          "amount_subtotal_decimal": {
-            "type": "string",
-            "description": "Total of all items before (discounts or) taxes are applied, as a string with all the decimal places."
-          },
-          "amount_total": {
-            "type": "integer",
-            "description": "Total of all items after (discounts and) taxes are applied."
-          },
-          "amount_total_decimal": {
-            "type": "string",
-            "description": "Total of all items after (discounts and) taxes are applied, as a string with all the decimal places."
-          },
-          "discount_amount": {
-            "type": "integer",
-            "description": "The discount amount.",
-            "readOnly": true
-          },
-          "discount_amount_decimal": {
-            "type": "string",
-            "description": "The discount amount as a string with all the decimal places.",
-            "readOnly": true
-          },
           "cashback_amount": {
             "type": "integer",
             "description": "The cashback amount.",
@@ -5295,13 +5284,7 @@
             "readOnly": true
           },
           "cashback_period": {
-            "type": "string",
-            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
-            "enum": [
-              "0",
-              "12"
-            ],
-            "nullable": true
+            "$ref": "#/components/schemas/CashbackPeriod"
           },
           "after_cashback_amount_total": {
             "type": "integer",
@@ -5311,6 +5294,21 @@
           "after_cashback_amount_total_decimal": {
             "type": "string",
             "description": "Total amount after cashback is applied as a string with all the decimal places.",
+            "readOnly": true
+          }
+        }
+      },
+      "DiscountAmounts": {
+        "type": "object",
+        "properties": {
+          "discount_amount": {
+            "type": "integer",
+            "description": "The discount amount.",
+            "readOnly": true
+          },
+          "discount_amount_decimal": {
+            "type": "string",
+            "description": "The discount amount as a string with all the decimal places.",
             "readOnly": true
           },
           "discount_percentage": {
@@ -5329,6 +5327,40 @@
             "readOnly": true
           }
         }
+      },
+      "PriceAmounts": {
+        "type": "object",
+        "properties": {
+          "amount_subtotal": {
+            "type": "integer",
+            "description": "Total of all items before (discounts or) taxes are applied."
+          },
+          "amount_subtotal_decimal": {
+            "type": "string",
+            "description": "Total of all items before (discounts or) taxes are applied, as a string with all the decimal places."
+          },
+          "amount_total": {
+            "type": "integer",
+            "description": "Total of all items after (discounts and) taxes are applied."
+          },
+          "amount_total_decimal": {
+            "type": "string",
+            "description": "Total of all items after (discounts and) taxes are applied, as a string with all the decimal places."
+          }
+        }
+      },
+      "Amounts": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PriceAmounts"
+          },
+          {
+            "$ref": "#/components/schemas/CashbackAmounts"
+          },
+          {
+            "$ref": "#/components/schemas/DiscountAmounts"
+          }
+        ]
       },
       "PriceItem": {
         "allOf": [
@@ -5494,13 +5526,7 @@
         "description": "An amount associated with a specific cashback period.",
         "properties": {
           "cashback_period": {
-            "type": "string",
-            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
-            "enum": [
-              "0",
-              "12"
-            ],
-            "nullable": true
+            "$ref": "#/components/schemas/CashbackPeriod"
           },
           "amount_total": {
             "type": "integer",
@@ -5703,6 +5729,15 @@
           "every_6_months",
           "yearly"
         ]
+      },
+      "CashbackPeriod": {
+        "type": "string",
+        "description": "The cashback period, for now it's limited to either 0 months or 12 months",
+        "enum": [
+          "0",
+          "12"
+        ],
+        "nullable": true
       },
       "SalesTax": {
         "type": "string",
@@ -6208,13 +6243,7 @@
             ]
           },
           "cashback_period": {
-            "type": "string",
-            "description": "The cashback period, for now it's limited to either 0 months or 12 months",
-            "enum": [
-              "0",
-              "12"
-            ],
-            "nullable": true
+            "$ref": "#/components/schemas/CashbackPeriod"
           },
           "active": {
             "type": "boolean"
