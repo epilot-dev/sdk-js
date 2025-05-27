@@ -4943,7 +4943,7 @@ declare namespace Components {
              * Type of product recommendation
              */
             type?: "change" | "cross-sell" | "up-sell";
-            offer?: Offer[];
+            offers?: Offer[];
         }
         /**
          * Product recommendations request payload
