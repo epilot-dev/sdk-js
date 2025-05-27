@@ -6890,7 +6890,7 @@
               "up-sell"
             ]
           },
-          "offer": {
+          "offers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Offer"
