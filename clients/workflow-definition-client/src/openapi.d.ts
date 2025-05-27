@@ -47,6 +47,10 @@ declare namespace Components {
             automation_config: /* Configuration for automation execution to run */ AutomationConfig;
             trigger_mode?: TriggerMode;
             schedule?: ActionSchedule;
+            /**
+             * Indicates whether this task was created automatically by journeys or manually by an user
+             */
+            created_automatically?: boolean;
         }
         export interface AutomationTrigger {
             id?: string;

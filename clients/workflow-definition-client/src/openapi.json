@@ -1788,6 +1788,11 @@
           },
           "schedule": {
             "$ref": "#/components/schemas/ActionSchedule"
+          },
+          "created_automatically": {
+            "type": "boolean",
+            "description": "Indicates whether this task was created automatically by journeys or manually by an user",
+            "default": false
           }
         },
         "allOf": [
