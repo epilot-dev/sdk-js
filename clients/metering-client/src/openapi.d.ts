@@ -16,9 +16,11 @@ declare namespace Components {
          * 01F130Q52Q6MWSNS8N2AVXV4JN
          */
         Schemas.ActivityId /* ulid */;
+        export type SkipValidationQueryParam = boolean;
     }
     export interface QueryParameters {
         ActivityIdQueryParam?: Parameters.ActivityIdQueryParam;
+        SkipValidationQueryParam?: Parameters.SkipValidationQueryParam;
     }
     namespace Responses {
         export type Forbidden = Schemas.ErrorResp;
@@ -985,6 +987,12 @@ declare namespace Paths {
                      * 2022-10-10T00:00:00.000Z
                      */
                     last_reading?: string;
+                    /**
+                     * The current consumption of the meter
+                     * example:
+                     * 100.5
+                     */
+                    current_consumption?: number;
                 }[];
             }
             export type $400 = Components.Responses.InvalidRequest;

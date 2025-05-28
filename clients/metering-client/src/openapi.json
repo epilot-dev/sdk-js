@@ -95,6 +95,11 @@
                                 "type": "string",
                                 "example": "2022-10-10T00:00:00.000Z",
                                 "description": "The timestamp of the last reading"
+                              },
+                              "current_consumption": {
+                                "type": "number",
+                                "example": 100.5,
+                                "description": "The current consumption of the meter"
                               }
                             }
                           }
@@ -506,14 +511,7 @@
             "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
-            "in": "query",
-            "name": "skip_validation",
-            "description": "If true, the system will skip validating against the previous reading and create the reading.\nFor e.g: if the previous reading is 100 and the current reading is 50, the system will allowed to create the reading when skip_validation is true.\n",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
+            "$ref": "#/components/parameters/SkipValidationQueryParam"
           }
         ],
         "requestBody": {
@@ -594,14 +592,7 @@
             }
           },
           {
-            "in": "query",
-            "name": "skip_validation",
-            "description": "If true, the system will skip validating against the previous reading and create the reading.\nFor e.g: if the previous reading is 100 and the current reading is 50, the system will allowed to create the reading when skip_validation is true.\n",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
+            "$ref": "#/components/parameters/SkipValidationQueryParam"
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
@@ -2119,6 +2110,16 @@
         "schema": {
           "$ref": "#/components/schemas/ActivityId"
         }
+      },
+      "SkipValidationQueryParam": {
+        "name": "skip_validation",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "description": "When set to true, all validations will be skipped and the system will allow the reading to be created.\nIf set to false or not provided, the system performs the following validations:\n  Validation Rules (when not skipped)\n  - Previous Reading Check:\n    The new reading must be greater than the previous reading.\n    Example: If the previous reading is 100 and the new reading is 50, the system will reject it.\n  - Subsequent Reading Check\n    The new reading must be less than the next (subsequent) reading, if one exists.\n    Example: If a future reading for 2022-10-10 is 200, and you try to enter 250 for 2022-10-09, it will be rejected.\n  - Future Timestamp Check\n    The reading timestamp must be less than or equal to the current time.\n    Example: If the current time is 2022-10-10T20:00:00Z, a reading with timestamp 2022-10-11T20:00:00Z will not be accepted.\n  - Duplicate Check\n    A reading is not allowed if there's already a record with the same meter_id, counter_id, and timestamp`.\n  - Update Check\n    When updating a reading, the system will look for an existing record with the same meter_id, counter_id, and timestamp.\n    If no such record exists, it won't throw an error — the update simply won't take effect.\n"
       }
     }
   },

@@ -104,9 +104,7 @@
             "$ref": "#/components/parameters/ActivityIdQueryParam"
           },
           {
-            "in": "query",
-            "name": "skip_validation",
-            "required": false
+            "$ref": "#/components/parameters/SkipValidationQueryParam"
           }
         ],
         "requestBody": {
@@ -128,9 +126,7 @@
             "required": false
           },
           {
-            "in": "query",
-            "name": "skip_validation",
-            "required": false
+            "$ref": "#/components/parameters/SkipValidationQueryParam"
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
@@ -350,6 +346,11 @@
     "parameters": {
       "ActivityIdQueryParam": {
         "name": "activity_id",
+        "in": "query",
+        "required": false
+      },
+      "SkipValidationQueryParam": {
+        "name": "skip_validation",
         "in": "query",
         "required": false
       }
