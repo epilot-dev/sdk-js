@@ -3285,7 +3285,7 @@
         }
       },
       "CompositePrice": {
-        "oneOf": [
+        "anyOf": [
           {
             "$ref": "#/components/schemas/NonHydratedCompositePrice"
           },
@@ -5068,6 +5068,14 @@
           "total_details": {
             "$ref": "#/components/schemas/TotalDetails"
           },
+          "_price": {
+            "description": "The price snapshot data.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompositePrice"
+              }
+            ]
+          },
           "_coupons": {
             "type": "array",
             "description": "The coupons applicable to the composite price item + related (cashback) amounts",
@@ -5221,17 +5229,6 @@
           },
           "currency": {
             "$ref": "#/components/schemas/Currency"
-          },
-          "_price": {
-            "description": "The price snapshot data.",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Price"
-              },
-              {
-                "$ref": "#/components/schemas/CompositePrice"
-              }
-            ]
           },
           "taxes": {
             "type": "array",
@@ -5416,6 +5413,14 @@
           },
           "dynamic_tariff": {
             "$ref": "#/components/schemas/PriceDynamicTariff"
+          },
+          "_price": {
+            "description": "The price snapshot data.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Price"
+              }
+            ]
           }
         },
         "required": [

@@ -746,17 +746,6 @@ declare namespace Components {
              */
             Currency;
             /**
-             * The price snapshot data.
-             */
-            _price?: /* The price snapshot data. */ /**
-             * The price entity schema for simple pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/price"
-             * }
-             */
-            Price | /* The composite price entity */ CompositePrice;
-            /**
              * The taxes applied to the price item.
              */
             taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
@@ -1737,17 +1726,6 @@ declare namespace Components {
              */
             Currency;
             /**
-             * The price snapshot data.
-             */
-            _price?: /* The price snapshot data. */ /**
-             * The price entity schema for simple pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/price"
-             * }
-             */
-            Price | /* The composite price entity */ CompositePrice;
-            /**
              * The taxes applied to the price item.
              */
             taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
@@ -1852,6 +1830,10 @@ declare namespace Components {
              */
             PriceItem[];
             total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
+            /**
+             * The price snapshot data.
+             */
+            _price?: /* The price snapshot data. */ /* The composite price entity */ CompositePrice;
         }
         /**
          * Represents a composite price input to the pricing library.
@@ -4212,17 +4194,6 @@ declare namespace Components {
              */
             Currency;
             /**
-             * The price snapshot data.
-             */
-            _price?: /* The price snapshot data. */ /**
-             * The price entity schema for simple pricing
-             * example:
-             * {
-             *   "$ref": "#/components/examples/price"
-             * }
-             */
-            Price | /* The composite price entity */ CompositePrice;
-            /**
              * The taxes applied to the price item.
              */
             taxes?: (/* A tax amount associated with a specific tax rate. */ TaxAmount)[];
@@ -4264,6 +4235,17 @@ declare namespace Components {
             tiers_details?: TierDetails[];
             get_ag?: PriceGetAg;
             dynamic_tariff?: PriceDynamicTariff;
+            /**
+             * The price snapshot data.
+             */
+            _price?: /* The price snapshot data. */ /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "$ref": "#/components/examples/price"
+             * }
+             */
+            Price;
         }
         /**
          * Represents a price input to the pricing library.
