@@ -129,6 +129,23 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/ready_imported_resources.json
              */
             ready_imported_resources_url?: string;
+            /**
+             * Information about the manifest that was deployed from, used to update existing deployments instead of always creating new ones
+             */
+            deployed_from?: {
+                /**
+                 * ID of the organization that deployed the manifest
+                 */
+                source_organization_id?: string;
+                /**
+                 * ID of the manifest that was deployed
+                 */
+                source_manifest_id?: string;
+                /**
+                 * When the deployment was last triggered
+                 */
+                last_triggered_at?: string; // date-time
+            };
         }
         export interface CommonMarkdownFields {
             /**
@@ -200,6 +217,10 @@ declare namespace Components {
              */
             JobID;
             job_status?: JobStatus;
+            /**
+             * The S3 key of the manifest file
+             */
+            manifest_file_path?: string;
             message?: string;
             timestamp?: string; // date-time
             /**
@@ -327,6 +348,23 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/ready_imported_resources.json
              */
             ready_imported_resources_url?: string;
+            /**
+             * Information about the manifest that was deployed from, used to update existing deployments instead of always creating new ones
+             */
+            deployed_from?: {
+                /**
+                 * ID of the organization that deployed the manifest
+                 */
+                source_organization_id?: string;
+                /**
+                 * ID of the manifest that was deployed
+                 */
+                source_manifest_id?: string;
+                /**
+                 * When the deployment was last triggered
+                 */
+                last_triggered_at?: string; // date-time
+            };
         }
         /**
          * ID of an import or export job (state machine)
@@ -417,6 +455,23 @@ declare namespace Components {
              * https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/ready_imported_resources.json
              */
             ready_imported_resources_url?: string;
+            /**
+             * Information about the manifest that was deployed from, used to update existing deployments instead of always creating new ones
+             */
+            deployed_from?: {
+                /**
+                 * ID of the organization that deployed the manifest
+                 */
+                source_organization_id?: string;
+                /**
+                 * ID of the manifest that was deployed
+                 */
+                source_manifest_id?: string;
+                /**
+                 * When the deployment was last triggered
+                 */
+                last_triggered_at?: string; // date-time
+            };
             /**
              * Markdown content part of a manifest file
              */
@@ -537,6 +592,23 @@ declare namespace Components {
              */
             ready_imported_resources_url?: string;
             /**
+             * Information about the manifest that was deployed from, used to update existing deployments instead of always creating new ones
+             */
+            deployed_from?: {
+                /**
+                 * ID of the organization that deployed the manifest
+                 */
+                source_organization_id?: string;
+                /**
+                 * ID of the manifest that was deployed
+                 */
+                source_manifest_id?: string;
+                /**
+                 * When the deployment was last triggered
+                 */
+                last_triggered_at?: string; // date-time
+            };
+            /**
              * When the manifest was first installed (applied)
              */
             created_at?: string; // date-time
@@ -561,7 +633,7 @@ declare namespace Components {
             /**
              * Name of the source blueprint
              */
-            source_blueprint_name: string;
+            source_blueprint_name?: string;
             /**
              * Markdown content of the manifest
              */
@@ -606,7 +678,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "custom_variable" | "coupon" | "usergroup" | "saved_view";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "custom_variable" | "coupon" | "usergroup" | "saved_view" | "app";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -715,12 +787,6 @@ declare namespace Paths {
             job_id: Parameters.JobId;
         }
         export interface RequestBody {
-            /**
-             * This is no longer used
-             * example:
-             * example.tf
-             */
-            manifestFilePath?: string | null;
             /**
              * List of resources to ignore changes for
              */
@@ -882,6 +948,10 @@ declare namespace Paths {
              * List of resource replacements to apply during import
              */
             resourceReplacements?: Components.Schemas.ResourceReplacement[];
+            deployedFrom?: {
+                sourceOrganizationId: string;
+                sourceManifestId: string;
+            };
         } | {
             /**
              * Manifest s3 key uploaded via `uploadManifest`
@@ -905,6 +975,10 @@ declare namespace Paths {
              * List of resource replacements to apply during import
              */
             resourceReplacements?: Components.Schemas.ResourceReplacement[];
+            deployedFrom?: {
+                sourceOrganizationId: string;
+                sourceManifestId: string;
+            };
         };
         namespace Responses {
             export interface $200 {
@@ -954,7 +1028,17 @@ declare namespace Paths {
              * journey_HouseConnectionJourney
              */
             resourceName: string;
-            metadata?: any;
+            metadata?: {
+                markdown?: {
+                    manifest?: string;
+                    preinstall?: string;
+                    postinstall?: string;
+                };
+                docs_link?: string;
+                source_blueprint_name?: string;
+                source_blueprint_slug?: string;
+                source_blueprint_version?: string;
+            };
             /**
              * Temporary flag to indicate if multiple resources are being exported
              */

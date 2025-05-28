@@ -201,31 +201,34 @@
                     "example": "journey_HouseConnectionJourney"
                   },
                   "metadata": {
-                    "markdown": {
-                      "type": "object",
-                      "properties": {
-                        "manifest": {
-                          "type": "string"
-                        },
-                        "preinstall": {
-                          "type": "string"
-                        },
-                        "postinstall": {
-                          "type": "string"
+                    "type": "object",
+                    "properties": {
+                      "markdown": {
+                        "type": "object",
+                        "properties": {
+                          "manifest": {
+                            "type": "string"
+                          },
+                          "preinstall": {
+                            "type": "string"
+                          },
+                          "postinstall": {
+                            "type": "string"
+                          }
                         }
+                      },
+                      "docs_link": {
+                        "type": "string"
+                      },
+                      "source_blueprint_name": {
+                        "type": "string"
+                      },
+                      "source_blueprint_slug": {
+                        "type": "string"
+                      },
+                      "source_blueprint_version": {
+                        "type": "string"
                       }
-                    },
-                    "docs_link": {
-                      "type": "string"
-                    },
-                    "source_blueprint_name": {
-                      "type": "string"
-                    },
-                    "source_blueprint_slug": {
-                      "type": "string"
-                    },
-                    "source_blueprint_version": {
-                      "type": "string"
                     }
                   },
                   "isExportingMultipleResources": {
@@ -371,6 +374,21 @@
                           "$ref": "#/components/schemas/ResourceReplacement"
                         },
                         "description": "List of resource replacements to apply during import"
+                      },
+                      "deployedFrom": {
+                        "type": "object",
+                        "properties": {
+                          "sourceOrganizationId": {
+                            "type": "string"
+                          },
+                          "sourceManifestId": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "sourceOrganizationId",
+                          "sourceManifestId"
+                        ]
                       }
                     },
                     "required": [
@@ -419,6 +437,21 @@
                           "$ref": "#/components/schemas/ResourceReplacement"
                         },
                         "description": "List of resource replacements to apply during import"
+                      },
+                      "deployedFrom": {
+                        "type": "object",
+                        "properties": {
+                          "sourceOrganizationId": {
+                            "type": "string"
+                          },
+                          "sourceManifestId": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "sourceOrganizationId",
+                          "sourceManifestId"
+                        ]
                       }
                     },
                     "required": [
@@ -469,13 +502,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "manifestFilePath": {
-                    "description": "This is no longer used",
-                    "type": "string",
-                    "example": "example.tf",
-                    "deprecated": true,
-                    "nullable": true
-                  },
                   "resourcesToIgnore": {
                     "type": "array",
                     "items": {
@@ -755,7 +781,8 @@
           "custom_variable",
           "coupon",
           "usergroup",
-          "saved_view"
+          "saved_view",
+          "app"
         ]
       },
       "PlanChanges": {
@@ -904,6 +931,10 @@
               },
               "job_status": {
                 "$ref": "#/components/schemas/JobStatus"
+              },
+              "manifest_file_path": {
+                "type": "string",
+                "description": "The S3 key of the manifest file"
               },
               "message": {
                 "type": "string"
@@ -1078,6 +1109,25 @@
             "type": "string",
             "description": "All the resources that were marked as ready by the user",
             "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/ready_imported_resources.json"
+          },
+          "deployed_from": {
+            "type": "object",
+            "properties": {
+              "source_organization_id": {
+                "type": "string",
+                "description": "ID of the organization that deployed the manifest"
+              },
+              "source_manifest_id": {
+                "type": "string",
+                "description": "ID of the manifest that was deployed"
+              },
+              "last_triggered_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the deployment was last triggered"
+              }
+            },
+            "description": "Information about the manifest that was deployed from, used to update existing deployments instead of always creating new ones"
           }
         }
       },
@@ -1318,10 +1368,7 @@
             },
             "description": "Array of ids of resources selected to be ready by the user"
           }
-        },
-        "required": [
-          "source_blueprint_name"
-        ]
+        }
       }
     },
     "parameters": {
