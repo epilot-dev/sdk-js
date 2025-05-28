@@ -5783,9 +5783,7 @@
         "tags": [
           "Public"
         ],
-        "security": [
-          []
-        ],
+        "security": [],
         "parameters": [
           {
             "in": "query",
@@ -10657,7 +10655,7 @@
           "props": {
             "$ref": "#/components/schemas/BlockProps"
           },
-          "parent_id": {
+          "parentId": {
             "type": "string",
             "description": "The id of the parent block",
             "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
@@ -10767,7 +10765,7 @@
             "description": "Whether the page is public",
             "example": true
           },
-          "parent_id": {
+          "parentId": {
             "type": "string",
             "description": "The id of the parent page",
             "example": "c495fef9-eeca-4019-a989-8390dcd9825b"

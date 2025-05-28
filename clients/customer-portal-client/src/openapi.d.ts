@@ -569,7 +569,7 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parent_id?: string;
+            parentId?: string;
             type: /**
              * The type of the block. eg; tabs, tab, group, attribute
              * example:
@@ -624,7 +624,7 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parent_id?: string;
+            parentId?: string;
             type: /**
              * The type of the block. eg; tabs, tab, group, attribute
              * example:
@@ -3141,7 +3141,7 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parent_id?: string;
+            parentId?: string;
             /**
              * The id of the page
              * example:
@@ -3211,7 +3211,7 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parent_id?: string;
+            parentId?: string;
         }
         export interface PaymentWidget {
             id: string;
