@@ -3094,10 +3094,26 @@ declare namespace Components {
              */
             path: string;
             /**
+             * The schema of the page
+             */
+            schema?: "contact" | "contract" | "meter" | "order" | "opportunity";
+            /**
              * The conditions that need to be met for the page to be shown
              */
             visibility?: {
-                [key: string]: any;
+                [name: string]: any;
+            };
+            /**
+             * The content of the page
+             */
+            content?: {
+                [name: string]: any;
+            };
+            /**
+             * The design of the page
+             */
+            design?: {
+                [name: string]: any;
             };
             blocks?: {
                 [name: string]: Block;
@@ -3109,11 +3125,23 @@ declare namespace Components {
              */
             order: number;
             /**
-             * The name of the page
+             * Whether the page is a system page
              * example:
-             * Dashboard
+             * false
              */
-            name?: string;
+            is_system?: boolean;
+            /**
+             * Whether the page is public
+             * example:
+             * true
+             */
+            is_public?: boolean;
+            /**
+             * The id of the parent page
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            parent_id?: string;
             /**
              * The id of the page
              * example:
@@ -3136,10 +3164,26 @@ declare namespace Components {
              */
             path: string;
             /**
+             * The schema of the page
+             */
+            schema?: "contact" | "contract" | "meter" | "order" | "opportunity";
+            /**
              * The conditions that need to be met for the page to be shown
              */
             visibility?: {
-                [key: string]: any;
+                [name: string]: any;
+            };
+            /**
+             * The content of the page
+             */
+            content?: {
+                [name: string]: any;
+            };
+            /**
+             * The design of the page
+             */
+            design?: {
+                [name: string]: any;
             };
             blocks?: {
                 [name: string]: Block;
@@ -3151,11 +3195,23 @@ declare namespace Components {
              */
             order: number;
             /**
-             * The name of the page
+             * Whether the page is a system page
              * example:
-             * Dashboard
+             * false
              */
-            name?: string;
+            is_system?: boolean;
+            /**
+             * Whether the page is public
+             * example:
+             * true
+             */
+            is_public?: boolean;
+            /**
+             * The id of the parent page
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            parent_id?: string;
         }
         export interface PaymentWidget {
             id: string;
@@ -6817,6 +6873,50 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetPublicPages {
+        namespace Parameters {
+            /**
+             * The domain of the portal
+             * example:
+             * customer-portal.epilot.io
+             */
+            export type Domain = string;
+            /**
+             * example:
+             * id,slug,description
+             */
+            export type Fields = string;
+            /**
+             * example:
+             * schema=contract,slug=contracts
+             */
+            export type Filter = string;
+        }
+        export interface QueryParameters {
+            domain: /**
+             * The domain of the portal
+             * example:
+             * customer-portal.epilot.io
+             */
+            Parameters.Domain;
+            fields?: /**
+             * example:
+             * id,slug,description
+             */
+            Parameters.Fields;
+            filter?: /**
+             * example:
+             * schema=contract,slug=contracts
+             */
+            Parameters.Filter;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Page[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetPublicPortalConfig {
         namespace Parameters {
             /**
@@ -8875,6 +8975,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreatePortalPage.Responses.$200>
   /**
+   * getPublicPages - getPublicPages
+   * 
+   * Fetch all public portal pages
+   */
+  'getPublicPages'(
+    parameters?: Parameters<Paths.GetPublicPages.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicPages.Responses.$200>
+  /**
    * getPortalPageBlocks - getPortalPageBlocks
    * 
    * Fetch all portal page blocks
@@ -9969,6 +10079,18 @@ export interface PathsDictionary {
       data?: Paths.CreatePortalPage.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreatePortalPage.Responses.$200>
+  }
+  ['/v2/portal/public/pages']: {
+    /**
+     * getPublicPages - getPublicPages
+     * 
+     * Fetch all public portal pages
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicPages.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicPages.Responses.$200>
   }
   ['/v2/portal/pages/{id}/blocks']: {
     /**

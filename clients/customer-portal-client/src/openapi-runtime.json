@@ -1370,6 +1370,29 @@
         "responses": {}
       }
     },
+    "/v2/portal/public/pages": {
+      "get": {
+        "operationId": "getPublicPages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "domain",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/pages/{id}/blocks": {
       "parameters": [
         {
