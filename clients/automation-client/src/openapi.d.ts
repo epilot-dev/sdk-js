@@ -1903,7 +1903,14 @@ declare namespace Components {
             id?: string; // uuid
             type: "flows_trigger";
             configuration: {
+                /**
+                 * ID of the flow that triggers the automation
+                 */
                 source_id: string; // uuid
+                /**
+                 * Certain flows can be triggered automatically by a journey, this is the ID of that journey
+                 */
+                journey_id?: string; // uuid
             };
         }
         export interface FrontendSubmitTrigger {
@@ -3643,7 +3650,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * searchFlows - searchFlows
@@ -3957,7 +3963,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type ActionCondition = Components.Schemas.ActionCondition;
 export type ActionSchedule = Components.Schemas.ActionSchedule;

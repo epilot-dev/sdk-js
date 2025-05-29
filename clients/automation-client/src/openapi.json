@@ -2989,7 +2989,13 @@
                 "properties": {
                   "source_id": {
                     "type": "string",
-                    "format": "uuid"
+                    "format": "uuid",
+                    "description": "ID of the flow that triggers the automation"
+                  },
+                  "journey_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Certain flows can be triggered automatically by a journey, this is the ID of that journey"
                   }
                 },
                 "required": [
