@@ -2764,20 +2764,31 @@ declare namespace Components {
                 key: string;
             };
             /**
+             * Recognized meter reading.
              * example:
              * 000123.45
              */
             reading?: string;
             /**
+             * Recognized sector of the meter.
              * example:
              * water
              */
             sector?: string;
             /**
+             * Recognized meter number. Deprecated: Use `meter_numbers` instead as we can recognize several potential meter numbers.
              * example:
              * 00123456
              */
             meter_number?: string;
+            /**
+             * Recognized list of (potential) meter numbers.
+             * example:
+             * [
+             *   "00123456"
+             * ]
+             */
+            meter_numbers?: string[];
         }
         export interface MeterReadingWidget {
             id: string;
@@ -3087,6 +3098,12 @@ declare namespace Components {
              * dashboard
              */
             slug: string;
+            /**
+             * The path of the page
+             * example:
+             * /dashboard
+             */
+            path?: string;
             schema?: ("contact" | "contract" | "meter" | "order" | "opportunity")[];
             /**
              * The conditions that need to be met for the page to be shown
@@ -3133,12 +3150,6 @@ declare namespace Components {
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
             parentId?: string;
-            /**
-             * Whether the page is the default route
-             * example:
-             * false
-             */
-            is_default_route?: boolean;
             /**
              * Whether the page is the entry route
              * example:
@@ -3160,6 +3171,12 @@ declare namespace Components {
              * dashboard
              */
             slug: string;
+            /**
+             * The path of the page
+             * example:
+             * /dashboard
+             */
+            path?: string;
             schema?: ("contact" | "contract" | "meter" | "order" | "opportunity")[];
             /**
              * The conditions that need to be met for the page to be shown
@@ -3206,12 +3223,6 @@ declare namespace Components {
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
             parentId?: string;
-            /**
-             * Whether the page is the default route
-             * example:
-             * false
-             */
-            is_default_route?: boolean;
             /**
              * Whether the page is the entry route
              * example:

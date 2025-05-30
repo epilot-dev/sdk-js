@@ -10274,15 +10274,29 @@
           },
           "reading": {
             "type": "string",
+            "description": "Recognized meter reading.",
             "example": "000123.45"
           },
           "sector": {
             "type": "string",
+            "description": "Recognized sector of the meter.",
             "example": "water"
           },
           "meter_number": {
             "type": "string",
+            "deprecated": true,
+            "description": "Recognized meter number. Deprecated: Use `meter_numbers` instead as we can recognize several potential meter numbers.",
             "example": "00123456"
+          },
+          "meter_numbers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Recognized list of (potential) meter numbers.",
+            "example": [
+              "00123456"
+            ]
           }
         }
       },
@@ -10704,7 +10718,6 @@
         "additionalProperties": true,
         "required": [
           "slug",
-          "path",
           "order"
         ],
         "properties": {
@@ -10712,6 +10725,12 @@
             "type": "string",
             "description": "The slug of the page",
             "example": "dashboard"
+          },
+          "path": {
+            "type": "string",
+            "deprecated": true,
+            "description": "The path of the page",
+            "example": "/dashboard"
           },
           "schema": {
             "type": "array",
@@ -10767,11 +10786,6 @@
             "type": "string",
             "description": "The id of the parent page",
             "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
-          },
-          "is_default_route": {
-            "type": "boolean",
-            "description": "Whether the page is the default route",
-            "example": false
           },
           "is_entry_route": {
             "type": "boolean",
