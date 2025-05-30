@@ -569,7 +569,7 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parent_id?: string;
+            parentId?: string;
             type: /**
              * The type of the block. eg; tabs, tab, group, attribute
              * example:
@@ -624,7 +624,7 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parent_id?: string;
+            parentId?: string;
             type: /**
              * The type of the block. eg; tabs, tab, group, attribute
              * example:
@@ -3087,16 +3087,7 @@ declare namespace Components {
              * dashboard
              */
             slug: string;
-            /**
-             * The path of the page
-             * example:
-             * /dashboard
-             */
-            path: string;
-            /**
-             * The schema of the page
-             */
-            schema?: "contact" | "contract" | "meter" | "order" | "opportunity";
+            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity")[];
             /**
              * The conditions that need to be met for the page to be shown
              */
@@ -3141,7 +3132,19 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parent_id?: string;
+            parentId?: string;
+            /**
+             * Whether the page is the default route
+             * example:
+             * false
+             */
+            is_default_route?: boolean;
+            /**
+             * Whether the page is the entry route
+             * example:
+             * false
+             */
+            is_entry_route?: boolean;
             /**
              * The id of the page
              * example:
@@ -3157,16 +3160,7 @@ declare namespace Components {
              * dashboard
              */
             slug: string;
-            /**
-             * The path of the page
-             * example:
-             * /dashboard
-             */
-            path: string;
-            /**
-             * The schema of the page
-             */
-            schema?: "contact" | "contract" | "meter" | "order" | "opportunity";
+            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity")[];
             /**
              * The conditions that need to be met for the page to be shown
              */
@@ -3211,7 +3205,19 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parent_id?: string;
+            parentId?: string;
+            /**
+             * Whether the page is the default route
+             * example:
+             * false
+             */
+            is_default_route?: boolean;
+            /**
+             * Whether the page is the entry route
+             * example:
+             * false
+             */
+            is_entry_route?: boolean;
         }
         export interface PaymentWidget {
             id: string;

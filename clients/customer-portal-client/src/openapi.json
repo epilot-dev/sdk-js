@@ -5783,9 +5783,7 @@
         "tags": [
           "Public"
         ],
-        "security": [
-          []
-        ],
+        "security": [],
         "parameters": [
           {
             "in": "query",
@@ -10657,7 +10655,7 @@
           "props": {
             "$ref": "#/components/schemas/BlockProps"
           },
-          "parent_id": {
+          "parentId": {
             "type": "string",
             "description": "The id of the parent block",
             "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
@@ -10715,21 +10713,19 @@
             "description": "The slug of the page",
             "example": "dashboard"
           },
-          "path": {
-            "type": "string",
-            "description": "The path of the page",
-            "example": "/dashboard"
-          },
           "schema": {
-            "type": "string",
-            "description": "The schema of the page",
-            "enum": [
-              "contact",
-              "contract",
-              "meter",
-              "order",
-              "opportunity"
-            ]
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "The schema of the page",
+              "enum": [
+                "contact",
+                "contract",
+                "meter",
+                "order",
+                "opportunity"
+              ]
+            }
           },
           "visibility": {
             "type": "object",
@@ -10767,10 +10763,20 @@
             "description": "Whether the page is public",
             "example": true
           },
-          "parent_id": {
+          "parentId": {
             "type": "string",
             "description": "The id of the parent page",
             "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
+          },
+          "is_default_route": {
+            "type": "boolean",
+            "description": "Whether the page is the default route",
+            "example": false
+          },
+          "is_entry_route": {
+            "type": "boolean",
+            "description": "Whether the page is the entry route",
+            "example": false
           }
         }
       },
