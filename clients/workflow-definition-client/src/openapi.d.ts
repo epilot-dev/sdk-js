@@ -348,6 +348,10 @@ declare namespace Components {
              * ID of the journey that will trigger this flow
              */
             journey_id: string;
+            /**
+             * Name of the journey that will trigger this flow
+             */
+            journey_name?: string;
             automation_id?: string;
         }
         export interface ManualTask {

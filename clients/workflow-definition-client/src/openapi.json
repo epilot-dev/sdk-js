@@ -1713,6 +1713,10 @@
             "type": "string",
             "description": "ID of the journey that will trigger this flow"
           },
+          "journey_name": {
+            "type": "string",
+            "description": "Name of the journey that will trigger this flow"
+          },
           "automation_id": {
             "type": "string"
           }
