@@ -274,6 +274,12 @@
           },
           "updated_by": {
             "type": "string"
+          },
+          "shared_with": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -296,6 +302,18 @@
                     "type": "array",
                     "items": {
                       "$ref": "#/components/schemas/Swimlane"
+                    }
+                  },
+                  "card_config": {
+                    "type": "object",
+                    "properties": {
+                      "fields": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "example": "assignee"
+                        }
+                      }
                     }
                   },
                   "board_filters": {
@@ -388,9 +406,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://kanban.sls.epilot.io"
-    },
     {
       "url": "https://kanban.sls.epilot.io"
     }

@@ -26,6 +26,7 @@ declare namespace Components {
             updated_at?: string; // date-time
             created_by?: string;
             updated_by?: string;
+            shared_with?: string[];
             config: {
                 /**
                  * example:
@@ -33,6 +34,9 @@ declare namespace Components {
                  */
                 dataset?: string;
                 swimlanes?: Swimlane[];
+                card_config?: {
+                    fields?: string[];
+                };
                 board_filters?: BoardFilter[];
                 sorting?: Sorting;
             };
@@ -61,6 +65,7 @@ declare namespace Components {
             updated_at?: string; // date-time
             created_by?: string;
             updated_by?: string;
+            shared_with?: string[];
         }
         export interface Sorting {
             /**
@@ -185,6 +190,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * createKanbanBoard - Create a Kanban board
@@ -298,6 +304,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type Board = Components.Schemas.Board;
 export type BoardFilter = Components.Schemas.BoardFilter;
