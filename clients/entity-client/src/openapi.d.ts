@@ -2698,7 +2698,7 @@ declare namespace Components {
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
             ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
-            operation: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity";
+            operation: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved";
             /**
              * example:
              * {
@@ -8343,8 +8343,8 @@ declare namespace Components {
                 ClassificationId[];
             };
             output?: {
-                target_entities?: EntityId /* uuid */[];
-                affected_entities?: EntityId /* uuid */[];
+                target_entities_count?: number;
+                affected_entities_count?: number;
                 failures_count?: number;
                 failed_entities?: EntityId /* uuid */[];
             };
@@ -9443,6 +9443,11 @@ declare namespace Paths {
             export type After = string; // date-time
             export type Before = string; // date-time
             export type EndDate = string; // date-time
+            /**
+             * example:
+             * workflow
+             */
+            export type ExcludeActivityGroups = string;
             export type From = number;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type IncludeRelations = boolean;
@@ -9487,6 +9492,11 @@ declare namespace Paths {
              */
             Parameters.Type;
             include_relations?: Parameters.IncludeRelations;
+            exclude_activity_groups?: /**
+             * example:
+             * workflow
+             */
+            Parameters.ExcludeActivityGroups;
         }
         namespace Responses {
             export interface $200 {

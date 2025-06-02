@@ -529,6 +529,10 @@
           {
             "in": "query",
             "name": "include_relations"
+          },
+          {
+            "in": "query",
+            "name": "exclude_activity_groups"
           }
         ],
         "responses": {}
