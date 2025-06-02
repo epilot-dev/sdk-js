@@ -1740,6 +1740,15 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "in": "query",
+            "name": "exclude_activity_groups",
+            "description": "Exclude activity groups from results",
+            "schema": {
+              "type": "string",
+              "example": "workflow"
+            }
           }
         ],
         "responses": {
@@ -7577,7 +7586,9 @@
               "updateEntity",
               "deleteEntity",
               "softDeleteEntity",
-              "restoreEntity"
+              "restoreEntity",
+              "relationsAdded",
+              "relationsRemoved"
             ]
           },
           "params": {
@@ -8127,17 +8138,11 @@
           "output": {
             "type": "object",
             "properties": {
-              "target_entities": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/EntityId"
-                }
+              "target_entities_count": {
+                "type": "number"
               },
-              "affected_entities": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/EntityId"
-                }
+              "affected_entities_count": {
+                "type": "number"
               },
               "failures_count": {
                 "type": "number"
@@ -9129,9 +9134,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }
