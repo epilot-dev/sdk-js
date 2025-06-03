@@ -993,6 +993,17 @@
         "responses": {}
       }
     },
+    "/v2/entity/taxonomies/classifications": {
+      "post": {
+        "operationId": "createTaxonomyClassification",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/entity/taxonomies/classifications/{classificationSlug}": {
       "get": {
         "operationId": "getTaxonomyClassification",
@@ -1121,6 +1132,19 @@
           {
             "in": "path",
             "name": "job_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/bulk-jobs/{job_id}/cancel": {
+      "post": {
+        "operationId": "cancelBulkAction",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
             "required": true
           }
         ],

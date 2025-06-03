@@ -1744,7 +1744,7 @@
           {
             "in": "query",
             "name": "exclude_activity_groups",
-            "description": "Exclude activity groups from results",
+            "description": "Exclude all activity types that are part of an activity group from results",
             "schema": {
               "type": "string",
               "example": "workflow"
@@ -2877,6 +2877,37 @@
         }
       }
     },
+    "/v2/entity/taxonomies/classifications": {
+      "post": {
+        "operationId": "createTaxonomyClassification",
+        "summary": "createTaxonomyClassification",
+        "description": "Create a new classification for a taxonomy\n",
+        "tags": [
+          "Taxonomy"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxonomyClassification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created taxonomy classification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxonomyClassification"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/entity/taxonomies/classifications/{classificationSlug}": {
       "get": {
         "operationId": "getTaxonomyClassification",
@@ -2965,6 +2996,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Taxonomy classification deletion not allowed"
           }
         }
       }
@@ -3245,6 +3279,51 @@
         }
       }
     },
+    "/v1/entity/taxonomies/bulk-jobs/{job_id}/cancel": {
+      "post": {
+        "operationId": "cancelBulkAction",
+        "summary": "cancelBulkAction",
+        "description": "Cancels a running bulk action job. The job status will be updated to CANCELLED\nand the job will be stopped.\n",
+        "tags": [
+          "Taxonomy"
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Job ID of the bulk operation to cancel"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxonomyBulkJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/v1/entity/taxonomies/classifications:move": {
       "post": {
         "operationId": "bulkMoveClassifications",
@@ -3303,6 +3382,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid request"
           }
         }
       }
@@ -3365,6 +3447,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid request"
           }
         }
       }
@@ -3417,6 +3502,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid request"
           }
         }
       }
@@ -7078,7 +7166,10 @@
               "fields": {},
               "aggs": {},
               "include_deleted": {},
-              "highlight": {}
+              "highlight": {},
+              "stable_for": {},
+              "stable_query_id": {},
+              "search_after": {}
             },
             "additionalProperties": false,
             "required": [
@@ -7109,7 +7200,11 @@
               "hydrate": {},
               "fields": {},
               "aggs": {},
-              "include_deleted": {}
+              "include_deleted": {},
+              "highlight": {},
+              "stable_for": {},
+              "stable_query_id": {},
+              "search_after": {}
             },
             "additionalProperties": false,
             "required": [
@@ -7312,7 +7407,8 @@
           "from": {
             "type": "integer",
             "minimum": 0,
-            "default": 0
+            "default": 0,
+            "description": "The offset from which to start the search results.\nOnly one of `from` or `search_after` should be used.\n"
           },
           "size": {
             "type": "integer",
@@ -7341,6 +7437,32 @@
           },
           "include_deleted": {
             "$ref": "#/components/schemas/EntitySearchIncludeDeletedParam"
+          },
+          "stable_for": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60,
+            "description": "A TTL (in seconds) that specifies how long the context should be maintained.\nDefaults to 30 seconds; configurable up to 60 seconds to prevent abuse.\nA value of 0 can be provided the close the context after the query.\nDefaults to none.\n"
+          },
+          "stable_query_id": {
+            "type": "string",
+            "description": "A unique identifier of the query context from the last stable query.\nThe context is maintained for the duration of the stable_for value.\n"
+          },
+          "search_after": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "nullable": true
+                },
+                {
+                  "type": "number",
+                  "nullable": true
+                }
+              ]
+            },
+            "description": "The sort values from which to start the search results.\nOnly one of `from` or `search_after` should be used.\nIt is strongly recommended to always use the `sort_end` field from the last search result.\nUsed for deep pagination, typically together with `stable_query_id` to maintain the context between requests.\nRequires explicit sort to work reliably.\nTypically used sort fields are `_id` or `_created_at`.\n"
           }
         }
       },
@@ -7426,6 +7548,30 @@
                 ]
               }
             }
+          },
+          "stable_query_id": {
+            "type": "string",
+            "description": "A unique identifier of the query context.\nShould be used on the input for the next query that needs to be executed in the same context.\n"
+          },
+          "sort_end": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "nullable": true
+                },
+                {
+                  "type": "number",
+                  "nullable": true
+                }
+              ]
+            },
+            "description": "The sort value of the last item returned in `results`.\nCan be used as the input for the `search_after` in the next query.\n",
+            "example": [
+              1747905443332,
+              "0.000023312468"
+            ]
           }
         }
       },
@@ -8029,7 +8175,8 @@
       },
       "ClassificationId": {
         "type": "string",
-        "example": "taxonomy-slug:classification-slug"
+        "example": "taxonomy-slug:classification-slug",
+        "readOnly": true
       },
       "ClassificationSlug": {
         "type": "string",

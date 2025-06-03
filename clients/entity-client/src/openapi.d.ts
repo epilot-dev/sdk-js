@@ -2633,6 +2633,11 @@ declare namespace Components {
              * You can pass one sort field or an array of sort fields. Each sort field can be a string
              */
             sort?: /* You can pass one sort field or an array of sort fields. Each sort field can be a string */ string | string[];
+            /**
+             * The offset from which to start the search results.
+             * Only one of `from` or `search_after` should be used.
+             *
+             */
             from?: number;
             /**
              * Max search size is 1000 with higher values defaulting to 1000
@@ -2684,6 +2689,31 @@ declare namespace Components {
              *
              */
             EntitySearchIncludeDeletedParam;
+            highlight?: any;
+            /**
+             * A TTL (in seconds) that specifies how long the context should be maintained.
+             * Defaults to 30 seconds; configurable up to 60 seconds to prevent abuse.
+             * A value of 0 can be provided the close the context after the query.
+             * Defaults to none.
+             *
+             */
+            stable_for?: number;
+            /**
+             * A unique identifier of the query context from the last stable query.
+             * The context is maintained for the duration of the stable_for value.
+             *
+             */
+            stable_query_id?: string;
+            /**
+             * The sort values from which to start the search results.
+             * Only one of `from` or `search_after` should be used.
+             * It is strongly recommended to always use the `sort_end` field from the last search result.
+             * Used for deep pagination, typically together with `stable_query_id` to maintain the context between requests.
+             * Requires explicit sort to work reliably.
+             * Typically used sort fields are `_id` or `_created_at`.
+             *
+             */
+            search_after?: ((string | null) | (number | null))[];
         }
         export interface EntityOperation {
             entity: EntityId /* uuid */;
@@ -3560,6 +3590,11 @@ declare namespace Components {
              * You can pass one sort field or an array of sort fields. Each sort field can be a string
              */
             sort?: /* You can pass one sort field or an array of sort fields. Each sort field can be a string */ string | string[];
+            /**
+             * The offset from which to start the search results.
+             * Only one of `from` or `search_after` should be used.
+             *
+             */
             from?: number;
             /**
              * Max search size is 1000 with higher values defaulting to 1000
@@ -3611,6 +3646,30 @@ declare namespace Components {
              *
              */
             EntitySearchIncludeDeletedParam;
+            /**
+             * A TTL (in seconds) that specifies how long the context should be maintained.
+             * Defaults to 30 seconds; configurable up to 60 seconds to prevent abuse.
+             * A value of 0 can be provided the close the context after the query.
+             * Defaults to none.
+             *
+             */
+            stable_for?: number;
+            /**
+             * A unique identifier of the query context from the last stable query.
+             * The context is maintained for the duration of the stable_for value.
+             *
+             */
+            stable_query_id?: string;
+            /**
+             * The sort values from which to start the search results.
+             * Only one of `from` or `search_after` should be used.
+             * It is strongly recommended to always use the `sort_end` field from the last search result.
+             * Used for deep pagination, typically together with `stable_query_id` to maintain the context between requests.
+             * Requires explicit sort to work reliably.
+             * Typically used sort fields are `_id` or `_created_at`.
+             *
+             */
+            search_after?: ((string | null) | (number | null))[];
         }
         export interface EntitySearchParams {
             /**
@@ -3627,6 +3686,11 @@ declare namespace Components {
              * You can pass one sort field or an array of sort fields. Each sort field can be a string
              */
             sort?: /* You can pass one sort field or an array of sort fields. Each sort field can be a string */ string | string[];
+            /**
+             * The offset from which to start the search results.
+             * Only one of `from` or `search_after` should be used.
+             *
+             */
             from?: number;
             /**
              * Max search size is 1000 with higher values defaulting to 1000
@@ -3679,6 +3743,30 @@ declare namespace Components {
              */
             EntitySearchIncludeDeletedParam;
             highlight?: any;
+            /**
+             * A TTL (in seconds) that specifies how long the context should be maintained.
+             * Defaults to 30 seconds; configurable up to 60 seconds to prevent abuse.
+             * A value of 0 can be provided the close the context after the query.
+             * Defaults to none.
+             *
+             */
+            stable_for?: number;
+            /**
+             * A unique identifier of the query context from the last stable query.
+             * The context is maintained for the duration of the stable_for value.
+             *
+             */
+            stable_query_id?: string;
+            /**
+             * The sort values from which to start the search results.
+             * Only one of `from` or `search_after` should be used.
+             * It is strongly recommended to always use the `sort_end` field from the last search result.
+             * Used for deep pagination, typically together with `stable_query_id` to maintain the context between requests.
+             * Requires explicit sort to work reliably.
+             * Typically used sort fields are `_id` or `_created_at`.
+             *
+             */
+            search_after?: ((string | null) | (number | null))[];
         }
         export interface EntitySearchResults {
             /**
@@ -3755,6 +3843,23 @@ declare namespace Components {
             aggregations?: {
                 [key: string]: any;
             };
+            /**
+             * A unique identifier of the query context.
+             * Should be used on the input for the next query that needs to be executed in the same context.
+             *
+             */
+            stable_query_id?: string;
+            /**
+             * The sort value of the last item returned in `results`.
+             * Can be used as the input for the `search_after` in the next query.
+             *
+             * example:
+             * [
+             *   1747905443332,
+             *   "0.000023312468"
+             * ]
+             */
+            sort_end?: ((string | null) | (number | null))[];
         }
         /**
          * URL-friendly identifier for the entity schema
@@ -8844,6 +8949,8 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.TaxonomyBulkJobTriggerResponse;
+            export interface $400 {
+            }
         }
     }
     namespace BulkMergeClassifications {
@@ -8866,6 +8973,8 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.TaxonomyBulkJobTriggerResponse;
+            export interface $400 {
+            }
         }
     }
     namespace BulkMoveClassifications {
@@ -8888,6 +8997,39 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.TaxonomyBulkJobTriggerResponse;
+            export interface $400 {
+            }
+        }
+    }
+    namespace CancelBulkAction {
+        namespace Parameters {
+            export type JobId = string;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * {
+             *   "job_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "status": "PENDING",
+             *   "action_type": "MOVE_CLASSIFICATIONS",
+             *   "created_by": "10598",
+             *   "created_at": "2024-01-01T00:00:00.000Z",
+             *   "updated_at": "2024-01-01T00:00:00.000Z",
+             *   "org": "66"
+             * }
+             */
+            Components.Schemas.TaxonomyBulkJob;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $500 {
+            }
         }
     }
     namespace CreateActivity {
@@ -9052,6 +9194,12 @@ declare namespace Paths {
             export type $201 = Components.Schemas.Taxonomy;
             export interface $409 {
             }
+        }
+    }
+    namespace CreateTaxonomyClassification {
+        export type RequestBody = Components.Schemas.TaxonomyClassification;
+        namespace Responses {
+            export type $201 = Components.Schemas.TaxonomyClassification;
         }
     }
     namespace DeleteEntity {
@@ -9257,6 +9405,8 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.TaxonomyClassification;
+            export interface $403 {
+            }
         }
     }
     namespace ExportEntities {
@@ -12394,6 +12544,17 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
   /**
+   * createTaxonomyClassification - createTaxonomyClassification
+   * 
+   * Create a new classification for a taxonomy
+   * 
+   */
+  'createTaxonomyClassification'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateTaxonomyClassification.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateTaxonomyClassification.Responses.$201>
+  /**
    * getTaxonomyClassification - getTaxonomyClassification
    * 
    * Get a classification for a taxonomy by slug
@@ -12481,6 +12642,18 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetTaxonomyBulkActionJobById.Responses.$200>
+  /**
+   * cancelBulkAction - cancelBulkAction
+   * 
+   * Cancels a running bulk action job. The job status will be updated to CANCELLED
+   * and the job will be stopped.
+   * 
+   */
+  'cancelBulkAction'(
+    parameters?: Parameters<Paths.CancelBulkAction.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelBulkAction.Responses.$200>
   /**
    * bulkMoveClassifications - bulkMoveClassifications
    * 
@@ -13504,6 +13677,19 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateClassificationsForTaxonomy.Responses.$200>
   }
+  ['/v2/entity/taxonomies/classifications']: {
+    /**
+     * createTaxonomyClassification - createTaxonomyClassification
+     * 
+     * Create a new classification for a taxonomy
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateTaxonomyClassification.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateTaxonomyClassification.Responses.$201>
+  }
   ['/v2/entity/taxonomies/classifications/{classificationSlug}']: {
     /**
      * getTaxonomyClassification - getTaxonomyClassification
@@ -13603,6 +13789,20 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetTaxonomyBulkActionJobById.Responses.$200>
+  }
+  ['/v1/entity/taxonomies/bulk-jobs/{job_id}/cancel']: {
+    /**
+     * cancelBulkAction - cancelBulkAction
+     * 
+     * Cancels a running bulk action job. The job status will be updated to CANCELLED
+     * and the job will be stopped.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CancelBulkAction.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelBulkAction.Responses.$200>
   }
   ['/v1/entity/taxonomies/classifications:move']: {
     /**
