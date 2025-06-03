@@ -5697,7 +5697,7 @@
             "description": "The filter to apply to the response",
             "schema": {
               "type": "string",
-              "example": "schema=contract,slug=contracts"
+              "example": "slug=contracts"
             }
           }
         ],
@@ -6871,6 +6871,15 @@
             "type": "object",
             "description": "Authentication settings for the portal",
             "properties": {
+              "passwordless_login": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Passwordless login feature flag"
+                  }
+                }
+              },
               "entry_point": {
                 "type": "string",
                 "enum": [
@@ -10790,6 +10799,11 @@
           "is_entry_route": {
             "type": "boolean",
             "description": "Whether the page is the entry route",
+            "example": false
+          },
+          "is_dynamic_route": {
+            "type": "boolean",
+            "description": "Whether the page is a dynamic route",
             "example": false
           }
         }
