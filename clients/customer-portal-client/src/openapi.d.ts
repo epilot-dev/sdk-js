@@ -738,6 +738,12 @@ declare namespace Components {
              * Authentication settings for the portal
              */
             auth_settings?: {
+                passwordless_login?: {
+                    /**
+                     * Passwordless login feature flag
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -3157,6 +3163,12 @@ declare namespace Components {
              */
             is_entry_route?: boolean;
             /**
+             * Whether the page is a dynamic route
+             * example:
+             * false
+             */
+            is_dynamic_route?: boolean;
+            /**
              * The id of the page
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
@@ -3229,6 +3241,12 @@ declare namespace Components {
              * false
              */
             is_entry_route?: boolean;
+            /**
+             * Whether the page is a dynamic route
+             * example:
+             * false
+             */
+            is_dynamic_route?: boolean;
         }
         export interface PaymentWidget {
             id: string;
@@ -3309,6 +3327,12 @@ declare namespace Components {
              * Authentication settings for the portal
              */
             auth_settings?: {
+                passwordless_login?: {
+                    /**
+                     * Passwordless login feature flag
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -4292,6 +4316,12 @@ declare namespace Components {
              * Authentication settings for the portal
              */
             auth_settings?: {
+                passwordless_login?: {
+                    /**
+                     * Passwordless login feature flag
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -6294,6 +6324,12 @@ declare namespace Paths {
                  * Authentication settings for the portal
                  */
                 auth_settings?: {
+                    passwordless_login?: {
+                        /**
+                         * Passwordless login feature flag
+                         */
+                        enabled?: boolean;
+                    };
                     entry_point?: "PASSWORD" | "SSO";
                     preferred_sso_providers?: /**
                      * URL-friendly slug to use as organization-unique identifier for Provider
@@ -6710,7 +6746,7 @@ declare namespace Paths {
             export type Fields = string;
             /**
              * example:
-             * schema=contract,slug=contracts
+             * slug=contracts
              */
             export type Filter = string;
         }
@@ -6722,7 +6758,7 @@ declare namespace Paths {
             Parameters.Fields;
             filter?: /**
              * example:
-             * schema=contract,slug=contracts
+             * slug=contracts
              */
             Parameters.Filter;
         }
