@@ -924,15 +924,17 @@ declare namespace Components {
             /**
              * Status of the bulk trigger automation job
              * * approval: Waiting for user approval to start the bulk trigger automation
-             * * starting: Starting automation executions
-             * * in_progress: Automation execution are currently running
+             * * querying_entities: Loading entities in batches
+             * * entities_loaded: All entities have been loaded and stored
+             * * executing: Automation execution are currently running
+             * * monitoring: All executions have been started, now monitoring their completion
              * * send_report: Automation executions finished running. Report is being created & sent to the user who initiated the bulk trigger automation
              * * finished: Automation executions finished running. Some may have failed. Check the status of each entity.
              * * failed: Bulk trigger automation execution failed. Some executions might have started. Check the status of each entity.
              * * cancelled: Bulk trigger automation execution was cancelled
              *
              */
-            status: "approval" | "starting" | "in_progress" | "send_report" | "finished" | "failed" | "cancelled";
+            status: "approval" | "querying_entities" | "entities_loaded" | "executing" | "monitoring" | "send_report" | "finished" | "failed" | "cancelled";
             /**
              * User ID who created the bulk trigger automation job
              * example:
@@ -956,9 +958,63 @@ declare namespace Components {
              */
             report_file_entity_id?: string;
             /**
+             * Query configuration for loading entities
+             */
+            entity_query?: {
+                type: "refs" | "query" | "filter";
+                data: EntityRef[] | string | /**
+                 * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
+                 * example:
+                 * [
+                 *   {
+                 *     "term": {
+                 *       "_schema": "contact"
+                 *     }
+                 *   },
+                 *   {
+                 *     "terms": {
+                 *       "status": [
+                 *         "active"
+                 *       ]
+                 *     }
+                 *   }
+                 * ]
+                 */
+                EntitySearchFilter;
+            };
+            /**
+             * Pagination state for entity loading
+             */
+            pagination_state?: {
+                /**
+                 * Number of entities per page
+                 */
+                page_size?: number;
+                /**
+                 * Number of pages processed so far
+                 */
+                pages_processed?: number;
+                /**
+                 * Total number of entities processed so far
+                 */
+                total_processed?: number;
+                /**
+                 * Stable query ID for pagination
+                 */
+                stable_query_id?: string;
+                /**
+                 * Last sort value used for pagination
+                 */
+                search_after?: string;
+                /**
+                 * Whether there are more entities to load
+                 */
+                has_more?: boolean;
+            };
+            /**
              * List of entities & their automation execution id & status
              */
-            execution_summary: /* Execution item for bulk trigger automation. It maps each entity to its automation execution id & status */ ExecItem[];
+            execution_summary?: /* Execution item for bulk trigger automation. It maps each entity to its automation execution id & status */ ExecItem[];
         }
         export type BulkTriggerRequest = {
             flow_id: /**
@@ -1888,7 +1944,7 @@ declare namespace Components {
              */
             error?: string;
         }
-        export type ExecutionStatus = "pending" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot";
+        export type ExecutionStatus = "pending" | "starting" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot";
         export interface ExistsCondition {
             exists?: boolean;
         }
@@ -1903,14 +1959,7 @@ declare namespace Components {
             id?: string; // uuid
             type: "flows_trigger";
             configuration: {
-                /**
-                 * ID of the flow that triggers the automation
-                 */
                 source_id: string; // uuid
-                /**
-                 * Certain flows can be triggered automatically by a journey, this is the ID of that journey
-                 */
-                journey_id?: string; // uuid
             };
         }
         export interface FrontendSubmitTrigger {
@@ -3650,6 +3699,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * searchFlows - searchFlows
@@ -3963,6 +4013,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type ActionCondition = Components.Schemas.ActionCondition;
 export type ActionSchedule = Components.Schemas.ActionSchedule;

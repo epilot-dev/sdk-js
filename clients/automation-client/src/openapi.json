@@ -2714,6 +2714,7 @@
         "type": "string",
         "enum": [
           "pending",
+          "starting",
           "in_progress",
           "paused",
           "success",
@@ -2855,8 +2856,7 @@
           "status",
           "created_by",
           "created_at",
-          "updated_at",
-          "execution_summary"
+          "updated_at"
         ],
         "properties": {
           "job_id": {
@@ -2870,11 +2870,13 @@
           },
           "status": {
             "type": "string",
-            "description": "Status of the bulk trigger automation job\n* approval: Waiting for user approval to start the bulk trigger automation\n* starting: Starting automation executions\n* in_progress: Automation execution are currently running\n* send_report: Automation executions finished running. Report is being created & sent to the user who initiated the bulk trigger automation\n* finished: Automation executions finished running. Some may have failed. Check the status of each entity.\n* failed: Bulk trigger automation execution failed. Some executions might have started. Check the status of each entity.\n* cancelled: Bulk trigger automation execution was cancelled\n",
+            "description": "Status of the bulk trigger automation job\n* approval: Waiting for user approval to start the bulk trigger automation\n* querying_entities: Loading entities in batches\n* entities_loaded: All entities have been loaded and stored\n* executing: Automation execution are currently running\n* monitoring: All executions have been started, now monitoring their completion\n* send_report: Automation executions finished running. Report is being created & sent to the user who initiated the bulk trigger automation\n* finished: Automation executions finished running. Some may have failed. Check the status of each entity.\n* failed: Bulk trigger automation execution failed. Some executions might have started. Check the status of each entity.\n* cancelled: Bulk trigger automation execution was cancelled\n",
             "enum": [
               "approval",
-              "starting",
-              "in_progress",
+              "querying_entities",
+              "entities_loaded",
+              "executing",
+              "monitoring",
               "send_report",
               "finished",
               "failed",
@@ -2907,6 +2909,70 @@
           "report_file_entity_id": {
             "type": "string",
             "description": "Entity ID of the report file entity"
+          },
+          "entity_query": {
+            "type": "object",
+            "description": "Query configuration for loading entities",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "refs",
+                  "query",
+                  "filter"
+                ]
+              },
+              "data": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRef"
+                    }
+                  },
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EntitySearchFilter"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ]
+          },
+          "pagination_state": {
+            "type": "object",
+            "description": "Pagination state for entity loading",
+            "properties": {
+              "page_size": {
+                "type": "integer",
+                "description": "Number of entities per page"
+              },
+              "pages_processed": {
+                "type": "integer",
+                "description": "Number of pages processed so far"
+              },
+              "total_processed": {
+                "type": "integer",
+                "description": "Total number of entities processed so far"
+              },
+              "stable_query_id": {
+                "type": "string",
+                "description": "Stable query ID for pagination"
+              },
+              "search_after": {
+                "type": "string",
+                "description": "Last sort value used for pagination"
+              },
+              "has_more": {
+                "type": "boolean",
+                "description": "Whether there are more entities to load"
+              }
+            }
           },
           "execution_summary": {
             "type": "array",
@@ -2989,13 +3055,7 @@
                 "properties": {
                   "source_id": {
                     "type": "string",
-                    "format": "uuid",
-                    "description": "ID of the flow that triggers the automation"
-                  },
-                  "journey_id": {
-                    "type": "string",
-                    "format": "uuid",
-                    "description": "Certain flows can be triggered automatically by a journey, this is the ID of that journey"
+                    "format": "uuid"
                   }
                 },
                 "required": [
