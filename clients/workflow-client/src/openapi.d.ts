@@ -274,6 +274,20 @@ declare namespace Components {
             trigger_mode: TriggerMode;
             conditions: Condition[];
             schedule?: DelayedSchedule | RelativeSchedule;
+            loop_config?: {
+                /**
+                 * The id of the branch that will be looped
+                 */
+                loop_branch_id: string;
+                /**
+                 * The id of the branch that will be used to exit the loop
+                 */
+                exit_branch_id: string;
+                /**
+                 * Maximum number of iterations for the loop branch
+                 */
+                max_iterations: number;
+            };
         }
         export interface DelayedSchedule {
             mode: "delayed";
@@ -1147,7 +1161,7 @@ declare namespace Components {
             enableECPWorkflow?: boolean;
             updateEntityAttributes?: UpdateEntityAttributes[];
             /**
-             * Version of the workflow execution
+             * Version of the workflow execution.
              */
             version?: number;
             /**
@@ -1196,7 +1210,7 @@ declare namespace Components {
             enableECPWorkflow?: boolean;
             updateEntityAttributes?: UpdateEntityAttributes[];
             /**
-             * Version of the workflow execution
+             * Version of the workflow execution.
              */
             version?: number;
             /**
@@ -1303,7 +1317,7 @@ declare namespace Components {
             enableECPWorkflow?: boolean;
             updateEntityAttributes?: UpdateEntityAttributes[];
             /**
-             * Version of the workflow execution
+             * Version of the workflow execution.
              */
             version?: number;
             /**
