@@ -3220,7 +3220,7 @@
               "description": "A comma separated list of job statuses to return",
               "type": "array",
               "items": {
-                "$ref": "#/components/schemas/TaxonomyBulkJobStatus"
+                "type": "string"
               }
             }
           },

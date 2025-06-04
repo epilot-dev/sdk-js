@@ -10586,7 +10586,7 @@ declare namespace Paths {
             /**
              * A comma separated list of job statuses to return
              */
-            export type Status = /* The status of the bulk job */ Components.Schemas.TaxonomyBulkJobStatus[];
+            export type Status = string[];
         }
         export interface QueryParameters {
             status?: /* A comma separated list of job statuses to return */ Parameters.Status;
