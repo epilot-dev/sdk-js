@@ -74,6 +74,10 @@ declare namespace Components {
              * Email address for support requests
              */
             support_email?: string;
+            /**
+             * Flag to indicate if the app is in dev mode. If true, the app takes the override properties of components into account.
+             */
+            dev_mode?: boolean;
         }
         export interface PatchVersionRequest {
             /**
@@ -247,6 +251,10 @@ declare namespace Components {
             name: string;
             author?: Author;
             /**
+             * Flag to indicate if the app is in dev mode. If true, the app takes the override_url property of components into account.
+             */
+            dev_mode?: boolean;
+            /**
              * List of available versions of the app
              */
             versions: string[];
@@ -405,6 +413,10 @@ declare namespace Components {
              */
             name: string;
             author?: Author;
+            /**
+             * Flag to indicate if the app is in dev mode. If true, the app takes the override_url property of components into account.
+             */
+            dev_mode?: boolean;
             /**
              * List of available versions of the app
              */
@@ -669,6 +681,10 @@ declare namespace Components {
              */
             installer_org_id: string;
             /**
+             * Organization ID of the app creator
+             */
+            owner_org_id?: string;
+            /**
              * Flag to indicate if the app is enabled. Enabled is set to true when required option values are set.
              */
             enabled: boolean;
@@ -713,6 +729,10 @@ declare namespace Components {
                  */
                 updated_by?: string;
             };
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
         }
         export interface JourneyBlockComponent {
             component_type: "CUSTOM_JOURNEY_BLOCK";
@@ -756,6 +776,7 @@ declare namespace Components {
             };
         } & (TextArg | BooleanArg | EnumArg);
         export interface JourneyBlockConfig {
+            override_dev_mode?: /* Override URL when app is in dev mode */ OverrideDevMode;
             /**
              * URL of the web component object
              * example:
@@ -837,6 +858,17 @@ declare namespace Components {
             component_id: string;
             options: Option[];
         }
+        /**
+         * Override URL when app is in dev mode
+         */
+        export interface OverrideDevMode {
+            /**
+             * URL of the web component object in dev mode
+             * example:
+             * http://localhost:3000/bundle.js
+             */
+            override_url?: string;
+        }
         export interface PortalAuth {
             type?: string;
             url?: string;
@@ -908,6 +940,10 @@ declare namespace Components {
              */
             name: string;
             author?: Author;
+            /**
+             * Flag to indicate if the app is in dev mode.
+             */
+            dev_mode?: boolean;
             /**
              * Category of the app.
              */
@@ -1937,6 +1973,7 @@ export type NotificationEvent = Components.Schemas.NotificationEvent;
 export type Option = Components.Schemas.Option;
 export type Options = Components.Schemas.Options;
 export type OptionsRef = Components.Schemas.OptionsRef;
+export type OverrideDevMode = Components.Schemas.OverrideDevMode;
 export type PortalAuth = Components.Schemas.PortalAuth;
 export type PortalExtensionComponent = Components.Schemas.PortalExtensionComponent;
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
