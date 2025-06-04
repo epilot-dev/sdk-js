@@ -10583,10 +10583,13 @@ declare namespace Paths {
              * The maximum number of jobs to return (defaults to 20)
              */
             export type Size = number;
-            export type Status = /* The status of the bulk job */ Components.Schemas.TaxonomyBulkJobStatus;
+            /**
+             * A comma separated list of job statuses to return
+             */
+            export type Status = /* The status of the bulk job */ Components.Schemas.TaxonomyBulkJobStatus[];
         }
         export interface QueryParameters {
-            status?: Parameters.Status;
+            status?: /* A comma separated list of job statuses to return */ Parameters.Status;
             size?: /* The maximum number of jobs to return (defaults to 20) */ Parameters.Size;
         }
         namespace Responses {

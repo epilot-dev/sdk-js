@@ -3217,7 +3217,11 @@
             "description": "The status of the jobs to return",
             "name": "status",
             "schema": {
-              "$ref": "#/components/schemas/TaxonomyBulkJobStatus"
+              "description": "A comma separated list of job statuses to return",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TaxonomyBulkJobStatus"
+              }
             }
           },
           {
@@ -9281,9 +9285,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }
