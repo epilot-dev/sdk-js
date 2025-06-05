@@ -11,7 +11,7 @@ import type {
 declare namespace Components {
     namespace Schemas {
         export interface Board {
-            id?: string; // uuid
+            id?: string;
             /**
              * example:
              * Board 1
@@ -37,20 +37,25 @@ declare namespace Components {
                 card_config?: {
                     fields?: string[];
                 };
-                board_filters?: BoardFilter[];
+                board_filter?: BoardFilter;
                 sorting?: Sorting;
+                /**
+                 * example:
+                 * task 1
+                 */
+                search_query?: string;
             };
         }
         export interface BoardFilter {
+            items: (FilterItem | FilterGroup)[];
             /**
              * example:
-             * status
+             * OR
              */
-            filter_field: string;
-            filter_values: string[];
+            combination: "AND" | "OR";
         }
         export interface BoardSummary {
-            id?: string; // uuid
+            id?: string;
             /**
              * example:
              * Board 1
@@ -67,6 +72,41 @@ declare namespace Components {
             updated_by?: string;
             shared_with?: string[];
         }
+        export interface FilterGroup {
+            items: FilterItem[];
+            /**
+             * example:
+             * AND
+             */
+            combination: "AND" | "OR";
+        }
+        export interface FilterItem {
+            /**
+             * The field key to filter on
+             * example:
+             * assignee
+             */
+            key: string;
+            operator: /**
+             * The comparison operator for filtering
+             * example:
+             * EQUALS
+             */
+            FilterOperator;
+            value: /* The value to compare against - can be a single value (string, number, boolean) or an array of values */ ValueType;
+            /**
+             * The data type of the field
+             * example:
+             * string
+             */
+            data_type?: "string" | "number" | "boolean" | "date";
+        }
+        /**
+         * The comparison operator for filtering
+         * example:
+         * EQUALS
+         */
+        export type FilterOperator = "EQUALS" | "NOT_EQUALS" | "EMPTY" | "NOT_EMPTY" | "CONTAINS" | "NOT_CONTAINS" | "IS_ONE_OF" | "IS_NONE_OF" | "GREATER_THAN" | "LESS_THAN" | "GREATER_THAN_OR_EQUAL" | "LESS_THAN_OR_EQUAL";
         export interface Sorting {
             /**
              * example:
@@ -76,13 +116,7 @@ declare namespace Components {
             direction?: "asc" | "desc";
         }
         export interface Swimlane {
-            /**
-             * example:
-             * status
-             */
-            filter_field: string;
-            filter_values: string[];
-            id?: string; // uuid
+            id?: string;
             /**
              * example:
              * Swimlane 1
@@ -93,12 +127,17 @@ declare namespace Components {
              * 1
              */
             position?: number;
+            filter?: BoardFilter;
             /**
              * example:
              * success
              */
             title_chip_variant?: string;
         }
+        /**
+         * The value to compare against - can be a single value (string, number, boolean) or an array of values
+         */
+        export type ValueType = /* The value to compare against - can be a single value (string, number, boolean) or an array of values */ string | number | boolean | (string | number | boolean)[];
     }
 }
 declare namespace Paths {
@@ -118,10 +157,10 @@ declare namespace Paths {
     }
     namespace DeleteKanbanBoard {
         namespace Parameters {
-            export type BoardId = string; // uuid
+            export type BoardId = string;
         }
         export interface PathParameters {
-            boardId: Parameters.BoardId /* uuid */;
+            boardId: Parameters.BoardId;
         }
         namespace Responses {
             export interface $200 {
@@ -138,10 +177,10 @@ declare namespace Paths {
     }
     namespace GetKanbanBoard {
         namespace Parameters {
-            export type BoardId = string; // uuid
+            export type BoardId = string;
         }
         export interface PathParameters {
-            boardId: Parameters.BoardId /* uuid */;
+            boardId: Parameters.BoardId;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Board;
@@ -168,10 +207,10 @@ declare namespace Paths {
     }
     namespace UpdateKanbanBoard {
         namespace Parameters {
-            export type BoardId = string; // uuid
+            export type BoardId = string;
         }
         export interface PathParameters {
-            boardId: Parameters.BoardId /* uuid */;
+            boardId: Parameters.BoardId;
         }
         export type RequestBody = Components.Schemas.Board;
         namespace Responses {
@@ -309,5 +348,9 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type Board = Components.Schemas.Board;
 export type BoardFilter = Components.Schemas.BoardFilter;
 export type BoardSummary = Components.Schemas.BoardSummary;
+export type FilterGroup = Components.Schemas.FilterGroup;
+export type FilterItem = Components.Schemas.FilterItem;
+export type FilterOperator = Components.Schemas.FilterOperator;
 export type Sorting = Components.Schemas.Sorting;
 export type Swimlane = Components.Schemas.Swimlane;
+export type ValueType = Components.Schemas.ValueType;
