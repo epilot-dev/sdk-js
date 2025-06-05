@@ -1,0 +1,68 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://address.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/public/suggestions": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fileRef",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "countryCodeSearchTerm",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "postalCodeSearchTerm",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "streetSearchTerm",
+            "required": false
+          }
+        ],
+        "operationId": "getAddressSuggestions",
+        "responses": {}
+      }
+    },
+    "/v1/public/availability": {
+      "post": {
+        "operationId": "availabilityCheck",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/availability/{id}/validate": {
+      "get": {
+        "operationId": "validateAvailabilityFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}
