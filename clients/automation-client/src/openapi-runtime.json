@@ -206,7 +206,7 @@
         "responses": {}
       }
     },
-    "/v1/automation/executions/{execution_id}/{schedule_id}": {
+    "/v1/automation/executions/{execution_id}/schedules/{schedule_id}": {
       "delete": {
         "operationId": "cancelSchedule",
         "parameters": [

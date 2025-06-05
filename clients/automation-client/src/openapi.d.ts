@@ -4279,7 +4279,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ResumeExecutionWithToken.Responses.$200>
   }
-  ['/v1/automation/executions/{execution_id}/{schedule_id}']: {
+  ['/v1/automation/executions/{execution_id}/schedules/{schedule_id}']: {
     /**
      * cancelSchedule - cancelSchedule
      * 
