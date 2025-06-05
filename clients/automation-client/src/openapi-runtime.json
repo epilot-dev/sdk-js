@@ -205,6 +205,24 @@
         },
         "responses": {}
       }
+    },
+    "/v1/automation/executions/{execution_id}/{schedule_id}": {
+      "delete": {
+        "operationId": "cancelSchedule",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {

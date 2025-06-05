@@ -126,7 +126,7 @@ declare namespace Components {
                 types?: (("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword" | "SelfAssignmentFromPortal") | string)[];
             };
         }
-        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerShareEntityAction | TriggerWebhookAction | InformERPAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction;
+        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerShareEntityAction | TriggerWebhookAction | InformERPAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction | FlowExecutionCancelAction;
         export type AnyActionConfig = /**
          * example:
          * {
@@ -341,7 +341,28 @@ declare namespace Components {
          *   }
          * }
          */
-        SendEmailActionConfig | /* Creates an order entity with prices from journey */ CartCheckoutActionConfig | CustomAction | AutomationActionConfig;
+        SendEmailActionConfig | /* Creates an order entity with prices from journey */ CartCheckoutActionConfig | CustomAction | AutomationActionConfig | /**
+         * example:
+         * {
+         *   "id": "2520gja-2sgmsaga-0asg-822jgal",
+         *   "name": "Cancel Flow Execution",
+         *   "type": "cancel-flow-execution",
+         *   "config": {
+         *     "selected_reasons": [
+         *       {
+         *         "id": "_6kITMwkv_0Uo4i7fO7Ja",
+         *         "title": "when you are done! that's when you close it."
+         *       },
+         *       {
+         *         "id": "qgK9sGbKoS7NxlAbNReVn",
+         *         "title": "Client didn't want our services"
+         *       }
+         *     ],
+         *     "extra_description": "Test cancellation"
+         *   }
+         * }
+         */
+        FlowExecutionCancelActionConfig;
         export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | /**
          * - If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.
          * - The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`
@@ -745,6 +766,7 @@ declare namespace Components {
              */
             OrganizationId;
             flow_id: /**
+             * ID of the Automation Flow
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
@@ -776,7 +798,7 @@ declare namespace Components {
              * 2
              */
             version?: number;
-            trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation;
+            trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask;
         }
         /**
          * example:
@@ -785,6 +807,7 @@ declare namespace Components {
         export type AutomationExecutionId = string;
         export interface AutomationFlow {
             id?: /**
+             * ID of the Automation Flow
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
@@ -833,7 +856,7 @@ declare namespace Components {
             /**
              * The actions (nodes) of the automation flow
              */
-            actions: AnyActionConfig[];
+            actions: AnyAction[];
             /**
              * Number of automation executions that ran
              * example:
@@ -893,6 +916,7 @@ declare namespace Components {
             _manifest?: string /* uuid */[] | null;
         }
         /**
+         * ID of the Automation Flow
          * example:
          * 7791b04a-16d2-44a2-9af9-2d59c25c512f
          */
@@ -917,6 +941,7 @@ declare namespace Components {
              */
             OrganizationId;
             flow_id: /**
+             * ID of the Automation Flow
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
@@ -1005,7 +1030,7 @@ declare namespace Components {
                 /**
                  * Last sort value used for pagination
                  */
-                search_after?: string;
+                search_after?: (string | number)[];
                 /**
                  * Whether there are more entities to load
                  */
@@ -1018,6 +1043,7 @@ declare namespace Components {
         }
         export type BulkTriggerRequest = {
             flow_id: /**
+             * ID of the Automation Flow
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
@@ -1025,6 +1051,7 @@ declare namespace Components {
             entities_refs: EntityRef[];
         } | {
             flow_id: /**
+             * ID of the Automation Flow
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
@@ -1032,6 +1059,7 @@ declare namespace Components {
             entities_query: string;
         } | {
             flow_id: /**
+             * ID of the Automation Flow
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
@@ -1056,6 +1084,23 @@ declare namespace Components {
              */
             EntitySearchFilter;
         };
+        /**
+         * A reason for cancelling a flow execution
+         */
+        export interface CancellationReason {
+            /**
+             * Unique identifier for the cancellation reason
+             * example:
+             * _6kITMwkv_0Uo4i7fO7Ja
+             */
+            id: string;
+            /**
+             * Human-readable title for the cancellation reason
+             * example:
+             * Process completed successfully
+             */
+            title: string;
+        }
         /**
          * Creates an order entity with prices from journey
          */
@@ -1951,6 +1996,152 @@ declare namespace Components {
         export type FilterConditionOnEvent = OrCondition | {
             [name: string]: (string | EqualsIgnoreCaseCondition | AnythingButCondition | NumericCondition | ExistsCondition | PrefixCondition | SuffixCondition | WildcardCondition)[];
         };
+        export interface FlowExecutionCancelAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "cancel-flow-execution";
+            config?: /* Configuration for cancelling a flow execution with selected reasons */ FlowExecutionCancelConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+        }
+        /**
+         * example:
+         * {
+         *   "id": "2520gja-2sgmsaga-0asg-822jgal",
+         *   "name": "Cancel Flow Execution",
+         *   "type": "cancel-flow-execution",
+         *   "config": {
+         *     "selected_reasons": [
+         *       {
+         *         "id": "_6kITMwkv_0Uo4i7fO7Ja",
+         *         "title": "when you are done! that's when you close it."
+         *       },
+         *       {
+         *         "id": "qgK9sGbKoS7NxlAbNReVn",
+         *         "title": "Client didn't want our services"
+         *       }
+         *     ],
+         *     "extra_description": "Test cancellation"
+         *   }
+         * }
+         */
+        export interface FlowExecutionCancelActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "cancel-flow-execution";
+            config?: /* Configuration for cancelling a flow execution with selected reasons */ FlowExecutionCancelConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+        }
+        /**
+         * Configuration for cancelling a flow execution with selected reasons
+         */
+        export interface FlowExecutionCancelConfig {
+            /**
+             * List of reasons selected for this specific cancellation
+             */
+            selected_reasons?: /* A reason for cancelling a flow execution */ CancellationReason[];
+            /**
+             * Additional description or notes for the cancellation
+             * example:
+             * Process completed successfully
+             */
+            extra_description?: string;
+        }
         export interface FlowsTrigger {
             /**
              * example:
@@ -2799,10 +2990,19 @@ declare namespace Components {
              */
             EntityId;
             flow_id: /**
+             * ID of the Automation Flow
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
             AutomationFlowId;
+            /**
+             * ID of the Flow Execution
+             */
+            flow_execution_id?: string;
+            /**
+             * ID of the automated flow action
+             */
+            flow_automation_task_id?: string; // UUID
         }
         export interface SuffixCondition {
             suffix?: string;
@@ -2856,6 +3056,30 @@ declare namespace Components {
              */
             ActivityId;
             operation_type: EntityOperation;
+        }
+        export interface TriggerEventFlowAutomationTask {
+            type?: "flow_automation_task";
+            /**
+             * example:
+             * 123
+             */
+            org_id: string;
+            entity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
+            /**
+             * example:
+             * wfwAJoT_cK
+             */
+            flow_execution_id: string;
+            /**
+             * example:
+             * 2fa221ec-3aac-4655-ab8f-c062eca44a3
+             */
+            flow_automation_task_id: string; // UUID
+            caller?: ApiCallerContext;
         }
         export interface TriggerEventManual {
             type?: "manual";
@@ -3363,6 +3587,39 @@ declare namespace Paths {
             Components.Responses.NotFoundError;
         }
     }
+    namespace CancelSchedule {
+        namespace Parameters {
+            export type ExecutionId = /**
+             * example:
+             * 9baf184f-bc81-4128-bca3-d974c90a12c4
+             */
+            Components.Schemas.AutomationExecutionId;
+            export type ScheduleId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+            schedule_id: Parameters.ScheduleId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ActionSchedule;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+        }
+    }
     namespace CreateFlow {
         export type RequestBody = Components.Schemas.AutomationFlow;
         namespace Responses {
@@ -3380,6 +3637,7 @@ declare namespace Paths {
     namespace DeleteFlow {
         namespace Parameters {
             export type FlowId = /**
+             * ID of the Automation Flow
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
@@ -3502,6 +3760,7 @@ declare namespace Paths {
     namespace GetFlow {
         namespace Parameters {
             export type FlowId = /**
+             * ID of the Automation Flow
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
@@ -3566,6 +3825,7 @@ declare namespace Paths {
     namespace PutFlow {
         namespace Parameters {
             export type FlowId = /**
+             * ID of the Automation Flow
              * example:
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
@@ -3698,7 +3958,6 @@ declare namespace Paths {
         }
     }
 }
-
 
 export interface OperationMethods {
   /**
@@ -3846,6 +4105,16 @@ export interface OperationMethods {
     data?: Paths.ResumeExecutionWithToken.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ResumeExecutionWithToken.Responses.$200>
+  /**
+   * cancelSchedule - cancelSchedule
+   * 
+   * Cancel a scheduled automation
+   */
+  'cancelSchedule'(
+    parameters?: Parameters<Paths.CancelSchedule.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelSchedule.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -4010,10 +4279,21 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ResumeExecutionWithToken.Responses.$200>
   }
+  ['/v1/automation/executions/{execution_id}/{schedule_id}']: {
+    /**
+     * cancelSchedule - cancelSchedule
+     * 
+     * Cancel a scheduled automation
+     */
+    'delete'(
+      parameters?: Parameters<Paths.CancelSchedule.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelSchedule.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type ActionCondition = Components.Schemas.ActionCondition;
 export type ActionSchedule = Components.Schemas.ActionSchedule;
@@ -4039,6 +4319,7 @@ export type AutomationFlowId = Components.Schemas.AutomationFlowId;
 export type AutomationTrigger = Components.Schemas.AutomationTrigger;
 export type BulkTriggerJob = Components.Schemas.BulkTriggerJob;
 export type BulkTriggerRequest = Components.Schemas.BulkTriggerRequest;
+export type CancellationReason = Components.Schemas.CancellationReason;
 export type CartCheckoutAction = Components.Schemas.CartCheckoutAction;
 export type CartCheckoutActionConfig = Components.Schemas.CartCheckoutActionConfig;
 export type CartCheckoutConfig = Components.Schemas.CartCheckoutConfig;
@@ -4069,6 +4350,9 @@ export type ExecItem = Components.Schemas.ExecItem;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
 export type ExistsCondition = Components.Schemas.ExistsCondition;
 export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;
+export type FlowExecutionCancelAction = Components.Schemas.FlowExecutionCancelAction;
+export type FlowExecutionCancelActionConfig = Components.Schemas.FlowExecutionCancelActionConfig;
+export type FlowExecutionCancelConfig = Components.Schemas.FlowExecutionCancelConfig;
 export type FlowsTrigger = Components.Schemas.FlowsTrigger;
 export type FrontendSubmitTrigger = Components.Schemas.FrontendSubmitTrigger;
 export type GetExecutionsResp = Components.Schemas.GetExecutionsResp;
@@ -4111,6 +4395,7 @@ export type SuffixCondition = Components.Schemas.SuffixCondition;
 export type TriggerCondition = Components.Schemas.TriggerCondition;
 export type TriggerEventEntityActivity = Components.Schemas.TriggerEventEntityActivity;
 export type TriggerEventEntityOperation = Components.Schemas.TriggerEventEntityOperation;
+export type TriggerEventFlowAutomationTask = Components.Schemas.TriggerEventFlowAutomationTask;
 export type TriggerEventManual = Components.Schemas.TriggerEventManual;
 export type TriggerShareEntityAction = Components.Schemas.TriggerShareEntityAction;
 export type TriggerShareEntityActionConfig = Components.Schemas.TriggerShareEntityActionConfig;
