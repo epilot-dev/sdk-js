@@ -2593,14 +2593,8 @@
           "assigned_to": {
             "$ref": "#/components/schemas/Assignees"
           },
-          "selected_closing_reasons": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ClosingReason"
-            }
-          },
-          "closing_reason_description": {
-            "type": "string"
+          "closing_reason": {
+            "$ref": "#/components/schemas/FlowClosingReason"
           },
           "due_date": {
             "type": "string"
@@ -2728,24 +2722,7 @@
             }
           },
           "closing_reason": {
-            "type": "object",
-            "properties": {
-              "selected_reasons": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ClosingReason"
-                }
-              },
-              "configured_reasons": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ClosingReason"
-                }
-              },
-              "extra_description": {
-                "type": "string"
-              }
-            }
+            "$ref": "#/components/schemas/FlowClosingReason"
           },
           "available_in_ecp": {
             "type": "boolean",
@@ -2766,6 +2743,26 @@
           },
           "trigger": {
             "$ref": "#/components/schemas/FlowTrigger"
+          }
+        }
+      },
+      "FlowClosingReason": {
+        "type": "object",
+        "properties": {
+          "selected_reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          },
+          "configured_reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          },
+          "extra_description": {
+            "type": "string"
           }
         }
       },
