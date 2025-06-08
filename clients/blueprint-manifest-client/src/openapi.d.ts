@@ -897,58 +897,15 @@ declare namespace Paths {
     }
     namespace CreateExport {
         export interface RequestBody {
-            resourceType: /* Type of the resource */ Components.Schemas.ResourceNodeType;
-            resourceIds: [
-                string,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?
+            resources: [
+                {
+                    type: /* Type of the resource */ Components.Schemas.ResourceNodeType;
+                    id: string;
+                },
+                ...{
+                    type: /* Type of the resource */ Components.Schemas.ResourceNodeType;
+                    id: string;
+                }[]
             ];
             jobId?: /**
              * ID of an import or export job (state machine)

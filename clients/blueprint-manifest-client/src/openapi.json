@@ -78,16 +78,24 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "resourceType": {
-                    "$ref": "#/components/schemas/ResourceNodeType"
-                  },
-                  "resourceIds": {
+                  "resources": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "$ref": "#/components/schemas/ResourceNodeType"
+                        },
+                        "id": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id"
+                      ]
                     },
-                    "minItems": 1,
-                    "maxItems": 50
+                    "minItems": 1
                   },
                   "jobId": {
                     "$ref": "#/components/schemas/JobID"
@@ -106,8 +114,7 @@
                   }
                 },
                 "required": [
-                  "resourceType",
-                  "resourceIds"
+                  "resources"
                 ]
               }
             }
