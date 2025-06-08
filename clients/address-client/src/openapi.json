@@ -1,0 +1,578 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "2.0.0",
+    "title": "Address API",
+    "description": "API for address based operations on the Epilot platform",
+    "termsOfService": "https://epilot.cloud/agb",
+    "contact": {
+      "name": "Support",
+      "email": "info@epilot.cloud",
+      "url": "https://help.epilot.cloud"
+    }
+  },
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotPublicAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://address.sls.epilot.io"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Availability"
+    },
+    {
+      "name": "Address Suggestion"
+    }
+  ],
+  "paths": {
+    "/v1/public/suggestions": {
+      "get": {
+        "description": "Get address suggestions for the given Availability File",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fileRef",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 255,
+              "format": "uri"
+            },
+            "description": "Reference to the File URL",
+            "example": "https://epilot-dev-user-content.s3.eu-central-1.amazonaws.com/739224/0a3639af-d4c3-4f96-bfc1-9dcbafdfaa42/availability-file-template%2520(13).csv"
+          },
+          {
+            "in": "query",
+            "name": "countryCodeSearchTerm",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 2
+            },
+            "description": "Country code search term",
+            "example": "de"
+          },
+          {
+            "in": "query",
+            "name": "postalCodeSearchTerm",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "postal-code",
+              "maxLength": 10
+            },
+            "description": "Postal code search term",
+            "example": "506"
+          },
+          {
+            "in": "query",
+            "name": "streetSearchTerm",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "street-address",
+              "maxLength": 255
+            },
+            "description": "street search term"
+          }
+        ],
+        "operationId": "getAddressSuggestions",
+        "summary": "getAddressSuggestions",
+        "tags": [
+          "Address Suggestion"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Suggestions list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressSuggestions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/availability": {
+      "post": {
+        "description": "Check for Entities that contain a matching availability range in related availability files.",
+        "operationId": "availabilityCheck",
+        "summary": "availabilityCheck",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Availability"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityCheckParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The availability check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/availability/{id}/validate": {
+      "get": {
+        "description": "Validates an already uploaded availability file, it returns an array of errors if any errors are found in the file.",
+        "operationId": "validateAvailabilityFile",
+        "summary": "validateAvailabilityFile",
+        "tags": [
+          "Availability"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Entity ID of the File Entity with the Availability File. The accepted formats are `.csv` and `.xlsx`.",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "maxLength": 36
+            },
+            "example": "72c803b2-2e5d-4bd6-bffc-fad998bbbe36"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateAvailabilityFileResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token. Supports RFC8725 for JWT validation.",
+        "bearerFormat": "JWT"
+      },
+      "EpilotPublicAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Public Access Bearer Token. Supports RFC8725 for JWT validation.",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "AvailabilityCheckParams": {
+        "properties": {
+          "entities": {
+            "description": "Entity ID's to check the availability parameters against",
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "maxLength": 36,
+              "format": "uuid"
+            }
+          },
+          "schemas": {
+            "description": "One or more schemas that should be used to query for the matching Entities. Defaults to all schemas if nore are specified.",
+            "type": "array",
+            "example": [
+              "opportunity",
+              "offer"
+            ],
+            "items": {
+              "type": "string",
+              "maxLength": 255
+            }
+          },
+          "filters": {
+            "$ref": "#/components/schemas/AvailabilityFilters"
+          }
+        },
+        "required": [
+          "entities",
+          "filters"
+        ]
+      },
+      "AvailabilityFilters": {
+        "description": "Availability filters dimensions",
+        "type": "object",
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/AvailabilityLocation"
+          },
+          "available_date": {
+            "$ref": "#/components/schemas/AvailabilityDate"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      },
+      "AvailabilityDate": {
+        "type": "string",
+        "format": "date",
+        "description": "A value to be matched against the availability window (start & end date)",
+        "example": "2017-07-21",
+        "maxLength": 10
+      },
+      "AvailabilityLocation": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Street address or PO Box number.",
+            "example": "MediaPark"
+          },
+          "street_number": {
+            "type": "string",
+            "maxLength": 20,
+            "description": "Apartment, suite, or unit number.",
+            "example": "8a"
+          },
+          "postal_code": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "The postal code for the address.",
+            "example": "57008"
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "The name of the city, district, village, or town.",
+            "example": "Cologne"
+          },
+          "country": {
+            "type": "string",
+            "maxLength": 2,
+            "description": "Country code",
+            "example": "DE"
+          }
+        }
+      },
+      "AvailabilityResult": {
+        "description": "The availability check result payload",
+        "type": "object",
+        "properties": {
+          "available_entities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Available Entities",
+              "maxLength": 255
+            }
+          },
+          "check_results": {
+            "description": "The check result details",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "maxLength": 36
+                },
+                "matching_hits": {
+                  "description": "The number of rules matched",
+                  "type": "number"
+                },
+                "matching_error": {
+                  "description": "A set of matching errors when checking availability",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "entity_id",
+                "matching_hits"
+              ]
+            }
+          }
+        },
+        "required": [
+          "available_entities",
+          "check_results"
+        ],
+        "example": {
+          "available_entities": [],
+          "check_results": [
+            {
+              "entity_id": "72c803b2-2e5d-4bd6-bffc-fad998bbbe36",
+              "matching_hits": 0
+            },
+            {
+              "entity_id": "72c803b2-2e5d-4bd6-bffc-fad998bbbe37",
+              "matching_hits": 0
+            }
+          ]
+        }
+      },
+      "ValidateAvailabilityFileResult": {
+        "description": "The availability map file result payload",
+        "type": "object",
+        "properties": {
+          "status": {
+            "description": "The status of the validation",
+            "type": "string",
+            "enum": [
+              "success",
+              "error"
+            ]
+          },
+          "rules_parsed_count": {
+            "description": "The number of rules successfully parsed",
+            "type": "number"
+          },
+          "errors": {
+            "description": "The errors found on the file",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidateAvailabilityFileError"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "rules_parsed_count",
+          "errors"
+        ]
+      },
+      "ValidateAvailabilityFileError": {
+        "description": "The availability rule error",
+        "type": "object",
+        "properties": {
+          "line": {
+            "description": "The line number where the error was found",
+            "type": "number"
+          },
+          "message": {
+            "description": "The error message",
+            "type": "string",
+            "maxLength": 255
+          },
+          "data": {
+            "description": "Data related to the error",
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "AddressSuggestion": {
+        "type": "object",
+        "description": "The address suggestions entity",
+        "properties": {
+          "country": {
+            "type": "string",
+            "maxLength": 2,
+            "description": "The country code"
+          },
+          "postal_code": {
+            "type": "string",
+            "maxLength": 10,
+            "format": "postal-code",
+            "description": "The postal code"
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 100,
+            "format": "city",
+            "description": "The city"
+          },
+          "street": {
+            "type": "string",
+            "maxLength": 255,
+            "format": "street-address",
+            "description": "The street"
+          },
+          "street_number": {
+            "type": "string",
+            "maxLength": 20,
+            "format": "street-number",
+            "description": "The street number"
+          }
+        }
+      },
+      "AddressSuggestions": {
+        "type": "array",
+        "description": "The address suggestions entity array",
+        "items": {
+          "$ref": "#/components/schemas/AddressSuggestion"
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Error message"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      }
+    }
+  }
+}

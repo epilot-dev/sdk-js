@@ -273,6 +273,241 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetExecutionsResp"
+                },
+                "examples": {
+                  "manual_trigger": {
+                    "summary": "Manual trigger execution",
+                    "value": {
+                      "total": 1,
+                      "results": [
+                        {
+                          "id": "9baf184f-bc81-4128-bca3-d974c90a12c4",
+                          "execution_status": "success",
+                          "entity_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+                          "org_id": "123",
+                          "flow_id": "7791b04a-16d2-44a2-9af9-2d59c25c512f",
+                          "flow_name": "Handle contact form",
+                          "created_at": "2023-01-01T10:00:00Z",
+                          "updated_at": "2023-01-01T10:05:00Z",
+                          "actions": [],
+                          "version": 1,
+                          "trigger_event": {
+                            "type": "manual",
+                            "org_id": "123",
+                            "entity_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+                            "caller": {
+                              "EpilotAuth": {
+                                "claims": {
+                                  "userId": "10006129",
+                                  "email": "user@epilot.cloud"
+                                },
+                                "userId": "10006129",
+                                "organizationId": "123"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "entity_operation_trigger": {
+                    "summary": "Entity operation trigger execution",
+                    "value": {
+                      "total": 1,
+                      "results": [
+                        {
+                          "id": "8cdf274e-ab70-4029-9ca2-c863b80a11c3",
+                          "execution_status": "in_progress",
+                          "entity_id": "f4e4fcbd-cbcc-4496-bf5f-60c6ce2c621e",
+                          "activity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+                          "org_id": "123",
+                          "flow_id": "8e2e067e-3c63-4b1a-8e02-6150a3d1fd89",
+                          "flow_name": "Contact updated automation",
+                          "created_at": "2023-01-01T12:00:00Z",
+                          "updated_at": "2023-01-01T12:02:00Z",
+                          "actions": [],
+                          "version": 1,
+                          "trigger_event": {
+                            "type": "entity_operation",
+                            "entity_id": "f4e4fcbd-cbcc-4496-bf5f-60c6ce2c621e",
+                            "org_id": "123",
+                            "activity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+                            "operation_type": "updateEntity"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "entity_activity_trigger": {
+                    "summary": "Entity activity trigger execution",
+                    "value": {
+                      "total": 1,
+                      "results": [
+                        {
+                          "id": "7bde163d-9a5f-3f18-8b92-d752a79a10b2",
+                          "execution_status": "failed",
+                          "entity_id": "c2b1a9d8-7e6f-5040-3029-180716253f4e",
+                          "activity_id": "b3c4d5e6-f7a8-9012-3456-789012bcdef0",
+                          "org_id": "123",
+                          "flow_id": "6d1d956d-2b52-4a0a-9e01-5049a2c0ee78",
+                          "flow_name": "Document upload handler",
+                          "created_at": "2023-01-01T14:00:00Z",
+                          "updated_at": "2023-01-01T14:01:30Z",
+                          "actions": [],
+                          "version": 1,
+                          "trigger_event": {
+                            "type": "entity_activity",
+                            "org_id": "123",
+                            "activity_id": "b3c4d5e6-f7a8-9012-3456-789012bcdef0",
+                            "activity_type": "DocUploadedFromPortal",
+                            "entity_id": "c2b1a9d8-7e6f-5040-3029-180716253f4e"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "flow_automation_task_trigger": {
+                    "summary": "Flow automation task trigger execution",
+                    "value": {
+                      "total": 1,
+                      "results": [
+                        {
+                          "id": "5ade051c-8a4e-2e07-7a81-c641968a0fa1",
+                          "execution_status": "paused",
+                          "entity_id": "d3c2b1a0-8f7e-6d5c-4b3a-291807364e5f",
+                          "org_id": "123",
+                          "flow_id": "9f0f178f-4c74-5b2b-af12-6160b3d1ee89",
+                          "flow_name": "Journey completion follow-up",
+                          "created_at": "2023-01-01T16:00:00Z",
+                          "updated_at": "2023-01-01T16:03:00Z",
+                          "actions": [],
+                          "version": 1,
+                          "resume_token": "eyJraWQiOiJrZXkifQ==",
+                          "trigger_event": {
+                            "type": "flow_automation_task",
+                            "org_id": "123",
+                            "entity_id": "d3c2b1a0-8f7e-6d5c-4b3a-291807364e5f",
+                            "flow_execution_id": "wfwAJoT_cK",
+                            "flow_automation_task_id": "2fa221ec-3aac-4655-ab8f-c062eca44a3",
+                            "caller": {
+                              "EpilotAuth": {
+                                "claims": {
+                                  "userId": "10006129",
+                                  "email": "user@epilot.cloud"
+                                },
+                                "userId": "10006129",
+                                "organizationId": "123"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "mixed_execution_statuses": {
+                    "summary": "Multiple executions with different trigger types and statuses",
+                    "value": {
+                      "total": 4,
+                      "results": [
+                        {
+                          "id": "1aef262e-9b5f-4f29-8c93-e763b90b21d3",
+                          "execution_status": "success",
+                          "entity_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+                          "org_id": "123",
+                          "flow_id": "7791b04a-16d2-44a2-9af9-2d59c25c512f",
+                          "flow_name": "Send welcome email",
+                          "created_at": "2023-01-01T09:00:00Z",
+                          "updated_at": "2023-01-01T09:02:00Z",
+                          "actions": [],
+                          "version": 2,
+                          "trigger_event": {
+                            "type": "manual",
+                            "org_id": "123",
+                            "entity_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+                            "caller": {
+                              "EpilotAuth": {
+                                "claims": {
+                                  "userId": "10006129",
+                                  "email": "admin@epilot.cloud"
+                                },
+                                "userId": "10006129",
+                                "organizationId": "123"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "id": "2bef373f-ac60-5039-9da4-f874ca1c32e4",
+                          "execution_status": "in_progress",
+                          "entity_id": "f4e4fcbd-cbcc-4496-bf5f-60c6ce2c621e",
+                          "activity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+                          "org_id": "123",
+                          "flow_id": "8e2e067e-3c63-4b1a-8e02-6150a3d1fd89",
+                          "flow_name": "Update CRM system",
+                          "created_at": "2023-01-01T10:30:00Z",
+                          "updated_at": "2023-01-01T10:31:00Z",
+                          "actions": [],
+                          "version": 1,
+                          "trigger_event": {
+                            "type": "entity_operation",
+                            "entity_id": "f4e4fcbd-cbcc-4496-bf5f-60c6ce2c621e",
+                            "org_id": "123",
+                            "activity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+                            "operation_type": "createEntity"
+                          }
+                        },
+                        {
+                          "id": "3cef484g-bd71-6149-ae04-0985db2d43f5",
+                          "execution_status": "failed",
+                          "entity_id": "c2b1a9d8-7e6f-5040-3029-180716253f4e",
+                          "activity_id": "b3c4d5e6-f7a8-9012-3456-789012bcdef0",
+                          "org_id": "123",
+                          "flow_id": "6d1d956d-2b52-4a0a-9e01-5049a2c0ee78",
+                          "flow_name": "Generate invoice",
+                          "created_at": "2023-01-01T11:15:00Z",
+                          "updated_at": "2023-01-01T11:16:30Z",
+                          "actions": [],
+                          "version": 1,
+                          "trigger_event": {
+                            "type": "entity_activity",
+                            "org_id": "123",
+                            "activity_id": "b3c4d5e6-f7a8-9012-3456-789012bcdef0",
+                            "activity_type": "CreateMeterReading",
+                            "entity_id": "c2b1a9d8-7e6f-5040-3029-180716253f4e"
+                          }
+                        },
+                        {
+                          "id": "4def595h-ce82-7259-bf15-1a96ec3e54g6",
+                          "execution_status": "scheduled",
+                          "entity_id": "d3c2b1a0-8f7e-6d5c-4b3a-291807364e5f",
+                          "org_id": "123",
+                          "flow_id": "9f0f178f-4c74-5b2b-af12-6160b3d1ee89",
+                          "flow_name": "Scheduled reminder",
+                          "created_at": "2023-01-01T12:45:00Z",
+                          "updated_at": "2023-01-01T12:45:00Z",
+                          "actions": [],
+                          "version": 1,
+                          "trigger_event": {
+                            "type": "flow_automation_task",
+                            "org_id": "123",
+                            "entity_id": "d3c2b1a0-8f7e-6d5c-4b3a-291807364e5f",
+                            "flow_execution_id": "xgxBKpU_dL",
+                            "flow_automation_task_id": "3gb332fd-4bbd-5766-bc9g-d173fdb55b4",
+                            "caller": {
+                              "EpilotAuth": {
+                                "claims": {
+                                  "userId": "10006130",
+                                  "email": "scheduler@epilot.cloud"
+                                },
+                                "userId": "10006130",
+                                "organizationId": "123"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -618,6 +853,53 @@
           }
         }
       }
+    },
+    "/v1/automation/executions/{execution_id}/schedules/{schedule_id}": {
+      "delete": {
+        "operationId": "cancelSchedule",
+        "summary": "cancelSchedule",
+        "description": "Cancel a scheduled automation",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/AutomationExecutionId"
+            },
+            "required": true
+          },
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "ID of the schedule to cancel"
+          }
+        ],
+        "tags": [
+          "executions"
+        ],
+        "responses": {
+          "200": {
+            "description": "The schedule was successfully cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionSchedule"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -631,6 +913,7 @@
     "schemas": {
       "AutomationFlowId": {
         "type": "string",
+        "description": "ID of the Automation Flow",
         "example": "7791b04a-16d2-44a2-9af9-2d59c25c512f",
         "readOnly": true
       },
@@ -712,7 +995,7 @@
             "type": "array",
             "description": "The actions (nodes) of the automation flow",
             "items": {
-              "$ref": "#/components/schemas/AnyActionConfig"
+              "$ref": "#/components/schemas/AnyAction"
             },
             "readOnly": true
           },
@@ -869,6 +1152,9 @@
           },
           {
             "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "$ref": "#/components/schemas/FlowExecutionCancelAction"
           }
         ]
       },
@@ -903,6 +1189,9 @@
           },
           {
             "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/FlowExecutionCancelActionConfig"
           }
         ]
       },
@@ -2266,6 +2555,105 @@
           }
         }
       },
+      "FlowExecutionCancelActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "cancel-flow-execution"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/FlowExecutionCancelConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "2520gja-2sgmsaga-0asg-822jgal",
+          "name": "Cancel Flow Execution",
+          "type": "cancel-flow-execution",
+          "config": {
+            "selected_reasons": [
+              {
+                "id": "_6kITMwkv_0Uo4i7fO7Ja",
+                "title": "when you are done! that's when you close it."
+              },
+              {
+                "id": "qgK9sGbKoS7NxlAbNReVn",
+                "title": "Client didn't want our services"
+              }
+            ],
+            "extra_description": "Test cancellation"
+          }
+        }
+      },
+      "FlowExecutionCancelAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "cancel-flow-execution"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/FlowExecutionCancelConfig"
+              }
+            }
+          }
+        ]
+      },
+      "FlowExecutionCancelConfig": {
+        "type": "object",
+        "description": "Configuration for cancelling a flow execution with selected reasons",
+        "properties": {
+          "selected_reasons": {
+            "type": "array",
+            "description": "List of reasons selected for this specific cancellation",
+            "items": {
+              "$ref": "#/components/schemas/CancellationReason"
+            }
+          },
+          "extra_description": {
+            "type": "string",
+            "description": "Additional description or notes for the cancellation",
+            "example": "Process completed successfully"
+          }
+        },
+        "required": [
+          "configured_reasons"
+        ]
+      },
+      "CancellationReason": {
+        "type": "object",
+        "description": "A reason for cancelling a flow execution",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the cancellation reason",
+            "example": "_6kITMwkv_0Uo4i7fO7Ja"
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable title for the cancellation reason",
+            "example": "Process completed successfully"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ]
+      },
       "ConditionStatement": {
         "type": "object",
         "properties": {
@@ -2551,6 +2939,9 @@
               },
               {
                 "$ref": "#/components/schemas/TriggerEventEntityOperation"
+              },
+              {
+                "$ref": "#/components/schemas/TriggerEventFlowAutomationTask"
               }
             ]
           }
@@ -2587,6 +2978,42 @@
         "required": [
           "org_id",
           "entity_id"
+        ]
+      },
+      "TriggerEventFlowAutomationTask": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "flow_automation_task"
+            ]
+          },
+          "org_id": {
+            "type": "string",
+            "example": "123"
+          },
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "flow_execution_id": {
+            "type": "string",
+            "example": "wfwAJoT_cK"
+          },
+          "flow_automation_task_id": {
+            "type": "string",
+            "format": "UUID",
+            "example": "2fa221ec-3aac-4655-ab8f-c062eca44a3"
+          },
+          "caller": {
+            "$ref": "#/components/schemas/ApiCallerContext"
+          }
+        },
+        "required": [
+          "org_id",
+          "entity_id",
+          "flow_execution_id",
+          "flow_automation_task_id"
         ]
       },
       "TriggerEventEntityActivity": {
@@ -2714,6 +3141,7 @@
         "type": "string",
         "enum": [
           "pending",
+          "starting",
           "in_progress",
           "paused",
           "success",
@@ -2750,6 +3178,15 @@
           },
           "flow_id": {
             "$ref": "#/components/schemas/AutomationFlowId"
+          },
+          "flow_execution_id": {
+            "type": "string",
+            "description": "ID of the Flow Execution"
+          },
+          "flow_automation_task_id": {
+            "type": "string",
+            "format": "UUID",
+            "description": "ID of the automated flow action"
           }
         },
         "required": [
@@ -2855,8 +3292,7 @@
           "status",
           "created_by",
           "created_at",
-          "updated_at",
-          "execution_summary"
+          "updated_at"
         ],
         "properties": {
           "job_id": {
@@ -2870,11 +3306,13 @@
           },
           "status": {
             "type": "string",
-            "description": "Status of the bulk trigger automation job\n* approval: Waiting for user approval to start the bulk trigger automation\n* starting: Starting automation executions\n* in_progress: Automation execution are currently running\n* send_report: Automation executions finished running. Report is being created & sent to the user who initiated the bulk trigger automation\n* finished: Automation executions finished running. Some may have failed. Check the status of each entity.\n* failed: Bulk trigger automation execution failed. Some executions might have started. Check the status of each entity.\n* cancelled: Bulk trigger automation execution was cancelled\n",
+            "description": "Status of the bulk trigger automation job\n* approval: Waiting for user approval to start the bulk trigger automation\n* querying_entities: Loading entities in batches\n* entities_loaded: All entities have been loaded and stored\n* executing: Automation execution are currently running\n* monitoring: All executions have been started, now monitoring their completion\n* send_report: Automation executions finished running. Report is being created & sent to the user who initiated the bulk trigger automation\n* finished: Automation executions finished running. Some may have failed. Check the status of each entity.\n* failed: Bulk trigger automation execution failed. Some executions might have started. Check the status of each entity.\n* cancelled: Bulk trigger automation execution was cancelled\n",
             "enum": [
               "approval",
-              "starting",
-              "in_progress",
+              "querying_entities",
+              "entities_loaded",
+              "executing",
+              "monitoring",
               "send_report",
               "finished",
               "failed",
@@ -2907,6 +3345,80 @@
           "report_file_entity_id": {
             "type": "string",
             "description": "Entity ID of the report file entity"
+          },
+          "entity_query": {
+            "type": "object",
+            "description": "Query configuration for loading entities",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "refs",
+                  "query",
+                  "filter"
+                ]
+              },
+              "data": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRef"
+                    }
+                  },
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EntitySearchFilter"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ]
+          },
+          "pagination_state": {
+            "type": "object",
+            "description": "Pagination state for entity loading",
+            "properties": {
+              "page_size": {
+                "type": "integer",
+                "description": "Number of entities per page"
+              },
+              "pages_processed": {
+                "type": "integer",
+                "description": "Number of pages processed so far"
+              },
+              "total_processed": {
+                "type": "integer",
+                "description": "Total number of entities processed so far"
+              },
+              "stable_query_id": {
+                "type": "string",
+                "description": "Stable query ID for pagination"
+              },
+              "search_after": {
+                "type": "array",
+                "description": "Last sort value used for pagination",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              "has_more": {
+                "type": "boolean",
+                "description": "Whether there are more entities to load"
+              }
+            }
           },
           "execution_summary": {
             "type": "array",

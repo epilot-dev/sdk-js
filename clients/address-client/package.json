@@ -1,7 +1,7 @@
 {
-  "name": "@epilot/automation-client",
-  "version": "2.18.2",
-  "description": "Client library for epilot automation API",
+  "name": "@epilot/address-client",
+  "version": "0.1.0",
+  "description": "Client for unified Address API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "epilot GmbH",
@@ -10,22 +10,19 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git",
-    "directory": "clients/automation-client"
+    "directory": "clients/address-client"
   },
   "bugs": {
     "url": "https://github.com/epilot-dev/sdk-js/issues"
   },
-  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/automation-client#readme",
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/address-client#readme",
   "keywords": [
-    "epilot",
-    "sdk",
-    "automation"
+    "address"
   ],
   "scripts": {
     "test": "jest",
-    "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/automation.yaml",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/address-api.yaml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
@@ -53,28 +50,23 @@
     "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
     "buffer": "^6.0.3",
     "https-browserify": "^1.0.0",
+    "openapi-client-axios": "^7.5.1",
     "stream-http": "^3.1.1",
     "url": "^0.11.0",
     "util": "^0.12.3"
   },
   "devDependencies": {
-    "@oclif/command": "^1.8.18",
-    "@oclif/errors": "^1.3.6",
     "@types/jest": "^26.0.20",
-    "axios": "^1.6.2",
     "copy-webpack-plugin": "^7.0.0",
     "jest": "^26.6.3",
     "json-loader": "^0.5.7",
-    "node-fetch": "^3.2.10",
-    "openapi-client-axios": "^7.5.1",
-    "openapicmd": "^2.6.2",
+    "openapicmd": "^2.6.0",
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.14",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.1.3",
+    "ts-node": "^10.8.2",
+    "typescript": "^4.7.4",
     "webpack": "^5.18.0",
-    "webpack-cli": "^4.4.0",
-    "whatwg-url": "^11.0.0"
+    "webpack-cli": "^4.4.0"
   },
   "gitHead": "39426e86cfb320fa3227dc03f60ee6a10848e7c7"
 }

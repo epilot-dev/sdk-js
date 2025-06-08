@@ -274,6 +274,20 @@ declare namespace Components {
             trigger_mode: TriggerMode;
             conditions: Condition[];
             schedule?: DelayedSchedule | RelativeSchedule;
+            loop_config?: {
+                /**
+                 * The id of the branch that will be looped
+                 */
+                loop_branch_id: string;
+                /**
+                 * The id of the branch that will be used to exit the loop
+                 */
+                exit_branch_id: string;
+                /**
+                 * Maximum number of iterations for the loop branch
+                 */
+                max_iterations: number;
+            };
         }
         export interface DelayedSchedule {
             mode: "delayed";
@@ -367,6 +381,11 @@ declare namespace Components {
         export interface Flow {
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
+        export interface FlowClosingReason {
+            selected_reasons?: ClosingReason[];
+            configured_reasons?: ClosingReason[];
+            extra_description?: string;
+        }
         export type FlowContext = EntityRef;
         export interface FlowExecution {
             id: FlowExecutionId;
@@ -417,11 +436,7 @@ declare namespace Components {
             phases?: Phase[];
             tasks: Task[];
             edges: Edge[];
-            closing_reason?: {
-                selected_reasons?: ClosingReason[];
-                configured_reasons?: ClosingReason[];
-                extra_description?: string;
-            };
+            closing_reason?: FlowClosingReason;
             /**
              * Indicates whether this flow execution is available for End Customer Portal or not. By default it's not.
              */
@@ -455,8 +470,7 @@ declare namespace Components {
         export interface PatchFlowReq {
             status?: WorkflowStatus;
             assigned_to?: /* The user ids */ Assignees;
-            selected_closing_reasons?: ClosingReason[];
-            closing_reason_description?: string;
+            closing_reason?: FlowClosingReason;
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             contexts?: FlowContext[];
@@ -1147,7 +1161,7 @@ declare namespace Components {
             enableECPWorkflow?: boolean;
             updateEntityAttributes?: UpdateEntityAttributes[];
             /**
-             * Version of the workflow execution
+             * Version of the workflow execution.
              */
             version?: number;
             /**
@@ -1196,7 +1210,7 @@ declare namespace Components {
             enableECPWorkflow?: boolean;
             updateEntityAttributes?: UpdateEntityAttributes[];
             /**
-             * Version of the workflow execution
+             * Version of the workflow execution.
              */
             version?: number;
             /**
@@ -1303,7 +1317,7 @@ declare namespace Components {
             enableECPWorkflow?: boolean;
             updateEntityAttributes?: UpdateEntityAttributes[];
             /**
-             * Version of the workflow execution
+             * Version of the workflow execution.
              */
             version?: number;
             /**
@@ -2302,6 +2316,7 @@ export type ErrorResp = Components.Schemas.ErrorResp;
 export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type ExecutionPaginationDynamo = Components.Schemas.ExecutionPaginationDynamo;
 export type Flow = Components.Schemas.Flow;
+export type FlowClosingReason = Components.Schemas.FlowClosingReason;
 export type FlowContext = Components.Schemas.FlowContext;
 export type FlowExecution = Components.Schemas.FlowExecution;
 export type FlowExecutionId = Components.Schemas.FlowExecutionId;

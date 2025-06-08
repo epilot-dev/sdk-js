@@ -107,8 +107,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -150,8 +149,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -205,8 +203,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -250,8 +247,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "format": "uuid"
+            "type": "string"
           },
           "title": {
             "type": "string",
@@ -274,6 +270,12 @@
           },
           "updated_by": {
             "type": "string"
+          },
+          "shared_with": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -298,14 +300,27 @@
                       "$ref": "#/components/schemas/Swimlane"
                     }
                   },
-                  "board_filters": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/BoardFilter"
+                  "card_config": {
+                    "type": "object",
+                    "properties": {
+                      "fields": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "example": "assignee"
+                        }
+                      }
                     }
+                  },
+                  "board_filter": {
+                    "$ref": "#/components/schemas/BoardFilter"
                   },
                   "sorting": {
                     "$ref": "#/components/schemas/Sorting"
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "example": "task 1"
                   }
                 }
               }
@@ -318,32 +333,27 @@
         ]
       },
       "Swimlane": {
-        "allOf": [
-          {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "example": "Swimlane 1"
+          },
+          "position": {
+            "type": "number",
+            "example": 1
+          },
+          "filter": {
             "$ref": "#/components/schemas/BoardFilter"
           },
-          {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "title": {
-                "type": "string",
-                "example": "Swimlane 1"
-              },
-              "position": {
-                "type": "number",
-                "example": 1
-              },
-              "title_chip_variant": {
-                "type": "string",
-                "example": "success"
-              }
-            }
+          "title_chip_variant": {
+            "type": "string",
+            "example": "success"
           }
-        ]
+        }
       },
       "Sorting": {
         "type": "object",
@@ -368,29 +378,149 @@
       "BoardFilter": {
         "type": "object",
         "properties": {
-          "filter_field": {
-            "type": "string",
-            "example": "status"
-          },
-          "filter_values": {
+          "items": {
             "type": "array",
             "items": {
-              "type": "string",
-              "example": "SKIPPED"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FilterItem"
+                },
+                {
+                  "$ref": "#/components/schemas/FilterGroup"
+                }
+              ]
             }
+          },
+          "combination": {
+            "type": "string",
+            "enum": [
+              "AND",
+              "OR"
+            ],
+            "example": "OR"
           }
         },
         "required": [
-          "filter_field",
-          "filter_values"
+          "items",
+          "combination"
+        ]
+      },
+      "FilterGroup": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterItem"
+            }
+          },
+          "combination": {
+            "type": "string",
+            "enum": [
+              "AND",
+              "OR"
+            ],
+            "example": "AND"
+          }
+        },
+        "required": [
+          "items",
+          "combination"
+        ]
+      },
+      "FilterOperator": {
+        "type": "string",
+        "enum": [
+          "EQUALS",
+          "NOT_EQUALS",
+          "EMPTY",
+          "NOT_EMPTY",
+          "CONTAINS",
+          "NOT_CONTAINS",
+          "IS_ONE_OF",
+          "IS_NONE_OF",
+          "GREATER_THAN",
+          "LESS_THAN",
+          "GREATER_THAN_OR_EQUAL",
+          "LESS_THAN_OR_EQUAL"
+        ],
+        "example": "EQUALS",
+        "description": "The comparison operator for filtering"
+      },
+      "ValueType": {
+        "oneOf": [
+          {
+            "type": "string",
+            "example": "100020"
+          },
+          {
+            "type": "number",
+            "example": 42
+          },
+          {
+            "type": "boolean",
+            "example": true
+          },
+          {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "example": [
+              "value1",
+              "value2",
+              123,
+              true
+            ]
+          }
+        ],
+        "description": "The value to compare against - can be a single value (string, number, boolean) or an array of values"
+      },
+      "FilterItem": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "assignee",
+            "description": "The field key to filter on"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/FilterOperator"
+          },
+          "value": {
+            "$ref": "#/components/schemas/ValueType"
+          },
+          "data_type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "date"
+            ],
+            "example": "string",
+            "description": "The data type of the field"
+          }
+        },
+        "required": [
+          "key",
+          "operator",
+          "value"
         ]
       }
     }
   },
   "servers": [
-    {
-      "url": "https://kanban.sls.epilot.io"
-    },
     {
       "url": "https://kanban.sls.epilot.io"
     }

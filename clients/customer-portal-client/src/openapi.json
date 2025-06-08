@@ -5697,7 +5697,7 @@
             "description": "The filter to apply to the response",
             "schema": {
               "type": "string",
-              "example": "schema=contract,slug=contracts"
+              "example": "slug=contracts"
             }
           }
         ],
@@ -5768,6 +5768,73 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/pages": {
+      "get": {
+        "operationId": "getPublicPages",
+        "summary": "getPublicPages",
+        "description": "Fetch all public portal pages",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "domain",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "customer-portal.epilot.io",
+              "description": "The domain of the portal"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "description": "The fields to include in the response",
+            "schema": {
+              "type": "string",
+              "example": "id,slug,description"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "description": "The filter to apply to the response",
+            "schema": {
+              "type": "string",
+              "example": "schema=contract,slug=contracts"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The portal pages have been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Page"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -6804,6 +6871,15 @@
             "type": "object",
             "description": "Authentication settings for the portal",
             "properties": {
+              "passwordless_login": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Passwordless login feature flag"
+                  }
+                }
+              },
               "entry_point": {
                 "type": "string",
                 "enum": [
@@ -10207,15 +10283,29 @@
           },
           "reading": {
             "type": "string",
+            "description": "Recognized meter reading.",
             "example": "000123.45"
           },
           "sector": {
             "type": "string",
+            "description": "Recognized sector of the meter.",
             "example": "water"
           },
           "meter_number": {
             "type": "string",
+            "deprecated": true,
+            "description": "Recognized meter number. Deprecated: Use `meter_numbers` instead as we can recognize several potential meter numbers.",
             "example": "00123456"
+          },
+          "meter_numbers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Recognized list of (potential) meter numbers.",
+            "example": [
+              "00123456"
+            ]
           }
         }
       },
@@ -10588,7 +10678,7 @@
           "props": {
             "$ref": "#/components/schemas/BlockProps"
           },
-          "parent_id": {
+          "parentId": {
             "type": "string",
             "description": "The id of the parent block",
             "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
@@ -10637,7 +10727,6 @@
         "additionalProperties": true,
         "required": [
           "slug",
-          "path",
           "order"
         ],
         "properties": {
@@ -10648,12 +10737,38 @@
           },
           "path": {
             "type": "string",
+            "deprecated": true,
             "description": "The path of the page",
             "example": "/dashboard"
           },
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "The schema of the page",
+              "enum": [
+                "contact",
+                "contract",
+                "meter",
+                "order",
+                "opportunity"
+              ]
+            }
+          },
           "visibility": {
             "type": "object",
-            "description": "The conditions that need to be met for the page to be shown"
+            "description": "The conditions that need to be met for the page to be shown",
+            "additionalProperties": true
+          },
+          "content": {
+            "type": "object",
+            "description": "The content of the page",
+            "additionalProperties": true
+          },
+          "design": {
+            "type": "object",
+            "description": "The design of the page",
+            "additionalProperties": true
           },
           "blocks": {
             "type": "object",
@@ -10666,10 +10781,30 @@
             "description": "The order of the block",
             "example": 1
           },
-          "name": {
+          "is_system": {
+            "type": "boolean",
+            "description": "Whether the page is a system page",
+            "example": false
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Whether the page is public",
+            "example": true
+          },
+          "parentId": {
             "type": "string",
-            "description": "The name of the page",
-            "example": "Dashboard"
+            "description": "The id of the parent page",
+            "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
+          },
+          "is_entry_route": {
+            "type": "boolean",
+            "description": "Whether the page is the entry route",
+            "example": false
+          },
+          "is_dynamic_route": {
+            "type": "boolean",
+            "description": "Whether the page is a dynamic route",
+            "example": false
           }
         }
       },

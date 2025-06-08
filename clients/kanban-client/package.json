@@ -1,6 +1,6 @@
 {
   "name": "@epilot/kanban-client",
-  "version": "0.1.0",
+  "version": "0.1.2-0",
   "description": "Client library for epilot Kanban API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -64,7 +64,7 @@
     "copy-webpack-plugin": "^7.0.0",
     "jest": "^26.6.3",
     "json-loader": "^0.5.7",
-    "openapicmd": "^2.6.0",
+    "openapicmd": "^2.6.2",
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.14",
     "ts-node": "^10.9.1",

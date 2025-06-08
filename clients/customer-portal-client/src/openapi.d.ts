@@ -569,7 +569,7 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parent_id?: string;
+            parentId?: string;
             type: /**
              * The type of the block. eg; tabs, tab, group, attribute
              * example:
@@ -624,7 +624,7 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parent_id?: string;
+            parentId?: string;
             type: /**
              * The type of the block. eg; tabs, tab, group, attribute
              * example:
@@ -738,6 +738,12 @@ declare namespace Components {
              * Authentication settings for the portal
              */
             auth_settings?: {
+                passwordless_login?: {
+                    /**
+                     * Passwordless login feature flag
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -2764,20 +2770,31 @@ declare namespace Components {
                 key: string;
             };
             /**
+             * Recognized meter reading.
              * example:
              * 000123.45
              */
             reading?: string;
             /**
+             * Recognized sector of the meter.
              * example:
              * water
              */
             sector?: string;
             /**
+             * Recognized meter number. Deprecated: Use `meter_numbers` instead as we can recognize several potential meter numbers.
              * example:
              * 00123456
              */
             meter_number?: string;
+            /**
+             * Recognized list of (potential) meter numbers.
+             * example:
+             * [
+             *   "00123456"
+             * ]
+             */
+            meter_numbers?: string[];
         }
         export interface MeterReadingWidget {
             id: string;
@@ -3092,12 +3109,25 @@ declare namespace Components {
              * example:
              * /dashboard
              */
-            path: string;
+            path?: string;
+            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity")[];
             /**
              * The conditions that need to be met for the page to be shown
              */
             visibility?: {
-                [key: string]: any;
+                [name: string]: any;
+            };
+            /**
+             * The content of the page
+             */
+            content?: {
+                [name: string]: any;
+            };
+            /**
+             * The design of the page
+             */
+            design?: {
+                [name: string]: any;
             };
             blocks?: {
                 [name: string]: Block;
@@ -3109,11 +3139,35 @@ declare namespace Components {
              */
             order: number;
             /**
-             * The name of the page
+             * Whether the page is a system page
              * example:
-             * Dashboard
+             * false
              */
-            name?: string;
+            is_system?: boolean;
+            /**
+             * Whether the page is public
+             * example:
+             * true
+             */
+            is_public?: boolean;
+            /**
+             * The id of the parent page
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            parentId?: string;
+            /**
+             * Whether the page is the entry route
+             * example:
+             * false
+             */
+            is_entry_route?: boolean;
+            /**
+             * Whether the page is a dynamic route
+             * example:
+             * false
+             */
+            is_dynamic_route?: boolean;
             /**
              * The id of the page
              * example:
@@ -3134,12 +3188,25 @@ declare namespace Components {
              * example:
              * /dashboard
              */
-            path: string;
+            path?: string;
+            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity")[];
             /**
              * The conditions that need to be met for the page to be shown
              */
             visibility?: {
-                [key: string]: any;
+                [name: string]: any;
+            };
+            /**
+             * The content of the page
+             */
+            content?: {
+                [name: string]: any;
+            };
+            /**
+             * The design of the page
+             */
+            design?: {
+                [name: string]: any;
             };
             blocks?: {
                 [name: string]: Block;
@@ -3151,11 +3218,35 @@ declare namespace Components {
              */
             order: number;
             /**
-             * The name of the page
+             * Whether the page is a system page
              * example:
-             * Dashboard
+             * false
              */
-            name?: string;
+            is_system?: boolean;
+            /**
+             * Whether the page is public
+             * example:
+             * true
+             */
+            is_public?: boolean;
+            /**
+             * The id of the parent page
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            parentId?: string;
+            /**
+             * Whether the page is the entry route
+             * example:
+             * false
+             */
+            is_entry_route?: boolean;
+            /**
+             * Whether the page is a dynamic route
+             * example:
+             * false
+             */
+            is_dynamic_route?: boolean;
         }
         export interface PaymentWidget {
             id: string;
@@ -3236,6 +3327,12 @@ declare namespace Components {
              * Authentication settings for the portal
              */
             auth_settings?: {
+                passwordless_login?: {
+                    /**
+                     * Passwordless login feature flag
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -4219,6 +4316,12 @@ declare namespace Components {
              * Authentication settings for the portal
              */
             auth_settings?: {
+                passwordless_login?: {
+                    /**
+                     * Passwordless login feature flag
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -6221,6 +6324,12 @@ declare namespace Paths {
                  * Authentication settings for the portal
                  */
                 auth_settings?: {
+                    passwordless_login?: {
+                        /**
+                         * Passwordless login feature flag
+                         */
+                        enabled?: boolean;
+                    };
                     entry_point?: "PASSWORD" | "SSO";
                     preferred_sso_providers?: /**
                      * URL-friendly slug to use as organization-unique identifier for Provider
@@ -6637,7 +6746,7 @@ declare namespace Paths {
             export type Fields = string;
             /**
              * example:
-             * schema=contract,slug=contracts
+             * slug=contracts
              */
             export type Filter = string;
         }
@@ -6649,7 +6758,7 @@ declare namespace Paths {
             Parameters.Fields;
             filter?: /**
              * example:
-             * schema=contract,slug=contracts
+             * slug=contracts
              */
             Parameters.Filter;
         }
@@ -6814,6 +6923,50 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPublicPages {
+        namespace Parameters {
+            /**
+             * The domain of the portal
+             * example:
+             * customer-portal.epilot.io
+             */
+            export type Domain = string;
+            /**
+             * example:
+             * id,slug,description
+             */
+            export type Fields = string;
+            /**
+             * example:
+             * schema=contract,slug=contracts
+             */
+            export type Filter = string;
+        }
+        export interface QueryParameters {
+            domain: /**
+             * The domain of the portal
+             * example:
+             * customer-portal.epilot.io
+             */
+            Parameters.Domain;
+            fields?: /**
+             * example:
+             * id,slug,description
+             */
+            Parameters.Fields;
+            filter?: /**
+             * example:
+             * schema=contract,slug=contracts
+             */
+            Parameters.Filter;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Page[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -8875,6 +9028,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreatePortalPage.Responses.$200>
   /**
+   * getPublicPages - getPublicPages
+   * 
+   * Fetch all public portal pages
+   */
+  'getPublicPages'(
+    parameters?: Parameters<Paths.GetPublicPages.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicPages.Responses.$200>
+  /**
    * getPortalPageBlocks - getPortalPageBlocks
    * 
    * Fetch all portal page blocks
@@ -9969,6 +10132,18 @@ export interface PathsDictionary {
       data?: Paths.CreatePortalPage.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreatePortalPage.Responses.$200>
+  }
+  ['/v2/portal/public/pages']: {
+    /**
+     * getPublicPages - getPublicPages
+     * 
+     * Fetch all public portal pages
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicPages.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicPages.Responses.$200>
   }
   ['/v2/portal/pages/{id}/blocks']: {
     /**
