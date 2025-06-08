@@ -76,76 +76,38 @@
           "content": {
             "application/json": {
               "schema": {
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "resourceType": {
-                        "$ref": "#/components/schemas/ResourceNodeType"
-                      },
-                      "resourceIds": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "minItems": 1,
-                        "maxItems": 50
-                      },
-                      "jobId": {
-                        "$ref": "#/components/schemas/JobID"
-                      },
-                      "isExportingMultipleResources": {
-                        "type": "boolean",
-                        "description": "Temporary flag to indicate if multiple resources are being exported"
-                      },
-                      "pipelineId": {
-                        "type": "string",
-                        "description": "Pipeline ID selected when doing the sandbox sync"
-                      }
-                    },
-                    "required": [
-                      "resourceType",
-                      "resourceIds"
-                    ]
+                "type": "object",
+                "properties": {
+                  "resourceType": {
+                    "$ref": "#/components/schemas/ResourceNodeType"
                   },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "resources": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "$ref": "#/components/schemas/ResourceNodeType"
-                            },
-                            "id": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "type",
-                            "id"
-                          ]
-                        },
-                        "minItems": 1
-                      },
-                      "jobId": {
-                        "$ref": "#/components/schemas/JobID"
-                      },
-                      "isExportingMultipleResources": {
-                        "type": "boolean",
-                        "description": "Temporary flag to indicate if multiple resources are being exported"
-                      },
-                      "pipelineId": {
-                        "type": "string",
-                        "description": "Pipeline ID selected when doing the sandbox sync"
-                      }
+                  "resourceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
                     },
-                    "required": [
-                      "resources"
-                    ]
+                    "minItems": 1,
+                    "maxItems": 50
+                  },
+                  "jobId": {
+                    "$ref": "#/components/schemas/JobID"
+                  },
+                  "isExportingMultipleResources": {
+                    "type": "boolean",
+                    "description": "Temporary flag to indicate if multiple resources are being exported"
+                  },
+                  "pipelineId": {
+                    "type": "string",
+                    "description": "Pipeline ID selected when doing the sandbox sync"
+                  },
+                  "manifestId": {
+                    "type": "string",
+                    "description": "ID of the installed manifest to load the resource addresses from"
                   }
+                },
+                "required": [
+                  "resourceType",
+                  "resourceIds"
                 ]
               }
             }
@@ -383,11 +345,19 @@
                           },
                           "sourceManifestId": {
                             "type": "string"
+                          },
+                          "sourceOrganizationType": {
+                            "type": "string",
+                            "enum": [
+                              "sandbox",
+                              "production"
+                            ]
                           }
                         },
                         "required": [
                           "sourceOrganizationId",
-                          "sourceManifestId"
+                          "sourceManifestId",
+                          "sourceOrganizationType"
                         ]
                       }
                     },
@@ -446,11 +416,19 @@
                           },
                           "sourceManifestId": {
                             "type": "string"
+                          },
+                          "sourceOrganizationType": {
+                            "type": "string",
+                            "enum": [
+                              "sandbox",
+                              "production"
+                            ]
                           }
                         },
                         "required": [
                           "sourceOrganizationId",
-                          "sourceManifestId"
+                          "sourceManifestId",
+                          "sourceOrganizationType"
                         ]
                       }
                     },
@@ -778,6 +756,7 @@
           "closing_reason",
           "taxonomy_classification",
           "webhook",
+          "dashboard",
           "custom_variable",
           "coupon",
           "usergroup",
@@ -1121,6 +1100,13 @@
                 "type": "string",
                 "description": "ID of the manifest that was deployed"
               },
+              "source_organization_type": {
+                "type": "string",
+                "enum": [
+                  "sandbox",
+                  "production"
+                ]
+              },
               "last_triggered_at": {
                 "type": "string",
                 "format": "date-time",
@@ -1128,6 +1114,35 @@
               }
             },
             "description": "Information about the manifest that was deployed from, used to update existing deployments instead of always creating new ones"
+          },
+          "deployed_to": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "destination_organization_id": {
+                  "type": "string",
+                  "description": "ID of the organization that the manifest was deployed to"
+                },
+                "destination_manifest_id": {
+                  "type": "string",
+                  "description": "ID of the manifest that was deployed to"
+                },
+                "destination_organization_type": {
+                  "type": "string",
+                  "enum": [
+                    "sandbox",
+                    "production"
+                  ]
+                },
+                "last_triggered_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the deployment was last triggered"
+                }
+              }
+            },
+            "description": "Information about the manifest that was deployed to, used to update existing deployments instead of always creating new ones"
           }
         }
       },
@@ -1367,6 +1382,32 @@
               "type": "string"
             },
             "description": "Array of ids of resources selected to be ready by the user"
+          },
+          "deployed_to": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "destination_organization_id": {
+                  "type": "string",
+                  "description": "ID of the organization that the manifest was deployed to"
+                },
+                "destination_manifest_id": {
+                  "type": "string",
+                  "description": "ID of the manifest that was deployed to"
+                },
+                "destination_organization_type": {
+                  "type": "string",
+                  "enum": [
+                    "sandbox",
+                    "production"
+                  ]
+                },
+                "last_triggered_at": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }

@@ -141,11 +141,30 @@ declare namespace Components {
                  * ID of the manifest that was deployed
                  */
                 source_manifest_id?: string;
+                source_organization_type?: "sandbox" | "production";
                 /**
                  * When the deployment was last triggered
                  */
                 last_triggered_at?: string; // date-time
             };
+            /**
+             * Information about the manifest that was deployed to, used to update existing deployments instead of always creating new ones
+             */
+            deployed_to?: {
+                /**
+                 * ID of the organization that the manifest was deployed to
+                 */
+                destination_organization_id?: string;
+                /**
+                 * ID of the manifest that was deployed to
+                 */
+                destination_manifest_id?: string;
+                destination_organization_type?: "sandbox" | "production";
+                /**
+                 * When the deployment was last triggered
+                 */
+                last_triggered_at?: string; // date-time
+            }[];
         }
         export interface CommonMarkdownFields {
             /**
@@ -360,11 +379,30 @@ declare namespace Components {
                  * ID of the manifest that was deployed
                  */
                 source_manifest_id?: string;
+                source_organization_type?: "sandbox" | "production";
                 /**
                  * When the deployment was last triggered
                  */
                 last_triggered_at?: string; // date-time
             };
+            /**
+             * Information about the manifest that was deployed to, used to update existing deployments instead of always creating new ones
+             */
+            deployed_to?: {
+                /**
+                 * ID of the organization that the manifest was deployed to
+                 */
+                destination_organization_id?: string;
+                /**
+                 * ID of the manifest that was deployed to
+                 */
+                destination_manifest_id?: string;
+                destination_organization_type?: "sandbox" | "production";
+                /**
+                 * When the deployment was last triggered
+                 */
+                last_triggered_at?: string; // date-time
+            }[];
         }
         /**
          * ID of an import or export job (state machine)
@@ -467,11 +505,30 @@ declare namespace Components {
                  * ID of the manifest that was deployed
                  */
                 source_manifest_id?: string;
+                source_organization_type?: "sandbox" | "production";
                 /**
                  * When the deployment was last triggered
                  */
                 last_triggered_at?: string; // date-time
             };
+            /**
+             * Information about the manifest that was deployed to, used to update existing deployments instead of always creating new ones
+             */
+            deployed_to?: {
+                /**
+                 * ID of the organization that the manifest was deployed to
+                 */
+                destination_organization_id?: string;
+                /**
+                 * ID of the manifest that was deployed to
+                 */
+                destination_manifest_id?: string;
+                destination_organization_type?: "sandbox" | "production";
+                /**
+                 * When the deployment was last triggered
+                 */
+                last_triggered_at?: string; // date-time
+            }[];
             /**
              * Markdown content part of a manifest file
              */
@@ -603,11 +660,30 @@ declare namespace Components {
                  * ID of the manifest that was deployed
                  */
                 source_manifest_id?: string;
+                source_organization_type?: "sandbox" | "production";
                 /**
                  * When the deployment was last triggered
                  */
                 last_triggered_at?: string; // date-time
             };
+            /**
+             * Information about the manifest that was deployed to, used to update existing deployments instead of always creating new ones
+             */
+            deployed_to?: {
+                /**
+                 * ID of the organization that the manifest was deployed to
+                 */
+                destination_organization_id?: string;
+                /**
+                 * ID of the manifest that was deployed to
+                 */
+                destination_manifest_id?: string;
+                destination_organization_type?: "sandbox" | "production";
+                /**
+                 * When the deployment was last triggered
+                 */
+                last_triggered_at?: string; // date-time
+            }[];
             /**
              * When the manifest was first installed (applied)
              */
@@ -642,6 +718,18 @@ declare namespace Components {
              * Array of ids of resources selected to be ready by the user
              */
             ready_resources?: string[];
+            deployed_to?: {
+                /**
+                 * ID of the organization that the manifest was deployed to
+                 */
+                destination_organization_id?: string;
+                /**
+                 * ID of the manifest that was deployed to
+                 */
+                destination_manifest_id?: string;
+                destination_organization_type?: "sandbox" | "production";
+                last_triggered_at?: string;
+            }[];
         }
         export interface ResourceNode {
             /**
@@ -678,7 +766,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "custom_variable" | "coupon" | "usergroup" | "saved_view" | "app";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "dashboard" | "custom_variable" | "coupon" | "usergroup" | "saved_view" | "app";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -808,7 +896,7 @@ declare namespace Paths {
         }
     }
     namespace CreateExport {
-        export type RequestBody = {
+        export interface RequestBody {
             resourceType: /* Type of the resource */ Components.Schemas.ResourceNodeType;
             resourceIds: [
                 string,
@@ -876,32 +964,11 @@ declare namespace Paths {
              * Pipeline ID selected when doing the sandbox sync
              */
             pipelineId?: string;
-        } | {
-            resources: [
-                {
-                    type: /* Type of the resource */ Components.Schemas.ResourceNodeType;
-                    id: string;
-                },
-                ...{
-                    type: /* Type of the resource */ Components.Schemas.ResourceNodeType;
-                    id: string;
-                }[]
-            ];
-            jobId?: /**
-             * ID of an import or export job (state machine)
-             * example:
-             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
-             */
-            Components.Schemas.JobID;
             /**
-             * Temporary flag to indicate if multiple resources are being exported
+             * ID of the installed manifest to load the resource addresses from
              */
-            isExportingMultipleResources?: boolean;
-            /**
-             * Pipeline ID selected when doing the sandbox sync
-             */
-            pipelineId?: string;
-        };
+            manifestId?: string;
+        }
         namespace Responses {
             export interface $200 {
                 jobId?: /**
@@ -951,6 +1018,7 @@ declare namespace Paths {
             deployedFrom?: {
                 sourceOrganizationId: string;
                 sourceManifestId: string;
+                sourceOrganizationType: "sandbox" | "production";
             };
         } | {
             /**
@@ -978,6 +1046,7 @@ declare namespace Paths {
             deployedFrom?: {
                 sourceOrganizationId: string;
                 sourceManifestId: string;
+                sourceOrganizationType: "sandbox" | "production";
             };
         };
         namespace Responses {
