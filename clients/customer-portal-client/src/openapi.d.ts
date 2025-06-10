@@ -1425,6 +1425,15 @@ declare namespace Components {
              */
             EntityId /* uuid */;
             /**
+             * ID of the advanced Auth with login link and login code
+             */
+            advancedAuth?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
              * ID of the advanced MFA with login link and login code
              */
             advancedMFA?: /**
@@ -3990,7 +3999,7 @@ declare namespace Components {
              * example:
              * 123456
              */
-            client_secret: string;
+            client_secret?: string;
             /**
              * The code verifier
              * example:
@@ -7166,6 +7175,30 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetSchemasByDomain {
+        namespace Parameters {
+            /**
+             * Domain of the portal
+             * example:
+             * ecp.dev.epilot.io
+             */
+            export type Domain = string;
+        }
+        export interface QueryParameters {
+            domain: /**
+             * Domain of the portal
+             * example:
+             * ecp.dev.epilot.io
+             */
+            Parameters.Domain;
+        }
+        namespace Responses {
+            export interface $200 {
+                schemas?: Components.Schemas.Schema[];
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetSearchResultsForOpportunities {
         namespace Parameters {
             /**
@@ -8385,13 +8418,23 @@ export interface OperationMethods {
   /**
    * getSchemas - getSchemas
    * 
-   * Retrieves the schemas.
+   * Retrieves the schemas. Only schemas usable in the private part of the portal are returned.
    */
   'getSchemas'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchemas.Responses.$200>
+  /**
+   * getSchemasByDomain - getSchemasByDomain
+   * 
+   * Retrieves schemas by domain. Only schemas and attributes used on public pages are returned.
+   */
+  'getSchemasByDomain'(
+    parameters?: Parameters<Paths.GetSchemasByDomain.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSchemasByDomain.Responses.$200>
   /**
    * extraPermissionAttributes - extraPermissionAttributes
    * 
@@ -9386,13 +9429,25 @@ export interface PathsDictionary {
     /**
      * getSchemas - getSchemas
      * 
-     * Retrieves the schemas.
+     * Retrieves the schemas. Only schemas usable in the private part of the portal are returned.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchemas.Responses.$200>
+  }
+  ['/v2/portal/public/schemas']: {
+    /**
+     * getSchemasByDomain - getSchemasByDomain
+     * 
+     * Retrieves schemas by domain. Only schemas and attributes used on public pages are returned.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSchemasByDomain.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSchemasByDomain.Responses.$200>
   }
   ['/v2/portal/extra-permission-attributes']: {
     /**

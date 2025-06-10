@@ -427,6 +427,19 @@
         "responses": {}
       }
     },
+    "/v2/portal/public/schemas": {
+      "get": {
+        "operationId": "getSchemasByDomain",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "domain",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/extra-permission-attributes": {
       "get": {
         "operationId": "extraPermissionAttributes",

@@ -1725,7 +1725,7 @@
       "get": {
         "operationId": "getSchemas",
         "summary": "getSchemas",
-        "description": "Retrieves the schemas.",
+        "description": "Retrieves the schemas. Only schemas usable in the private part of the portal are returned.",
         "tags": [
           "ECP"
         ],
@@ -1755,6 +1755,52 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/schemas": {
+      "get": {
+        "operationId": "getSchemasByDomain",
+        "summary": "getSchemasByDomain",
+        "description": "Retrieves schemas by domain. Only schemas and attributes used on public pages are returned.",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "domain",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Domain of the portal",
+              "example": "ecp.dev.epilot.io"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved schemas for an organization successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schemas": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Schema"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -6421,9 +6467,15 @@
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the confirmation email template upon registration"
           },
+          "advancedAuth": {
+            "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
+            "description": "ID of the advanced Auth with login link and login code"
+          },
           "advancedMFA": {
             "$ref": "#/components/schemas/EntityId",
             "nullable": true,
+            "deprecated": true,
             "description": "ID of the advanced MFA with login link and login code"
           },
           "journeySignUp": {
@@ -10566,7 +10618,6 @@
           "code",
           "redirect_uri",
           "client_id",
-          "client_secret",
           "code_verifier"
         ],
         "properties": {
