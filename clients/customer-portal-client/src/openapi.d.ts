@@ -3119,7 +3119,7 @@ declare namespace Components {
              * /dashboard
              */
             path?: string;
-            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity")[];
+            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity" | "meter_counter")[];
             /**
              * The conditions that need to be met for the page to be shown
              */
@@ -3198,7 +3198,7 @@ declare namespace Components {
              * /dashboard
              */
             path?: string;
-            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity")[];
+            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity" | "meter_counter")[];
             /**
              * The conditions that need to be met for the page to be shown
              */

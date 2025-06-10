@@ -10802,7 +10802,8 @@
                 "contract",
                 "meter",
                 "order",
-                "opportunity"
+                "opportunity",
+                "meter_counter"
               ]
             }
           },
