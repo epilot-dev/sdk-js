@@ -168,6 +168,7 @@ declare namespace Components {
             automation_execution_id?: string;
             trigger_mode?: TriggerMode;
             schedule?: ActionSchedule;
+            loop_config?: /* Information about loop iterations, when task is part of a loop branch */ LoopInfo;
         }
         export interface ClosingReason {
             id: string;
@@ -274,20 +275,7 @@ declare namespace Components {
             trigger_mode: TriggerMode;
             conditions: Condition[];
             schedule?: DelayedSchedule | RelativeSchedule;
-            loop_config?: {
-                /**
-                 * The id of the branch that will be looped
-                 */
-                loop_branch_id: string;
-                /**
-                 * The id of the branch that will be used to exit the loop
-                 */
-                exit_branch_id: string;
-                /**
-                 * Maximum number of iterations for the loop branch
-                 */
-                max_iterations: number;
-            };
+            loop_config?: LoopConfig;
         }
         export interface DelayedSchedule {
             mode: "delayed";
@@ -465,7 +453,86 @@ declare namespace Components {
             orgId?: string;
             creationTime?: string;
         }
-        export type ManualTask = TaskBase;
+        export interface LoopConfig {
+            /**
+             * The id of the branch that will be looped
+             */
+            loop_branch_id: string;
+            /**
+             * The id of the branch that will be used to exit the loop
+             */
+            exit_branch_id: string;
+            /**
+             * Maximum number of iterations for the loop branch
+             */
+            max_iterations: number;
+            /**
+             * Current number of iterations for the loop branch
+             */
+            crt_iterations?: number;
+        }
+        /**
+         * Information about loop iterations, when task is part of a loop branch
+         */
+        export interface LoopInfo {
+            /**
+             * Maximum number of iterations for the loop branch
+             */
+            max_iterations: number;
+            /**
+             * Current number of iterations for the loop branch
+             */
+            crt_iterations?: number;
+        }
+        export interface ManualTask {
+            id: TaskId;
+            template_id: string;
+            name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
+            status: /**
+             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             *
+             */
+            StepStatus;
+            journey?: StepJourney;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            /**
+             * requirements that need to be fulfilled in order to enable the task while flow instances are running
+             */
+            requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            assigned_to?: /* The user ids */ Assignees;
+            analytics: AnalyticsInfo;
+            /**
+             * Time when the task was created
+             */
+            created_at?: string; // date-time
+            /**
+             * Last Update timestamp
+             */
+            updated_at?: string; // date-time
+            /**
+             * Flag to indicate if the task was created manually
+             */
+            manually_created?: boolean;
+            /**
+             * enabled flag results from calculating the requirements
+             */
+            enabled: boolean;
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            phase_id?: string;
+            task_type: TaskType;
+            loop_config?: /* Information about loop iterations, when task is part of a loop branch */ LoopInfo;
+        }
         export type Operator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
         export interface PatchFlowReq {
             status?: WorkflowStatus;
@@ -2326,6 +2393,8 @@ export type FlowTrigger = Components.Schemas.FlowTrigger;
 export type ImmediateSchedule = Components.Schemas.ImmediateSchedule;
 export type ItemType = Components.Schemas.ItemType;
 export type LastEvaluatedKey = Components.Schemas.LastEvaluatedKey;
+export type LoopConfig = Components.Schemas.LoopConfig;
+export type LoopInfo = Components.Schemas.LoopInfo;
 export type ManualTask = Components.Schemas.ManualTask;
 export type Operator = Components.Schemas.Operator;
 export type PatchFlowReq = Components.Schemas.PatchFlowReq;
