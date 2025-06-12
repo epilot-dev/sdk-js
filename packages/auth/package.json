@@ -11,7 +11,7 @@
     "build": "tsc",
     "build:watch": "tsc -w",
     "prepublishOnly": "npm run build",
-    "lint": "../../node_modules/eslint/bin/eslint.js src",
+    "lint": "pnpm exec eslint src",
     "print-token": "node dist/script/print-token.js"
   },
   "keywords": [

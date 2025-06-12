@@ -31,7 +31,7 @@
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
     "build:watch": "npm run build && tsc -w",
     "release-alpha": "npm version prerelease --preid alpha",
-    "lint": "../../node_modules/eslint/bin/eslint.js src"
+    "lint": "pnpm exec eslint src"
   },
   "files": [
     "*.js",
