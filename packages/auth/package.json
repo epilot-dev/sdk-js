@@ -44,9 +44,10 @@
     "@types/debug": "^4.1.7",
     "@types/jest": "^27.4.0",
     "@types/yargs-interactive": "^2.1.3",
+    "axios": "^1.6.2",
     "jest": "^27.4.7",
     "msw": "^0.36.8",
-    "openapi-client-axios": "^7.5.1",
+    "openapi-client-axios": "^7.6.0",
     "ts-jest": "^27.1.3",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.5"
@@ -54,9 +55,11 @@
   "dependencies": {
     "@epilot/user-client": "^3.9.1",
     "amazon-cognito-identity-js": "^5.2.5",
-    "axios": "^1.6.2",
     "debug": "^4.3.3",
     "yargs-interactive": "^3.0.0"
+  },
+  "peerDependencies": {
+    "axios": ">=0.21.1"
   },
   "gitHead": "39426e86cfb320fa3227dc03f60ee6a10848e7c7"
 }
