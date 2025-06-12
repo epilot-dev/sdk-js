@@ -4,6 +4,8 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "epilot GmbH",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vite build && tsc",
