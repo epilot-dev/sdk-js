@@ -1,0 +1,41 @@
+{
+  "name": "@epilot/app-sdk",
+  "version": "0.0.1-alpha.1",
+  "description": "SDK to build Apps for epilot XRM",
+  "author": "epilot GmbH",
+  "license": "MIT",
+  "private": false,
+  "engines": {
+    "node": ">= 16"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "devDependencies": {
+    "@tsconfig/node16": "^16.1.4",
+    "@types/node": "~20",
+    "@vitest/coverage-v8": "~2.1",
+    "globals": "~15.14",
+    "rimraf": "~6.0",
+    "ts-api-utils": "~2.0",
+    "typescript": "~5.7",
+    "vitest": "~2.1"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "start": "node build/src/main.js",
+    "clean": "rimraf dist tmp",
+    "build": "npm run clean && tsc -p tsconfig.release.json",
+    "lint": "pnpm exec eslint src",
+    "test": "vitest run",
+    "test:watch": "vitest run"
+  },
+  "dependencies": {
+    "msw": "^2.10.2",
+    "tslib": "~2.8"
+  }
+}

@@ -3,6 +3,9 @@
   "version": "0.7.1",
   "description": "Authenticate with epilot APIs",
   "main": "dist/index.js",
+  "author": "epilot GmbH",
+  "license": "MIT",
+  "private": false,
   "bin": {
     "print-token": "dist/script/print-token.js"
   },
@@ -20,8 +23,6 @@
     "auth",
     "oauth"
   ],
-  "author": "epilot GmbH",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git"
