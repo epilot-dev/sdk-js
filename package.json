@@ -8,10 +8,10 @@
     "clients/*"
   ],
   "scripts": {
-    "dev": "pnpm --no-bail --filter './packages/*' --filter './clients/*' run build:watch",
-    "test": "pnpm --no-bail --filter './packages/*' --filter './clients/*' run test",
-    "lint": "pnpm --no-bail --filter './packages/*' --filter './clients/*' run lint",
-    "build": "pnpm --no-bail --filter './packages/*' --filter './clients/*' run build",
+    "dev": "pnpm --no-bail recursive run build:watch",
+    "test": "pnpm --no-bail recursive run test",
+    "lint": "pnpm --no-bail recursive run lint",
+    "build": "pnpm --no-bail recursive run build",
     "lint:fix": "eslint \"**/*.{js,ts}\" --fix"
   },
   "keywords": [
