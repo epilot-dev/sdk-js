@@ -25,3 +25,9 @@ rules:
       singleQuote: true
       quoteProps: as-needed
       proseWrap: never
+  "import/export":
+    - warn
+settings:
+  import/resolver:
+    node:
+      extensions: [".js", ".jsx", ".ts", ".tsx", ".d.ts"]

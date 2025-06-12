@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/epilot-dev/sdk-js#readme",
   "devDependencies": {
-    "@epilot/eslint-config": "^1.2.10",
+    "@epilot/eslint-config": "^2.1.3",
     "@jest/types": "^30.0.0",
     "@types/node": "^24.0.1",
     "eslint": "^7.32.0",

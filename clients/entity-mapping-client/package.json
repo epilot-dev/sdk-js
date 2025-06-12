@@ -33,7 +33,7 @@
     "build:watch": "npm run build && tsc -w",
     "prepublishOnly": "npm run typegen && npm run build",
     "release-alpha": "npm version prerelease --preid alpha",
-    "lint": "../../node_modules/eslint/bin/eslint.js src"
+    "lint": "pnpm exec eslint src"
   },
   "files": [
     "*.js",

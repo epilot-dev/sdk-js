@@ -11,7 +11,7 @@
     "prepublishOnly": "npm run build",
     "clients:check-updates": "npx -y npm-check-updates -f '@epilot/*-client'",
     "clients:upgrade": "npx -y npm-check-updates -u -f '@epilot/*-client'",
-    "lint": "../../node_modules/eslint/bin/eslint.js src"
+    "lint": "pnpm exec eslint src"
   },
   "keywords": [
     "epilot",
