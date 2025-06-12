@@ -768,7 +768,8 @@
           "coupon",
           "usergroup",
           "saved_view",
-          "app"
+          "app",
+          "role"
         ]
       },
       "PlanChanges": {
