@@ -1,0 +1,30 @@
+{
+  "name": "@epilot/app-bridge",
+  "version": "0.0.1-alpha.8",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build",
+    "lint": "pnpm exec eslint src"
+  },
+  "files": [
+    "dist/"
+  ],
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@types/common-tags": "^1.8.4",
+    "jsdom": "^26.0.0",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0",
+    "vitest": "^3.0.9"
+  },
+  "dependencies": {
+    "common-tags": "^1.8.2"
+  }
+}
