@@ -1,10 +1,10 @@
 import { authenticate, authorizeWithToken, UsernamePasswordAuthParams } from '@epilot/auth';
 
+import { default as accessTokenClient, getClient as getAccessTokenClient } from './access-token-client';
 import {
   default as addressSuggestionsClient,
   getClient as getAddressSuggestionsClient,
 } from './address-suggestions-client';
-import { default as accessTokenClient, getClient as getAccessTokenClient } from './access-token-client';
 import { default as auditLogsClient, getClient as getAuditLogsClient } from './audit-logs-client';
 import { default as automationClient, getClient as getAutomationClient } from './automation-client';
 import {

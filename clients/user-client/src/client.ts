@@ -14,7 +14,10 @@ export const getClient = () => {
 };
 
 export const createClient = () => {
-  const api = new OpenAPIClientAxios({ definition, quick: true });
+  const api = new OpenAPIClientAxios({
+    definition,
+    quick: true,
+  });
 
   const apiClient = api.initSync<Client>();
 

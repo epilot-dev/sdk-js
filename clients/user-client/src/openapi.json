@@ -1856,5 +1856,13 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://user.sls.epilot.io"
+    },
+    {
+      "url": "https://user.sls.epilot.io"
+    }
+  ]
 }

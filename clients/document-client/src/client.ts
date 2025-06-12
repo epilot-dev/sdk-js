@@ -1,11 +1,24 @@
 import OpenAPIClientAxios from 'openapi-client-axios';
 
 import definition from './definition';
-// eslint-disable-next-line import/no-unresolved
 import { Client } from './openapi';
 
+let client: Client;
 export const getClient = () => {
-  const api = new OpenAPIClientAxios({ definition, quick: true });
+  if (!client) {
+    client = createClient();
+  }
 
-  return api.initSync<Client>();
+  return client;
+};
+
+export const createClient = () => {
+  const api = new OpenAPIClientAxios({ definition, quick: true });
+  const apiClient = api.initSync<Client>();
+
+  apiClient.defaults.headers.common = {
+    ...(apiClient.defaults.headers.common ?? {}),
+  };
+
+  return apiClient;
 };

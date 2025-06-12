@@ -5,6 +5,12 @@
     "version": ""
   },
   "paths": {
+    "/v2/organization/current": {
+      "get": {
+        "operationId": "getCurrentOrganization",
+        "responses": {}
+      }
+    },
     "/v2/organization/{org_id}": {
       "get": {
         "operationId": "getOrganization",

@@ -99,7 +99,7 @@ declare namespace Components {
             /**
              * Organization contact phone
              * example:
-             * 49123123123
+             * +49123123123
              */
             phone?: string | null;
             /**
@@ -193,7 +193,7 @@ declare namespace Components {
             /**
              * Organization contact phone
              * example:
-             * 49123123123
+             * +49123123123
              */
             phone?: string | null;
             /**
@@ -283,7 +283,7 @@ declare namespace Components {
              *   {
              *     "action": "Delete",
              *     "resource": "OrgTable",
-             *     "extra_info": "ORG#739224"
+             *     "extra_info": "pk: ORG#739224"
              *   },
              *   {
              *     "action": "Archive",
@@ -387,6 +387,11 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetCurrentOrganization {
+        namespace Responses {
+            export type $200 = Components.Schemas.Organization;
+        }
+    }
     namespace GetOrganization {
         namespace Parameters {
             export type OrgId = /**
@@ -473,9 +478,22 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
+   * getCurrentOrganization - getCurrentOrganization
+   * 
+   * Get caller's current organization
+   */
+  'getCurrentOrganization'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCurrentOrganization.Responses.$200>
+  /**
    * getOrganization - getOrganization
+   * 
+   * Get an organization
    */
   'getOrganization'(
     parameters?: Parameters<Paths.GetOrganization.PathParameters> | null,
@@ -484,6 +502,8 @@ export interface OperationMethods {
   ): OperationResponse<Paths.GetOrganization.Responses.$200>
   /**
    * updateOrganization - updateOrganization
+   * 
+   * Updates an organization
    */
   'updateOrganization'(
     parameters?: Parameters<Paths.UpdateOrganization.PathParameters> | null,
@@ -523,9 +543,23 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
+  ['/v2/organization/current']: {
+    /**
+     * getCurrentOrganization - getCurrentOrganization
+     * 
+     * Get caller's current organization
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCurrentOrganization.Responses.$200>
+  }
   ['/v2/organization/{org_id}']: {
     /**
      * getOrganization - getOrganization
+     * 
+     * Get an organization
      */
     'get'(
       parameters?: Parameters<Paths.GetOrganization.PathParameters> | null,
@@ -534,6 +568,8 @@ export interface PathsDictionary {
     ): OperationResponse<Paths.GetOrganization.Responses.$200>
     /**
      * updateOrganization - updateOrganization
+     * 
+     * Updates an organization
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateOrganization.PathParameters> | null,
@@ -578,6 +614,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type CreateOrganizationRequest = Components.Schemas.CreateOrganizationRequest;
 export type DataPoint = Components.Schemas.DataPoint;
