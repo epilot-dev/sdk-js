@@ -1335,7 +1335,8 @@
           "TRIGGER_WEBHOOK_ERROR",
           "TEMPLATE_ERROR",
           "INVALID_PAYLOAD",
-          "INVALID_SCHEDULE_CONFIG"
+          "INVALID_SCHEDULE_CONFIG",
+          "CUSTOM_ACTION_ERROR"
         ]
       },
       "ErrorDetail": {
@@ -4408,10 +4409,5 @@
         }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://automation.sls.epilot.io"
-    }
-  ]
+  }
 }
