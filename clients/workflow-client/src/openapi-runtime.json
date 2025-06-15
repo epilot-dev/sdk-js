@@ -323,6 +323,20 @@
         },
         "responses": {}
       }
+    },
+    "/v2/flows/executions/{execution_id}/schedules/{schedule_id}": {
+      "post": {
+        "operationId": "cancelSchedule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/ScheduleIdParam"
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -340,6 +354,11 @@
       "PhaseIdParam": {
         "in": "path",
         "name": "phase_id",
+        "required": true
+      },
+      "ScheduleIdParam": {
+        "in": "path",
+        "name": "schedule_id",
         "required": true
       },
       "SoftDeleteParam": {

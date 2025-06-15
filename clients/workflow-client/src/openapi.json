@@ -1256,6 +1256,59 @@
           }
         }
       }
+    },
+    "/v2/flows/executions/{execution_id}/schedules/{schedule_id}": {
+      "post": {
+        "operationId": "cancelSchedule",
+        "summary": "cancelSchedule",
+        "description": "Cancels a flow schedule, marking it as canceled.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/ScheduleIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - when schedule has been successfully canceled"
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1296,6 +1349,16 @@
         "required": true,
         "description": "Id of the phase",
         "example": "9gjs2952j"
+      },
+      "ScheduleIdParam": {
+        "in": "path",
+        "name": "schedule_id",
+        "schema": {
+          "type": "string"
+        },
+        "required": true,
+        "description": "Id of the schedule",
+        "example": "sch_8k2m9n4p"
       },
       "SoftDeleteParam": {
         "in": "query",

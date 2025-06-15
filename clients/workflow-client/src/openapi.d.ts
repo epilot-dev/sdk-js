@@ -12,6 +12,7 @@ declare namespace Components {
     namespace Parameters {
         export type ExecutionIdParam = string;
         export type PhaseIdParam = string;
+        export type ScheduleIdParam = string;
         export type SoftDeleteParam = boolean;
         export type TaskIdParam = string;
     }
@@ -19,6 +20,7 @@ declare namespace Components {
         ExecutionIdParam?: Parameters.ExecutionIdParam;
         TaskIdParam?: Parameters.TaskIdParam;
         PhaseIdParam?: Parameters.PhaseIdParam;
+        ScheduleIdParam?: Parameters.ScheduleIdParam;
     }
     export interface QueryParameters {
         SoftDeleteParam?: Parameters.SoftDeleteParam;
@@ -1457,6 +1459,23 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace CancelSchedule {
+        namespace Parameters {
+            export type ExecutionId = string;
+            export type ScheduleId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+            schedule_id: Parameters.ScheduleId;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace CreateExecution {
         export type RequestBody = /**
          * example:
@@ -2109,6 +2128,16 @@ export interface OperationMethods {
     data?: Paths.AddTask.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddTask.Responses.$201>
+  /**
+   * cancelSchedule - cancelSchedule
+   * 
+   * Cancels a flow schedule, marking it as canceled.
+   */
+  'cancelSchedule'(
+    parameters?: Parameters<Paths.CancelSchedule.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelSchedule.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -2354,6 +2383,18 @@ export interface PathsDictionary {
       data?: Paths.AddTask.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddTask.Responses.$201>
+  }
+  ['/v2/flows/executions/{execution_id}/schedules/{schedule_id}']: {
+    /**
+     * cancelSchedule - cancelSchedule
+     * 
+     * Cancels a flow schedule, marking it as canceled.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CancelSchedule.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelSchedule.Responses.$200>
   }
 }
 
