@@ -10586,6 +10586,10 @@ declare namespace Paths {
              */
             export type CreatedAfter = string; // date-time
             /**
+             * Scope of jobs to return. 'me' returns only jobs created by the current user, 'all' returns jobs from all users in the organization.
+             */
+            export type Scope = "me" | "all";
+            /**
              * The maximum number of jobs to return (defaults to 20)
              */
             export type Size = number;
@@ -10608,6 +10612,7 @@ declare namespace Paths {
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
+            scope?: /* Scope of jobs to return. 'me' returns only jobs created by the current user, 'all' returns jobs from all users in the organization. */ Parameters.Scope;
         }
         namespace Responses {
             export type $200 = /**

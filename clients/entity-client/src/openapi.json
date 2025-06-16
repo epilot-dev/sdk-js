@@ -3251,6 +3251,19 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "description": "Scope of jobs to return. 'me' returns only jobs created by the current user, 'all' returns jobs from all users in the organization.",
+              "type": "string",
+              "enum": [
+                "me",
+                "all"
+              ],
+              "default": "me"
+            }
           }
         ],
         "responses": {

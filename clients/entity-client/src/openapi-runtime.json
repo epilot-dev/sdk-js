@@ -1128,6 +1128,10 @@
           {
             "in": "query",
             "name": "sort_pending_first"
+          },
+          {
+            "in": "query",
+            "name": "scope"
           }
         ],
         "responses": {}
