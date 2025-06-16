@@ -103,6 +103,21 @@ declare namespace Components {
              */
             type: "user" | "system";
         }
+        export interface AggregatedEvents {
+            type?: "aggregated";
+            groups?: {
+                /**
+                 * The grouped dimensions e.g., "source": "CUSTOM_JOURNEY_BLOCK", "event_type": "ERROR"
+                 */
+                dimensions?: {
+                    [name: string]: any;
+                };
+                metrics?: {
+                    count?: number;
+                    error_rate?: number;
+                };
+            }[];
+        }
         export interface AppBridgeSurfaceConfig {
             /**
              * URL of the uploaded App Bridge App. This is the entrypoint for the app
@@ -795,6 +810,71 @@ declare namespace Components {
                 }[]
             ];
         }
+        export interface EventsQuery {
+            /**
+             * Either use preset OR start+end
+             */
+            time_range?: {
+                /**
+                 * Start time (ISO 8601)
+                 */
+                start?: string; // date-time
+                /**
+                 * End time (ISO 8601)
+                 */
+                end?: string; // date-time
+                /**
+                 * Predefined time range (alternative to start/end)
+                 */
+                preset?: "1h" | "6h" | "24h" | "7d" | "30d";
+            };
+            filters?: {
+                /**
+                 * Filter by component types
+                 */
+                source?: /* Type of app component */ ComponentType[];
+                /**
+                 * Filter by specific component IDs
+                 */
+                component_id?: string[];
+                /**
+                 * Filter by event types
+                 */
+                event_type?: ("ERROR" | "WARNING" | "INFO")[];
+                /**
+                 * Filter by correlation ID for tracing
+                 */
+                correlation_id?: string;
+            };
+            aggregation?: {
+                /**
+                 * Group results by specified fields
+                 */
+                group_by?: ("source" | "component_id" | "event_type" | "hour" | "day")[];
+                /**
+                 * Metrics to calculate
+                 */
+                metrics?: ("count" | "error_rate" | "unique_users")[];
+            };
+            pagination?: {
+                page?: number;
+                page_size?: number;
+            };
+            sort?: {
+                field?: "timestamp" | "event_type" | "component_id";
+                order?: "asc" | "desc";
+            };
+        }
+        export interface EventsQueryResponse {
+            query?: EventsQuery;
+            results?: RawEvents | AggregatedEvents;
+            pagination?: {
+                page?: number;
+                page_size?: number;
+                total_items?: number;
+                has_next?: boolean;
+            };
+        }
         export interface ExternalIntegrationCustomActionConfig {
             /**
              * Name of the custom action
@@ -1162,6 +1242,10 @@ declare namespace Components {
              * List of available versions of the app
              */
             versions?: /* Configuration data about your app which is versionable */ ConfigurationVersion[];
+        }
+        export interface RawEvents {
+            type?: "raw";
+            events?: AppEventData[];
         }
         export interface Role {
             /**
@@ -1637,6 +1721,22 @@ declare namespace Paths {
             }
         }
     }
+    namespace QueryEvents {
+        namespace Parameters {
+            export type AppId = string;
+        }
+        export interface PathParameters {
+            appId: Parameters.AppId;
+        }
+        export type RequestBody = Components.Schemas.EventsQuery;
+        namespace Responses {
+            export type $200 = Components.Schemas.EventsQueryResponse;
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace Uninstall {
         namespace Parameters {
             export type AppId = string;
@@ -1749,6 +1849,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteConfiguration.Responses.$204>
+  /**
+   * queryEvents - queryEvents
+   * 
+   * Query analytics events for a specific app with flexible filtering
+   */
+  'queryEvents'(
+    parameters?: Parameters<Paths.QueryEvents.PathParameters> | null,
+    data?: Paths.QueryEvents.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.QueryEvents.Responses.$200>
   /**
    * createBundleUploadUrl - createBundleUploadUrl
    * 
@@ -2021,6 +2131,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteConfiguration.Responses.$204>
   }
+  ['/v1/app-configurations/{appId}/events']: {
+    /**
+     * queryEvents - queryEvents
+     * 
+     * Query analytics events for a specific app with flexible filtering
+     */
+    'post'(
+      parameters?: Parameters<Paths.QueryEvents.PathParameters> | null,
+      data?: Paths.QueryEvents.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.QueryEvents.Responses.$200>
+  }
   ['/v1/app-configurations/{appId}/bundle']: {
     /**
      * createBundleUploadUrl - createBundleUploadUrl
@@ -2242,6 +2364,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type Actor = Components.Schemas.Actor;
+export type AggregatedEvents = Components.Schemas.AggregatedEvents;
 export type AppBridgeSurfaceConfig = Components.Schemas.AppBridgeSurfaceConfig;
 export type AppEventData = Components.Schemas.AppEventData;
 export type Audit = Components.Schemas.Audit;
@@ -2260,6 +2383,8 @@ export type ConfigurationVersion = Components.Schemas.ConfigurationVersion;
 export type CustomFlowActionComponent = Components.Schemas.CustomFlowActionComponent;
 export type CustomFlowConfig = Components.Schemas.CustomFlowConfig;
 export type EnumArg = Components.Schemas.EnumArg;
+export type EventsQuery = Components.Schemas.EventsQuery;
+export type EventsQueryResponse = Components.Schemas.EventsQueryResponse;
 export type ExternalIntegrationCustomActionConfig = Components.Schemas.ExternalIntegrationCustomActionConfig;
 export type Grants = Components.Schemas.Grants;
 export type Installation = Components.Schemas.Installation;
@@ -2277,6 +2402,7 @@ export type PortalExtensionComponent = Components.Schemas.PortalExtensionCompone
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
 export type Pricing = Components.Schemas.Pricing;
 export type PublicConfiguration = Components.Schemas.PublicConfiguration;
+export type RawEvents = Components.Schemas.RawEvents;
 export type Role = Components.Schemas.Role;
 export type S3Reference = Components.Schemas.S3Reference;
 export type TextArg = Components.Schemas.TextArg;

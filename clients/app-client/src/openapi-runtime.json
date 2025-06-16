@@ -90,6 +90,25 @@
         "responses": {}
       }
     },
+    "/v1/app-configurations/{appId}/events": {
+      "post": {
+        "operationId": "queryEvents",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/app-configurations/{appId}/bundle": {
       "post": {
         "operationId": "createBundleUploadUrl",

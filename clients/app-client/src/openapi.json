@@ -295,6 +295,55 @@
         }
       }
     },
+    "/v1/app-configurations/{appId}/events": {
+      "post": {
+        "summary": "queryEvents",
+        "description": "Query analytics events for a specific app with flexible filtering",
+        "operationId": "queryEvents",
+        "tags": [
+          "App Analytics"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventsQuery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analytics events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventsQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      }
+    },
     "/v1/app-configurations/{appId}/bundle": {
       "post": {
         "summary": "createBundleUploadUrl",
@@ -2757,6 +2806,232 @@
             "type": "object",
             "description": "Details about the event",
             "additionalProperties": true
+          }
+        }
+      },
+      "EventsQuery": {
+        "type": "object",
+        "properties": {
+          "time_range": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Start time (ISO 8601)"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time",
+                "description": "End time (ISO 8601)"
+              },
+              "preset": {
+                "type": "string",
+                "enum": [
+                  "1h",
+                  "6h",
+                  "24h",
+                  "7d",
+                  "30d"
+                ],
+                "description": "Predefined time range (alternative to start/end)"
+              }
+            },
+            "description": "Either use preset OR start+end"
+          },
+          "filters": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ComponentType"
+                },
+                "description": "Filter by component types"
+              },
+              "component_id": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Filter by specific component IDs"
+              },
+              "event_type": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "ERROR",
+                    "WARNING",
+                    "INFO"
+                  ]
+                },
+                "description": "Filter by event types"
+              },
+              "correlation_id": {
+                "type": "string",
+                "description": "Filter by correlation ID for tracing"
+              }
+            }
+          },
+          "aggregation": {
+            "type": "object",
+            "properties": {
+              "group_by": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "source",
+                    "component_id",
+                    "event_type",
+                    "hour",
+                    "day"
+                  ]
+                },
+                "description": "Group results by specified fields"
+              },
+              "metrics": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "count",
+                    "error_rate",
+                    "unique_users"
+                  ]
+                },
+                "default": [
+                  "count"
+                ],
+                "description": "Metrics to calculate"
+              }
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer",
+                "minimum": 1,
+                "default": 1
+              },
+              "page_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000,
+                "default": 100
+              }
+            }
+          },
+          "sort": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "type": "string",
+                "enum": [
+                  "timestamp",
+                  "event_type",
+                  "component_id"
+                ],
+                "default": "timestamp"
+              },
+              "order": {
+                "type": "string",
+                "enum": [
+                  "asc",
+                  "desc"
+                ],
+                "default": "desc"
+              }
+            }
+          }
+        }
+      },
+      "EventsQueryResponse": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "$ref": "#/components/schemas/EventsQuery"
+          },
+          "results": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RawEvents"
+              },
+              {
+                "$ref": "#/components/schemas/AggregatedEvents"
+              }
+            ]
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer"
+              },
+              "page_size": {
+                "type": "integer"
+              },
+              "total_items": {
+                "type": "integer"
+              },
+              "has_next": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "RawEvents": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "raw"
+            ]
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppEventData"
+            }
+          }
+        }
+      },
+      "AggregatedEvents": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "aggregated"
+            ]
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dimensions": {
+                  "type": "object",
+                  "description": "The grouped dimensions e.g., \"source\": \"CUSTOM_JOURNEY_BLOCK\", \"event_type\": \"ERROR\"",
+                  "additionalProperties": true
+                },
+                "metrics": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "error_rate": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
