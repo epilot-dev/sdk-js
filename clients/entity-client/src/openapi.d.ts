@@ -2728,7 +2728,7 @@ declare namespace Components {
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
             ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
-            operation: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved";
+            operation: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved" | "relationsSoftDeleted" | "relationsRestored" | "relationsDeleted";
             /**
              * example:
              * {
@@ -10580,9 +10580,19 @@ declare namespace Paths {
     namespace GetTaxonomyBulkActionJobs {
         namespace Parameters {
             /**
+             * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
+             * example:
+             * 2023-01-01T00:00:00.000Z
+             */
+            export type CreatedAfter = string; // date-time
+            /**
              * The maximum number of jobs to return (defaults to 20)
              */
             export type Size = number;
+            /**
+             * When true, sorts PENDING status jobs to the top of the results.
+             */
+            export type SortPendingFirst = boolean;
             /**
              * A comma separated list of job statuses to return
              */
@@ -10591,6 +10601,13 @@ declare namespace Paths {
         export interface QueryParameters {
             status?: /* A comma separated list of job statuses to return */ Parameters.Status;
             size?: /* The maximum number of jobs to return (defaults to 20) */ Parameters.Size;
+            created_after?: /**
+             * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
+             * example:
+             * 2023-01-01T00:00:00.000Z
+             */
+            Parameters.CreatedAfter /* date-time */;
+            sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
         }
         namespace Responses {
             export type $200 = /**

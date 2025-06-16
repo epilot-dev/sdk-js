@@ -3232,6 +3232,25 @@
               "type": "number",
               "default": 20
             }
+          },
+          {
+            "in": "query",
+            "name": "created_after",
+            "schema": {
+              "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
+              "type": "string",
+              "format": "date-time",
+              "example": "2023-01-01T00:00:00.000Z"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_pending_first",
+            "schema": {
+              "description": "When true, sorts PENDING status jobs to the top of the results.",
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -7738,7 +7757,10 @@
               "softDeleteEntity",
               "restoreEntity",
               "relationsAdded",
-              "relationsRemoved"
+              "relationsRemoved",
+              "relationsSoftDeleted",
+              "relationsRestored",
+              "relationsDeleted"
             ]
           },
           "params": {

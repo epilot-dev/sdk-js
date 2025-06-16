@@ -1120,6 +1120,14 @@
           {
             "in": "query",
             "name": "size"
+          },
+          {
+            "in": "query",
+            "name": "created_after"
+          },
+          {
+            "in": "query",
+            "name": "sort_pending_first"
           }
         ],
         "responses": {}
