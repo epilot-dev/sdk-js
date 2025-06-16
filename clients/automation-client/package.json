@@ -1,6 +1,6 @@
 {
   "name": "@epilot/automation-client",
-  "version": "2.18.7",
+  "version": "2.18.8",
   "description": "Client library for epilot automation API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,7 +25,7 @@
     "test": "jest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/automation.yaml",
+    "openapi": "node ../../scripts/update-openapi.js ../../../backend/automation-api/lambda/ApiHandlerFunction/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",

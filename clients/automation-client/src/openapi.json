@@ -1336,7 +1336,12 @@
           "TEMPLATE_ERROR",
           "INVALID_PAYLOAD",
           "INVALID_SCHEDULE_CONFIG",
-          "CUSTOM_ACTION_ERROR"
+          "CUSTOM_ACTION_ERROR",
+          "ORDER_CREATION_ERROR",
+          "DOCUMENT_GENERATION_ERROR",
+          "BULK_EMAIL_ERROR",
+          "SHARING_ERROR",
+          "CANCEL_FLOW_EXECUTION_ERROR"
         ]
       },
       "ErrorDetail": {

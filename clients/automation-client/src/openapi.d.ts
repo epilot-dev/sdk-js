@@ -1942,7 +1942,7 @@ declare namespace Components {
         export interface EqualsIgnoreCaseCondition {
             "equals-ignore-case"?: string;
         }
-        export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR" | "TEMPLATE_ERROR" | "INVALID_PAYLOAD" | "INVALID_SCHEDULE_CONFIG" | "CUSTOM_ACTION_ERROR";
+        export type ErrorCode = "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR" | "TEMPLATE_ERROR" | "INVALID_PAYLOAD" | "INVALID_SCHEDULE_CONFIG" | "CUSTOM_ACTION_ERROR" | "ORDER_CREATION_ERROR" | "DOCUMENT_GENERATION_ERROR" | "BULK_EMAIL_ERROR" | "SHARING_ERROR" | "CANCEL_FLOW_EXECUTION_ERROR";
         export interface ErrorDetail {
             explanation: string;
             context?: string;
