@@ -13,6 +13,10 @@
     {
       "name": "App Installation",
       "description": "Install and uninstall apps"
+    },
+    {
+      "name": "App Analytics",
+      "description": "Analytics for installed apps"
     }
   ],
   "servers": [
@@ -32,6 +36,43 @@
     }
   ],
   "paths": {
+    "/v1/public/.well-known/public-key": {
+      "get": {
+        "security": [],
+        "summary": "getPublicKey",
+        "operationId": "getPublicKey",
+        "description": "Retrieve the public key for verifying signatures",
+        "tags": [
+          "App Configuration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Public key for signature verification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "algorithm": {
+                      "type": "string",
+                      "example": "rsa-sha256"
+                    },
+                    "public_key": {
+                      "type": "string",
+                      "description": "PEM-formatted RSA public key"
+                    },
+                    "issuer": {
+                      "type": "string",
+                      "example": "epilot"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/app-configurations": {
       "get": {
         "summary": "listConfigurations",
@@ -257,7 +298,7 @@
     "/v1/app-configurations/{appId}/bundle": {
       "post": {
         "summary": "createBundleUploadUrl",
-        "description": "Generate a presigned URL for uploading app bundle to /<app-id>/bundle.zip path",
+        "description": "Generate a presigned URL for uploading app bundle to /<app-id>/bundle.js path",
         "operationId": "createBundleUploadUrl",
         "tags": [
           "App Configuration"
@@ -298,6 +339,80 @@
                     "upload_url": {
                       "type": "string",
                       "description": "Presigned S3 URL for uploading the bundle"
+                    },
+                    "s3ref": {
+                      "$ref": "#/components/schemas/S3Reference"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the upload URL expires"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/zip": {
+      "post": {
+        "summary": "createZipUploadUrl",
+        "operationId": "createZipUploadUrl",
+        "description": "Generate a presigned URL to upload a zip file with artifacts that will be unpacked in a new directory under the /<app-id>/ path\n",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "example": "dist.zip"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upload URL generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "upload_url",
+                    "artifact_url"
+                  ],
+                  "properties": {
+                    "upload_url": {
+                      "type": "string",
+                      "description": "Presigned S3 URL for uploading the bundle"
+                    },
+                    "artifact_url": {
+                      "type": "string",
+                      "description": "Public CDN URL for the unpacked artifacts"
                     },
                     "s3ref": {
                       "$ref": "#/components/schemas/S3Reference"
@@ -627,8 +742,20 @@
           "$ref": "#/components/requestBodies/UpsertComponentRequest"
         },
         "responses": {
-          "204": {
-            "description": "Component created successfully"
+          "200": {
+            "description": "Component created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "component": {
+                      "$ref": "#/components/schemas/BaseComponent"
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid version format"
@@ -1061,6 +1188,41 @@
           }
         }
       }
+    },
+    "/v1/app-events": {
+      "post": {
+        "summary": "ingestEvent",
+        "operationId": "ingestEvent",
+        "description": "Internal endpoint for services to submit app events for analytic purposes",
+        "tags": [
+          "App Analytics"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AppEventData"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BatchEventRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Events accepted for processing"
+          },
+          "400": {
+            "description": "Invalid event format"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1112,7 +1274,7 @@
                 },
                 "component_id": {
                   "type": "string",
-                  "description": "ID of the journye block component"
+                  "description": "ID of the journey block component"
                 }
               }
             }
@@ -1297,7 +1459,11 @@
             "description": "Detailed description of what this configuration option does"
           },
           "value": {
-            "type": "string",
+            "type": [
+              "string",
+              "boolean",
+              "number"
+            ],
             "description": "The configured value for this option. Is only present when the component is installed."
           },
           "type": {
@@ -1323,7 +1489,11 @@
             "description": "Key matching a config_option from the component"
           },
           "value": {
-            "type": "string",
+            "type": [
+              "string",
+              "boolean",
+              "number"
+            ],
             "description": "The configured value for this option"
           }
         }
@@ -1460,6 +1630,9 @@
               "$ref": "#/components/schemas/Options"
             },
             "description": "List of options for the app component"
+          },
+          "surfaces": {
+            "type": "object"
           }
         }
       },
@@ -1525,6 +1698,14 @@
           },
           "configuration": {
             "$ref": "#/components/schemas/CustomFlowConfig"
+          },
+          "surfaces": {
+            "type": "object",
+            "properties": {
+              "flow_action_config": {
+                "$ref": "#/components/schemas/AppBridgeSurfaceConfig"
+              }
+            }
           }
         }
       },
@@ -1565,10 +1746,6 @@
                   "headers": {
                     "type": "object",
                     "additionalProperties": true
-                  },
-                  "auth_token_ref": {
-                    "type": "string",
-                    "description": "SSM Reference to the auth token to use for the request"
                   }
                 }
               }
@@ -1739,7 +1916,7 @@
           "override_url": {
             "type": "string",
             "description": "URL of the web component object in dev mode",
-            "example": "http://localhost:3000/bundle.js"
+            "example": "http://localhost:3000"
           }
         }
       },
@@ -1789,6 +1966,23 @@
                 "number"
               ]
             }
+          }
+        }
+      },
+      "AppBridgeSurfaceConfig": {
+        "type": "object",
+        "properties": {
+          "app_url": {
+            "type": "string",
+            "description": "URL of the uploaded App Bridge App. This is the entrypoint for the app"
+          },
+          "zip_url": {
+            "type": "string",
+            "description": "URL of the uploaded zip file containing the app"
+          },
+          "override_url": {
+            "type": "string",
+            "description": "URL of the app in dev mode"
           }
         }
       },
@@ -2471,6 +2665,99 @@
         "required": [
           "org_id"
         ]
+      },
+      "BatchEventRequest": {
+        "type": "object",
+        "required": [
+          "events"
+        ],
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppEventData"
+            },
+            "maxItems": 100
+          }
+        }
+      },
+      "Actor": {
+        "type": "object",
+        "readOnly": true,
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID of the actor"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID of the actor"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the actor (e.g., user, system)",
+            "enum": [
+              "user",
+              "system"
+            ]
+          }
+        }
+      },
+      "AppEventData": {
+        "type": "object",
+        "required": [
+          "app_id",
+          "event_type",
+          "component_id",
+          "version",
+          "source"
+        ],
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "description": "ID of the app configuration"
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the app configuration"
+          },
+          "event_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "component_id": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "readOnly": true
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "ERROR",
+              "WARNING",
+              "INFO"
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/ComponentType"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/Actor"
+          },
+          "details": {
+            "type": "object",
+            "description": "Details about the event",
+            "additionalProperties": true
+          }
+        }
       }
     }
   }

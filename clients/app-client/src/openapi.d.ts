@@ -16,7 +16,7 @@ declare namespace Components {
              */
             version: string;
             /**
-             * ID of the journye block component
+             * ID of the journey block component
              */
             component_id?: string;
         }
@@ -89,6 +89,57 @@ declare namespace Components {
         export type UpsertComponentRequest = Schemas.BaseComponent;
     }
     namespace Schemas {
+        export interface Actor {
+            /**
+             * Organization ID of the actor
+             */
+            org_id?: string;
+            /**
+             * User ID of the actor
+             */
+            user_id?: string;
+            /**
+             * Type of the actor (e.g., user, system)
+             */
+            type: "user" | "system";
+        }
+        export interface AppBridgeSurfaceConfig {
+            /**
+             * URL of the uploaded App Bridge App. This is the entrypoint for the app
+             */
+            app_url?: string;
+            /**
+             * URL of the uploaded zip file containing the app
+             */
+            zip_url?: string;
+            /**
+             * URL of the app in dev mode
+             */
+            override_url?: string;
+        }
+        export interface AppEventData {
+            /**
+             * ID of the app configuration
+             */
+            app_id: string;
+            /**
+             * Version of the app configuration
+             */
+            version: string;
+            event_id?: string;
+            component_id: string;
+            timestamp?: string;
+            correlation_id?: string;
+            event_type: "ERROR" | "WARNING" | "INFO";
+            source: /* Type of app component */ ComponentType;
+            actor?: Actor;
+            /**
+             * Details about the event
+             */
+            details?: {
+                [name: string]: any;
+            };
+        }
         export interface Audit {
             /**
              * Timestamp of the creation
@@ -156,6 +207,9 @@ declare namespace Components {
              * List of options for the app component
              */
             options?: /* Options for the component configuration */ Options[];
+            surfaces?: {
+                [key: string]: any;
+            };
         } & (JourneyBlockComponent | PortalExtensionComponent | CustomFlowActionComponent);
         export interface BaseComponentCommon {
             /**
@@ -192,6 +246,9 @@ declare namespace Components {
              * List of options for the app component
              */
             options?: /* Options for the component configuration */ Options[];
+            surfaces?: {
+                [key: string]: any;
+            };
         }
         export interface BaseCustomActionConfig {
             /**
@@ -202,6 +259,110 @@ declare namespace Components {
              * Description of the custom action
              */
             description?: string;
+        }
+        export interface BatchEventRequest {
+            events: [
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?,
+                AppEventData?
+            ];
         }
         /**
          * How often the subscription is billed
@@ -579,6 +740,9 @@ declare namespace Components {
         export interface CustomFlowActionComponent {
             component_type: "CUSTOM_FLOW_ACTION";
             configuration: CustomFlowConfig;
+            surfaces?: {
+                flow_action_config?: AppBridgeSurfaceConfig;
+            };
         }
         export type CustomFlowConfig = ExternalIntegrationCustomActionConfig;
         export interface EnumArg {
@@ -649,10 +813,6 @@ declare namespace Components {
                 headers?: {
                     [name: string]: any;
                 };
-                /**
-                 * SSM Reference to the auth token to use for the request
-                 */
-                auth_token_ref?: string;
             };
         }
         /**
@@ -823,7 +983,7 @@ declare namespace Components {
             /**
              * The configured value for this option
              */
-            value: string;
+            value: string | boolean | number;
         }
         /**
          * Options for the component configuration
@@ -848,7 +1008,7 @@ declare namespace Components {
             /**
              * The configured value for this option. Is only present when the component is installed.
              */
-            value?: string;
+            value?: string | boolean | number;
             type: "text" | "number" | "boolean" | "secret";
         }
         export interface OptionsRef {
@@ -865,7 +1025,7 @@ declare namespace Components {
             /**
              * URL of the web component object in dev mode
              * example:
-             * http://localhost:3000/bundle.js
+             * http://localhost:3000
              */
             override_url?: string;
         }
@@ -1106,7 +1266,8 @@ declare namespace Paths {
         }
         export type RequestBody = Components.RequestBodies.UpsertComponentRequest;
         namespace Responses {
-            export interface $204 {
+            export interface $200 {
+                component?: Components.Schemas.BaseComponent;
             }
             export interface $400 {
             }
@@ -1130,6 +1291,40 @@ declare namespace Paths {
                  * Presigned S3 URL for uploading the logo
                  */
                 upload_url: string;
+                s3ref?: Components.Schemas.S3Reference;
+                /**
+                 * Timestamp when the upload URL expires
+                 */
+                expires_at?: string; // date-time
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace CreateZipUploadUrl {
+        namespace Parameters {
+            export type AppId = string;
+        }
+        export interface PathParameters {
+            appId: Parameters.AppId;
+        }
+        export interface RequestBody {
+            /**
+             * example:
+             * dist.zip
+             */
+            filename?: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Presigned S3 URL for uploading the bundle
+                 */
+                upload_url: string;
+                /**
+                 * Public CDN URL for the unpacked artifacts
+                 */
+                artifact_url: string;
                 s3ref?: Components.Schemas.S3Reference;
                 /**
                  * Timestamp when the upload URL expires
@@ -1233,6 +1428,26 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetPublicKey {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * rsa-sha256
+                 */
+                algorithm?: string;
+                /**
+                 * PEM-formatted RSA public key
+                 */
+                public_key?: string;
+                /**
+                 * example:
+                 * epilot
+                 */
+                issuer?: string;
+            }
+        }
+    }
     namespace GetVersion {
         namespace Parameters {
             export type AppId = string;
@@ -1245,6 +1460,15 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = /* Configuration of the published app */ Components.Schemas.Configuration;
             export interface $404 {
+            }
+        }
+    }
+    namespace IngestEvent {
+        export type RequestBody = Components.Schemas.AppEventData | Components.Schemas.BatchEventRequest;
+        namespace Responses {
+            export interface $202 {
+            }
+            export interface $400 {
             }
         }
     }
@@ -1453,7 +1677,18 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
+  /**
+   * getPublicKey - getPublicKey
+   * 
+   * Retrieve the public key for verifying signatures
+   */
+  'getPublicKey'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicKey.Responses.$200>
   /**
    * listConfigurations - listConfigurations
    * 
@@ -1517,13 +1752,24 @@ export interface OperationMethods {
   /**
    * createBundleUploadUrl - createBundleUploadUrl
    * 
-   * Generate a presigned URL for uploading app bundle to /<app-id>/bundle.zip path
+   * Generate a presigned URL for uploading app bundle to /<app-id>/bundle.js path
    */
   'createBundleUploadUrl'(
     parameters?: Parameters<Paths.CreateBundleUploadUrl.PathParameters> | null,
     data?: Paths.CreateBundleUploadUrl.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBundleUploadUrl.Responses.$200>
+  /**
+   * createZipUploadUrl - createZipUploadUrl
+   * 
+   * Generate a presigned URL to upload a zip file with artifacts that will be unpacked in a new directory under the /<app-id>/ path
+   * 
+   */
+  'createZipUploadUrl'(
+    parameters?: Parameters<Paths.CreateZipUploadUrl.PathParameters> | null,
+    data?: Paths.CreateZipUploadUrl.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateZipUploadUrl.Responses.$200>
   /**
    * createLogoUploadUrl - createLogoUploadUrl
    * 
@@ -1593,7 +1839,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.CreateComponent.PathParameters> | null,
     data?: Paths.CreateComponent.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateComponent.Responses.$204>
+  ): OperationResponse<Paths.CreateComponent.Responses.$200>
   /**
    * patchComponent - patchComponent
    * 
@@ -1684,9 +1930,31 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PromoteVersion.Responses.$200>
+  /**
+   * ingestEvent - ingestEvent
+   * 
+   * Internal endpoint for services to submit app events for analytic purposes
+   */
+  'ingestEvent'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.IngestEvent.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.IngestEvent.Responses.$202>
 }
 
 export interface PathsDictionary {
+  ['/v1/public/.well-known/public-key']: {
+    /**
+     * getPublicKey - getPublicKey
+     * 
+     * Retrieve the public key for verifying signatures
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicKey.Responses.$200>
+  }
   ['/v1/app-configurations']: {
     /**
      * listConfigurations - listConfigurations
@@ -1757,13 +2025,26 @@ export interface PathsDictionary {
     /**
      * createBundleUploadUrl - createBundleUploadUrl
      * 
-     * Generate a presigned URL for uploading app bundle to /<app-id>/bundle.zip path
+     * Generate a presigned URL for uploading app bundle to /<app-id>/bundle.js path
      */
     'post'(
       parameters?: Parameters<Paths.CreateBundleUploadUrl.PathParameters> | null,
       data?: Paths.CreateBundleUploadUrl.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBundleUploadUrl.Responses.$200>
+  }
+  ['/v1/app-configurations/{appId}/zip']: {
+    /**
+     * createZipUploadUrl - createZipUploadUrl
+     * 
+     * Generate a presigned URL to upload a zip file with artifacts that will be unpacked in a new directory under the /<app-id>/ path
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateZipUploadUrl.PathParameters> | null,
+      data?: Paths.CreateZipUploadUrl.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateZipUploadUrl.Responses.$200>
   }
   ['/v1/app-configurations/{appId}/logo']: {
     /**
@@ -1841,7 +2122,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.CreateComponent.PathParameters> | null,
       data?: Paths.CreateComponent.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateComponent.Responses.$204>
+    ): OperationResponse<Paths.CreateComponent.Responses.$200>
   }
   ['/v1/app-configurations/{appId}/versions/{version}/components/{componentId}']: {
     /**
@@ -1943,15 +2224,32 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PromoteVersion.Responses.$200>
   }
+  ['/v1/app-events']: {
+    /**
+     * ingestEvent - ingestEvent
+     * 
+     * Internal endpoint for services to submit app events for analytic purposes
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.IngestEvent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.IngestEvent.Responses.$202>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
+export type Actor = Components.Schemas.Actor;
+export type AppBridgeSurfaceConfig = Components.Schemas.AppBridgeSurfaceConfig;
+export type AppEventData = Components.Schemas.AppEventData;
 export type Audit = Components.Schemas.Audit;
 export type Author = Components.Schemas.Author;
 export type BaseComponent = Components.Schemas.BaseComponent;
 export type BaseComponentCommon = Components.Schemas.BaseComponentCommon;
 export type BaseCustomActionConfig = Components.Schemas.BaseCustomActionConfig;
+export type BatchEventRequest = Components.Schemas.BatchEventRequest;
 export type BillingFrequency = Components.Schemas.BillingFrequency;
 export type BooleanArg = Components.Schemas.BooleanArg;
 export type CallerIdentity = Components.Schemas.CallerIdentity;

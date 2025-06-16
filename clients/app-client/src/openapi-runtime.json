@@ -10,6 +10,12 @@
     }
   ],
   "paths": {
+    "/v1/public/.well-known/public-key": {
+      "get": {
+        "operationId": "getPublicKey",
+        "responses": {}
+      }
+    },
     "/v1/app-configurations": {
       "get": {
         "operationId": "listConfigurations",
@@ -96,6 +102,24 @@
         ],
         "requestBody": {
           "$ref": "#/components/requestBodies/CreateBundlePresignedRequest"
+        },
+        "responses": {}
+      }
+    },
+    "/v1/app-configurations/{appId}/zip": {
+      "post": {
+        "operationId": "createZipUploadUrl",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
         },
         "responses": {}
       }
@@ -377,6 +401,18 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/app-events": {
+      "post": {
+        "operationId": "ingestEvent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     }
