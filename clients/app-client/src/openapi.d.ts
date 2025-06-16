@@ -132,7 +132,7 @@ declare namespace Components {
             correlation_id?: string;
             event_type: "ERROR" | "WARNING" | "INFO";
             source: /* Type of app component */ ComponentType;
-            actor?: Actor;
+            actor: Actor;
             /**
              * Details about the event
              */

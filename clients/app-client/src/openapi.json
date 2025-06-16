@@ -2713,7 +2713,8 @@
           "event_type",
           "component_id",
           "version",
-          "source"
+          "source",
+          "actor"
         ],
         "properties": {
           "app_id": {
