@@ -6851,7 +6851,7 @@
       "CommonConfigAttributes": {
         "type": "object",
         "required": [
-          "design_id"
+          "domain"
         ],
         "properties": {
           "enabled": {
@@ -7237,6 +7237,9 @@
         }
       },
       "UpsertPortalConfig": {
+        "required": [
+          "domain"
+        ],
         "allOf": [
           {
             "$ref": "#/components/schemas/UpdateOnlyPortalConfigAttributes"
@@ -7244,11 +7247,6 @@
           {
             "$ref": "#/components/schemas/CommonConfigAttributes"
           }
-        ],
-        "required": [
-          "config",
-          "design_id",
-          "feature_settings"
         ]
       },
       "PortalConfig": {
@@ -10559,6 +10557,14 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/OIDCProviderMetadata"
+          },
+          "prompt": {
+            "type": "string",
+            "enum": [
+              "login",
+              "select_account",
+              "consent"
+            ]
           }
         },
         "required": [

@@ -688,7 +688,7 @@ declare namespace Components {
              * example:
              * abc.com
              */
-            domain?: string;
+            domain: string;
             /**
              * Mark true if the domain is an Epilot domain
              */
@@ -696,7 +696,7 @@ declare namespace Components {
             /**
              * ID of the design used to build the portal
              */
-            design_id: /**
+            design_id?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -2866,6 +2866,7 @@ declare namespace Components {
              */
             scope: string;
             metadata?: OIDCProviderMetadata;
+            prompt?: "login" | "select_account" | "consent";
         }
         export interface OIDCProviderMetadata {
             /**
@@ -3289,12 +3290,12 @@ declare namespace Components {
              * example:
              * abc.com
              */
-            domain?: string;
+            domain: string;
             /**
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
-            design_id: /**
+            design_id?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -4278,12 +4279,12 @@ declare namespace Components {
              * example:
              * abc.com
              */
-            domain?: string;
+            domain: string;
             /**
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
-            design_id: /**
+            design_id?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -4293,7 +4294,7 @@ declare namespace Components {
             /**
              * Feature settings for the portal
              */
-            feature_settings: {
+            feature_settings?: {
                 /**
                  * Start page feature flag
                  */
@@ -4400,7 +4401,7 @@ declare namespace Components {
             /**
              * Stringified object with configuration details
              */
-            config: string;
+            config?: string;
             /**
              * Deprecated. Use registration_identifiers instead.
              * example:
@@ -6286,12 +6287,12 @@ declare namespace Paths {
                  * example:
                  * abc.com
                  */
-                domain?: string;
+                domain: string;
                 /**
                  * Mark true if the domain is an Epilot domain
                  */
                 is_epilot_domain?: boolean;
-                design_id: /**
+                design_id?: /**
                  * Entity ID
                  * example:
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
