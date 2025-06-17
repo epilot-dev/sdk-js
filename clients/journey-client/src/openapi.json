@@ -1,0 +1,1980 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Journey API",
+    "description": "API to configure journeys",
+    "version": "1.0.0"
+  },
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Journeys",
+      "description": "Journey operations"
+    },
+    {
+      "name": "Journeys V2",
+      "description": "Journey V2 operations"
+    },
+    {
+      "name": "journey_schema",
+      "x-displayName": "Journey",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Journey\" />\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "APIs",
+      "tags": [
+        "Journeys",
+        "Journeys V2"
+      ]
+    },
+    {
+      "name": "Schemas",
+      "tags": [
+        "journey_schema"
+      ]
+    }
+  ],
+  "paths": {
+    "/v1/journey/organization/{id}": {
+      "get": {
+        "operationId": "getJourneysByOrgId",
+        "summary": "getJourneysByOrgId",
+        "description": "Get all journeys by organization id",
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Organization ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "123"
+            }
+          },
+          {
+            "name": "hydrate",
+            "in": "query",
+            "description": "Hydrate",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "true"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetJourneysResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/journey/configuration/{id}": {
+      "get": {
+        "operationId": "getJourney",
+        "summary": "getJourney",
+        "description": "Get journey by id. Private journeys requires valid private token to be passed",
+        "security": [
+          {},
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "description": "What source ID. Journey or Entity ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orgId",
+            "in": "query",
+            "description": "Organization ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Journey"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeJourney",
+        "summary": "removeJourney",
+        "description": "Remove journey by id",
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/v1/journey/products/{id}": {
+      "get": {
+        "operationId": "getJourneyProducts",
+        "summary": "getJourneyProducts",
+        "description": "Get products available in the journey by id. requires public journey token to be passed.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "description": "What source ID. Journey or Entity ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "postal_code",
+            "in": "query",
+            "description": "Zip Code for availibility",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "description": "city for availibility",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "street",
+            "in": "query",
+            "description": "street name for availibility",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "street_number",
+            "in": "query",
+            "description": "street number for availibility",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyProductsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/journey/configuration": {
+      "post": {
+        "operationId": "createJourney",
+        "summary": "createJourney",
+        "description": "Create a Journey",
+        "tags": [
+          "Journeys"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JourneyCreationRequest"
+              }
+            }
+          },
+          "description": "Payload"
+        },
+        "parameters": [
+          {
+            "name": "skipAutomation",
+            "in": "query",
+            "description": "skip creating an Automation (it takes Yn format \"true, yes, 1, y\")",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "Yn",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Journey"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateJourney",
+        "summary": "updateJourney",
+        "description": "Update a Journey",
+        "tags": [
+          "Journeys"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JourneyCreationRequest"
+              }
+            }
+          },
+          "description": "Payload"
+        },
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Success",
+            "headers": {
+              "X-Resource-Revisions": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Last revisions number of the updated resource"
+              }
+            }
+          },
+          "409": {
+            "description": "The Journey has been modified since your last read, please refresh it and try again"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchUpdateJourney",
+        "summary": "patchUpdateJourney",
+        "description": "Update a Journey (partially / patch). Support for nested properties updates (e.g. \"property[0].name\").",
+        "tags": [
+          "Journeys"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchUpdateJourneyRequest"
+              },
+              "example": {
+                "journeyId": "509cdffe-424f-457a-95c2-9708c304ce77",
+                "name": "New Journey Name",
+                "steps[0].uischema.elements[0].products": [
+                  "123456",
+                  "654321"
+                ]
+              }
+            }
+          },
+          "description": "Payload"
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/journey/configuration/search": {
+      "post": {
+        "operationId": "searchJourneys",
+        "summary": "searchJourneys",
+        "description": "Search Journeys",
+        "tags": [
+          "Journeys"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchJourneysQueryRequest"
+              }
+            }
+          },
+          "description": "Payload"
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchJourneysResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/journey/document:generate": {
+      "post": {
+        "operationId": "generateDocument",
+        "summary": "generateDocument",
+        "description": "Builds document generated from a template with journey values.\"\n\nSupported input document types:\n- .docx\n\nSupported output document types:\n- .pdf\n- .docx but limited to only text based variables\n\nUses [Document API](https://gitlab.com/e-pilot/product/file-management/document-api) to generate the document.\nUses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the document.\n",
+        "security": [
+          {},
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateDocumentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated document output",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateDocumentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/journey/configuration": {
+      "post": {
+        "operationId": "createJourneyV2",
+        "summary": "createJourneyV2",
+        "description": "Create a Journey",
+        "tags": [
+          "Journeys V2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JourneyCreationRequestV2"
+              }
+            }
+          },
+          "description": "Payload"
+        },
+        "parameters": [
+          {
+            "name": "skipAutomation",
+            "in": "query",
+            "description": "skip creating an Automation (it takes Yn format \"true, yes, 1, y\")",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "Yn",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateJourneyV2",
+        "summary": "updateJourneyV2",
+        "description": "Update a Journey",
+        "tags": [
+          "Journeys V2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JourneyCreationRequestV2"
+              }
+            }
+          },
+          "description": "Payload"
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchUpdateJourneyV2",
+        "summary": "patchUpdateJourneyV2",
+        "description": "Update a Journey (partially / patch). Support for nested properties updates (e.g. \"property[0].name\").",
+        "tags": [
+          "Journeys V2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchUpdateJourneyRequest"
+              },
+              "example": {
+                "journeyId": "509cdffe-424f-457a-95c2-9708c304ce77",
+                "name": "New Journey Name",
+                "steps[0].uischema.elements[0].products": [
+                  "123456",
+                  "654321"
+                ]
+              }
+            }
+          },
+          "description": "Payload"
+        },
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/journey/configuration/{id}": {
+      "get": {
+        "operationId": "getJourneyV2",
+        "summary": "getJourneyV2",
+        "description": "Get journey by id",
+        "security": [],
+        "tags": [
+          "Journeys V2"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeJourneyV2",
+        "summary": "removeJourneyV2",
+        "description": "Remove journey by id",
+        "tags": [
+          "Journeys V2"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/v1/journey/{id}/settings": {
+      "get": {
+        "operationId": "getSettingsForJourney",
+        "summary": "getSettingsForJourney",
+        "description": "Get settings related to the journey using journey ID.",
+        "tags": [
+          "Journeys"
+        ],
+        "security": [
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSettingsForJourney"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "journey not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/journey/button-options": {
+      "get": {
+        "operationId": "getButtonOptions",
+        "summary": "getButtonOptions",
+        "description": "Get button options from a csv file.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fileId",
+            "required": true,
+            "description": "file id to get button options from",
+            "schema": {
+              "type": "string",
+              "example": "535ef74a-dd66-4d01-94a9-725016e70d1c"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ButtonOption"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "journey not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetJourneysResponse": {
+        "type": "object"
+      },
+      "JourneyResponse": {
+        "type": "object",
+        "properties": {
+          "createdJourney": {
+            "$ref": "#/components/schemas/Journey"
+          }
+        }
+      },
+      "JourneyProductsResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "_schema": {
+              "type": "string"
+            },
+            "_title": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "_id": {
+              "type": "string"
+            },
+            "_org": {
+              "type": "string"
+            },
+            "code": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "feature": {
+              "type": "array"
+            },
+            "product_images": {
+              "type": "array"
+            },
+            "legal_footnote": {
+              "type": "string"
+            },
+            "product_downloads": {
+              "type": "array"
+            },
+            "price": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "PatchUpdateJourneyRequest": {
+        "type": "object",
+        "properties": {
+          "journeyId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+          },
+          "__lastModifiedAt": {
+            "type": "string",
+            "description": "If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey",
+            "nullable": true
+          }
+        },
+        "additionalProperties": true,
+        "description": "Patch request to update a journey (journey id is required) Support for nested properties (e.g. steps[0].uischema.elements[0].products) is supported.\n",
+        "required": [
+          "journeyId"
+        ]
+      },
+      "JourneyCreationRequest": {
+        "type": "object",
+        "properties": {
+          "journeyId": {
+            "type": "string"
+          },
+          "organizationId": {
+            "type": "string"
+          },
+          "brandId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "showStepName": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "title": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "subTitle": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "showStepSubtitle": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "showStepper": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "showStepperLabels": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "hideNextButton": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "name": {
+                  "type": "string"
+                },
+                "stepId": {
+                  "type": "string"
+                },
+                "schema": {},
+                "uischema": {},
+                "maxWidth": {
+                  "type": "string",
+                  "enum": [
+                    "small",
+                    "medium",
+                    "large",
+                    "extra large"
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "schema",
+                "uischema"
+              ]
+            }
+          },
+          "design": {
+            "type": "object",
+            "properties": {
+              "logoUrl": {
+                "type": "string",
+                "nullable": true
+              },
+              "theme": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "designTokens": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "theme"
+            ],
+            "additionalProperties": false
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "inject",
+                    "injectWithKey"
+                  ]
+                },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "journey",
+                    "step",
+                    "block"
+                  ]
+                },
+                "source": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "sourceType",
+                "source",
+                "target"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "logics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "autoGeneratedId": {
+                  "type": "string"
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "conditions",
+                "actions"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "contextSchema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "paramKey": {
+                  "type": "string"
+                },
+                "isRequired": {
+                  "type": "boolean"
+                },
+                "shouldLoadEntity": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "paramKey",
+                "type"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "journey_type": {
+            "type": "string",
+            "description": "Journey Template",
+            "example": "Sales template (Premium)"
+          },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "embedOptions": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "full-screen",
+                      "inline"
+                    ]
+                  },
+                  "lang": {
+                    "type": "string",
+                    "enum": [
+                      "de",
+                      "en",
+                      "fr"
+                    ]
+                  },
+                  "width": {
+                    "type": "string"
+                  },
+                  "topBar": {
+                    "type": "boolean"
+                  },
+                  "scrollToTop": {
+                    "type": "boolean"
+                  },
+                  "button": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "align": {
+                        "type": "string",
+                        "enum": [
+                          "left",
+                          "center",
+                          "right"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "safeModeAutomation": {
+                "type": "boolean"
+              },
+              "canary": {
+                "deprecated": true,
+                "description": "DEPRECATED - This API will return hardcoded value of false. Please note that this field is internal to epilot and should not be used by external clients. If you wish to get the canary flag, please use the /v1/journey/{id}/settings API.",
+                "type": "boolean"
+              },
+              "designId": {
+                "type": "string"
+              },
+              "templateId": {
+                "type": "string"
+              },
+              "entityId": {
+                "type": "string",
+                "nullable": true
+              },
+              "mappingsAutomationId": {
+                "type": "string"
+              },
+              "targetedCustomer": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string",
+                "nullable": true
+              },
+              "organizationSettings": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "boolean"
+                },
+                "nullable": true
+              },
+              "publicToken": {
+                "type": "string",
+                "nullable": true
+              },
+              "runtimeEntities": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "ORDER",
+                    "OPPORTUNITY"
+                  ]
+                }
+              },
+              "filePurposes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "entityTags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "addressSuggestionsFileUrl": {
+                "type": "string",
+                "nullable": true,
+                "deprecated": true,
+                "description": "@deprecated Use addressSuggestionsFileId instead"
+              },
+              "addressSuggestionsFileId": {
+                "type": "string",
+                "nullable": true
+              },
+              "useNewDesign": {
+                "type": "boolean"
+              },
+              "accessMode": {
+                "type": "string",
+                "enum": [
+                  "PUBLIC",
+                  "PRIVATE"
+                ]
+              },
+              "isPublished": {
+                "type": "boolean"
+              },
+              "status": {
+                "type": "string"
+              },
+              "isActive": {
+                "type": "boolean"
+              },
+              "savingProgress": {
+                "type": "object",
+                "properties": {
+                  "savingMode": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "local",
+                      "remote",
+                      "none"
+                    ]
+                  },
+                  "supportedVersion": {
+                    "type": "number"
+                  }
+                }
+              },
+              "thirdPartyCookies": {
+                "type": "boolean",
+                "description": "If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent."
+              }
+            },
+            "required": [
+              "designId"
+            ],
+            "additionalProperties": false
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "__lastModifiedAt": {
+            "type": "string",
+            "description": "If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey",
+            "nullable": true
+          }
+        },
+        "required": [
+          "organizationId",
+          "name",
+          "steps"
+        ],
+        "additionalProperties": true
+      },
+      "JourneyCreationRequestV2": {
+        "type": "object",
+        "properties": {
+          "journeyId": {
+            "type": "string"
+          },
+          "brandId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "showStepName": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "title": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "subTitle": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "showStepSubtitle": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "showStepper": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "showStepperLabels": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "hideNextButton": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "name": {
+                  "type": "string"
+                },
+                "stepId": {
+                  "type": "string"
+                },
+                "schema": {},
+                "uischema": {},
+                "maxWidth": {
+                  "type": "string",
+                  "enum": [
+                    "small",
+                    "medium",
+                    "large",
+                    "extra large"
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "schema",
+                "uischema"
+              ]
+            }
+          },
+          "design": {
+            "type": "object",
+            "properties": {
+              "logoUrl": {
+                "type": "string",
+                "nullable": true
+              },
+              "theme": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "designTokens": {
+                "type": "object"
+              }
+            },
+            "additionalProperties": false
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "inject",
+                    "injectWithKey"
+                  ]
+                },
+                "sourceType": {
+                  "type": "string",
+                  "enum": [
+                    "journey",
+                    "step",
+                    "block"
+                  ]
+                },
+                "source": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "sourceType",
+                "source",
+                "target"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "logics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "autoGeneratedId": {
+                  "type": "string"
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "conditions",
+                "actions"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "contextSchema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "paramKey": {
+                  "type": "string"
+                },
+                "isRequired": {
+                  "type": "boolean"
+                },
+                "shouldLoadEntity": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "paramKey",
+                "type"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "journey_type": {
+            "type": "string",
+            "description": "Journey Template",
+            "example": "Sales template (Premium)"
+          },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "embedOptions": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "full-screen",
+                      "inline"
+                    ]
+                  },
+                  "lang": {
+                    "type": "string",
+                    "enum": [
+                      "de",
+                      "en",
+                      "fr"
+                    ]
+                  },
+                  "width": {
+                    "type": "string"
+                  },
+                  "topBar": {
+                    "type": "boolean"
+                  },
+                  "scrollToTop": {
+                    "type": "boolean"
+                  },
+                  "button": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "align": {
+                        "type": "string",
+                        "enum": [
+                          "left",
+                          "center",
+                          "right"
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "safeModeAutomation": {
+                "type": "boolean"
+              },
+              "designId": {
+                "type": "string"
+              },
+              "entityId": {
+                "type": "string",
+                "nullable": true
+              },
+              "mappingsAutomationId": {
+                "type": "string"
+              },
+              "templateId": {
+                "type": "string"
+              },
+              "targetedCustomer": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string",
+                "nullable": true
+              },
+              "runtimeEntities": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "ORDER",
+                    "OPPORTUNITY"
+                  ]
+                }
+              },
+              "filePurposes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "entityTags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "addressSuggestionsFileUrl": {
+                "type": "string",
+                "nullable": true,
+                "deprecated": true,
+                "description": "@deprecated Use addressSuggestionsFileId instead"
+              },
+              "addressSuggestionsFileId": {
+                "type": "string",
+                "nullable": true
+              },
+              "useNewDesign": {
+                "type": "boolean"
+              },
+              "thirdPartyCookies": {
+                "type": "boolean",
+                "description": "If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent."
+              },
+              "accessMode": {
+                "type": "string",
+                "enum": [
+                  "PUBLIC",
+                  "PRIVATE"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest/Blueprint ID used to create/update the entity",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "steps"
+        ]
+      },
+      "SearchJourneysQueryRequest": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Lucene query syntax\nSee https://lucene.apache.org/core/2_9_4/queryparsersyntax.html ; https://www.elastic.co/guide/en/kibana/current/lucene-query.html\n",
+            "example": "_tags:*Flex*",
+            "default": "*"
+          },
+          "from": {
+            "type": "integer",
+            "description": "The offset of the first result to return.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-from-size.html\n",
+            "example": 0,
+            "default": 0
+          },
+          "size": {
+            "type": "integer",
+            "description": "The maximum number of results to return.\nSee https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-from-size.html\n",
+            "example": 25,
+            "default": 25
+          },
+          "sort": {
+            "type": "string",
+            "description": "The sort order. Follows Lucene syntax.\n",
+            "example": "_created_at:desc",
+            "default": "_created_at:desc"
+          }
+        }
+      },
+      "SearchJourneysResponse": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "number",
+            "description": "The total number of hits.\n",
+            "example": 1
+          },
+          "results": {
+            "type": "array",
+            "description": "The results.\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "Journey Entity ID",
+                  "format": "uuid",
+                  "example": "e0f8f8f8-f8f8-f8f8-f8f8-f8f8f8f8f8f8"
+                },
+                "_schema": {
+                  "type": "string",
+                  "description": "Entity Schema (journey always in this case)",
+                  "example": "journey"
+                },
+                "_title": {
+                  "type": "string",
+                  "description": "Journey Entity Title",
+                  "example": "Journey Entity Title"
+                },
+                "_org": {
+                  "type": "string",
+                  "description": "Organization ID",
+                  "example": "739224"
+                },
+                "_created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "example": "2020-01-01T00:00:00.000Z"
+                },
+                "_updated_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "example": "2020-01-01T00:00:00.000Z"
+                },
+                "_tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "example": "Flex"
+                  }
+                },
+                "_manifest": {
+                  "type": "array",
+                  "description": "Manifest ID used to create/update the entity",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                  }
+                },
+                "journey_name": {
+                  "type": "string",
+                  "description": "Journey Name",
+                  "example": "Journey Name"
+                },
+                "journey_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Journey config ID",
+                  "example": "de7df470-253e-11ed-9174-116b8a718c0a"
+                },
+                "journey_type": {
+                  "type": "string",
+                  "description": "Journey Template",
+                  "example": "Sales template"
+                },
+                "design": {
+                  "type": "string",
+                  "description": "Journey Design Name",
+                  "example": "Design EPILOT"
+                },
+                "created_by": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "User ID",
+                        "example": "12345"
+                      }
+                    }
+                  }
+                },
+                "journey_version": {
+                  "type": "string",
+                  "description": "Journey Version",
+                  "enum": [
+                    "Flex"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Journey": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/JourneyCreationRequest"
+          },
+          {
+            "$ref": "#/components/schemas/JourneyAuditInfo"
+          },
+          {
+            "$ref": "#/components/schemas/JourneyFeatureFlags"
+          }
+        ]
+      },
+      "JourneyFeatureFlags": {
+        "type": "object",
+        "properties": {
+          "featureFlags": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "JourneyAuditInfo": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "lastModifiedAt": {
+            "type": "string"
+          },
+          "deletedAt": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "revisions": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "createdAt",
+          "lastModifiedAt",
+          "version",
+          "revisions"
+        ]
+      },
+      "S3Reference": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "example": "document-api-prod"
+          },
+          "key": {
+            "type": "string",
+            "example": "uploads/my-template.pdf"
+          }
+        },
+        "required": [
+          "bucket",
+          "key"
+        ]
+      },
+      "TemplateSettings": {
+        "type": "object",
+        "description": "Template Settings for document generation",
+        "properties": {
+          "custom_margins": {
+            "description": "Custom margins for the document",
+            "type": "object",
+            "properties": {
+              "top": {
+                "description": "Top margin in cm",
+                "type": "number",
+                "example": 2.54
+              },
+              "bottom": {
+                "description": "Bottom margin in cm",
+                "type": "number",
+                "example": 2.54
+              }
+            }
+          },
+          "suggested_margins": {
+            "description": "Suggested margins for the document",
+            "type": "object",
+            "properties": {
+              "top": {
+                "description": "Top margin in cm",
+                "type": "number",
+                "example": 2.54
+              },
+              "bottom": {
+                "description": "Bottom margin in cm",
+                "type": "number",
+                "example": 2.54
+              }
+            }
+          },
+          "display_margin_guidelines": {
+            "description": "Display margin guidelines (applicable to partial generation only)",
+            "type": "boolean",
+            "example": true
+          },
+          "enable_data_table_margin_autofix": {
+            "description": "Enable data table margin autofix",
+            "type": "boolean",
+            "example": false
+          },
+          "template_with_datatable": {
+            "description": "A flag that indicates whether the template has 1 or more data tables in it",
+            "type": "boolean",
+            "example": false
+          },
+          "enabled_template_settings_persistence": {
+            "description": "Enables the persistance of template settings",
+            "type": "boolean",
+            "example": false
+          },
+          "misconfigured_margins": {
+            "description": "An indication that the page margins are misconfigured",
+            "type": "boolean",
+            "example": false
+          },
+          "file_entity_id": {
+            "description": "The file entity id, used when persisting a new template version with updated settings",
+            "type": "string",
+            "format": "uuid",
+            "example": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+          }
+        }
+      },
+      "GenerateDocumentResponse": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "job_status": {
+            "description": "Status of the job",
+            "type": "string",
+            "enum": [
+              "STARTED",
+              "PROCESSING",
+              "SUCCESS",
+              "FAILED"
+            ]
+          },
+          "message": {
+            "description": "A message explaining the progress",
+            "type": "string"
+          },
+          "pdf_output": {
+            "type": "object",
+            "properties": {
+              "preview_url": {
+                "description": "Pre-signed S3 GET URL for PDF preview",
+                "type": "string",
+                "example": "https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.pdf"
+              },
+              "output_document": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "description": "Generated document filename for PDF",
+                    "type": "string",
+                    "example": "my-template-OR-001.pdf"
+                  },
+                  "s3ref": {
+                    "$ref": "#/components/schemas/S3Reference"
+                  }
+                },
+                "example": {
+                  "s3ref": {
+                    "bucket": "document-api-preview-prod",
+                    "key": "preview/my-template.pdf"
+                  }
+                }
+              }
+            }
+          },
+          "docx_output": {
+            "type": "object",
+            "properties": {
+              "preview_url": {
+                "description": "Pre-signed S3 GET URL for DOCX preview",
+                "type": "string",
+                "example": "https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.docx"
+              },
+              "output_document": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "description": "Generated document filename for DOCX",
+                    "type": "string",
+                    "example": "my-template-OR-001.docx"
+                  },
+                  "s3ref": {
+                    "$ref": "#/components/schemas/S3Reference"
+                  }
+                },
+                "example": {
+                  "s3ref": {
+                    "bucket": "document-api-preview-prod",
+                    "key": "preview/my-template.docx"
+                  }
+                }
+              }
+            }
+          },
+          "variable_payload": {
+            "description": "List of variables and its corresponding replaced values from the document template",
+            "type": "object",
+            "properties": {
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "template_settings": {
+            "$ref": "#/components/schemas/TemplateSettings"
+          }
+        }
+      },
+      "GenerateDocumentRequest": {
+        "type": "object",
+        "properties": {
+          "file_id": {
+            "description": "Entity id for the template being used",
+            "type": "string",
+            "example": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+          },
+          "context_data": {
+            "description": "Custom values for variables in the template. Takes the higher precedence than others.",
+            "type": "object",
+            "properties": {
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "language": {
+            "description": "Language code for the document",
+            "type": "string",
+            "example": "de"
+          }
+        },
+        "required": [
+          "file_id",
+          "context_data"
+        ]
+      },
+      "GetSettingsForJourney": {
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "description": "ID of an organization in epilot platform",
+            "example": "739224"
+          },
+          "canary": {
+            "type": "boolean",
+            "description": "The canary flag controls update frequency of epilot application: when true, customers receive continuous updates; when false, they only get updates with new version releases.",
+            "example": true
+          }
+        }
+      },
+      "ButtonOption": {
+        "type": "object",
+        "description": "A single button option data",
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "Button Hidden Value",
+            "description": "The value of the button"
+          },
+          "label": {
+            "type": "string",
+            "example": "Button Label",
+            "description": "The label of the button"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Authorization Bearer Token - public access token / user token",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://journey-config.sls.epilot.io"
+    },
+    {
+      "url": "https://journey-config.sls.epilot.io"
+    }
+  ]
+}
