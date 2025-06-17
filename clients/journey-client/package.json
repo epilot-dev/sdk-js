@@ -1,0 +1,60 @@
+{
+  "name": "@epilot/journey-client",
+  "version": "0.3.11",
+  "description": "API Client for epilot Journey API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "vitest",
+    "typescript": "tsc",
+    "bundle-definition": "webpack",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/journey-config.yaml",
+    "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
+    "build": "npm run openapi && npm run typegen && npm run typescript && npm run bundle-definition",
+    "eslint": "../node_modules/.bin/eslint -c ../.eslintrc.yml",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "**/*.js",
+    "**/*.d.ts",
+    "!*.test.*",
+    "!**/*.test.*",
+    "!node_modules",
+    "!src",
+    "!*.config.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/epilot-dev/sdk-js",
+    "directory": "clients/ts-sam-client"
+  },
+  "keywords": [],
+  "author": "epilot GmbH",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "axios": "^1.6.5"
+  },
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "https-browserify": "^1.0.0",
+    "openapi-backend": "5.11.1",
+    "openapi-client-axios": "^7.5.1",
+    "stream-http": "^3.1.1",
+    "url": "^0.11.0",
+    "util": "^0.12.3"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^1.6.0",
+    "axios": "1.7.8",
+    "copy-webpack-plugin": "^7.0.0",
+    "json-loader": "^0.5.7",
+    "openapi-client-axios-typegen": "^7.5.1",
+    "ts-loader": "^8.3.0",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
