@@ -3179,6 +3179,12 @@ declare namespace Components {
              */
             is_dynamic_route?: boolean;
             /**
+             * Send the flag as true to delete the page
+             * example:
+             * false
+             */
+            is_deleted?: boolean;
+            /**
              * The id of the page
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
@@ -3257,6 +3263,12 @@ declare namespace Components {
              * false
              */
             is_dynamic_route?: boolean;
+            /**
+             * Send the flag as true to delete the page
+             * example:
+             * false
+             */
+            is_deleted?: boolean;
         }
         export interface PaymentWidget {
             id: string;

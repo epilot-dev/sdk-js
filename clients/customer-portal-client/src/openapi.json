@@ -10863,6 +10863,11 @@
             "type": "boolean",
             "description": "Whether the page is a dynamic route",
             "example": false
+          },
+          "is_deleted": {
+            "type": "boolean",
+            "description": "Send the flag as true to delete the page",
+            "example": false
           }
         }
       },
