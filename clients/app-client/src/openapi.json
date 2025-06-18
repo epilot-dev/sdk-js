@@ -1380,6 +1380,10 @@
             "schema": {
               "type": "object",
               "properties": {
+                "manifest_id": {
+                  "type": "string",
+                  "description": "ID of the manifest to use for this version"
+                },
                 "role_id": {
                   "nullable": true,
                   "type": "string",
@@ -1590,7 +1594,8 @@
         "enum": [
           "CUSTOM_JOURNEY_BLOCK",
           "PORTAL_EXTENSION",
-          "CUSTOM_FLOW_ACTION"
+          "CUSTOM_FLOW_ACTION",
+          "ERP_INFORM_TOOLKIT"
         ],
         "description": "Type of app component"
       },
@@ -1697,7 +1702,8 @@
               "mapping": {
                 "CUSTOM_JOURNEY_BLOCK": "#/components/schemas/JourneyBlockComponent",
                 "PORTAL_EXTENSION": "#/components/schemas/PortalExtensionComponent",
-                "CUSTOM_FLOW_ACTION": "#/components/schemas/CustomFlowActionComponent"
+                "CUSTOM_FLOW_ACTION": "#/components/schemas/CustomFlowActionComponent",
+                "ERP_INFORM_TOOLKIT": "#/components/schemas/ErpInformToolkitComponent"
               }
             },
             "oneOf": [
@@ -1709,6 +1715,9 @@
               },
               {
                 "$ref": "#/components/schemas/CustomFlowActionComponent"
+              },
+              {
+                "$ref": "#/components/schemas/ErpInformToolkitComponent"
               }
             ]
           }
@@ -1729,6 +1738,36 @@
           },
           "configuration": {
             "$ref": "#/components/schemas/JourneyBlockConfig"
+          }
+        }
+      },
+      "ErpInformToolkitComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "ERP_INFORM_TOOLKIT"
+            ]
+          },
+          "configuration": {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound",
+                  "outbound"
+                ]
+              }
+            }
           }
         }
       },
@@ -2420,6 +2459,9 @@
           "role": {
             "$ref": "#/components/schemas/Role"
           },
+          "blueprint_ref": {
+            "$ref": "#/components/schemas/BlueprintRef"
+          },
           "version_audit": {
             "readOnly": true,
             "allOf": [
@@ -2462,6 +2504,19 @@
               "type": "string",
               "description": "The resource the app can access"
             }
+          }
+        }
+      },
+      "BlueprintRef": {
+        "type": "object",
+        "properties": {
+          "manifest_id": {
+            "type": "string",
+            "description": "ID of the blueprint"
+          },
+          "job_id": {
+            "type": "string",
+            "description": "ID of the job that created the blueprint"
           }
         }
       },
@@ -2527,6 +2582,9 @@
           "role": {
             "type": "string",
             "description": "The name of the role the app can use to access APIs"
+          },
+          "blueprint_ref": {
+            "$ref": "#/components/schemas/BlueprintRef"
           },
           "installation_audit": {
             "readOnly": true,
@@ -2639,6 +2697,9 @@
           },
           "role": {
             "$ref": "#/components/schemas/Role"
+          },
+          "blueprint_ref": {
+            "$ref": "#/components/schemas/BlueprintRef"
           },
           "latest_version": {
             "type": "string",

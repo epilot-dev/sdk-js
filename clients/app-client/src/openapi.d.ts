@@ -81,6 +81,10 @@ declare namespace Components {
         }
         export interface PatchVersionRequest {
             /**
+             * ID of the manifest to use for this version
+             */
+            manifest_id?: string;
+            /**
              * Name of the role
              */
             role_id?: string | null;
@@ -225,7 +229,7 @@ declare namespace Components {
             surfaces?: {
                 [key: string]: any;
             };
-        } & (JourneyBlockComponent | PortalExtensionComponent | CustomFlowActionComponent);
+        } & (JourneyBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent);
         export interface BaseComponentCommon {
             /**
              * Unique identifier for the component
@@ -383,6 +387,16 @@ declare namespace Components {
          * How often the subscription is billed
          */
         export type BillingFrequency = "MONTHLY" | "QUARTERLY" | "YEARLY" | "CUSTOM";
+        export interface BlueprintRef {
+            /**
+             * ID of the blueprint
+             */
+            manifest_id?: string;
+            /**
+             * ID of the job that created the blueprint
+             */
+            job_id?: string;
+        }
         export interface BooleanArg {
             type?: "boolean";
         }
@@ -415,7 +429,7 @@ declare namespace Components {
         /**
          * Type of app component
          */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION";
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT";
         /**
          * Configuration of the published app
          */
@@ -552,6 +566,7 @@ declare namespace Components {
              */
             review_status?: "approved" | "rejected" | "pending";
             role?: Role;
+            blueprint_ref?: BlueprintRef;
             version_audit: {
                 /**
                  * Timestamp of the creation
@@ -725,6 +740,7 @@ declare namespace Components {
              */
             review_status?: "approved" | "rejected" | "pending";
             role?: Role;
+            blueprint_ref?: BlueprintRef;
             version_audit: {
                 /**
                  * Timestamp of the creation
@@ -809,6 +825,12 @@ declare namespace Components {
                     };
                 }[]
             ];
+        }
+        export interface ErpInformToolkitComponent {
+            component_type: "ERP_INFORM_TOOLKIT";
+            configuration: {
+                type: "inbound" | "outbound";
+            };
         }
         export interface EventsQuery {
             /**
@@ -948,6 +970,7 @@ declare namespace Components {
              * The name of the role the app can use to access APIs
              */
             role?: string;
+            blueprint_ref?: BlueprintRef;
             /**
              * Audit information for the app
              */
@@ -1230,6 +1253,7 @@ declare namespace Components {
              */
             version: string;
             role?: Role;
+            blueprint_ref?: BlueprintRef;
             /**
              * Latest version of the app
              */
@@ -2374,6 +2398,7 @@ export type BaseComponentCommon = Components.Schemas.BaseComponentCommon;
 export type BaseCustomActionConfig = Components.Schemas.BaseCustomActionConfig;
 export type BatchEventRequest = Components.Schemas.BatchEventRequest;
 export type BillingFrequency = Components.Schemas.BillingFrequency;
+export type BlueprintRef = Components.Schemas.BlueprintRef;
 export type BooleanArg = Components.Schemas.BooleanArg;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type ComponentType = Components.Schemas.ComponentType;
@@ -2383,6 +2408,7 @@ export type ConfigurationVersion = Components.Schemas.ConfigurationVersion;
 export type CustomFlowActionComponent = Components.Schemas.CustomFlowActionComponent;
 export type CustomFlowConfig = Components.Schemas.CustomFlowConfig;
 export type EnumArg = Components.Schemas.EnumArg;
+export type ErpInformToolkitComponent = Components.Schemas.ErpInformToolkitComponent;
 export type EventsQuery = Components.Schemas.EventsQuery;
 export type EventsQueryResponse = Components.Schemas.EventsQueryResponse;
 export type ExternalIntegrationCustomActionConfig = Components.Schemas.ExternalIntegrationCustomActionConfig;
