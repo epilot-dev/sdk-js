@@ -43,6 +43,57 @@
         "responses": {}
       }
     },
+    "/v1/campaign/{campaign_id}/portal:accept": {
+      "post": {
+        "operationId": "acceptPortal",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/portal:dismiss": {
+      "post": {
+        "operationId": "dismissPortal",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/automations:retrigger": {
+      "post": {
+        "operationId": "retriggerCampaignAutomations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/campaign:match": {
       "post": {
         "operationId": "matchCampaigns",
@@ -66,12 +117,81 @@
         },
         "responses": {}
       }
+    },
+    "/v1/campaign/{campaign_id}/recipient": {
+      "post": {
+        "operationId": "createRecipient",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/recipient/{recipient_id}": {
+      "patch": {
+        "operationId": "updateRecipient",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/RecipientIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/recipients": {
+      "get": {
+        "operationId": "getRecipients",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "name": "next",
+            "in": "query"
+          },
+          {
+            "name": "automation_status",
+            "in": "query"
+          },
+          {
+            "name": "portal_status",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
     "parameters": {
       "CampaignIdPathParam": {
         "name": "campaign_id",
+        "in": "path",
+        "required": true
+      },
+      "RecipientIdPathParam": {
+        "name": "recipient_id",
         "in": "path",
         "required": true
       }
@@ -97,6 +217,16 @@
           "application/json": {}
         }
       },
+      "RecipientResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "RecipientsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "MatchCampaignsResponse": {
         "content": {
           "application/json": {}
@@ -108,6 +238,11 @@
         }
       },
       "CampaignPortalsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "RetriggerAutomationsResponse": {
         "content": {
           "application/json": {}
         }

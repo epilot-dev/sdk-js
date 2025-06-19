@@ -15,9 +15,15 @@ declare namespace Components {
          * b8c01433-5556-4e2b-aad4-6f5348d1df84
          */
         Schemas.BaseUUID /* uuid */;
+        export type RecipientIdPathParam = /**
+         * example:
+         * b8c01433-5556-4e2b-aad4-6f5348d1df84
+         */
+        Schemas.BaseUUID /* uuid */;
     }
     export interface PathParameters {
         CampaignIdPathParam?: Parameters.CampaignIdPathParam;
+        RecipientIdPathParam?: Parameters.RecipientIdPathParam;
     }
     namespace Responses {
         export type CampaignPortalsResponse = {
@@ -89,9 +95,32 @@ declare namespace Components {
                 target: Schemas.Target;
             }[];
         }
+        export type RecipientResponse = Schemas.Recipient;
+        export interface RecipientsResponse {
+            results?: Schemas.Recipient[];
+            /**
+             * Cursor for next page of results
+             */
+            next?: string | null;
+        }
+        export interface RetriggerAutomationsResponse {
+            /**
+             * A confirmation message indicating the request was received and processed
+             */
+            message: string;
+            /**
+             * List of retriggering results
+             */
+            results: Schemas.RetriggerAutomationsResult[];
+        }
         export type ServerErrorResponse = Schemas.ServerError;
     }
     namespace Schemas {
+        export interface AutomationRecipientPayload {
+            automation_status: AutomationStatus;
+            automation_execution_id: string;
+        }
+        export type AutomationStatus = "pending" | "in_progress" | "success" | "failed" | "cancelled";
         /**
          * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
          */
@@ -136,6 +165,14 @@ declare namespace Components {
          * xHcOoJCa07eysJ1GaQeSb
          */
         export type BaseNanoID = string;
+        export interface BaseRecipientPayload {
+            entity_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            entity_schema: string;
+        }
         export interface BaseRelation {
             $relation?: {
                 entity_id?: /**
@@ -256,6 +293,40 @@ declare namespace Components {
              * 400
              */
             status: number;
+        };
+        export type CreateRecipientPayload = {
+            entity_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            entity_schema: string;
+            automation_status: AutomationStatus;
+            automation_execution_id: string;
+        } | {
+            entity_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            entity_schema: string;
+            portal_status: PortalStatus;
+            portal_state: {
+                [name: string]: any;
+            };
+        } | {
+            entity_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            entity_schema: string;
+            automation_status: AutomationStatus;
+            automation_execution_id: string;
+            portal_status: PortalStatus;
+            portal_state: {
+                [name: string]: any;
+            };
         };
         export interface ExecutionSummaryItem {
             execution_id?: string;
@@ -1312,6 +1383,59 @@ declare namespace Components {
                 BaseUUID /* uuid */?
             ];
         }
+        export interface PortalActionRequest {
+            /**
+             * The entity ID of the recipient to perform the action for.
+             */
+            recipient_id: string; // uuid
+        }
+        export interface PortalRecipientPayload {
+            portal_status: PortalStatus;
+            portal_state: {
+                [name: string]: any;
+            };
+        }
+        export type PortalStatus = "shown" | "not_shown" | "accepted" | "dismissed";
+        export interface Recipient {
+            entity_id?: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            entity_schema?: string;
+            name?: string;
+            automation_status?: AutomationStatus;
+            automation_execution_id?: string;
+            portal_status?: PortalStatus;
+            portal_state?: {
+                [name: string]: any;
+            };
+            updated_at?: string; // date-time
+        }
+        export interface RetriggerAutomationsRequest {
+            /**
+             * List of recipient IDs to retrigger automations for
+             */
+            recipient_ids: string /* uuid */[];
+        }
+        export interface RetriggerAutomationsResult {
+            /**
+             * The ID of the recipient
+             */
+            recipient_id: string; // uuid
+            /**
+             * The result of the retriggering operation
+             */
+            result: "success" | "failure" | "not_found" | "invalid_status";
+            /**
+             * The ID of the new automation execution (if successful)
+             */
+            execution_id?: string;
+            /**
+             * The error message if the operation failed
+             */
+            error?: string;
+        }
         export type ServerError = BaseError;
         export interface Target {
             /**
@@ -1343,9 +1467,36 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
+        export interface UpdateRecipientPayload {
+            automation_status?: AutomationStatus;
+            automation_execution_id?: string;
+            portal_status?: PortalStatus;
+            portal_state?: {
+                [name: string]: any;
+            };
+        }
     }
 }
 declare namespace Paths {
+    namespace AcceptPortal {
+        namespace Parameters {
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+        }
+        export type RequestBody = Components.Schemas.PortalActionRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.RecipientResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $409 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
     namespace ChangeCampaignStatus {
         namespace Parameters {
             export type CampaignId = /**
@@ -1360,6 +1511,43 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Responses.CampaignResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
+    namespace CreateRecipient {
+        namespace Parameters {
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+        }
+        export type RequestBody = Components.Schemas.CreateRecipientPayload;
+        namespace Responses {
+            export type $201 = Components.Responses.RecipientResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
+    namespace DismissPortal {
+        namespace Parameters {
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+        }
+        export type RequestBody = Components.Schemas.PortalActionRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.RecipientResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $409 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
@@ -1397,6 +1585,33 @@ declare namespace Paths {
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
+    namespace GetRecipients {
+        namespace Parameters {
+            export type AutomationStatus = Components.Schemas.AutomationStatus;
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+            export type Limit = number;
+            export type Next = string;
+            export type PortalStatus = Components.Schemas.PortalStatus;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            next?: Parameters.Next;
+            automation_status?: Parameters.AutomationStatus;
+            portal_status?: Parameters.PortalStatus;
+        }
+        namespace Responses {
+            export type $200 = Components.Responses.RecipientsResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
     namespace MatchCampaigns {
         export type RequestBody = Components.Schemas.MatchCampaignParams;
         namespace Responses {
@@ -1409,6 +1624,49 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.MatchTargetParams;
         namespace Responses {
             export type $200 = Components.Responses.MatchTargetsResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
+    namespace RetriggerCampaignAutomations {
+        namespace Parameters {
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+        }
+        export type RequestBody = Components.Schemas.RetriggerAutomationsRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.RetriggerAutomationsResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $404 = Components.Responses.ServerErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
+    namespace UpdateRecipient {
+        namespace Parameters {
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+            export type RecipientId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+            recipient_id: Parameters.RecipientId;
+        }
+        export type RequestBody = Components.Schemas.UpdateRecipientPayload;
+        namespace Responses {
+            export type $200 = Components.Responses.RecipientResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
         }
@@ -1454,6 +1712,47 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCampaignPortals.Responses.$200>
   /**
+   * acceptPortal - Accept a portal interaction for a campaign recipient
+   * 
+   * Marks a portal interaction as 'accepted' for a specific campaign recipient.
+   * This is only allowed if the recipient's current portal status is 'shown'.
+   * 
+   */
+  'acceptPortal'(
+    parameters?: Parameters<Paths.AcceptPortal.PathParameters> | null,
+    data?: Paths.AcceptPortal.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AcceptPortal.Responses.$200>
+  /**
+   * dismissPortal - Dismiss a portal interaction for a campaign recipient
+   * 
+   * Marks a portal interaction as 'dismissed' for a specific campaign recipient.
+   * This is only allowed if the recipient's current portal status is 'shown'.
+   * 
+   */
+  'dismissPortal'(
+    parameters?: Parameters<Paths.DismissPortal.PathParameters> | null,
+    data?: Paths.DismissPortal.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DismissPortal.Responses.$200>
+  /**
+   * retriggerCampaignAutomations - Retrigger automations for campaign recipients
+   * 
+   * Retrigger automation executions for specific campaign recipients that have failed.
+   * 
+   * This endpoint starts new automation executions for the specified recipients
+   * using the campaign's associated automation flow. Only recipients with
+   * automation_status 'failed' will be processed. Recipients with other statuses
+   * (success, pending, in_progress, cancelled) will be skipped to prevent
+   * accidentally retriggering successful or ongoing automations.
+   * 
+   */
+  'retriggerCampaignAutomations'(
+    parameters?: Parameters<Paths.RetriggerCampaignAutomations.PathParameters> | null,
+    data?: Paths.RetriggerCampaignAutomations.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RetriggerCampaignAutomations.Responses.$200>
+  /**
    * matchCampaigns - Match campaigns
    * 
    * Match campaigns based on target entities.
@@ -1477,6 +1776,36 @@ export interface OperationMethods {
     data?: Paths.MatchTargets.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MatchTargets.Responses.$200>
+  /**
+   * createRecipient - Create a recipient associated with a campaign
+   * 
+   * Creates a new recipient associated with a campaign.
+   */
+  'createRecipient'(
+    parameters?: Parameters<Paths.CreateRecipient.PathParameters> | null,
+    data?: Paths.CreateRecipient.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateRecipient.Responses.$201>
+  /**
+   * updateRecipient - Update a recipient
+   * 
+   * Updates a recipient's attributes.
+   */
+  'updateRecipient'(
+    parameters?: Parameters<Paths.UpdateRecipient.PathParameters> | null,
+    data?: Paths.UpdateRecipient.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateRecipient.Responses.$200>
+  /**
+   * getRecipients - Get campaign recipients
+   * 
+   * Get a paginated list of recipients for a campaign.
+   */
+  'getRecipients'(
+    parameters?: Parameters<Paths.GetRecipients.QueryParameters & Paths.GetRecipients.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRecipients.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1522,6 +1851,53 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCampaignPortals.Responses.$200>
   }
+  ['/v1/campaign/{campaign_id}/portal:accept']: {
+    /**
+     * acceptPortal - Accept a portal interaction for a campaign recipient
+     * 
+     * Marks a portal interaction as 'accepted' for a specific campaign recipient.
+     * This is only allowed if the recipient's current portal status is 'shown'.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.AcceptPortal.PathParameters> | null,
+      data?: Paths.AcceptPortal.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AcceptPortal.Responses.$200>
+  }
+  ['/v1/campaign/{campaign_id}/portal:dismiss']: {
+    /**
+     * dismissPortal - Dismiss a portal interaction for a campaign recipient
+     * 
+     * Marks a portal interaction as 'dismissed' for a specific campaign recipient.
+     * This is only allowed if the recipient's current portal status is 'shown'.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.DismissPortal.PathParameters> | null,
+      data?: Paths.DismissPortal.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DismissPortal.Responses.$200>
+  }
+  ['/v1/campaign/{campaign_id}/automations:retrigger']: {
+    /**
+     * retriggerCampaignAutomations - Retrigger automations for campaign recipients
+     * 
+     * Retrigger automation executions for specific campaign recipients that have failed.
+     * 
+     * This endpoint starts new automation executions for the specified recipients
+     * using the campaign's associated automation flow. Only recipients with
+     * automation_status 'failed' will be processed. Recipients with other statuses
+     * (success, pending, in_progress, cancelled) will be skipped to prevent
+     * accidentally retriggering successful or ongoing automations.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.RetriggerCampaignAutomations.PathParameters> | null,
+      data?: Paths.RetriggerCampaignAutomations.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RetriggerCampaignAutomations.Responses.$200>
+  }
   ['/v1/campaign:match']: {
     /**
      * matchCampaigns - Match campaigns
@@ -1550,15 +1926,54 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MatchTargets.Responses.$200>
   }
+  ['/v1/campaign/{campaign_id}/recipient']: {
+    /**
+     * createRecipient - Create a recipient associated with a campaign
+     * 
+     * Creates a new recipient associated with a campaign.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateRecipient.PathParameters> | null,
+      data?: Paths.CreateRecipient.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateRecipient.Responses.$201>
+  }
+  ['/v1/campaign/{campaign_id}/recipient/{recipient_id}']: {
+    /**
+     * updateRecipient - Update a recipient
+     * 
+     * Updates a recipient's attributes.
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateRecipient.PathParameters> | null,
+      data?: Paths.UpdateRecipient.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateRecipient.Responses.$200>
+  }
+  ['/v1/campaign/{campaign_id}/recipients']: {
+    /**
+     * getRecipients - Get campaign recipients
+     * 
+     * Get a paginated list of recipients for a campaign.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetRecipients.QueryParameters & Paths.GetRecipients.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRecipients.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AutomationRecipientPayload = Components.Schemas.AutomationRecipientPayload;
+export type AutomationStatus = Components.Schemas.AutomationStatus;
 export type BaseEntityAcl = Components.Schemas.BaseEntityAcl;
 export type BaseEntityOwner = Components.Schemas.BaseEntityOwner;
 export type BaseError = Components.Schemas.BaseError;
 export type BaseNanoID = Components.Schemas.BaseNanoID;
+export type BaseRecipientPayload = Components.Schemas.BaseRecipientPayload;
 export type BaseRelation = Components.Schemas.BaseRelation;
 export type BaseSystemFields = Components.Schemas.BaseSystemFields;
 export type BaseSystemFieldsRequired = Components.Schemas.BaseSystemFieldsRequired;
@@ -1568,9 +1983,17 @@ export type BaseUUID = Components.Schemas.BaseUUID;
 export type Campaign = Components.Schemas.Campaign;
 export type CampaignStatus = Components.Schemas.CampaignStatus;
 export type ClientError = Components.Schemas.ClientError;
+export type CreateRecipientPayload = Components.Schemas.CreateRecipientPayload;
 export type ExecutionSummaryItem = Components.Schemas.ExecutionSummaryItem;
 export type JobStatus = Components.Schemas.JobStatus;
 export type MatchCampaignParams = Components.Schemas.MatchCampaignParams;
 export type MatchTargetParams = Components.Schemas.MatchTargetParams;
+export type PortalActionRequest = Components.Schemas.PortalActionRequest;
+export type PortalRecipientPayload = Components.Schemas.PortalRecipientPayload;
+export type PortalStatus = Components.Schemas.PortalStatus;
+export type Recipient = Components.Schemas.Recipient;
+export type RetriggerAutomationsRequest = Components.Schemas.RetriggerAutomationsRequest;
+export type RetriggerAutomationsResult = Components.Schemas.RetriggerAutomationsResult;
 export type ServerError = Components.Schemas.ServerError;
 export type Target = Components.Schemas.Target;
+export type UpdateRecipientPayload = Components.Schemas.UpdateRecipientPayload;
