@@ -36,39 +36,52 @@
     }
   ],
   "paths": {
-    "/v1/public/.well-known/public-key": {
+    "/v1/public/app/{appId}/components/{componentId}": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the app configuration to install"
+        },
+        {
+          "name": "componentId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the component to retrieve"
+        }
+      ],
       "get": {
-        "security": [],
-        "summary": "getPublicKey",
-        "operationId": "getPublicKey",
-        "description": "Retrieve the public key for verifying signatures",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "summary": "getPublicFacingComponent",
+        "description": "Retrieve public facing components for an installed app",
+        "operationId": "getPublicFacingComponent",
         "tags": [
-          "App Configuration"
+          "App Installation"
         ],
         "responses": {
           "200": {
-            "description": "Public key for signature verification",
+            "description": "Successful response with public app component details",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "algorithm": {
-                      "type": "string",
-                      "example": "rsa-sha256"
-                    },
-                    "public_key": {
-                      "type": "string",
-                      "description": "PEM-formatted RSA public key"
-                    },
-                    "issuer": {
-                      "type": "string",
-                      "example": "epilot"
-                    }
-                  }
+                  "$ref": "#/components/schemas/BaseComponent"
                 }
               }
             }
+          },
+          "404": {
+            "description": "App Installation not found"
           }
         }
       }

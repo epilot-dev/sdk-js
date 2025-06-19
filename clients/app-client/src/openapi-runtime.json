@@ -10,9 +10,23 @@
     }
   ],
   "paths": {
-    "/v1/public/.well-known/public-key": {
+    "/v1/public/app/{appId}/components/{componentId}": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the app configuration to install"
+        },
+        {
+          "name": "componentId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the component to retrieve"
+        }
+      ],
       "get": {
-        "operationId": "getPublicKey",
+        "operationId": "getPublicFacingComponent",
         "responses": {}
       }
     },

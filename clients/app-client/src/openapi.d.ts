@@ -1536,23 +1536,10 @@ declare namespace Paths {
             }
         }
     }
-    namespace GetPublicKey {
+    namespace GetPublicFacingComponent {
         namespace Responses {
-            export interface $200 {
-                /**
-                 * example:
-                 * rsa-sha256
-                 */
-                algorithm?: string;
-                /**
-                 * PEM-formatted RSA public key
-                 */
-                public_key?: string;
-                /**
-                 * example:
-                 * epilot
-                 */
-                issuer?: string;
+            export type $200 = Components.Schemas.BaseComponent;
+            export interface $404 {
             }
         }
     }
@@ -1799,20 +1786,30 @@ declare namespace Paths {
             appId: Parameters.AppId;
         }
     }
+    namespace V1PublicApp$AppIdComponents$ComponentId {
+        namespace Parameters {
+            export type AppId = string;
+            export type ComponentId = string;
+        }
+        export interface PathParameters {
+            appId: Parameters.AppId;
+            componentId: Parameters.ComponentId;
+        }
+    }
 }
 
 
 export interface OperationMethods {
   /**
-   * getPublicKey - getPublicKey
+   * getPublicFacingComponent - getPublicFacingComponent
    * 
-   * Retrieve the public key for verifying signatures
+   * Retrieve public facing components for an installed app
    */
-  'getPublicKey'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+  'getPublicFacingComponent'(
+    parameters?: Parameters<Paths.V1PublicApp$AppIdComponents$ComponentId.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetPublicKey.Responses.$200>
+  ): OperationResponse<Paths.GetPublicFacingComponent.Responses.$200>
   /**
    * listConfigurations - listConfigurations
    * 
@@ -2077,17 +2074,17 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
-  ['/v1/public/.well-known/public-key']: {
+  ['/v1/public/app/{appId}/components/{componentId}']: {
     /**
-     * getPublicKey - getPublicKey
+     * getPublicFacingComponent - getPublicFacingComponent
      * 
-     * Retrieve the public key for verifying signatures
+     * Retrieve public facing components for an installed app
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.V1PublicApp$AppIdComponents$ComponentId.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetPublicKey.Responses.$200>
+    ): OperationResponse<Paths.GetPublicFacingComponent.Responses.$200>
   }
   ['/v1/app-configurations']: {
     /**
