@@ -45,7 +45,7 @@ function isFreshTimestamp(webhookTimestamp: string) {
 
 export async function getEpilotPublicKey(): Promise<string | null> {
   if (!cachedPublicKey) {
-    const response = await fetch('https://app.sls.epilot.io/v1/public/.well-known/public-key');
+    const response = await fetch('https://cdn.app.sls.epilot.io/v1/.well-known/public-key');
     if (!response.ok) return null;
     const json = (await response.json()) as PublicKey;
     cachedPublicKey = json.public_key;

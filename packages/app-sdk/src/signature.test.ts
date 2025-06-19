@@ -16,7 +16,7 @@ vi.mock('node:crypto', async () => {
 });
 
 const server = setupServer(
-  http.get('https://app.sls.epilot.io/v1/public/.well-known/public-key', () => {
+  http.get('https://cdn.app.sls.epilot.io/v1/.well-known/public-key', () => {
     return HttpResponse.json({
       algorithm: 'ed25519',
       issuer: 'epilot',
