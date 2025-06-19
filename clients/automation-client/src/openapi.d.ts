@@ -792,6 +792,14 @@ declare namespace Components {
              * eyJraWQiOiJrZXkifQ==
              */
             ResumeToken;
+            trigger_context?: /**
+             * Additional contextual data for a bulk trigger automation. This would normally include additional entity IDs you'd need after a listener picks up an event.
+             * example:
+             * {
+             *   "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+             * }
+             */
+            TriggerContext;
             /**
              * Version of the flow
              * example:
@@ -972,6 +980,14 @@ declare namespace Components {
              * Time when the bulk trigger automation executions job was approved
              */
             approved_at?: string; // date-time
+            trigger_context?: /**
+             * Additional contextual data for a bulk trigger automation. This would normally include additional entity IDs you'd need after a listener picks up an event.
+             * example:
+             * {
+             *   "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+             * }
+             */
+            TriggerContext;
             /**
              * Task token to approve/cancel the bulk automation job
              * example:
@@ -1049,6 +1065,14 @@ declare namespace Components {
              */
             AutomationFlowId;
             entities_refs: EntityRef[];
+            trigger_context?: /**
+             * Additional contextual data for a bulk trigger automation. This would normally include additional entity IDs you'd need after a listener picks up an event.
+             * example:
+             * {
+             *   "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+             * }
+             */
+            TriggerContext;
         } | {
             flow_id: /**
              * ID of the Automation Flow
@@ -1057,6 +1081,14 @@ declare namespace Components {
              */
             AutomationFlowId;
             entities_query: string;
+            trigger_context?: /**
+             * Additional contextual data for a bulk trigger automation. This would normally include additional entity IDs you'd need after a listener picks up an event.
+             * example:
+             * {
+             *   "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+             * }
+             */
+            TriggerContext;
         } | {
             flow_id: /**
              * ID of the Automation Flow
@@ -1083,6 +1115,14 @@ declare namespace Components {
              * ]
              */
             EntitySearchFilter;
+            trigger_context?: /**
+             * Additional contextual data for a bulk trigger automation. This would normally include additional entity IDs you'd need after a listener picks up an event.
+             * example:
+             * {
+             *   "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+             * }
+             */
+            TriggerContext;
         };
         /**
          * A reason for cancelling a flow execution
@@ -3019,6 +3059,16 @@ declare namespace Components {
             comparison: Comparison;
             value?: string | number | string[] | number[];
         }
+        /**
+         * Additional contextual data for a bulk trigger automation. This would normally include additional entity IDs you'd need after a listener picks up an event.
+         * example:
+         * {
+         *   "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+         * }
+         */
+        export interface TriggerContext {
+            [name: string]: string;
+        }
         export interface TriggerEventEntityActivity {
             type?: "entity_activity";
             /**
@@ -4395,6 +4445,7 @@ export type SetValueMapper = Components.Schemas.SetValueMapper;
 export type StartExecutionRequest = Components.Schemas.StartExecutionRequest;
 export type SuffixCondition = Components.Schemas.SuffixCondition;
 export type TriggerCondition = Components.Schemas.TriggerCondition;
+export type TriggerContext = Components.Schemas.TriggerContext;
 export type TriggerEventEntityActivity = Components.Schemas.TriggerEventEntityActivity;
 export type TriggerEventEntityOperation = Components.Schemas.TriggerEventEntityOperation;
 export type TriggerEventFlowAutomationTask = Components.Schemas.TriggerEventFlowAutomationTask;

@@ -574,7 +574,10 @@
                     "entity_schema": "opportunity",
                     "entity_id": "b35a6c51-2a15-4ef1-9623-20db37b0744f"
                   }
-                ]
+                ],
+                "trigger_context": {
+                  "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+                }
               }
             }
           }
@@ -2930,6 +2933,9 @@
           "resume_token": {
             "$ref": "#/components/schemas/ResumeToken"
           },
+          "trigger_context": {
+            "$ref": "#/components/schemas/TriggerContext"
+          },
           "version": {
             "type": "number",
             "description": "Version of the flow",
@@ -3232,13 +3238,15 @@
                 "items": {
                   "$ref": "#/components/schemas/EntityRef"
                 }
+              },
+              "trigger_context": {
+                "$ref": "#/components/schemas/TriggerContext"
               }
             },
             "required": [
               "flow_id",
               "entities_refs"
-            ],
-            "additionalProperties": false
+            ]
           },
           {
             "type": "object",
@@ -3248,13 +3256,15 @@
               },
               "entities_query": {
                 "type": "string"
+              },
+              "trigger_context": {
+                "$ref": "#/components/schemas/TriggerContext"
               }
             },
             "required": [
               "flow_id",
               "entities_query"
-            ],
-            "additionalProperties": false
+            ]
           },
           {
             "type": "object",
@@ -3264,13 +3274,15 @@
               },
               "entities_filter": {
                 "$ref": "#/components/schemas/EntitySearchFilter"
+              },
+              "trigger_context": {
+                "$ref": "#/components/schemas/TriggerContext"
               }
             },
             "required": [
               "flow_id",
               "entities_filter"
-            ],
-            "additionalProperties": false
+            ]
           }
         ]
       },
@@ -3342,6 +3354,9 @@
             "type": "string",
             "description": "Time when the bulk trigger automation executions job was approved",
             "format": "date-time"
+          },
+          "trigger_context": {
+            "$ref": "#/components/schemas/TriggerContext"
           },
           "task_token": {
             "type": "string",
@@ -3477,6 +3492,16 @@
       "OrganizationId": {
         "type": "string",
         "example": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74"
+      },
+      "TriggerContext": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "Additional contextual data for a bulk trigger automation. This would normally include additional entity IDs you'd need after a listener picks up an event.",
+        "example": {
+          "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        }
       },
       "AutomationTrigger": {
         "type": "object",
