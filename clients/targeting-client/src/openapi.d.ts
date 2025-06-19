@@ -1415,6 +1415,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * changeCampaignStatus - Change the status of a campaign
@@ -1552,6 +1553,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type BaseEntityAcl = Components.Schemas.BaseEntityAcl;
 export type BaseEntityOwner = Components.Schemas.BaseEntityOwner;
