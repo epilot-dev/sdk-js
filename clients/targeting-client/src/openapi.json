@@ -131,94 +131,6 @@
         }
       }
     },
-    "/v1/campaign/{campaign_id}/portal:accept": {
-      "post": {
-        "operationId": "acceptPortal",
-        "summary": "Accept a portal interaction for a campaign recipient",
-        "description": "Marks a portal interaction as 'accepted' for a specific campaign recipient.\nThis is only allowed if the recipient's current portal status is 'shown'.\n",
-        "tags": [
-          "Campaign Recipient"
-        ],
-        "security": [
-          {
-            "EpilotAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/CampaignIdPathParam"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PortalActionRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/RecipientResponse"
-          },
-          "400": {
-            "$ref": "#/components/responses/ClientErrorResponse"
-          },
-          "409": {
-            "$ref": "#/components/responses/ClientErrorResponse"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerErrorResponse"
-          }
-        }
-      }
-    },
-    "/v1/campaign/{campaign_id}/portal:dismiss": {
-      "post": {
-        "operationId": "dismissPortal",
-        "summary": "Dismiss a portal interaction for a campaign recipient",
-        "description": "Marks a portal interaction as 'dismissed' for a specific campaign recipient.\nThis is only allowed if the recipient's current portal status is 'shown'.\n",
-        "tags": [
-          "Campaign Recipient"
-        ],
-        "security": [
-          {
-            "EpilotAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/CampaignIdPathParam"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PortalActionRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/RecipientResponse"
-          },
-          "400": {
-            "$ref": "#/components/responses/ClientErrorResponse"
-          },
-          "409": {
-            "$ref": "#/components/responses/ClientErrorResponse"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerErrorResponse"
-          }
-        }
-      }
-    },
     "/v1/campaign/{campaign_id}/automations:retrigger": {
       "post": {
         "operationId": "retriggerCampaignAutomations",
@@ -412,6 +324,56 @@
             "$ref": "#/components/responses/RecipientResponse"
           },
           "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/campaign/{campaign_id}/recipient/{recipient_id}/portal:status": {
+      "patch": {
+        "operationId": "updateRecipientPortalStatus",
+        "summary": "Update portal status for a campaign recipient",
+        "description": "Updates the portal status for a specific campaign recipient.\nThe portal_status_updated_at timestamp is automatically set when the status changes.\n\nStatus transition rules:\n- From 'delivered': can change to 'seen', 'accepted', or 'dismissed'\n- From 'seen': can change to 'accepted' or 'dismissed'\n- From 'accepted' or 'dismissed': cannot be changed (final states)\n",
+        "tags": [
+          "Campaign Recipient"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/RecipientIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePortalStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RecipientResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "409": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
           "500": {
@@ -933,8 +895,8 @@
       "PortalStatus": {
         "type": "string",
         "enum": [
-          "shown",
-          "not_shown",
+          "delivered",
+          "seen",
           "accepted",
           "dismissed"
         ]
@@ -959,6 +921,10 @@
           },
           "portal_status": {
             "$ref": "#/components/schemas/PortalStatus"
+          },
+          "portal_status_updated_at": {
+            "type": "string",
+            "format": "date-time"
           },
           "portal_state": {
             "type": "object",
@@ -1012,8 +978,7 @@
           }
         },
         "required": [
-          "portal_status",
-          "portal_state"
+          "portal_status"
         ]
       },
       "CreateRecipientPayload": {
@@ -1119,17 +1084,15 @@
           "result"
         ]
       },
-      "PortalActionRequest": {
+      "UpdatePortalStatusRequest": {
         "type": "object",
         "properties": {
-          "recipient_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "The entity ID of the recipient to perform the action for."
+          "status": {
+            "$ref": "#/components/schemas/PortalStatus"
           }
         },
         "required": [
-          "recipient_id"
+          "status"
         ]
       }
     },

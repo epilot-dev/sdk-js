@@ -43,40 +43,6 @@
         "responses": {}
       }
     },
-    "/v1/campaign/{campaign_id}/portal:accept": {
-      "post": {
-        "operationId": "acceptPortal",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/CampaignIdPathParam"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/campaign/{campaign_id}/portal:dismiss": {
-      "post": {
-        "operationId": "dismissPortal",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/CampaignIdPathParam"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
     "/v1/campaign/{campaign_id}/automations:retrigger": {
       "post": {
         "operationId": "retriggerCampaignAutomations",
@@ -138,6 +104,26 @@
     "/v1/campaign/{campaign_id}/recipient/{recipient_id}": {
       "patch": {
         "operationId": "updateRecipient",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/RecipientIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/recipient/{recipient_id}/portal:status": {
+      "patch": {
+        "operationId": "updateRecipientPortalStatus",
         "parameters": [
           {
             "$ref": "#/components/parameters/CampaignIdPathParam"

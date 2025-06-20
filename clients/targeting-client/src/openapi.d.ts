@@ -311,7 +311,7 @@ declare namespace Components {
             BaseUUID /* uuid */;
             entity_schema: string;
             portal_status: PortalStatus;
-            portal_state: {
+            portal_state?: {
                 [name: string]: any;
             };
         } | {
@@ -324,7 +324,7 @@ declare namespace Components {
             automation_status: AutomationStatus;
             automation_execution_id: string;
             portal_status: PortalStatus;
-            portal_state: {
+            portal_state?: {
                 [name: string]: any;
             };
         };
@@ -1383,19 +1383,13 @@ declare namespace Components {
                 BaseUUID /* uuid */?
             ];
         }
-        export interface PortalActionRequest {
-            /**
-             * The entity ID of the recipient to perform the action for.
-             */
-            recipient_id: string; // uuid
-        }
         export interface PortalRecipientPayload {
             portal_status: PortalStatus;
-            portal_state: {
+            portal_state?: {
                 [name: string]: any;
             };
         }
-        export type PortalStatus = "shown" | "not_shown" | "accepted" | "dismissed";
+        export type PortalStatus = "delivered" | "seen" | "accepted" | "dismissed";
         export interface Recipient {
             entity_id?: /**
              * example:
@@ -1407,6 +1401,7 @@ declare namespace Components {
             automation_status?: AutomationStatus;
             automation_execution_id?: string;
             portal_status?: PortalStatus;
+            portal_status_updated_at?: string; // date-time
             portal_state?: {
                 [name: string]: any;
             };
@@ -1467,6 +1462,9 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
+        export interface UpdatePortalStatusRequest {
+            status: PortalStatus;
+        }
         export interface UpdateRecipientPayload {
             automation_status?: AutomationStatus;
             automation_execution_id?: string;
@@ -1478,25 +1476,6 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
-    namespace AcceptPortal {
-        namespace Parameters {
-            export type CampaignId = /**
-             * example:
-             * b8c01433-5556-4e2b-aad4-6f5348d1df84
-             */
-            Components.Schemas.BaseUUID /* uuid */;
-        }
-        export interface PathParameters {
-            campaign_id: Parameters.CampaignId;
-        }
-        export type RequestBody = Components.Schemas.PortalActionRequest;
-        namespace Responses {
-            export type $200 = Components.Responses.RecipientResponse;
-            export type $400 = Components.Responses.ClientErrorResponse;
-            export type $409 = Components.Responses.ClientErrorResponse;
-            export type $500 = Components.Responses.ServerErrorResponse;
-        }
-    }
     namespace ChangeCampaignStatus {
         namespace Parameters {
             export type CampaignId = /**
@@ -1529,25 +1508,6 @@ declare namespace Paths {
         namespace Responses {
             export type $201 = Components.Responses.RecipientResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
-            export type $500 = Components.Responses.ServerErrorResponse;
-        }
-    }
-    namespace DismissPortal {
-        namespace Parameters {
-            export type CampaignId = /**
-             * example:
-             * b8c01433-5556-4e2b-aad4-6f5348d1df84
-             */
-            Components.Schemas.BaseUUID /* uuid */;
-        }
-        export interface PathParameters {
-            campaign_id: Parameters.CampaignId;
-        }
-        export type RequestBody = Components.Schemas.PortalActionRequest;
-        namespace Responses {
-            export type $200 = Components.Responses.RecipientResponse;
-            export type $400 = Components.Responses.ClientErrorResponse;
-            export type $409 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
@@ -1671,6 +1631,32 @@ declare namespace Paths {
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
+    namespace UpdateRecipientPortalStatus {
+        namespace Parameters {
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+            export type RecipientId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+            recipient_id: Parameters.RecipientId;
+        }
+        export type RequestBody = Components.Schemas.UpdatePortalStatusRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.RecipientResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $404 = Components.Responses.ClientErrorResponse;
+            export type $409 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
 }
 
 
@@ -1711,30 +1697,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCampaignPortals.Responses.$200>
-  /**
-   * acceptPortal - Accept a portal interaction for a campaign recipient
-   * 
-   * Marks a portal interaction as 'accepted' for a specific campaign recipient.
-   * This is only allowed if the recipient's current portal status is 'shown'.
-   * 
-   */
-  'acceptPortal'(
-    parameters?: Parameters<Paths.AcceptPortal.PathParameters> | null,
-    data?: Paths.AcceptPortal.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.AcceptPortal.Responses.$200>
-  /**
-   * dismissPortal - Dismiss a portal interaction for a campaign recipient
-   * 
-   * Marks a portal interaction as 'dismissed' for a specific campaign recipient.
-   * This is only allowed if the recipient's current portal status is 'shown'.
-   * 
-   */
-  'dismissPortal'(
-    parameters?: Parameters<Paths.DismissPortal.PathParameters> | null,
-    data?: Paths.DismissPortal.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DismissPortal.Responses.$200>
   /**
    * retriggerCampaignAutomations - Retrigger automations for campaign recipients
    * 
@@ -1797,6 +1759,23 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateRecipient.Responses.$200>
   /**
+   * updateRecipientPortalStatus - Update portal status for a campaign recipient
+   * 
+   * Updates the portal status for a specific campaign recipient.
+   * The portal_status_updated_at timestamp is automatically set when the status changes.
+   * 
+   * Status transition rules:
+   * - From 'delivered': can change to 'seen', 'accepted', or 'dismissed'
+   * - From 'seen': can change to 'accepted' or 'dismissed'
+   * - From 'accepted' or 'dismissed': cannot be changed (final states)
+   * 
+   */
+  'updateRecipientPortalStatus'(
+    parameters?: Parameters<Paths.UpdateRecipientPortalStatus.PathParameters> | null,
+    data?: Paths.UpdateRecipientPortalStatus.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateRecipientPortalStatus.Responses.$200>
+  /**
    * getRecipients - Get campaign recipients
    * 
    * Get a paginated list of recipients for a campaign.
@@ -1850,34 +1829,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCampaignPortals.Responses.$200>
-  }
-  ['/v1/campaign/{campaign_id}/portal:accept']: {
-    /**
-     * acceptPortal - Accept a portal interaction for a campaign recipient
-     * 
-     * Marks a portal interaction as 'accepted' for a specific campaign recipient.
-     * This is only allowed if the recipient's current portal status is 'shown'.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<Paths.AcceptPortal.PathParameters> | null,
-      data?: Paths.AcceptPortal.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.AcceptPortal.Responses.$200>
-  }
-  ['/v1/campaign/{campaign_id}/portal:dismiss']: {
-    /**
-     * dismissPortal - Dismiss a portal interaction for a campaign recipient
-     * 
-     * Marks a portal interaction as 'dismissed' for a specific campaign recipient.
-     * This is only allowed if the recipient's current portal status is 'shown'.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<Paths.DismissPortal.PathParameters> | null,
-      data?: Paths.DismissPortal.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DismissPortal.Responses.$200>
   }
   ['/v1/campaign/{campaign_id}/automations:retrigger']: {
     /**
@@ -1950,6 +1901,25 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateRecipient.Responses.$200>
   }
+  ['/v1/campaign/{campaign_id}/recipient/{recipient_id}/portal:status']: {
+    /**
+     * updateRecipientPortalStatus - Update portal status for a campaign recipient
+     * 
+     * Updates the portal status for a specific campaign recipient.
+     * The portal_status_updated_at timestamp is automatically set when the status changes.
+     * 
+     * Status transition rules:
+     * - From 'delivered': can change to 'seen', 'accepted', or 'dismissed'
+     * - From 'seen': can change to 'accepted' or 'dismissed'
+     * - From 'accepted' or 'dismissed': cannot be changed (final states)
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateRecipientPortalStatus.PathParameters> | null,
+      data?: Paths.UpdateRecipientPortalStatus.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateRecipientPortalStatus.Responses.$200>
+  }
   ['/v1/campaign/{campaign_id}/recipients']: {
     /**
      * getRecipients - Get campaign recipients
@@ -1988,7 +1958,6 @@ export type ExecutionSummaryItem = Components.Schemas.ExecutionSummaryItem;
 export type JobStatus = Components.Schemas.JobStatus;
 export type MatchCampaignParams = Components.Schemas.MatchCampaignParams;
 export type MatchTargetParams = Components.Schemas.MatchTargetParams;
-export type PortalActionRequest = Components.Schemas.PortalActionRequest;
 export type PortalRecipientPayload = Components.Schemas.PortalRecipientPayload;
 export type PortalStatus = Components.Schemas.PortalStatus;
 export type Recipient = Components.Schemas.Recipient;
@@ -1996,4 +1965,5 @@ export type RetriggerAutomationsRequest = Components.Schemas.RetriggerAutomation
 export type RetriggerAutomationsResult = Components.Schemas.RetriggerAutomationsResult;
 export type ServerError = Components.Schemas.ServerError;
 export type Target = Components.Schemas.Target;
+export type UpdatePortalStatusRequest = Components.Schemas.UpdatePortalStatusRequest;
 export type UpdateRecipientPayload = Components.Schemas.UpdateRecipientPayload;
