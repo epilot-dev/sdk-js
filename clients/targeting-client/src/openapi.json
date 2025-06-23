@@ -910,7 +910,7 @@
           "entity_schema": {
             "type": "string"
           },
-          "name": {
+          "title": {
             "type": "string"
           },
           "automation_status": {

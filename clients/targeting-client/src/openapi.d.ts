@@ -1397,7 +1397,7 @@ declare namespace Components {
              */
             BaseUUID /* uuid */;
             entity_schema?: string;
-            name?: string;
+            title?: string;
             automation_status?: AutomationStatus;
             automation_execution_id?: string;
             portal_status?: PortalStatus;
