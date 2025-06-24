@@ -55,6 +55,10 @@ declare namespace Components {
              * Configuration values for the app components
              */
             option_values?: Schemas.OptionsRef[];
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
         }
         export interface PatchConfigMetadataRequest {
             /**
@@ -1538,7 +1542,9 @@ declare namespace Paths {
     }
     namespace GetPublicFacingComponent {
         namespace Responses {
-            export type $200 = Components.Schemas.BaseComponent;
+            export interface $200 {
+                component?: Components.Schemas.BaseComponent;
+            }
             export interface $404 {
             }
         }
