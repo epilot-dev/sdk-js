@@ -102,6 +102,10 @@ declare namespace Components {
              * Cursor for next page of results
              */
             next?: string | null;
+            /**
+             * Total number of recipients
+             */
+            total?: number;
         }
         export interface RetriggerAutomationsResponse {
             /**
