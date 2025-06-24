@@ -689,6 +689,7 @@
         "default": "draft",
         "enum": [
           "draft",
+          "activating",
           "active",
           "inactive"
         ]

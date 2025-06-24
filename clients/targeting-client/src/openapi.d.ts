@@ -253,7 +253,7 @@ declare namespace Components {
             job_id?: string;
             target?: BaseRelation;
         }
-        export type CampaignStatus = "draft" | "active" | "inactive";
+        export type CampaignStatus = "draft" | "activating" | "active" | "inactive";
         /**
          * Describes the structure of a client error response, which can be one of several types:
          * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
