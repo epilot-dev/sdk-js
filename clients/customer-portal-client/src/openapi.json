@@ -5888,6 +5888,45 @@
         }
       }
     },
+    "/v2/portal/pages/default": {
+      "get": {
+        "operationId": "getDefaultPages",
+        "summary": "getDefaultPages",
+        "description": "Fetch all default portal pages",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The default portal pages have been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Page"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/pages/{id}/blocks": {
       "parameters": [
         {
@@ -6198,6 +6237,92 @@
                 }
               }
             }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/campaign/{campaign_id}/entity/{entity_id}:status": {
+      "put": {
+        "operationId": "updateCampaignPortalBlockStatus",
+        "summary": "Update Campaign Portal Block Status",
+        "description": "Updates the status of a campaign portal block for a recipient.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the campaign"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "description": "ID of the recipient entity"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "seen",
+                      "accepted",
+                      "dismissed"
+                    ],
+                    "description": "The status to set for the campaign portal block"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Campaign portal block status updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -10859,11 +10984,6 @@
             "description": "Whether the page is the entry route",
             "example": false
           },
-          "is_dynamic_route": {
-            "type": "boolean",
-            "description": "Whether the page is a dynamic route",
-            "example": false
-          },
           "is_deleted": {
             "type": "boolean",
             "description": "Send the flag as true to delete the page",
@@ -10889,6 +11009,12 @@
                 "description": "The id of the page",
                 "format": "uuid",
                 "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
+              },
+              "last_modified_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last modified timestamp of the Page",
+                "example": "2021-02-09T12:41:43.662Z"
               }
             }
           }

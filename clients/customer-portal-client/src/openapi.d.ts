@@ -3173,12 +3173,6 @@ declare namespace Components {
              */
             is_entry_route?: boolean;
             /**
-             * Whether the page is a dynamic route
-             * example:
-             * false
-             */
-            is_dynamic_route?: boolean;
-            /**
              * Send the flag as true to delete the page
              * example:
              * false
@@ -3190,6 +3184,12 @@ declare namespace Components {
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
             id: string; // uuid
+            /**
+             * Last modified timestamp of the Page
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            last_modified_at?: string; // date-time
         }
         export interface PageRequest {
             [name: string]: any;
@@ -3257,12 +3257,6 @@ declare namespace Components {
              * false
              */
             is_entry_route?: boolean;
-            /**
-             * Whether the page is a dynamic route
-             * example:
-             * false
-             */
-            is_dynamic_route?: boolean;
             /**
              * Send the flag as true to delete the page
              * example:
@@ -5923,6 +5917,14 @@ declare namespace Paths {
             export type $200 = Components.Schemas.Balance;
         }
     }
+    namespace GetDefaultPages {
+        namespace Responses {
+            export type $200 = Components.Schemas.Page[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetECPContact {
         namespace Parameters {
             export type Id = /**
@@ -7744,6 +7746,36 @@ declare namespace Paths {
             }
         }
     }
+    namespace UpdateCampaignPortalBlockStatus {
+        namespace Parameters {
+            export type CampaignId = string;
+            export type EntityId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+            entity_id: Parameters.EntityId;
+        }
+        export interface RequestBody {
+            /**
+             * The status to set for the campaign portal block
+             */
+            status: "seen" | "accepted" | "dismissed";
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace UpdateContact {
         export type RequestBody = Components.Schemas.Entity;
         namespace Responses {
@@ -9094,6 +9126,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPublicPages.Responses.$200>
   /**
+   * getDefaultPages - getDefaultPages
+   * 
+   * Fetch all default portal pages
+   */
+  'getDefaultPages'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDefaultPages.Responses.$200>
+  /**
    * getPortalPageBlocks - getPortalPageBlocks
    * 
    * Fetch all portal page blocks
@@ -9153,6 +9195,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUserEntryPoint.Responses.$200>
+  /**
+   * updateCampaignPortalBlockStatus - Update Campaign Portal Block Status
+   * 
+   * Updates the status of a campaign portal block for a recipient.
+   */
+  'updateCampaignPortalBlockStatus'(
+    parameters?: Parameters<Paths.UpdateCampaignPortalBlockStatus.PathParameters> | null,
+    data?: Paths.UpdateCampaignPortalBlockStatus.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateCampaignPortalBlockStatus.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -10213,6 +10265,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPublicPages.Responses.$200>
   }
+  ['/v2/portal/pages/default']: {
+    /**
+     * getDefaultPages - getDefaultPages
+     * 
+     * Fetch all default portal pages
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDefaultPages.Responses.$200>
+  }
   ['/v2/portal/pages/{id}/blocks']: {
     /**
      * createPortalPageBlock - createPortalPageBlock
@@ -10278,6 +10342,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUserEntryPoint.Responses.$200>
+  }
+  ['/v2/portal/campaign/{campaign_id}/entity/{entity_id}:status']: {
+    /**
+     * updateCampaignPortalBlockStatus - Update Campaign Portal Block Status
+     * 
+     * Updates the status of a campaign portal block for a recipient.
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateCampaignPortalBlockStatus.PathParameters> | null,
+      data?: Paths.UpdateCampaignPortalBlockStatus.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateCampaignPortalBlockStatus.Responses.$200>
   }
 }
 

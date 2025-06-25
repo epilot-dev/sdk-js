@@ -1406,6 +1406,12 @@
         "responses": {}
       }
     },
+    "/v2/portal/pages/default": {
+      "get": {
+        "operationId": "getDefaultPages",
+        "responses": {}
+      }
+    },
     "/v2/portal/pages/{id}/blocks": {
       "parameters": [
         {
@@ -1476,6 +1482,30 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/campaign/{campaign_id}/entity/{entity_id}:status": {
+      "put": {
+        "operationId": "updateCampaignPortalBlockStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     }
