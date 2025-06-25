@@ -2364,7 +2364,8 @@
         "type": "string",
         "enum": [
           "getag",
-          "ikom"
+          "ikom",
+          "external-catalog"
         ]
       },
       "Error": {
@@ -3061,7 +3062,7 @@
             "type": "number"
           },
           "unit_amount_decimal": {
-            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+            "description": "The unit amount in eur to be charged, represented as a decimal string with at most 12 decimal places.",
             "type": "string"
           },
           "unit_amount_currency": {
@@ -4698,7 +4699,7 @@
                 "$ref": "#/components/schemas/Currency"
               },
               "unit_amount_decimal": {
-                "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+                "description": "The unit amount in eur to be charged, represented as a decimal string with at most 12 decimal places.",
                 "type": "string"
               },
               "is_composite_price": {
@@ -5119,7 +5120,7 @@
             "readOnly": true
           },
           "unit_amount_decimal": {
-            "description": "The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.",
+            "description": "The unit amount in eur to be charged, represented as a decimal string with at most 12 decimal places.",
             "type": "string",
             "readOnly": true
           },
@@ -6241,7 +6242,7 @@
             "type": "number"
           },
           "fixed_value_decimal": {
-            "description": "Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.",
+            "description": "Use if type is set to fixed. The unit amount in eur to be discounted, represented as a decimal string with at most 12 decimal places.",
             "type": "string"
           },
           "fixed_value_currency": {

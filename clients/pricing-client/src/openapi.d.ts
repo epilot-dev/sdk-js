@@ -392,7 +392,7 @@ declare namespace Components {
              */
             fixed_value?: number;
             /**
-             * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
+             * Use if type is set to fixed. The unit amount in eur to be discounted, represented as a decimal string with at most 12 decimal places.
              */
             fixed_value_decimal?: string;
             /**
@@ -650,7 +650,7 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             * The unit amount in eur to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
             /**
@@ -1630,7 +1630,7 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             * The unit amount in eur to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
             /**
@@ -1773,7 +1773,7 @@ declare namespace Components {
                  */
                 fixed_value?: number;
                 /**
-                 * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
+                 * Use if type is set to fixed. The unit amount in eur to be discounted, represented as a decimal string with at most 12 decimal places.
                  */
                 fixed_value_decimal?: string;
                 /**
@@ -2300,7 +2300,7 @@ declare namespace Components {
              */
             fixed_value?: number;
             /**
-             * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
+             * Use if type is set to fixed. The unit amount in eur to be discounted, represented as a decimal string with at most 12 decimal places.
              */
             fixed_value_decimal?: string;
             /**
@@ -2387,7 +2387,7 @@ declare namespace Components {
              */
             fixed_value?: number;
             /**
-             * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
+             * Use if type is set to fixed. The unit amount in eur to be discounted, represented as a decimal string with at most 12 decimal places.
              */
             fixed_value_decimal?: string;
             /**
@@ -2452,7 +2452,7 @@ declare namespace Components {
              */
             fixed_value?: number;
             /**
-             * Use if type is set to fixed. The unit amount in cents to be discounted, represented as a decimal string with at most 12 decimal places.
+             * Use if type is set to fixed. The unit amount in eur to be discounted, represented as a decimal string with at most 12 decimal places.
              */
             fixed_value_decimal?: string;
             /**
@@ -2856,7 +2856,7 @@ declare namespace Components {
          */
         export type IntegrationAuthCredentials = /* The auth credentials for external integrations */ BasicAuthIntegration | OAuthIntegration;
         export type IntegrationCredentialsResult = /* The auth credentials for external integrations */ IntegrationAuthCredentials;
-        export type IntegrationId = "getag" | "ikom";
+        export type IntegrationId = "getag" | "ikom" | "external-catalog";
         export interface JourneyContext {
             /**
              * The ID of the journey.
@@ -3650,7 +3650,7 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             * The unit amount in eur to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
             /**
@@ -4098,7 +4098,7 @@ declare namespace Components {
              */
             unit_amount?: number;
             /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             * The unit amount in eur to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
             /**
@@ -4447,7 +4447,7 @@ declare namespace Components {
              */
             Currency;
             /**
-             * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+             * The unit amount in eur to be charged, represented as a decimal string with at most 12 decimal places.
              */
             unit_amount_decimal?: string;
             /**
@@ -4579,7 +4579,7 @@ declare namespace Components {
                  */
                 unit_amount?: number;
                 /**
-                 * The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.
+                 * The unit amount in eur to be charged, represented as a decimal string with at most 12 decimal places.
                  */
                 unit_amount_decimal?: string;
                 /**
@@ -5893,6 +5893,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * $calculatePricingDetails - calculatePricingDetails
@@ -6340,6 +6341,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type Address = Components.Schemas.Address;
 export type Amounts = Components.Schemas.Amounts;
