@@ -1344,7 +1344,8 @@
           "DOCUMENT_GENERATION_ERROR",
           "BULK_EMAIL_ERROR",
           "SHARING_ERROR",
-          "CANCEL_FLOW_EXECUTION_ERROR"
+          "CANCEL_FLOW_EXECUTION_ERROR",
+          "METER_READING_ERROR"
         ]
       },
       "ErrorDetail": {
@@ -4439,5 +4440,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://automation.sls.epilot.io"
+    }
+  ]
 }
