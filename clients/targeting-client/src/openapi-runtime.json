@@ -157,6 +157,10 @@
             "in": "query"
           },
           {
+            "name": "q",
+            "in": "query"
+          },
+          {
             "name": "automation_status",
             "in": "query"
           },

@@ -1560,6 +1560,7 @@ declare namespace Paths {
             export type Limit = number;
             export type Next = string;
             export type PortalStatus = Components.Schemas.PortalStatus;
+            export type Q = string;
         }
         export interface PathParameters {
             campaign_id: Parameters.CampaignId;
@@ -1567,6 +1568,7 @@ declare namespace Paths {
         export interface QueryParameters {
             limit?: Parameters.Limit;
             next?: Parameters.Next;
+            q?: Parameters.Q;
             automation_status?: Parameters.AutomationStatus;
             portal_status?: Parameters.PortalStatus;
         }

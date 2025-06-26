@@ -411,7 +411,15 @@
           {
             "name": "next",
             "in": "query",
-            "description": "Cursor for pagination (preferred)",
+            "description": "Cursor for pagination",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search by recipient title",
             "schema": {
               "type": "string"
             }
