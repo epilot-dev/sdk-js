@@ -1345,7 +1345,8 @@
           "BULK_EMAIL_ERROR",
           "SHARING_ERROR",
           "CANCEL_FLOW_EXECUTION_ERROR",
-          "METER_READING_ERROR"
+          "METER_READING_NOT_FOUND",
+          "ENTITY_NOT_FOUND"
         ]
       },
       "ErrorDetail": {

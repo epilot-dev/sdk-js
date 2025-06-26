@@ -285,6 +285,10 @@ declare namespace Components {
              */
             source_type: string;
             /**
+             * A group this source belongs to. Used for grouping sources in the UI
+             */
+            group?: string;
+            /**
              * Data Structure Type of the underlaying output value
              */
             possible_target_types?: MappingSourceTargetType[];
@@ -761,6 +765,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * storeConfig - storeConfig
@@ -1026,6 +1031,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type AppendValueMapper = Components.Schemas.AppendValueMapper;
 export type AttributeOrigin = Components.Schemas.AttributeOrigin;
