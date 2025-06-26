@@ -1471,6 +1471,10 @@
             "type": "string",
             "description": "Data Structure type of source"
           },
+          "group": {
+            "type": "string",
+            "description": "A group this source belongs to. Used for grouping sources in the UI"
+          },
           "possible_target_types": {
             "type": "array",
             "items": {
@@ -1607,9 +1611,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity-mapping.sls.epilot.io"
-    },
     {
       "url": "https://entity-mapping.sls.epilot.io"
     }
