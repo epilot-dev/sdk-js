@@ -83,19 +83,11 @@
           "trigger"
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "webhookId"
-                ],
-                "properties": {
-                  "webhookId": {
-                    "type": "string",
-                    "description": "The Webhook that relates to this service action."
-                  }
-                }
+                "$ref": "#/components/schemas/TriggerErpActionRequest"
               }
             }
           }
@@ -117,13 +109,145 @@
             }
           },
           "400": {
-            "description": "Bad request - missing webhookId"
+            "description": "Bad request - invalid or missing parameters"
           },
           "401": {
             "description": "Unauthorized - invalid or missing token"
           },
           "500": {
             "description": "Server error processing the request"
+          }
+        }
+      }
+    },
+    "/v1/erp/updates/events": {
+      "post": {
+        "operationId": "processErpUpdatesEvents",
+        "summary": "Process ERP system updates",
+        "description": "Handles updates from ERP systems and tracks them appropriately",
+        "tags": [
+          "erp"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "app_id",
+                  "component_id",
+                  "meta",
+                  "events"
+                ],
+                "properties": {
+                  "app_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "UUID that identifies the specific integration app instance"
+                  },
+                  "component_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "UUID that identifies the specific integration app component instance"
+                  },
+                  "meta": {
+                    "type": "object",
+                    "description": "Metadata to be passed along with the events",
+                    "additionalProperties": true,
+                    "properties": {
+                      "correlation_id": {
+                        "type": "string",
+                        "description": "ID that identifies the specific request for debugging purposes"
+                      }
+                    }
+                  },
+                  "events": {
+                    "type": "array",
+                    "description": "List of ERP events to process",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "event_type",
+                        "object_type",
+                        "timestamp",
+                        "format",
+                        "payload"
+                      ],
+                      "properties": {
+                        "event_type": {
+                          "type": "string",
+                          "enum": [
+                            "CREATE",
+                            "UPDATE",
+                            "DELETE"
+                          ],
+                          "description": "Type of event (create, update, delete)"
+                        },
+                        "object_type": {
+                          "type": "string",
+                          "description": "Type of the object being updated (business_partner, contract_account, etc.)"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Timestamp when the event occurred"
+                        },
+                        "format": {
+                          "type": "string",
+                          "enum": [
+                            "json",
+                            "xml"
+                          ],
+                          "default": "json",
+                          "description": "Format of the payload data"
+                        },
+                        "payload": {
+                          "type": "string",
+                          "description": "The serialized object data payload (JSON, XML, etc.) as a string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "app_id": "123e4567-e89b-12d3-a456-426614174000",
+                "component_id": "123e4567-e89b-12d3-a456-426614174000",
+                "events": [
+                  {
+                    "event_type": "CREATE",
+                    "object_type": "business_partner",
+                    "timestamp": "2025-05-01T08:30:00Z",
+                    "format": "json",
+                    "payload": "{\"id\":\"BP10001\",\"name\":\"Acme Corporation\",\"type\":\"organization\",\"tax_id\":\"DE123456789\",\"status\":\"active\"}"
+                  },
+                  {
+                    "event_type": "UPDATE",
+                    "object_type": "contract_account",
+                    "timestamp": "2025-05-01T08:35:00Z",
+                    "format": "json",
+                    "payload": "{\"id\":\"CA20001\",\"business_partner_id\":\"BP10001\",\"status\":\"active\",\"payment_method\":\"direct_debit\"}"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
@@ -143,9 +267,172 @@
         "description": "Authorization header with epilot public access token",
         "bearerFormat": "JWT"
       }
+    },
+    "schemas": {
+      "ErrorResponseBase": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Computer-readable error code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      },
+      "TriggerErpActionRequest": {
+        "type": "object",
+        "required": [
+          "manifest_id",
+          "execution_id",
+          "org_id",
+          "webhook_id",
+          "flow_id",
+          "created_at",
+          "action_id",
+          "flow_action_id",
+          "flow_name",
+          "activity_id",
+          "entity_id"
+        ],
+        "properties": {
+          "manifest_id": {
+            "type": "string",
+            "description": "Unique identifier of the ERP Toolkit manifest"
+          },
+          "execution_id": {
+            "type": "string",
+            "description": "Unique identifier of the current automation execution"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Identifier of the organization where the automation is executed"
+          },
+          "webhook_id": {
+            "type": "string",
+            "description": "Identifier of the self-service webhook configuration"
+          },
+          "flow_id": {
+            "type": "string",
+            "description": "Identifier of the automation flow that triggered the action"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the webhook event was created"
+          },
+          "action_id": {
+            "type": "string",
+            "description": "Identifier of the automation action being executed"
+          },
+          "flow_action_id": {
+            "type": "string",
+            "description": "Identifier of the specific automation flow action instance"
+          },
+          "flow_name": {
+            "type": "string",
+            "description": "Human readable name of the automation flow"
+          },
+          "activity_id": {
+            "type": "string",
+            "description": "Identifier of the entity activity related to this trigger"
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "Identifier of the entity referenced by the activity"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
+      "ERPUpdatesResponse": {
+        "description": "Some events failed to process",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "event_id",
+                      "status"
+                    ],
+                    "properties": {
+                      "event_id": {
+                        "type": "string",
+                        "description": "ID of the processed event"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "success",
+                          "error"
+                        ],
+                        "description": "Processing status for the event"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Information about the processing status"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "servers": [
+    {
+      "url": "https://erp-integration-api.sls.epilot.io"
+    },
     {
       "url": "https://erp-integration-api.sls.epilot.io"
     }

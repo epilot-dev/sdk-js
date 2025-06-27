@@ -20,6 +20,18 @@
       "post": {
         "operationId": "triggerErp",
         "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/erp/updates/events": {
+      "post": {
+        "operationId": "processErpUpdatesEvents",
+        "requestBody": {
           "content": {
             "application/json": {}
           }
@@ -28,7 +40,35 @@
       }
     }
   },
-  "components": {},
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ERPUpdatesResponse": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://erp-integration-api.sls.epilot.io"
