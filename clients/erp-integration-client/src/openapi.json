@@ -94,19 +94,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success - if the ERP Toolkit was triggered successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/TriggerWebhookResponse"
           },
           "400": {
             "description": "Bad request - invalid or missing parameters"
@@ -285,7 +273,6 @@
       "TriggerErpActionRequest": {
         "type": "object",
         "required": [
-          "manifest_id",
           "execution_id",
           "org_id",
           "webhook_id",
@@ -298,10 +285,6 @@
           "entity_id"
         ],
         "properties": {
-          "manifest_id": {
-            "type": "string",
-            "description": "Unique identifier of the ERP Toolkit manifest"
-          },
           "execution_id": {
             "type": "string",
             "description": "Unique identifier of the current automation execution"
@@ -342,6 +325,39 @@
           "entity_id": {
             "type": "string",
             "description": "Identifier of the entity referenced by the activity"
+          }
+        }
+      },
+      "TriggerWebhookResp": {
+        "type": "object",
+        "properties": {
+          "status_code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object"
+          },
+          "code": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed"
+            ]
+          },
+          "start_date": {
+            "type": "string"
+          },
+          "end_date": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string"
           }
         }
       }
@@ -416,13 +432,22 @@
                         "description": "Processing status for the event"
                       },
                       "message": {
-                        "type": "string",
-                        "description": "Information about the processing status"
+                        "type": "string"
                       }
                     }
                   }
                 }
               }
+            }
+          }
+        }
+      },
+      "TriggerWebhookResponse": {
+        "description": "Result of triggering an ERP synchronization event",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TriggerWebhookResp"
             }
           }
         }

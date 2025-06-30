@@ -66,6 +66,11 @@
         "content": {
           "application/json": {}
         }
+      },
+      "TriggerWebhookResponse": {
+        "content": {
+          "application/json": {}
+        }
       }
     }
   },
