@@ -21,14 +21,12 @@ declare namespace Components {
                  * Processing status for the event
                  */
                 status: "success" | "error";
-                /**
-                 * Information about the processing status
-                 */
                 message?: string;
             }[];
         }
         export type InternalServerError = Schemas.ErrorResponseBase;
         export type NotFound = Schemas.ErrorResponseBase;
+        export type TriggerWebhookResponse = Schemas.TriggerWebhookResp;
         export type Unauthorized = Schemas.ErrorResponseBase;
     }
     namespace Schemas {
@@ -43,10 +41,6 @@ declare namespace Components {
             message?: string;
         }
         export interface TriggerErpActionRequest {
-            /**
-             * Unique identifier of the ERP Toolkit manifest
-             */
-            manifest_id: string;
             /**
              * Unique identifier of the current automation execution
              */
@@ -87,6 +81,18 @@ declare namespace Components {
              * Identifier of the entity referenced by the activity
              */
             entity_id: string;
+        }
+        export interface TriggerWebhookResp {
+            status_code?: string;
+            message?: string;
+            body?: {
+                [key: string]: any;
+            };
+            code?: string;
+            status?: "succeeded" | "failed";
+            start_date?: string;
+            end_date?: string;
+            event_id?: string;
         }
     }
 }
@@ -169,9 +175,7 @@ declare namespace Paths {
     namespace TriggerErp {
         export type RequestBody = Components.Schemas.TriggerErpActionRequest;
         namespace Responses {
-            export interface $200 {
-                message?: string;
-            }
+            export type $200 = Components.Responses.TriggerWebhookResponse;
             export interface $400 {
             }
             export interface $401 {
@@ -260,3 +264,4 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
 export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest;
+export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
