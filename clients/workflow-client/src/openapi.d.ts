@@ -43,7 +43,16 @@ declare namespace Components {
                 id?: string; // uuid
                 name: string;
                 status?: /**
-                 * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+                 * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+                 * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+                 * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+                 * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+                 * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+                 * - **COMPLETED**: Step/Task has been finished successfully
+                 * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+                 * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+                 * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+                 * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
                  *
                  */
                 StepStatus;
@@ -122,7 +131,16 @@ declare namespace Components {
             name: string;
             description?: /* Longer information regarding Task */ StepDescription;
             status: /**
-             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
             StepStatus;
@@ -213,7 +231,16 @@ declare namespace Components {
             insertionIndex: number;
             name: string;
             status?: /**
-             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
             StepStatus;
@@ -233,7 +260,16 @@ declare namespace Components {
             name: string;
             description?: /* Longer information regarding Task */ StepDescription;
             status: /**
-             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
             StepStatus;
@@ -492,7 +528,16 @@ declare namespace Components {
             name: string;
             description?: /* Longer information regarding Task */ StepDescription;
             status: /**
-             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
             StepStatus;
@@ -557,7 +602,16 @@ declare namespace Components {
         export interface PatchTaskReq {
             name?: string;
             status?: /**
-             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
             StepStatus;
@@ -734,7 +788,16 @@ declare namespace Components {
                  */
                 assignedToInProgress?: string;
                 status?: /**
-                 * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+                 * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+                 * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+                 * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+                 * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+                 * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+                 * - **COMPLETED**: Step/Task has been finished successfully
+                 * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+                 * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+                 * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+                 * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
                  *
                  */
                 StepStatus;
@@ -855,7 +918,16 @@ declare namespace Components {
              */
             assignedToInProgress?: string;
             status?: /**
-             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
             StepStatus;
@@ -910,7 +982,16 @@ declare namespace Components {
              */
             assignedToInProgress?: string;
             status?: /**
-             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
             StepStatus;
@@ -983,10 +1064,19 @@ declare namespace Components {
             executionType?: StepType;
         }
         /**
-         * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+         * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+         * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+         * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+         * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+         * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+         * - **COMPLETED**: Step/Task has been finished successfully
+         * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+         * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+         * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+         * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
          *
          */
-        export type StepStatus = "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING";
+        export type StepStatus = "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING" | "FAILED";
         export type StepType = "MANUAL" | "AUTOMATION";
         export type Task = ManualTask | AutomationTask | DecisionTask;
         export interface TaskBase {
@@ -995,7 +1085,16 @@ declare namespace Components {
             name: string;
             description?: /* Longer information regarding Task */ StepDescription;
             status: /**
-             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
             StepStatus;
@@ -1073,7 +1172,16 @@ declare namespace Components {
              */
             assignedToInProgress?: string;
             status?: /**
-             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
             StepStatus;
@@ -1115,7 +1223,16 @@ declare namespace Components {
              */
             assignedToInProgress?: string;
             status?: /**
-             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
             StepStatus;
@@ -1428,7 +1545,16 @@ declare namespace Components {
             task_duedate?: string; // date-time
             task_execution_type?: StepType;
             task_status?: /**
-             * Note: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead.
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
             StepStatus;
