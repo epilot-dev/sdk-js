@@ -5,19 +5,9 @@
     "version": ""
   },
   "paths": {
-    "/v1/files/public/upload": {
+    "/v2/files/upload": {
       "post": {
-        "operationId": "uploadFilePublic",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v1/files/upload": {
-      "post": {
-        "operationId": "uploadFile",
+        "operationId": "uploadFileV2",
         "parameters": [
           {
             "name": "file_entity_id",
@@ -28,17 +18,115 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/files": {
+      "post": {
+        "operationId": "saveFileV2",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/StrictQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/files/upload": {
+      "post": {
+        "operationId": "uploadFile",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "file_entity_id",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v1/files": {
       "post": {
         "operationId": "saveFile",
+        "deprecated": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/files/{id}": {
+      "get": {
+        "operationId": "getFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "source_url",
+            "in": "query"
+          },
+          {
+            "$ref": "#/components/parameters/StrictQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "purge",
+            "in": "query"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/StrictQueryParam"
+          }
+        ],
+        "responses": {}
       }
     },
     "/v1/files/{id}/download": {
@@ -58,27 +146,8 @@
             "name": "attachment",
             "in": "query"
           }
-        ]
-      }
-    },
-    "/v1/files/download:verify": {
-      "post": {
-        "operationId": "verifyCustomDownloadUrl",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v1/files:downloadFiles": {
-      "post": {
-        "operationId": "downloadFiles",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
+        ],
+        "responses": {}
       }
     },
     "/v1/files:downloadS3": {
@@ -99,7 +168,19 @@
             "name": "attachment",
             "in": "query"
           }
-        ]
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files:downloadFiles": {
+      "post": {
+        "operationId": "downloadFiles",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v1/files/{id}/preview": {
@@ -123,7 +204,53 @@
             "name": "h",
             "in": "query"
           }
-        ]
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files:previewS3": {
+      "post": {
+        "operationId": "previewS3File",
+        "parameters": [
+          {
+            "name": "w",
+            "in": "query"
+          },
+          {
+            "name": "h",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "previewS3FileGet",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "bucket",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "w",
+            "in": "query"
+          },
+          {
+            "name": "h",
+            "in": "query"
+          }
+        ],
+        "responses": {}
       }
     },
     "/v1/files/public/{id}/preview": {
@@ -151,68 +278,18 @@
             "name": "org_id",
             "in": "query"
           }
-        ]
-      }
-    },
-    "/v1/files:previewS3": {
-      "get": {
-        "operationId": "previewS3FileGet",
-        "parameters": [
-          {
-            "name": "key",
-            "in": "query",
-            "required": true
-          },
-          {
-            "name": "bucket",
-            "in": "query",
-            "required": true
-          },
-          {
-            "name": "w",
-            "in": "query"
-          },
-          {
-            "name": "h",
-            "in": "query"
-          }
-        ]
-      },
-      "post": {
-        "operationId": "previewS3File",
-        "parameters": [
-          {
-            "name": "w",
-            "in": "query"
-          },
-          {
-            "name": "h",
-            "in": "query"
-          }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
-      }
-    },
-    "/v1/files/delete": {
-      "delete": {
-        "operationId": "deleteFile",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/v1/files/session": {
       "get": {
-        "operationId": "getSession"
+        "operationId": "getSession",
+        "responses": {}
       },
       "delete": {
-        "operationId": "deleteSession"
+        "operationId": "deleteSession",
+        "responses": {}
       }
     },
     "/v1/files/{id}/public/links": {
@@ -224,17 +301,19 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "get": {
-        "operationId": "getAllPublicLinksForFile",
+        "operationId": "listPublicLinksForFile",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/files/public/links/{id}/{filename}": {
@@ -250,8 +329,14 @@
             "name": "filename",
             "in": "path",
             "required": true
+          },
+          {
+            "name": "hash",
+            "in": "query",
+            "required": false
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/files/public/links/{id}": {
@@ -263,37 +348,57 @@
             "in": "path",
             "required": true
           }
-        ]
-      }
-    },
-    "/v2/files/upload": {
-      "post": {
-        "operationId": "uploadFileV2",
-        "parameters": [
-          {
-            "name": "file_entity_id",
-            "in": "query"
-          }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        }
+        "responses": {}
       }
     },
-    "/v2/files": {
+    "/v1/files/download:verify": {
       "post": {
-        "operationId": "saveFileV2",
+        "operationId": "verifyCustomDownloadUrl",
         "requestBody": {
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/files/public/upload": {
+      "post": {
+        "operationId": "uploadFilePublic",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     }
   },
-  "components": {},
+  "components": {
+    "parameters": {
+      "StrictQueryParam": {
+        "name": "strict",
+        "in": "query",
+        "required": false
+      },
+      "ActivityIdQueryParam": {
+        "name": "activity_id",
+        "in": "query",
+        "required": false
+      },
+      "FillActivityQueryParam": {
+        "name": "fill_activity",
+        "in": "query",
+        "required": false
+      },
+      "AsyncOperationQueryParam": {
+        "name": "async",
+        "in": "query",
+        "required": false
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://file.sls.epilot.io"
