@@ -304,6 +304,10 @@ declare namespace Components {
              * Human readable type of the source
              */
             sub_title?: string;
+            /**
+             * Whether the source (block or attribute) is a repeatable, aka holds a list of values
+             */
+            repeatable?: boolean;
             target_settings?: {
                 /**
                  * Describes which actions the user can perform on each target, if specified. If not specified, all actions are allowed

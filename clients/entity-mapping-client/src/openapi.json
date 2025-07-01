@@ -1494,6 +1494,10 @@
             "type": "string",
             "description": "Human readable type of the source"
           },
+          "repeatable": {
+            "type": "boolean",
+            "description": "Whether the source (block or attribute) is a repeatable, aka holds a list of values"
+          },
           "target_settings": {
             "type": "object",
             "properties": {
