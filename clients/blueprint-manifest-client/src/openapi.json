@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
     "version": "0.1.0",
@@ -21,6 +21,14 @@
     {
       "name": "Manifests",
       "description": "Manage installed Manifests"
+    },
+    {
+      "name": "Blueprints",
+      "description": "Manage Custom and Installed Blueprints"
+    },
+    {
+      "name": "Installations",
+      "description": "Manage installation jobs"
     }
   ],
   "security": [
@@ -320,6 +328,16 @@
                           }
                         ]
                       },
+                      "job_id": {
+                        "allOf": [
+                          {
+                            "description": "Continue a previous job"
+                          },
+                          {
+                            "$ref": "#/components/schemas/JobID"
+                          }
+                        ]
+                      },
                       "source": {
                         "allOf": [
                           {
@@ -388,6 +406,16 @@
                           },
                           {
                             "$ref": "#/components/schemas/ManifestID"
+                          }
+                        ]
+                      },
+                      "job_id": {
+                        "allOf": [
+                          {
+                            "description": "Continue a previous job"
+                          },
+                          {
+                            "$ref": "#/components/schemas/JobID"
                           }
                         ]
                       },
@@ -659,10 +687,1181 @@
           }
         }
       }
+    },
+    "/v2/blueprint-manifest/blueprints": {
+      "get": {
+        "operationId": "listBlueprints",
+        "summary": "listBlueprints",
+        "description": "List Custom and Installed Blueprints",
+        "tags": [
+          "Blueprints"
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Blueprint"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBlueprint",
+        "summary": "createBlueprint",
+        "description": "Create a Blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommonBlueprintFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created Blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomBlueprint"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}": {
+      "get": {
+        "operationId": "getBlueprint",
+        "summary": "getBlueprint",
+        "description": "Get Blueprint by ID",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Blueprint"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateBlueprint",
+        "summary": "updateBlueprint",
+        "description": "Update a Blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommonBlueprintFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Blueprint"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
+      "post": {
+        "operationId": "exportBlueprint",
+        "summary": "exportBlueprint",
+        "description": "Zip the blueprint content and return the url to download it",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exported Blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources": {
+      "post": {
+        "operationId": "addBlueprintResource",
+        "summary": "addBlueprintResource",
+        "description": "Add a resource to a Blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "add_dependencies",
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to add this resource dependencies to the blueprint automatically"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/EditableBlueprintResource"
+                  },
+                  {
+                    "$ref": "#/components/schemas/InstalledBlueprintResource"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Added Blueprint Resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/EditableBlueprintResource"
+                          },
+                          {
+                            "$ref": "#/components/schemas/InstalledBlueprintResource"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/bulk": {
+      "post": {
+        "operationId": "bulkAddBlueprintResources",
+        "summary": "bulkAddBlueprintResources",
+        "description": "Bulk Add resources in a Blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "add_dependencies",
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to add this resource dependencies to the blueprint automatically"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/EditableBlueprintResource"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InstalledBlueprintResource"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk updated Blueprint Resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/EditableBlueprintResource"
+                          },
+                          {
+                            "$ref": "#/components/schemas/InstalledBlueprintResource"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "bulkUpdateBlueprintResources",
+        "summary": "bulkUpdateBlueprintResources",
+        "description": "Bulk update resources in a Blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/EditableBlueprintResource"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InstalledBlueprintResource"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk updated Blueprint Resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/EditableBlueprintResource"
+                          },
+                          {
+                            "$ref": "#/components/schemas/InstalledBlueprintResource"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "bulkDeleteBlueprintResources",
+        "summary": "bulkDeleteBlueprintResources",
+        "description": "Bulk delete resources in a Blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BlueprintResourceID"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk deleted Blueprint Resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/EditableBlueprintResource"
+                          },
+                          {
+                            "$ref": "#/components/schemas/InstalledBlueprintResource"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}": {
+      "put": {
+        "operationId": "updateBlueprintResource",
+        "summary": "updateBlueprintResource",
+        "description": "Update a resource in a Blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "resource_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintResourceID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/EditableBlueprintResource"
+                  },
+                  {
+                    "$ref": "#/components/schemas/InstalledBlueprintResource"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Blueprint Resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/EditableBlueprintResource"
+                          },
+                          {
+                            "$ref": "#/components/schemas/InstalledBlueprintResource"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBlueprintResource",
+        "summary": "deleteBlueprintResource",
+        "description": "Delete a resource from a Blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "resource_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintResourceID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted Blueprint Resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/EditableBlueprintResource"
+                          },
+                          {
+                            "$ref": "#/components/schemas/InstalledBlueprintResource"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}:syncDependencies": {
+      "post": {
+        "operationId": "syncDependencies",
+        "summary": "syncDependencies",
+        "description": "Sync dependencies of a resource in a Blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "resource_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintResourceID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synced dependencies of a resource in a Blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/EditableBlueprintResource"
+                          },
+                          {
+                            "$ref": "#/components/schemas/InstalledBlueprintResource"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/installations": {
+      "post": {
+        "operationId": "createInstallationJob",
+        "summary": "Create Installation Job",
+        "description": "Kick off a new installation job. Returns 202 Accepted with Location header pointing to the job resource and a strict idempotency-key header.\n",
+        "tags": [
+          "Installations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source_blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
+                  },
+                  "destination_org_id": {
+                    "type": "string",
+                    "description": "Destination organization ID"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "simple",
+                      "advanced"
+                    ],
+                    "description": "Installation mode"
+                  }
+                },
+                "required": [
+                  "source_blueprint_id",
+                  "destination_org_id",
+                  "mode"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Installation job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Idempotency-Key": {
+                "description": "Strict idempotency key",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/InstallationJobID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/installations/{job_id}": {
+      "get": {
+        "operationId": "getInstallationJob",
+        "summary": "Get Installation Job",
+        "description": "Poll current state of an installation job.",
+        "tags": [
+          "Installations"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id",
+            "schema": {
+              "$ref": "#/components/schemas/InstallationJobID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Installation job status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationJob"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/installations/{job_id}:continue": {
+      "post": {
+        "operationId": "continueInstallationJob",
+        "summary": "Continue Installation Job",
+        "description": "Continue an installation job if it is waiting for user action.",
+        "tags": [
+          "Installations"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id",
+            "schema": {
+              "$ref": "#/components/schemas/InstallationJobID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Installation job continued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationJob"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/installations/{job_id}:cancel": {
+      "operationId": "cancelInstallationJob",
+      "summary": "Cancel Installation Job",
+      "description": "Cancel an installation job if it is still running.",
+      "tags": [
+        "Installations"
+      ],
+      "parameters": [
+        {
+          "in": "path",
+          "required": true,
+          "name": "job_id",
+          "schema": {
+            "$ref": "#/components/schemas/InstallationJobID"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Installation job cancelled",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallationJob"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/installations/{job_id}/events": {
+      "get": {
+        "operationId": "getInstallationJobEvents",
+        "summary": "Get Installation Job Events",
+        "description": "Event log for an installation job.",
+        "tags": [
+          "Installations"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id",
+            "schema": {
+              "$ref": "#/components/schemas/InstallationJobID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event logs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "STARTED",
+                        "WAITING_USER_ACTION",
+                        "CANCELED",
+                        "IN_PROGRESS",
+                        "SUCCESS",
+                        "FAILED"
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FormattedError"
+                      }
+                    },
+                    "progress": {
+                      "type": "number",
+                      "format": "float",
+                      "minimum": 0,
+                      "maximum": 100,
+                      "description": "Progress completion (0-100)"
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/InstallationJobEvent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "BlueprintID": {
+        "type": "string",
+        "description": "ID of a blueprint",
+        "example": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
+      },
+      "BlueprintResourceID": {
+        "type": "string",
+        "description": "ID of a blueprint resource",
+        "example": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
+      },
+      "CommonBlueprintFields": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "preinstall": {
+                "type": "string",
+                "description": "Markdown content shown before starting to install the blueprint",
+                "example": "This is the content of the preinstall.md file which contains the blueprint description.\n"
+              },
+              "postinstall": {
+                "type": "string",
+                "description": "Markdown content to be displayed when showing the plan to install blueprint",
+                "example": "This is the content of the postinstall.md file\n"
+              }
+            }
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "BlueprintResource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BlueprintResourceID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceNodeType"
+          },
+          "address": {
+            "type": "string"
+          },
+          "is_ready": {
+            "type": "boolean",
+            "description": "on EditableBlueprintResources, this indicates if the resource is ready to be exported and on InstalledBlueprintResources, this indicates if the resource is ready to be used"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ]
+      },
+      "EditableBlueprintResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BlueprintResource"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "note": {
+                "type": "string",
+                "description": "An internal note to help remember what's missing to export the resource"
+              }
+            }
+          }
+        ]
+      },
+      "InstalledBlueprintResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BlueprintResource"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "impact_on_install": {
+                "type": "string",
+                "enum": [
+                  "create",
+                  "update",
+                  "no-op",
+                  "delete"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "CustomBlueprint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "resources": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EditableBlueprintResource"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "FileBlueprint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "is_verified": {
+                "type": "boolean",
+                "description": "Whether the blueprint is verified by epilot"
+              },
+              "source_type": {
+                "type": "string",
+                "const": "file"
+              },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/InstalledBlueprintResource"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "MarketplaceBlueprint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "docs_url": {
+                "type": "string",
+                "description": "URL to the blueprint documentation"
+              },
+              "is_verified": {
+                "type": "boolean",
+                "description": "Whether the blueprint is verified by epilot"
+              },
+              "source_type": {
+                "type": "string",
+                "const": "marketplace"
+              },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/InstalledBlueprintResource"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "DeployedBlueprint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_type": {
+                "type": "string",
+                "const": "deploy"
+              },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/InstalledBlueprintResource"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "AppBlueprint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "is_verified": {
+                "type": "boolean",
+                "description": "Whether the blueprint is verified by epilot"
+              },
+              "source_type": {
+                "type": "string",
+                "const": "app"
+              },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/InstalledBlueprintResource"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Blueprint": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CustomBlueprint"
+          },
+          {
+            "$ref": "#/components/schemas/FileBlueprint"
+          },
+          {
+            "$ref": "#/components/schemas/MarketplaceBlueprint"
+          },
+          {
+            "$ref": "#/components/schemas/DeployedBlueprint"
+          },
+          {
+            "$ref": "#/components/schemas/AppBlueprint"
+          }
+        ]
+      },
+      "InstallationJobID": {
+        "type": "string",
+        "description": "ID of an installation job",
+        "example": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
+      },
+      "InstallationJob": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/InstallationJobID"
+          },
+          "source_blueprint_id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "source_blueprint_type": {
+            "type": "string",
+            "enum": [
+              "file",
+              "marketplace",
+              "deploy",
+              "app"
+            ]
+          },
+          "source_org_id": {
+            "type": "string"
+          },
+          "destination_blueprint_id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "destination_org_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "STARTED",
+              "WAITING_USER_ACTION",
+              "CANCELED",
+              "IN_PROGRESS",
+              "SUCCESS",
+              "FAILED"
+            ]
+          },
+          "triggered_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          }
+        }
+      },
+      "InstallationJobEvent": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "info",
+              "warning",
+              "error"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        }
+      },
       "ManifestID": {
         "type": "string",
         "description": "ID of an imported / installed manifest",
@@ -1328,6 +2527,10 @@
                 },
                 "type": {
                   "$ref": "#/components/schemas/ResourceNodeType"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Terraform address of the resource"
                 }
               },
               "required": [

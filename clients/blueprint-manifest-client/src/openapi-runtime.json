@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "",
     "version": ""
@@ -127,6 +127,265 @@
             "in": "path",
             "required": true,
             "name": "manifest_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints": {
+      "get": {
+        "operationId": "listBlueprints",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createBlueprint",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}": {
+      "get": {
+        "operationId": "getBlueprint",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateBlueprint",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
+      "post": {
+        "operationId": "exportBlueprint",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources": {
+      "post": {
+        "operationId": "addBlueprintResource",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "query",
+            "name": "add_dependencies"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/bulk": {
+      "post": {
+        "operationId": "bulkAddBlueprintResources",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "query",
+            "name": "add_dependencies"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "put": {
+        "operationId": "bulkUpdateBlueprintResources",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "bulkDeleteBlueprintResources",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}": {
+      "put": {
+        "operationId": "updateBlueprintResource",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "resource_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteBlueprintResource",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "resource_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}:syncDependencies": {
+      "post": {
+        "operationId": "syncDependencies",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "resource_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/installations": {
+      "post": {
+        "operationId": "createInstallationJob",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/installations/{job_id}": {
+      "get": {
+        "operationId": "getInstallationJob",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/installations/{job_id}:continue": {
+      "post": {
+        "operationId": "continueInstallationJob",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/installations/{job_id}:cancel": {
+      "operationId": "cancelInstallationJob",
+      "parameters": [
+        {
+          "in": "path",
+          "required": true,
+          "name": "job_id"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Installation job cancelled",
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/installations/{job_id}/events": {
+      "get": {
+        "operationId": "getInstallationJobEvents",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id"
           }
         ],
         "responses": {}

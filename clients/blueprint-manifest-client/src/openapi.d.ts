@@ -21,7 +21,68 @@ declare namespace Components {
         JobID?: Parameters.JobID;
     }
     namespace Schemas {
+        export interface AppBlueprint {
+            id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            title: string;
+            slug?: string;
+            description?: {
+                /**
+                 * Markdown content shown before starting to install the blueprint
+                 * example:
+                 * This is the content of the preinstall.md file which contains the blueprint description.
+                 *
+                 */
+                preinstall?: string;
+                /**
+                 * Markdown content to be displayed when showing the plan to install blueprint
+                 * example:
+                 * This is the content of the postinstall.md file
+                 *
+                 */
+                postinstall?: string;
+            };
+            version?: string;
+            /**
+             * Whether the blueprint is verified by epilot
+             */
+            is_verified?: boolean;
+            source_type?: "app";
+            resources?: InstalledBlueprintResource[];
+        }
+        export type Blueprint = CustomBlueprint | FileBlueprint | MarketplaceBlueprint | DeployedBlueprint | AppBlueprint;
+        /**
+         * ID of a blueprint
+         * example:
+         * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+         */
+        export type BlueprintID = string;
         export type BlueprintInstallStatus = "SUCCESS" | "PARTIAL" | "FAILED";
+        export interface BlueprintResource {
+            id: /**
+             * ID of a blueprint resource
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintResourceID;
+            name?: string;
+            type: /* Type of the resource */ ResourceNodeType;
+            address?: string;
+            /**
+             * on EditableBlueprintResources, this indicates if the resource is ready to be exported and on InstalledBlueprintResources, this indicates if the resource is ready to be used
+             */
+            is_ready?: boolean;
+        }
+        /**
+         * ID of a blueprint resource
+         * example:
+         * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+         */
+        export type BlueprintResourceID = string;
         export interface CallerIdentity {
             /**
              * a human readable name of the caller (e.g. user name, token name or email address)
@@ -47,6 +108,33 @@ declare namespace Components {
              * api_5ZugdRXasLfWBypHi93Fk
              */
             token_id?: string;
+        }
+        export interface CommonBlueprintFields {
+            id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            title: string;
+            slug?: string;
+            description?: {
+                /**
+                 * Markdown content shown before starting to install the blueprint
+                 * example:
+                 * This is the content of the preinstall.md file which contains the blueprint description.
+                 *
+                 */
+                preinstall?: string;
+                /**
+                 * Markdown content to be displayed when showing the plan to install blueprint
+                 * example:
+                 * This is the content of the postinstall.md file
+                 *
+                 */
+                postinstall?: string;
+            };
+            version?: string;
         }
         export interface CommonImportFields {
             source_type?: ManifestSource;
@@ -213,6 +301,115 @@ declare namespace Components {
              */
             is_virtual?: boolean;
         }
+        export interface CustomBlueprint {
+            id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            title: string;
+            slug?: string;
+            description?: {
+                /**
+                 * Markdown content shown before starting to install the blueprint
+                 * example:
+                 * This is the content of the preinstall.md file which contains the blueprint description.
+                 *
+                 */
+                preinstall?: string;
+                /**
+                 * Markdown content to be displayed when showing the plan to install blueprint
+                 * example:
+                 * This is the content of the postinstall.md file
+                 *
+                 */
+                postinstall?: string;
+            };
+            version?: string;
+            resources?: EditableBlueprintResource[];
+        }
+        export interface DeployedBlueprint {
+            id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            title: string;
+            slug?: string;
+            description?: {
+                /**
+                 * Markdown content shown before starting to install the blueprint
+                 * example:
+                 * This is the content of the preinstall.md file which contains the blueprint description.
+                 *
+                 */
+                preinstall?: string;
+                /**
+                 * Markdown content to be displayed when showing the plan to install blueprint
+                 * example:
+                 * This is the content of the postinstall.md file
+                 *
+                 */
+                postinstall?: string;
+            };
+            version?: string;
+            source_type?: "deploy";
+            resources?: InstalledBlueprintResource[];
+        }
+        export interface EditableBlueprintResource {
+            id: /**
+             * ID of a blueprint resource
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintResourceID;
+            name?: string;
+            type: /* Type of the resource */ ResourceNodeType;
+            address?: string;
+            /**
+             * on EditableBlueprintResources, this indicates if the resource is ready to be exported and on InstalledBlueprintResources, this indicates if the resource is ready to be used
+             */
+            is_ready?: boolean;
+            /**
+             * An internal note to help remember what's missing to export the resource
+             */
+            note?: string;
+        }
+        export interface FileBlueprint {
+            id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            title: string;
+            slug?: string;
+            description?: {
+                /**
+                 * Markdown content shown before starting to install the blueprint
+                 * example:
+                 * This is the content of the preinstall.md file which contains the blueprint description.
+                 *
+                 */
+                preinstall?: string;
+                /**
+                 * Markdown content to be displayed when showing the plan to install blueprint
+                 * example:
+                 * This is the content of the postinstall.md file
+                 *
+                 */
+                postinstall?: string;
+            };
+            version?: string;
+            /**
+             * Whether the blueprint is verified by epilot
+             */
+            is_verified?: boolean;
+            source_type?: "file";
+            resources?: InstalledBlueprintResource[];
+        }
         export interface FormattedError {
             error?: string | {
                 [key: string]: any;
@@ -227,6 +424,63 @@ declare namespace Components {
                 name?: string;
                 type?: string;
             };
+        }
+        export interface InstallationJob {
+            id?: /**
+             * ID of an installation job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            InstallationJobID;
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            source_blueprint_type?: "file" | "marketplace" | "deploy" | "app";
+            source_org_id?: string;
+            destination_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            destination_org_id?: string;
+            status?: "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
+            triggered_at?: string; // date-time
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
+        }
+        export interface InstallationJobEvent {
+            timestamp?: string; // date-time
+            message?: string;
+            level?: "info" | "warning" | "error";
+            data?: {
+                [name: string]: any;
+            };
+        }
+        /**
+         * ID of an installation job
+         * example:
+         * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+         */
+        export type InstallationJobID = string;
+        export interface InstalledBlueprintResource {
+            id: /**
+             * ID of a blueprint resource
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintResourceID;
+            name?: string;
+            type: /* Type of the resource */ ResourceNodeType;
+            address?: string;
+            /**
+             * on EditableBlueprintResources, this indicates if the resource is ready to be exported and on InstalledBlueprintResources, this indicates if the resource is ready to be used
+             */
+            is_ready?: boolean;
+            impact_on_install?: "create" | "update" | "no-op" | "delete";
         }
         export interface Job {
             job_id?: /**
@@ -704,6 +958,43 @@ declare namespace Components {
              */
             updated_at?: string; // date-time
         }
+        export interface MarketplaceBlueprint {
+            id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            title: string;
+            slug?: string;
+            description?: {
+                /**
+                 * Markdown content shown before starting to install the blueprint
+                 * example:
+                 * This is the content of the preinstall.md file which contains the blueprint description.
+                 *
+                 */
+                preinstall?: string;
+                /**
+                 * Markdown content to be displayed when showing the plan to install blueprint
+                 * example:
+                 * This is the content of the postinstall.md file
+                 *
+                 */
+                postinstall?: string;
+            };
+            version?: string;
+            /**
+             * URL to the blueprint documentation
+             */
+            docs_url?: string;
+            /**
+             * Whether the blueprint is verified by epilot
+             */
+            is_verified?: boolean;
+            source_type?: "marketplace";
+            resources?: InstalledBlueprintResource[];
+        }
         export type PlanChanges = ("create" | "update" | "no-op" | "delete")[];
         export interface PutManifestPayload {
             /**
@@ -825,6 +1116,10 @@ declare namespace Components {
             exported_root_resources: {
                 id: string;
                 type: /* Type of the resource */ ResourceNodeType;
+                /**
+                 * Terraform address of the resource
+                 */
+                address?: string;
             }[];
             selected_resources: string[];
             /**
@@ -862,6 +1157,32 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace AddBlueprintResource {
+        namespace Parameters {
+            /**
+             * Whether to add this resource dependencies to the blueprint automatically
+             */
+            export type AddDependencies = boolean;
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface QueryParameters {
+            add_dependencies?: /* Whether to add this resource dependencies to the blueprint automatically */ Parameters.AddDependencies;
+        }
+        export type RequestBody = Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource;
+        namespace Responses {
+            export interface $200 {
+                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+            }
+        }
+    }
     namespace ApplyPlan {
         namespace Parameters {
             export type JobId = /**
@@ -893,6 +1214,97 @@ declare namespace Paths {
                  */
                 Components.Schemas.JobID;
             }
+        }
+    }
+    namespace BulkAddBlueprintResources {
+        namespace Parameters {
+            /**
+             * Whether to add this resource dependencies to the blueprint automatically
+             */
+            export type AddDependencies = boolean;
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface QueryParameters {
+            add_dependencies?: /* Whether to add this resource dependencies to the blueprint automatically */ Parameters.AddDependencies;
+        }
+        export type RequestBody = (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+        namespace Responses {
+            export interface $200 {
+                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+            }
+        }
+    }
+    namespace BulkDeleteBlueprintResources {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export type RequestBody = /**
+         * ID of a blueprint resource
+         * example:
+         * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+         */
+        Components.Schemas.BlueprintResourceID[];
+        namespace Responses {
+            export interface $200 {
+                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+            }
+        }
+    }
+    namespace BulkUpdateBlueprintResources {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export type RequestBody = (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+        namespace Responses {
+            export interface $200 {
+                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+            }
+        }
+    }
+    namespace ContinueInstallationJob {
+        namespace Parameters {
+            export type JobId = /**
+             * ID of an installation job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.InstallationJobID;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.InstallationJob;
+        }
+    }
+    namespace CreateBlueprint {
+        export type RequestBody = Components.Schemas.CommonBlueprintFields;
+        namespace Responses {
+            export type $200 = Components.Schemas.CustomBlueprint;
         }
     }
     namespace CreateExport {
@@ -937,6 +1349,34 @@ declare namespace Paths {
             }
         }
     }
+    namespace CreateInstallationJob {
+        export interface RequestBody {
+            source_blueprint_id: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            /**
+             * Destination organization ID
+             */
+            destination_org_id: string;
+            /**
+             * Installation mode
+             */
+            mode: "simple" | "advanced";
+        }
+        namespace Responses {
+            export interface $202 {
+                job_id?: /**
+                 * ID of an installation job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.InstallationJobID;
+            }
+        }
+    }
     namespace CreatePlan {
         export type RequestBody = {
             /**
@@ -960,6 +1400,12 @@ declare namespace Paths {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             manifest_id?: string;
+            /**
+             * ID of an import or export job (state machine)
+             * example:
+             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+             */
+            job_id?: string;
             /**
              * Source of the manifest
              */
@@ -989,6 +1435,12 @@ declare namespace Paths {
              */
             manifest_id?: string;
             /**
+             * ID of an import or export job (state machine)
+             * example:
+             * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
+             */
+            job_id?: string;
+            /**
              * Source of the manifest
              */
             source?: "file" | "marketplace" | "sandbox";
@@ -1016,6 +1468,31 @@ declare namespace Paths {
             }
         }
     }
+    namespace DeleteBlueprintResource {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type ResourceId = /**
+             * ID of a blueprint resource
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintResourceID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            resource_id: Parameters.ResourceId;
+        }
+        namespace Responses {
+            export interface $200 {
+                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+            }
+        }
+    }
     namespace DeleteManifest {
         namespace Parameters {
             export type ManifestId = /**
@@ -1030,6 +1507,24 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.Manifest;
+        }
+    }
+    namespace ExportBlueprint {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        namespace Responses {
+            export interface $200 {
+                url?: string;
+            }
         }
     }
     namespace ExportManifest {
@@ -1083,6 +1578,63 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetBlueprint {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Blueprint;
+        }
+    }
+    namespace GetInstallationJob {
+        namespace Parameters {
+            export type JobId = /**
+             * ID of an installation job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.InstallationJobID;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.InstallationJob;
+        }
+    }
+    namespace GetInstallationJobEvents {
+        namespace Parameters {
+            export type JobId = /**
+             * ID of an installation job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.InstallationJobID;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export interface $200 {
+                created_at?: string; // date-time
+                status?: "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
+                errors?: Components.Schemas.FormattedError[];
+                /**
+                 * Progress completion (0-100)
+                 */
+                progress?: number; // float
+                events?: Components.Schemas.InstallationJobEvent[];
+            }
+        }
+    }
     namespace GetJob {
         namespace Parameters {
             export type JobId = /**
@@ -1115,6 +1667,11 @@ declare namespace Paths {
             export type $200 = Components.Schemas.Manifest;
         }
     }
+    namespace ListBlueprints {
+        namespace Responses {
+            export type $200 = Components.Schemas.Blueprint[];
+        }
+    }
     namespace ListInstalledManifests {
         namespace Responses {
             export interface $200 {
@@ -1124,6 +1681,74 @@ declare namespace Paths {
                  */
                 total?: number;
                 results?: Components.Schemas.ManifestItem[];
+            }
+        }
+    }
+    namespace SyncDependencies {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type ResourceId = /**
+             * ID of a blueprint resource
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintResourceID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            resource_id: Parameters.ResourceId;
+        }
+        namespace Responses {
+            export interface $200 {
+                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+            }
+        }
+    }
+    namespace UpdateBlueprint {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export type RequestBody = Components.Schemas.CommonBlueprintFields;
+        namespace Responses {
+            export type $200 = Components.Schemas.Blueprint;
+        }
+    }
+    namespace UpdateBlueprintResource {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type ResourceId = /**
+             * ID of a blueprint resource
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintResourceID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            resource_id: Parameters.ResourceId;
+        }
+        export type RequestBody = Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource;
+        namespace Responses {
+            export interface $200 {
+                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
             }
         }
     }
@@ -1155,6 +1780,19 @@ declare namespace Paths {
                  */
                 upload_url?: string; // url
             }
+        }
+    }
+    namespace V2BlueprintManifestInstallations$JobIdCancel {
+        namespace Parameters {
+            export type JobId = /**
+             * ID of an installation job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.InstallationJobID;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
         }
     }
 }
@@ -1271,6 +1909,167 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteManifest.Responses.$200>
+  /**
+   * listBlueprints - listBlueprints
+   * 
+   * List Custom and Installed Blueprints
+   */
+  'listBlueprints'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListBlueprints.Responses.$200>
+  /**
+   * createBlueprint - createBlueprint
+   * 
+   * Create a Blueprint
+   */
+  'createBlueprint'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateBlueprint.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
+  /**
+   * getBlueprint - getBlueprint
+   * 
+   * Get Blueprint by ID
+   */
+  'getBlueprint'(
+    parameters?: Parameters<Paths.GetBlueprint.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprint.Responses.$200>
+  /**
+   * updateBlueprint - updateBlueprint
+   * 
+   * Update a Blueprint
+   */
+  'updateBlueprint'(
+    parameters?: Parameters<Paths.UpdateBlueprint.PathParameters> | null,
+    data?: Paths.UpdateBlueprint.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateBlueprint.Responses.$200>
+  /**
+   * exportBlueprint - exportBlueprint
+   * 
+   * Zip the blueprint content and return the url to download it
+   */
+  'exportBlueprint'(
+    parameters?: Parameters<Paths.ExportBlueprint.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ExportBlueprint.Responses.$200>
+  /**
+   * addBlueprintResource - addBlueprintResource
+   * 
+   * Add a resource to a Blueprint
+   */
+  'addBlueprintResource'(
+    parameters?: Parameters<Paths.AddBlueprintResource.QueryParameters & Paths.AddBlueprintResource.PathParameters> | null,
+    data?: Paths.AddBlueprintResource.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AddBlueprintResource.Responses.$200>
+  /**
+   * bulkUpdateBlueprintResources - bulkUpdateBlueprintResources
+   * 
+   * Bulk update resources in a Blueprint
+   */
+  'bulkUpdateBlueprintResources'(
+    parameters?: Parameters<Paths.BulkUpdateBlueprintResources.PathParameters> | null,
+    data?: Paths.BulkUpdateBlueprintResources.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkUpdateBlueprintResources.Responses.$200>
+  /**
+   * bulkAddBlueprintResources - bulkAddBlueprintResources
+   * 
+   * Bulk Add resources in a Blueprint
+   */
+  'bulkAddBlueprintResources'(
+    parameters?: Parameters<Paths.BulkAddBlueprintResources.QueryParameters & Paths.BulkAddBlueprintResources.PathParameters> | null,
+    data?: Paths.BulkAddBlueprintResources.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkAddBlueprintResources.Responses.$200>
+  /**
+   * bulkDeleteBlueprintResources - bulkDeleteBlueprintResources
+   * 
+   * Bulk delete resources in a Blueprint
+   */
+  'bulkDeleteBlueprintResources'(
+    parameters?: Parameters<Paths.BulkDeleteBlueprintResources.PathParameters> | null,
+    data?: Paths.BulkDeleteBlueprintResources.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkDeleteBlueprintResources.Responses.$200>
+  /**
+   * updateBlueprintResource - updateBlueprintResource
+   * 
+   * Update a resource in a Blueprint
+   */
+  'updateBlueprintResource'(
+    parameters?: Parameters<Paths.UpdateBlueprintResource.PathParameters> | null,
+    data?: Paths.UpdateBlueprintResource.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateBlueprintResource.Responses.$200>
+  /**
+   * deleteBlueprintResource - deleteBlueprintResource
+   * 
+   * Delete a resource from a Blueprint
+   */
+  'deleteBlueprintResource'(
+    parameters?: Parameters<Paths.DeleteBlueprintResource.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteBlueprintResource.Responses.$200>
+  /**
+   * syncDependencies - syncDependencies
+   * 
+   * Sync dependencies of a resource in a Blueprint
+   */
+  'syncDependencies'(
+    parameters?: Parameters<Paths.SyncDependencies.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SyncDependencies.Responses.$200>
+  /**
+   * createInstallationJob - Create Installation Job
+   * 
+   * Kick off a new installation job. Returns 202 Accepted with Location header pointing to the job resource and a strict idempotency-key header.
+   * 
+   */
+  'createInstallationJob'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateInstallationJob.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateInstallationJob.Responses.$202>
+  /**
+   * getInstallationJob - Get Installation Job
+   * 
+   * Poll current state of an installation job.
+   */
+  'getInstallationJob'(
+    parameters?: Parameters<Paths.GetInstallationJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetInstallationJob.Responses.$200>
+  /**
+   * continueInstallationJob - Continue Installation Job
+   * 
+   * Continue an installation job if it is waiting for user action.
+   */
+  'continueInstallationJob'(
+    parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ContinueInstallationJob.Responses.$200>
+  /**
+   * getInstallationJobEvents - Get Installation Job Events
+   * 
+   * Event log for an installation job.
+   */
+  'getInstallationJobEvents'(
+    parameters?: Parameters<Paths.GetInstallationJobEvents.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetInstallationJobEvents.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1401,19 +2200,218 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteManifest.Responses.$200>
   }
+  ['/v2/blueprint-manifest/blueprints']: {
+    /**
+     * listBlueprints - listBlueprints
+     * 
+     * List Custom and Installed Blueprints
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListBlueprints.Responses.$200>
+    /**
+     * createBlueprint - createBlueprint
+     * 
+     * Create a Blueprint
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateBlueprint.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}']: {
+    /**
+     * getBlueprint - getBlueprint
+     * 
+     * Get Blueprint by ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprint.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprint.Responses.$200>
+    /**
+     * updateBlueprint - updateBlueprint
+     * 
+     * Update a Blueprint
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateBlueprint.PathParameters> | null,
+      data?: Paths.UpdateBlueprint.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateBlueprint.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}:export']: {
+    /**
+     * exportBlueprint - exportBlueprint
+     * 
+     * Zip the blueprint content and return the url to download it
+     */
+    'post'(
+      parameters?: Parameters<Paths.ExportBlueprint.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ExportBlueprint.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources']: {
+    /**
+     * addBlueprintResource - addBlueprintResource
+     * 
+     * Add a resource to a Blueprint
+     */
+    'post'(
+      parameters?: Parameters<Paths.AddBlueprintResource.QueryParameters & Paths.AddBlueprintResource.PathParameters> | null,
+      data?: Paths.AddBlueprintResource.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AddBlueprintResource.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/bulk']: {
+    /**
+     * bulkAddBlueprintResources - bulkAddBlueprintResources
+     * 
+     * Bulk Add resources in a Blueprint
+     */
+    'post'(
+      parameters?: Parameters<Paths.BulkAddBlueprintResources.QueryParameters & Paths.BulkAddBlueprintResources.PathParameters> | null,
+      data?: Paths.BulkAddBlueprintResources.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkAddBlueprintResources.Responses.$200>
+    /**
+     * bulkUpdateBlueprintResources - bulkUpdateBlueprintResources
+     * 
+     * Bulk update resources in a Blueprint
+     */
+    'put'(
+      parameters?: Parameters<Paths.BulkUpdateBlueprintResources.PathParameters> | null,
+      data?: Paths.BulkUpdateBlueprintResources.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkUpdateBlueprintResources.Responses.$200>
+    /**
+     * bulkDeleteBlueprintResources - bulkDeleteBlueprintResources
+     * 
+     * Bulk delete resources in a Blueprint
+     */
+    'delete'(
+      parameters?: Parameters<Paths.BulkDeleteBlueprintResources.PathParameters> | null,
+      data?: Paths.BulkDeleteBlueprintResources.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkDeleteBlueprintResources.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}']: {
+    /**
+     * updateBlueprintResource - updateBlueprintResource
+     * 
+     * Update a resource in a Blueprint
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateBlueprintResource.PathParameters> | null,
+      data?: Paths.UpdateBlueprintResource.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateBlueprintResource.Responses.$200>
+    /**
+     * deleteBlueprintResource - deleteBlueprintResource
+     * 
+     * Delete a resource from a Blueprint
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteBlueprintResource.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteBlueprintResource.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}:syncDependencies']: {
+    /**
+     * syncDependencies - syncDependencies
+     * 
+     * Sync dependencies of a resource in a Blueprint
+     */
+    'post'(
+      parameters?: Parameters<Paths.SyncDependencies.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SyncDependencies.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/installations']: {
+    /**
+     * createInstallationJob - Create Installation Job
+     * 
+     * Kick off a new installation job. Returns 202 Accepted with Location header pointing to the job resource and a strict idempotency-key header.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateInstallationJob.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateInstallationJob.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/installations/{job_id}']: {
+    /**
+     * getInstallationJob - Get Installation Job
+     * 
+     * Poll current state of an installation job.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetInstallationJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetInstallationJob.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/installations/{job_id}:continue']: {
+    /**
+     * continueInstallationJob - Continue Installation Job
+     * 
+     * Continue an installation job if it is waiting for user action.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ContinueInstallationJob.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/installations/{job_id}:cancel']: {
+  }
+  ['/v2/blueprint-manifest/installations/{job_id}/events']: {
+    /**
+     * getInstallationJobEvents - Get Installation Job Events
+     * 
+     * Event log for an installation job.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetInstallationJobEvents.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetInstallationJobEvents.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type AppBlueprint = Components.Schemas.AppBlueprint;
+export type Blueprint = Components.Schemas.Blueprint;
+export type BlueprintID = Components.Schemas.BlueprintID;
 export type BlueprintInstallStatus = Components.Schemas.BlueprintInstallStatus;
+export type BlueprintResource = Components.Schemas.BlueprintResource;
+export type BlueprintResourceID = Components.Schemas.BlueprintResourceID;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
+export type CommonBlueprintFields = Components.Schemas.CommonBlueprintFields;
 export type CommonImportFields = Components.Schemas.CommonImportFields;
 export type CommonManifestFields = Components.Schemas.CommonManifestFields;
 export type CommonMarkdownFields = Components.Schemas.CommonMarkdownFields;
 export type CommonResourceNode = Components.Schemas.CommonResourceNode;
+export type CustomBlueprint = Components.Schemas.CustomBlueprint;
+export type DeployedBlueprint = Components.Schemas.DeployedBlueprint;
+export type EditableBlueprintResource = Components.Schemas.EditableBlueprintResource;
+export type FileBlueprint = Components.Schemas.FileBlueprint;
 export type FormattedError = Components.Schemas.FormattedError;
 export type FormattedErrorCodes = Components.Schemas.FormattedErrorCodes;
 export type FormattedErrorData = Components.Schemas.FormattedErrorData;
+export type InstallationJob = Components.Schemas.InstallationJob;
+export type InstallationJobEvent = Components.Schemas.InstallationJobEvent;
+export type InstallationJobID = Components.Schemas.InstallationJobID;
+export type InstalledBlueprintResource = Components.Schemas.InstalledBlueprintResource;
 export type Job = Components.Schemas.Job;
 export type JobID = Components.Schemas.JobID;
 export type JobStatus = Components.Schemas.JobStatus;
@@ -1422,6 +2420,7 @@ export type ManifestID = Components.Schemas.ManifestID;
 export type ManifestItem = Components.Schemas.ManifestItem;
 export type ManifestSource = Components.Schemas.ManifestSource;
 export type ManifestTimestampFields = Components.Schemas.ManifestTimestampFields;
+export type MarketplaceBlueprint = Components.Schemas.MarketplaceBlueprint;
 export type PlanChanges = Components.Schemas.PlanChanges;
 export type PutManifestPayload = Components.Schemas.PutManifestPayload;
 export type ResourceNode = Components.Schemas.ResourceNode;
