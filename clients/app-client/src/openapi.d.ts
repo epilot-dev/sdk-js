@@ -233,7 +233,7 @@ declare namespace Components {
             surfaces?: {
                 [key: string]: any;
             };
-        } & (JourneyBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent);
+        } & (JourneyBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent);
         export interface BaseComponentCommon {
             /**
              * Unique identifier for the component
@@ -433,7 +433,7 @@ declare namespace Components {
         /**
          * Type of app component
          */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT";
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY";
         /**
          * Configuration of the published app
          */
@@ -770,6 +770,22 @@ declare namespace Components {
                  * User ID of the user who last updated the app
                  */
                 versioned_by?: string;
+            };
+        }
+        export interface CustomCapabilityComponent {
+            component_type: "CUSTOM_CAPABILITY";
+            configuration: {
+                /**
+                 * Define what type of capability this is
+                 */
+                type?: "tab" | "group";
+                /**
+                 * Which schemas are supported by the capability. If empty, all schemas are supported.
+                 */
+                allowed_schemas?: string[];
+            };
+            surfaces?: {
+                capability_config?: AppBridgeSurfaceConfig;
             };
         }
         export interface CustomFlowActionComponent {
@@ -2408,6 +2424,7 @@ export type ComponentType = Components.Schemas.ComponentType;
 export type Configuration = Components.Schemas.Configuration;
 export type ConfigurationMetadata = Components.Schemas.ConfigurationMetadata;
 export type ConfigurationVersion = Components.Schemas.ConfigurationVersion;
+export type CustomCapabilityComponent = Components.Schemas.CustomCapabilityComponent;
 export type CustomFlowActionComponent = Components.Schemas.CustomFlowActionComponent;
 export type CustomFlowConfig = Components.Schemas.CustomFlowConfig;
 export type EnumArg = Components.Schemas.EnumArg;

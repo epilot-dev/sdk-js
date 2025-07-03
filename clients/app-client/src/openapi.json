@@ -1622,7 +1622,8 @@
           "CUSTOM_JOURNEY_BLOCK",
           "PORTAL_EXTENSION",
           "CUSTOM_FLOW_ACTION",
-          "ERP_INFORM_TOOLKIT"
+          "ERP_INFORM_TOOLKIT",
+          "CUSTOM_CAPABILITY"
         ],
         "description": "Type of app component"
       },
@@ -1730,7 +1731,8 @@
                 "CUSTOM_JOURNEY_BLOCK": "#/components/schemas/JourneyBlockComponent",
                 "PORTAL_EXTENSION": "#/components/schemas/PortalExtensionComponent",
                 "CUSTOM_FLOW_ACTION": "#/components/schemas/CustomFlowActionComponent",
-                "ERP_INFORM_TOOLKIT": "#/components/schemas/ErpInformToolkitComponent"
+                "ERP_INFORM_TOOLKIT": "#/components/schemas/ErpInformToolkitComponent",
+                "CUSTOM_CAPABILITY": "#/components/schemas/CustomCapabilityComponent"
               }
             },
             "oneOf": [
@@ -1745,10 +1747,58 @@
               },
               {
                 "$ref": "#/components/schemas/ErpInformToolkitComponent"
+              },
+              {
+                "$ref": "#/components/schemas/CustomCapabilityComponent"
               }
             ]
           }
         ]
+      },
+      "CustomCapabilityComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "CUSTOM_CAPABILITY"
+            ]
+          },
+          "configuration": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "description": "Define what type of capability this is",
+                "type": "string",
+                "enum": [
+                  "tab",
+                  "group"
+                ]
+              },
+              "allowed_schemas": {
+                "description": "Which schemas are supported by the capability. If empty, all schemas are supported.",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "Name of the schema",
+                  "example": "opportunity"
+                }
+              }
+            }
+          },
+          "surfaces": {
+            "type": "object",
+            "properties": {
+              "capability_config": {
+                "$ref": "#/components/schemas/AppBridgeSurfaceConfig"
+              }
+            }
+          }
+        }
       },
       "JourneyBlockComponent": {
         "type": "object",
