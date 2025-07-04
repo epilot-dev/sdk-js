@@ -452,6 +452,15 @@
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
+                  "version": {
+                    "type": "string",
+                    "description": "Version of the app configuration",
+                    "example": "1.0.0"
+                  },
+                  "component_id": {
+                    "type": "string",
+                    "description": "ID of the journey block component"
+                  },
                   "filename": {
                     "type": "string",
                     "example": "dist.zip"
@@ -473,6 +482,10 @@
                     "artifact_url"
                   ],
                   "properties": {
+                    "component_id": {
+                      "type": "string",
+                      "description": "ID of the journye block component"
+                    },
                     "upload_url": {
                       "type": "string",
                       "description": "Presigned S3 URL for uploading the bundle"

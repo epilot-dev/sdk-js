@@ -1438,6 +1438,16 @@ declare namespace Paths {
         }
         export interface RequestBody {
             /**
+             * Version of the app configuration
+             * example:
+             * 1.0.0
+             */
+            version?: string;
+            /**
+             * ID of the journey block component
+             */
+            component_id?: string;
+            /**
              * example:
              * dist.zip
              */
@@ -1445,6 +1455,10 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
+                /**
+                 * ID of the journye block component
+                 */
+                component_id?: string;
                 /**
                  * Presigned S3 URL for uploading the bundle
                  */
