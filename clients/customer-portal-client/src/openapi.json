@@ -1687,7 +1687,8 @@
       "get": {
         "operationId": "getOrganizationSettings",
         "summary": "getOrganizationSettings",
-        "description": "Retrieves the organization settings.",
+        "description": "Retrieves the organization settings. This endpoint is deprecated, use org_settings from the portal config or getOrganizationSettingsByDomain instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -1796,6 +1797,49 @@
                       "items": {
                         "$ref": "#/components/schemas/Schema"
                       }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/org/settings": {
+      "get": {
+        "operationId": "getOrganizationSettingsByDomain",
+        "summary": "getOrganizationSettingsByDomain",
+        "description": "Retrieves organization settings by domain. Only public organization settings are returned.",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "domain",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Domain of the portal",
+              "example": "ecp.dev.epilot.io"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved organization settings successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/OrganizationSettings"
                     }
                   }
                 }
@@ -4635,6 +4679,23 @@
               "example": [
                 "4910096f-000a-4504-bf5a-d3774ec3032a",
                 "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "file_types",
+            "description": "List of `File.type`'s to filter the results",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "uniqueItems": true,
+              "example": [
+                "document",
+                "image"
               ]
             }
           }

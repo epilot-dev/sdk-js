@@ -5350,6 +5350,17 @@ declare namespace Paths {
                 Components.Schemas.EntityId /* uuid */[]
             ];
             /**
+             * example:
+             * [
+             *   "document",
+             *   "image"
+             * ]
+             */
+            export type FileTypes = [
+                string,
+                ...string[]
+            ];
+            /**
              * Initial offset to set for the search results
              * example:
              * 0
@@ -5383,6 +5394,14 @@ declare namespace Paths {
              * ]
              */
             Parameters.EntityIds;
+            file_types?: /**
+             * example:
+             * [
+             *   "document",
+             *   "image"
+             * ]
+             */
+            Parameters.FileTypes;
         }
         namespace Responses {
             export interface $200 {
@@ -6681,6 +6700,30 @@ declare namespace Paths {
                 data?: Components.Schemas.OrganizationSettings;
             }
             export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetOrganizationSettingsByDomain {
+        namespace Parameters {
+            /**
+             * Domain of the portal
+             * example:
+             * ecp.dev.epilot.io
+             */
+            export type Domain = string;
+        }
+        export interface QueryParameters {
+            domain: /**
+             * Domain of the portal
+             * example:
+             * ecp.dev.epilot.io
+             */
+            Parameters.Domain;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.OrganizationSettings;
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -8453,7 +8496,7 @@ export interface OperationMethods {
   /**
    * getOrganizationSettings - getOrganizationSettings
    * 
-   * Retrieves the organization settings.
+   * Retrieves the organization settings. This endpoint is deprecated, use org_settings from the portal config or getOrganizationSettingsByDomain instead.
    */
   'getOrganizationSettings'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -8480,6 +8523,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchemasByDomain.Responses.$200>
+  /**
+   * getOrganizationSettingsByDomain - getOrganizationSettingsByDomain
+   * 
+   * Retrieves organization settings by domain. Only public organization settings are returned.
+   */
+  'getOrganizationSettingsByDomain'(
+    parameters?: Parameters<Paths.GetOrganizationSettingsByDomain.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetOrganizationSettingsByDomain.Responses.$200>
   /**
    * extraPermissionAttributes - extraPermissionAttributes
    * 
@@ -9482,7 +9535,7 @@ export interface PathsDictionary {
     /**
      * getOrganizationSettings - getOrganizationSettings
      * 
-     * Retrieves the organization settings.
+     * Retrieves the organization settings. This endpoint is deprecated, use org_settings from the portal config or getOrganizationSettingsByDomain instead.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -9513,6 +9566,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchemasByDomain.Responses.$200>
+  }
+  ['/v2/portal/public/org/settings']: {
+    /**
+     * getOrganizationSettingsByDomain - getOrganizationSettingsByDomain
+     * 
+     * Retrieves organization settings by domain. Only public organization settings are returned.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetOrganizationSettingsByDomain.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetOrganizationSettingsByDomain.Responses.$200>
   }
   ['/v2/portal/extra-permission-attributes']: {
     /**

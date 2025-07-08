@@ -418,6 +418,7 @@
     "/v2/portal/org/settings": {
       "get": {
         "operationId": "getOrganizationSettings",
+        "deprecated": true,
         "responses": {}
       }
     },
@@ -430,6 +431,19 @@
     "/v2/portal/public/schemas": {
       "get": {
         "operationId": "getSchemasByDomain",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "domain",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/public/org/settings": {
+      "get": {
+        "operationId": "getOrganizationSettingsByDomain",
         "parameters": [
           {
             "in": "query",
@@ -1062,6 +1076,10 @@
           {
             "in": "query",
             "name": "entity_ids"
+          },
+          {
+            "in": "query",
+            "name": "file_types"
           }
         ],
         "responses": {}
