@@ -69,6 +69,15 @@
               "type": "string",
               "example": "600945fe-212e-4b97-acf7-391d64648384"
             }
+          },
+          {
+            "name": "include_flows",
+            "in": "query",
+            "description": "Include flow automations in the response",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -260,6 +269,15 @@
             "schema": {
               "type": "integer",
               "default": 0
+            }
+          },
+          {
+            "name": "include_flows",
+            "in": "query",
+            "description": "Include flow automations in the response",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -1070,12 +1088,46 @@
               "example": "123e4567-e89b-12d3-a456-426614174000"
             },
             "nullable": true
+          },
+          "workflow_context": {
+            "$ref": "#/components/schemas/WorkflowContext"
           }
         },
         "required": [
           "flow_name",
           "triggers",
           "actions"
+        ]
+      },
+      "WorkflowContext": {
+        "type": "object",
+        "description": "For automation that are connected to workflows V2, this field tracks various information about the workflow.",
+        "required": [
+          "workflow_id",
+          "workflow_role"
+        ],
+        "properties": {
+          "workflow_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the workflow this automation is connected to"
+          },
+          "task_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the task in the workflow that this automation is connected to"
+          },
+          "workflow_role": {
+            "$ref": "#/components/schemas/WorkflowContextRole"
+          }
+        }
+      },
+      "WorkflowContextRole": {
+        "type": "string",
+        "description": "The role this automation plays in the workflow.",
+        "enum": [
+          "trigger_workflow",
+          "run_task_automation"
         ]
       },
       "SearchAutomationsResp": {
@@ -2958,6 +3010,9 @@
                 "$ref": "#/components/schemas/TriggerEventFlowAutomationTask"
               }
             ]
+          },
+          "workflow_context": {
+            "$ref": "#/components/schemas/WorkflowExecutionContext"
           }
         },
         "required": [
@@ -2968,6 +3023,24 @@
           "flow_id",
           "actions"
         ]
+      },
+      "WorkflowExecutionContext": {
+        "type": "object",
+        "required": [
+          "workflow_exec_id",
+          "workflow_role"
+        ],
+        "properties": {
+          "workflow_exec_id": {
+            "type": "string"
+          },
+          "workflow_exec_task_id": {
+            "type": "string"
+          },
+          "workflow_role": {
+            "$ref": "#/components/schemas/WorkflowContextRole"
+          }
+        }
       },
       "TriggerEventManual": {
         "type": "object",
@@ -3193,14 +3266,18 @@
           "flow_id": {
             "$ref": "#/components/schemas/AutomationFlowId"
           },
+          "workflow_context": {
+            "$ref": "#/components/schemas/WorkflowExecutionContext"
+          },
           "flow_execution_id": {
             "type": "string",
-            "description": "ID of the Flow Execution"
+            "deprecated": true,
+            "description": "Use workflow_context.workflow_exec_id instead"
           },
           "flow_automation_task_id": {
             "type": "string",
-            "format": "UUID",
-            "description": "ID of the automated flow action"
+            "deprecated": true,
+            "description": "Use workflow_context.workflow_exec_task_id instead"
           }
         },
         "required": [

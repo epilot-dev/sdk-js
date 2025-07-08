@@ -24,6 +24,10 @@
           {
             "name": "trigger_source_id",
             "in": "query"
+          },
+          {
+            "name": "include_flows",
+            "in": "query"
           }
         ],
         "responses": {}
@@ -92,6 +96,10 @@
           },
           {
             "name": "from",
+            "in": "query"
+          },
+          {
+            "name": "include_flows",
             "in": "query"
           }
         ],

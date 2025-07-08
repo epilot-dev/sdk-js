@@ -807,6 +807,7 @@ declare namespace Components {
              */
             version?: number;
             trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask;
+            workflow_context?: WorkflowExecutionContext;
         }
         /**
          * example:
@@ -922,6 +923,7 @@ declare namespace Components {
              * Source blueprint/manifest ID used when automation is created via blueprints.
              */
             _manifest?: string /* uuid */[] | null;
+            workflow_context?: /* For automation that are connected to workflows V2, this field tracks various information about the workflow. */ WorkflowContext;
         }
         /**
          * ID of the Automation Flow
@@ -3035,14 +3037,15 @@ declare namespace Components {
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
             AutomationFlowId;
+            workflow_context?: WorkflowExecutionContext;
             /**
-             * ID of the Flow Execution
+             * Use workflow_context.workflow_exec_id instead
              */
             flow_execution_id?: string;
             /**
-             * ID of the automated flow action
+             * Use workflow_context.workflow_exec_task_id instead
              */
-            flow_automation_task_id?: string; // UUID
+            flow_automation_task_id?: string;
         }
         export interface SuffixCondition {
             suffix?: string;
@@ -3589,6 +3592,29 @@ declare namespace Components {
         export interface WildcardCondition {
             wildcard?: string;
         }
+        /**
+         * For automation that are connected to workflows V2, this field tracks various information about the workflow.
+         */
+        export interface WorkflowContext {
+            /**
+             * The ID of the workflow this automation is connected to
+             */
+            workflow_id: string; // uuid
+            /**
+             * The ID of the task in the workflow that this automation is connected to
+             */
+            task_id?: string; // uuid
+            workflow_role: /* The role this automation plays in the workflow. */ WorkflowContextRole;
+        }
+        /**
+         * The role this automation plays in the workflow.
+         */
+        export type WorkflowContextRole = "trigger_workflow" | "run_task_automation";
+        export interface WorkflowExecutionContext {
+            workflow_exec_id: string;
+            workflow_exec_task_id?: string;
+            workflow_role: /* The role this automation plays in the workflow. */ WorkflowContextRole;
+        }
     }
 }
 declare namespace Paths {
@@ -3788,12 +3814,14 @@ declare namespace Paths {
              */
             Components.Schemas.EntityId;
             export type From = number;
+            export type IncludeFlows = boolean;
             export type Size = number;
         }
         export interface QueryParameters {
             entity_id?: Parameters.EntityId;
             size?: Parameters.Size;
             from?: Parameters.From;
+            include_flows?: Parameters.IncludeFlows;
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetExecutionsResp;
@@ -3963,6 +3991,7 @@ declare namespace Paths {
     namespace SearchFlows {
         namespace Parameters {
             export type From = number;
+            export type IncludeFlows = boolean;
             /**
              * example:
              * submission
@@ -3988,6 +4017,7 @@ declare namespace Paths {
              * 600945fe-212e-4b97-acf7-391d64648384
              */
             Parameters.TriggerSourceId;
+            include_flows?: Parameters.IncludeFlows;
         }
         namespace Responses {
             export type $200 = Components.Schemas.SearchAutomationsResp;
@@ -4008,6 +4038,7 @@ declare namespace Paths {
         }
     }
 }
+
 
 export interface OperationMethods {
   /**
@@ -4345,6 +4376,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type ActionCondition = Components.Schemas.ActionCondition;
 export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type ActionScheduleSource = Components.Schemas.ActionScheduleSource;
@@ -4459,3 +4491,6 @@ export type TriggerWorkflowActionConfig = Components.Schemas.TriggerWorkflowActi
 export type TriggerWorkflowCondition = Components.Schemas.TriggerWorkflowCondition;
 export type TriggerWorkflowConfig = Components.Schemas.TriggerWorkflowConfig;
 export type WildcardCondition = Components.Schemas.WildcardCondition;
+export type WorkflowContext = Components.Schemas.WorkflowContext;
+export type WorkflowContextRole = Components.Schemas.WorkflowContextRole;
+export type WorkflowExecutionContext = Components.Schemas.WorkflowExecutionContext;
