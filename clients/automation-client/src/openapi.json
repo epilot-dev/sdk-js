@@ -3611,7 +3611,13 @@
                 "properties": {
                   "source_id": {
                     "type": "string",
-                    "format": "uuid"
+                    "format": "uuid",
+                    "description": "The ID of the workflow v2 that triggers this automation"
+                  },
+                  "journey_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "When Journeys are linked to Workflows V2 as Journey Automations, this field will contain the ID of the Journey"
                   }
                 },
                 "required": [

@@ -2192,7 +2192,14 @@ declare namespace Components {
             id?: string; // uuid
             type: "flows_trigger";
             configuration: {
+                /**
+                 * The ID of the workflow v2 that triggers this automation
+                 */
                 source_id: string; // uuid
+                /**
+                 * When Journeys are linked to Workflows V2 as Journey Automations, this field will contain the ID of the Journey
+                 */
+                journey_id?: string; // uuid
             };
         }
         export interface FrontendSubmitTrigger {
