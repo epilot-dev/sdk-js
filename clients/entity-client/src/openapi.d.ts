@@ -2258,6 +2258,14 @@ declare namespace Components {
              * Manifest ID used to create/update the schema capabilility
              */
             _manifest?: string /* uuid */[] | null;
+            ui_config?: {
+                /**
+                 * Whether the capability is filterable
+                 * example:
+                 * true
+                 */
+                is_filterable?: boolean;
+            };
             ui_hooks?: {
                 [name: string]: any;
                 /**
@@ -2377,6 +2385,14 @@ declare namespace Components {
              * Manifest ID used to create/update the schema capabilility
              */
             _manifest?: string /* uuid */[] | null;
+            ui_config?: {
+                /**
+                 * Whether the capability is filterable
+                 * example:
+                 * true
+                 */
+                is_filterable?: boolean;
+            };
             ui_hooks?: {
                 [name: string]: any;
                 /**

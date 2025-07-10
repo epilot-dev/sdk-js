@@ -6489,6 +6489,17 @@
             },
             "nullable": true
           },
+          "ui_config": {
+            "type": "object",
+            "properties": {
+              "is_filterable": {
+                "type": "boolean",
+                "description": "Whether the capability is filterable",
+                "example": true,
+                "default": false
+              }
+            }
+          },
           "ui_hooks": {
             "type": "array",
             "items": {
