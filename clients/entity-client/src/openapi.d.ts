@@ -115,6 +115,28 @@ declare namespace Components {
              */
             error?: string;
         }
+        /**
+         * A generic error returned by the API
+         * example:
+         * {
+         *   "status": 429,
+         *   "error": "Too many requests. Try again later."
+         * }
+         */
+        export interface TooManyRequestsError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+        }
     }
     namespace Schemas {
         export interface Activity {
@@ -6589,15 +6611,7 @@ declare namespace Components {
              * example:
              * d5839b94-ba20-4225-a78e-76951d352bd6
              */
-            id?: /**
-             * example:
-             * taxonomy-slug:classification-slug
-             */
-            ClassificationId;
-            /**
-             * example:
-             * Wallbox PV
-             */
+            id?: string;
             name: string;
             label: string;
             placeholder?: string;
@@ -6655,7 +6669,7 @@ declare namespace Components {
              */
             ClassificationId[];
             /**
-             * Manifest ID used to create/update the taxonomy classification
+             * Manifest ID used to create/update the schema attribute
              */
             _manifest?: string /* uuid */[] | null;
             /**
@@ -6727,29 +6741,6 @@ declare namespace Components {
              */
             repeatable?: boolean;
             has_primary?: boolean;
-            /**
-             * URL-friendly identifier for the classification
-             * example:
-             * wallbox-pv
-             */
-            slug?: string;
-            parents?: /**
-             * example:
-             * taxonomy-slug:classification-slug
-             */
-            ClassificationId[];
-            /**
-             * Color of the classification
-             * example:
-             * #FF5733
-             */
-            color?: string;
-            created_at?: string; // date-time
-            updated_at?: string; // date-time
-            /**
-             * Archived classification are not visible in the UI
-             */
-            archived?: boolean;
             type: "purpose";
         }
         /**
@@ -6938,7 +6929,7 @@ declare namespace Components {
             relation_picker_filter?: {
                 /**
                  * example:
-                 * AND is_composite_price:true
+                 * NOT is_composite_price:true
                  */
                 q: string;
             };
@@ -8478,7 +8469,7 @@ declare namespace Components {
              * example:
              * wallbox-pv
              */
-            slug?: string;
+            slug: string;
             /**
              * example:
              * Wallbox PV
@@ -8888,6 +8879,15 @@ declare namespace Paths {
              * }
              */
             Components.Responses.NotFoundError;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace Autocomplete {
@@ -8951,6 +8951,15 @@ declare namespace Paths {
             export type $200 = Components.Schemas.TaxonomyBulkJobTriggerResponse;
             export interface $400 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace BulkMergeClassifications {
@@ -8975,6 +8984,15 @@ declare namespace Paths {
             export type $200 = Components.Schemas.TaxonomyBulkJobTriggerResponse;
             export interface $400 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace BulkMoveClassifications {
@@ -8999,6 +9017,15 @@ declare namespace Paths {
             export type $200 = Components.Schemas.TaxonomyBulkJobTriggerResponse;
             export interface $400 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace CancelBulkAction {
@@ -9028,6 +9055,15 @@ declare namespace Paths {
             }
             export interface $404 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
             export interface $500 {
             }
         }
@@ -9042,6 +9078,15 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.Activity;
         namespace Responses {
             export type $200 = Components.Schemas.BaseActivityItem;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace CreateEntity {
@@ -9156,36 +9201,90 @@ declare namespace Paths {
              */
             Components.Schemas.EntityItem;
             export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationV2ResultError;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace CreateSavedView {
         export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
         namespace Responses {
             export type $201 = /* A saved entity view */ Components.Schemas.SavedViewItem;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace CreateSchemaAttribute {
         export type RequestBody = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
         namespace Responses {
             export type $201 = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace CreateSchemaCapability {
         export type RequestBody = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
         namespace Responses {
             export type $201 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace CreateSchemaGroup {
         export type RequestBody = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
         namespace Responses {
             export type $201 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace CreateSchemaGroupHeadline {
         export type RequestBody = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
         namespace Responses {
             export type $201 = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace CreateTaxonomy {
@@ -9194,12 +9293,30 @@ declare namespace Paths {
             export type $201 = Components.Schemas.Taxonomy;
             export interface $409 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace CreateTaxonomyClassification {
         export type RequestBody = Components.Schemas.TaxonomyClassification;
         namespace Responses {
             export type $201 = Components.Schemas.TaxonomyClassification;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace DeleteEntity {
@@ -9230,6 +9347,15 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace DeleteRelation {
@@ -9273,6 +9399,15 @@ declare namespace Paths {
              * }
              */
             Components.Responses.NotFoundError;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace DeleteSavedView {
@@ -9285,6 +9420,15 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace DeleteSchema {
@@ -9302,6 +9446,15 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace DeleteSchemaAttribute {
@@ -9321,6 +9474,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* a readonly computed ID for the attribute including schema slug and the attribute ID */ Components.Schemas.AttributeWithCompositeID;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace DeleteSchemaCapability {
@@ -9340,6 +9502,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* a readonly computed ID for the entity capability including schema slug and the capability ID */ Components.Schemas.EntityCapabilityWithCompositeID;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace DeleteSchemaGroup {
@@ -9359,6 +9530,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* a readonly computed ID for the group including schema slug and the group ID */ Components.Schemas.EntitySchemaGroupWithCompositeID;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace DeleteSchemaGroupHeadline {
@@ -9378,6 +9558,15 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace DeleteTaxonomy {
@@ -9394,6 +9583,15 @@ declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace DeleteTaxonomyClassification {
@@ -9407,6 +9605,15 @@ declare namespace Paths {
             export type $200 = Components.Schemas.TaxonomyClassification;
             export interface $403 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace ExportEntities {
@@ -9429,6 +9636,15 @@ declare namespace Paths {
         namespace Responses {
             export interface $201 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace GetActivity {
@@ -10421,6 +10637,15 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace GetSchemaGroup {
@@ -10582,7 +10807,7 @@ declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00.000Z
+             * 2023-01-01T00:00:00Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -10608,7 +10833,7 @@ declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00.000Z
+             * 2023-01-01T00:00:00Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
@@ -10666,12 +10891,30 @@ declare namespace Paths {
         namespace Responses {
             export interface $201 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace ListEntities {
         export type RequestBody = Components.Schemas.EntityListParams;
         namespace Responses {
             export type $200 = Components.Schemas.EntitySearchResults;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace ListFavoriteViewsForUser {
@@ -10934,6 +11177,15 @@ declare namespace Paths {
         export type RequestBody = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchema;
         namespace Responses {
             export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace PutSchemaAttribute {
@@ -11085,6 +11337,15 @@ declare namespace Paths {
             Components.Schemas.EntityItem;
             export interface $404 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
             export interface $500 {
             }
         }
@@ -11127,6 +11388,15 @@ declare namespace Paths {
              * }
              */
             Components.Responses.NotFoundError;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace RestoreEntity {
@@ -11209,12 +11479,30 @@ declare namespace Paths {
             }
             export interface $404 {
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace SearchEntities {
         export type RequestBody = Components.Schemas.EntitySearchParams;
         namespace Responses {
             export type $200 = Components.Schemas.EntitySearchResults;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace TaxonomiesClassificationsSearch {
@@ -11271,6 +11559,15 @@ declare namespace Paths {
                  */
                 hits?: number;
             }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace TaxonomyAutocomplete {
@@ -11317,6 +11614,15 @@ declare namespace Paths {
              * }
              */
             Components.Responses.NotFoundError;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace UpdateEntity {
@@ -11694,6 +12000,15 @@ declare namespace Paths {
             export interface $409 {
             }
             export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationV2ResultError;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace ValidateEntity {
@@ -11752,6 +12067,15 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = /* Validation result for a successful validation */ Components.Schemas.EntityValidationResultSuccess;
             export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationResultError;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
         }
     }
     namespace ValidateEntityV2 {
@@ -11810,9 +12134,33 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = /* Validation result for a successful validation */ Components.Schemas.EntityValidationV2ResultSuccess;
             export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationV2ResultError;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
+        }
+    }
+    namespace WipeAllEntities {
+        export interface RequestBody {
+            schemas?: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug[];
+        }
+        namespace Responses {
+            export interface $201 {
+            }
         }
     }
 }
+
 
 export interface OperationMethods {
   /**
@@ -12270,6 +12618,17 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.Autocomplete.Responses.$200>
+  /**
+   * wipeAllEntities - wipeAllEntities
+   * 
+   * Creates a request to queue the deletion of all entities in the system. This is a destructive operation and should only be used in sandbox environments.
+   * 
+   */
+  'wipeAllEntities'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.WipeAllEntities.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.WipeAllEntities.Responses.$201>
   /**
    * createActivity - createActivity
    * 
@@ -13368,6 +13727,19 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.Autocomplete.Responses.$200>
   }
+  ['/v1/entity:wipeAllEntities']: {
+    /**
+     * wipeAllEntities - wipeAllEntities
+     * 
+     * Creates a request to queue the deletion of all entities in the system. This is a destructive operation and should only be used in sandbox environments.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.WipeAllEntities.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.WipeAllEntities.Responses.$201>
+  }
   ['/v1/entity/activity']: {
     /**
      * createActivity - createActivity
@@ -14051,6 +14423,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type Activity = Components.Schemas.Activity;
 export type ActivityCallerContext = Components.Schemas.ActivityCallerContext;

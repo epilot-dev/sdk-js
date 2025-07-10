@@ -430,6 +430,17 @@
         "responses": {}
       }
     },
+    "/v1/entity:wipeAllEntities": {
+      "post": {
+        "operationId": "wipeAllEntities",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/entity/activity": {
       "post": {
         "operationId": "createActivity",
@@ -1510,6 +1521,14 @@
     },
     "responses": {
       "NotFoundError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "TooManyRequestsError": {
+        "headers": {
+          "Retry-After": {}
+        },
         "content": {
           "application/json": {}
         }
