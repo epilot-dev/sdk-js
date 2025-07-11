@@ -467,7 +467,20 @@ declare namespace Components {
              * Indicates whether this flow execution is available for End Customer Portal or not. By default it's not.
              */
             available_in_ecp?: boolean;
-            update_entity_attributes?: UpdateEntityAttributes[];
+            update_entity_attributes?: /**
+             * example:
+             * {
+             *   "trigger": "workflow_started",
+             *   "target": {
+             *     "entitySchema": "opportunity",
+             *     "entityAttribute": "my_status"
+             *   },
+             *   "value": {
+             *     "source": "workflow_name"
+             *   }
+             * }
+             */
+            UpdateEntityAttributes[];
             /**
              * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
              */
@@ -1141,8 +1154,25 @@ declare namespace Components {
         export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months";
         export type TriggerMode = "manual" | "automatic";
         export type TriggerType = "MANUAL" | "AUTOMATIC";
+        /**
+         * example:
+         * {
+         *   "trigger": "workflow_started",
+         *   "target": {
+         *     "entitySchema": "opportunity",
+         *     "entityAttribute": "my_status"
+         *   },
+         *   "value": {
+         *     "source": "workflow_name"
+         *   }
+         * }
+         */
         export interface UpdateEntityAttributes {
-            source: "workflow_status" | "current_section" | "current_step";
+            trigger: "workflow_updated" | "workflow_started" | "workflow_closed" | "workflow_cancelled" | "task_updated" | "task_completed" | "task_skipped" | "task_in_progress" | "phase_updated" | "phase_completed" | "phase_skipped" | "phase_in_progress";
+            value: {
+                source: "workflow_name" | "workflow_status" | "workflow_assigned_to" | "task_name" | "task_status" | "task_assigned_to" | "phase_name" | "phase_status" | "phase_assigned_to";
+                custom_value?: string;
+            };
             target: {
                 /**
                  * example:
@@ -1345,7 +1375,20 @@ declare namespace Components {
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             enableECPWorkflow?: boolean;
-            updateEntityAttributes?: UpdateEntityAttributes[];
+            updateEntityAttributes?: /**
+             * example:
+             * {
+             *   "trigger": "workflow_started",
+             *   "target": {
+             *     "entitySchema": "opportunity",
+             *     "entityAttribute": "my_status"
+             *   },
+             *   "value": {
+             *     "source": "workflow_name"
+             *   }
+             * }
+             */
+            UpdateEntityAttributes[];
             /**
              * Version of the workflow execution.
              */
@@ -1394,7 +1437,20 @@ declare namespace Components {
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             enableECPWorkflow?: boolean;
-            updateEntityAttributes?: UpdateEntityAttributes[];
+            updateEntityAttributes?: /**
+             * example:
+             * {
+             *   "trigger": "workflow_started",
+             *   "target": {
+             *     "entitySchema": "opportunity",
+             *     "entityAttribute": "my_status"
+             *   },
+             *   "value": {
+             *     "source": "workflow_name"
+             *   }
+             * }
+             */
+            UpdateEntityAttributes[];
             /**
              * Version of the workflow execution.
              */
@@ -1501,7 +1557,20 @@ declare namespace Components {
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             enableECPWorkflow?: boolean;
-            updateEntityAttributes?: UpdateEntityAttributes[];
+            updateEntityAttributes?: /**
+             * example:
+             * {
+             *   "trigger": "workflow_started",
+             *   "target": {
+             *     "entitySchema": "opportunity",
+             *     "entityAttribute": "my_status"
+             *   },
+             *   "value": {
+             *     "source": "workflow_name"
+             *   }
+             * }
+             */
+            UpdateEntityAttributes[];
             /**
              * Version of the workflow execution.
              */

@@ -2513,12 +2513,46 @@
       "UpdateEntityAttributes": {
         "type": "object",
         "properties": {
-          "source": {
+          "trigger": {
             "type": "string",
             "enum": [
-              "workflow_status",
-              "current_section",
-              "current_step"
+              "workflow_updated",
+              "workflow_started",
+              "workflow_closed",
+              "workflow_cancelled",
+              "task_updated",
+              "task_completed",
+              "task_skipped",
+              "task_in_progress",
+              "phase_updated",
+              "phase_completed",
+              "phase_skipped",
+              "phase_in_progress"
+            ]
+          },
+          "value": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "enum": [
+                  "workflow_name",
+                  "workflow_status",
+                  "workflow_assigned_to",
+                  "task_name",
+                  "task_status",
+                  "task_assigned_to",
+                  "phase_name",
+                  "phase_status",
+                  "phase_assigned_to"
+                ]
+              },
+              "custom_value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "source"
             ]
           },
           "target": {
@@ -2539,9 +2573,20 @@
             ]
           }
         },
+        "example": {
+          "trigger": "workflow_started",
+          "target": {
+            "entitySchema": "opportunity",
+            "entityAttribute": "my_status"
+          },
+          "value": {
+            "source": "workflow_name"
+          }
+        },
         "required": [
-          "source",
-          "target"
+          "trigger",
+          "target",
+          "value"
         ]
       },
       "DynamicDueDate": {
