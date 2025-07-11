@@ -384,6 +384,38 @@ declare namespace Components {
              */
             is_primary?: boolean;
         }
+        /**
+         * example:
+         * {
+         *   "trigger": "workflow_started",
+         *   "target": {
+         *     "entitySchema": "opportunity",
+         *     "entityAttribute": "my_status"
+         *   },
+         *   "value": {
+         *     "source": "workflow_name"
+         *   }
+         * }
+         */
+        export interface EntitySync {
+            trigger: "workflow_updated" | "workflow_started" | "workflow_closed" | "workflow_cancelled" | "task_updated" | "task_completed" | "task_skipped" | "task_in_progress" | "phase_updated" | "phase_completed" | "phase_skipped" | "phase_in_progress";
+            value: {
+                source: "workflow_name" | "workflow_status" | "workflow_assigned_to" | "task_name" | "task_status" | "task_assigned_to" | "phase_name" | "phase_status" | "phase_assigned_to";
+                custom_value?: string;
+            };
+            target: {
+                /**
+                 * example:
+                 * opportunity
+                 */
+                entitySchema: string;
+                /**
+                 * example:
+                 * my_status
+                 */
+                entityAttribute: string;
+            };
+        }
         export interface ErrorResp {
             message?: string;
         }
@@ -467,7 +499,7 @@ declare namespace Components {
              * Indicates whether this flow execution is available for End Customer Portal or not. By default it's not.
              */
             available_in_ecp?: boolean;
-            update_entity_attributes?: /**
+            entity_sync?: /**
              * example:
              * {
              *   "trigger": "workflow_started",
@@ -480,7 +512,7 @@ declare namespace Components {
              *   }
              * }
              */
-            UpdateEntityAttributes[];
+            EntitySync[];
             /**
              * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
              */
@@ -1154,25 +1186,8 @@ declare namespace Components {
         export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months";
         export type TriggerMode = "manual" | "automatic";
         export type TriggerType = "MANUAL" | "AUTOMATIC";
-        /**
-         * example:
-         * {
-         *   "trigger": "workflow_started",
-         *   "target": {
-         *     "entitySchema": "opportunity",
-         *     "entityAttribute": "my_status"
-         *   },
-         *   "value": {
-         *     "source": "workflow_name"
-         *   }
-         * }
-         */
         export interface UpdateEntityAttributes {
-            trigger: "workflow_updated" | "workflow_started" | "workflow_closed" | "workflow_cancelled" | "task_updated" | "task_completed" | "task_skipped" | "task_in_progress" | "phase_updated" | "phase_completed" | "phase_skipped" | "phase_in_progress";
-            value: {
-                source: "workflow_name" | "workflow_status" | "workflow_assigned_to" | "task_name" | "task_status" | "task_assigned_to" | "phase_name" | "phase_status" | "phase_assigned_to";
-                custom_value?: string;
-            };
+            source: "workflow_status" | "current_section" | "current_step";
             target: {
                 /**
                  * example:
@@ -1375,20 +1390,7 @@ declare namespace Components {
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             enableECPWorkflow?: boolean;
-            updateEntityAttributes?: /**
-             * example:
-             * {
-             *   "trigger": "workflow_started",
-             *   "target": {
-             *     "entitySchema": "opportunity",
-             *     "entityAttribute": "my_status"
-             *   },
-             *   "value": {
-             *     "source": "workflow_name"
-             *   }
-             * }
-             */
-            UpdateEntityAttributes[];
+            updateEntityAttributes?: UpdateEntityAttributes[];
             /**
              * Version of the workflow execution.
              */
@@ -1437,20 +1439,7 @@ declare namespace Components {
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             enableECPWorkflow?: boolean;
-            updateEntityAttributes?: /**
-             * example:
-             * {
-             *   "trigger": "workflow_started",
-             *   "target": {
-             *     "entitySchema": "opportunity",
-             *     "entityAttribute": "my_status"
-             *   },
-             *   "value": {
-             *     "source": "workflow_name"
-             *   }
-             * }
-             */
-            UpdateEntityAttributes[];
+            updateEntityAttributes?: UpdateEntityAttributes[];
             /**
              * Version of the workflow execution.
              */
@@ -1557,20 +1546,7 @@ declare namespace Components {
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             enableECPWorkflow?: boolean;
-            updateEntityAttributes?: /**
-             * example:
-             * {
-             *   "trigger": "workflow_started",
-             *   "target": {
-             *     "entitySchema": "opportunity",
-             *     "entityAttribute": "my_status"
-             *   },
-             *   "value": {
-             *     "source": "workflow_name"
-             *   }
-             * }
-             */
-            UpdateEntityAttributes[];
+            updateEntityAttributes?: UpdateEntityAttributes[];
             /**
              * Version of the workflow execution.
              */
@@ -2615,6 +2591,7 @@ export type ECPDetails = Components.Schemas.ECPDetails;
 export type Edge = Components.Schemas.Edge;
 export type EnableRequirement = Components.Schemas.EnableRequirement;
 export type EntityRef = Components.Schemas.EntityRef;
+export type entitySync = Components.Schemas.EntitySync;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type ExecutionPaginationDynamo = Components.Schemas.ExecutionPaginationDynamo;

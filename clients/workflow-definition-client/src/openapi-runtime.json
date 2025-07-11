@@ -65,6 +65,18 @@
         "responses": {}
       }
     },
+    "/v2/flows/templates:search": {
+      "post": {
+        "operationId": "searchFlowTemplates",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/flows/templates/{flowId}": {
       "get": {
         "operationId": "getFlowTemplate",

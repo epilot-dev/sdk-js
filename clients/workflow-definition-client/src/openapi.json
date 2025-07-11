@@ -449,6 +449,68 @@
         }
       }
     },
+    "/v2/flows/templates:search": {
+      "post": {
+        "operationId": "searchFlowTemplates",
+        "summary": "searchFlowTemplates",
+        "description": "Search for flow templates by name, trigger type, enabled status, and more.",
+        "tags": [
+          "Flows V2"
+        ],
+        "requestBody": {
+          "description": "Search for flow templates by name, trigger type, enabled status, and more.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchFlowTemplates"
+              },
+              "example": {
+                "name": "Lead Qualification",
+                "definition_id": "25n2k52ja",
+                "trigger_type": "journey_submission",
+                "enabled": true,
+                "from": 0,
+                "size": 10
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - flow templates loaded with success. Empty array if customer has no flows defined.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "type": "number"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FlowTemplate"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/flows/templates/{flowId}": {
       "get": {
         "operationId": "getFlowTemplate",
@@ -1609,10 +1671,10 @@
               "$ref": "#/components/schemas/ClosingReason"
             }
           },
-          "update_entity_attributes": {
+          "entity_sync": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/UpdateEntityAttributes"
+              "$ref": "#/components/schemas/entitySync"
             }
           },
           "taxonomies": {
@@ -1739,6 +1801,50 @@
             }
           }
         ]
+      },
+      "SearchFlowTemplates": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "definition_id": {
+            "type": "string"
+          },
+          "trigger_type": {
+            "type": "string",
+            "enum": [
+              "journey_submission",
+              "manual",
+              "automation"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "from": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "sort_by": {
+            "type": "string",
+            "enum": [
+              "created_at",
+              "updated_at"
+            ],
+            "default": "updated_at"
+          },
+          "sort_order": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "desc"
+          }
+        }
       },
       "FlowTemplatesList": {
         "type": "object",
@@ -2772,6 +2878,85 @@
         "required": [
           "source",
           "target"
+        ]
+      },
+      "entitySync": {
+        "type": "object",
+        "properties": {
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "workflow_updated",
+              "workflow_started",
+              "workflow_closed",
+              "workflow_cancelled",
+              "task_updated",
+              "task_completed",
+              "task_skipped",
+              "task_in_progress",
+              "phase_updated",
+              "phase_completed",
+              "phase_skipped",
+              "phase_in_progress"
+            ]
+          },
+          "value": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "enum": [
+                  "workflow_name",
+                  "workflow_status",
+                  "workflow_assigned_to",
+                  "task_name",
+                  "task_status",
+                  "task_assigned_to",
+                  "phase_name",
+                  "phase_status",
+                  "phase_assigned_to"
+                ]
+              },
+              "custom_value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "source"
+            ]
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "entitySchema": {
+                "type": "string",
+                "example": "opportunity"
+              },
+              "entityAttribute": {
+                "type": "string",
+                "example": "my_status"
+              }
+            },
+            "required": [
+              "entitySchema",
+              "entityAttribute"
+            ]
+          }
+        },
+        "example": {
+          "trigger": "workflow_started",
+          "target": {
+            "entitySchema": "opportunity",
+            "entityAttribute": "my_status"
+          },
+          "value": {
+            "source": "workflow_name"
+          }
+        },
+        "required": [
+          "trigger",
+          "target",
+          "value"
         ]
       },
       "DynamicDueDate": {

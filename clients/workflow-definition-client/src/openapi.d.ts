@@ -159,7 +159,20 @@ declare namespace Components {
             tasks: Task[];
             edges: Edge[];
             closing_reasons?: ClosingReasonId[];
-            update_entity_attributes?: UpdateEntityAttributes[];
+            entity_sync?: /**
+             * example:
+             * {
+             *   "trigger": "workflow_started",
+             *   "target": {
+             *     "entitySchema": "opportunity",
+             *     "entityAttribute": "my_status"
+             *   },
+             *   "value": {
+             *     "source": "workflow_name"
+             *   }
+             * }
+             */
+            EntitySync[];
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -265,6 +278,38 @@ declare namespace Components {
             phase_id?: string;
             when: "TASK_FINISHED" | "PHASE_FINISHED";
         }
+        /**
+         * example:
+         * {
+         *   "trigger": "workflow_started",
+         *   "target": {
+         *     "entitySchema": "opportunity",
+         *     "entityAttribute": "my_status"
+         *   },
+         *   "value": {
+         *     "source": "workflow_name"
+         *   }
+         * }
+         */
+        export interface EntitySync {
+            trigger: "workflow_updated" | "workflow_started" | "workflow_closed" | "workflow_cancelled" | "task_updated" | "task_completed" | "task_skipped" | "task_in_progress" | "phase_updated" | "phase_completed" | "phase_skipped" | "phase_in_progress";
+            value: {
+                source: "workflow_name" | "workflow_status" | "workflow_assigned_to" | "task_name" | "task_status" | "task_assigned_to" | "phase_name" | "phase_status" | "phase_assigned_to";
+                custom_value?: string;
+            };
+            target: {
+                /**
+                 * example:
+                 * opportunity
+                 */
+                entitySchema: string;
+                /**
+                 * example:
+                 * my_status
+                 */
+                entityAttribute: string;
+            };
+        }
         export interface ErrorResp {
             message?: string;
         }
@@ -336,7 +381,20 @@ declare namespace Components {
             tasks: Task[];
             edges: Edge[];
             closing_reasons?: /* One Closing reason for a workflow */ ClosingReason[];
-            update_entity_attributes?: UpdateEntityAttributes[];
+            entity_sync?: /**
+             * example:
+             * {
+             *   "trigger": "workflow_started",
+             *   "target": {
+             *     "entitySchema": "opportunity",
+             *     "entityAttribute": "my_status"
+             *   },
+             *   "value": {
+             *     "source": "workflow_name"
+             *   }
+             * }
+             */
+            EntitySync[];
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -438,6 +496,16 @@ declare namespace Components {
                  */
                 attribute?: string;
             };
+        }
+        export interface SearchFlowTemplates {
+            name?: string;
+            definition_id?: string;
+            trigger_type?: "journey_submission" | "manual" | "automation";
+            enabled?: boolean;
+            from?: number;
+            size?: number;
+            sort_by?: "created_at" | "updated_at";
+            sort_order?: "asc" | "desc";
         }
         /**
          * A group of Steps that define the progress of the Workflow
@@ -884,6 +952,16 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace SearchFlowTemplates {
+        export type RequestBody = Components.Schemas.SearchFlowTemplates;
+        namespace Responses {
+            export interface $200 {
+                hits?: number;
+                results?: Components.Schemas.FlowTemplate[];
+            }
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace SetWorkflowClosingReasons {
         namespace Parameters {
             export type DefinitionId = string;
@@ -1008,6 +1086,16 @@ export interface OperationMethods {
     data?: Paths.CreateFlowTemplate.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateFlowTemplate.Responses.$201>
+  /**
+   * searchFlowTemplates - searchFlowTemplates
+   * 
+   * Search for flow templates by name, trigger type, enabled status, and more.
+   */
+  'searchFlowTemplates'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchFlowTemplates.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchFlowTemplates.Responses.$200>
   /**
    * getFlowTemplate - getFlowTemplate
    * 
@@ -1227,6 +1315,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateFlowTemplate.Responses.$201>
   }
+  ['/v2/flows/templates:search']: {
+    /**
+     * searchFlowTemplates - searchFlowTemplates
+     * 
+     * Search for flow templates by name, trigger type, enabled status, and more.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchFlowTemplates.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchFlowTemplates.Responses.$200>
+  }
   ['/v2/flows/templates/{flowId}']: {
     /**
      * getFlowTemplate - getFlowTemplate
@@ -1426,6 +1526,7 @@ export type DynamicDueDate = Components.Schemas.DynamicDueDate;
 export type ECPDetails = Components.Schemas.ECPDetails;
 export type Edge = Components.Schemas.Edge;
 export type EnableRequirement = Components.Schemas.EnableRequirement;
+export type entitySync = Components.Schemas.EntitySync;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type FlowTemplate = Components.Schemas.FlowTemplate;
@@ -1440,6 +1541,7 @@ export type MaxAllowedLimit = Components.Schemas.MaxAllowedLimit;
 export type Operator = Components.Schemas.Operator;
 export type Phase = Components.Schemas.Phase;
 export type RelativeSchedule = Components.Schemas.RelativeSchedule;
+export type SearchFlowTemplates = Components.Schemas.SearchFlowTemplates;
 export type Section = Components.Schemas.Section;
 export type Statement = Components.Schemas.Statement;
 export type Step = Components.Schemas.Step;
