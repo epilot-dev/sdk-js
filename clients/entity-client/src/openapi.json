@@ -3360,7 +3360,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00Z"
+              "example": "2023-01-01T00:00:00.000Z"
             }
           },
           {
@@ -6489,6 +6489,11 @@
             },
             "nullable": true
           },
+          "app_id": {
+            "type": "string",
+            "description": "ID of the app if the capability is provided by an app",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
           "ui_config": {
             "type": "object",
             "properties": {
@@ -9514,6 +9519,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    },
     {
       "url": "https://entity.sls.epilot.io"
     }
