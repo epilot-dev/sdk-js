@@ -47,11 +47,15 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
             /**
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
-            source_type?: "app";
+            source_type: "app";
             resources?: InstalledBlueprintResource[];
         }
         export type Blueprint = CustomBlueprint | FileBlueprint | MarketplaceBlueprint | DeployedBlueprint | AppBlueprint;
@@ -72,6 +76,10 @@ declare namespace Components {
             name?: string;
             type: /* Type of the resource */ ResourceNodeType;
             address?: string;
+            /**
+             * When a resource is marked as root, we'll be able to keep track of it's dependencies
+             */
+            is_root?: boolean;
             /**
              * on EditableBlueprintResources, this indicates if the resource is ready to be exported and on InstalledBlueprintResources, this indicates if the resource is ready to be used
              */
@@ -135,6 +143,10 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
         }
         export interface CommonImportFields {
             source_type?: ManifestSource;
@@ -327,7 +339,12 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
             resources?: EditableBlueprintResource[];
+            source_type: "custom";
         }
         export interface DeployedBlueprint {
             id?: /**
@@ -355,7 +372,11 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
-            source_type?: "deploy";
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
+            source_type: "deploy";
             resources?: InstalledBlueprintResource[];
         }
         export interface EditableBlueprintResource {
@@ -368,6 +389,10 @@ declare namespace Components {
             name?: string;
             type: /* Type of the resource */ ResourceNodeType;
             address?: string;
+            /**
+             * When a resource is marked as root, we'll be able to keep track of it's dependencies
+             */
+            is_root?: boolean;
             /**
              * on EditableBlueprintResources, this indicates if the resource is ready to be exported and on InstalledBlueprintResources, this indicates if the resource is ready to be used
              */
@@ -403,11 +428,15 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
             /**
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
-            source_type?: "file";
+            source_type: "file";
             resources?: InstalledBlueprintResource[];
         }
         export interface FormattedError {
@@ -476,6 +505,10 @@ declare namespace Components {
             name?: string;
             type: /* Type of the resource */ ResourceNodeType;
             address?: string;
+            /**
+             * When a resource is marked as root, we'll be able to keep track of it's dependencies
+             */
+            is_root?: boolean;
             /**
              * on EditableBlueprintResources, this indicates if the resource is ready to be exported and on InstalledBlueprintResources, this indicates if the resource is ready to be used
              */
@@ -984,6 +1017,10 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
             /**
              * URL to the blueprint documentation
              */
@@ -992,7 +1029,7 @@ declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
-            source_type?: "marketplace";
+            source_type: "marketplace";
             resources?: InstalledBlueprintResource[];
         }
         export type PlanChanges = ("create" | "update" | "no-op" | "delete")[];
@@ -1302,9 +1339,9 @@ declare namespace Paths {
         }
     }
     namespace CreateBlueprint {
-        export type RequestBody = Components.Schemas.CommonBlueprintFields;
+        export type RequestBody = Components.Schemas.Blueprint;
         namespace Responses {
-            export type $200 = Components.Schemas.CustomBlueprint;
+            export type $200 = Components.Schemas.Blueprint;
         }
     }
     namespace CreateExport {
@@ -1466,6 +1503,22 @@ declare namespace Paths {
                  */
                 jobId?: string;
             }
+        }
+    }
+    namespace DeleteBlueprint {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Blueprint;
         }
     }
     namespace DeleteBlueprintResource {
@@ -1669,7 +1722,14 @@ declare namespace Paths {
     }
     namespace ListBlueprints {
         namespace Responses {
-            export type $200 = Components.Schemas.Blueprint[];
+            export interface $200 {
+                /**
+                 * example:
+                 * 1
+                 */
+                total?: number;
+                results?: Components.Schemas.Blueprint[];
+            }
         }
     }
     namespace ListInstalledManifests {
@@ -1692,16 +1752,9 @@ declare namespace Paths {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             Components.Schemas.BlueprintID;
-            export type ResourceId = /**
-             * ID of a blueprint resource
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintResourceID;
         }
         export interface PathParameters {
             blueprint_id: Parameters.BlueprintId;
-            resource_id: Parameters.ResourceId;
         }
         namespace Responses {
             export interface $200 {
@@ -1721,7 +1774,7 @@ declare namespace Paths {
         export interface PathParameters {
             blueprint_id: Parameters.BlueprintId;
         }
-        export type RequestBody = Components.Schemas.CommonBlueprintFields;
+        export type RequestBody = Components.Schemas.Blueprint;
         namespace Responses {
             export type $200 = Components.Schemas.Blueprint;
         }
@@ -1950,6 +2003,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateBlueprint.Responses.$200>
   /**
+   * deleteBlueprint - deleteBlueprint
+   * 
+   * Delete a Blueprint
+   */
+  'deleteBlueprint'(
+    parameters?: Parameters<Paths.DeleteBlueprint.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
+  /**
    * exportBlueprint - exportBlueprint
    * 
    * Zip the blueprint content and return the url to download it
@@ -1969,6 +2032,16 @@ export interface OperationMethods {
     data?: Paths.AddBlueprintResource.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddBlueprintResource.Responses.$200>
+  /**
+   * syncDependencies - syncDependencies
+   * 
+   * Sync dependencies of all root resources in a Blueprint
+   */
+  'syncDependencies'(
+    parameters?: Parameters<Paths.SyncDependencies.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SyncDependencies.Responses.$200>
   /**
    * bulkUpdateBlueprintResources - bulkUpdateBlueprintResources
    * 
@@ -2019,16 +2092,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprintResource.Responses.$200>
-  /**
-   * syncDependencies - syncDependencies
-   * 
-   * Sync dependencies of a resource in a Blueprint
-   */
-  'syncDependencies'(
-    parameters?: Parameters<Paths.SyncDependencies.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.SyncDependencies.Responses.$200>
   /**
    * createInstallationJob - Create Installation Job
    * 
@@ -2243,6 +2306,16 @@ export interface PathsDictionary {
       data?: Paths.UpdateBlueprint.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateBlueprint.Responses.$200>
+    /**
+     * deleteBlueprint - deleteBlueprint
+     * 
+     * Delete a Blueprint
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteBlueprint.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}:export']: {
     /**
@@ -2267,6 +2340,18 @@ export interface PathsDictionary {
       data?: Paths.AddBlueprintResource.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddBlueprintResource.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources:syncDependencies']: {
+    /**
+     * syncDependencies - syncDependencies
+     * 
+     * Sync dependencies of all root resources in a Blueprint
+     */
+    'post'(
+      parameters?: Parameters<Paths.SyncDependencies.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SyncDependencies.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/bulk']: {
     /**
@@ -2321,18 +2406,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBlueprintResource.Responses.$200>
-  }
-  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}:syncDependencies']: {
-    /**
-     * syncDependencies - syncDependencies
-     * 
-     * Sync dependencies of a resource in a Blueprint
-     */
-    'post'(
-      parameters?: Parameters<Paths.SyncDependencies.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.SyncDependencies.Responses.$200>
   }
   ['/v2/blueprint-manifest/installations']: {
     /**

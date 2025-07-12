@@ -702,9 +702,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Blueprint"
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Blueprint"
+                      }
+                    }
                   }
                 }
               }
@@ -723,7 +732,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CommonBlueprintFields"
+                "$ref": "#/components/schemas/Blueprint"
               }
             }
           }
@@ -734,7 +743,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CustomBlueprint"
+                  "$ref": "#/components/schemas/Blueprint"
                 }
               }
             }
@@ -794,7 +803,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CommonBlueprintFields"
+                "$ref": "#/components/schemas/Blueprint"
               }
             }
           }
@@ -802,6 +811,36 @@
         "responses": {
           "200": {
             "description": "Updated Blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Blueprint"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBlueprint",
+        "summary": "deleteBlueprint",
+        "description": "Delete a Blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted Blueprint",
             "content": {
               "application/json": {
                 "schema": {
@@ -896,6 +935,53 @@
         "responses": {
           "200": {
             "description": "Added Blueprint Resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/EditableBlueprintResource"
+                          },
+                          {
+                            "$ref": "#/components/schemas/InstalledBlueprintResource"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources:syncDependencies": {
+      "post": {
+        "operationId": "syncDependencies",
+        "summary": "syncDependencies",
+        "description": "Sync dependencies of all root resources in a Blueprint",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Synced dependencies of all root resources in a Blueprint",
             "content": {
               "application/json": {
                 "schema": {
@@ -1242,61 +1328,6 @@
         }
       }
     },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}:syncDependencies": {
-      "post": {
-        "operationId": "syncDependencies",
-        "summary": "syncDependencies",
-        "description": "Sync dependencies of a resource in a Blueprint",
-        "tags": [
-          "Blueprints"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id",
-            "schema": {
-              "$ref": "#/components/schemas/BlueprintID"
-            }
-          },
-          {
-            "in": "path",
-            "required": true,
-            "name": "resource_id",
-            "schema": {
-              "$ref": "#/components/schemas/BlueprintResourceID"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Synced dependencies of a resource in a Blueprint",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "resources": {
-                      "type": "array",
-                      "items": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/EditableBlueprintResource"
-                          },
-                          {
-                            "$ref": "#/components/schemas/InstalledBlueprintResource"
-                          }
-                        ]
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v2/blueprint-manifest/installations": {
       "post": {
         "operationId": "createInstallationJob",
@@ -1574,6 +1605,20 @@
           },
           "version": {
             "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
           }
         },
         "required": [
@@ -1594,6 +1639,10 @@
           },
           "address": {
             "type": "string"
+          },
+          "is_root": {
+            "type": "boolean",
+            "description": "When a resource is marked as root, we'll be able to keep track of it's dependencies"
           },
           "is_ready": {
             "type": "boolean",
@@ -1655,9 +1704,16 @@
                 "items": {
                   "$ref": "#/components/schemas/EditableBlueprintResource"
                 }
+              },
+              "source_type": {
+                "type": "string",
+                "const": "custom"
               }
             }
           }
+        ],
+        "required": [
+          "source_type"
         ]
       },
       "FileBlueprint": {
@@ -1684,6 +1740,9 @@
               }
             }
           }
+        ],
+        "required": [
+          "source_type"
         ]
       },
       "MarketplaceBlueprint": {
@@ -1714,6 +1773,9 @@
               }
             }
           }
+        ],
+        "required": [
+          "source_type"
         ]
       },
       "DeployedBlueprint": {
@@ -1736,6 +1798,9 @@
               }
             }
           }
+        ],
+        "required": [
+          "source_type"
         ]
       },
       "AppBlueprint": {
@@ -1762,6 +1827,9 @@
               }
             }
           }
+        ],
+        "required": [
+          "source_type"
         ]
       },
       "Blueprint": {
