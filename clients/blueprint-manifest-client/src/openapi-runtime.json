@@ -147,6 +147,18 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprint:install": {
+      "post": {
+        "operationId": "installBlueprint",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}": {
       "get": {
         "operationId": "getBlueprint",
@@ -328,21 +340,15 @@
         "responses": {}
       }
     },
-    "/v2/blueprint-manifest/installations": {
-      "post": {
-        "operationId": "createInstallationJob",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
+    "/v2/blueprint-manifest/jobs": {
+      "get": {
+        "operationId": "listBlueprintJobs",
         "responses": {}
       }
     },
-    "/v2/blueprint-manifest/installations/{job_id}": {
+    "/v2/blueprint-manifest/jobs/{job_id}": {
       "get": {
-        "operationId": "getInstallationJob",
+        "operationId": "getBlueprintJob",
         "parameters": [
           {
             "in": "path",
@@ -353,7 +359,7 @@
         "responses": {}
       }
     },
-    "/v2/blueprint-manifest/installations/{job_id}:continue": {
+    "/v2/blueprint-manifest/jobs/{job_id}:continue": {
       "post": {
         "operationId": "continueInstallationJob",
         "parameters": [
@@ -366,8 +372,8 @@
         "responses": {}
       }
     },
-    "/v2/blueprint-manifest/installations/{job_id}:cancel": {
-      "operationId": "cancelInstallationJob",
+    "/v2/blueprint-manifest/jobs/{job_id}:cancel": {
+      "operationId": "cancelBlueprintJob",
       "parameters": [
         {
           "in": "path",
@@ -377,24 +383,11 @@
       ],
       "responses": {
         "200": {
-          "description": "Installation job cancelled",
+          "description": "Blueprint job cancelled",
           "content": {
             "application/json": {}
           }
         }
-      }
-    },
-    "/v2/blueprint-manifest/installations/{job_id}/events": {
-      "get": {
-        "operationId": "getInstallationJobEvents",
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "job_id"
-          }
-        ],
-        "responses": {}
       }
     }
   },

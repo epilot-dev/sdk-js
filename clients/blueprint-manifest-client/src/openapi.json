@@ -751,6 +751,68 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprint:install": {
+      "post": {
+        "operationId": "installBlueprint",
+        "summary": "installBlueprint",
+        "description": "Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source_blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
+                  },
+                  "source_blueprint_file_url": {
+                    "type": "string",
+                    "description": "URL to the blueprint zip file"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "simple",
+                      "advanced"
+                    ],
+                    "description": "Installation mode"
+                  }
+                },
+                "required": [
+                  "mode"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Blueprint installation job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}": {
       "get": {
         "operationId": "getBlueprint",
@@ -856,7 +918,7 @@
       "post": {
         "operationId": "exportBlueprint",
         "summary": "exportBlueprint",
-        "description": "Zip the blueprint content and return the url to download it",
+        "description": "Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.\n",
         "tags": [
           "Blueprints"
         ],
@@ -871,15 +933,23 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Exported Blueprint",
+          "202": {
+            "description": "Blueprint export job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "url": {
-                      "type": "string"
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
                     }
                   }
                 }
@@ -1328,71 +1398,23 @@
         }
       }
     },
-    "/v2/blueprint-manifest/installations": {
-      "post": {
-        "operationId": "createInstallationJob",
-        "summary": "Create Installation Job",
-        "description": "Kick off a new installation job. Returns 202 Accepted with Location header pointing to the job resource and a strict idempotency-key header.\n",
+    "/v2/blueprint-manifest/jobs": {
+      "get": {
+        "operationId": "listBlueprintJobs",
+        "summary": "List Blueprint Jobs",
+        "description": "List all blueprint jobs",
         "tags": [
-          "Installations"
+          "Jobs"
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "source_blueprint_id": {
-                    "$ref": "#/components/schemas/BlueprintID"
-                  },
-                  "destination_org_id": {
-                    "type": "string",
-                    "description": "Destination organization ID"
-                  },
-                  "mode": {
-                    "type": "string",
-                    "enum": [
-                      "simple",
-                      "advanced"
-                    ],
-                    "description": "Installation mode"
-                  }
-                },
-                "required": [
-                  "source_blueprint_id",
-                  "destination_org_id",
-                  "mode"
-                ]
-              }
-            }
-          }
-        },
         "responses": {
-          "202": {
-            "description": "Installation job started",
-            "headers": {
-              "Location": {
-                "description": "URL to poll the job",
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Idempotency-Key": {
-                "description": "Strict idempotency key",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
+          "200": {
+            "description": "Blueprint jobs",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "job_id": {
-                      "$ref": "#/components/schemas/InstallationJobID"
-                    }
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BlueprintJob"
                   }
                 }
               }
@@ -1401,31 +1423,28 @@
         }
       }
     },
-    "/v2/blueprint-manifest/installations/{job_id}": {
+    "/v2/blueprint-manifest/jobs/{job_id}": {
       "get": {
-        "operationId": "getInstallationJob",
-        "summary": "Get Installation Job",
-        "description": "Poll current state of an installation job.",
-        "tags": [
-          "Installations"
-        ],
+        "operationId": "getBlueprintJob",
+        "summary": "Get Job",
+        "description": "Poll current state of a job.",
         "parameters": [
           {
             "in": "path",
             "required": true,
             "name": "job_id",
             "schema": {
-              "$ref": "#/components/schemas/InstallationJobID"
+              "$ref": "#/components/schemas/BlueprintJobID"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Installation job status",
+            "description": "Job status",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/InstallationJob"
+                  "$ref": "#/components/schemas/BlueprintJob"
                 }
               }
             }
@@ -1433,7 +1452,7 @@
         }
       }
     },
-    "/v2/blueprint-manifest/installations/{job_id}:continue": {
+    "/v2/blueprint-manifest/jobs/{job_id}:continue": {
       "post": {
         "operationId": "continueInstallationJob",
         "summary": "Continue Installation Job",
@@ -1447,17 +1466,17 @@
             "required": true,
             "name": "job_id",
             "schema": {
-              "$ref": "#/components/schemas/InstallationJobID"
+              "$ref": "#/components/schemas/BlueprintJobID"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Installation job continued",
+            "description": "Blueprint installation job continued",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/InstallationJob"
+                  "$ref": "#/components/schemas/BlueprintInstallationJob"
                 }
               }
             }
@@ -1465,12 +1484,12 @@
         }
       }
     },
-    "/v2/blueprint-manifest/installations/{job_id}:cancel": {
-      "operationId": "cancelInstallationJob",
-      "summary": "Cancel Installation Job",
-      "description": "Cancel an installation job if it is still running.",
+    "/v2/blueprint-manifest/jobs/{job_id}:cancel": {
+      "operationId": "cancelBlueprintJob",
+      "summary": "Cancel Blueprint Job",
+      "description": "Cancel a blueprint job if it is still running.",
       "tags": [
-        "Installations"
+        "Jobs"
       ],
       "parameters": [
         {
@@ -1478,85 +1497,17 @@
           "required": true,
           "name": "job_id",
           "schema": {
-            "$ref": "#/components/schemas/InstallationJobID"
+            "$ref": "#/components/schemas/BlueprintJobID"
           }
         }
       ],
       "responses": {
         "200": {
-          "description": "Installation job cancelled",
+          "description": "Blueprint job cancelled",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InstallationJob"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/blueprint-manifest/installations/{job_id}/events": {
-      "get": {
-        "operationId": "getInstallationJobEvents",
-        "summary": "Get Installation Job Events",
-        "description": "Event log for an installation job.",
-        "tags": [
-          "Installations"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "job_id",
-            "schema": {
-              "$ref": "#/components/schemas/InstallationJobID"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Event logs",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "created_at": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "STARTED",
-                        "WAITING_USER_ACTION",
-                        "CANCELED",
-                        "IN_PROGRESS",
-                        "SUCCESS",
-                        "FAILED"
-                      ]
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/FormattedError"
-                      }
-                    },
-                    "progress": {
-                      "type": "number",
-                      "format": "float",
-                      "minimum": 0,
-                      "maximum": 100,
-                      "description": "Progress completion (0-100)"
-                    },
-                    "events": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/InstallationJobEvent"
-                      }
-                    }
-                  }
-                }
+                "$ref": "#/components/schemas/BlueprintJob"
               }
             }
           }
@@ -1605,6 +1556,9 @@
           },
           "version": {
             "type": "string"
+          },
+          "latest_download_file": {
+            "$ref": "#/components/schemas/S3Reference"
           },
           "created_at": {
             "type": "string",
@@ -1851,48 +1805,22 @@
           }
         ]
       },
-      "InstallationJobID": {
+      "BlueprintJobID": {
         "type": "string",
-        "description": "ID of an installation job",
+        "description": "ID of a job",
         "example": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
       },
-      "InstallationJob": {
+      "CommonBlueprintJobFields": {
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/InstallationJobID"
+            "$ref": "#/components/schemas/BlueprintJobID"
           },
-          "source_blueprint_id": {
-            "$ref": "#/components/schemas/BlueprintID"
-          },
-          "source_blueprint_type": {
-            "type": "string",
-            "enum": [
-              "file",
-              "marketplace",
-              "deploy",
-              "app"
-            ]
-          },
-          "source_org_id": {
-            "type": "string"
-          },
-          "destination_blueprint_id": {
-            "$ref": "#/components/schemas/BlueprintID"
-          },
-          "destination_org_id": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "STARTED",
-              "WAITING_USER_ACTION",
-              "CANCELED",
-              "IN_PROGRESS",
-              "SUCCESS",
-              "FAILED"
-            ]
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintJobEvent"
+            }
           },
           "triggered_at": {
             "type": "string",
@@ -1900,13 +1828,91 @@
           },
           "created_by": {
             "$ref": "#/components/schemas/CallerIdentity"
-          },
-          "updated_by": {
-            "$ref": "#/components/schemas/CallerIdentity"
           }
         }
       },
-      "InstallationJobEvent": {
+      "BlueprintExportJob": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintJobFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "IN_PROGRESS",
+                  "SUCCESS",
+                  "FAILED",
+                  "CANCELED"
+                ]
+              },
+              "download_file": {
+                "$ref": "#/components/schemas/S3Reference"
+              }
+            }
+          }
+        ]
+      },
+      "BlueprintInstallationJob": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintJobFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "source_blueprint_type": {
+                "type": "string",
+                "enum": [
+                  "custom",
+                  "file",
+                  "marketplace",
+                  "deploy",
+                  "app"
+                ]
+              },
+              "source_org_id": {
+                "type": "string"
+              },
+              "destination_blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "destination_org_id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "IN_PROGRESS",
+                  "WAITING_USER_ACTION",
+                  "CANCELED",
+                  "SUCCESS",
+                  "FAILED"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "BlueprintJob": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BlueprintExportJob"
+          },
+          {
+            "$ref": "#/components/schemas/BlueprintInstallationJob"
+          }
+        ]
+      },
+      "BlueprintJobEvent": {
         "type": "object",
         "properties": {
           "timestamp": {
@@ -1915,6 +1921,12 @@
           },
           "message": {
             "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormattedError"
+            }
           },
           "level": {
             "type": "string",
