@@ -88,8 +88,18 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "Portal updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalConfig"
+                }
+              }
+            }
+          },
           "201": {
-            "description": "Portal upserted successfully.",
+            "description": "Portal created successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5806,6 +5816,15 @@
               "type": "string",
               "example": "slug=contracts"
             }
+          },
+          {
+            "in": "query",
+            "name": "contract_id",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "description": "Contract context for blocks"
           }
         ],
         "responses": {

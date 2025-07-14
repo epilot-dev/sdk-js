@@ -1386,6 +1386,11 @@
             "in": "query",
             "name": "filter",
             "required": false
+          },
+          {
+            "in": "query",
+            "name": "contract_id",
+            "required": false
           }
         ],
         "responses": {}

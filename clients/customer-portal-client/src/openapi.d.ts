@@ -6806,6 +6806,12 @@ declare namespace Paths {
     }
     namespace GetPortalPages {
         namespace Parameters {
+            export type ContractId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
             /**
              * example:
              * id,slug,description
@@ -6828,6 +6834,7 @@ declare namespace Paths {
              * slug=contracts
              */
             Parameters.Filter;
+            contract_id?: Parameters.ContractId;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Page[];
@@ -8050,6 +8057,7 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.UpsertPortalConfig;
         namespace Responses {
+            export type $200 = Components.Schemas.PortalConfig;
             export type $201 = Components.Schemas.PortalConfig;
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
@@ -8272,7 +8280,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.UpsertPortal.QueryParameters> | null,
     data?: Paths.UpsertPortal.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpsertPortal.Responses.$201>
+  ): OperationResponse<Paths.UpsertPortal.Responses.$200 | Paths.UpsertPortal.Responses.$201>
   /**
    * createUser - createUser
    * 
@@ -9271,7 +9279,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.UpsertPortal.QueryParameters> | null,
       data?: Paths.UpsertPortal.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpsertPortal.Responses.$201>
+    ): OperationResponse<Paths.UpsertPortal.Responses.$200 | Paths.UpsertPortal.Responses.$201>
   }
   ['/v2/portal/public/user']: {
     /**
