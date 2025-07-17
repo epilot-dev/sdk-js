@@ -10,7 +10,7 @@
     }
   ],
   "paths": {
-    "/v1/public/suggestions": {
+    "/v1/address/suggestions/public": {
       "get": {
         "parameters": [
           {
@@ -38,7 +38,7 @@
         "responses": {}
       }
     },
-    "/v1/public/availability": {
+    "/v1/address/availability/public": {
       "post": {
         "operationId": "availabilityCheck",
         "requestBody": {
@@ -50,7 +50,7 @@
         "responses": {}
       }
     },
-    "/v1/availability/{id}/validate": {
+    "/v1/address/availability/{id}/validate": {
       "get": {
         "operationId": "validateAvailabilityFile",
         "parameters": [

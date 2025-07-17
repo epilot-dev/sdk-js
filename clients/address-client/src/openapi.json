@@ -22,7 +22,8 @@
   "servers": [
     {
       "url": "https://address.sls.epilot.io"
-    }
+    },
+    null
   ],
   "tags": [
     {
@@ -33,7 +34,7 @@
     }
   ],
   "paths": {
-    "/v1/public/suggestions": {
+    "/v1/address/suggestions/public": {
       "get": {
         "description": "Get address suggestions for the given Availability File",
         "parameters": [
@@ -148,7 +149,7 @@
         }
       }
     },
-    "/v1/public/availability": {
+    "/v1/address/availability/public": {
       "post": {
         "description": "Check for Entities that contain a matching availability range in related availability files.",
         "operationId": "availabilityCheck",
@@ -225,7 +226,7 @@
         }
       }
     },
-    "/v1/availability/{id}/validate": {
+    "/v1/address/availability/{id}/validate": {
       "get": {
         "description": "Validates an already uploaded availability file, it returns an array of errors if any errors are found in the file.",
         "operationId": "validateAvailabilityFile",
