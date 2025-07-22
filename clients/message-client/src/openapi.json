@@ -210,6 +210,65 @@
         }
       }
     },
+    "/v1/message/messages:search": {
+      "post": {
+        "operationId": "searchMessages",
+        "summary": "searchMessages",
+        "description": "Search Messages",
+        "tags": [
+          "Messages"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchParamsV2"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "hits",
+                    "results"
+                  ],
+                  "properties": {
+                    "hits": {
+                      "type": "number",
+                      "description": "Total of matched messages",
+                      "example": 14
+                    },
+                    "results": {
+                      "type": "array",
+                      "description": "Matched messages",
+                      "items": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/BaseEntity"
+                          },
+                          {
+                            "$ref": "#/components/schemas/Message"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/message/messages/{id}/trash": {
       "post": {
         "operationId": "trashMessage",
@@ -408,6 +467,11 @@
                     "count"
                   ],
                   "properties": {
+                    "count": {
+                      "type": "number",
+                      "description": "Total of unread messages",
+                      "example": 14
+                    },
                     "unread": {
                       "type": "number",
                       "description": "Total of unread messages",
