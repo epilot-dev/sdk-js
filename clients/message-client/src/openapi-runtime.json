@@ -50,6 +50,17 @@
         "responses": {}
       }
     },
+    "/v1/message/messages:search": {
+      "post": {
+        "operationId": "searchMessages",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/message/messages/{id}/trash": {
       "post": {
         "operationId": "trashMessage",
