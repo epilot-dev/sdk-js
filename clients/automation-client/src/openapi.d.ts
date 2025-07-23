@@ -3394,6 +3394,10 @@ declare namespace Components {
             schedule_id?: string;
         }
         export interface TriggerWebhookConfig {
+            /**
+             * The latest webhook event_id for an execution of this action
+             */
+            event_id?: string;
             entity_sources?: string[];
             target_webhook_id?: string;
             /**
