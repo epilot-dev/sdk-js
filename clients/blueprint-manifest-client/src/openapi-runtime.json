@@ -373,21 +373,16 @@
       }
     },
     "/v2/blueprint-manifest/jobs/{job_id}:cancel": {
-      "operationId": "cancelBlueprintJob",
-      "parameters": [
-        {
-          "in": "path",
-          "required": true,
-          "name": "job_id"
-        }
-      ],
-      "responses": {
-        "200": {
-          "description": "Blueprint job cancelled",
-          "content": {
-            "application/json": {}
+      "post": {
+        "operationId": "cancelBlueprintJob",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id"
           }
-        }
+        ],
+        "responses": {}
       }
     }
   },

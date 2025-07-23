@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -756,6 +756,9 @@
         "operationId": "installBlueprint",
         "summary": "installBlueprint",
         "description": "Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource\n",
+        "tags": [
+          "Blueprints"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -763,12 +766,21 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "source_org_id": {
+                    "type": "string"
+                  },
                   "source_blueprint_id": {
                     "$ref": "#/components/schemas/BlueprintID"
                   },
-                  "source_blueprint_file_url": {
+                  "source_blueprint_file": {
                     "type": "string",
                     "description": "URL to the blueprint zip file"
+                  },
+                  "destination_org_id": {
+                    "type": "string"
+                  },
+                  "destination_blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
                   },
                   "mode": {
                     "type": "string",
@@ -1412,9 +1424,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BlueprintJob"
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintJob"
+                      }
+                    }
                   }
                 }
               }
@@ -1428,6 +1449,9 @@
         "operationId": "getBlueprintJob",
         "summary": "Get Job",
         "description": "Poll current state of a job.",
+        "tags": [
+          "Jobs"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -1458,7 +1482,7 @@
         "summary": "Continue Installation Job",
         "description": "Continue an installation job if it is waiting for user action.",
         "tags": [
-          "Installations"
+          "Jobs"
         ],
         "parameters": [
           {
@@ -1485,29 +1509,31 @@
       }
     },
     "/v2/blueprint-manifest/jobs/{job_id}:cancel": {
-      "operationId": "cancelBlueprintJob",
-      "summary": "Cancel Blueprint Job",
-      "description": "Cancel a blueprint job if it is still running.",
-      "tags": [
-        "Jobs"
-      ],
-      "parameters": [
-        {
-          "in": "path",
-          "required": true,
-          "name": "job_id",
-          "schema": {
-            "$ref": "#/components/schemas/BlueprintJobID"
+      "post": {
+        "operationId": "cancelBlueprintJob",
+        "summary": "Cancel Blueprint Job",
+        "description": "Cancel a blueprint job if it is still running.",
+        "tags": [
+          "Jobs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
           }
-        }
-      ],
-      "responses": {
-        "200": {
-          "description": "Blueprint job cancelled",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BlueprintJob"
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprint job cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintJob"
+                }
               }
             }
           }
@@ -1880,6 +1906,9 @@
                 ]
               },
               "source_org_id": {
+                "type": "string"
+              },
+              "source_blueprint_file": {
                 "type": "string"
               },
               "destination_blueprint_id": {

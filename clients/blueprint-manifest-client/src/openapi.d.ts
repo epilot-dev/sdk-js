@@ -104,6 +104,7 @@ declare namespace Components {
             BlueprintID;
             source_blueprint_type?: "custom" | "file" | "marketplace" | "deploy" | "app";
             source_org_id?: string;
+            source_blueprint_file?: string;
             destination_blueprint_id?: /**
              * ID of a blueprint
              * example:
@@ -1360,6 +1361,22 @@ declare namespace Paths {
             }
         }
     }
+    namespace CancelBlueprintJob {
+        namespace Parameters {
+            export type JobId = /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintJobID;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintJob;
+        }
+    }
     namespace ContinueInstallationJob {
         namespace Parameters {
             export type JobId = /**
@@ -1712,6 +1729,7 @@ declare namespace Paths {
     }
     namespace InstallBlueprint {
         export interface RequestBody {
+            source_org_id?: string;
             source_blueprint_id?: /**
              * ID of a blueprint
              * example:
@@ -1721,7 +1739,14 @@ declare namespace Paths {
             /**
              * URL to the blueprint zip file
              */
-            source_blueprint_file_url?: string;
+            source_blueprint_file?: string;
+            destination_org_id?: string;
+            destination_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
             /**
              * Installation mode
              */
@@ -1740,7 +1765,14 @@ declare namespace Paths {
     }
     namespace ListBlueprintJobs {
         namespace Responses {
-            export type $200 = Components.Schemas.BlueprintJob[];
+            export interface $200 {
+                /**
+                 * example:
+                 * 1
+                 */
+                total?: number;
+                results?: Components.Schemas.BlueprintJob[];
+            }
         }
     }
     namespace ListBlueprints {
@@ -1856,19 +1888,6 @@ declare namespace Paths {
                  */
                 upload_url?: string; // url
             }
-        }
-    }
-    namespace V2BlueprintManifestJobs$JobIdCancel {
-        namespace Parameters {
-            export type JobId = /**
-             * ID of a job
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintJobID;
-        }
-        export interface PathParameters {
-            job_id: Parameters.JobId;
         }
     }
 }
@@ -2158,6 +2177,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ContinueInstallationJob.Responses.$200>
+  /**
+   * cancelBlueprintJob - Cancel Blueprint Job
+   * 
+   * Cancel a blueprint job if it is still running.
+   */
+  'cancelBlueprintJob'(
+    parameters?: Parameters<Paths.CancelBlueprintJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelBlueprintJob.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -2483,6 +2512,16 @@ export interface PathsDictionary {
     ): OperationResponse<Paths.ContinueInstallationJob.Responses.$200>
   }
   ['/v2/blueprint-manifest/jobs/{job_id}:cancel']: {
+    /**
+     * cancelBlueprintJob - Cancel Blueprint Job
+     * 
+     * Cancel a blueprint job if it is still running.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CancelBlueprintJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelBlueprintJob.Responses.$200>
   }
 }
 
