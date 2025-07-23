@@ -766,21 +766,12 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "source_org_id": {
-                    "type": "string"
-                  },
                   "source_blueprint_id": {
                     "$ref": "#/components/schemas/BlueprintID"
                   },
-                  "source_blueprint_file": {
+                  "source_blueprint_file_url": {
                     "type": "string",
                     "description": "URL to the blueprint zip file"
-                  },
-                  "destination_org_id": {
-                    "type": "string"
-                  },
-                  "destination_blueprint_id": {
-                    "$ref": "#/components/schemas/BlueprintID"
                   },
                   "mode": {
                     "type": "string",
@@ -1424,18 +1415,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "total": {
-                      "type": "integer",
-                      "example": 1
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/BlueprintJob"
-                      }
-                    }
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BlueprintJob"
                   }
                 }
               }
@@ -1908,9 +1890,6 @@
               "source_org_id": {
                 "type": "string"
               },
-              "source_blueprint_file": {
-                "type": "string"
-              },
               "destination_blueprint_id": {
                 "$ref": "#/components/schemas/BlueprintID"
               },
@@ -2077,7 +2056,8 @@
           "usergroup",
           "saved_view",
           "app",
-          "role"
+          "role",
+          "portal_config"
         ]
       },
       "PlanChanges": {

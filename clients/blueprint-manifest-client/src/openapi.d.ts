@@ -104,7 +104,6 @@ declare namespace Components {
             BlueprintID;
             source_blueprint_type?: "custom" | "file" | "marketplace" | "deploy" | "app";
             source_org_id?: string;
-            source_blueprint_file?: string;
             destination_blueprint_id?: /**
              * ID of a blueprint
              * example:
@@ -1133,7 +1132,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "dashboard" | "custom_variable" | "coupon" | "usergroup" | "saved_view" | "app" | "role";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "dashboard" | "custom_variable" | "coupon" | "usergroup" | "saved_view" | "app" | "role" | "portal_config";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -1729,7 +1728,6 @@ declare namespace Paths {
     }
     namespace InstallBlueprint {
         export interface RequestBody {
-            source_org_id?: string;
             source_blueprint_id?: /**
              * ID of a blueprint
              * example:
@@ -1739,14 +1737,7 @@ declare namespace Paths {
             /**
              * URL to the blueprint zip file
              */
-            source_blueprint_file?: string;
-            destination_org_id?: string;
-            destination_blueprint_id?: /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
+            source_blueprint_file_url?: string;
             /**
              * Installation mode
              */
@@ -1765,14 +1756,7 @@ declare namespace Paths {
     }
     namespace ListBlueprintJobs {
         namespace Responses {
-            export interface $200 {
-                /**
-                 * example:
-                 * 1
-                 */
-                total?: number;
-                results?: Components.Schemas.BlueprintJob[];
-            }
+            export type $200 = Components.Schemas.BlueprintJob[];
         }
     }
     namespace ListBlueprints {
@@ -1891,7 +1875,6 @@ declare namespace Paths {
         }
     }
 }
-
 
 export interface OperationMethods {
   /**
@@ -2526,7 +2509,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
