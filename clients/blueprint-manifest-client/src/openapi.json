@@ -766,12 +766,21 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "source_org_id": {
+                    "type": "string"
+                  },
                   "source_blueprint_id": {
                     "$ref": "#/components/schemas/BlueprintID"
                   },
-                  "source_blueprint_file_url": {
+                  "source_blueprint_file": {
                     "type": "string",
                     "description": "URL to the blueprint zip file"
+                  },
+                  "destination_org_id": {
+                    "type": "string"
+                  },
+                  "destination_blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
                   },
                   "mode": {
                     "type": "string",
@@ -993,14 +1002,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/EditableBlueprintResource"
-                  },
-                  {
-                    "$ref": "#/components/schemas/InstalledBlueprintResource"
-                  }
-                ]
+                "$ref": "#/components/schemas/BlueprintResource"
               }
             }
           }
@@ -1016,14 +1018,7 @@
                     "resources": {
                       "type": "array",
                       "items": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/EditableBlueprintResource"
-                          },
-                          {
-                            "$ref": "#/components/schemas/InstalledBlueprintResource"
-                          }
-                        ]
+                        "$ref": "#/components/schemas/BlueprintResource"
                       }
                     }
                   }
@@ -1063,14 +1058,7 @@
                     "resources": {
                       "type": "array",
                       "items": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/EditableBlueprintResource"
-                          },
-                          {
-                            "$ref": "#/components/schemas/InstalledBlueprintResource"
-                          }
-                        ]
+                        "$ref": "#/components/schemas/BlueprintResource"
                       }
                     }
                   }
@@ -1114,14 +1102,7 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/EditableBlueprintResource"
-                    },
-                    {
-                      "$ref": "#/components/schemas/InstalledBlueprintResource"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/BlueprintResource"
                 }
               }
             }
@@ -1138,14 +1119,7 @@
                     "resources": {
                       "type": "array",
                       "items": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/EditableBlueprintResource"
-                          },
-                          {
-                            "$ref": "#/components/schemas/InstalledBlueprintResource"
-                          }
-                        ]
+                        "$ref": "#/components/schemas/BlueprintResource"
                       }
                     }
                   }
@@ -1178,14 +1152,7 @@
               "schema": {
                 "type": "array",
                 "items": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/EditableBlueprintResource"
-                    },
-                    {
-                      "$ref": "#/components/schemas/InstalledBlueprintResource"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/BlueprintResource"
                 }
               }
             }
@@ -1202,14 +1169,7 @@
                     "resources": {
                       "type": "array",
                       "items": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/EditableBlueprintResource"
-                          },
-                          {
-                            "$ref": "#/components/schemas/InstalledBlueprintResource"
-                          }
-                        ]
+                        "$ref": "#/components/schemas/BlueprintResource"
                       }
                     }
                   }
@@ -1259,14 +1219,7 @@
                     "resources": {
                       "type": "array",
                       "items": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/EditableBlueprintResource"
-                          },
-                          {
-                            "$ref": "#/components/schemas/InstalledBlueprintResource"
-                          }
-                        ]
+                        "$ref": "#/components/schemas/BlueprintResource"
                       }
                     }
                   }
@@ -1307,14 +1260,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/EditableBlueprintResource"
-                  },
-                  {
-                    "$ref": "#/components/schemas/InstalledBlueprintResource"
-                  }
-                ]
+                "$ref": "#/components/schemas/BlueprintResource"
               }
             }
           }
@@ -1330,14 +1276,7 @@
                     "resources": {
                       "type": "array",
                       "items": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/EditableBlueprintResource"
-                          },
-                          {
-                            "$ref": "#/components/schemas/InstalledBlueprintResource"
-                          }
-                        ]
+                        "$ref": "#/components/schemas/BlueprintResource"
                       }
                     }
                   }
@@ -1383,14 +1322,7 @@
                     "resources": {
                       "type": "array",
                       "items": {
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/EditableBlueprintResource"
-                          },
-                          {
-                            "$ref": "#/components/schemas/InstalledBlueprintResource"
-                          }
-                        ]
+                        "$ref": "#/components/schemas/BlueprintResource"
                       }
                     }
                   }
@@ -1415,9 +1347,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BlueprintJob"
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintJob"
+                      }
+                    }
                   }
                 }
               }
@@ -1568,6 +1509,10 @@
           "latest_download_file": {
             "$ref": "#/components/schemas/S3Reference"
           },
+          "is_verified": {
+            "type": "boolean",
+            "description": "Whether the blueprint is verified by epilot"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time"
@@ -1608,49 +1553,41 @@
           },
           "is_ready": {
             "type": "boolean",
-            "description": "on EditableBlueprintResources, this indicates if the resource is ready to be exported and on InstalledBlueprintResources, this indicates if the resource is ready to be used"
+            "description": "when editing a blueprint, this indicates if the resource is ready to be exported and when installing a blueprint, this indicates if the resource is ready to be used"
+          },
+          "is_hidden": {
+            "type": "boolean",
+            "description": "When a resource is marked as hidden, it's used to hide it from the UI"
+          },
+          "hard_dependencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceNodeType"
+            }
+          },
+          "parent_resource_ids": {
+            "type": "array",
+            "description": "Used to automatically remove resources with hard dependencies and to block deletion of resources with hard dependencies",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintResourceID"
+            }
+          },
+          "impact_on_install": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "create",
+                "update",
+                "no-op",
+                "delete"
+              ]
+            }
           }
         },
         "required": [
           "id",
           "type"
-        ]
-      },
-      "EditableBlueprintResource": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BlueprintResource"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "note": {
-                "type": "string",
-                "description": "An internal note to help remember what's missing to export the resource"
-              }
-            }
-          }
-        ]
-      },
-      "InstalledBlueprintResource": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BlueprintResource"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "impact_on_install": {
-                "type": "string",
-                "enum": [
-                  "create",
-                  "update",
-                  "no-op",
-                  "delete"
-                ]
-              }
-            }
-          }
         ]
       },
       "CustomBlueprint": {
@@ -1664,7 +1601,7 @@
               "resources": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/EditableBlueprintResource"
+                  "$ref": "#/components/schemas/BlueprintResource"
                 }
               },
               "source_type": {
@@ -1686,10 +1623,6 @@
           {
             "type": "object",
             "properties": {
-              "is_verified": {
-                "type": "boolean",
-                "description": "Whether the blueprint is verified by epilot"
-              },
               "source_type": {
                 "type": "string",
                 "const": "file"
@@ -1697,7 +1630,7 @@
               "resources": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/InstalledBlueprintResource"
+                  "$ref": "#/components/schemas/BlueprintResource"
                 }
               }
             }
@@ -1719,10 +1652,6 @@
                 "type": "string",
                 "description": "URL to the blueprint documentation"
               },
-              "is_verified": {
-                "type": "boolean",
-                "description": "Whether the blueprint is verified by epilot"
-              },
               "source_type": {
                 "type": "string",
                 "const": "marketplace"
@@ -1730,7 +1659,7 @@
               "resources": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/InstalledBlueprintResource"
+                  "$ref": "#/components/schemas/BlueprintResource"
                 }
               }
             }
@@ -1755,7 +1684,7 @@
               "resources": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/InstalledBlueprintResource"
+                  "$ref": "#/components/schemas/BlueprintResource"
                 }
               }
             }
@@ -1773,10 +1702,6 @@
           {
             "type": "object",
             "properties": {
-              "is_verified": {
-                "type": "boolean",
-                "description": "Whether the blueprint is verified by epilot"
-              },
               "source_type": {
                 "type": "string",
                 "const": "app"
@@ -1784,7 +1709,7 @@
               "resources": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/InstalledBlueprintResource"
+                  "$ref": "#/components/schemas/BlueprintResource"
                 }
               }
             }
@@ -1888,6 +1813,9 @@
                 ]
               },
               "source_org_id": {
+                "type": "string"
+              },
+              "source_blueprint_file": {
                 "type": "string"
               },
               "destination_blueprint_id": {

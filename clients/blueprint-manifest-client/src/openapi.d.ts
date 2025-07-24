@@ -48,16 +48,16 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
-            created_at?: string; // date-time
-            updated_at?: string; // date-time
-            created_by?: CallerIdentity;
-            updated_by?: CallerIdentity;
             /**
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
             source_type: "app";
-            resources?: InstalledBlueprintResource[];
+            resources?: BlueprintResource[];
         }
         export type Blueprint = CustomBlueprint | FileBlueprint | MarketplaceBlueprint | DeployedBlueprint | AppBlueprint;
         export interface BlueprintExportJob {
@@ -104,6 +104,7 @@ declare namespace Components {
             BlueprintID;
             source_blueprint_type?: "custom" | "file" | "marketplace" | "deploy" | "app";
             source_org_id?: string;
+            source_blueprint_file?: string;
             destination_blueprint_id?: /**
              * ID of a blueprint
              * example:
@@ -144,9 +145,24 @@ declare namespace Components {
              */
             is_root?: boolean;
             /**
-             * on EditableBlueprintResources, this indicates if the resource is ready to be exported and on InstalledBlueprintResources, this indicates if the resource is ready to be used
+             * when editing a blueprint, this indicates if the resource is ready to be exported and when installing a blueprint, this indicates if the resource is ready to be used
              */
             is_ready?: boolean;
+            /**
+             * When a resource is marked as hidden, it's used to hide it from the UI
+             */
+            is_hidden?: boolean;
+            hard_dependencies?: /* Type of the resource */ ResourceNodeType[];
+            /**
+             * Used to automatically remove resources with hard dependencies and to block deletion of resources with hard dependencies
+             */
+            parent_resource_ids?: /**
+             * ID of a blueprint resource
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintResourceID[];
+            impact_on_install?: ("create" | "update" | "no-op" | "delete")[];
         }
         /**
          * ID of a blueprint resource
@@ -207,6 +223,10 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
+            /**
+             * Whether the blueprint is verified by epilot
+             */
+            is_verified?: boolean;
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -415,11 +435,15 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
+            /**
+             * Whether the blueprint is verified by epilot
+             */
+            is_verified?: boolean;
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
-            resources?: EditableBlueprintResource[];
+            resources?: BlueprintResource[];
             source_type: "custom";
         }
         export interface DeployedBlueprint {
@@ -449,35 +473,16 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
+            /**
+             * Whether the blueprint is verified by epilot
+             */
+            is_verified?: boolean;
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
             source_type: "deploy";
-            resources?: InstalledBlueprintResource[];
-        }
-        export interface EditableBlueprintResource {
-            id: /**
-             * ID of a blueprint resource
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            BlueprintResourceID;
-            name?: string;
-            type: /* Type of the resource */ ResourceNodeType;
-            address?: string;
-            /**
-             * When a resource is marked as root, we'll be able to keep track of it's dependencies
-             */
-            is_root?: boolean;
-            /**
-             * on EditableBlueprintResources, this indicates if the resource is ready to be exported and on InstalledBlueprintResources, this indicates if the resource is ready to be used
-             */
-            is_ready?: boolean;
-            /**
-             * An internal note to help remember what's missing to export the resource
-             */
-            note?: string;
+            resources?: BlueprintResource[];
         }
         export interface FileBlueprint {
             id?: /**
@@ -506,16 +511,16 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
-            created_at?: string; // date-time
-            updated_at?: string; // date-time
-            created_by?: CallerIdentity;
-            updated_by?: CallerIdentity;
             /**
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            created_by?: CallerIdentity;
+            updated_by?: CallerIdentity;
             source_type: "file";
-            resources?: InstalledBlueprintResource[];
+            resources?: BlueprintResource[];
         }
         export interface FormattedError {
             error?: string | {
@@ -531,26 +536,6 @@ declare namespace Components {
                 name?: string;
                 type?: string;
             };
-        }
-        export interface InstalledBlueprintResource {
-            id: /**
-             * ID of a blueprint resource
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            BlueprintResourceID;
-            name?: string;
-            type: /* Type of the resource */ ResourceNodeType;
-            address?: string;
-            /**
-             * When a resource is marked as root, we'll be able to keep track of it's dependencies
-             */
-            is_root?: boolean;
-            /**
-             * on EditableBlueprintResources, this indicates if the resource is ready to be exported and on InstalledBlueprintResources, this indicates if the resource is ready to be used
-             */
-            is_ready?: boolean;
-            impact_on_install?: "create" | "update" | "no-op" | "delete";
         }
         export interface Job {
             job_id?: /**
@@ -1055,6 +1040,10 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
+            /**
+             * Whether the blueprint is verified by epilot
+             */
+            is_verified?: boolean;
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -1063,12 +1052,8 @@ declare namespace Components {
              * URL to the blueprint documentation
              */
             docs_url?: string;
-            /**
-             * Whether the blueprint is verified by epilot
-             */
-            is_verified?: boolean;
             source_type: "marketplace";
-            resources?: InstalledBlueprintResource[];
+            resources?: BlueprintResource[];
         }
         export type PlanChanges = ("create" | "update" | "no-op" | "delete")[];
         export interface PutManifestPayload {
@@ -1251,10 +1236,10 @@ declare namespace Paths {
         export interface QueryParameters {
             add_dependencies?: /* Whether to add this resource dependencies to the blueprint automatically */ Parameters.AddDependencies;
         }
-        export type RequestBody = Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource;
+        export type RequestBody = Components.Schemas.BlueprintResource;
         namespace Responses {
             export interface $200 {
-                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+                resources?: Components.Schemas.BlueprintResource[];
             }
         }
     }
@@ -1310,10 +1295,10 @@ declare namespace Paths {
         export interface QueryParameters {
             add_dependencies?: /* Whether to add this resource dependencies to the blueprint automatically */ Parameters.AddDependencies;
         }
-        export type RequestBody = (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+        export type RequestBody = Components.Schemas.BlueprintResource[];
         namespace Responses {
             export interface $200 {
-                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+                resources?: Components.Schemas.BlueprintResource[];
             }
         }
     }
@@ -1337,7 +1322,7 @@ declare namespace Paths {
         Components.Schemas.BlueprintResourceID[];
         namespace Responses {
             export interface $200 {
-                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+                resources?: Components.Schemas.BlueprintResource[];
             }
         }
     }
@@ -1353,10 +1338,10 @@ declare namespace Paths {
         export interface PathParameters {
             blueprint_id: Parameters.BlueprintId;
         }
-        export type RequestBody = (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+        export type RequestBody = Components.Schemas.BlueprintResource[];
         namespace Responses {
             export interface $200 {
-                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+                resources?: Components.Schemas.BlueprintResource[];
             }
         }
     }
@@ -1568,7 +1553,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+                resources?: Components.Schemas.BlueprintResource[];
             }
         }
     }
@@ -1728,6 +1713,7 @@ declare namespace Paths {
     }
     namespace InstallBlueprint {
         export interface RequestBody {
+            source_org_id?: string;
             source_blueprint_id?: /**
              * ID of a blueprint
              * example:
@@ -1737,7 +1723,14 @@ declare namespace Paths {
             /**
              * URL to the blueprint zip file
              */
-            source_blueprint_file_url?: string;
+            source_blueprint_file?: string;
+            destination_org_id?: string;
+            destination_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
             /**
              * Installation mode
              */
@@ -1756,7 +1749,14 @@ declare namespace Paths {
     }
     namespace ListBlueprintJobs {
         namespace Responses {
-            export type $200 = Components.Schemas.BlueprintJob[];
+            export interface $200 {
+                /**
+                 * example:
+                 * 1
+                 */
+                total?: number;
+                results?: Components.Schemas.BlueprintJob[];
+            }
         }
     }
     namespace ListBlueprints {
@@ -1797,7 +1797,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+                resources?: Components.Schemas.BlueprintResource[];
             }
         }
     }
@@ -1837,10 +1837,10 @@ declare namespace Paths {
             blueprint_id: Parameters.BlueprintId;
             resource_id: Parameters.ResourceId;
         }
-        export type RequestBody = Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource;
+        export type RequestBody = Components.Schemas.BlueprintResource;
         namespace Responses {
             export interface $200 {
-                resources?: (Components.Schemas.EditableBlueprintResource | Components.Schemas.InstalledBlueprintResource)[];
+                resources?: Components.Schemas.BlueprintResource[];
             }
         }
     }
@@ -1875,6 +1875,7 @@ declare namespace Paths {
         }
     }
 }
+
 
 export interface OperationMethods {
   /**
@@ -2510,6 +2511,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
 export type BlueprintExportJob = Components.Schemas.BlueprintExportJob;
@@ -2530,12 +2532,10 @@ export type CommonMarkdownFields = Components.Schemas.CommonMarkdownFields;
 export type CommonResourceNode = Components.Schemas.CommonResourceNode;
 export type CustomBlueprint = Components.Schemas.CustomBlueprint;
 export type DeployedBlueprint = Components.Schemas.DeployedBlueprint;
-export type EditableBlueprintResource = Components.Schemas.EditableBlueprintResource;
 export type FileBlueprint = Components.Schemas.FileBlueprint;
 export type FormattedError = Components.Schemas.FormattedError;
 export type FormattedErrorCodes = Components.Schemas.FormattedErrorCodes;
 export type FormattedErrorData = Components.Schemas.FormattedErrorData;
-export type InstalledBlueprintResource = Components.Schemas.InstalledBlueprintResource;
 export type Job = Components.Schemas.Job;
 export type JobID = Components.Schemas.JobID;
 export type JobStatus = Components.Schemas.JobStatus;
