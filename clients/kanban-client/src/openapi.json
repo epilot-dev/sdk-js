@@ -190,6 +190,79 @@
           }
         }
       },
+      "patch": {
+        "operationId": "patchKanbanBoard",
+        "summary": "Patch a Kanban board",
+        "description": "Patch a Kanban board",
+        "tags": [
+          "Kanban"
+        ],
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Board 1"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Board description"
+                  },
+                  "shared_with": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "shared_with_org": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully patched board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Board"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Board not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
       "delete": {
         "operationId": "deleteKanbanBoard",
         "summary": "Delete a Kanban board",
@@ -225,6 +298,112 @@
           }
         }
       }
+    },
+    "/v1/kanban/query/flows:autocomplete": {
+      "get": {
+        "operationId": "flowsAutocomplete",
+        "summary": "flowsAutocomplete",
+        "description": "Autocomplete flows data\n",
+        "tags": [
+          "Query"
+        ],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "description": "Input to autocomplete",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attribute",
+            "in": "query",
+            "description": "Autocomplete attribute",
+            "schema": {
+              "type": "string",
+              "example": "name"
+            },
+            "required": true
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Maximum number of results to return",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "minimum": 1,
+              "maximum": 250
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        ]
+                      },
+                      "example": [
+                        "value"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/kanban/query/flows:execute": {
+      "post": {
+        "operationId": "executeFlowsQuery",
+        "summary": "executeFlowsQuery",
+        "description": "Query Flows Data for Kanban View.",
+        "tags": [
+          "Query"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowsQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowsQueryResult"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -233,12 +412,6 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Authorization header with epilot OAuth2 bearer token",
-        "bearerFormat": "JWT"
-      },
-      "EpilotPublicAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Authorization header with epilot public access token",
         "bearerFormat": "JWT"
       }
     },
@@ -268,6 +441,9 @@
           "created_by": {
             "type": "string"
           },
+          "org_id": {
+            "type": "string"
+          },
           "updated_by": {
             "type": "string"
           },
@@ -276,6 +452,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "shared_with_org": {
+            "type": "boolean"
           }
         }
       },
@@ -360,7 +539,7 @@
         "properties": {
           "field": {
             "type": "string",
-            "example": "createdAt"
+            "example": "created_at"
           },
           "direction": {
             "type": "string",
@@ -486,6 +665,50 @@
         ],
         "description": "The value to compare against - can be a single value (string, number, boolean) or an array of values"
       },
+      "FlowsQueryRequest": {
+        "type": "object",
+        "properties": {
+          "filters": {
+            "$ref": "#/components/schemas/BoardFilter"
+          },
+          "sorting": {
+            "$ref": "#/components/schemas/Sorting"
+          },
+          "from": {
+            "type": "number",
+            "default": 0
+          },
+          "size": {
+            "type": "number",
+            "default": 10
+          }
+        }
+      },
+      "FlowsQueryResult": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "hits": {
+            "type": "number"
+          },
+          "page_number": {
+            "type": "number"
+          },
+          "page_size": {
+            "type": "number"
+          },
+          "total_pages": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      },
       "FilterItem": {
         "type": "object",
         "properties": {
@@ -514,8 +737,7 @@
         },
         "required": [
           "key",
-          "operator",
-          "value"
+          "operator"
         ]
       }
     }

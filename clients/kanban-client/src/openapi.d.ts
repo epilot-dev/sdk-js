@@ -25,8 +25,10 @@ declare namespace Components {
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: string;
+            org_id?: string;
             updated_by?: string;
             shared_with?: string[];
+            shared_with_org?: boolean;
             config: {
                 /**
                  * example:
@@ -69,8 +71,10 @@ declare namespace Components {
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: string;
+            org_id?: string;
             updated_by?: string;
             shared_with?: string[];
+            shared_with_org?: boolean;
         }
         export interface FilterGroup {
             items: FilterItem[];
@@ -93,7 +97,7 @@ declare namespace Components {
              * EQUALS
              */
             FilterOperator;
-            value: /* The value to compare against - can be a single value (string, number, boolean) or an array of values */ ValueType;
+            value?: /* The value to compare against - can be a single value (string, number, boolean) or an array of values */ ValueType;
             /**
              * The data type of the field
              * example:
@@ -107,10 +111,26 @@ declare namespace Components {
          * EQUALS
          */
         export type FilterOperator = "EQUALS" | "NOT_EQUALS" | "EMPTY" | "NOT_EMPTY" | "CONTAINS" | "NOT_CONTAINS" | "IS_ONE_OF" | "IS_NONE_OF" | "GREATER_THAN" | "LESS_THAN" | "GREATER_THAN_OR_EQUAL" | "LESS_THAN_OR_EQUAL";
+        export interface FlowsQueryRequest {
+            filters?: BoardFilter;
+            sorting?: Sorting;
+            from?: number;
+            size?: number;
+        }
+        export interface FlowsQueryResult {
+            [name: string]: any;
+            results?: {
+                [name: string]: any;
+            }[];
+            hits?: number;
+            page_number?: number;
+            page_size?: number;
+            total_pages?: number;
+        }
         export interface Sorting {
             /**
              * example:
-             * createdAt
+             * created_at
              */
             field: string;
             direction?: "asc" | "desc";
@@ -175,6 +195,45 @@ declare namespace Paths {
             }
         }
     }
+    namespace ExecuteFlowsQuery {
+        export type RequestBody = Components.Schemas.FlowsQueryRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.FlowsQueryResult;
+        }
+    }
+    namespace FlowsAutocomplete {
+        namespace Parameters {
+            /**
+             * example:
+             * name
+             */
+            export type Attribute = string;
+            export type Input = string;
+            export type Size = number;
+        }
+        export interface QueryParameters {
+            input?: Parameters.Input;
+            attribute: /**
+             * example:
+             * name
+             */
+            Parameters.Attribute;
+            size?: Parameters.Size;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * [
+                 *   "value"
+                 * ]
+                 */
+                results?: (string | boolean | {
+                    [name: string]: any;
+                })[];
+            }
+        }
+    }
     namespace GetKanbanBoard {
         namespace Parameters {
             export type BoardId = string;
@@ -200,6 +259,41 @@ declare namespace Paths {
             export interface $401 {
             }
             export interface $403 {
+            }
+            export interface $500 {
+            }
+        }
+    }
+    namespace PatchKanbanBoard {
+        namespace Parameters {
+            export type BoardId = string;
+        }
+        export interface PathParameters {
+            boardId: Parameters.BoardId;
+        }
+        export interface RequestBody {
+            /**
+             * example:
+             * Board 1
+             */
+            title?: string;
+            /**
+             * example:
+             * Board description
+             */
+            description?: string;
+            shared_with?: string[];
+            shared_with_org?: boolean;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Board;
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
             }
             export interface $500 {
             }
@@ -272,6 +366,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateKanbanBoard.Responses.$200>
   /**
+   * patchKanbanBoard - Patch a Kanban board
+   * 
+   * Patch a Kanban board
+   */
+  'patchKanbanBoard'(
+    parameters?: Parameters<Paths.PatchKanbanBoard.PathParameters> | null,
+    data?: Paths.PatchKanbanBoard.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PatchKanbanBoard.Responses.$200>
+  /**
    * deleteKanbanBoard - Delete a Kanban board
    * 
    * Delete a Kanban board
@@ -281,6 +385,27 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteKanbanBoard.Responses.$200>
+  /**
+   * flowsAutocomplete - flowsAutocomplete
+   * 
+   * Autocomplete flows data
+   * 
+   */
+  'flowsAutocomplete'(
+    parameters?: Parameters<Paths.FlowsAutocomplete.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.FlowsAutocomplete.Responses.$200>
+  /**
+   * executeFlowsQuery - executeFlowsQuery
+   * 
+   * Query Flows Data for Kanban View.
+   */
+  'executeFlowsQuery'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ExecuteFlowsQuery.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ExecuteFlowsQuery.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -330,6 +455,16 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateKanbanBoard.Responses.$200>
     /**
+     * patchKanbanBoard - Patch a Kanban board
+     * 
+     * Patch a Kanban board
+     */
+    'patch'(
+      parameters?: Parameters<Paths.PatchKanbanBoard.PathParameters> | null,
+      data?: Paths.PatchKanbanBoard.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PatchKanbanBoard.Responses.$200>
+    /**
      * deleteKanbanBoard - Delete a Kanban board
      * 
      * Delete a Kanban board
@@ -339,6 +474,31 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteKanbanBoard.Responses.$200>
+  }
+  ['/v1/kanban/query/flows:autocomplete']: {
+    /**
+     * flowsAutocomplete - flowsAutocomplete
+     * 
+     * Autocomplete flows data
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.FlowsAutocomplete.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.FlowsAutocomplete.Responses.$200>
+  }
+  ['/v1/kanban/query/flows:execute']: {
+    /**
+     * executeFlowsQuery - executeFlowsQuery
+     * 
+     * Query Flows Data for Kanban View.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ExecuteFlowsQuery.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ExecuteFlowsQuery.Responses.$200>
   }
 }
 
@@ -351,6 +511,8 @@ export type BoardSummary = Components.Schemas.BoardSummary;
 export type FilterGroup = Components.Schemas.FilterGroup;
 export type FilterItem = Components.Schemas.FilterItem;
 export type FilterOperator = Components.Schemas.FilterOperator;
+export type FlowsQueryRequest = Components.Schemas.FlowsQueryRequest;
+export type FlowsQueryResult = Components.Schemas.FlowsQueryResult;
 export type Sorting = Components.Schemas.Sorting;
 export type Swimlane = Components.Schemas.Swimlane;
 export type ValueType = Components.Schemas.ValueType;
