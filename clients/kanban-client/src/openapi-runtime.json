@@ -50,6 +50,22 @@
         },
         "responses": {}
       },
+      "patch": {
+        "operationId": "patchKanbanBoard",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
       "delete": {
         "operationId": "deleteKanbanBoard",
         "parameters": [
@@ -59,6 +75,38 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/kanban/query/flows:autocomplete": {
+      "get": {
+        "operationId": "flowsAutocomplete",
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query"
+          },
+          {
+            "name": "attribute",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "size",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/kanban/query/flows:execute": {
+      "post": {
+        "operationId": "executeFlowsQuery",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     }
