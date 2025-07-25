@@ -2865,6 +2865,12 @@ declare namespace Components {
              */
             journey_id: string;
             /**
+             * The ID of the entity.
+             * example:
+             * 8d0a2235-97ce-42d0-88a3-e374634ca44e
+             */
+            entity_id?: string;
+            /**
              * The name of the journey.
              * example:
              * journey name
@@ -5771,6 +5777,20 @@ declare namespace Paths {
             export type $403 = Components.Schemas.Error;
         }
     }
+    namespace $SearchExternalProducts {
+        namespace Parameters {
+            export type IntegrationId = Components.Schemas.IntegrationId;
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId;
+        }
+        export type RequestBody = Components.Schemas.SearchExternalCatalogParams;
+        namespace Responses {
+            export type $200 = Components.Schemas.SearchExternalCatalogResult;
+            export type $400 = Components.Schemas.Error;
+            export type $403 = Components.Schemas.Error;
+        }
+    }
     namespace $SearchProviders {
         export interface HeaderParameters {
             "X-Epilot-Org-ID": Parameters.XEpilotOrgID;
@@ -6027,6 +6047,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchExternalCatalog.Responses.$200>
   /**
+   * $searchExternalProducts - searchExternalProducts
+   * 
+   * Returns the list of available products with computed prices based on a given context and for a given org integration.
+   */
+  '$searchExternalProducts'(
+    parameters?: Parameters<Paths.$SearchExternalProducts.PathParameters> | null,
+    data?: Paths.$SearchExternalProducts.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$SearchExternalProducts.Responses.$200>
+  /**
    * $searchProviders - searchProviders
    * 
    * Returns the list of providers available based on a given location
@@ -6253,6 +6283,18 @@ export interface PathsDictionary {
       data?: Paths.$SearchExternalCatalog.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$SearchExternalCatalog.Responses.$200>
+  }
+  ['/v1/public/integration/{integrationId}/products']: {
+    /**
+     * $searchExternalProducts - searchExternalProducts
+     * 
+     * Returns the list of available products with computed prices based on a given context and for a given org integration.
+     */
+    'post'(
+      parameters?: Parameters<Paths.$SearchExternalProducts.PathParameters> | null,
+      data?: Paths.$SearchExternalProducts.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$SearchExternalProducts.Responses.$200>
   }
   ['/v1/public/integration/{integrationId}/providers:search']: {
     /**

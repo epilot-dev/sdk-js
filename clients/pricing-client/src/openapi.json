@@ -384,7 +384,8 @@
                                 "_created_at": "2025-02-24T10:01:24.537Z",
                                 "_updated_at": "2025-02-24T10:01:24.537Z",
                                 "percentage_value": "0",
-                                "_title": "My Custom Discount"
+                                "_title": "My Custom Discount",
+                                "_id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
                               }
                             ]
                           },
@@ -1655,6 +1656,7 @@
     },
     "/v1/public/integration/{integrationId}/external-catalog": {
       "post": {
+        "deprecated": true,
         "description": "Returns the list of available products (including computed prices) based on a given context.",
         "operationId": "$searchExternalCatalog",
         "security": [
@@ -1676,6 +1678,81 @@
           }
         ],
         "summary": "searchExternalCatalog",
+        "tags": [
+          "External Integrations API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchExternalCatalogParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The available products response payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchExternalCatalogResult"
+                },
+                "examples": {
+                  "External products": {
+                    "$ref": "#/components/examples/external-catalog-sample-1"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, no credentials found for the given integration / organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/integration/{integrationId}/products": {
+      "post": {
+        "description": "Returns the list of available products with computed prices based on a given context and for a given org integration.",
+        "operationId": "$searchExternalProducts",
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "description": "The integration identifier",
+            "schema": {
+              "$ref": "#/components/schemas/IntegrationId"
+            },
+            "required": true,
+            "example": "ikom"
+          }
+        ],
+        "summary": "searchExternalProducts",
         "tags": [
           "External Integrations API"
         ],
@@ -6684,6 +6761,11 @@
           "journey_id": {
             "type": "string",
             "description": "The ID of the journey.",
+            "example": "8d0a2235-97ce-42d0-88a3-e374634ca44e"
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "The ID of the entity.",
             "example": "8d0a2235-97ce-42d0-88a3-e374634ca44e"
           },
           "journey_name": {

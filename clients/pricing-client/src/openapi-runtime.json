@@ -225,7 +225,27 @@
     },
     "/v1/public/integration/{integrationId}/external-catalog": {
       "post": {
+        "deprecated": true,
         "operationId": "$searchExternalCatalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/integration/{integrationId}/products": {
+      "post": {
+        "operationId": "$searchExternalProducts",
         "parameters": [
           {
             "in": "path",
