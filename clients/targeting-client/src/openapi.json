@@ -336,7 +336,7 @@
       "patch": {
         "operationId": "updateRecipientPortalStatus",
         "summary": "Update portal status for a campaign recipient",
-        "description": "Updates the portal status for a specific campaign recipient.\nThe portal_status_updated_at timestamp is automatically set when the status changes.\n\nStatus transition rules:\n- From 'delivered': can change to 'seen', 'accepted', or 'dismissed'\n- From 'seen': can change to 'accepted' or 'dismissed'\n- From 'accepted' or 'dismissed': cannot be changed (final states)\n",
+        "description": "Updates the portal status for a specific campaign recipient.\nThe portal_status_updated_at timestamp is automatically set when the status changes.\n\nStatus transition rules:\n- From 'sent': can change to 'seen', 'dismissed', or 'clicked'\n- From 'seen': can change to 'dismissed' or 'clicked'\n- From 'dismissed' or 'clicked': cannot be changed (final states)\n",
         "tags": [
           "Campaign Recipient"
         ],
@@ -904,10 +904,10 @@
       "PortalStatus": {
         "type": "string",
         "enum": [
-          "delivered",
+          "sent",
           "seen",
-          "accepted",
-          "dismissed"
+          "dismissed",
+          "clicked"
         ]
       },
       "Recipient": {

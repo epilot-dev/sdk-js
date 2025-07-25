@@ -1393,7 +1393,7 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
-        export type PortalStatus = "delivered" | "seen" | "accepted" | "dismissed";
+        export type PortalStatus = "sent" | "seen" | "dismissed" | "clicked";
         export interface Recipient {
             entity_id?: /**
              * example:
@@ -1771,9 +1771,9 @@ export interface OperationMethods {
    * The portal_status_updated_at timestamp is automatically set when the status changes.
    * 
    * Status transition rules:
-   * - From 'delivered': can change to 'seen', 'accepted', or 'dismissed'
-   * - From 'seen': can change to 'accepted' or 'dismissed'
-   * - From 'accepted' or 'dismissed': cannot be changed (final states)
+   * - From 'sent': can change to 'seen', 'dismissed', or 'clicked'
+   * - From 'seen': can change to 'dismissed' or 'clicked'
+   * - From 'dismissed' or 'clicked': cannot be changed (final states)
    * 
    */
   'updateRecipientPortalStatus'(
@@ -1915,9 +1915,9 @@ export interface PathsDictionary {
      * The portal_status_updated_at timestamp is automatically set when the status changes.
      * 
      * Status transition rules:
-     * - From 'delivered': can change to 'seen', 'accepted', or 'dismissed'
-     * - From 'seen': can change to 'accepted' or 'dismissed'
-     * - From 'accepted' or 'dismissed': cannot be changed (final states)
+     * - From 'sent': can change to 'seen', 'dismissed', or 'clicked'
+     * - From 'seen': can change to 'dismissed' or 'clicked'
+     * - From 'dismissed' or 'clicked': cannot be changed (final states)
      * 
      */
     'patch'(
