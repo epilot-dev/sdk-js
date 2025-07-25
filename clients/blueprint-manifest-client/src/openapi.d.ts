@@ -114,6 +114,12 @@ declare namespace Components {
             destination_org_id?: string;
             status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "FAILED";
         }
+        export interface BlueprintInstallationJobOptions {
+            /**
+             * List of resource addresses to ignore changes for. When a resource is marked as create, it will be ignored and not created.
+             */
+            resources_to_ignore?: string[];
+        }
         export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob;
         export interface BlueprintJobEvent {
             timestamp?: string; // date-time
@@ -1373,6 +1379,7 @@ declare namespace Paths {
         export interface PathParameters {
             job_id: Parameters.JobId;
         }
+        export type RequestBody = Components.Schemas.BlueprintInstallationJobOptions;
         namespace Responses {
             export type $200 = Components.Schemas.BlueprintInstallationJob;
         }
@@ -1731,6 +1738,7 @@ declare namespace Paths {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             Components.Schemas.BlueprintID;
+            options?: Components.Schemas.BlueprintInstallationJobOptions;
             /**
              * Installation mode
              */
@@ -1744,6 +1752,12 @@ declare namespace Paths {
                  * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
                  */
                 Components.Schemas.BlueprintJobID;
+                destination_blueprint_id?: /**
+                 * ID of a blueprint
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintID;
             }
         }
     }
@@ -2158,7 +2172,7 @@ export interface OperationMethods {
    */
   'continueInstallationJob'(
     parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
-    data?: any,
+    data?: Paths.ContinueInstallationJob.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ContinueInstallationJob.Responses.$200>
   /**
@@ -2491,7 +2505,7 @@ export interface PathsDictionary {
      */
     'post'(
       parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
-      data?: any,
+      data?: Paths.ContinueInstallationJob.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ContinueInstallationJob.Responses.$200>
   }
@@ -2518,6 +2532,7 @@ export type BlueprintExportJob = Components.Schemas.BlueprintExportJob;
 export type BlueprintID = Components.Schemas.BlueprintID;
 export type BlueprintInstallStatus = Components.Schemas.BlueprintInstallStatus;
 export type BlueprintInstallationJob = Components.Schemas.BlueprintInstallationJob;
+export type BlueprintInstallationJobOptions = Components.Schemas.BlueprintInstallationJobOptions;
 export type BlueprintJob = Components.Schemas.BlueprintJob;
 export type BlueprintJobEvent = Components.Schemas.BlueprintJobEvent;
 export type BlueprintJobID = Components.Schemas.BlueprintJobID;

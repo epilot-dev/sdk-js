@@ -369,6 +369,11 @@
             "name": "job_id"
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

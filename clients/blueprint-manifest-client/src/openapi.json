@@ -782,6 +782,9 @@
                   "destination_blueprint_id": {
                     "$ref": "#/components/schemas/BlueprintID"
                   },
+                  "options": {
+                    "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
+                  },
                   "mode": {
                     "type": "string",
                     "enum": [
@@ -816,6 +819,9 @@
                   "properties": {
                     "job_id": {
                       "$ref": "#/components/schemas/BlueprintJobID"
+                    },
+                    "destination_blueprint_id": {
+                      "$ref": "#/components/schemas/BlueprintID"
                     }
                   }
                 }
@@ -1417,6 +1423,15 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Blueprint installation job continued",
@@ -1875,6 +1890,18 @@
           "data": {
             "type": "object",
             "additionalProperties": {}
+          }
+        }
+      },
+      "BlueprintInstallationJobOptions": {
+        "type": "object",
+        "properties": {
+          "resources_to_ignore": {
+            "description": "List of resource addresses to ignore changes for. When a resource is marked as create, it will be ignored and not created.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
