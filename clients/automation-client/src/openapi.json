@@ -2531,10 +2531,6 @@
       "TriggerWebhookConfig": {
         "type": "object",
         "properties": {
-          "event_id": {
-            "type": "string",
-            "description": "The latest webhook event_id for an execution of this action"
-          },
           "entity_sources": {
             "type": "array",
             "items": {
@@ -2779,7 +2775,9 @@
                   "radio",
                   "relation_user",
                   "purpose",
-                  "label"
+                  "label",
+                  "payment",
+                  "relation_payment_method"
                 ]
               },
               "attributeRepeatable": {
@@ -4530,9 +4528,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://automation.sls.epilot.io"
-    },
     {
       "url": "https://automation.sls.epilot.io"
     }

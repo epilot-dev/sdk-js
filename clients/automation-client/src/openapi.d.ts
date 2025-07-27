@@ -1327,7 +1327,7 @@ declare namespace Components {
                 originType?: "entity" | "workflow" | "journey_block";
                 schema?: string;
                 attribute?: string;
-                attributeType?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label";
+                attributeType?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "payment" | "relation_payment_method";
                 attributeRepeatable?: boolean;
                 attributeOperation?: "all" | "updated" | "added" | "deleted";
             };
@@ -3394,10 +3394,6 @@ declare namespace Components {
             schedule_id?: string;
         }
         export interface TriggerWebhookConfig {
-            /**
-             * The latest webhook event_id for an execution of this action
-             */
-            event_id?: string;
             entity_sources?: string[];
             target_webhook_id?: string;
             /**
