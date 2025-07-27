@@ -2783,6 +2783,10 @@
               "attributeRepeatable": {
                 "type": "boolean"
               },
+              "repeatableItemOp": {
+                "type": "boolean",
+                "description": "Whether to apply the operation to each item of the repeatable attribute"
+              },
               "attributeOperation": {
                 "enum": [
                   "all",
