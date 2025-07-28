@@ -1424,6 +1424,7 @@
           }
         ],
         "requestBody": {
+          "required": false,
           "content": {
             "application/json": {
               "schema": {
@@ -1889,7 +1890,17 @@
           },
           "data": {
             "type": "object",
-            "additionalProperties": {}
+            "properties": {
+              "installed_blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "export_job_id": {
+                "$ref": "#/components/schemas/BlueprintJobID"
+              },
+              "resources": {
+                "type": "number"
+              }
+            }
           }
         }
       },

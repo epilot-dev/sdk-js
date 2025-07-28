@@ -127,7 +127,19 @@ declare namespace Components {
             errors?: FormattedError[];
             level?: "info" | "warning" | "error";
             data?: {
-                [name: string]: any;
+                installed_blueprint_id?: /**
+                 * ID of a blueprint
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                BlueprintID;
+                export_job_id?: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                BlueprintJobID;
+                resources?: number;
             };
         }
         /**
