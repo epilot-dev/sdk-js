@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
