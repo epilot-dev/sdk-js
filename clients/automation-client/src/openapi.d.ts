@@ -3398,6 +3398,10 @@ declare namespace Components {
             schedule_id?: string;
         }
         export interface TriggerWebhookConfig {
+            /**
+             * The latest webhook event_id for an execution of this action
+             */
+            event_id?: string;
             entity_sources?: string[];
             target_webhook_id?: string;
             /**
@@ -3629,6 +3633,27 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace BatchGetFlows {
+        export interface RequestBody {
+            ids?: /**
+             * ID of the Automation Flow
+             * example:
+             * 7791b04a-16d2-44a2-9af9-2d59c25c512f
+             */
+            Components.Schemas.AutomationFlowId[];
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.SearchAutomationsResp;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+        }
+    }
     namespace BulkTriggerExecutions {
         export type RequestBody = Components.Schemas.BulkTriggerRequest;
         namespace Responses {
@@ -4073,6 +4098,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateFlow.Responses.$201>
   /**
+   * batchGetFlows - batchGetFlows
+   * 
+   * Get multiple automation flows by their IDs
+   */
+  'batchGetFlows'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.BatchGetFlows.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BatchGetFlows.Responses.$200>
+  /**
    * getFlow - getFlow
    * 
    * List available automation flows
@@ -4231,6 +4266,18 @@ export interface PathsDictionary {
       data?: Paths.CreateFlow.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateFlow.Responses.$201>
+  }
+  ['/v1/automation/flows:batchGet']: {
+    /**
+     * batchGetFlows - batchGetFlows
+     * 
+     * Get multiple automation flows by their IDs
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.BatchGetFlows.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BatchGetFlows.Responses.$200>
   }
   ['/v1/automation/flows/{flow_id}']: {
     /**

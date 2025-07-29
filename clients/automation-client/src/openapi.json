@@ -127,6 +127,49 @@
         }
       }
     },
+    "/v1/automation/flows:batchGet": {
+      "post": {
+        "operationId": "batchGetFlows",
+        "summary": "batchGetFlows",
+        "description": "Get multiple automation flows by their IDs",
+        "tags": [
+          "flows"
+        ],
+        "requestBody": {
+          "description": "List of flow IDs to retrieve",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/AutomationFlowId"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of automation flows",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchAutomationsResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
+      }
+    },
     "/v1/automation/flows/{flow_id}": {
       "get": {
         "operationId": "getFlow",
@@ -2531,6 +2574,10 @@
       "TriggerWebhookConfig": {
         "type": "object",
         "properties": {
+          "event_id": {
+            "type": "string",
+            "description": "The latest webhook event_id for an execution of this action"
+          },
           "entity_sources": {
             "type": "array",
             "items": {

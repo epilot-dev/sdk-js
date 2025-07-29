@@ -42,6 +42,17 @@
         "responses": {}
       }
     },
+    "/v1/automation/flows:batchGet": {
+      "post": {
+        "operationId": "batchGetFlows",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/automation/flows/{flow_id}": {
       "get": {
         "operationId": "getFlow",

@@ -1,6 +1,6 @@
 {
   "name": "@epilot/automation-client",
-  "version": "2.22.5",
+  "version": "2.23.0-alpha",
   "description": "Client library for epilot automation API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
