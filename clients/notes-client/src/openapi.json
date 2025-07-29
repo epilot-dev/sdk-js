@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "version": "2.0.0",
+    "version": "2.1.0",
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
@@ -200,11 +200,36 @@
         }
       }
     },
+    "/v1/notes:search": {
+      "post": {
+        "operationId": "searchNotesByContext",
+        "summary": "searchNotesByContext",
+        "description": "Search for a paginated list of Notes based on one or more contexts",
+        "tags": [
+          "Notes"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteSearchByContextRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with Note content"
+          }
+        }
+      }
+    },
     "/v1/notes/{entity_id}": {
       "get": {
         "operationId": "getNotesByContext",
         "summary": "getNotesByContext",
-        "description": "Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`",
+        "deprecated": true,
+        "description": "Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`. \nThis endpoint is deprecated but will be kept for backwards compatibility. Please use the `searchNotesByContext` endpoint instead.",
         "tags": [
           "Notes"
         ],
@@ -218,6 +243,26 @@
               "description": "The ID of the Contextual Entity from where to retrieve Notes"
             },
             "required": true
+          },
+          {
+            "in": "path",
+            "name": "from",
+            "description": "The index of the first Note to return in this query",
+            "schema": {
+              "type": "number",
+              "default": 0,
+              "description": "The index of the first Note to return in this query"
+            }
+          },
+          {
+            "in": "path",
+            "name": "size",
+            "description": "The number of Note entries to return in this query",
+            "schema": {
+              "type": "number",
+              "default": 10,
+              "description": "The number of Note entries to return in this query"
+            }
           },
           {
             "in": "query",
@@ -367,26 +412,20 @@
           },
           "entity_id": {
             "type": "string",
-            "description": "The Entity ID of the Entity this Note will be related to"
+            "description": "The Entity ID of the Entity this Note will be related to. This option has been deprecated since 2.1.0. Please use `contexts` instead.",
+            "deprecated": true
           },
           "parent_id": {
             "type": "string",
             "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
           },
-          "additional_contexts": {
+          "contexts": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
                 "type": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/EntitySlug"
-                    },
-                    {
-                      "$ref": "#/components/schemas/ContextType"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/ContextType"
                 },
                 "id": {
                   "type": "string"
@@ -396,7 +435,28 @@
                 "type",
                 "id"
               ]
-            }
+            },
+            "description": "The contexts to which this Note will be related to"
+          },
+          "additional_contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ]
+            },
+            "description": "Any additional non-entity contexts to which this Note will be related to. This option has been deprecated since 2.1.0. Please use `contexts` instead.",
+            "deprecated": true
           },
           "content": {
             "type": "string",
@@ -408,33 +468,23 @@
               "type": "string"
             },
             "description": "List of File Entity IDs attached to the Note"
+          },
+          "read_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user IDs who have read this note"
           }
-        },
-        "required": [
-          "entity_id"
-        ]
-      },
-      "EntitySlug": {
-        "type": "string",
-        "enum": [
-          "account",
-          "billing_event",
-          "contact",
-          "contract",
-          "coupon",
-          "email_template",
-          "file",
-          "journey",
-          "meter",
-          "meter_counter",
-          "opportunity"
-        ]
+        }
       },
       "ContextType": {
         "type": "string",
         "enum": [
           "workflow_execution",
           "workflow_task",
+          "workflow_configuration",
+          "journey_configuration",
           "entity"
         ]
       },
@@ -499,10 +549,10 @@
           },
           "read_by": {
             "type": "array",
-            "description": "Array of user ids that have read this note",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "List of user IDs who have read this note"
           }
         },
         "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place."
@@ -657,6 +707,13 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "read_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user IDs who have read this note"
           }
         }
       },
@@ -729,10 +786,10 @@
           },
           "read_by": {
             "type": "array",
-            "description": "Array of user ids that have read this note",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "List of user IDs who have read this note"
           }
         }
       },
@@ -824,10 +881,10 @@
           },
           "read_by": {
             "type": "array",
-            "description": "Array of user ids that have read this note",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "List of user IDs who have read this note"
           }
         },
         "required": [
@@ -1012,8 +1069,51 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "read_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user IDs who have read this note"
           }
         }
+      },
+      "NoteSearchByContextRequestBody": {
+        "type": "object",
+        "properties": {
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ]
+            }
+          },
+          "from": {
+            "type": "number",
+            "default": 0,
+            "description": "The index of the first Note to return in this query"
+          },
+          "size": {
+            "type": "number",
+            "default": 10,
+            "description": "The number of Note entries to return in this query"
+          }
+        },
+        "required": [
+          "contexts"
+        ]
       },
       "NotesGetRequestResponse": {
         "type": "object",
@@ -1082,13 +1182,5 @@
         "description": "Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data"
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://notes.sls.epilot.io"
-    },
-    {
-      "url": "https://notes.sls.epilot.io"
-    }
-  ]
+  }
 }
