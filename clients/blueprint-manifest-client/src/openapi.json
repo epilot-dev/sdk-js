@@ -1595,9 +1595,17 @@
               "enum": [
                 "create",
                 "update",
+                "internal-update",
                 "no-op",
                 "delete"
               ]
+            }
+          },
+          "impact_on_install_reason": {
+            "type": "array",
+            "description": "Fields causing the updates / internal updates on a resource install",
+            "items": {
+              "type": "string"
             }
           }
         },
@@ -2033,6 +2041,7 @@
           "enum": [
             "create",
             "update",
+            "internal-update",
             "no-op",
             "delete"
           ]
@@ -2305,6 +2314,9 @@
             "description": "Version of the blueprint (semver)",
             "example": "1.0.0"
           },
+          "pre_install_requirements": {
+            "$ref": "#/components/schemas/PreInstallRequirements"
+          },
           "source_blueprint_file": {
             "type": "string",
             "deprecated": true,
@@ -2474,6 +2486,30 @@
                 "description": "Markdown content to be displayed when showing the plan to install blueprint",
                 "example": "This is the content of the postinstall.md file\n"
               }
+            }
+          }
+        }
+      },
+      "PreInstallRequirements": {
+        "type": "array",
+        "description": "List of pre-installation requirements for the blueprint",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Requirement Name",
+              "example": "billing_enabled"
+            },
+            "description": {
+              "type": "string",
+              "description": "Human-readable description of the requirement",
+              "example": "Billing must be enabled in your epilot organization"
+            },
+            "completed": {
+              "type": "boolean",
+              "description": "Whether this requirement has been completed",
+              "default": false
             }
           }
         }

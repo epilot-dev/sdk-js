@@ -180,7 +180,11 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintResourceID[];
-            impact_on_install?: ("create" | "update" | "no-op" | "delete")[];
+            impact_on_install?: ("create" | "update" | "internal-update" | "no-op" | "delete")[];
+            /**
+             * Fields causing the updates / internal updates on a resource install
+             */
+            impact_on_install_reason?: string[];
         }
         /**
          * ID of a blueprint resource
@@ -299,6 +303,7 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            pre_install_requirements?: /* List of pre-installation requirements for the blueprint */ PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -655,6 +660,7 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            pre_install_requirements?: /* List of pre-installation requirements for the blueprint */ PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -777,6 +783,7 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            pre_install_requirements?: /* List of pre-installation requirements for the blueprint */ PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -932,6 +939,7 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            pre_install_requirements?: /* List of pre-installation requirements for the blueprint */ PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -1073,7 +1081,28 @@ declare namespace Components {
             source_type: "marketplace";
             resources?: BlueprintResource[];
         }
-        export type PlanChanges = ("create" | "update" | "no-op" | "delete")[];
+        export type PlanChanges = ("create" | "update" | "internal-update" | "no-op" | "delete")[];
+        /**
+         * List of pre-installation requirements for the blueprint
+         */
+        export type PreInstallRequirements = {
+            /**
+             * Requirement Name
+             * example:
+             * billing_enabled
+             */
+            name?: string;
+            /**
+             * Human-readable description of the requirement
+             * example:
+             * Billing must be enabled in your epilot organization
+             */
+            description?: string;
+            /**
+             * Whether this requirement has been completed
+             */
+            completed?: boolean;
+        }[];
         export interface PutManifestPayload {
             /**
              * Name of the source blueprint
@@ -1902,7 +1931,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * getJob - getJob
@@ -2537,7 +2565,6 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
 export type BlueprintExportJob = Components.Schemas.BlueprintExportJob;
@@ -2573,6 +2600,7 @@ export type ManifestSource = Components.Schemas.ManifestSource;
 export type ManifestTimestampFields = Components.Schemas.ManifestTimestampFields;
 export type MarketplaceBlueprint = Components.Schemas.MarketplaceBlueprint;
 export type PlanChanges = Components.Schemas.PlanChanges;
+export type PreInstallRequirements = Components.Schemas.PreInstallRequirements;
 export type PutManifestPayload = Components.Schemas.PutManifestPayload;
 export type ResourceNode = Components.Schemas.ResourceNode;
 export type ResourceNodeType = Components.Schemas.ResourceNodeType;
