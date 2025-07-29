@@ -3847,6 +3847,8 @@ declare namespace Components {
             markup_amount_decimal: string;
             markup_amount_net?: number;
             markup_amount_net_decimal?: string;
+            markup_amount_gross?: number;
+            markup_amount_gross_decimal?: string;
             unit_amount_gross: number;
             unit_amount_gross_decimal?: string;
             unit_amount_net: number;
@@ -4940,8 +4942,8 @@ declare namespace Components {
             /**
              * The number os results returned.
              */
-            hits?: number;
-            results?: /**
+            hits: number;
+            results: /**
              * example:
              * {
              *   "$ref": "#/components/examples/entity-item/value"

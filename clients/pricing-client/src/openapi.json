@@ -6614,6 +6614,12 @@
           "markup_amount_net_decimal": {
             "type": "string"
           },
+          "markup_amount_gross": {
+            "type": "number"
+          },
+          "markup_amount_gross_decimal": {
+            "type": "string"
+          },
           "unit_amount_gross": {
             "type": "number"
           },
@@ -6921,7 +6927,11 @@
               "$ref": "#/components/schemas/ProductRecommendation"
             }
           }
-        }
+        },
+        "required": [
+          "results",
+          "hits"
+        ]
       },
       "Offer": {
         "type": "object",
