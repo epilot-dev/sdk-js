@@ -10,6 +10,17 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        /**
+         * Type of approval action for the bulk message request.
+         * * APPROVE_WITH_CONSENT: Approve the bulk message request and send emails to queued recipients with consent
+         * * APPROVE_ALL: Approve the bulk message request and send emails to all queued recipients, including those without consent
+         *
+         */
+        export type ApproveAction = "APPROVE_WITH_CONSENT" | "APPROVE_ALL";
+        /**
+         * Time when the bulk message action was last approved
+         */
+        export type ApprovedAt = string; // date-time
         export interface AsyncEmailTemplateResponse {
             /**
              * Job ID of the email template that is requested to replace and generate docs
@@ -217,12 +228,12 @@ declare namespace Components {
             _manifest?: string /* uuid */[];
         }
         export interface BulkSendMessageJob {
-            /**
+            org_id?: /**
              * Organization ID
              * example:
              * 206801
              */
-            org_id?: string;
+            OrgId;
             /**
              * Job ID for tracking the status of bulk message action
              * example:
@@ -253,38 +264,28 @@ declare namespace Components {
              *
              */
             BulkSendMessageRequestWithQuery;
-            /**
+            created_by?: /**
              * User ID who created the bulk message action
              * example:
              * 1234
              */
-            created_by?: string;
-            /**
-             * Time when the bulk message action was created
-             */
-            created_at?: string; // date-time
-            /**
-             * Time when the bulk message action was last updated
-             */
-            updated_at?: string; // date-time
-            /**
-             * Time when the bulk message action was last updated
-             */
-            approved_at?: string; // date-time
-            /**
+            CreatedBy;
+            created_at?: /* Time when the bulk message action was created */ CreatedAt /* date-time */;
+            updated_at?: /* Time when the bulk message action was last updated */ UpdatedAt /* date-time */;
+            approved_at?: /* Time when the bulk message action was last approved */ ApprovedAt /* date-time */;
+            approve_action?: /**
              * Type of approval action for the bulk message request.
-             *
              * * APPROVE_WITH_CONSENT: Approve the bulk message request and send emails to queued recipients with consent
              * * APPROVE_ALL: Approve the bulk message request and send emails to all queued recipients, including those without consent
              *
              */
-            approve_action?: "APPROVE_WITH_CONSENT" | "APPROVE_ALL";
-            /**
+            ApproveAction;
+            task_token?: /**
              * Task token to approve or cancel the bulk message action
              * example:
              * 8c086140-f33e-4bb7-a993-50c0f2402c7b
              */
-            task_token?: string;
+            TaskToken;
             /**
              * Total number of emails generated and queued for sending
              * example:
@@ -368,6 +369,7 @@ declare namespace Components {
              * ]
              */
             recipient_ids: string[];
+            custom_variables?: /* Custom variables to be replaced in the email template */ CustomVariables;
         }
         /**
          * It takes an entity query to derive recipient_ids, treating each as a separate mainEntity to construct individual messages.
@@ -389,6 +391,7 @@ declare namespace Components {
              * _schema:contact AND consent_email_marketing:active
              */
             recipient_query: string;
+            custom_variables?: /* Custom variables to be replaced in the email template */ CustomVariables;
         }
         export interface CreateSystemTemplatesReq {
             /**
@@ -402,6 +405,33 @@ declare namespace Components {
             template_names: string[];
         }
         export type CreateSystemTemplatesResp = BaseEntity[];
+        /**
+         * Time when the bulk message action was created
+         */
+        export type CreatedAt = string; // date-time
+        /**
+         * User ID who created the bulk message action
+         * example:
+         * 1234
+         */
+        export type CreatedBy = string;
+        /**
+         * Custom variables to be replaced in the email template
+         */
+        export type CustomVariables = {
+            /**
+             * Template Variable Name
+             * example:
+             * {{abc.xyz}}
+             */
+            variable?: string;
+            /**
+             * Value to be Replaced
+             * example:
+             * ReplacedValue
+             */
+            value?: string;
+        }[];
         export interface EmailTemplateEntity {
             /**
              * Entity ID
@@ -646,6 +676,12 @@ declare namespace Components {
              */
             email: string;
         }
+        /**
+         * Organization ID
+         * example:
+         * 206801
+         */
+        export type OrgId = string;
         export interface PresignedRequest {
             /**
              * UUID
@@ -697,6 +733,12 @@ declare namespace Components {
          * When true, it lets to send only the email by skip creating the thread & message entities.
          */
         export type SkipCreatingEntities = boolean;
+        /**
+         * Task token to approve or cancel the bulk message action
+         * example:
+         * 8c086140-f33e-4bb7-a993-50c0f2402c7b
+         */
+        export type TaskToken = string;
         export type TemplateType = "email" | "document";
         export interface To {
             /**
@@ -710,6 +752,10 @@ declare namespace Components {
              */
             email: string;
         }
+        /**
+         * Time when the bulk message action was last updated
+         */
+        export type UpdatedAt = string; // date-time
         export interface UserResponse {
             id?: string;
             organization_id?: string;
@@ -770,20 +816,7 @@ declare namespace Components {
              * 123452
              */
             user_id?: string;
-            custom_variables?: {
-                /**
-                 * Template Variable Name
-                 * example:
-                 * {{abc.xyz}}
-                 */
-                variable?: string;
-                /**
-                 * Value to be Replaced
-                 * example:
-                 * ReplacedValue
-                 */
-                value?: string;
-            }[];
+            custom_variables?: /* Custom variables to be replaced in the email template */ CustomVariables;
         }
     }
 }
@@ -1102,6 +1135,8 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+export type ApproveAction = Components.Schemas.ApproveAction;
+export type ApprovedAt = Components.Schemas.ApprovedAt;
 export type AsyncEmailTemplateResponse = Components.Schemas.AsyncEmailTemplateResponse;
 export type Attachment = Components.Schemas.Attachment;
 export type AttachmentResponse = Components.Schemas.AttachmentResponse;
@@ -1111,14 +1146,20 @@ export type BulkSendMessageRequest = Components.Schemas.BulkSendMessageRequest;
 export type BulkSendMessageRequestWithQuery = Components.Schemas.BulkSendMessageRequestWithQuery;
 export type CreateSystemTemplatesReq = Components.Schemas.CreateSystemTemplatesReq;
 export type CreateSystemTemplatesResp = Components.Schemas.CreateSystemTemplatesResp;
+export type CreatedAt = Components.Schemas.CreatedAt;
+export type CreatedBy = Components.Schemas.CreatedBy;
+export type CustomVariables = Components.Schemas.CustomVariables;
 export type EmailTemplateEntity = Components.Schemas.EmailTemplateEntity;
 export type EmailTemplateRequest = Components.Schemas.EmailTemplateRequest;
 export type EmailTemplateResponse = Components.Schemas.EmailTemplateResponse;
 export type From = Components.Schemas.From;
+export type OrgId = Components.Schemas.OrgId;
 export type PresignedRequest = Components.Schemas.PresignedRequest;
 export type PresignedResponse = Components.Schemas.PresignedResponse;
 export type SkipCreatingEntities = Components.Schemas.SkipCreatingEntities;
+export type TaskToken = Components.Schemas.TaskToken;
 export type TemplateType = Components.Schemas.TemplateType;
 export type To = Components.Schemas.To;
+export type UpdatedAt = Components.Schemas.UpdatedAt;
 export type UserResponse = Components.Schemas.UserResponse;
 export type VariableParameters = Components.Schemas.VariableParameters;

@@ -991,22 +991,7 @@
             "example": "123452"
           },
           "custom_variables": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "variable": {
-                  "type": "string",
-                  "description": "Template Variable Name",
-                  "example": "{{abc.xyz}}"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "Value to be Replaced",
-                  "example": "ReplacedValue"
-                }
-              }
-            }
+            "$ref": "#/components/schemas/CustomVariables"
           }
         },
         "required": [
@@ -1127,6 +1112,9 @@
               "3fa85f64-5717-4562-b3fc-2c963f66afa7",
               "3fa85f64-5717-4562-b3fc-2c963f66afa8"
             ]
+          },
+          "custom_variables": {
+            "$ref": "#/components/schemas/CustomVariables"
           }
         }
       },
@@ -1150,6 +1138,28 @@
             "type": "string",
             "description": "Entity search query to select recipients",
             "example": "_schema:contact AND consent_email_marketing:active"
+          },
+          "custom_variables": {
+            "$ref": "#/components/schemas/CustomVariables"
+          }
+        }
+      },
+      "CustomVariables": {
+        "description": "Custom variables to be replaced in the email template",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "variable": {
+              "type": "string",
+              "description": "Template Variable Name",
+              "example": "{{abc.xyz}}"
+            },
+            "value": {
+              "type": "string",
+              "description": "Value to be Replaced",
+              "example": "ReplacedValue"
+            }
           }
         }
       },
@@ -1162,10 +1172,7 @@
         ],
         "properties": {
           "org_id": {
-            "type": "string",
-            "description": "Organization ID",
-            "example": "206801",
-            "readonly": true
+            "$ref": "#/components/schemas/OrgId"
           },
           "job_id": {
             "type": "string",
@@ -1199,43 +1206,22 @@
             ]
           },
           "created_by": {
-            "type": "string",
-            "description": "User ID who created the bulk message action",
-            "example": "1234",
-            "readonly": true
+            "$ref": "#/components/schemas/CreatedBy"
           },
           "created_at": {
-            "type": "string",
-            "description": "Time when the bulk message action was created",
-            "format": "date-time",
-            "readonly": true
+            "$ref": "#/components/schemas/CreatedAt"
           },
           "updated_at": {
-            "type": "string",
-            "description": "Time when the bulk message action was last updated",
-            "format": "date-time",
-            "readonly": true
+            "$ref": "#/components/schemas/UpdatedAt"
           },
           "approved_at": {
-            "type": "string",
-            "description": "Time when the bulk message action was last updated",
-            "format": "date-time",
-            "readonly": true
+            "$ref": "#/components/schemas/ApprovedAt"
           },
           "approve_action": {
-            "type": "string",
-            "description": "Type of approval action for the bulk message request.\n\n* APPROVE_WITH_CONSENT: Approve the bulk message request and send emails to queued recipients with consent\n* APPROVE_ALL: Approve the bulk message request and send emails to all queued recipients, including those without consent\n",
-            "enum": [
-              "APPROVE_WITH_CONSENT",
-              "APPROVE_ALL"
-            ],
-            "readonly": true
+            "$ref": "#/components/schemas/ApproveAction"
           },
           "task_token": {
-            "type": "string",
-            "description": "Task token to approve or cancel the bulk message action",
-            "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b",
-            "readonly": true
+            "$ref": "#/components/schemas/TaskToken"
           },
           "total_queued": {
             "type": "integer",
@@ -1367,6 +1353,51 @@
         "items": {
           "$ref": "#/components/schemas/BaseEntity"
         }
+      },
+      "OrgId": {
+        "type": "string",
+        "description": "Organization ID",
+        "example": "206801",
+        "readOnly": true
+      },
+      "CreatedBy": {
+        "type": "string",
+        "description": "User ID who created the bulk message action",
+        "example": "1234",
+        "readOnly": true
+      },
+      "CreatedAt": {
+        "type": "string",
+        "description": "Time when the bulk message action was created",
+        "format": "date-time",
+        "readOnly": true
+      },
+      "UpdatedAt": {
+        "type": "string",
+        "description": "Time when the bulk message action was last updated",
+        "format": "date-time",
+        "readOnly": true
+      },
+      "ApprovedAt": {
+        "type": "string",
+        "description": "Time when the bulk message action was last approved",
+        "format": "date-time",
+        "readOnly": true
+      },
+      "ApproveAction": {
+        "type": "string",
+        "description": "Type of approval action for the bulk message request.\n* APPROVE_WITH_CONSENT: Approve the bulk message request and send emails to queued recipients with consent\n* APPROVE_ALL: Approve the bulk message request and send emails to all queued recipients, including those without consent\n",
+        "enum": [
+          "APPROVE_WITH_CONSENT",
+          "APPROVE_ALL"
+        ],
+        "readOnly": true
+      },
+      "TaskToken": {
+        "type": "string",
+        "description": "Task token to approve or cancel the bulk message action",
+        "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b",
+        "readOnly": true
       }
     }
   },

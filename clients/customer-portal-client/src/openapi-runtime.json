@@ -1231,6 +1231,24 @@
         "responses": {}
       }
     },
+    "/v2/portal/automation-context": {
+      "get": {
+        "operationId": "getAutomationContext",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "activity_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/workflow/{workflow_id}/{step_id}:markDone": {
       "put": {
         "operationId": "updateWorkflowStepAsDone",

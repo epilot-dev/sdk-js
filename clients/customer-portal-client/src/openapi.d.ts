@@ -997,6 +997,10 @@ declare namespace Components {
              * Number of years to look back for showing inactive contracts in the portal
              */
             inactive_contract_cutoff_years?: number;
+            /**
+             * Whether this is a dummy/test portal configuration
+             */
+            is_dummy?: boolean;
             pages?: {
                 [name: string]: Page;
             };
@@ -3602,6 +3606,10 @@ declare namespace Components {
              * Number of years to look back for showing inactive contracts in the portal
              */
             inactive_contract_cutoff_years?: number;
+            /**
+             * Whether this is a dummy/test portal configuration
+             */
+            is_dummy?: boolean;
             pages?: {
                 [name: string]: Page;
             };
@@ -4591,6 +4599,10 @@ declare namespace Components {
              * Number of years to look back for showing inactive contracts in the portal
              */
             inactive_contract_cutoff_years?: number;
+            /**
+             * Whether this is a dummy/test portal configuration
+             */
+            is_dummy?: boolean;
             pages?: {
                 [name: string]: Page;
             };
@@ -5639,6 +5651,28 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetAutomationContext {
+        namespace Parameters {
+            export type ActivityId = /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            Components.Schemas.ActivityId /* ulid */;
+            export type Type = "file";
+        }
+        export interface QueryParameters {
+            activity_id: Parameters.ActivityId;
+            type: Parameters.Type;
+        }
+        namespace Responses {
+            export interface $200 {
+                [name: string]: Components.Schemas.Entity;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetBillingEvents {
         namespace Parameters {
             /**
@@ -6626,6 +6660,10 @@ declare namespace Paths {
                  * Number of years to look back for showing inactive contracts in the portal
                  */
                 inactive_contract_cutoff_years?: number;
+                /**
+                 * Whether this is a dummy/test portal configuration
+                 */
+                is_dummy?: boolean;
                 pages?: {
                     [name: string]: Components.Schemas.Page;
                 };
@@ -7134,6 +7172,15 @@ declare namespace Paths {
              * Email template ID that used on the automation
              */
             template_id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            /**
+             * Entity ID that is part of the automation
+             */
+            context_id: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -9058,6 +9105,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CanTriggerPortalFlow.Responses.$200>
   /**
+   * getAutomationContext - getAutomationContext
+   * 
+   * Retrieves the automation context.
+   */
+  'getAutomationContext'(
+    parameters?: Parameters<Paths.GetAutomationContext.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAutomationContext.Responses.$200>
+  /**
    * updateWorkflowStepAsDone - updateWorkflowStepAsDone
    * 
    * Update a workflow step as done
@@ -10190,6 +10247,18 @@ export interface PathsDictionary {
       data?: Paths.CanTriggerPortalFlow.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CanTriggerPortalFlow.Responses.$200>
+  }
+  ['/v2/portal/automation-context']: {
+    /**
+     * getAutomationContext - getAutomationContext
+     * 
+     * Retrieves the automation context.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAutomationContext.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAutomationContext.Responses.$200>
   }
   ['/v2/portal/workflow/{workflow_id}/{step_id}:markDone']: {
     /**

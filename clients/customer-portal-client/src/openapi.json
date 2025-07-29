@@ -2777,7 +2777,8 @@
                 "type": "object",
                 "required": [
                   "emails",
-                  "template_id"
+                  "template_id",
+                  "context_id"
                 ],
                 "properties": {
                   "emails": {
@@ -2793,6 +2794,10 @@
                   "template_id": {
                     "$ref": "#/components/schemas/EntityId",
                     "description": "Email template ID that used on the automation"
+                  },
+                  "context_id": {
+                    "$ref": "#/components/schemas/EntityId",
+                    "description": "Entity ID that is part of the automation"
                   }
                 }
               }
@@ -5291,6 +5296,65 @@
         }
       }
     },
+    "/v2/portal/automation-context": {
+      "get": {
+        "operationId": "getAutomationContext",
+        "summary": "getAutomationContext",
+        "description": "Retrieves the automation context.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ActivityId"
+            },
+            "description": "Activity ID"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "file"
+              ]
+            },
+            "description": "Type of the context to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved the automation context successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/Entity"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/workflow/{workflow_id}/{step_id}:markDone": {
       "put": {
         "operationId": "updateWorkflowStepAsDone",
@@ -7432,6 +7496,10 @@
           "inactive_contract_cutoff_years": {
             "type": "number",
             "description": "Number of years to look back for showing inactive contracts in the portal"
+          },
+          "is_dummy": {
+            "type": "boolean",
+            "description": "Whether this is a dummy/test portal configuration"
           },
           "pages": {
             "type": "object",
