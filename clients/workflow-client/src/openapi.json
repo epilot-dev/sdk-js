@@ -2033,9 +2033,10 @@
           "SCHEDULED",
           "PENDING",
           "CONDITION_PENDING",
+          "WAITING_FOR_CONFIRMATION",
           "FAILED"
         ],
-        "description": "**Note**: \"UNASSIGNED\" and \"ASSIGNED\" are deprecated and will be removed in a future version. Please use \"PENDING\" instead. Status values for workflow execution steps/tasks:\n- **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)\n- **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)\n- **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution\n- **IN_PROGRESS**: Step/Task is currently being worked on by a user\n- **COMPLETED**: Step/Task has been finished successfully\n- **SKIPPED**: Step/Task was intentionally bypassed and will not be executed\n- **SCHEDULED**: Task is scheduled to run at a specific time in the future\n- **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed\n- **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.\n"
+        "description": "**Note**: \"UNASSIGNED\" and \"ASSIGNED\" are deprecated and will be removed in a future version. Please use \"PENDING\" instead. Status values for workflow execution steps/tasks:\n- **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)\n- **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)\n- **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution\n- **IN_PROGRESS**: Step/Task is currently being worked on by a user\n- **COMPLETED**: Step/Task has been finished successfully\n- **SKIPPED**: Step/Task was intentionally bypassed and will not be executed\n- **SCHEDULED**: Task is scheduled to run at a specific time in the future\n- **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed\n- **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.\n- **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.\n"
       },
       "SectionStatus": {
         "type": "string",
@@ -2544,85 +2545,6 @@
           "target"
         ]
       },
-      "entitySync": {
-        "type": "object",
-        "properties": {
-          "trigger": {
-            "type": "string",
-            "enum": [
-              "workflow_updated",
-              "workflow_started",
-              "workflow_closed",
-              "workflow_cancelled",
-              "task_updated",
-              "task_completed",
-              "task_skipped",
-              "task_in_progress",
-              "phase_updated",
-              "phase_completed",
-              "phase_skipped",
-              "phase_in_progress"
-            ]
-          },
-          "value": {
-            "type": "object",
-            "properties": {
-              "source": {
-                "type": "string",
-                "enum": [
-                  "workflow_name",
-                  "workflow_status",
-                  "workflow_assigned_to",
-                  "task_name",
-                  "task_status",
-                  "task_assigned_to",
-                  "phase_name",
-                  "phase_status",
-                  "phase_assigned_to"
-                ]
-              },
-              "custom_value": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "source"
-            ]
-          },
-          "target": {
-            "type": "object",
-            "properties": {
-              "entitySchema": {
-                "type": "string",
-                "example": "opportunity"
-              },
-              "entityAttribute": {
-                "type": "string",
-                "example": "my_status"
-              }
-            },
-            "required": [
-              "entitySchema",
-              "entityAttribute"
-            ]
-          }
-        },
-        "example": {
-          "trigger": "workflow_started",
-          "target": {
-            "entitySchema": "opportunity",
-            "entityAttribute": "my_status"
-          },
-          "value": {
-            "source": "workflow_name"
-          }
-        },
-        "required": [
-          "trigger",
-          "target",
-          "value"
-        ]
-      },
       "DynamicDueDate": {
         "description": "set a Duedate for a step then a specific",
         "type": "object",
@@ -2871,10 +2793,10 @@
             "type": "boolean",
             "description": "Indicates whether this flow execution is available for End Customer Portal or not. By default it's not."
           },
-          "entity_sync": {
+          "update_entity_attributes": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/entitySync"
+              "$ref": "#/components/schemas/UpdateEntityAttributes"
             }
           },
           "taxonomies": {
@@ -3643,10 +3565,12 @@
         "type": "object",
         "properties": {
           "task_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The template_id of the task that this requirement points to"
           },
           "phase_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The template_id of the phase that this requirement points to"
           },
           "when": {
             "type": "string",
