@@ -10,7 +10,7 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
-        export type ContextType = "workflow_execution" | "workflow_task" | "entity";
+        export type ContextType = "workflow_execution" | "workflow_task" | "workflow_configuration" | "journey_configuration" | "entity";
         /**
          * Base Entity schema
          */
@@ -62,7 +62,6 @@ declare namespace Components {
              */
             type?: string;
         }
-        export type EntitySlug = "account" | "billing_event" | "contact" | "contract" | "coupon" | "email_template" | "file" | "journey" | "meter" | "meter_counter" | "opportunity";
         /**
          * A note Entity object cotaining Entity metadata and content. Relational attributes are not hydrated in place.
          */
@@ -141,7 +140,7 @@ declare namespace Components {
              */
             pinned_at?: string; // date-time
             /**
-             * Array of user ids that have read this note
+             * List of user IDs who have read this note
              */
             read_by?: string[];
         }
@@ -219,7 +218,7 @@ declare namespace Components {
              */
             pinned_at?: string; // date-time
             /**
-             * Array of user ids that have read this note
+             * List of user IDs who have read this note
              */
             read_by?: string[];
         }
@@ -297,6 +296,10 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            /**
+             * List of user IDs who have read this note
+             */
+            read_by?: string[];
         }
         export interface NotePatchRequestBody {
             /**
@@ -329,7 +332,7 @@ declare namespace Components {
              */
             pinned_at?: string; // date-time
             /**
-             * Array of user ids that have read this note
+             * List of user IDs who have read this note
              */
             read_by?: string[];
         }
@@ -343,15 +346,25 @@ declare namespace Components {
              */
             type?: string;
             /**
-             * The Entity ID of the Entity this Note will be related to
+             * The Entity ID of the Entity this Note will be related to. This option has been deprecated since 2.1.0. Please use `contexts` instead.
              */
-            entity_id: string;
+            entity_id?: string;
             /**
              * The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep
              */
             parent_id?: string;
+            /**
+             * The contexts to which this Note will be related to
+             */
+            contexts?: {
+                type: ContextType;
+                id: string;
+            }[];
+            /**
+             * Any additional non-entity contexts to which this Note will be related to. This option has been deprecated since 2.1.0. Please use `contexts` instead.
+             */
             additional_contexts?: {
-                type: EntitySlug | ContextType;
+                type: ContextType;
                 id: string;
             }[];
             /**
@@ -362,6 +375,10 @@ declare namespace Components {
              * List of File Entity IDs attached to the Note
              */
             attachments?: string[];
+            /**
+             * List of user IDs who have read this note
+             */
+            read_by?: string[];
         }
         export interface NotePutRequestBody {
             /**
@@ -436,6 +453,24 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            /**
+             * List of user IDs who have read this note
+             */
+            read_by?: string[];
+        }
+        export interface NoteSearchByContextRequestBody {
+            contexts: {
+                type: ContextType;
+                id: string;
+            }[];
+            /**
+             * The index of the first Note to return in this query
+             */
+            from?: number;
+            /**
+             * The number of Note entries to return in this query
+             */
+            size?: number;
         }
         export interface NotesGetRequestResponse {
             /**
@@ -536,6 +571,8 @@ declare namespace Paths {
         }
         export interface PathParameters {
             entity_id: /* The ID of the Contextual Entity from where to retrieve Notes */ Parameters.EntityId;
+            from?: /* The index of the first Note to return in this query */ Parameters.From;
+            size?: /* The number of Note entries to return in this query */ Parameters.Size;
         }
         export interface QueryParameters {
             contexts?: Parameters.Contexts;
@@ -571,6 +608,13 @@ declare namespace Paths {
         export interface PathParameters {
             id: /* The Entity ID of the Note entry to pin */ Parameters.Id;
         }
+        namespace Responses {
+            export interface $200 {
+            }
+        }
+    }
+    namespace SearchNotesByContext {
+        export type RequestBody = Components.Schemas.NoteSearchByContextRequestBody;
         namespace Responses {
             export interface $200 {
             }
@@ -645,9 +689,20 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteNote.Responses.$200>
   /**
+   * searchNotesByContext - searchNotesByContext
+   * 
+   * Search for a paginated list of Notes based on one or more contexts
+   */
+  'searchNotesByContext'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchNotesByContext.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchNotesByContext.Responses.$200>
+  /**
    * getNotesByContext - getNotesByContext
    * 
-   * Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`
+   * Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`. 
+   * This endpoint is deprecated but will be kept for backwards compatibility. Please use the `searchNotesByContext` endpoint instead.
    */
   'getNotesByContext'(
     parameters?: Parameters<Paths.GetNotesByContext.QueryParameters & Paths.GetNotesByContext.PathParameters> | null,
@@ -731,11 +786,24 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteNote.Responses.$200>
   }
+  ['/v1/notes:search']: {
+    /**
+     * searchNotesByContext - searchNotesByContext
+     * 
+     * Search for a paginated list of Notes based on one or more contexts
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchNotesByContext.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchNotesByContext.Responses.$200>
+  }
   ['/v1/notes/{entity_id}']: {
     /**
      * getNotesByContext - getNotesByContext
      * 
-     * Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`
+     * Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`. 
+     * This endpoint is deprecated but will be kept for backwards compatibility. Please use the `searchNotesByContext` endpoint instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetNotesByContext.QueryParameters & Paths.GetNotesByContext.PathParameters> | null,
@@ -773,7 +841,6 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type ContextType = Components.Schemas.ContextType;
 export type Entity = Components.Schemas.Entity;
-export type EntitySlug = Components.Schemas.EntitySlug;
 export type NonHydratedNoteEntity = Components.Schemas.NonHydratedNoteEntity;
 export type NoteContexts = Components.Schemas.NoteContexts;
 export type NoteEntity = Components.Schemas.NoteEntity;
@@ -782,5 +849,6 @@ export type NoteGetRequestResponse = Components.Schemas.NoteGetRequestResponse;
 export type NotePatchRequestBody = Components.Schemas.NotePatchRequestBody;
 export type NotePostRequestBody = Components.Schemas.NotePostRequestBody;
 export type NotePutRequestBody = Components.Schemas.NotePutRequestBody;
+export type NoteSearchByContextRequestBody = Components.Schemas.NoteSearchByContextRequestBody;
 export type NotesGetRequestResponse = Components.Schemas.NotesGetRequestResponse;
 export type WorkflowExecution = Components.Schemas.WorkflowExecution;

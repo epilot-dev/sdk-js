@@ -76,14 +76,34 @@
         "responses": {}
       }
     },
+    "/v1/notes:search": {
+      "post": {
+        "operationId": "searchNotesByContext",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/notes/{entity_id}": {
       "get": {
         "operationId": "getNotesByContext",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
             "name": "entity_id",
             "required": true
+          },
+          {
+            "in": "path",
+            "name": "from"
+          },
+          {
+            "in": "path",
+            "name": "size"
           },
           {
             "in": "query",
@@ -128,10 +148,5 @@
       }
     }
   },
-  "components": {},
-  "servers": [
-    {
-      "url": "https://notes.sls.epilot.io"
-    }
-  ]
+  "components": {}
 }
