@@ -79,6 +79,18 @@ declare namespace Components {
         export interface ExampleResponse {
             [name: string]: any;
             metadata?: /* Contains the metadata about the configured event */ Metadata;
+            /**
+             * Example payload for the webhook event
+             */
+            entity?: {
+                [name: string]: any;
+            };
+            /**
+             * Example relations for the webhook event
+             */
+            relations?: {
+                [name: string]: any;
+            }[];
         }
         /**
          * Payload for triggering a webhook

@@ -1504,6 +1504,19 @@
         "properties": {
           "metadata": {
             "$ref": "#/components/schemas/Metadata"
+          },
+          "entity": {
+            "type": "object",
+            "description": "Example payload for the webhook event",
+            "additionalProperties": true
+          },
+          "relations": {
+            "type": "array",
+            "description": "Example relations for the webhook event",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
           }
         },
         "additionalProperties": true
