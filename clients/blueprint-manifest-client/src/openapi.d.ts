@@ -48,6 +48,13 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
+            deployments?: {
+                source_org_id?: string;
+                source_blueprint_id?: string;
+                destination_org_id?: string;
+                destination_blueprint_id?: string;
+                triggered_at?: string; // date-time
+            }[];
             /**
              * Whether the blueprint is verified by epilot
              */
@@ -245,6 +252,13 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
+            deployments?: {
+                source_org_id?: string;
+                source_blueprint_id?: string;
+                destination_org_id?: string;
+                destination_blueprint_id?: string;
+                triggered_at?: string; // date-time
+            }[];
             /**
              * Whether the blueprint is verified by epilot
              */
@@ -303,7 +317,6 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
-            pre_install_requirements?: /* List of pre-installation requirements for the blueprint */ PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -458,6 +471,13 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
+            deployments?: {
+                source_org_id?: string;
+                source_blueprint_id?: string;
+                destination_org_id?: string;
+                destination_blueprint_id?: string;
+                triggered_at?: string; // date-time
+            }[];
             /**
              * Whether the blueprint is verified by epilot
              */
@@ -496,6 +516,13 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
+            deployments?: {
+                source_org_id?: string;
+                source_blueprint_id?: string;
+                destination_org_id?: string;
+                destination_blueprint_id?: string;
+                triggered_at?: string; // date-time
+            }[];
             /**
              * Whether the blueprint is verified by epilot
              */
@@ -534,6 +561,13 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
+            deployments?: {
+                source_org_id?: string;
+                source_blueprint_id?: string;
+                destination_org_id?: string;
+                destination_blueprint_id?: string;
+                triggered_at?: string; // date-time
+            }[];
             /**
              * Whether the blueprint is verified by epilot
              */
@@ -660,7 +694,6 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
-            pre_install_requirements?: /* List of pre-installation requirements for the blueprint */ PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -783,7 +816,6 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
-            pre_install_requirements?: /* List of pre-installation requirements for the blueprint */ PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -939,7 +971,6 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
-            pre_install_requirements?: /* List of pre-installation requirements for the blueprint */ PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -1066,6 +1097,13 @@ declare namespace Components {
             };
             version?: string;
             latest_download_file?: S3Reference;
+            deployments?: {
+                source_org_id?: string;
+                source_blueprint_id?: string;
+                destination_org_id?: string;
+                destination_blueprint_id?: string;
+                triggered_at?: string; // date-time
+            }[];
             /**
              * Whether the blueprint is verified by epilot
              */
@@ -1082,27 +1120,6 @@ declare namespace Components {
             resources?: BlueprintResource[];
         }
         export type PlanChanges = ("create" | "update" | "internal-update" | "no-op" | "delete")[];
-        /**
-         * List of pre-installation requirements for the blueprint
-         */
-        export type PreInstallRequirements = {
-            /**
-             * Requirement Name
-             * example:
-             * billing_enabled
-             */
-            name?: string;
-            /**
-             * Human-readable description of the requirement
-             * example:
-             * Billing must be enabled in your epilot organization
-             */
-            description?: string;
-            /**
-             * Whether this requirement has been completed
-             */
-            completed?: boolean;
-        }[];
         export interface PutManifestPayload {
             /**
              * Name of the source blueprint
@@ -1633,6 +1650,10 @@ declare namespace Paths {
         export interface PathParameters {
             blueprint_id: Parameters.BlueprintId;
         }
+        export interface RequestBody {
+            destination_org_id?: string;
+            destination_blueprint_id?: string;
+        }
         namespace Responses {
             export interface $202 {
                 job_id?: /**
@@ -1931,6 +1952,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getJob - getJob
@@ -2112,7 +2134,7 @@ export interface OperationMethods {
    */
   'exportBlueprint'(
     parameters?: Parameters<Paths.ExportBlueprint.PathParameters> | null,
-    data?: any,
+    data?: Paths.ExportBlueprint.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExportBlueprint.Responses.$202>
   /**
@@ -2431,7 +2453,7 @@ export interface PathsDictionary {
      */
     'post'(
       parameters?: Parameters<Paths.ExportBlueprint.PathParameters> | null,
-      data?: any,
+      data?: Paths.ExportBlueprint.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExportBlueprint.Responses.$202>
   }
@@ -2565,6 +2587,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
 export type BlueprintExportJob = Components.Schemas.BlueprintExportJob;
@@ -2600,7 +2623,6 @@ export type ManifestSource = Components.Schemas.ManifestSource;
 export type ManifestTimestampFields = Components.Schemas.ManifestTimestampFields;
 export type MarketplaceBlueprint = Components.Schemas.MarketplaceBlueprint;
 export type PlanChanges = Components.Schemas.PlanChanges;
-export type PreInstallRequirements = Components.Schemas.PreInstallRequirements;
 export type PutManifestPayload = Components.Schemas.PutManifestPayload;
 export type ResourceNode = Components.Schemas.ResourceNode;
 export type ResourceNodeType = Components.Schemas.ResourceNodeType;

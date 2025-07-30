@@ -209,6 +209,12 @@
             "name": "blueprint_id"
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

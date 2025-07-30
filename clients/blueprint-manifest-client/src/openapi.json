@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "2.0.0",
+    "version": "2.1.1",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -950,6 +950,24 @@
             }
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "destination_org_id": {
+                    "type": "string"
+                  },
+                  "destination_blueprint_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "202": {
             "description": "Blueprint export job started",
@@ -1524,6 +1542,30 @@
           },
           "latest_download_file": {
             "$ref": "#/components/schemas/S3Reference"
+          },
+          "deployments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "source_org_id": {
+                  "type": "string"
+                },
+                "source_blueprint_id": {
+                  "type": "string"
+                },
+                "destination_org_id": {
+                  "type": "string"
+                },
+                "destination_blueprint_id": {
+                  "type": "string"
+                },
+                "triggered_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
           },
           "is_verified": {
             "type": "boolean",
@@ -2314,9 +2356,6 @@
             "description": "Version of the blueprint (semver)",
             "example": "1.0.0"
           },
-          "pre_install_requirements": {
-            "$ref": "#/components/schemas/PreInstallRequirements"
-          },
           "source_blueprint_file": {
             "type": "string",
             "deprecated": true,
@@ -2486,30 +2525,6 @@
                 "description": "Markdown content to be displayed when showing the plan to install blueprint",
                 "example": "This is the content of the postinstall.md file\n"
               }
-            }
-          }
-        }
-      },
-      "PreInstallRequirements": {
-        "type": "array",
-        "description": "List of pre-installation requirements for the blueprint",
-        "items": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string",
-              "description": "Requirement Name",
-              "example": "billing_enabled"
-            },
-            "description": {
-              "type": "string",
-              "description": "Human-readable description of the requirement",
-              "example": "Billing must be enabled in your epilot organization"
-            },
-            "completed": {
-              "type": "boolean",
-              "description": "Whether this requirement has been completed",
-              "default": false
             }
           }
         }
