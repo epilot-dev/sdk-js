@@ -317,6 +317,16 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            pre_install_requirements?: /**
+             * List of feature settings that must be enabled before installing the blueprint
+             * example:
+             * [
+             *   "journey_automation",
+             *   "ticket-entities",
+             *   "advanced_permissions"
+             * ]
+             */
+            PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -694,6 +704,16 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            pre_install_requirements?: /**
+             * List of feature settings that must be enabled before installing the blueprint
+             * example:
+             * [
+             *   "journey_automation",
+             *   "ticket-entities",
+             *   "advanced_permissions"
+             * ]
+             */
+            PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -816,6 +836,16 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            pre_install_requirements?: /**
+             * List of feature settings that must be enabled before installing the blueprint
+             * example:
+             * [
+             *   "journey_automation",
+             *   "ticket-entities",
+             *   "advanced_permissions"
+             * ]
+             */
+            PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -971,6 +1001,16 @@ declare namespace Components {
              * 1.0.0
              */
             source_blueprint_version?: string;
+            pre_install_requirements?: /**
+             * List of feature settings that must be enabled before installing the blueprint
+             * example:
+             * [
+             *   "journey_automation",
+             *   "ticket-entities",
+             *   "advanced_permissions"
+             * ]
+             */
+            PreInstallRequirements;
             /**
              * A URL to download the source blueprint file used to import the blueprint
              * example:
@@ -1120,6 +1160,16 @@ declare namespace Components {
             resources?: BlueprintResource[];
         }
         export type PlanChanges = ("create" | "update" | "internal-update" | "no-op" | "delete")[];
+        /**
+         * List of feature settings that must be enabled before installing the blueprint
+         * example:
+         * [
+         *   "journey_automation",
+         *   "ticket-entities",
+         *   "advanced_permissions"
+         * ]
+         */
+        export type PreInstallRequirements = string[];
         export interface PutManifestPayload {
             /**
              * Name of the source blueprint
@@ -1177,6 +1227,10 @@ declare namespace Components {
                 type?: /* Type of the resource */ ResourceNodeType;
             }[];
             changes?: PlanChanges;
+            /**
+             * Fields causing the updates / internal updates on a resource install
+             */
+            changes_reason?: string[];
         }
         /**
          * Type of the resource
@@ -1223,6 +1277,10 @@ declare namespace Components {
              */
             dependencies?: VirtualResourceNodeGroup[] | null;
             changes?: PlanChanges;
+            /**
+             * Fields causing the updates / internal updates on a resource install
+             */
+            changes_reason?: string[];
         }
         export interface S3Reference {
             /**
@@ -1952,7 +2010,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * getJob - getJob
@@ -2587,7 +2644,6 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
 export type BlueprintExportJob = Components.Schemas.BlueprintExportJob;
@@ -2623,6 +2679,7 @@ export type ManifestSource = Components.Schemas.ManifestSource;
 export type ManifestTimestampFields = Components.Schemas.ManifestTimestampFields;
 export type MarketplaceBlueprint = Components.Schemas.MarketplaceBlueprint;
 export type PlanChanges = Components.Schemas.PlanChanges;
+export type PreInstallRequirements = Components.Schemas.PreInstallRequirements;
 export type PutManifestPayload = Components.Schemas.PutManifestPayload;
 export type ResourceNode = Components.Schemas.ResourceNode;
 export type ResourceNodeType = Components.Schemas.ResourceNodeType;

@@ -2139,6 +2139,13 @@
               },
               "changes": {
                 "$ref": "#/components/schemas/PlanChanges"
+              },
+              "changes_reason": {
+                "type": "array",
+                "description": "Fields causing the updates / internal updates on a resource install",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -2208,6 +2215,13 @@
               },
               "changes": {
                 "$ref": "#/components/schemas/PlanChanges"
+              },
+              "changes_reason": {
+                "type": "array",
+                "description": "Fields causing the updates / internal updates on a resource install",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -2355,6 +2369,9 @@
             "type": "string",
             "description": "Version of the blueprint (semver)",
             "example": "1.0.0"
+          },
+          "pre_install_requirements": {
+            "$ref": "#/components/schemas/PreInstallRequirements"
           },
           "source_blueprint_file": {
             "type": "string",
@@ -2528,6 +2545,18 @@
             }
           }
         }
+      },
+      "PreInstallRequirements": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "List of feature settings that must be enabled before installing the blueprint",
+        "example": [
+          "journey_automation",
+          "ticket-entities",
+          "advanced_permissions"
+        ]
       },
       "BlueprintInstallStatus": {
         "type": "string",
