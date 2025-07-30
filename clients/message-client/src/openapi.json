@@ -254,6 +254,15 @@
                           },
                           {
                             "$ref": "#/components/schemas/Message"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "done": {
+                                "type": "boolean",
+                                "example": true
+                              }
+                            }
                           }
                         ]
                       }
