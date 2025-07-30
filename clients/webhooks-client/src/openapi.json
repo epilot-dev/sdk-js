@@ -9,6 +9,10 @@
     {
       "name": "webhooks",
       "description": "Configure and trigger webhooks"
+    },
+    {
+      "name": "example",
+      "description": "Generate example payloads for webhooks"
     }
   ],
   "paths": {
@@ -786,6 +790,82 @@
           }
         }
       }
+    },
+    "/v1/webhooks/configs/{configId}/example": {
+      "post": {
+        "operationId": "getWebhookExample",
+        "summary": "getWebhookExample",
+        "description": "Generate an example payload for a webhook configuration based on trigger type",
+        "tags": [
+          "webhooks",
+          "example"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          }
+        ],
+        "requestBody": {
+          "description": "Example generation parameters",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExampleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - example payload generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No configuration found for this configId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -958,6 +1038,15 @@
           "jsonataExpression": {
             "type": "string",
             "description": "JSONata expression to transform the payload"
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the webhook resource",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
           }
         },
         "required": [
@@ -1399,6 +1488,25 @@
           "webhook_config_id",
           "org_id"
         ]
+      },
+      "ExampleRequest": {
+        "type": "object",
+        "properties": {
+          "automation_id": {
+            "type": "string",
+            "description": "ID of the automation, if applicable",
+            "example": "automation_123"
+          }
+        }
+      },
+      "ExampleResponse": {
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "additionalProperties": true
       }
     },
     "securitySchemes": {

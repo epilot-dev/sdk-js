@@ -68,6 +68,18 @@ declare namespace Components {
          * ]
          */
         export type EventConfigResp = EventConfigEntry[];
+        export interface ExampleRequest {
+            /**
+             * ID of the automation, if applicable
+             * example:
+             * automation_123
+             */
+            automation_id?: string;
+        }
+        export interface ExampleResponse {
+            [name: string]: any;
+            metadata?: /* Contains the metadata about the configured event */ Metadata;
+        }
         /**
          * Payload for triggering a webhook
          */
@@ -350,6 +362,10 @@ declare namespace Components {
              * JSONata expression to transform the payload
              */
             jsonataExpression?: string;
+            /**
+             * Manifest ID used to create/update the webhook resource
+             */
+            _manifest?: string /* uuid */[];
         }
         export interface WebhookEvent {
             event_id: string;
@@ -760,6 +776,21 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace GetWebhookExample {
+        namespace Parameters {
+            export type ConfigId = string;
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+        }
+        export type RequestBody = Components.Schemas.ExampleRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.ExampleResponse;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace GetWehookEvents {
         namespace Parameters {
             export type ConfigId = string;
@@ -890,6 +921,7 @@ declare namespace Paths {
         }
     }
 }
+
 
 export interface OperationMethods {
   /**
@@ -1022,6 +1054,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplayEvent.Responses.$204>
+  /**
+   * getWebhookExample - getWebhookExample
+   * 
+   * Generate an example payload for a webhook configuration based on trigger type
+   */
+  'getWebhookExample'(
+    parameters?: Parameters<Paths.GetWebhookExample.PathParameters> | null,
+    data?: Paths.GetWebhookExample.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetWebhookExample.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1175,9 +1217,22 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ReplayEvent.Responses.$204>
   }
+  ['/v1/webhooks/configs/{configId}/example']: {
+    /**
+     * getWebhookExample - getWebhookExample
+     * 
+     * Generate an example payload for a webhook configuration based on trigger type
+     */
+    'post'(
+      parameters?: Parameters<Paths.GetWebhookExample.PathParameters> | null,
+      data?: Paths.GetWebhookExample.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetWebhookExample.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type ApiKeyConfig = Components.Schemas.ApiKeyConfig;
 export type Auth = Components.Schemas.Auth;
@@ -1188,6 +1243,8 @@ export type CustomOAuthParameter = Components.Schemas.CustomOAuthParameter;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type EventConfigEntry = Components.Schemas.EventConfigEntry;
 export type EventConfigResp = Components.Schemas.EventConfigResp;
+export type ExampleRequest = Components.Schemas.ExampleRequest;
+export type ExampleResponse = Components.Schemas.ExampleResponse;
 export type ExecutionPayload = Components.Schemas.ExecutionPayload;
 export type FailureEntry = Components.Schemas.FailureEntry;
 export type FailureLastKey = Components.Schemas.FailureLastKey;

@@ -211,6 +211,25 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/webhooks/configs/{configId}/example": {
+      "post": {
+        "operationId": "getWebhookExample",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {},
