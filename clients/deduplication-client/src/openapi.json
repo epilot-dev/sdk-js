@@ -1,0 +1,183 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "version": "2.0.0",
+    "title": "Deduplication API",
+    "description": "Backend for Epilot Deduplication feature"
+  },
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/deduplicate": {
+      "post": {
+        "operationId": "deduplicate",
+        "summary": "deduplicate",
+        "description": "Deduplicates Entities",
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeduplicateRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with Deduplication content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeduplicateRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "DeduplicateRequestBody": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "toKeep": {
+              "type": "string"
+            },
+            "toDelete": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "toKeep",
+            "toDelete"
+          ]
+        }
+      },
+      "DeduplicateRequestResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Entity"
+        }
+      },
+      "Entity": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Entity ID of the Deduplication entry"
+          },
+          "_org": {
+            "type": "string",
+            "description": "ID of the Organization that owns this Deduplication"
+          },
+          "_schema": {
+            "type": "string",
+            "description": "The Entity schema of this Deduplication"
+          },
+          "_created_at": {
+            "type": "string",
+            "description": "The timestamp of when this Deduplication was created",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "type": "string",
+            "description": "The timestamp of when this Deduplication was last updated",
+            "format": "date-time"
+          },
+          "_created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "description": "The Entity ID of the User that created this Deduplication"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "description": "The Entity ID of the User that created this Deduplication"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with this Deduplication"
+          },
+          "_acl": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Access Control List for this Deduplication entry"
+          },
+          "_owners": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "org_id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "org_id",
+                "user_id"
+              ]
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "Entity ID of the Deduplication entry"
+          }
+        },
+        "required": [
+          "_id"
+        ],
+        "description": "Base Entity schema"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://deduplication.sls.epilot.io"
+    },
+    {
+      "url": "https://deduplication.sls.epilot.io"
+    }
+  ]
+}
