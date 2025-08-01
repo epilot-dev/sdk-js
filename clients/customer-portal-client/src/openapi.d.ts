@@ -2841,6 +2841,7 @@ declare namespace Components {
             client_secret?: string;
         }
         export interface OIDCProviderConfig {
+            type?: "authorization_code" | "implicit";
             /**
              * Issuing Authority URL
              * example:
@@ -2863,6 +2864,12 @@ declare namespace Components {
              * 7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B
              */
             client_secret?: string;
+            /**
+             * Whether the client secret is present
+             * example:
+             * true
+             */
+            has_client_secret?: boolean;
             /**
              * Space-separated list of OAuth 2.0 scopes to request from OpenID Connect
              * example:
@@ -2897,6 +2904,16 @@ declare namespace Components {
              * msauth.io.epilot.ecp://auth
              */
             mobile_redirect_uri?: string;
+            /**
+             * The username for the test auth, only used for testing on auth code flow
+             * example:
+             * test@epilot.io
+             */
+            test_auth_username?: string;
+            /**
+             * The password for the test auth, only used for testing on auth code flow
+             */
+            test_auth_password?: string;
         }
         /**
          * The opportunity entity
@@ -3979,6 +3996,12 @@ declare namespace Components {
         export interface SAMLProviderConfig {
         }
         export interface SSOCallbackRequest {
+            provider_slug?: /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            ProviderSlug /* [0-9a-z-]+ */;
             /**
              * URL of the authorization endpoint
              * example:
@@ -4009,12 +4032,6 @@ declare namespace Components {
              * 123456
              */
             client_id: string;
-            /**
-             * The client secret
-             * example:
-             * 123456
-             */
-            client_secret?: string;
             /**
              * The code verifier
              * example:
@@ -4052,7 +4069,13 @@ declare namespace Components {
              * example:
              * 123456
              */
-            id_token: string;
+            id_token?: string;
+            /**
+             * The scope of the access token
+             * example:
+             * openid email
+             */
+            scope?: string;
         }
         export type SSOLoginToken = string;
         export interface SaveEntityFile {
@@ -7700,6 +7723,22 @@ declare namespace Paths {
         }
     }
     namespace SsoCallback {
+        namespace Parameters {
+            /**
+             * The domain of the portal
+             * example:
+             * customer-portal.epilot.io
+             */
+            export type Domain = string;
+        }
+        export interface QueryParameters {
+            domain?: /**
+             * The domain of the portal
+             * example:
+             * customer-portal.epilot.io
+             */
+            Parameters.Domain;
+        }
         export type RequestBody = Components.Schemas.SSOCallbackRequest;
         namespace Responses {
             export type $200 = Components.Schemas.SSOCallbackResponse;
@@ -7861,7 +7900,7 @@ declare namespace Paths {
             /**
              * The status to set for the campaign portal block
              */
-            status: "seen" | "accepted" | "dismissed";
+            status: "seen" | "dismissed" | "clicked";
         }
         namespace Responses {
             export interface $200 {
@@ -9179,7 +9218,7 @@ export interface OperationMethods {
    * 
    */
   'ssoCallback'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.SsoCallback.QueryParameters> | null,
     data?: Paths.SsoCallback.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SsoCallback.Responses.$200>
@@ -10336,7 +10375,7 @@ export interface PathsDictionary {
      * 
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.SsoCallback.QueryParameters> | null,
       data?: Paths.SsoCallback.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SsoCallback.Responses.$200>

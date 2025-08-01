@@ -5677,6 +5677,17 @@
         "tags": [
           "Public"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "domain",
+            "schema": {
+              "type": "string",
+              "example": "customer-portal.epilot.io",
+              "description": "The domain of the portal"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -6435,8 +6446,8 @@
                     "type": "string",
                     "enum": [
                       "seen",
-                      "accepted",
-                      "dismissed"
+                      "dismissed",
+                      "clicked"
                     ],
                     "description": "The status to set for the campaign portal block"
                   }
@@ -10805,6 +10816,14 @@
       "OIDCProviderConfig": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "authorization_code",
+              "implicit"
+            ],
+            "default": "implicit"
+          },
           "oidc_issuer": {
             "type": "string",
             "description": "Issuing Authority URL",
@@ -10822,6 +10841,11 @@
           "client_secret": {
             "type": "string",
             "example": "7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B"
+          },
+          "has_client_secret": {
+            "type": "boolean",
+            "description": "Whether the client secret is present",
+            "example": true
           },
           "scope": {
             "type": "string",
@@ -10883,6 +10907,15 @@
             "type": "string",
             "description": "URL of the mobile redirect URI",
             "example": "msauth.io.epilot.ecp://auth"
+          },
+          "test_auth_username": {
+            "type": "string",
+            "description": "The username for the test auth, only used for testing on auth code flow",
+            "example": "test@epilot.io"
+          },
+          "test_auth_password": {
+            "type": "string",
+            "description": "The password for the test auth, only used for testing on auth code flow"
           }
         }
       },
@@ -10900,6 +10933,9 @@
           "code_verifier"
         ],
         "properties": {
+          "provider_slug": {
+            "$ref": "#/components/schemas/ProviderSlug"
+          },
           "token_endpoint": {
             "type": "string",
             "description": "URL of the authorization endpoint",
@@ -10925,11 +10961,6 @@
             "description": "The client id",
             "example": "123456"
           },
-          "client_secret": {
-            "type": "string",
-            "description": "The client secret",
-            "example": "123456"
-          },
           "code_verifier": {
             "type": "string",
             "description": "The code verifier",
@@ -10943,8 +10974,7 @@
           "access_token",
           "token_type",
           "expires_in",
-          "refresh_token",
-          "id_token"
+          "refresh_token"
         ],
         "properties": {
           "access_token": {
@@ -10971,6 +11001,11 @@
             "type": "string",
             "description": "The id token",
             "example": "123456"
+          },
+          "scope": {
+            "type": "string",
+            "description": "The scope of the access token",
+            "example": "openid email"
           }
         }
       },
