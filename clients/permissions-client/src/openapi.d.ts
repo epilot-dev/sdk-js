@@ -76,6 +76,254 @@ declare namespace Components {
              */
             grants: Grant[];
         }
+        export interface BaseRoleForCreate {
+            id?: /**
+             * Format: <organization_id>:<slug>
+             * example:
+             * 123:owner
+             */
+            RoleId;
+            /**
+             * Human-friendly name for the role
+             * example:
+             * Owner
+             */
+            name: string;
+            /**
+             * URL-friendly name for the role
+             * example:
+             * owner
+             */
+            slug: string;
+            /**
+             * Type of the role
+             */
+            type: string;
+            /**
+             * date and time then the role will expire
+             * example:
+             * 2028-07-21T17:32:28Z
+             */
+            expires_at?: string; // date-time
+            organization_id?: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId;
+            /**
+             * List of grants (permissions) applied to the role
+             */
+            grants: Grant[];
+        }
+        export type CreateRolePayload = {
+            /**
+             * Type of the role
+             */
+            type: "user_role";
+            /**
+             * List of grants (permissions) applied to the role
+             */
+            grants: Grant[];
+            id?: /**
+             * Format: <organization_id>:<slug>
+             * example:
+             * 123:owner
+             */
+            RoleId;
+            /**
+             * Human-friendly name for the role
+             * example:
+             * Owner
+             */
+            name: string;
+            /**
+             * URL-friendly name for the role
+             * example:
+             * owner
+             */
+            slug: string;
+            /**
+             * date and time then the role will expire
+             * example:
+             * 2028-07-21T17:32:28Z
+             */
+            expires_at?: string; // date-time
+            organization_id?: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId;
+        } | {
+            /**
+             * Type of the role
+             */
+            type: "org_role";
+            /**
+             * The pricing tier of the organization this root role is based on
+             * example:
+             * Professional
+             */
+            pricing_tier?: string;
+            /**
+             * List of grants (permissions) applied to the role
+             */
+            grants: Grant[];
+            id?: /**
+             * Format: <organization_id>:<slug>
+             * example:
+             * 123:owner
+             */
+            RoleId;
+            /**
+             * Human-friendly name for the role
+             * example:
+             * Owner
+             */
+            name: string;
+            /**
+             * URL-friendly name for the role
+             * example:
+             * owner
+             */
+            slug: string;
+            /**
+             * date and time then the role will expire
+             * example:
+             * 2028-07-21T17:32:28Z
+             */
+            expires_at?: string; // date-time
+            organization_id?: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId;
+        } | {
+            /**
+             * Type of the role
+             */
+            type: "share_role";
+            /**
+             * List of grants (permissions) applied to the role
+             */
+            grants: Grant[];
+            id?: /**
+             * Format: <organization_id>:<slug>
+             * example:
+             * 123:owner
+             */
+            RoleId;
+            /**
+             * Human-friendly name for the role
+             * example:
+             * Owner
+             */
+            name: string;
+            /**
+             * URL-friendly name for the role
+             * example:
+             * owner
+             */
+            slug: string;
+            /**
+             * date and time then the role will expire
+             * example:
+             * 2028-07-21T17:32:28Z
+             */
+            expires_at?: string; // date-time
+            organization_id?: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId;
+        } | {
+            /**
+             * Type of the role
+             */
+            type: "partner_role";
+            /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            partner_org_id?: string;
+            /**
+             * List of grants (permissions) applied to the role
+             */
+            grants: Grant[];
+            id?: /**
+             * Format: <organization_id>:<slug>
+             * example:
+             * 123:owner
+             */
+            RoleId;
+            /**
+             * Human-friendly name for the role
+             * example:
+             * Owner
+             */
+            name: string;
+            /**
+             * URL-friendly name for the role
+             * example:
+             * owner
+             */
+            slug: string;
+            /**
+             * date and time then the role will expire
+             * example:
+             * 2028-07-21T17:32:28Z
+             */
+            expires_at?: string; // date-time
+            organization_id?: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId;
+        } | {
+            /**
+             * Type of the role
+             */
+            type: "portal_role";
+            /**
+             * List of grants (permissions) applied to the role
+             */
+            grants: Grant[];
+            id?: /**
+             * Format: <organization_id>:<slug>
+             * example:
+             * 123:owner
+             */
+            RoleId;
+            /**
+             * Human-friendly name for the role
+             * example:
+             * Owner
+             */
+            name: string;
+            /**
+             * URL-friendly name for the role
+             * example:
+             * owner
+             */
+            slug: string;
+            /**
+             * date and time then the role will expire
+             * example:
+             * 2028-07-21T17:32:28Z
+             */
+            expires_at?: string; // date-time
+            organization_id?: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId;
+        };
         /**
          * Check if attribute equals to any of the values
          */
@@ -123,6 +371,23 @@ declare namespace Components {
              * Provided additional dependencies, exploded when storing the role
              */
             dependencies?: Grant[];
+        }
+        /**
+         * A role attached to an user
+         */
+        export interface InternalAssignment {
+            userId?: /**
+             * Id of a user
+             * example:
+             * 1
+             */
+            UserId;
+            roles?: /**
+             * Format: <organization_id>:<slug>
+             * example:
+             * 123:owner
+             */
+            RoleId[];
         }
         /**
          * A role automatically applied to all users in an organization.
@@ -484,6 +749,12 @@ declare namespace Paths {
             export type $200 = /* List of role ids attached to an user */ Components.Schemas.Assignments;
         }
     }
+    namespace CreateRole {
+        export type RequestBody = Components.Schemas.CreateRolePayload;
+        namespace Responses {
+            export type $200 = Components.Schemas.Role;
+        }
+    }
     namespace DeleteRole {
         namespace Parameters {
             export type RoleId = /**
@@ -632,6 +903,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListAllRoles.Responses.$200>
   /**
+   * createRole - createRole
+   * 
+   * Create role
+   */
+  'createRole'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateRole.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateRole.Responses.$200>
+  /**
    * searchRoles - searchRoles
    * 
    * Search Roles
@@ -760,6 +1041,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListAllRoles.Responses.$200>
+    /**
+     * createRole - createRole
+     * 
+     * Create role
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateRole.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateRole.Responses.$200>
   }
   ['/v1/permissions/roles:search']: {
     /**
@@ -883,10 +1174,13 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type Assignment = Components.Schemas.Assignment;
 export type Assignments = Components.Schemas.Assignments;
 export type BaseRole = Components.Schemas.BaseRole;
+export type BaseRoleForCreate = Components.Schemas.BaseRoleForCreate;
+export type CreateRolePayload = Components.Schemas.CreateRolePayload;
 export type EqualsCondition = Components.Schemas.EqualsCondition;
 export type Grant = Components.Schemas.Grant;
 export type GrantCondition = Components.Schemas.GrantCondition;
 export type GrantWithDependencies = Components.Schemas.GrantWithDependencies;
+export type InternalAssignment = Components.Schemas.InternalAssignment;
 export type OrgRole = Components.Schemas.OrgRole;
 export type OrganizationId = Components.Schemas.OrganizationId;
 export type PartnerRole = Components.Schemas.PartnerRole;
