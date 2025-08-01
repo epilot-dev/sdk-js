@@ -7,12 +7,23 @@
   "paths": {
     "/v1/permissions/me": {
       "get": {
-        "operationId": "listCurrentRoles"
+        "operationId": "listCurrentRoles",
+        "responses": {}
       }
     },
     "/v1/permissions/roles": {
       "get": {
-        "operationId": "listAllRoles"
+        "operationId": "listAllRoles",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createRole",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v1/permissions/roles:search": {
@@ -22,7 +33,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/permissions/roles/{roleId}": {
@@ -34,7 +46,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "put": {
         "operationId": "putRole",
@@ -49,7 +62,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteRole",
@@ -59,12 +73,14 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/permissions/refresh": {
       "get": {
-        "operationId": "refreshPermissions"
+        "operationId": "refreshPermissions",
+        "responses": {}
       }
     },
     "/v1/permissions/assignments/{userId}": {
@@ -76,7 +92,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "put": {
         "operationId": "assignRoles",
@@ -91,7 +108,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/permissions/assignments/{userId}/{roleId}": {
@@ -108,7 +126,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "delete": {
         "operationId": "removeAssignment",
@@ -123,12 +142,14 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/permissions/assignments": {
       "get": {
-        "operationId": "listAllAssignments"
+        "operationId": "listAllAssignments",
+        "responses": {}
       }
     }
   },

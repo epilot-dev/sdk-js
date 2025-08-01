@@ -82,6 +82,35 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createRole",
+        "summary": "createRole",
+        "description": "Create role",
+        "tags": [
+          "Roles"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRolePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/permissions/roles:search": {
@@ -840,6 +869,50 @@
           "grants"
         ]
       },
+      "BaseRoleForCreate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RoleId"
+          },
+          "name": {
+            "type": "string",
+            "example": "Owner",
+            "description": "Human-friendly name for the role"
+          },
+          "slug": {
+            "type": "string",
+            "example": "owner",
+            "description": "URL-friendly name for the role"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the role"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2028-07-21T17:32:28Z",
+            "description": "date and time then the role will expire"
+          },
+          "organization_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "grants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Grant"
+            },
+            "description": "List of grants (permissions) applied to the role"
+          }
+        },
+        "required": [
+          "name",
+          "slug",
+          "type",
+          "grants"
+        ]
+      },
       "UserRole": {
         "allOf": [
           {
@@ -1007,6 +1080,21 @@
           }
         }
       },
+      "InternalAssignment": {
+        "type": "object",
+        "description": "A role attached to an user",
+        "properties": {
+          "userId": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleId"
+            }
+          }
+        }
+      },
       "Assignments": {
         "type": "array",
         "description": "List of role ids attached to an user",
@@ -1085,6 +1173,92 @@
             "default": 0
           }
         }
+      },
+      "CreateRolePayload": {
+        "allOf": [
+          {
+            "properties": {
+              "grants": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GrantWithDependencies"
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/BaseRoleForCreate"
+          },
+          {
+            "oneOf": [
+              {
+                "description": "A standard user role. Must be explicitly assigned to users.",
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "user_role"
+                    ]
+                  }
+                }
+              },
+              {
+                "description": "A role automatically applied to all users in an organization.",
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "org_role"
+                    ]
+                  },
+                  "pricing_tier": {
+                    "type": "string",
+                    "description": "The pricing tier of the organization this root role is based on",
+                    "example": "Professional"
+                  }
+                }
+              },
+              {
+                "description": "A role that can be assigned to users in other organizations for sharing purposes.",
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "share_role"
+                    ]
+                  }
+                }
+              },
+              {
+                "description": "A role that appears in another organization's role list that can be assigned but not modified by the partner organization.",
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "partner_role"
+                    ]
+                  },
+                  "partner_org_id": {
+                    "allOf": [
+                      {
+                        "description": "Partner organization who can assign this role to their users."
+                      },
+                      {
+                        "$ref": "#/components/schemas/OrganizationId"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "description": "A role that is applied to end customers and installers using the Portals",
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "portal_role"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
       }
     }
   },
