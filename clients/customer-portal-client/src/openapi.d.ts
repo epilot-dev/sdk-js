@@ -7783,6 +7783,12 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 token?: Components.Schemas.SSOLoginToken;
+                /**
+                 * The email address of the user to log in as
+                 * example:
+                 * portal-customer@email.com
+                 */
+                email?: string;
             }
         }
     }
