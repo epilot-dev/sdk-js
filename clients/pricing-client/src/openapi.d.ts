@@ -3849,6 +3849,24 @@ declare namespace Components {
             markup_amount_net_decimal?: string;
             markup_amount_gross?: number;
             markup_amount_gross_decimal?: string;
+            markup_total_amount_net?: number;
+            markup_total_amount_net_decimal?: string;
+            markup_total_amount_gross?: number;
+            markup_total_amount_gross_decimal?: string;
+            /**
+             * Whether the additional markups are enabled
+             */
+            additional_markups_enabled?: boolean;
+            additional_markups?: {
+                [name: string]: {
+                    amount_decimal: string;
+                    amount: number;
+                    amount_net?: number;
+                    amount_net_decimal?: string;
+                    amount_gross?: number;
+                    amount_gross_decimal?: string;
+                };
+            };
             unit_amount_gross: number;
             unit_amount_gross_decimal?: string;
             unit_amount_net: number;

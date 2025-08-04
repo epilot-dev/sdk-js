@@ -6620,6 +6620,52 @@
           "markup_amount_gross_decimal": {
             "type": "string"
           },
+          "markup_total_amount_net": {
+            "type": "number"
+          },
+          "markup_total_amount_net_decimal": {
+            "type": "string"
+          },
+          "markup_total_amount_gross": {
+            "type": "number"
+          },
+          "markup_total_amount_gross_decimal": {
+            "type": "string"
+          },
+          "additional_markups_enabled": {
+            "type": "boolean",
+            "description": "Whether the additional markups are enabled"
+          },
+          "additional_markups": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "amount_decimal": {
+                  "type": "string"
+                },
+                "amount": {
+                  "type": "number"
+                },
+                "amount_net": {
+                  "type": "number"
+                },
+                "amount_net_decimal": {
+                  "type": "string"
+                },
+                "amount_gross": {
+                  "type": "number"
+                },
+                "amount_gross_decimal": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "amount_decimal",
+                "amount"
+              ]
+            }
+          },
           "unit_amount_gross": {
             "type": "number"
           },
