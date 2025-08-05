@@ -1921,7 +1921,7 @@ declare namespace Components {
                 [name: string]: string;
             };
             /**
-             * JSON body to use for authentication. Supports variable interpolation.
+             * JSON body to use for authentication. Supports variable interpolation. Content format is determined by Content-Type header.
              */
             body?: {
                 [name: string]: string;
@@ -2000,6 +2000,12 @@ declare namespace Components {
                  * Headers to use. Supports variable interpolation.
                  */
                 headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
                     [name: string]: string;
                 };
             };
@@ -2088,6 +2094,12 @@ declare namespace Components {
                 headers?: {
                     [name: string]: string;
                 };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
             };
             resolved?: {
                 /**
@@ -2114,7 +2126,7 @@ declare namespace Components {
                  */
                 url: string;
                 /**
-                 * JSON body to use for authentication. Supports variable interpolation.
+                 * JSON body to use for the call. Supports variable interpolation.
                  */
                 body: {
                     [name: string]: string;
@@ -2177,6 +2189,12 @@ declare namespace Components {
                  * Headers to use. Supports variable interpolation.
                  */
                 headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
                     [name: string]: string;
                 };
             };
@@ -7473,6 +7491,12 @@ declare namespace Paths {
                  * office-365-login
                  */
                 Components.Schemas.ProviderSlug /* [0-9a-z-]+ */[];
+                /**
+                 * Whether the user is soft deleted
+                 * example:
+                 * true
+                 */
+                is_soft_deleted?: boolean;
             }
             export type $500 = Components.Responses.InternalServerError;
         }

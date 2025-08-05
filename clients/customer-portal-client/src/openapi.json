@@ -6392,6 +6392,11 @@
                       "items": {
                         "$ref": "#/components/schemas/ProviderSlug"
                       }
+                    },
+                    "is_soft_deleted": {
+                      "type": "boolean",
+                      "description": "Whether the user is soft deleted",
+                      "example": true
                     }
                   }
                 }
@@ -10177,7 +10182,7 @@
               },
               "body": {
                 "type": "object",
-                "description": "JSON body to use for authentication. Supports variable interpolation.",
+                "description": "JSON body to use for the call. Supports variable interpolation.",
                 "additionalProperties": {
                   "type": "string"
                 },
@@ -10267,6 +10272,14 @@
                   "type": "string"
                 },
                 "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
               }
             },
             "required": [
@@ -10324,6 +10337,14 @@
               "headers": {
                 "type": "object",
                 "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
                 "additionalProperties": {
                   "type": "string"
                 },
@@ -10389,6 +10410,14 @@
                   "type": "string"
                 },
                 "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
               }
             },
             "required": [
@@ -10440,7 +10469,7 @@
           },
           "body": {
             "type": "object",
-            "description": "JSON body to use for authentication. Supports variable interpolation.",
+            "description": "JSON body to use for authentication. Supports variable interpolation. Content format is determined by Content-Type header.",
             "additionalProperties": {
               "type": "string"
             },
