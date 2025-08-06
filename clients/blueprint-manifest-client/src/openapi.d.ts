@@ -47,7 +47,6 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
-            latest_download_file?: S3Reference;
             deployments?: {
                 source_org_id?: string;
                 source_blueprint_id?: string;
@@ -59,6 +58,7 @@ declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -251,7 +251,6 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
-            latest_download_file?: S3Reference;
             deployments?: {
                 source_org_id?: string;
                 source_blueprint_id?: string;
@@ -263,6 +262,7 @@ declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -480,7 +480,6 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
-            latest_download_file?: S3Reference;
             deployments?: {
                 source_org_id?: string;
                 source_blueprint_id?: string;
@@ -492,6 +491,7 @@ declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -525,7 +525,6 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
-            latest_download_file?: S3Reference;
             deployments?: {
                 source_org_id?: string;
                 source_blueprint_id?: string;
@@ -537,6 +536,7 @@ declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -570,7 +570,6 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
-            latest_download_file?: S3Reference;
             deployments?: {
                 source_org_id?: string;
                 source_blueprint_id?: string;
@@ -582,6 +581,7 @@ declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -1136,7 +1136,6 @@ declare namespace Components {
                 postinstall?: string;
             };
             version?: string;
-            latest_download_file?: S3Reference;
             deployments?: {
                 source_org_id?: string;
                 source_blueprint_id?: string;
@@ -1148,6 +1147,7 @@ declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -2010,6 +2010,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getJob - getJob
@@ -2643,6 +2644,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;

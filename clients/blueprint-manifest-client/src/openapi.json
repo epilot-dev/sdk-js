@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -1540,9 +1540,6 @@
           "version": {
             "type": "string"
           },
-          "latest_download_file": {
-            "$ref": "#/components/schemas/S3Reference"
-          },
           "deployments": {
             "type": "array",
             "items": {
@@ -1570,6 +1567,16 @@
           "is_verified": {
             "type": "boolean",
             "description": "Whether the blueprint is verified by epilot"
+          },
+          "installation_status": {
+            "type": "string",
+            "enum": [
+              "IN_PROGRESS",
+              "CANCELED",
+              "PARTIAL",
+              "SUCCESS",
+              "FAILED"
+            ]
           },
           "created_at": {
             "type": "string",
