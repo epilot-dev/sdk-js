@@ -1093,6 +1093,11 @@
             "description": "Include all relation tags (labels) present on the main entity relation",
             "default": false
           },
+          "override_with_source_filter": {
+            "type": "boolean",
+            "description": "Whether to override the relation source_filter with the specified one",
+            "default": false
+          },
           "source_filter": {
             "type": "object",
             "description": "A filter to identify which source entities to pick as relations from main entity",
@@ -1208,6 +1213,12 @@
               "$ref": "#/components/schemas/PrimitiveJSONValue"
             }
           },
+          "_prepend": {
+            "description": "Prepend to an array",
+            "items": {
+              "$ref": "#/components/schemas/OperationNode"
+            }
+          },
           "_uniq": {
             "description": "Unique array",
             "oneOf": [
@@ -1226,6 +1237,11 @@
                 }
               }
             ]
+          },
+          "_retain_old_values": {
+            "description": "Merge strategy when _uniq is defined",
+            "type": "boolean",
+            "example": true
           },
           "_copy": {
             "description": "Copy JSONPath value from source entity context",

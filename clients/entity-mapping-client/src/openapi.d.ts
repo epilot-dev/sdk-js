@@ -370,9 +370,19 @@ declare namespace Components {
              */
             _append?: any;
             /**
+             * Prepend to an array
+             */
+            _prepend?: any;
+            /**
              * Unique array
              */
             _uniq?: /* Unique array */ boolean | string[];
+            /**
+             * Merge strategy when _uniq is defined
+             * example:
+             * true
+             */
+            _retain_old_values?: boolean;
             /**
              * Copy JSONPath value from source entity context
              * example:
@@ -421,6 +431,10 @@ declare namespace Components {
              * Include all relation tags (labels) present on the main entity relation
              */
             target_tags_include_source?: boolean;
+            /**
+             * Whether to override the relation source_filter with the specified one
+             */
+            override_with_source_filter?: boolean;
             /**
              * A filter to identify which source entities to pick as relations from main entity
              */
